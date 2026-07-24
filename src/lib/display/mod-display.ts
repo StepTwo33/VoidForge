@@ -116,7 +116,7 @@ export function formatModStatValue(
   if (statKey === "abilityProjectileCount") {
     return `${formatStatNumber(perRank)} projectiles`;
   }
-  if (statKey === "range" || statKey === "attractionRange" || statKey === "allyRadius") {
+  if (statKey === "range" || statKey === "attractionRange" || statKey === "allyRadius" || statKey === "blastStaggerRadius") {
     return `${formatStatNumber(total)}m ${label}`;
   }
   if (statKey === "duration" || statKey === "cooldown") {

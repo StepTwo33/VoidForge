@@ -42,9 +42,8 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
   ]),
   amalgam_furax_body_count: mod("amalgam_furax_body_count", [
     line("comboDuration", "weapon_dps", "additive_percent", "wiki: Amalgam Furax Body Count — +15s Combo Duration on melee"),
-    line("duration", "mod_panel", "multiplicative_percent", "Amalgam Furax Body Count: duration \u2014 blast/stagger display"),
     line("fireRate", "mod_panel", "multiplicative_percent", "wiki: Amalgam Furax — +45% Secondary FR via linkage.meleeMods (Sim5 cross-slot)"),
-    line("range", "mod_panel", "multiplicative_percent", "Amalgam Furax Body Count: range \u2014 melee-kill blast radius display"),
+    line("blastStaggerRadius", "mod_panel", "multiplicative_percent", "wiki: Amalgam Furax — melee-kill Blast proc + stagger radius (15m at R5; not Ability Duration)"),
   ]),
   amalgam_javlok_magazine_warp: mod("amalgam_javlok_magazine_warp", [
     line("comboCountChance", "mod_panel", "multiplicative_percent", "Amalgam Javlok Magazine Warp: comboCountChance \u2014 shield-block gated"),

@@ -9586,8 +9586,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "comboDuration": 2.5,
       "fireRate": 7.5,
-      "duration": 2.5,
-      "range": 2.5
+      "blastStaggerRadius": 2.5
     },
     "description": "+15s Combo Duration\\n+45% Fire Rate for Secondary Weapons\\n<LINE_SEPARATOR>\\nMelee kills <DT_EXPLOSION_COLOR>Blast and stagger enemies in 15m",
     "rarity": "rare"
@@ -15621,6 +15620,20 @@ const RAW_MODS: Mod[] = [
       "duration": 1.0
     },
     "description": "Kavat has 60% chance to ignore Lethal Damage and be immune for 4s.",
+    "rarity": "rare"
+  },
+  {
+    "id": "tek_enhance",
+    "name": "Tek Enhance",
+    "polarity": "naramon",
+    "drain": 6,
+    "maxRank": 5,
+    "category": "companion",
+    "subCategory": "",
+    "stats": {
+      "abilityDuration": 5.0
+    },
+    "description": "+30% Ability Duration",
     "rarity": "rare"
   },
   {

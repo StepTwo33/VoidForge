@@ -569,6 +569,9 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "Tek Assault: damage \u2014 Kavat has 60% chance to ignore Lethal Damage and be immune for 4s."),
     line("duration", "mod_panel", "multiplicative_percent", "Tek Assault: duration \u2014 Kavat has 60% chance to ignore Lethal Damage and be immune for 4s."),
   ]),
+  tek_enhance: mod("tek_enhance", [
+    line("abilityDuration", "mod_panel", "multiplicative_percent", "wiki: Tek Enhance — +30% Kavat/Vulpaphyla Ability Duration (Tek set piece #4)"),
+  ]),
   tenacious_bond: mod("tenacious_bond", [
     line("criticalMultiplier", "mod_panel", "multiplicative_percent", "Tenacious Bond: criticalMultiplier \u2014 Headshot kills reduce Companion Recovery timer by 3s. If the Companion's Critica\u2026"),
     line("duration", "mod_panel", "multiplicative_percent", "Tenacious Bond: duration \u2014 Headshot kills reduce Companion Recovery timer by 3s. If the Companion's Critica\u2026"),

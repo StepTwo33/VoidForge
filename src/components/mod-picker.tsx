@@ -21,6 +21,7 @@ function isRivenMod(mod: Mod): boolean {
 }
 
 import {
+  isWarframeAugment,
   warframeAugmentEligibleInBuilder,
 } from "@/lib/mods/warframe-augment-mods";
 import { archwingAugmentEligibleInBuilder, isArchwingAugment } from "@/lib/mods/archwing-augment-mods";
@@ -152,7 +153,9 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
         if (category === "secondary") return ["secondary", "pistol", "general"].includes(m.category);
         if (category === "melee") return m.category === "melee" || (m.category === "general" && !isArchmeleeMod(m));
         if (category === "archmelee") return isArchmeleeMod(m);
-        if (category === "warframe") return m.category === "warframe" || m.category === "augment";
+        if (category === "warframe") {
+          return m.category === "warframe" || isWarframeAugment(m);
+        }
         if (category === "archwing") return m.category === "archwing" || isArchwingAugment(m);
         if (category === "companion") return m.category === "companion";
         return m.category === category;

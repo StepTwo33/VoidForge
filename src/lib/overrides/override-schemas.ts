@@ -213,6 +213,7 @@ export const FIELD_LABELS: Record<string, string> = {
   passive: "Passive description",
   damage: "Damage",
   fireRate: "Fire rate",
+  blastStaggerRadius: "Blast proc and stagger radius",
   criticalChance: "Crit chance",
   criticalChanceOnHeadshot: "Crit chance on headshot",
   criticalChanceOnHeadshotKill: "Crit chance per headshot kill",

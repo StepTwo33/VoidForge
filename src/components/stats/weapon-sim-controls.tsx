@@ -76,7 +76,7 @@ export function WeaponSimControls({
                 min={0}
                 max={3}
                 onChange={(v) => onSimParamsChange({ ...simParams, extraTekSetPiecesOffWeapon: v })}
-                tooltip="Tek mods on other slots (Collateral on frame, Gravity on melee, Enhance on Kavat). In-game set needs 4; data may show 3/4 until Tek Enhance exists."
+                tooltip="Tek mods on other slots (Collateral on frame, Gravity on melee, Assault/Enhance on Kavat). In-game set needs 4 pieces."
               />
               <SimSlider
                 label="Tek vs marked (DPS)"
