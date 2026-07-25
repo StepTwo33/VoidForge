@@ -38,7 +38,7 @@ export const allCompanions: Companion[] = [
     "health": 700,
     "shield": 300,
     "armor": 100,
-    "description": "Prime scanner with faster scanning",
+    "description": "Prime scanner sentinel",
     "precept": "Investigator - Automatically scans enemies and objects"
   },
   {
@@ -48,8 +48,8 @@ export const allCompanions: Companion[] = [
     "health": 560,
     "shield": 250,
     "armor": 80,
-    "description": "Infested sentinel with fatal attraction",
-    "precept": "Fatal Attraction - Draws enemy fire"
+    "description": "Infested sentinel that lures and blasts foes",
+    "precept": "Fatal Attraction - Pulls enemies in then deals radial damage"
   },
   {
     "id": "diriga",
@@ -58,7 +58,7 @@ export const allCompanions: Companion[] = [
     "health": 700,
     "shield": 150,
     "armor": 80,
-    "description": "Tank sentinel with shock ability",
+    "description": "Combat sentinel with electric crowd control",
     "precept": "Arc Coil - Shocks nearby enemies"
   },
   {
@@ -108,8 +108,8 @@ export const allCompanions: Companion[] = [
     "health": 560,
     "shield": 250,
     "armor": 80,
-    "description": "Aggressive combat sentinel",
-    "precept": "Vaporize - Fires high damage beam"
+    "description": "Aggressive combat sentinel that restores energy",
+    "precept": "Vaporize - Stuns and damages nearby enemies"
   },
   {
     "id": "dethcube_prime",
@@ -119,7 +119,7 @@ export const allCompanions: Companion[] = [
     "shield": 300,
     "armor": 150,
     "description": "Prime aggressive combat sentinel",
-    "precept": "Vaporize - Fires high damage beam"
+    "precept": "Vaporize - Stuns and damages nearby enemies"
   },
   {
     "id": "oxylus",
@@ -129,7 +129,7 @@ export const allCompanions: Companion[] = [
     "shield": 250,
     "armor": 80,
     "description": "Fishing and conservation specialist",
-    "precept": "Scan Lifeforms - Highlights fish and animals"
+    "precept": "Scan Aquatic Lifeforms - Marks fish and hotspots and Scan Matter - Marks resource deposits"
   },
   {
     "id": "prisma_shade",
@@ -158,8 +158,8 @@ export const allCompanions: Companion[] = [
     "health": 560,
     "shield": 250,
     "armor": 80,
-    "description": "Railjack sentinel that marks enemies",
-    "precept": "Cordon - Pulls enemies together"
+    "description": "Railjack sentinel that groups enemies",
+    "precept": "Cordon - Tethers enemies into a cluster"
   },
   {
     "id": "nautilus_prime",
@@ -169,7 +169,7 @@ export const allCompanions: Companion[] = [
     "shield": 350,
     "armor": 175,
     "description": "Prime railjack sentinel",
-    "precept": "Cordon - Pulls enemies together"
+    "precept": "Cordon - Tethers enemies into a cluster"
   },
   {
     "id": "raksa",
@@ -189,7 +189,7 @@ export const allCompanions: Companion[] = [
     "shield": 290,
     "armor": 300,
     "description": "Digging companion that finds items",
-    "precept": "Dig - Unearths items and Ferocity - Melee attacks"
+    "precept": "Dig - Unearths buried loot and Ferocity - High-crit finisher attacks"
   },
   {
     "id": "sunika",
@@ -198,8 +198,8 @@ export const allCompanions: Companion[] = [
     "health": 830,
     "shield": 350,
     "armor": 300,
-    "description": "Hunting companion that captures VIPs",
-    "precept": "Savagery - Finisher attacks and Unleashed - Captures targets"
+    "description": "Hunting companion that hunts Eximus",
+    "precept": "Savagery - Rushes and knocks down nearby enemies and Unleashed - Hunts Eximus and shreds Overguard"
   },
   {
     "id": "chesa",
@@ -219,7 +219,7 @@ export const allCompanions: Companion[] = [
     "shield": 490,
     "armor": 300,
     "description": "Stealth companion that cloaks owner",
-    "precept": "Stalk - Cloaks owner and Hunt - Stalks prey"
+    "precept": "Stalk - Cloaks owner and Hunt - Charges and drags enemies"
   },
   {
     "id": "helminth_charger",
@@ -228,8 +228,8 @@ export const allCompanions: Companion[] = [
     "health": 710,
     "shield": 330,
     "armor": 300,
-    "description": "Infested strain kubrow with trample ability",
-    "precept": "Trample - Charge attack"
+    "description": "Infested kubrow that charges through foes",
+    "precept": "Trample - Charge that damages enemies and buffs the Charger"
   },
   {
     "id": "adarza",
@@ -248,11 +248,11 @@ export const allCompanions: Companion[] = [
     "health": 390,
     "shield": 230,
     "armor": 300,
-    "description": "Trickster kavat that doubles pickups",
-    "precept": "Charm - Random buffs including double resources"
+    "description": "Trickster kavat with decoys and fortune buffs",
+    "precept": "Mischief - Decoy that draws fire and Charm - Random combat buffs"
   },
   {
-    "id": "vedica",
+    "id": "vasca",
     "name": "Vasca Kavat",
     "type": "kavat",
     "health": 310,
@@ -268,8 +268,8 @@ export const allCompanions: Companion[] = [
     "health": 150,
     "shield": 100,
     "armor": 25,
-    "description": "Shockwave MOA with stun abilities",
-    "precept": "Shockwave Actuators - Ground slam shockwave"
+    "description": "Defense MOA with stasis field and shockwave",
+    "precept": "Shockwave Actuators - Ground slam shockwave and Stasis Field - Slows enemy projectiles and reduces their damage"
   },
   {
     "id": "olaro",
@@ -278,8 +278,8 @@ export const allCompanions: Companion[] = [
     "health": 150,
     "shield": 100,
     "armor": 25,
-    "description": "Shield support MOA",
-    "precept": "Security Override - Hacks consoles and disarms alarms"
+    "description": "Utility MOA that hacks consoles and boosts aim glide",
+    "precept": "Security Override - Hacks consoles and disarms alarms and Tractor Beam - Increases aim glide duration and reduces gravity"
   },
   {
     "id": "para",
@@ -288,8 +288,8 @@ export const allCompanions: Companion[] = [
     "health": 150,
     "shield": 100,
     "armor": 25,
-    "description": "Hacking specialist MOA",
-    "precept": "Whiplash Mine - Deploys explosive mines"
+    "description": "Offense MOA with tether mines and anti-grav grenades",
+    "precept": "Whiplash Mine - Deploys a tether mine that snares and pulls enemies and Anti-Grav Grenade - Levitates enemies then slams them down"
   },
   {
     "id": "nidus_moa",
@@ -298,8 +298,8 @@ export const allCompanions: Companion[] = [
     "health": 150,
     "shield": 100,
     "armor": 25,
-    "description": "Melee-focused MOA with spinning attacks",
-    "precept": "Hard Engage - Melee spinning attack"
+    "description": "Close-quarters MOA with overshields and melee engage",
+    "precept": "Hard Engage - Melee spinning attack and Blast Shield - Boosts overshields and leap knock downs"
   },
   {
     "id": "vizier_predasite",
@@ -308,8 +308,8 @@ export const allCompanions: Companion[] = [
     "health": 710,
     "shield": 350,
     "armor": 300,
-    "description": "Toxin specialist with acid attacks",
-    "precept": ""
+    "description": "Support predasite that blinds and heals",
+    "precept": "Acidic Spittle - Corrosive spit that blinds and Iatric Mycelium - Healing spore trail"
   },
   {
     "id": "pharaoh_predasite",
@@ -318,8 +318,8 @@ export const allCompanions: Companion[] = [
     "health": 710,
     "shield": 350,
     "armor": 300,
-    "description": "Healing specialist with spore clouds",
-    "precept": ""
+    "description": "Empowering predasite that buffs toxin damage",
+    "precept": "Anabolic Pollination - Ally toxin damage spores and Endoparasitic Vector - Viral tentacle parasite"
   },
   {
     "id": "medjay_predasite",
@@ -328,38 +328,38 @@ export const allCompanions: Companion[] = [
     "health": 710,
     "shield": 350,
     "armor": 300,
-    "description": "Defense specialist with shielding",
-    "precept": ""
+    "description": "Aggressive predasite with bursting spores",
+    "precept": "Infectious Bite - Damage-absorbing pustules and Paralytic Spores - Slowing spores that open finishers"
   },
   {
     "id": "sly_vulpaphyla",
     "name": "Sly Vulpaphyla",
     "type": "vulpaphyla",
     "health": 680,
-    "shield": 0,
+    "shield": 370,
     "armor": 300,
-    "description": "Evasive with cloaking ability",
-    "precept": ""
+    "description": "Evasive vulpaphyla that breaks enemy lock-on",
+    "precept": "Survival Instinct - Bullet-jump breaks enemy sight and Sly Devolution - Larval form that reduces enemy accuracy"
   },
   {
     "id": "crescent_vulpaphyla",
     "name": "Crescent Vulpaphyla",
     "type": "vulpaphyla",
     "health": 680,
-    "shield": 0,
+    "shield": 370,
     "armor": 300,
-    "description": "Support with revive ability",
-    "precept": ""
+    "description": "Aggressive vulpaphyla that hurls enemies",
+    "precept": "Crescent Charge - Charges and flings foes into others and Crescent Devolution - Larval form that charges enemies"
   },
   {
     "id": "panzer_vulpaphyla",
     "name": "Panzer Vulpaphyla",
     "type": "vulpaphyla",
     "health": 680,
-    "shield": 0,
+    "shield": 370,
     "armor": 300,
-    "description": "Tanky with viral attacks",
-    "precept": ""
+    "description": "Armored vulpaphyla that spreads Viral",
+    "precept": "Viral Quills - Quills that spread Viral spores and Panzer Devolution - Larval form that fires quills"
   },
   {
     "id": "bhaira_hound",
@@ -368,8 +368,8 @@ export const allCompanions: Companion[] = [
     "health": 450,
     "shield": 150,
     "armor": 200,
-    "description": "Aggressive attack hound with blade weapons",
-    "precept": ""
+    "description": "Devastating hound with Lacerten and Null Audit",
+    "precept": "Null Audit - Copies Eximus aura and abilities while stripping Overguard"
   },
   {
     "id": "dorma_hound",
@@ -378,8 +378,8 @@ export const allCompanions: Companion[] = [
     "health": 450,
     "shield": 150,
     "armor": 200,
-    "description": "Defensive hound with shield abilities",
-    "precept": ""
+    "description": "Piercing hound with Batoten and Repo Audit",
+    "precept": "Repo Audit - Magnetic pulse that disarms nearby enemies"
   },
   {
     "id": "hec_hound",
@@ -388,8 +388,8 @@ export const allCompanions: Companion[] = [
     "health": 450,
     "shield": 150,
     "armor": 200,
-    "description": "Support hound with energy generation",
-    "precept": ""
+    "description": "Eviscerating hound with Akaten and Equilibrium Audit",
+    "precept": "Equilibrium Audit - Shockwaves that knockdown and damage nearby enemies"
   }
 ];
 

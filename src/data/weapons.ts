@@ -2126,7 +2126,7 @@ export const allWeapons: Weapon[] = [
     "hasRivenSlot": true
   },
   {
-    "id": "furia",
+    "id": "furax",
     "name": "Furax",
     "category": "melee",
     "stanceType": "fist",
@@ -2149,7 +2149,7 @@ export const allWeapons: Weapon[] = [
     "hasRivenSlot": true
   },
   {
-    "id": "furia_wraith",
+    "id": "furax_wraith",
     "name": "Furax Wraith",
     "category": "melee",
     "stanceType": "fist",

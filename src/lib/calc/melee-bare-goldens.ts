@@ -801,7 +801,7 @@ export const MELEE_BARE_GOLDENS: Array<{
     "multishot": 1.0
   },
   {
-    "id": "furia",
+    "id": "furax",
     "damage": 135.0,
     "impact": 94.5,
     "puncture": 20.25,
@@ -813,7 +813,7 @@ export const MELEE_BARE_GOLDENS: Array<{
     "multishot": 1.0
   },
   {
-    "id": "furia_wraith",
+    "id": "furax_wraith",
     "damage": 139.0,
     "impact": 97.3,
     "puncture": 20.85,

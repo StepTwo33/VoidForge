@@ -169,7 +169,7 @@ const WIKI_PASSIVES: Record<string, string> = {
   fragor_prime: "Innate 30 starting combo (2.0× heavy attack multiplier).",
   fulmin: "Silent semi-auto; full-auto emits a close-range shockwave.",
   fulmin_prime: "Does not use ammo pickups; regenerates ammo over time. Semi-auto mode is silent, has innate 3m punch through against bodies, and guarantees an Impact proc up to 9m. Alternate Fire mode-switching animation is halved to 0.5 seconds when wielded by Wisp / Wisp Prime.",
-  furia_wraith: "Innate 20 starting combo (2.0× heavy attack multiplier).",
+  furax_wraith: "Innate 20 starting combo (2.0× heavy attack multiplier).",
   fusilai: "Silent. Alt-fire: Throws 3 knives in a fan shape with a wide spread. Consumes 3 ammo. Changes noise level to Alarming.",
   gammacor: "Consumes 0.5 ammo per tick. Synoid Specific: Innate Entropy effect.",
   gazal_machete: "[Djinn Synergy] Gains bonus Corrosive damage after consecutive casts of Djinn's {{M|Fatal Attraction}}.",

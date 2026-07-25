@@ -1514,8 +1514,8 @@ describe("evolution numeric fixes", () => {
   });
 
   it("max-stack Genesis paper: Kill Joy / Stormburst / Infused / Crimson / Blazing / Synergist", () => {
-    const furax = incarnonDataMap.get("furax_incarnon") ?? incarnonDataMap.get("furia")!;
-    expect(mergeIncarnonStatChanges(furax, { 2: 1 }, "furia")?.fireRate).toBe(0.5);
+    const furax = incarnonDataMap.get("furax_incarnon") ?? incarnonDataMap.get("furax")!;
+    expect(mergeIncarnonStatChanges(furax, { 2: 1 }, "furax")?.fireRate).toBe(0.5);
 
     const furis = incarnonDataMap.get("furis")!;
     expect(mergeIncarnonStatChanges(furis, { 2: 1 }, "furis")?.multishot).toBe(1.2);
@@ -1709,8 +1709,8 @@ describe("evolution numeric fixes", () => {
     const felarx = incarnonDataMap.get("felarx")!;
     expect(mergeIncarnonStatChanges(felarx, { 3: 1 }, "felarx")?.fireRate).toBe(0.6);
 
-    const furax = incarnonDataMap.get("furax_incarnon") ?? incarnonDataMap.get("furia")!;
-    expect(mergeIncarnonStatChanges(furax, { 4: 1 }, "furia")?.criticalMultiplierSet).toBe(4);
+    const furax = incarnonDataMap.get("furax_incarnon") ?? incarnonDataMap.get("furax")!;
+    expect(mergeIncarnonStatChanges(furax, { 4: 1 }, "furax")?.criticalMultiplierSet).toBe(4);
 
     const laetum = incarnonDataMap.get("laetum")!;
     expect(mergeIncarnonStatChanges(laetum, { 3: 0 }, "laetum")?.reloadSpeed).toBe(0.9);
@@ -1734,7 +1734,7 @@ describe("evolution numeric fixes", () => {
       5,
     );
 
-    const furaxWpn = allWeapons.find((w) => w.id === "furia" || w.id === "mk1_furax")!;
+    const furaxWpn = allWeapons.find((w) => w.id === "furax" || w.id === "mk1_furax")!;
     const kinetic = calculateWeaponBuild(furaxWpn, [], modsMap(), { criticalMultiplierSet: 4 });
     expect(kinetic.criticalMultiplier).toBeCloseTo(quantizeBaseCritMultiplier(4), 5);
 
@@ -1746,8 +1746,8 @@ describe("evolution numeric fixes", () => {
   it("Flashing Bleed / Caput / Carnage / Alchemy / Fevered / Reaver / Neurotoxin", () => {
     const bo = incarnonDataMap.get("bo")!;
     expect(mergeIncarnonStatChanges(bo, { 4: 0 }, "bo")?.slashOnImpactProcChance).toBe(0.4);
-    const furax = incarnonDataMap.get("furax_incarnon") ?? incarnonDataMap.get("furia")!;
-    expect(mergeIncarnonStatChanges(furax, { 4: 0 }, "furia")?.slashOnImpactProcChance).toBe(0.4);
+    const furax = incarnonDataMap.get("furax_incarnon") ?? incarnonDataMap.get("furax")!;
+    expect(mergeIncarnonStatChanges(furax, { 4: 0 }, "furax")?.slashOnImpactProcChance).toBe(0.4);
     const magistar = incarnonDataMap.get("magistar")!;
     expect(mergeIncarnonStatChanges(magistar, { 4: 0 }, "magistar")?.slashOnImpactProcChance).toBe(
       0.5,

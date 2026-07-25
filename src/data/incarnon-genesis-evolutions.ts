@@ -272,16 +272,16 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
   ],
   "furax_incarnon": [
     { tier: 1, slot: 0, name: "Incarnon Form", description: "Reach 6x Combo and then Heavy Attack to activate Incarnon Form. Incarnon Form gains Heavy Slam Efficiency and leaves behind Heat Damage fields after Heavy Slams. +100% Melee Damage +25% Sprint Speed +25% to Bullet Jump", statChanges: {"additiveBaseDamage":1} },
-    { tier: 2, slot: 0, name: "Swordsman's Flourish", description: "Increase Base Damage by +110. With Melee Weapon Equipped: +100% Combo Count Chance", statChanges: {"flatBaseDamage":110}, variantStatChanges: {"furia":{"flatBaseDamage":110},"mk1_furax":{"flatBaseDamage":100},"furia_wraith":{"flatBaseDamage":65},"furax":{"flatBaseDamage":110},"furax_wraith":{"flatBaseDamage":65}} },
+    { tier: 2, slot: 0, name: "Swordsman's Flourish", description: "Increase Base Damage by +110. With Melee Weapon Equipped: +100% Combo Count Chance", statChanges: {"flatBaseDamage":110}, variantStatChanges: {"furax":{"flatBaseDamage":110},"mk1_furax":{"flatBaseDamage":100},"furax_wraith":{"flatBaseDamage":65}} },
     // Max stacks assumed for paper DPS (+10% × 5)
-    { tier: 2, slot: 1, name: "Kill Joy", description: "Increase Base Damage by +90. +10% Attack Speed per enemy within 6m, stacks up to 5x.", statChanges: {"flatBaseDamage":90,"fireRate":0.5}, variantStatChanges: {"furia":{"flatBaseDamage":90,"fireRate":0.5},"mk1_furax":{"flatBaseDamage":80,"fireRate":0.5},"furia_wraith":{"flatBaseDamage":55,"fireRate":0.5},"furax":{"flatBaseDamage":90,"fireRate":0.5},"furax_wraith":{"flatBaseDamage":55,"fireRate":0.5}} },
+    { tier: 2, slot: 1, name: "Kill Joy", description: "Increase Base Damage by +90. +10% Attack Speed per enemy within 6m, stacks up to 5x.", statChanges: {"flatBaseDamage":90,"fireRate":0.5}, variantStatChanges: {"furax":{"flatBaseDamage":90,"fireRate":0.5},"mk1_furax":{"flatBaseDamage":80,"fireRate":0.5},"furax_wraith":{"flatBaseDamage":55,"fireRate":0.5}} },
     { tier: 3, slot: 0, name: "Moonrise Velocity", description: "+1 Range", statChanges: {"range":1} },
     { tier: 3, slot: 1, name: "Overhand", description: "Heavy Attack Efficiency set at 20%", statChanges: {"heavyAttackEfficiencySet":0.2} },
     { tier: 3, slot: 2, name: "Standoff", description: "Combo Timer pauses when weapon is holstered.", statChanges: {"comboTimerPauseWhenHolstered":1} },
     { tier: 4, slot: 0, name: "Flashing Bleed", description: "+40% chance of Slash on Impact Status Effect.", statChanges: {"slashOnImpactProcChance":0.4} },
     // Assumes slide attacks for paper DPS (sets base CM to 4x; not sliding heavies)
     { tier: 4, slot: 1, name: "Kinetic Killer", description: "Increase Base Critical Damage Multiplier to 4x on Slide Attacks.", statChanges: {"criticalMultiplierSet":4} },
-    { tier: 4, slot: 2, name: "Absolute Dominion", description: "Increase Base Status Chance by +24%.", statChanges: {"statusChance":0.24}, variantStatChanges: {"furia":{"statusChance":0.24},"mk1_furax":{"statusChance":0.22},"furia_wraith":{"statusChance":0.14},"furax":{"statusChance":0.24},"furax_wraith":{"statusChance":0.14}} },
+    { tier: 4, slot: 2, name: "Absolute Dominion", description: "Increase Base Status Chance by +24%.", statChanges: {"statusChance":0.24}, variantStatChanges: {"furax":{"statusChance":0.24},"mk1_furax":{"statusChance":0.22},"furax_wraith":{"statusChance":0.14}} },
   ],
   "furis_incarnon": [
     { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge. Fire a wide Heat Damage beam.", statChanges: {} },

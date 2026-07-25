@@ -264,7 +264,7 @@ export const MOD_EXCLUSIVE_WEAPON_IDS: Record<string, readonly string[]> = {
   "acid_shells": ["sobek"],
   "amalgam_argonak_metal_auger": ["argonak"],
   "amalgam_daikyu_target_acquired": ["daikyu", "daikyu_prime"],
-  "amalgam_furax_body_count": ["furia", "furia_wraith", "mk1_furax"],
+  "amalgam_furax_body_count": ["furax", "furax_wraith", "mk1_furax"],
   "amalgam_javlok_magazine_warp": ["javlok"],
   "amalgam_ripkas_true_steel": ["ripkas"],
   "amanata_pressure": ["amanata"],

@@ -19,7 +19,7 @@ describe("Amalgam Furax Body Count eligibility + display", () => {
   });
 
   it("equips on Furax / Furax Wraith / MK1-Furax melee", () => {
-    for (const id of ["furia", "furia_wraith", "mk1_furax"]) {
+    for (const id of ["furax", "furax_wraith", "mk1_furax"]) {
       expect(
         modEligibleForWeaponSlot(furax, "melee", "melee", "regular", meleeProfile(id)),
       ).toBe(true);

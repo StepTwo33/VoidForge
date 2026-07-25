@@ -25,7 +25,7 @@ MELEE_INCARNON_IDS = {
     "ceramic_dagger_incarnon", "ceramic_dagger",
     "destreza_incarnon", "destreza", "destreza_prime",
     "dual_ichor_incarnon", "dual_ichor",
-    "furax_incarnon", "furia", "furia_wraith", "mk1_furax",
+    "furax_incarnon", "furax", "furax_wraith", "mk1_furax",
     "hate_incarnon", "hate",
     "magistar_incarnon", "magistar", "sancti_magistar",
     "nami_solo_incarnon", "nami_solo",
