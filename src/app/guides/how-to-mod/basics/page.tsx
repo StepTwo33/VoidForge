@@ -126,10 +126,10 @@ export default function HowToModBasicsPage() {
       <ContentPanel>
         <h2 className="mb-3 text-lg font-semibold">Can&apos;t equip both?</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          A lot of mods are exclusive with their upgraded cousins. You cannot run Serration
-          and Primed Serration together. Umbral sets, Archon variants, and some Galvanized
-          lines have the same kind of rule. If the game (or FrameHub) blocks a second mod,
-          it is usually exclusivity, not a bug.
+          A lot of mods are exclusive with their upgraded cousins. You cannot run Point Blank
+          and Primed Point Blank together, or Continuity and Primed Continuity. Umbral sets,
+          Archon variants, and some Galvanized lines have the same kind of rule. If the game
+          (or FrameHub) blocks a second mod, it is usually exclusivity, not a bug.
         </p>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           Pick the stronger legal option and free the other slot for something that multiplies
