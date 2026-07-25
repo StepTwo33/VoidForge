@@ -1,7 +1,7 @@
 /// Frame Hub Service Worker
-/// v9: static og-embed.png for social previews (Discord cache bust).
+/// v10: auto-activate updates + never cache sw.js consumers on stale scripts.
 
-const CACHE_NAME = "framehub-v9";
+const CACHE_NAME = "framehub-v10";
 
 const PRECACHE_URLS = [
   "/icons/icon-192x192.png",
@@ -28,11 +28,20 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
   if (request.method !== "GET" || url.origin !== self.location.origin) return;
+
+  // Never intercept the service worker script itself
+  if (url.pathname === "/sw.js") return;
 
   // Next.js hashed chunks & RSC — never intercept; avoids stale chunk refs after redeploys
   if (url.pathname.startsWith("/_next/")) return;

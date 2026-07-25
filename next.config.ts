@@ -1,5 +1,16 @@
 import type { NextConfig } from "next";
 
+if (process.env.FRAMEHUB_MAINTAINER !== "1") {
+  throw new Error(
+    [
+      "Frame Hub is not intended for self-hosting.",
+      "Use the planner at https://frame-hub.com",
+      "To verify calculations and item catalogs: npm test",
+      "Maintainers: set FRAMEHUB_MAINTAINER=1 to run the Next app.",
+    ].join("\n"),
+  );
+}
+
 /** HSTS is best enabled at Cloudflare (or your TLS terminator) so local HTTP dev is unaffected. */
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
@@ -29,6 +40,25 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+      // Browsers otherwise may keep sw.js for up to 24h, delaying post-deploy updates.
+      {
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+        ],
+      },
+      {
+        source: "/manifest.webmanifest",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, must-revalidate",
+          },
+        ],
       },
     ];
   },

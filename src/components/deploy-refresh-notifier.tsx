@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 const BUILD_STORAGE_KEY = "framehub_build_id";
+const CHECK_INTERVAL_MS = 60_000;
+const RELOAD_DELAY_MS = 1200;
 
 function isStaleClientError(message: string): boolean {
   const m = message.toLowerCase();
@@ -15,24 +17,25 @@ function isStaleClientError(message: string): boolean {
   );
 }
 
-function promptRefresh(reason: string) {
-  toast.info(reason, {
-    duration: 12000,
-    action: {
-      label: "Refresh",
-      onClick: () => window.location.reload(),
-    },
-  });
+function reloadSoon(reason: string) {
+  toast.info(reason, { duration: RELOAD_DELAY_MS + 500 });
+  window.setTimeout(() => {
+    window.location.reload();
+  }, RELOAD_DELAY_MS);
 }
 
+/**
+ * Detects a new production build and reloads the tab so users get fresh JS/HTML
+ * without needing a manual hard refresh (Ctrl+Shift+R).
+ */
 export function DeployRefreshNotifier() {
-  const warned = useRef(false);
+  const reloading = useRef(false);
 
   useEffect(() => {
-    const warnOnce = (reason: string) => {
-      if (warned.current) return;
-      warned.current = true;
-      promptRefresh(reason);
+    const triggerReload = (reason: string) => {
+      if (reloading.current) return;
+      reloading.current = true;
+      reloadSoon(reason);
     };
 
     const checkBuild = async () => {
@@ -43,21 +46,26 @@ export function DeployRefreshNotifier() {
         if (!buildId) return;
 
         const prev = sessionStorage.getItem(BUILD_STORAGE_KEY);
-        if (prev && prev !== buildId) {
-          warnOnce("Frame Hub was updated. Refresh for the latest version.");
-        }
         sessionStorage.setItem(BUILD_STORAGE_KEY, buildId);
+        if (prev && prev !== buildId) {
+          triggerReload("Frame Hub was updated. Reloading…");
+        }
       } catch {
         // ignore network errors during deploy
       }
     };
 
     checkBuild();
-    const interval = setInterval(checkBuild, 3 * 60 * 1000);
+    const interval = setInterval(checkBuild, CHECK_INTERVAL_MS);
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void checkBuild();
+    };
+    document.addEventListener("visibilitychange", onVisible);
 
     const onError = (event: ErrorEvent) => {
       if (isStaleClientError(event.message || "")) {
-        warnOnce("This page is from an older version. Please refresh.");
+        triggerReload("This page is from an older version. Reloading…");
       }
     };
 
@@ -67,7 +75,7 @@ export function DeployRefreshNotifier() {
           ? event.reason.message
           : String(event.reason ?? "");
       if (isStaleClientError(msg)) {
-        warnOnce("This page is from an older version. Please refresh.");
+        triggerReload("This page is from an older version. Reloading…");
       }
     };
 
@@ -76,6 +84,7 @@ export function DeployRefreshNotifier() {
 
     return () => {
       clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onRejection);
     };
