@@ -2,11 +2,15 @@
 
 Thanks for helping with FrameHub.
 
+Use the planner at [frame-hub.com](https://frame-hub.com). This repo is for verifying and fixing calculations and item catalogs.
+
 ## Quick start
 
-1. Follow [README](README.md) setup (`npm install`, `.env`, `npm run dev`).
+1. `npm install` then `npm test` (and `npm run lint` when touching logic).
 2. Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) before large changes.
-3. Run `npm test` and `npm run lint` when touching logic or UI.
+3. Prefer editing data/calc under `src/data/` and `src/lib/calc/`; see [docs/ACCURACY_CHECKLIST.md](docs/ACCURACY_CHECKLIST.md) for accuracy status.
+
+No app server or `.env` is required for calc/catalog verification.
 
 ## Data changes
 
