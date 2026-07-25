@@ -203,3 +203,32 @@ export async function PUT(req: NextRequest) {
 
   return NextResponse.json({ imported });
 }
+
+// DELETE /api/data-overrides — bulk delete by id (staff only)
+export async function DELETE(req: NextRequest) {
+  const { isAdmin } = await verifyAdmin();
+  if (!isAdmin) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  let json: unknown;
+  try {
+    json = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const ids = Array.isArray((json as { ids?: unknown })?.ids)
+    ? (json as { ids: unknown[] }).ids.filter((id): id is string => typeof id === "string" && id.length > 0)
+    : null;
+
+  if (!ids || ids.length === 0) {
+    return NextResponse.json({ error: "Expected non-empty ids array" }, { status: 400 });
+  }
+
+  const result = await prisma.dataOverride.deleteMany({
+    where: { id: { in: ids } },
+  });
+
+  return NextResponse.json({ ok: true, deleted: result.count });
+}

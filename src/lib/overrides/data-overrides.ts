@@ -40,6 +40,11 @@ export async function deleteOverride(id: string): Promise<void> {
   return removeOverride(id);
 }
 
+export async function deleteOverrides(ids: string[]): Promise<number> {
+  const { removeOverrides } = await import("@/lib/overrides/data-overrides-client");
+  return removeOverrides(ids);
+}
+
 export function notifyDataOverridesUpdated(): void {
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("framehub-data-overrides-updated"));

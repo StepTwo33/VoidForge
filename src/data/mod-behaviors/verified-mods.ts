@@ -53,21 +53,21 @@ export const VERIFIED_MOD_BEHAVIORS: Record<string, VerifiedModBehavior> = {
     line("multishotOnKill", "weapon_dps", "conditional_multishot_on_kill", "wiki: Galvanized Diffusion — multishot per kill stack"),
   ]),
   galvanized_aptitude: mod("galvanized_aptitude", [
-    line("statusChance", "weapon_dps", "conditional_damage_per_status_on_kill", "wiki: Galvanized Aptitude — base status"),
+    line("statusChance", "weapon_dps", "multiplicative_percent", "wiki: Galvanized Aptitude — +80% Status Chance (always-on paper)"),
     line("damagePerStatus", "weapon_dps", "conditional_damage_per_status_on_kill", "wiki: Galvanized Aptitude — damage per status per stack"),
   ]),
   galvanized_savvy: mod("galvanized_savvy", [
-    line("statusChance", "weapon_dps", "conditional_damage_per_status_on_kill", "wiki: Galvanized Savvy — base status"),
+    line("statusChance", "weapon_dps", "multiplicative_percent", "wiki: Galvanized Savvy — +80% Status Chance (always-on paper)"),
     line("damagePerStatus", "weapon_dps", "conditional_damage_per_status_on_kill", "wiki: Galvanized Savvy — damage per status per stack"),
   ]),
   galvanized_shot: mod("galvanized_shot", [
-    line("statusChance", "weapon_dps", "conditional_damage_per_status_on_kill", "wiki: Galvanized Shot — base status"),
+    line("statusChance", "weapon_dps", "multiplicative_percent", "wiki: Galvanized Shot — +80% Status Chance (always-on paper)"),
     line("damagePerStatus", "weapon_dps", "conditional_damage_per_status_on_kill", "wiki: Galvanized Shot — damage per status per stack"),
   ]),
 
   // ── Melee ───────────────────────────────────────────────────────────────
   pressure_point_r3: mod("pressure_point_r3", [
-    line("damage", "weapon_dps", "multiplicative_percent", "wiki: Pressure Point — +165% damage at R10"),
+    line("damage", "weapon_dps", "multiplicative_percent", "wiki: Pressure Point — +120% damage at R5"),
   ]),
   primed_pressure_point: mod("primed_pressure_point", [
     line("damage", "weapon_dps", "multiplicative_percent", "wiki: Primed Pressure Point — +165% damage at R10"),
@@ -103,30 +103,29 @@ export const VERIFIED_MOD_BEHAVIORS: Record<string, VerifiedModBehavior> = {
     line("criticalChance", "weapon_dps", "multiplicative_percent", "wiki: Sacrificial Steel — crit chance (set bonus applied separately)"),
     line("sentientDamage", "mod_panel", "multiplicative_percent", "wiki: Sacrificial Steel — vs Sentients, not generic DPS"),
   ]),
-  melee_aptitude: mod("melee_aptitude", [
-    line("statusChance", "weapon_dps", "multiplicative_percent", "wiki: Melee Aptitude — +90% status at R5"),
-  ]),
+
   volcanic_edge: mod("volcanic_edge", [
-    line("statusChance", "weapon_dps", "multiplicative_percent", "wiki: Volcanic Edge — +45% status at R3"),
+    line("heat", "weapon_dps", "elemental_from_base_damage", "wiki: Volcanic Edge — +60% heat at R3"),
+    line("statusChance", "weapon_dps", "multiplicative_percent", "wiki: Volcanic Edge — +60% status at R3"),
   ]),
 
   // ── Warframe ────────────────────────────────────────────────────────────
   intensify_r3: mod("intensify_r3", [
-    line("abilityStrength", "warframe_totals", "multiplicative_percent", "wiki: Intensify — +55% strength at R10"),
+    line("abilityStrength", "warframe_totals", "multiplicative_percent", "wiki: Intensify — +30% strength at R5"),
   ]),
   continuity_r3: mod("continuity_r3", [
-    line("abilityDuration", "warframe_totals", "multiplicative_percent", "wiki: Continuity — +30% duration at R3"),
+    line("abilityDuration", "warframe_totals", "multiplicative_percent", "wiki: Continuity — +30% duration at R5"),
   ]),
   stretch_r3: mod("stretch_r3", [
     line("abilityRange", "warframe_totals", "multiplicative_percent", "wiki: Stretch — +45% range at R5"),
   ]),
   flow_r3: mod("flow_r3", [
-    line("energy", "warframe_totals", "multiplicative_percent", "wiki: Flow — +50% energy at R3"),
+    line("energy", "warframe_totals", "multiplicative_percent", "wiki: Flow — +100% energy at R5 (post-U34)"),
   ]),
   vitality_r3: mod("vitality_r3", [
-    line("health", "warframe_totals", "multiplicative_percent", "wiki: Vitality — +55% health at R5"),
+    line("health", "warframe_totals", "multiplicative_percent", "wiki: Vitality — +100% health at R10 (post-U34)"),
   ]),
   steel_fiber_r3: mod("steel_fiber_r3", [
-    line("armor", "warframe_totals", "multiplicative_percent", "wiki: Steel Fiber — +55% armor at R5"),
+    line("armor", "warframe_totals", "multiplicative_percent", "wiki: Steel Fiber — +100% armor at R10 (post-U34)"),
   ]),
 };

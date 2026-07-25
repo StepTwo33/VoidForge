@@ -1,102 +1,39 @@
 # Frame Hub
 
-Open-source Warframe build planner — warframe, weapon, companion, and modular (kitgun / zaw / amp) builders with mod capacity, set bonuses, archon shards, arcanes, and cloud saves.
+Open-source verification source for [frame-hub.com](https://frame-hub.com) — Warframe build planner calculations and item catalogs (mods, weapons, warframes, arcanes, and more).
 
-**Live site:** [frame-hub.com](https://frame-hub.com)
+**Use the planner at:** [frame-hub.com](https://frame-hub.com)
+
+This repository is **not intended for self-hosting**. Clone it to inspect or correct damage math and catalog data, or to contribute fixes. Run the product on the live site.
 
 > **Fan project disclaimer:** Frame Hub is not affiliated with, endorsed by, or sponsored by Digital Extremes. *Warframe* and related logos are trademarks of Digital Extremes Ltd. All game data is used for informational purposes under community fan-site conventions.
 
-## Features
+## What lives here
 
-- Warframe, primary/secondary/melee, companion, and modular weapon builders
-- Mod capacity, polarity, set bonuses, Helminth subsume, archon shards, and warframe arcanes
-- Local builds (no account) or cloud saves with email/password or Google sign-in
-- Share builds via URL; loadout grouping across slots
+| Area | Path |
+|------|------|
+| Item catalogs | [`src/data/`](src/data/) |
+| Damage / build math | [`src/lib/calc/`](src/lib/calc/) |
+| Architecture map | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) |
+| Accuracy / golden status | [`docs/ACCURACY_CHECKLIST.md`](docs/ACCURACY_CHECKLIST.md) |
 
-## Tech stack
+## Verify calculations and catalogs
 
-- [Next.js](https://nextjs.org) 16 (App Router), React 19, TypeScript, Tailwind CSS
-- SQLite via Prisma + `better-sqlite3`
-- Session auth (JWT cookies), optional Google OAuth and Resend email
-
-## Getting started
-
-### Prerequisites
-
-- Node.js 20+
-- npm
-
-### Setup
+Node.js 20+ and npm:
 
 ```bash
 git clone https://github.com/StepTwo33/FrameHub.git
 cd FrameHub
 npm install
-cp .env.example .env
+npm test
 ```
 
-Edit `.env`:
-
-| Variable | Required | Notes |
-|----------|----------|--------|
-| `DATABASE_URL` | Dev | Default `file:./dev.db` |
-| `AUTH_SECRET` | **Production** | Long random string for session signing |
-| `AUTH_URL` | Production | Public origin, e.g. `https://frame-hub.com` |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional | Google sign-in |
-| `RESEND_API_KEY` | Optional | Verification / notification email |
-
-Generate a secret:
+No `.env` or app server is required for calc/unit tests.
 
 ```bash
-openssl rand -base64 32
+npm test          # Vitest unit tests (calc + catalog checks)
+npm run lint      # ESLint
 ```
-
-### Development
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-### Production (self-hosted)
-
-```bash
-./start.sh          # build + migrate + start on PORT (default 3000)
-./start.sh --dev    # dev server instead of production build
-```
-
-`start.sh` loads `.env`, runs `prisma migrate deploy`, and optionally a Cloudflare tunnel (`SKIP_TUNNEL=1` to disable).
-
-**Updating the server:** do not run `npm install` on the server — it changes `package-lock.json` and blocks `git pull`. Use:
-
-```bash
-git fetch origin dev
-git reset --hard origin/dev
-npm ci
-npm run build
-# then restart: ./start.sh (or your process manager)
-```
-
-Or run `./scripts/deploy.sh` (same steps, default branch `dev`).
-
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Next.js dev server |
-| `npm run build` | Production build |
-| `npm run db:migrate` | Apply Prisma migrations |
-| `npm test` | Run Vitest unit tests |
-| `CONFIRM_SET_ADMIN=1 npx tsx scripts/set-admin.ts` | **Local dev only** — promote users to admin |
-
-Never run `set-admin.ts` against a production database you do not fully control. More detail: [`scripts/README.md`](scripts/README.md).
-
-## Security
-
-- Do **not** commit `.env`, `*.db`, or `public/uploads/` — they are gitignored.
-- Set a strong `AUTH_SECRET` in production (the app refuses to start without one).
-- See [`.env.example`](.env.example) for all supported environment variables.
 
 ## Contributing
 
@@ -105,13 +42,14 @@ Issues and pull requests are welcome. Please do not commit secrets, database fil
 **Before changing code or data, read:**
 
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — where builders, calc, catalogs, and behaviors live
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — workflow for data/calc changes
 - [`scripts/README.md`](scripts/README.md) — which scripts are safe vs data-pipeline scratch
 - Prefer **one item at a time** when editing mods/weapons/warframes/arcanes (no blanket catalog transforms)
 
-```bash
-npm test          # Vitest unit tests
-npm run lint      # ESLint
-```
+## Security
+
+- Do **not** commit `.env`, `*.db`, or `public/uploads/` — they are gitignored.
+- See [`SECURITY.md`](SECURITY.md) for vulnerability reporting.
 
 ## License
 

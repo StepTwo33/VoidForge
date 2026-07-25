@@ -46,9 +46,7 @@ export const MOD_BEHAVIORS_SHOTGUN: Record<string, VerifiedModBehavior> = {
     line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "Primed Ravage: criticalMultiplier \u2014 +20% Critical Damage per rank (Primed)"),
   ]),
   riven_shotgun: mod("riven_shotgun", [], "wiki: Riven Mod (Shotgun) \u2014 Riven mod with random stats. Configure stats after equipping."),
-  shotgun_aptitude: mod("shotgun_aptitude", [
-    line("statusChance", "weapon_dps", "multiplicative_percent", "Shotgun Aptitude: statusChance \u2014 +15% Status Chance per rank"),
-  ]),
+
   shotgun_spazz: mod("shotgun_spazz", [
     line("fireRate", "weapon_dps", "multiplicative_percent", "Shotgun Spazz: fireRate \u2014 +15% Fire Rate per rank"),
   ]),

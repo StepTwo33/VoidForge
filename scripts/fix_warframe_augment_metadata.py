@@ -12,7 +12,7 @@ MODS_TS = ROOT / "src/data/mods.ts"
 FIXES: dict[str, dict] = {
   "afterburner": {"warframeId": "elytron"},
   "cold_snap": {"warframeId": "itzal"},
-  "energy_field": {"warframeId": "odenata"},
+  "energy_field": {"warframeId": "odonata"},
   "fomorian_accelerant": {"subCategory": "weapon"},
 }
 

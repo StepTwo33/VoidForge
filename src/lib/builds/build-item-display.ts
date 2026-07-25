@@ -12,6 +12,7 @@ import {
   getEffectiveWeaponsMap,
 } from "@/lib/weapons/effective-data";
 import { getCompanionImage, getWarframeImage, getWeaponImage } from "@/lib/display/images";
+import { normalizeArchwingId } from "@/lib/mods/archwing-augment-mods";
 
 export interface BuildItemDisplay {
   itemName: string | null;
@@ -105,8 +106,10 @@ export function resolveBuildItemDisplay(type: string, itemId: string): BuildItem
     case "modular":
       return resolveModularDisplay(itemId);
     case "archwing": {
+      const archwingKey = normalizeArchwingId(itemId);
       const frame =
-        archwings.find((a) => a.id === itemId) ?? necramechs.find((n) => n.id === itemId);
+        archwings.find((a) => a.id === itemId || a.id === archwingKey) ??
+        necramechs.find((n) => n.id === itemId);
       if (frame) {
         return {
           itemName: frame.name,

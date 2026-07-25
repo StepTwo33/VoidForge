@@ -21,7 +21,18 @@ import {
   computeWarframeAuraBonus,
   computeWarframeCapacityUsed,
 } from "@/lib/calc/compute-used-capacity";
-import { Warframe, Mod, Ability, Weapon, WarframeCalculatedStats, CalculatedStats, EquippedMod, EquippedArchonShard, ArchonShard } from "@/lib/types";
+import {
+  Warframe,
+  Mod,
+  Ability,
+  Weapon,
+  WarframeCalculatedStats,
+  CalculatedStats,
+  EquippedMod,
+  EquippedArchonShard,
+  ArchonShard,
+  WeaponCalculationOptions,
+} from "@/lib/types";
 import { Zap, Flag, Gem, Star, Save, FolderOpen, Share2, Check, Upload, Shield } from "lucide-react";
 import { warframeArcanes } from "@/data/arcanes";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
@@ -32,6 +43,7 @@ import { appendReturnTo } from "@/lib/site/nav-return";
 import {
   getExaltedWeaponForAbility,
   getExaltedWeaponsForWarframe,
+  getMeleeExaltedWeapon,
   getPrimaryExaltedWeapon,
 } from "@/lib/weapons/exalted-weapons";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, WarframeBuildData, persistSavedBuild, resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
@@ -114,6 +126,13 @@ export default function WarframeBuilderPage() {
   const [exaltedArcanes, setExaltedArcanes] = useState<(Mod | null)[]>([null]);
   const [exaltedArcanePickerOpen, setExaltedArcanePickerOpen] = useState(false);
   const [exaltedActiveArcaneSlot, setExaltedActiveArcaneSlot] = useState(0);
+  const [exaltedMeleeMods, setExaltedMeleeMods] = useState<EquippedMod[]>([]);
+  const [exaltedMeleeModPickerOpen, setExaltedMeleeModPickerOpen] = useState(false);
+  const [exaltedMeleeActiveSlot, setExaltedMeleeActiveSlot] = useState(0);
+  const [exaltedMeleeSlotPolarities, setExaltedMeleeSlotPolarities] = useState<Record<number, string>>({});
+  const [exaltedMeleeArcanes, setExaltedMeleeArcanes] = useState<(Mod | null)[]>([null]);
+  const [exaltedMeleeArcanePickerOpen, setExaltedMeleeArcanePickerOpen] = useState(false);
+  const [exaltedMeleeActiveArcaneSlot, setExaltedMeleeActiveArcaneSlot] = useState(0);
   const [slotPolarities, setSlotPolarities] = useState<Record<number, string>>({});
   const [activeDualFormId, setActiveDualFormId] = useState("sirius");
   const [dualFormBuilds, setDualFormBuilds] = useState<Record<string, DualFormBuildSlice>>({});
@@ -247,8 +266,24 @@ export default function WarframeBuilderPage() {
       exaltedMods: exaltedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
       exaltedSlotPolarities,
       exaltedArcaneIds: exaltedArcanes.map((a) => a?.id ?? null),
+      exaltedMeleeMods: exaltedMeleeMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      exaltedMeleeSlotPolarities,
+      exaltedMeleeArcaneIds: exaltedMeleeArcanes.map((a) => a?.id ?? null),
     };
-  }, [selectedWarframe, buildWarframePayload, hasOrokinReactor, isMR30, helminthSlot, helminthAbility, exaltedMods, exaltedSlotPolarities, exaltedArcanes]);
+  }, [
+    selectedWarframe,
+    buildWarframePayload,
+    hasOrokinReactor,
+    isMR30,
+    helminthSlot,
+    helminthAbility,
+    exaltedMods,
+    exaltedSlotPolarities,
+    exaltedArcanes,
+    exaltedMeleeMods,
+    exaltedMeleeSlotPolarities,
+    exaltedMeleeArcanes,
+  ]);
 
   const applyLoadedBuild = useCallback((build: SavedBuild, options?: { silent?: boolean }) => {
     const d = build.data as WarframeBuildData;
@@ -286,6 +321,12 @@ export default function WarframeBuilderPage() {
     }));
     setExaltedSlotPolarities(d.exaltedSlotPolarities || {});
     setExaltedArcanes(resolveSavedArcaneSlots(d.exaltedArcaneIds, 2));
+    setExaltedMeleeMods((d.exaltedMeleeMods || []).map((m) => {
+      const mod = modsMap.get(m.modId);
+      return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
+    }));
+    setExaltedMeleeSlotPolarities(d.exaltedMeleeSlotPolarities || {});
+    setExaltedMeleeArcanes(resolveSavedArcaneSlots(d.exaltedMeleeArcaneIds, 2));
     if (d.helminthSlot != null) {
       setHelminthSlot(d.helminthSlot);
       if (d.helminthAbilityId) {
@@ -376,9 +417,39 @@ export default function WarframeBuilderPage() {
     return getPrimaryExaltedWeapon(selectedWarframe.id, allWeaponsData);
   }, [selectedWarframe, allWeaponsData]);
 
+  const exaltedMeleeWeapon = useMemo<Weapon | null>(() => {
+    if (!selectedWarframe) return null;
+    return getMeleeExaltedWeapon(selectedWarframe.id, allWeaponsData);
+  }, [selectedWarframe, allWeaponsData]);
+
   const exaltedArcaneConfig = useMemo(
     () => (exaltedWeapon ? getWeaponArcanes(exaltedWeapon) : { arcanes: [] as Mod[], slots: 0, label: "" }),
     [exaltedWeapon],
+  );
+
+  const exaltedMeleeArcaneConfig = useMemo(
+    () =>
+      exaltedMeleeWeapon
+        ? getWeaponArcanes(exaltedMeleeWeapon)
+        : { arcanes: [] as Mod[], slots: 0, label: "" },
+    [exaltedMeleeWeapon],
+  );
+
+  const calculatedStats = useMemo<WarframeCalculatedStats | null>(() => {
+    if (!selectedWarframe) return null;
+    const modSlots = equippedMods.map((m) => ({
+      modId: m.modId,
+      rank: m.rank,
+      slotIndex: m.slotIndex,
+    }));
+    const stats = calculateWarframeBuild(selectedWarframe, modSlots, modsMap);
+    return applyWarframeShardsAndArcanes(stats, equippedShards, equippedArcanes, equippedArcaneRanks);
+  }, [selectedWarframe, equippedMods, equippedShards, equippedArcanes, equippedArcaneRanks, modsMap]);
+
+  /** Exalted DPS scales with host Ability Strength (wiki). */
+  const exaltedCalcOptions = useMemo<WeaponCalculationOptions>(
+    () => ({ abilityStrength: calculatedStats?.abilityStrength ?? 1 }),
+    [calculatedStats?.abilityStrength],
   );
 
   const exaltedStats = useMemo<CalculatedStats | null>(() => {
@@ -388,15 +459,83 @@ export default function WarframeBuilderPage() {
       .slice(0, exaltedArcaneConfig.slots)
       .filter((a): a is Mod => a !== null);
     if (activeArcanes.length > 0) {
-      return calculateWeaponBuildWithArcanes(exaltedWeapon, slots, modsMap, activeArcanes);
+      return calculateWeaponBuildWithArcanes(
+        exaltedWeapon,
+        slots,
+        modsMap,
+        activeArcanes,
+        undefined,
+        undefined,
+        exaltedCalcOptions,
+      );
     }
-    return calculateWeaponBuild(exaltedWeapon, slots, modsMap);
-  }, [exaltedWeapon, exaltedMods, exaltedArcanes, exaltedArcaneConfig.slots, modsMap]);
+    return calculateWeaponBuild(
+      exaltedWeapon,
+      slots,
+      modsMap,
+      undefined,
+      undefined,
+      exaltedCalcOptions,
+    );
+  }, [exaltedWeapon, exaltedMods, exaltedArcanes, exaltedArcaneConfig.slots, modsMap, exaltedCalcOptions]);
+
+  const exaltedMeleeStats = useMemo<CalculatedStats | null>(() => {
+    if (!exaltedMeleeWeapon) return null;
+    const slots = exaltedMeleeMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
+    const activeArcanes = exaltedMeleeArcanes
+      .slice(0, exaltedMeleeArcaneConfig.slots)
+      .filter((a): a is Mod => a !== null);
+    if (activeArcanes.length > 0) {
+      return calculateWeaponBuildWithArcanes(
+        exaltedMeleeWeapon,
+        slots,
+        modsMap,
+        activeArcanes,
+        undefined,
+        undefined,
+        exaltedCalcOptions,
+      );
+    }
+    return calculateWeaponBuild(
+      exaltedMeleeWeapon,
+      slots,
+      modsMap,
+      undefined,
+      undefined,
+      exaltedCalcOptions,
+    );
+  }, [
+    exaltedMeleeWeapon,
+    exaltedMeleeMods,
+    exaltedMeleeArcanes,
+    exaltedMeleeArcaneConfig.slots,
+    modsMap,
+    exaltedCalcOptions,
+  ]);
 
   const exaltedBaseStats = useMemo<CalculatedStats | null>(() => {
     if (!exaltedWeapon) return null;
-    return calculateWeaponBuild(exaltedWeapon, [], modsMap);
-  }, [exaltedWeapon]);
+    return calculateWeaponBuild(
+      exaltedWeapon,
+      [],
+      modsMap,
+      undefined,
+      undefined,
+      exaltedCalcOptions,
+    );
+  }, [exaltedWeapon, modsMap, exaltedCalcOptions]);
+
+  const exaltedMeleeBaseStats = useMemo<CalculatedStats | null>(() => {
+    if (!exaltedMeleeWeapon) return null;
+    return calculateWeaponBuild(
+      exaltedMeleeWeapon,
+      [],
+      modsMap,
+      undefined,
+      undefined,
+      exaltedCalcOptions,
+    );
+  }, [exaltedMeleeWeapon, modsMap, exaltedCalcOptions]);
 
   const exaltedContributionContext = useMemo(() => {
     if (!exaltedWeapon) return null;
@@ -407,12 +546,38 @@ export default function WarframeBuilderPage() {
       arcanes: exaltedArcanes
         .slice(0, exaltedArcaneConfig.slots)
         .filter((a): a is Mod => a !== null),
+      calcOptions: exaltedCalcOptions,
     };
-  }, [exaltedWeapon, exaltedMods, exaltedArcanes, exaltedArcaneConfig.slots, modsMap]);
+  }, [exaltedWeapon, exaltedMods, exaltedArcanes, exaltedArcaneConfig.slots, modsMap, exaltedCalcOptions]);
+
+  const exaltedMeleeContributionContext = useMemo(() => {
+    if (!exaltedMeleeWeapon) return null;
+    return {
+      baseWeapon: exaltedMeleeWeapon,
+      modSlots: exaltedMeleeMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      allMods: modsMap,
+      arcanes: exaltedMeleeArcanes
+        .slice(0, exaltedMeleeArcaneConfig.slots)
+        .filter((a): a is Mod => a !== null),
+      calcOptions: exaltedCalcOptions,
+    };
+  }, [
+    exaltedMeleeWeapon,
+    exaltedMeleeMods,
+    exaltedMeleeArcanes,
+    exaltedMeleeArcaneConfig.slots,
+    modsMap,
+    exaltedCalcOptions,
+  ]);
 
   const exaltedCapacity = useMemo(
     () => computeUsedCapacity(exaltedMods, modsMap, exaltedSlotPolarities),
     [exaltedMods, exaltedSlotPolarities, modsMap],
+  );
+
+  const exaltedMeleeCapacity = useMemo(
+    () => computeUsedCapacity(exaltedMeleeMods, modsMap, exaltedMeleeSlotPolarities),
+    [exaltedMeleeMods, exaltedMeleeSlotPolarities, modsMap],
   );
 
   const filteredWarframes = useMemo(() => {
@@ -423,18 +588,6 @@ export default function WarframeBuilderPage() {
     const q = warframeSearch.toLowerCase();
     return sorted.filter((w) => w.name.toLowerCase().includes(q));
   }, [warframeSearch]);
-
-  const calculatedStats = useMemo<WarframeCalculatedStats | null>(() => {
-    if (!selectedWarframe) return null;
-    const modSlots = equippedMods.map((m) => ({
-      modId: m.modId,
-      rank: m.rank,
-      slotIndex: m.slotIndex,
-    }));
-    const stats = calculateWarframeBuild(selectedWarframe, modSlots, modsMap);
-    // Shards + arcanes + derived-total recompute shared with loadout stats
-    return applyWarframeShardsAndArcanes(stats, equippedShards, equippedArcanes, equippedArcaneRanks);
-  }, [selectedWarframe, equippedMods, equippedShards, equippedArcanes, equippedArcaneRanks]);
 
   const abilityDisplayEntries = useMemo(() => {
     if (!selectedWarframe) return [];
@@ -463,6 +616,9 @@ export default function WarframeBuilderPage() {
     setExaltedMods([]);
     setExaltedSlotPolarities({});
     setExaltedArcanes([null]);
+    setExaltedMeleeMods([]);
+    setExaltedMeleeSlotPolarities({});
+    setExaltedMeleeArcanes([null]);
     setHelminthSlot(null);
     setHelminthAbility(null);
     setSlotPolarities({});
@@ -563,11 +719,6 @@ export default function WarframeBuilderPage() {
       },
     });
 
-    if (outcome.kind === "need_public_save") {
-      setSaveDialogDefaultPublic(true);
-      setSaveDialogOpen(true);
-      return;
-    }
     if (outcome.kind === "copied") {
       setShareCopied(true);
       setTimeout(() => setShareCopied(false), 2000);
@@ -997,6 +1148,8 @@ export default function WarframeBuilderPage() {
                     exaltedStats={exaltedStats}
                     exaltedBaseStats={exaltedBaseStats}
                     exaltedContributionContext={exaltedContributionContext}
+                    sectionTitle={exaltedMeleeWeapon ? "Exalted Primary" : "Exalted Weapon"}
+                    hideSiblingNote={!!exaltedMeleeWeapon}
                     onAddMod={(i) => {
                       setExaltedActiveSlot(i);
                       setExaltedModPickerOpen(true);
@@ -1018,6 +1171,50 @@ export default function WarframeBuilderPage() {
                     }}
                     onRemoveArcane={(i) =>
                       setExaltedArcanes((prev) => {
+                        const next = [...prev];
+                        next[i] = null;
+                        return next;
+                      })
+                    }
+                  />
+                )}
+
+                {exaltedMeleeWeapon && (
+                  <ExaltedWeaponSection
+                    exaltedWeapon={exaltedMeleeWeapon}
+                    exaltedWeapons={exaltedWeapons}
+                    exaltedCapacity={exaltedMeleeCapacity}
+                    exaltedMods={exaltedMeleeMods}
+                    modsMap={modsMap}
+                    exaltedSlotPolarities={exaltedMeleeSlotPolarities}
+                    exaltedArcaneConfig={exaltedMeleeArcaneConfig}
+                    exaltedArcanes={exaltedMeleeArcanes}
+                    exaltedStats={exaltedMeleeStats}
+                    exaltedBaseStats={exaltedMeleeBaseStats}
+                    exaltedContributionContext={exaltedMeleeContributionContext}
+                    sectionTitle="Exalted Melee"
+                    hideSiblingNote
+                    onAddMod={(i) => {
+                      setExaltedMeleeActiveSlot(i);
+                      setExaltedMeleeModPickerOpen(true);
+                    }}
+                    onRemoveMod={(i) =>
+                      setExaltedMeleeMods((prev) => prev.filter((m) => m.slotIndex !== i))
+                    }
+                    onPolarize={(i, p) =>
+                      setExaltedMeleeSlotPolarities((prev) => {
+                        const next = { ...prev };
+                        if (p) next[i] = p;
+                        else delete next[i];
+                        return next;
+                      })
+                    }
+                    onAddArcane={(i) => {
+                      setExaltedMeleeActiveArcaneSlot(i);
+                      setExaltedMeleeArcanePickerOpen(true);
+                    }}
+                    onRemoveArcane={(i) =>
+                      setExaltedMeleeArcanes((prev) => {
                         const next = [...prev];
                         next[i] = null;
                         return next;
@@ -1129,6 +1326,53 @@ export default function WarframeBuilderPage() {
             setExaltedArcanePickerOpen(false);
           }}
           title={`Select ${exaltedArcaneConfig.label}`}
+        />
+      )}
+
+      {exaltedMeleeWeapon && (
+        <ModPicker
+          open={exaltedMeleeModPickerOpen}
+          onClose={() => setExaltedMeleeModPickerOpen(false)}
+          mods={allMods}
+          category="melee"
+          equippedModIds={exaltedMeleeMods.map((m) => m.modId)}
+          weaponCategory={exaltedMeleeWeapon.category}
+          weapon={exaltedMeleeWeapon}
+          onSelect={(mod, rank) => {
+            setExaltedMeleeMods((prev) => {
+              const filtered = prev.filter((m) => m.slotIndex !== exaltedMeleeActiveSlot);
+              return [
+                ...filtered,
+                {
+                  modId: mod.id,
+                  modName: mod.name,
+                  rank,
+                  slotIndex: exaltedMeleeActiveSlot,
+                  polarity: mod.polarity,
+                  drain: mod.drain,
+                },
+              ];
+            });
+          }}
+        />
+      )}
+
+      {exaltedMeleeWeapon && exaltedMeleeArcaneConfig.slots > 0 && (
+        <ArcanePicker
+          open={exaltedMeleeArcanePickerOpen}
+          onOpenChange={setExaltedMeleeArcanePickerOpen}
+          arcanes={exaltedMeleeArcaneConfig.arcanes}
+          equippedArcaneIds={exaltedMeleeArcanes.filter(Boolean).map((a) => a!.id)}
+          onSelect={(arcane) => {
+            setExaltedMeleeArcanes((prev) => {
+              const next = [...prev];
+              while (next.length < exaltedMeleeArcaneConfig.slots) next.push(null);
+              next[exaltedMeleeActiveArcaneSlot] = arcane;
+              return next;
+            });
+            setExaltedMeleeArcanePickerOpen(false);
+          }}
+          title={`Select ${exaltedMeleeArcaneConfig.label}`}
         />
       )}
 

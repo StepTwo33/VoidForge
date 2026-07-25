@@ -26,6 +26,7 @@ export const STANCE_WEAPON_TYPE: Record<string, string> = {
   // Heavy Scythe
   "galeforce_dawn": "heavy_scythe",
   // Polearm
+  "argent_scourge": "polearm",
   "boreals_contempt": "polearm",
   "stance_bleeding_willow": "polearm",
   "stance_shimmering_blight": "polearm",

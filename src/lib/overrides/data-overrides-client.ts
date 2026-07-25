@@ -188,6 +188,29 @@ export async function removeOverride(id: string): Promise<void> {
   notifyDataOverridesUpdated();
 }
 
+export async function removeOverrides(ids: string[]): Promise<number> {
+  const unique = [...new Set(ids.filter(Boolean))];
+  if (unique.length === 0) return 0;
+  if (unique.length === 1) {
+    await removeOverride(unique[0]!);
+    return 1;
+  }
+  const res = await fetch("/api/data-overrides", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids: unique }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(typeof err.error === "string" ? err.error : "Failed to delete overrides");
+  }
+  const data = (await res.json()) as { deleted?: number };
+  const idSet = new Set(unique);
+  setOverrideCache(getOverrides().filter((o) => !idSet.has(o.id)));
+  notifyDataOverridesUpdated();
+  return data.deleted ?? unique.length;
+}
+
 export async function importSharedOverrides(json: string): Promise<number> {
   let incoming: unknown;
   try {

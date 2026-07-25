@@ -178,6 +178,10 @@ export interface WarframeBuildData {
   exaltedMods?: ModSlot[];
   exaltedSlotPolarities?: Record<number, string>;
   exaltedArcaneIds?: (string | null)[];
+  /** Titania Diwata (melee) when Dex Pixia is the primary exalted. */
+  exaltedMeleeMods?: ModSlot[];
+  exaltedMeleeSlotPolarities?: Record<number, string>;
+  exaltedMeleeArcaneIds?: (string | null)[];
   /** Non-default form configs for dual-form warframes (e.g. Orion on Sirius & Orion). */
   dualFormBuilds?: Record<string, {
     mods: ModSlot[];
@@ -209,7 +213,7 @@ export interface RailjackBuildData {
   shieldId?: string;
   engineId?: string;
   platingId?: string;
-  /** Port + starboard turret hardpoints. */
+  /** Nose / Dorsal / Ventral turret hardpoints. */
   turretIds?: (string | undefined)[];
   /** @deprecated Use turretIds[0] — kept for older saves. */
   turretId?: string;
@@ -222,11 +226,24 @@ export interface RailjackBuildData {
   tacticalPolarities: Record<number, string>;
   /** Elite crew member (Update 43 protoframes). */
   eliteCrewId?: string;
+  /** Selected Mk III house unique trait rolls. */
+  reactorTraitId?: string;
+  shieldTraitId?: string;
+  engineTraitId?: string;
+  /** Player Intrinsics ranks 0–10 (Dirac/grid removed U29.10 → Endo). */
+  intrinsics?: {
+    tactical?: number;
+    piloting?: number;
+    gunnery?: number;
+    engineering?: number;
+    command?: number;
+  };
   /** Simulation toggles for conditional integrated mods and active abilities. */
   simulation?: {
     crimsonFugueStacks?: number;
     cruisingSpeedActive?: boolean;
     protectiveShotsActive?: boolean;
+    shieldsDepleted?: boolean;
     activeBattleAbilityId?: string | null;
     activeTacticalAbilityId?: string | null;
   };

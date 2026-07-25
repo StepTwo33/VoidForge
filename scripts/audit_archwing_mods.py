@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MODS_TS = ROOT / "src/data/mods.ts"
 BEHAVIOR_DIR = ROOT / "src/data/mod-behaviors"
-ARCHWING_IDS = {"odenata", "odenata_prime", "elytron", "itzal", "amesha", "odonata", "odonata_prime"}
+ARCHWING_IDS = {"odonata", "odonata_prime", "elytron", "itzal", "amesha"}
 
 BEHAVIOR_FILES = {"archwing": "archwing.ts", "augment": "augment.ts"}
 

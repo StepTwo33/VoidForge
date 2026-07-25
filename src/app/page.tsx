@@ -96,7 +96,7 @@ export default function Home() {
               <FeatureCard
                 href="/riven-calculator"
                 title="Riven Calculator"
-                description="Generate, grade, and evaluate riven mods with disposition-adjusted stat ranges."
+                description="Grade your in-game riven rolls against disposition-scaled ranges and tier rankings."
                 icon={Dice5}
                 accent="amber"
                 badges={["596 Dispositions", "Grade System"]}

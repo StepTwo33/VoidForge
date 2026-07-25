@@ -6,7 +6,19 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { Resend } from "resend";
 import { logServerError } from "@/lib/log-server-error";
+import { escapeHtml } from "@/lib/auth/newsletter-template";
 
+export {
+  buildNewsletterHtml,
+  plainTextToNewsletterHtml,
+  markdownToNewsletterHtml,
+  renderNewsletterEmail,
+  buildNewsletterPreviewDocument,
+  escapeHtml,
+  isSafeHttpsUrl,
+  NEWSLETTER_DEFAULT_EYEBROW,
+} from "@/lib/auth/newsletter-template";
+export type { NewsletterCompose, BuildNewsletterHtmlParams } from "@/lib/auth/newsletter-template";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const SUPPORT_FROM =
@@ -159,55 +171,6 @@ export async function sendReportStatusEmail(params: {
   `;
 
   await sendEmail(params.to, subject, html);
-}
-
-export function buildNewsletterHtml(params: {
-  subject: string;
-  bodyHtml: string;
-  unsubscribeUrl: string;
-}): string {
-  return `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px;">
-      <div style="text-align: center; margin-bottom: 24px;">
-        <h1 style="margin: 0; font-size: 22px; color: #e2e8f0;">
-          <span style="color: #22d3ee;">Frame</span><span style="color: #94a3b8;">Hub</span>
-        </h1>
-        <p style="color: #64748b; font-size: 12px; margin: 8px 0 0;">News & updates</p>
-      </div>
-      <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px;">
-        <p style="color: #f1f5f9; font-size: 18px; font-weight: 600; margin: 0 0 16px;">${escapeHtml(params.subject)}</p>
-        <div style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
-          ${params.bodyHtml}
-        </div>
-      </div>
-      <p style="color: #475569; font-size: 11px; text-align: center; margin-top: 24px; line-height: 1.5;">
-        You are receiving this because you opted in to FrameHub newsletters.<br/>
-        <a href="${params.unsubscribeUrl}" style="color: #64748b;">Unsubscribe</a>
-        · Manage preferences in your
-        <a href="${getAppBaseUrl()}/profile" style="color: #64748b;">profile settings</a>
-      </p>
-    </div>
-  `;
-}
-
-/** Convert plain text newsletter body to simple HTML paragraphs. */
-export function plainTextToNewsletterHtml(body: string): string {
-  return body
-    .trim()
-    .split(/\n{2,}/)
-    .map((para) => {
-      const lines = escapeHtml(para).replace(/\n/g, "<br/>");
-      return `<p style="margin: 0 0 14px;">${lines}</p>`;
-    })
-    .join("");
-}
-
-export function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }
 
 function verificationTemplate(code: string): string {

@@ -13,10 +13,11 @@ import {
   type DpsContributionCategory,
   type WeaponDpsCalcContext,
 } from "@/lib/calc/dps-contributions";
-import { avgCritMultiplier, critTierDamage } from "@/lib/calc/crit-utils";
-import { CollapsibleSection, SimSlider, StatRow } from "./stat-primitives";
+import { avgCritMultiplier, critTierDamage, critTiersToShow, critTierLabel, critTierColorClass, exceedsWarframeInt32 } from "@/lib/calc/crit-utils";
+import { CollapsibleSection, StatRow } from "./stat-primitives";
 import { TTKSection } from "./ttk-section";
 import { WeaponSimControls } from "./weapon-sim-controls";
+import { useSimStatChangeFlash } from "./use-sim-stat-change-flash";
 
 const ELEMENT_COLORS: Record<string, string> = {
   heat: "text-orange-700 dark:text-orange-400",
@@ -69,6 +70,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
     () => (contributionContext ? computeDpsContributions(contributionContext) : []),
     [contributionContext],
   );
+  const flash = useSimStatChangeFlash(stats, simParams);
 
   if (!stats) {
     return (
@@ -93,6 +95,9 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
   const showSustainedColumn = dpsContributions.some(
     (c) => Math.abs(c.sustainedMarginalPct - c.burstMarginalPct) > 0.5,
   );
+  const ttkFlash = flash.has("ttk") || flash.has("burstDps") || flash.has("sustainedDps")
+    || flash.has("directBurstDps") || flash.has("fireRate") || flash.has("criticalChance")
+    || flash.has("avgHit") || flash.has("totalDamage") || flash.has("statusDps");
 
   return (
     <div className="border border-border rounded-xl p-4 bg-card space-y-1 min-w-0 overflow-x-hidden">
@@ -138,7 +143,12 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
         const arsenalTotal = dmg.totalDamage * Math.max(1, stats.multishot);
         return (
           <CollapsibleSection title="DIRECT DAMAGE" defaultOpen>
-            <StatRow label="Total Damage" value={arsenalTotal.toFixed(1)} highlighted />
+            <StatRow
+              label="Total Damage"
+              value={arsenalTotal.toFixed(1)}
+              highlighted
+              changed={flash.has("arsenalTotal") || flash.has("totalDamage")}
+            />
             {stats.multishot > 1 && (
               <div className="text-[9px] text-muted-foreground/60 -mt-0.5 mb-0.5">
                 {dmg.totalDamage.toFixed(1)} per pellet × {stats.multishot.toFixed(2)} multishot (projectile / hit)
@@ -150,13 +160,13 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
               </div>
             )}
             {(dmg.impact > 0 || (baseStats && baseStats.impact > 0)) && (
-              <StatRow label="Impact" value={dmg.impact.toFixed(1)} color="text-slate-400" />
+              <StatRow label="Impact" value={dmg.impact.toFixed(1)} color="text-slate-400" changed={flash.has("impact")} />
             )}
             {(dmg.puncture > 0 || (baseStats && baseStats.puncture > 0)) && (
-              <StatRow label="Puncture" value={dmg.puncture.toFixed(1)} color="text-stone-400" />
+              <StatRow label="Puncture" value={dmg.puncture.toFixed(1)} color="text-stone-400" changed={flash.has("puncture")} />
             )}
             {(dmg.slash > 0 || (baseStats && baseStats.slash > 0)) && (
-              <StatRow label="Slash" value={dmg.slash.toFixed(1)} color="text-red-400" />
+              <StatRow label="Slash" value={dmg.slash.toFixed(1)} color="text-red-400" changed={flash.has("slash")} />
             )}
 
             {/* Elemental Damage */}
@@ -169,6 +179,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                     label={ELEMENT_LABELS[e.type] || e.type}
                     value={e.value.toFixed(1)}
                     color={ELEMENT_COLORS[e.type]}
+                    changed={flash.has("totalDamage") || flash.has("arsenalTotal")}
                   />
                 ))}
               </>
@@ -182,48 +193,58 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
         const hitBase = (stats.arsenalDamage ?? stats).totalDamage;
         const cm = stats.criticalMultiplier;
         const cc = stats.criticalChance;
-        const yellow = hitBase * critTierDamage(1, cm);
-        const orange = hitBase * critTierDamage(2, cm);
-        const red = hitBase * critTierDamage(3, cm);
         const avgHit = hitBase * avgCritMultiplier(cc, cm);
+        const tiers = critTiersToShow(cc);
+        const hitValues = [
+          hitBase,
+          ...tiers.map((t) => hitBase * critTierDamage(t, cm)),
+          avgHit,
+        ];
+        const showOverflow = hitValues.some(exceedsWarframeInt32);
         return (
           <CollapsibleSection title="HIT DAMAGE" defaultOpen>
             <p className="text-[9px] text-muted-foreground/70 mb-1 leading-snug">
-              Per pellet / swing — not DPS (no multishot or fire rate).
+              Per pellet / swing — not DPS (no multishot or fire rate). Orange/red+ rows are tier hit values; Avg hit only blends tiers your crit chance can roll.
             </p>
             <StatRow
               label="Non-crit hit"
               value={hitBase.toFixed(1)}
               highlighted
+              changed={flash.has("nonCritHit")}
               tooltip="Raw hit damage before crit averaging, multishot, and fire rate."
             />
-            <StatRow
-              label="Yellow crit"
-              value={yellow.toFixed(1)}
-              color="text-yellow-400"
-              tooltip={`Non-crit × ${cm.toFixed(2)} crit multiplier`}
-            />
-            {cc >= 1 && (
-              <StatRow
-                label="Orange crit"
-                value={orange.toFixed(1)}
-                color="text-orange-400"
-                tooltip="Tier-2 crit (crit chance ≥ 100%)"
-              />
-            )}
-            {cc >= 2 && (
-              <StatRow
-                label="Red crit"
-                value={red.toFixed(1)}
-                color="text-red-400"
-                tooltip="Tier-3 crit (crit chance ≥ 200%)"
-              />
-            )}
+            {tiers.map((tier) => {
+              const reachable = tier === 1 ? cc > 0 : cc >= tier - 1;
+              const tierKey = tier === 1 ? "yellowHit" : tier === 2 ? "orangeHit" : tier === 3 ? "redHit" : `tier${tier}Hit`;
+              return (
+                <StatRow
+                  key={tier}
+                  label={critTierLabel(tier)}
+                  value={(hitBase * critTierDamage(tier, cm)).toFixed(1)}
+                  color={critTierColorClass(tier)}
+                  changed={flash.has(tierKey) || (tier > 3 && flash.has("avgHit"))}
+                  tooltip={
+                    tier === 1
+                      ? `Non-crit × ${cm.toFixed(2)} crit multiplier`
+                      : reachable
+                        ? `Tier-${tier} crit hit (crit chance ≥ ${(tier - 1) * 100}%)`
+                        : `Tier-${tier} crit hit — needs ≥${(tier - 1) * 100}% CC (reference only; not in avg hit yet)`
+                  }
+                />
+              );
+            })}
             <StatRow
               label="Avg hit"
               value={avgHit.toFixed(1)}
-              tooltip="Non-crit hit × average crit multiplier (still without multishot / fire rate)."
+              highlighted
+              changed={flash.has("avgHit")}
+              tooltip="Expected hit damage across crit tiers your current crit chance can roll (includes orange/red+ when CC &gt; 100%)."
             />
+            {showOverflow && (
+              <p className="text-[9px] text-amber-500/90 mt-1.5 leading-snug">
+                Note: values above ~2.147B can wrap to large negatives in-game (signed 32-bit). FrameHub shows uncapped math.
+              </p>
+            )}
           </CollapsibleSection>
         );
       })()}
@@ -233,6 +254,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
         <StatRow
           label={isMelee ? "Attack Speed" : "Fire Rate"}
           value={(stats.effectiveFireRate ?? stats.fireRate).toFixed(2)}
+          changed={flash.has("fireRate")}
           tooltip={
             isMelee
               ? "Melee attacks per second (same field as fire rate for guns in the build engine)."
@@ -242,12 +264,106 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                 : "Shots per second used for DPS."
           }
         />
-        <StatRow label="Critical Chance" value={`${(stats.criticalChance * 100).toFixed(1)}%`} />
-        <StatRow label="Critical Multiplier" value={`${stats.criticalMultiplier.toFixed(2)}x`} />
-        <StatRow label="Status Chance" value={`${(stats.statusChancePerShot * 100).toFixed(1)}%`} />
-        {!isMelee && <StatRow label="Multishot" value={stats.multishot.toFixed(2)} />}
+        <StatRow
+          label="Critical Chance"
+          value={`${(stats.criticalChance * 100).toFixed(1)}%`}
+          changed={flash.has("criticalChance")}
+        />
+        <StatRow
+          label="Critical Multiplier"
+          value={`${stats.criticalMultiplier.toFixed(2)}x`}
+          changed={flash.has("criticalMultiplier")}
+        />
+        <StatRow
+          label="Status Chance"
+          value={`${(stats.statusChancePerShot * 100).toFixed(1)}%`}
+          changed={flash.has("statusChance")}
+        />
+        {!isMelee && (
+          <StatRow label="Multishot" value={stats.multishot.toFixed(2)} changed={flash.has("multishot")} />
+        )}
         {stats.magazine > 0 && <StatRow label="Magazine" value={stats.magazine.toString()} />}
-        {stats.reloadTime > 0 && <StatRow label="Reload Time" value={`${stats.reloadTime.toFixed(2)}s`} />}
+        {stats.reloadTime > 0 && (
+          <StatRow
+            label="Reload Time"
+            value={`${stats.reloadTime.toFixed(2)}s`}
+            changed={flash.has("reloadTime")}
+          />
+        )}
+        {stats.range != null && stats.range !== 0 && (
+          <StatRow label="Range" value={`+${stats.range.toFixed(1)}m`} tooltip="Incarnon / reach bonus (display)." />
+        )}
+        {stats.ammoMax != null && stats.ammoMax > 0 && (
+          <StatRow label="Ammo Max" value={stats.ammoMax.toString()} tooltip="Incarnon ammo capacity perk (display)." />
+        )}
+        {stats.punchThrough != null && stats.punchThrough !== 0 && (
+          <StatRow
+            label="Punch Through"
+            value={`+${stats.punchThrough.toFixed(1)}m`}
+            tooltip="Incarnon / riven punch through (display; not modeled in DPS)."
+          />
+        )}
+        {stats.projectileSpeed != null && stats.projectileSpeed !== 0 && (
+          <StatRow
+            label="Projectile Speed"
+            value={`${stats.projectileSpeed > 0 ? "+" : ""}${(stats.projectileSpeed * 100).toFixed(0)}%`}
+            tooltip="Incarnon / riven projectile speed (display; not modeled in DPS)."
+          />
+        )}
+        {stats.followThrough != null && stats.followThrough !== 0 && (
+          <StatRow
+            label="Follow Through"
+            value={`${stats.followThrough > 0 ? "+" : ""}${(stats.followThrough * 100).toFixed(0)}%`}
+            tooltip="Incarnon follow-through bonus (display; not modeled in DPS)."
+          />
+        )}
+        {stats.accuracy != null && stats.accuracy !== 0 && (
+          <StatRow
+            label="Accuracy"
+            value={`${stats.accuracy > 0 ? "+" : ""}${(stats.accuracy * 100).toFixed(0)}%`}
+            tooltip="Incarnon / riven accuracy (display; not modeled in DPS). Aim-gated perks assume uptime."
+          />
+        )}
+        {stats.recoil != null && stats.recoil !== 0 && (
+          <StatRow
+            label="Recoil"
+            value={`${stats.recoil > 0 ? "+" : ""}${(stats.recoil * 100).toFixed(0)}%`}
+            color={stats.recoil < 0 ? "text-green-400" : undefined}
+            tooltip="Incarnon / riven recoil (display; negative = less recoil). Not modeled in DPS."
+          />
+        )}
+        {stats.zoom != null && stats.zoom !== 0 && (
+          <StatRow
+            label="Zoom"
+            value={`${stats.zoom > 0 ? "+" : ""}${(stats.zoom * 100).toFixed(0)}%`}
+            color={stats.zoom < 0 ? "text-green-400" : undefined}
+            tooltip="Incarnon / riven zoom (display; negative = less zoom). Not modeled in DPS."
+          />
+        )}
+        {stats.holsterReloadPerSec != null && stats.holsterReloadPerSec !== 0 && (
+          <StatRow
+            label="Holster Reload"
+            value={`${(stats.holsterReloadPerSec * 100).toFixed(0)}%/s`}
+            color="text-sky-400"
+            tooltip="Magazine fraction reloaded per second while holstered (display; swap-gated — not in same-weapon sustained DPS)."
+          />
+        )}
+        {stats.instantReloadOnKillChance != null && stats.instantReloadOnKillChance > 0 && (
+          <StatRow
+            label="Instant Reload (Kill)"
+            value={`${(stats.instantReloadOnKillChance * 100).toFixed(0)}%`}
+            color="text-amber-400"
+            tooltip="Chance to instantly reload on kill. Sustained DPS assumes one qualifying opportunity per magazine dump."
+          />
+        )}
+        {stats.instantReloadOnHeadshotChance != null && stats.instantReloadOnHeadshotChance > 0 && (
+          <StatRow
+            label="Instant Reload (HS)"
+            value={`${(stats.instantReloadOnHeadshotChance * 100).toFixed(0)}%`}
+            color="text-amber-400"
+            tooltip="Chance to instantly reload on headshot / headshot-kill. Sustained DPS assumes one qualifying opportunity per magazine dump."
+          />
+        )}
         {(stats.sprintSpeedBonus ?? 0) !== 0 && (
           <StatRow
             label="Sprint Speed"
@@ -262,6 +378,122 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             value={`${(stats.slideSpeedBonus ?? 0) > 0 ? "+" : ""}${((stats.slideSpeedBonus ?? 0) * 100).toFixed(0)}%`}
             color="text-cyan-400"
             tooltip="Warframe slide speed while this weapon is equipped."
+          />
+        )}
+        {(stats.parkourVelocityBonus ?? 0) !== 0 && (
+          <StatRow
+            label="Parkour Velocity"
+            value={`${(stats.parkourVelocityBonus ?? 0) > 0 ? "+" : ""}${((stats.parkourVelocityBonus ?? 0) * 100).toFixed(0)}%`}
+            color="text-cyan-400"
+            tooltip="Warframe parkour velocity while this weapon is equipped (display)."
+          />
+        )}
+        {(stats.movementSpeedBonus ?? 0) !== 0 && (
+          <StatRow
+            label="Movement Speed"
+            value={`${(stats.movementSpeedBonus ?? 0) > 0 ? "+" : ""}${((stats.movementSpeedBonus ?? 0) * 100).toFixed(0)}%`}
+            color="text-cyan-400"
+            tooltip="Warframe movement speed while this weapon is equipped (display; aim-gated perks assume uptime)."
+          />
+        )}
+        {stats.ammoRestoreChance != null && stats.ammoRestoreChance > 0 && (
+          <StatRow
+            label="Ammo Restore"
+            value={
+              stats.ammoRestoreMagFraction != null && stats.ammoRestoreMagFraction > 0
+                ? `${(stats.ammoRestoreChance * 100).toFixed(0)}% → ${(stats.ammoRestoreMagFraction * 100).toFixed(0)}% mag`
+                : `${(stats.ammoRestoreChance * 100).toFixed(0)}% → ${stats.ammoRestoreFlat ?? 0} rnd`
+            }
+            color="text-amber-400"
+            tooltip="Chance to restore ammo on perk trigger. Sustained DPS assumes one opportunity per magazine dump (extends effective mag)."
+          />
+        )}
+        {stats.lingeringFieldDurationMult != null && stats.lingeringFieldDurationMult > 0 && (
+          <StatRow
+            label="Linger Field Duration"
+            value={`×${stats.lingeringFieldDurationMult}`}
+            color="text-emerald-400"
+            tooltip="Lingering damage-field duration mult after empty reload (display)."
+          />
+        )}
+        {stats.incarnonHeadshotChargeBonus != null && stats.incarnonHeadshotChargeBonus > 0 && (
+          <StatRow
+            label="Incarnon Charge (HS)"
+            value={`+${(stats.incarnonHeadshotChargeBonus * 100).toFixed(0)}%`}
+            color="text-violet-400"
+            tooltip="Extra Incarnon Transmutation charge from headshots (display)."
+          />
+        )}
+        {stats.silentWeapon && (
+          <StatRow
+            label="Silent"
+            value="Yes"
+            color="text-emerald-400"
+            tooltip="Weapon fire does not alert enemies (Silent Running)."
+          />
+        )}
+        {stats.comboTimerPauseWhenHolstered && (
+          <StatRow
+            label="Holster Combo Pause"
+            value="Yes"
+            color="text-sky-400"
+            tooltip="Melee combo timer pauses while this weapon is holstered (Standoff / Abiding Hold)."
+          />
+        )}
+        {stats.comboOnAmmoPickup != null && stats.comboOnAmmoPickup > 0 && (
+          <StatRow
+            label="Combo on Ammo Pickup"
+            value={`+${stats.comboOnAmmoPickup}`}
+            color="text-orange-400"
+            tooltip="Melee combo counter gained when collecting ammo (display)."
+          />
+        )}
+        {stats.extraJumps != null && stats.extraJumps > 0 && (
+          <StatRow
+            label="Extra Jumps"
+            value={`+${stats.extraJumps}`}
+            color="text-cyan-400"
+            tooltip="Additional mid-air jumps (display)."
+          />
+        )}
+        {stats.jumpStrength != null && stats.jumpStrength !== 0 && (
+          <StatRow
+            label="Jump Strength"
+            value={`${stats.jumpStrength > 0 ? "+" : ""}${(stats.jumpStrength * 100).toFixed(0)}%`}
+            color="text-cyan-400"
+            tooltip="Double-jump / jump strength bonus (display)."
+          />
+        )}
+        {stats.healRegenPerSec != null && stats.healRegenPerSec > 0 && (
+          <StatRow
+            label="Heal Regen"
+            value={`${stats.healRegenPerSec}/s`}
+            color="text-emerald-400"
+            tooltip="Heal regeneration from perk trigger (display; duration not modeled)."
+          />
+        )}
+        {stats.statusChanceVulnerability != null && stats.statusChanceVulnerability > 0 && (
+          <StatRow
+            label="Status Vuln"
+            value={`+${(stats.statusChanceVulnerability * 100).toFixed(0)}%`}
+            color="text-purple-400"
+            tooltip="Target status-chance vulnerability (assumes uptime; multiplies modded SC for paper DPS)."
+          />
+        )}
+        {stats.punctureStatusOnImpale != null && stats.punctureStatusOnImpale > 0 && (
+          <StatRow
+            label="Impale Puncture"
+            value={`${stats.punctureStatusOnImpale}`}
+            color="text-yellow-400"
+            tooltip="Puncture status stacks while impaled (display)."
+          />
+        )}
+        {stats.finisherComboCountChance != null && stats.finisherComboCountChance > 0 && (
+          <StatRow
+            label="Finisher Combo Chance"
+            value={`+${(stats.finisherComboCountChance * 100).toFixed(0)}%`}
+            color="text-orange-400"
+            tooltip="Combo count chance on finishers (display)."
           />
         )}
       </CollapsibleSection>
@@ -346,7 +578,143 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             tooltip="Heavy Attack Multiplier (same track as combo mult: 2× at first tier, +1× per tier to 12× at 220+ hits on standard weapons)."
           />
           <StatRow label="Combo Duration" value={`${stats.comboDuration.toFixed(0)}s`} />
-          <StatRow label="Heavy Attack" value={stats.heavyAttackDamage.toFixed(0)} highlighted />
+          <StatRow label="Heavy Attack" value={stats.heavyAttackDamage.toFixed(0)} highlighted changed={flash.has("heavyAttack")} />
+          {stats.finisherDamage != null && stats.finisherDamage !== 0 && (
+            <StatRow
+              label="Finisher Damage"
+              value={`${stats.finisherDamage > 0 ? "+" : ""}${(stats.finisherDamage * 100).toFixed(0)}%`}
+              color="text-orange-400"
+              tooltip="Incarnon finisher damage bonus (display; not modeled in DPS)."
+            />
+          )}
+          {stats.slamRadius != null && stats.slamRadius !== 0 && (
+            <StatRow
+              label="Slam Radius"
+              value={`${stats.slamRadius > 0 ? "+" : ""}${(stats.slamRadius * 100).toFixed(0)}%`}
+              color="text-orange-400"
+              tooltip="Incarnon slam radius bonus (display; not modeled in DPS)."
+            />
+          )}
+          {stats.comboOnFinisher != null && stats.comboOnFinisher > 0 && (
+            <StatRow
+              label="Combo on Finisher"
+              value={`+${stats.comboOnFinisher}`}
+              color="text-orange-400"
+              tooltip="Flat combo granted on finisher (display)."
+            />
+          )}
+          {stats.comboOnSlashStatus != null && stats.comboOnSlashStatus > 0 && (
+            <StatRow
+              label="Combo on Slash Status"
+              value={`+${stats.comboOnSlashStatus}`}
+              color="text-orange-400"
+              tooltip="Extra combo on Slash-status targets (display)."
+            />
+          )}
+          {stats.comboOnToxinStatus != null && stats.comboOnToxinStatus > 0 && (
+            <StatRow
+              label="Combo on Toxin Status"
+              value={`+${stats.comboOnToxinStatus}`}
+              color="text-orange-400"
+              tooltip="Extra combo on Toxin-status targets (display)."
+            />
+          )}
+          {stats.comboOnColdStatus != null && stats.comboOnColdStatus > 0 && (
+            <StatRow
+              label="Combo on Cold Status"
+              value={`+${stats.comboOnColdStatus}`}
+              color="text-orange-400"
+              tooltip="Extra combo on Cold-status targets (display)."
+            />
+          )}
+          {stats.comboOnUndamaged != null && stats.comboOnUndamaged > 0 && (
+            <StatRow
+              label="Combo on Undamaged"
+              value={`+${stats.comboOnUndamaged}`}
+              color="text-orange-400"
+              tooltip="Extra combo on undamaged enemies (display)."
+            />
+          )}
+          {stats.comboPerSlamHit != null && stats.comboPerSlamHit > 0 && (
+            <StatRow
+              label="Combo per Slam Hit"
+              value={`+${stats.comboPerSlamHit}`}
+              color="text-orange-400"
+              tooltip="Combo per enemy hit by slam radius (display)."
+            />
+          )}
+          {stats.comboPerSlideHit != null && stats.comboPerSlideHit > 0 && (
+            <StatRow
+              label="Combo per Slide Hit"
+              value={`+${stats.comboPerSlideHit}`}
+              color="text-orange-400"
+              tooltip="Combo per enemy hit by slide attack (display)."
+            />
+          )}
+          {stats.comboPerSlideMeters != null && stats.comboPerSlideMeters > 0 && (
+            <StatRow
+              label="Combo per Slide"
+              value={`+${stats.comboPerSlideMeters}/${stats.comboSlideMeterInterval ?? 10}m`}
+              color="text-orange-400"
+              tooltip="Combo gained per continuous slide distance (display)."
+            />
+          )}
+          {stats.comboOnShardDamage != null && stats.comboOnShardDamage > 0 && (
+            <StatRow
+              label="Combo on Shard"
+              value={`+${stats.comboOnShardDamage}`}
+              color="text-orange-400"
+              tooltip="Combo granted on shard damage (display)."
+            />
+          )}
+          {stats.stunRadiusOnFinisher != null && stats.stunRadiusOnFinisher > 0 && (
+            <StatRow
+              label="Finisher Stun Radius"
+              value={`${stats.stunRadiusOnFinisher}m`}
+              color="text-yellow-400"
+              tooltip="Stun radius on finisher (display)."
+            />
+          )}
+          {stats.knockdownRadiusOnFinisher != null && stats.knockdownRadiusOnFinisher > 0 && (
+            <StatRow
+              label="Finisher KD Radius"
+              value={`${stats.knockdownRadiusOnFinisher}m`}
+              color="text-yellow-400"
+              tooltip="Knockdown radius on ground finisher (display)."
+            />
+          )}
+          {stats.shardDuration != null && stats.shardDuration > 0 && (
+            <StatRow
+              label="Shard Duration"
+              value={`${stats.shardDuration}s`}
+              color="text-violet-400"
+              tooltip="Embedded shard duration (display)."
+            />
+          )}
+          {stats.shardWeakSpotCritBonus != null && stats.shardWeakSpotCritBonus !== 0 && (
+            <StatRow
+              label="Shard Weak Spot CC"
+              value={`+${(stats.shardWeakSpotCritBonus * 100).toFixed(0)}%`}
+              color="text-violet-400"
+              tooltip="Extra crit chance vs shard weak spots (display)."
+            />
+          )}
+          {stats.shardDamageMult != null && stats.shardDamageMult !== 0 && (
+            <StatRow
+              label="Shard Damage"
+              value={`${stats.shardDamageMult > 0 ? "+" : ""}${(stats.shardDamageMult * 100).toFixed(0)}%`}
+              color="text-violet-400"
+              tooltip="Shard damage multiplier (display)."
+            />
+          )}
+          {stats.shardFullyGrownDamageMult != null && stats.shardFullyGrownDamageMult > 0 && (
+            <StatRow
+              label="Grown Shard Erupt"
+              value={`×${stats.shardFullyGrownDamageMult}`}
+              color="text-violet-400"
+              tooltip="Fully grown shard erupt damage mult (display)."
+            />
+          )}
           {stats.bloodRushStacks > 0 && (
             <StatRow
               label="Blood Rush"
@@ -371,20 +739,30 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
         {(() => {
           const radialBurst = stats.radialBurstDps ?? 0;
           const radialSustained = stats.radialSustainedDps ?? 0;
-          const directBurst = Math.max(0, stats.burstDps - radialBurst);
-          const directSustained = Math.max(0, stats.sustainedDps - radialSustained);
+          const contagionCloud = stats.contagionCloudDps ?? 0;
+          const mechaSpread = stats.mechaSpreadDps ?? 0;
+          const shardChain = stats.shardChainDps ?? 0;
+          const extraAoE = contagionCloud + mechaSpread + shardChain;
+          const directBurst = Math.max(0, stats.burstDps - radialBurst - extraAoE);
+          const directSustained = Math.max(0, stats.sustainedDps - radialSustained - extraAoE);
+          const showOverflow = [directBurst, directSustained, stats.burstDps, stats.sustainedDps].some(
+            exceedsWarframeInt32,
+          );
+          const showTotals = radialBurst > 0 || extraAoE > 0;
           return (
             <>
               <StatRow
                 label="Direct Burst DPS"
                 value={directBurst.toFixed(0)}
                 highlighted
-                tooltip="Projectile / hit DPS only (no radial). dmg × multishot × fire rate × avg crit × (faction × headshot × stance when enabled)."
+                changed={flash.has("directBurstDps") || flash.has("burstDps")}
+                tooltip="Projectile / hit DPS only (no radial / Contagion / Mecha spread / shards). dmg × multishot × fire rate × avg crit × (faction × headshot × stance when enabled)."
               />
               <StatRow
                 label="Direct Sustained DPS"
                 value={directSustained.toFixed(0)}
                 highlighted
+                changed={flash.has("directSustainedDps") || flash.has("sustainedDps")}
                 tooltip="Direct burst × (mag time / mag+reload cycle). Melee uses burst (no reload)."
               />
               {radialBurst > 0 && (
@@ -393,26 +771,66 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                     label="Radial Burst DPS"
                     value={radialBurst.toFixed(0)}
                     color="text-orange-300"
+                    changed={flash.has("radialBurstDps")}
                     tooltip="Innate explosion / AoE DPS (not slam radials)."
                   />
                   <StatRow
                     label="Radial Sustained DPS"
                     value={radialSustained.toFixed(0)}
                     color="text-orange-300"
+                    changed={flash.has("radialSustainedDps")}
                     tooltip="Radial DPS adjusted for magazine and reload cycle."
                   />
+                </>
+              )}
+              {contagionCloud > 0 && (
+                <StatRow
+                  label="Contagion Cloud DPS"
+                  value={contagionCloud.toFixed(0)}
+                  color="text-lime-300"
+                  changed={flash.has("contagionCloudDps")}
+                  tooltip="Toxic Lash Contagion Cloud (augment): ability toxin DPS × Strength (×2 melee) × sim enemies. Not in TTK."
+                />
+              )}
+              {mechaSpread > 0 && (
+                <StatRow
+                  label="Mecha Spread DPS"
+                  value={mechaSpread.toFixed(0)}
+                  color="text-cyan-300"
+                  changed={flash.has("mechaSpreadDps")}
+                  tooltip="Mecha mark-kill status spread: transferred DoT ticks × claw elemental × (spread + cascade) enemies / mark cooldown. Cascade is a sim estimate, not AI. Not in TTK."
+                />
+              )}
+              {shardChain > 0 && (
+                <StatRow
+                  label="Shard Chain DPS"
+                  value={shardChain.toFixed(0)}
+                  color="text-violet-300"
+                  changed={flash.has("shardChainDps")}
+                  tooltip="Thalys form embed triggers (+ Explosive Growth ×2 erupts) + Chain Shatter heavy detonations (sim shard hosts). Combo on host only. Not in TTK."
+                />
+              )}
+              {showTotals && (
+                <>
                   <div className="border-t border-border/50 my-1" />
                   <StatRow
                     label="Total Burst DPS"
                     value={stats.burstDps.toFixed(0)}
-                    tooltip="Direct + radial burst DPS combined."
+                    changed={flash.has("burstDps")}
+                    tooltip="Direct + radial + Contagion / Mecha spread / shard chain burst DPS combined."
                   />
                   <StatRow
                     label="Total Sustained DPS"
                     value={stats.sustainedDps.toFixed(0)}
-                    tooltip="Direct + radial sustained DPS combined."
+                    changed={flash.has("sustainedDps")}
+                    tooltip="Direct + radial + Contagion / Mecha spread / shard chain sustained DPS combined."
                   />
                 </>
+              )}
+              {showOverflow && (
+                <p className="text-[9px] text-amber-500/90 mt-1.5 leading-snug">
+                  Note: DPS above ~2.147B can wrap to large negatives in-game (signed 32-bit). FrameHub shows uncapped math.
+                </p>
               )}
             </>
           );
@@ -431,9 +849,10 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           return (
             <>
               <div className="border-t border-border/50 my-1" />
-              <StatRow label="Procs / Sec" value={procsPerSec.toFixed(1)} color="text-teal-400" />
+              <StatRow label="Procs / Sec" value={procsPerSec.toFixed(1)} color="text-teal-400" changed={flash.has("procsPerSec")} />
               {statusDps > 0 && (
                 <StatRow label="Status DPS" value={statusDps.toFixed(0)} color="text-teal-400"
+                  changed={flash.has("statusDps")}
                   tooltip="Estimated DPS from DoT status effects (Slash, Heat, Toxin, Gas)" />
               )}
             </>
@@ -511,7 +930,9 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             const tier = Number(tierStr);
             const evo = allEvolutions.find((e) => e.tier === tier && e.slot === slot);
             if (!evo) return null;
-            const hasStats = Object.keys(evo.statChanges).length > 0;
+            const hasStats =
+              Object.keys(evo.statChanges).length > 0 ||
+              (evo.formStatChanges != null && Object.keys(evo.formStatChanges).length > 0);
             return (
               <div key={tier} className="py-0.5">
                 <div className="flex justify-between items-center">
@@ -521,10 +942,78 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                       {Object.entries(evo.statChanges).map(([s, v]) => {
                         const n = v as number;
                         if (s === "flatBaseDamage") return `baseDamage: +${n}`;
+                        if (s === "flatMagazine") return `magazine: +${n}`;
+                        if (s === "flatAmmoMax") return `ammoMax: +${n}`;
+                        if (s === "ammoMaxSet") return `ammoMax: ${n}`;
+                        if (s === "range") return `range: +${n}m`;
+                        if (s === "punchThrough") return `PT: +${n}m`;
+                        if (s === "projectileSpeed") return `projSpeed: +${(n * 100).toFixed(0)}%`;
+                        if (s === "followThrough") return `followThrough: +${(n * 100).toFixed(0)}%`;
+                        if (s === "accuracy") return `acc: +${(n * 100).toFixed(0)}%`;
+                        if (s === "recoil") return `recoil: ${n > 0 ? "+" : ""}${(n * 100).toFixed(0)}%`;
+                        if (s === "zoom") return `zoom: ${n > 0 ? "+" : ""}${(n * 100).toFixed(0)}%`;
+                        if (s === "sprintSpeed") return `sprint: ${n > 0 ? "+" : ""}${(n * 100).toFixed(0)}%`;
+                        if (s === "slideSpeed") return `slide: ${n > 0 ? "+" : ""}${(n * 100).toFixed(0)}%`;
+                        if (s === "parkourVelocity") return `parkour: ${n > 0 ? "+" : ""}${(n * 100).toFixed(0)}%`;
+                        if (s === "movementSpeed") return `move: ${n > 0 ? "+" : ""}${(n * 100).toFixed(0)}%`;
+                        if (s === "finisherDamage") return `finisher: ${n > 0 ? "+" : ""}${(n * 100).toFixed(0)}%`;
+                        if (s === "slamRadius") return `slamR: ${n > 0 ? "+" : ""}${(n * 100).toFixed(0)}%`;
+                        if (s === "comboTimerPauseWhenHolstered") return "holster combo pause";
+                        if (s === "ammoRestoreChance") return `ammoChance: ${(n * 100).toFixed(0)}%`;
+                        if (s === "ammoRestoreFlat") return `ammo: +${n}`;
+                        if (s === "ammoRestoreMagFraction") return `ammo: ${(n * 100).toFixed(0)}% mag`;
+                        if (s === "incarnonHeadshotChargeBonus") return `charge@HS: +${(n * 100).toFixed(0)}%`;
+                        if (s === "silentWeapon") return "silent";
+                        if (s === "comboOnAmmoPickup") return `combo@ammo: +${n}`;
+                        if (s === "extraJumps") return `jumps: +${n}`;
+                        if (s === "jumpStrength") return `jump: +${(n * 100).toFixed(0)}%`;
+                        if (s === "healRegenPerSec") return `heal: ${n}/s`;
+                        if (s === "statusChanceVulnerability") return `SC vuln: +${(n * 100).toFixed(0)}%`;
+                        if (s === "punctureStatusOnImpale") return `impale PT status: ${n}`;
+                        if (s === "finisherComboCountChance") return `finisher combo: +${(n * 100).toFixed(0)}%`;
+                        if (s === "comboOnFinisher") return `combo@finisher: +${n}`;
+                        if (s === "comboOnSlashStatus") return `combo@slash: +${n}`;
+                        if (s === "comboOnToxinStatus") return `combo@toxin: +${n}`;
+                        if (s === "comboOnColdStatus") return `combo@cold: +${n}`;
+                        if (s === "comboOnUndamaged") return `combo@undamaged: +${n}`;
+                        if (s === "comboPerSlamHit") return `combo@slam: +${n}`;
+                        if (s === "comboPerSlideHit") return `combo@slide: +${n}`;
+                        if (s === "comboPerSlideMeters") return `combo@slide: +${n}`;
+                        if (s === "comboSlideMeterInterval") return `every ${n}m`;
+                        if (s === "comboOnShardDamage") return `combo@shard: +${n}`;
+                        if (s === "bodyshotCritChanceMult") return `body CC: ×${n}`;
+                        if (s === "additiveBaseDamage") return `+dmg (Serration): +${(n * 100).toFixed(0)}%`;
+                        if (s === "halfHealthAdditiveDamage") return `half-HP +dmg: +${(n * 100).toFixed(0)}%`;
+                        if (s === "capacityMsDamageMult") return `MS-pellet dmg: +${(n * 100).toFixed(0)}%`;
+                        if (s === "capacityMsBonusMult") return `MS bonus ×${(1 + n).toFixed(2)}`;
+                        if (s === "flatMsPelletDamage") return `MS-pellet flat: +${n}`;
+                        if (s === "airborneKillAdditivePerStack") return `airborne +dmg/stack: +${(n * 100).toFixed(0)}%`;
+                        if (s === "heavyKillPuncturePerStack") return `HA-kill Puncture/stack: +${(n * 100).toFixed(0)}%`;
+                        if (s === "shardTriggerMult") return `shard trigger: ×${n}`;
+                        if (s === "chainShatterDetonateMult") return `Chain Shatter: ×${n}`;
+                        if (s === "stunRadiusOnFinisher") return `stun: ${n}m`;
+                        if (s === "knockdownRadiusOnFinisher") return `KD: ${n}m`;
+                        if (s === "shardDuration") return `shard: ${n}s`;
+                        if (s === "shardWeakSpotCritBonus") return `shard CC: +${(n * 100).toFixed(0)}%`;
+                        if (s === "shardDamageMult") return `shard dmg: ${(n * 100).toFixed(0)}%`;
+                        if (s === "shardFullyGrownDamageMult") return `grown shard: ×${n}`;
+                        if (s === "lingeringFieldDurationMult") return `linger: ×${n}`;
+                        if (s === "holsterReloadPerSec") return `holster: ${(n * 100).toFixed(0)}%/s`;
+                        if (s === "instantReloadOnKillChance") return `reload@kill: ${(n * 100).toFixed(0)}%`;
+                        if (s === "instantReloadOnHeadshotChance") return `reload@HS: ${(n * 100).toFixed(0)}%`;
                         if (s === "criticalMultiplier") return `critMult: ${n > 0 ? "+" : ""}${n}x`;
                         if (s === "devouringAttrition") return `nonCritDmg: +${(n * 100).toFixed(0)}% (50%)`;
                         return `${s}: ${n > 0 ? "+" : ""}${(n * 100).toFixed(0)}%`;
                       }).join(", ")}
+                      {evo.formStatChanges && Object.keys(evo.formStatChanges).length > 0
+                        ? ` | form: ${Object.entries(evo.formStatChanges)
+                            .map(([s, v]) => {
+                              const n = v as number;
+                              if (s === "criticalMultiplier") return `critMult +${n}x`;
+                              return `${s} +${(n * 100).toFixed(0)}%`;
+                            })
+                            .join(", ")}`
+                        : ""}
                     </span>
                   )}
                 </div>
@@ -536,7 +1025,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
       )}
 
       {/* TTK */}
-      <TTKSection stats={stats} />
+      <TTKSection stats={stats} flash={ttkFlash} />
     </div>
   );
 }

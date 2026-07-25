@@ -47,8 +47,8 @@ export const MOD_BEHAVIORS_TEKTOLYST: Record<string, VerifiedModBehavior> = {
     line("operatorSprintSpeed", "mod_panel", "multiplicative_percent", "Metem-Erun: operatorSprintSpeed \u2014 Increase Operator Sprint Speed by +30%\\\\n+5% bonus for each Mod from a unique Sc\u2026"),
   ]),
   metem_hakh: mod("metem_hakh", [
-    line("health", "warframe_totals", "multiplicative_percent", "Metem-Hakh: health \u2014 +30% Operator Health & Shields\\\\n+15% bonus for each Mod from a unique School"),
-    line("operatorHealthShields", "mod_panel", "multiplicative_percent", "Metem-Hakh: operatorHealthShields \u2014 +30% Operator Health & Shields\\\\n+15% bonus for each Mod from a unique School"),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Metem-Hakh — Operator HP/shields (not warframe health)"),
+    line("operatorHealthShields", "mod_panel", "multiplicative_percent", "wiki: Metem-Hakh — Operator HP/shields (+ school bonus)"),
   ]),
   omn_evi: mod("omn_evi", [
     line("ampCriticalChance", "mod_panel", "multiplicative_percent", "Omn-Evi: ampCriticalChance \u2014 +60% Amp Critical Chance\\\\n+10% Amp Critical Damage for each Zenurik School Mod"),

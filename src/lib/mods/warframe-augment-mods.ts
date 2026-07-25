@@ -39,12 +39,16 @@ export function augmentMatchesWarframe(
   return candidates.has(mid) || candidates.has(normalizeWarframeId(mid));
 }
 
-/** Warframe augments only appear in the warframe builder for a matching frame (+ universal). */
+/** Warframe ability augments only appear in the warframe builder for a matching frame (+ universal). */
 export function warframeAugmentEligibleInBuilder(
   mod: Mod,
   builderCategory: string,
   selectedWarframeId?: string,
 ): boolean {
+  // Weapon-exclusive / weapon-slot amalgam augments must never appear on warframes.
+  if (isWeaponExclusiveMod(mod.id) || (mod.category === "augment" && mod.subCategory === "weapon")) {
+    return builderCategory !== "warframe";
+  }
   if (!isWarframeAugment(mod)) return true;
   if (builderCategory !== "warframe") return false;
   if (mod.warframeId === "universal") return true;

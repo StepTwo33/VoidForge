@@ -15,7 +15,7 @@ function mod(modId: string, stats: VerifiedItemStatLine[], descriptionOnly?: str
 
 export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   accelerated_deflection: mod("accelerated_deflection", [
-    line("shield", "warframe_totals", "multiplicative_percent", "Accelerated Deflection: shield \u2014 +90% Shield Recharge\\\\n-45% Shield Recharge Delay"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Accelerated Deflection — recharge delay (not capacity)"),
     line("shieldRecharge", "mod_panel", "multiplicative_percent", "Accelerated Deflection: shieldRecharge \u2014 +90% Shield Recharge\\\\n-45% Shield Recharge Delay"),
   ]),
   acidic_spittle: mod("acidic_spittle", [
@@ -63,13 +63,13 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "Auto Omni: damage \u2014 Nautilus has 100% chance to repair nearby Railjack hull damages and extinguishes\u2026"),
   ]),
   bell_ringer: mod("bell_ringer", [
-    line("impactStatusStacks", "companion_totals", "flat", "Bell Ringer: impactStatusStacks \u2014 Melee attacks knock down enemies and apply +4 Impact Status Effects"),
+    line("impactStatusStacks", "mod_panel", "flat", "wiki: Bell Ringer — precept knockdown/Impact stacks (AI)"),
   ]),
   bite: mod("bite", [
-    line("critChance", "mod_panel", "multiplicative_percent", "Bite: critChance \u2014 +330% Critical Chance\\\\n+220% Critical Damage"),
-    line("critDamage", "companion_totals", "multiplicative_percent", "Bite: critDamage \u2014 +330% Critical Chance\\\\n+220% Critical Damage"),
-    line("criticalChance", "weapon_dps", "multiplicative_percent", "Bite: criticalChance \u2014 +330% Critical Chance\\\\n+220% Critical Damage"),
-    line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "Bite: criticalMultiplier \u2014 +330% Critical Chance\\\\n+220% Critical Damage"),
+    line("critChance", "mod_panel", "multiplicative_percent", "wiki: Bite — duplicate critChance key"),
+    line("critDamage", "mod_panel", "multiplicative_percent", "wiki: Bite — duplicate critDamage key (CM via criticalMultiplier)"),
+    line("criticalChance", "weapon_dps", "multiplicative_percent", "wiki: Bite — +330% CC at max"),
+    line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "wiki: Bite — +220% CM at max"),
   ]),
   blast_shield: mod("blast_shield", [
     line("range", "mod_panel", "multiplicative_percent", "Blast Shield: range \u2014 Overshields increased by +3000. Leap at an enemy within 10m dealing 30 <DT_IMPAC\u2026 (arsenal display only)"),
@@ -92,10 +92,10 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Calculated Shot: range \u2014 Sentinel charges a powerful shot and fires at the first enemy within 70m. (arsenal display only)"),
   ]),
   cats_eye: mod("cats_eye", [
-    line("critBuff", "mod_panel", "multiplicative_percent", "Cat's Eye: critBuff \u2014 Adarza Kavat grants 60% increased critical chance for 10s to allies within 25m e\u2026"),
-    line("criticalChance", "companion_totals", "multiplicative_percent", "Cat's Eye: criticalChance \u2014 Adarza Kavat grants 60% increased critical chance for 10s to allies within 25m e\u2026"),
-    line("duration", "mod_panel", "multiplicative_percent", "Cat's Eye: duration \u2014 Adarza Kavat grants 60% increased critical chance for 10s to allies within 25m e\u2026"),
-    line("range", "mod_panel", "multiplicative_percent", "Cat's Eye: range \u2014 Adarza Kavat grants 60% increased critical chance for 10s to allies within 25m e\u2026 (arsenal display only)"),
+    line("critBuff", "mod_panel", "multiplicative_percent", "wiki: Cat's Eye — timed ally CC buff (precept)"),
+    line("criticalChance", "mod_panel", "multiplicative_percent", "wiki: Cat's Eye — timed ally CC buff (not always-on companion CC)"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Cat's Eye — buff duration"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Cat's Eye — affinity range display"),
   ]),
   charm: mod("charm", [
     line("buffChance", "mod_panel", "multiplicative_percent", "Charm: buffChance \u2014 Smeeta Kavat has a 40% chance every 27s to bestow its owner with good fortune."),
@@ -123,8 +123,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("stealthDamage", "mod_panel", "multiplicative_percent", "Covert Bond: stealthDamage \u2014 Finisher and Mercy Kills grant your Companion 10s of stealth that attacks will n\u2026"),
   ]),
   crescent_charge: mod("crescent_charge", [
-    line("health", "warframe_totals", "multiplicative_percent", "Crescent Charge: health \u2014 Charges an enemy within 25m dealing <DT_PUNCTURE_COLOR>Puncture Damage and lifti\u2026"),
-    line("range", "mod_panel", "multiplicative_percent", "Crescent Charge: range \u2014 Charges an enemy within 25m dealing <DT_PUNCTURE_COLOR>Puncture Damage and lifti\u2026 (arsenal display only)"),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Crescent Charge — precept charge damage (not max health)"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Crescent Charge — precept range"),
   ]),
   crescent_devolution: mod("crescent_devolution", [
     line("duration", "mod_panel", "multiplicative_percent", "Crescent Devolution: duration \u2014 Devolves into its larval form when downed and charges at enemies, dealing 100 <D\u2026"),
@@ -134,7 +134,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Crowd Dispersion: range \u2014 Unleashes a 10.0m radial knockdown when multiple enemies are nearby, dealing 10.\u2026 (arsenal display only)"),
   ]),
   detect_vulnerability: mod("detect_vulnerability", [
-    line("weakspotDamage", "companion_totals", "multiplicative_percent", "Detect Vulnerability: weakspotDamage \u2014 Reveals weakspots on codex-complete enemies; hits deal +275% Damage at max rank"),
+    line("weakspotDamage", "mod_panel", "multiplicative_percent", "wiki: Detect Vulnerability — precept weakspot reveal (AI)"),
   ]),
   dig: mod("dig", [
     line("digCooldown", "mod_panel", "multiplicative_percent", "Dig: digCooldown \u2014 The kubrow sniffs out buried objects and digs them up.\\\\n+270% Success Chance"),
@@ -151,10 +151,10 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("lifeSteal", "mod_panel", "multiplicative_percent", "Draining Bite: lifeSteal \u2014 Vasca Kavat inflicts 5 stacks of Slash at 150% of its melee damage and restores \u2026"),
   ]),
   duplex_bond: mod("duplex_bond", [
-    line("companionDamage", "mod_panel", "multiplicative_percent", "Duplex Bond: companionDamage \u2014 Companion will clone itself each time you expend 100 energy, up to 3 clones. Clo\u2026"),
-    line("duration", "mod_panel", "multiplicative_percent", "Duplex Bond: duration \u2014 Companion will clone itself each time you expend 100 energy, up to 3 clones. Clo\u2026"),
-    line("energy", "warframe_totals", "multiplicative_percent", "Duplex Bond: energy \u2014 Companion will clone itself each time you expend 100 energy, up to 3 clones. Clo\u2026"),
-    line("extraAttack", "mod_panel", "multiplicative_percent", "Duplex Bond: extraAttack \u2014 Companion will clone itself each time you expend 100 energy, up to 3 clones. Clo\u2026"),
+    line("companionDamage", "mod_panel", "multiplicative_percent", "wiki: Duplex Bond — clone precept"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Duplex Bond — clone duration"),
+    line("energy", "mod_panel", "multiplicative_percent", "wiki: Duplex Bond — energy spend threshold (not max energy)"),
+    line("extraAttack", "mod_panel", "multiplicative_percent", "wiki: Duplex Bond — clone attacks"),
   ]),
   electro_pulse: mod("electro_pulse", [
     line("duration", "mod_panel", "multiplicative_percent", "Electro Pulse: duration \u2014 Every 5s, Sentinel will continually zap an enemy within 15m, trapping them in a \u2026"),
@@ -168,7 +168,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("energyOnAssist", "mod_panel", "multiplicative_percent", "Energy Generator: energyOnAssist \u2014 Dethcube drops an Energy Orb after assisting in 10 kills."),
   ]),
   enhanced_vitality: mod("enhanced_vitality", [
-    line("health", "warframe_totals", "multiplicative_percent", "Enhanced Vitality: health \u2014 +275% Health"),
+    line("health", "warframe_totals", "multiplicative_percent", "wiki: Enhanced Vitality — +250% Health at max"),
   ]),
   equilibrium_audit: mod("equilibrium_audit", [
     line("range", "mod_panel", "multiplicative_percent", "Equilibrium Audit: range \u2014 Unleashes a series of shockwaves that knockdown enemies within 15m and deal 300 \u2026 (arsenal display only)"),
@@ -187,13 +187,13 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Fear Sense: range \u2014 The Kavat senses the weaknesses of enemies within 25m. For 25s, its attacks deal\u2026 (arsenal display only)"),
   ]),
   ferocity: mod("ferocity", [
-    line("attackSpeed", "companion_totals", "multiplicative_percent", "Ferocity: attackSpeed \u2014 Kubrow attacks an enemy open to finishers with +300% crit chance. If the enemy d\u2026"),
-    line("criticalChance", "companion_totals", "multiplicative_percent", "Ferocity: criticalChance \u2014 Kubrow attacks an enemy open to finishers with +300% crit chance. If the enemy d\u2026"),
-    line("range", "mod_panel", "multiplicative_percent", "Ferocity: range \u2014 Kubrow attacks an enemy open to finishers with +300% crit chance. If the enemy d\u2026 (arsenal display only)"),
+    line("attackSpeed", "mod_panel", "multiplicative_percent", "wiki: Ferocity — finisher precept AS"),
+    line("criticalChance", "mod_panel", "multiplicative_percent", "wiki: Ferocity — finisher precept CC"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Ferocity — precept range"),
   ]),
   fired_up: mod("fired_up", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Fired Up: damage \u2014 5% <DT_FIRE_COLOR>Heat Damage on weapon per hit. Stacks up to 100%. Resets after\u2026"),
-    line("duration", "mod_panel", "multiplicative_percent", "Fired Up: duration \u2014 5% <DT_FIRE_COLOR>Heat Damage on weapon per hit. Stacks up to 100%. Resets after\u2026"),
+    line("damage", "weapon_dps", "conditional_stat_on_trigger", "wiki: Fired Up — +5% Heat/hit up to +100% (catalog damage→heat; sim assumes max)"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Fired Up — stack reset window"),
   ]),
   flame_gland: mod("flame_gland", [
     line("heat", "weapon_dps", "elemental_from_base_damage", "Flame Gland: heat \u2014 +60% <DT_FIRE_COLOR>Heat, +60% Status Chance"),
@@ -218,7 +218,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("spinDamage", "mod_panel", "multiplicative_percent", "Hard Engage: spinDamage \u2014 Engages enemies within 10m with melee attacks, dealing 90 Impact Damage. Melee a\u2026"),
   ]),
   hastened_deflection: mod("hastened_deflection", [
-    line("shield", "warframe_totals", "multiplicative_percent", "Hastened Deflection: shield \u2014 +90% Shield Recharge, -45% Shield Recharge Delay"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Hastened Deflection — shield recharge/delay (not capacity)"),
   ]),
   helminth_ferocity: mod("helminth_ferocity", [
     line("finisherDamage", "companion_totals", "multiplicative_percent", "Helminth Ferocity: finisherDamage \u2014 +120% Finisher Damage"),
@@ -241,8 +241,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("lifestealToOwner", "mod_panel", "multiplicative_percent", "Hunter Recovery: lifestealToOwner \u2014 Warframe healed for +30% Companion Damage dealt"),
   ]),
   hunter_synergy: mod("hunter_synergy", [
-    line("critLink", "mod_panel", "multiplicative_percent", "Hunter Synergy: critLink \u2014 +30% Primary Weapon Critical Chance added to Companion"),
-    line("criticalChance", "weapon_dps", "multiplicative_percent", "Hunter Synergy: criticalChance \u2014 +30% Primary Weapon Critical Chance added to Companion"),
+    line("critLink", "mod_panel", "multiplicative_percent", "wiki: Hunter Synergy — links primary CC to companion (not weapon paper)"),
+    line("criticalChance", "mod_panel", "multiplicative_percent", "wiki: Hunter Synergy — companion receives linked CC"),
   ]),
   iatric_mycelium: mod("iatric_mycelium", [
     line("duration", "mod_panel", "multiplicative_percent", "Iatric Mycelium: duration \u2014 Release a trail of spores every <LOWER_IS_BETTER>8s that heal the companion and \u2026"),
@@ -262,18 +262,18 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("linkArmor", "mod_panel", "multiplicative_percent", "Link Armor: linkArmor \u2014 +10% Link Armor per rank"),
   ]),
   link_fiber: mod("link_fiber", [
-    line("armor", "warframe_totals", "multiplicative_percent", "Link Fiber: armor \u2014 Increase Max Armor by +125% of Warframe's Armor"),
+    line("armor", "mod_panel", "multiplicative_percent", "wiki: Link Fiber — +125% of Warframe armor (not companion base %)"),
     line("armorLink", "mod_panel", "multiplicative_percent", "Link Fiber: armorLink \u2014 Increase Max Armor by +125% of Warframe's Armor"),
   ]),
   link_redirection: mod("link_redirection", [
-    line("shield", "warframe_totals", "multiplicative_percent", "Link Redirection: shield \u2014 Increase Shield by +125% of Warframe's Max Shield"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Link Redirection — +125% of Warframe shields (not companion base %)"),
     line("shieldLink", "mod_panel", "multiplicative_percent", "Link Redirection: shieldLink \u2014 Increase Shield by +125% of Warframe's Max Shield"),
   ]),
   link_shields: mod("link_shields", [
     line("linkShields", "mod_panel", "multiplicative_percent", "Link Shields: linkShields \u2014 +10% Link Shields per rank"),
   ]),
   link_vitality: mod("link_vitality", [
-    line("health", "warframe_totals", "multiplicative_percent", "Link Vitality: health \u2014 Increase Health by +125% of Warframe's Max Health"),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Link Vitality — +125% of Warframe health (not companion base %)"),
     line("healthLink", "mod_panel", "multiplicative_percent", "Link Vitality: healthLink \u2014 Increase Health by +125% of Warframe's Max Health"),
   ]),
   looter: mod("looter", [
@@ -289,16 +289,16 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("pickupDoubleChance", "companion_totals", "multiplicative_percent", "Loyal Retriever: pickupDoubleChance \u2014 13% chance to double Credit and Resource pickups"),
   ]),
   magnetic_strike: mod("magnetic_strike", [
-    line("impact", "weapon_dps", "multiplicative_percent", "Magnetic Strike: impact \u2014 100% Chance to apply a <DT_MAGNETIC_COLOR>Magnetic status effect when inflicting\u2026"),
+    line("impact", "mod_panel", "multiplicative_percent", "wiki: Magnetic Strike — Impact→Magnetic on companion melee (not IPS)"),
   ]),
   manifold_bond: mod("manifold_bond", [
-    line("abilityDamage", "mod_panel", "multiplicative_percent", "Manifold Bond: abilityDamage \u2014 Companion Precept Mods apply Status Effects from Companion weapons. Killing enem\u2026"),
-    line("abilityDuration", "warframe_totals", "multiplicative_percent", "Manifold Bond: abilityDuration \u2014 Companion Precept Mods apply Status Effects from Companion weapons. Killing enem\u2026"),
-    line("cooldown", "mod_panel", "multiplicative_percent", "Manifold Bond: cooldown \u2014 Companion Precept Mods apply Status Effects from Companion weapons. Killing enem\u2026"),
+    line("abilityDamage", "mod_panel", "multiplicative_percent", "wiki: Manifold Bond — precept status / cooldown"),
+    line("abilityDuration", "mod_panel", "multiplicative_percent", "wiki: Manifold Bond — precept duration (not WF ability duration)"),
+    line("cooldown", "mod_panel", "multiplicative_percent", "wiki: Manifold Bond — precept cooldown"),
   ]),
   martyr_symbiosis: mod("martyr_symbiosis", [
-    line("health", "warframe_totals", "multiplicative_percent", "Martyr Symbiosis: health \u2014 Drains and stores 20 health from corpses within 25m up to 40% of your health. If\u2026"),
-    line("range", "mod_panel", "multiplicative_percent", "Martyr Symbiosis: range \u2014 Drains and stores 20 health from corpses within 25m up to 40% of your health. If\u2026 (arsenal display only)"),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Martyr Symbiosis — stored heal on death (not max health)"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Martyr Symbiosis — corpse drain range"),
   ]),
   maul: mod("maul", [
     line("damage", "weapon_dps", "multiplicative_percent", "Maul: damage \u2014 +330% Melee Damage (duplicate meleeDamage key removed)"),
@@ -322,19 +322,17 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   ]),
   medi_ray: mod("medi_ray", [
     line("duration", "mod_panel", "multiplicative_percent", "Medi-Ray: duration \u2014 Sentinel will occasionally heal its owner, restoring 12% Health over 4s."),
-    line("health", "warframe_totals", "multiplicative_percent", "Medi-Ray: health \u2014 Sentinel will occasionally heal its owner, restoring 12% Health over 4s."),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Medi-Ray — heal precept (not max health)"),
     line("healthRestore", "mod_panel", "multiplicative_percent", "Medi-Ray: healthRestore \u2014 Sentinel will occasionally heal its owner, restoring 12% Health over 4s."),
     line("range", "mod_panel", "multiplicative_percent", "Medi-Ray: range \u2014 Sentinel will occasionally heal its owner, restoring 12% Health over 4s. (arsenal display only)"),
   ]),
-  meditation: mod("meditation", [
-    line("healthRegen", "mod_panel", "multiplicative_percent", "Meditation: healthRegen \u2014 +3 HP/s Health Regen per rank"),
-  ]),
+
   melee_prowess_sentinel: mod("melee_prowess_sentinel", [
     line("attackRange", "mod_panel", "multiplicative_percent", "Assault Mode: attackRange \u2014 Sentinel will attack the first visible enemy within 30m."),
     line("range", "mod_panel", "multiplicative_percent", "Assault Mode: range \u2014 Sentinel will attack the first visible enemy within 30m. (arsenal display only)"),
   ]),
   metal_fiber: mod("metal_fiber", [
-    line("armor", "warframe_totals", "multiplicative_percent", "Metal Fiber: armor \u2014 +275% Armor"),
+    line("armor", "warframe_totals", "multiplicative_percent", "wiki: Metal Fiber — +250% Armor at max"),
   ]),
   mischief: mod("mischief", [
     line("damage", "mod_panel", "multiplicative_percent", "Mischief: damage \u2014 Smeeta Kavat becomes invisible for 9s every <LOWER_IS_BETTER>7s while a decoy ka\u2026"),
@@ -363,9 +361,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   null_audit: mod("null_audit", [
     line("duration", "mod_panel", "multiplicative_percent", "Null Audit: duration \u2014 The Hound utilizes the same Aura and Abilities as an Eximus enemy for 60s, while\u2026"),
   ]),
-  ocular_sentry: mod("ocular_sentry", [
-    line("markDuration", "mod_panel", "multiplicative_percent", "Ocular Sentry: markDuration \u2014 Marks enemies for +3s per rank"),
-  ]),
+
   odomedic: mod("odomedic", [
     line("duration", "mod_panel", "multiplicative_percent", "Odomedic: duration \u2014 Every 3m traversed by Wall Running regenerates +40 Health over 4s. This effect c\u2026"),
     line("healthRestoreMove", "mod_panel", "multiplicative_percent", "Odomedic: healthRestoreMove \u2014 Every 3m traversed by Wall Running regenerates +40 Health over 4s. This effect c\u2026"),
@@ -407,7 +403,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   protect: mod("protect", [
     line("cooldown", "mod_panel", "multiplicative_percent", "Protect: cooldown \u2014 The kubrow comes to the defense of its master, replenishing both of their shield\u2026"),
     line("duration", "mod_panel", "multiplicative_percent", "Protect: duration \u2014 The kubrow comes to the defense of its master, replenishing both of their shield\u2026"),
-    line("shield", "warframe_totals", "multiplicative_percent", "Protect: shield \u2014 The kubrow comes to the defense of its master, replenishing both of their shield\u2026"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Protect — shield restore precept (not capacity)"),
     line("shieldRestore", "mod_panel", "multiplicative_percent", "Protect: shieldRestore \u2014 The kubrow comes to the defense of its master, replenishing both of their shield\u2026"),
   ]),
   reawaken: mod("reawaken", [
@@ -429,9 +425,9 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("regenCharges", "mod_panel", "multiplicative_percent", "Regen: regenCharges \u2014 Sentinel recovery time reduced by 20s. Revives with 10s of invulnerability."),
   ]),
   reinforced_bond: mod("reinforced_bond", [
-    line("overguard", "mod_panel", "multiplicative_percent", "Reinforced Bond: overguard \u2014 If the Companion exceeds 1200 Max Shields or Overshields then your fire rate is \u2026"),
-    line("reviveOverguard", "mod_panel", "multiplicative_percent", "Reinforced Bond: reviveOverguard \u2014 If the Companion exceeds 1200 Max Shields or Overshields then your fire rate is \u2026"),
-    line("shield", "warframe_totals", "multiplicative_percent", "Reinforced Bond: shield \u2014 If the Companion exceeds 1200 Max Shields or Overshields then your fire rate is \u2026"),
+    line("overguard", "mod_panel", "multiplicative_percent", "wiki: Reinforced Bond — overguard on revive"),
+    line("reviveOverguard", "mod_panel", "multiplicative_percent", "wiki: Reinforced Bond — overguard on revive"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Reinforced Bond — companion shield threshold for fire rate (not WF shields)"),
   ]),
   repair_kit: mod("repair_kit", [
     line("healthRegen", "mod_panel", "multiplicative_percent", "Repair Kit: healthRegen \u2014 +18 Companion Health Regen/s"),
@@ -454,7 +450,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   ]),
   sacrifice: mod("sacrifice", [
     line("duration", "mod_panel", "multiplicative_percent", "Sacrifice: duration \u2014 Sentinel incapacitates itself to revive its downed owner to 100% health and shie\u2026"),
-    line("health", "warframe_totals", "multiplicative_percent", "Sacrifice: health \u2014 Sentinel incapacitates itself to revive its downed owner to 100% health and shie\u2026"),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Sacrifice — revive precept (not max health)"),
     line("revive", "mod_panel", "multiplicative_percent", "Sacrifice: revive \u2014 Sentinel incapacitates itself to revive its downed owner to 100% health and shie\u2026"),
   ]),
   sanctuary: mod("sanctuary", [
@@ -499,7 +495,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "Sharpened Claws: damage \u2014 A vicious attack dealing 300% damage that sunders armor by 120% and rends flesh."),
   ]),
   shelter: mod("shelter", [
-    line("reviveShieldHealth", "companion_totals", "flat", "Shelter: reviveShieldHealth \u2014 Creates a shield with 1800 Health around the player when they are reviving fallen allies."),
+    line("reviveShieldHealth", "mod_panel", "flat", "wiki: Shelter — revive bubble HP (precept)"),
   ]),
   shield_charger: mod("shield_charger", [
     line("duration", "mod_panel", "multiplicative_percent", "Shield Charger: duration \u2014 Increase Warframe Max Shields and Shield Regeneration by 60% for 10s."),
@@ -553,8 +549,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Synergized Prospectus: range \u2014 Fires a spark that seeks out the nearest enemy in 30m, dealing 300 <DT_ELECTRICI\u2026 (arsenal display only)"),
   ]),
   synth_deconstruct: mod("synth_deconstruct", [
-    line("health", "warframe_totals", "multiplicative_percent", "Synth Deconstruct: health \u2014 Enemies injured by the Companions have 25% chance to drop a Health Orb when kill\u2026"),
-    line("healthOrbChance", "mod_panel", "multiplicative_percent", "Synth Deconstruct: healthOrbChance \u2014 Enemies injured by the Companions have 25% chance to drop a Health Orb when kill\u2026"),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Synth Deconstruct — health orb drop chance (not max health)"),
+    line("healthOrbChance", "mod_panel", "multiplicative_percent", "wiki: Synth Deconstruct — health orb drop chance"),
   ]),
   synth_fiber: mod("synth_fiber", [
     line("duration", "mod_panel", "multiplicative_percent", "Synth Fiber: duration \u2014 Health Orbs increase Armor for Companions by 100% for 12s."),
@@ -563,19 +559,18 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   tandem_bond: mod("tandem_bond", [
     line("duration", "mod_panel", "multiplicative_percent", "Tandem Bond: duration \u2014 Companion melee hits increase your Combo by 6. Heavy Attacks increase Companion \u2026"),
   ]),
-  target_acquisition: mod("target_acquisition", [
-    line("weakpointChance", "mod_panel", "multiplicative_percent", "Target Acquisition: weakpointChance \u2014 +10% chance to mark weakpoints per rank"),
-  ]),
+
   targeting_receptor: mod("targeting_receptor", [
     line("range", "mod_panel", "multiplicative_percent", "Targeting Receptor: range \u2014 Causes the Helios Sentinel to attack targets within 10m with 3 glaives. (arsenal display only)"),
     line("targetRange", "mod_panel", "multiplicative_percent", "Targeting Receptor: targetRange \u2014 Causes the Helios Sentinel to attack targets within 10m with 3 glaives."),
   ]),
-  tease: mod("tease", [
-    line("drawAggro", "mod_panel", "multiplicative_percent", "Tease: drawAggro \u2014 Draws +15% enemy aggression per rank"),
-  ]),
+
   tek_assault_r3: mod("tek_assault_r3", [
     line("damage", "mod_panel", "multiplicative_percent", "Tek Assault: damage \u2014 Kavat has 60% chance to ignore Lethal Damage and be immune for 4s."),
     line("duration", "mod_panel", "multiplicative_percent", "Tek Assault: duration \u2014 Kavat has 60% chance to ignore Lethal Damage and be immune for 4s."),
+  ]),
+  tek_enhance: mod("tek_enhance", [
+    line("abilityDuration", "mod_panel", "multiplicative_percent", "wiki: Tek Enhance — +30% Kavat/Vulpaphyla Ability Duration (Tek set piece #4)"),
   ]),
   tenacious_bond: mod("tenacious_bond", [
     line("criticalMultiplier", "mod_panel", "multiplicative_percent", "Tenacious Bond: criticalMultiplier \u2014 Headshot kills reduce Companion Recovery timer by 3s. If the Companion's Critica\u2026"),
@@ -600,9 +595,9 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("explosionDamage", "mod_panel", "multiplicative_percent", "Trample: explosionDamage \u2014 The Helminth Charger rushes an enemy, dealing 160 Damage to all in its path. It \u2026"),
   ]),
   transfusion: mod("transfusion", [
-    line("cooldown", "mod_panel", "multiplicative_percent", "Transfusion: cooldown \u2014 When its Master is bleeding out, the Vasca Kavat sacrifices 20% of its Health to\u2026"),
-    line("health", "warframe_totals", "multiplicative_percent", "Transfusion: health \u2014 When its Master is bleeding out, the Vasca Kavat sacrifices 20% of its Health to\u2026"),
-    line("reviveChance", "mod_panel", "multiplicative_percent", "Transfusion: reviveChance \u2014 When its Master is bleeding out, the Vasca Kavat sacrifices 20% of its Health to\u2026"),
+    line("cooldown", "mod_panel", "multiplicative_percent", "wiki: Transfusion — bleedout revive precept"),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Transfusion — HP sacrifice (not max health)"),
+    line("reviveChance", "mod_panel", "multiplicative_percent", "wiki: Transfusion — revive chance"),
   ]),
   unleashed: mod("unleashed", [
     line("damage", "mod_panel", "multiplicative_percent", "Unleashed: damage \u2014 The kubrow hunts for Eximus units protected by Overguard within 60m and deals +3\u2026"),
@@ -628,7 +623,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   vicious_bond: mod("vicious_bond", [
     line("damage", "mod_panel", "multiplicative_percent", "Vicious Bond: damage \u2014 Companion melee attacks strip 15% of enemy armor. Enemies recently damaged by Ab\u2026"),
     line("meleeAttackSpeed", "mod_panel", "multiplicative_percent", "Vicious Bond: meleeAttackSpeed \u2014 Companion melee attacks strip 15% of enemy armor. Enemies recently damaged by Ab\u2026"),
-    line("meleeDamage", "companion_totals", "multiplicative_percent", "Vicious Bond: meleeDamage \u2014 Companion melee attacks strip 15% of enemy armor. Enemies recently damaged by Ab\u2026"),
+    line("meleeDamage", "mod_panel", "multiplicative_percent", "wiki: Vicious Bond — armor strip / spread (not always-on melee damage)"),
     line("range", "mod_panel", "multiplicative_percent", "Vicious Bond: range \u2014 Companion melee attacks strip 15% of enemy armor. Enemies recently damaged by Ab\u2026 (arsenal display only)"),
   ]),
   viral_quills: mod("viral_quills", [

@@ -60,6 +60,7 @@ export default function ImportExportPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [shareLink, setShareLink] = useState("");
+  const [shareCode, setShareCode] = useState("");
   const [copied, setCopied] = useState(false);
 
   // Import state
@@ -104,6 +105,7 @@ export default function ImportExportPage() {
     if (!selected) {
       setQrDataUrl(null);
       setShareLink("");
+      setShareCode("");
       return;
     }
 
@@ -114,9 +116,20 @@ export default function ImportExportPage() {
       data: selected.data,
     };
     const code = encodeJsonPayload(shareData);
+    if (!code) {
+      setShareLink("");
+      setShareCode("");
+      setQrDataUrl(null);
+      toast.error("Could not create share code", {
+        description: "Try a simpler build name (avoid unusual symbols) or re-save the build.",
+      });
+      return;
+    }
+
     const link = typeof window !== "undefined"
       ? `${window.location.origin}/import-export?code=${code}`
       : "";
+    setShareCode(code);
     setShareLink(link);
 
     // Always encode an absolute import URL so QR scans land on FrameHub (never raw base64).
@@ -130,14 +143,17 @@ export default function ImportExportPage() {
         .catch(() => {
           setQrDataUrl(null);
           toast.error("QR too large for this build", {
-            description: "Use Copy Share Link or Copy Short Code instead.",
+            description: "Use Copy Share Link or Copy Code instead.",
           });
         });
     });
   }, [selected]);
 
   const handleCopyLink = useCallback(async () => {
-    if (!shareLink) return;
+    if (!shareLink || !shareCode) {
+      toast.error("No share link available", { description: "Select a build first." });
+      return;
+    }
     const ok = await copyTextToClipboard(shareLink);
     if (ok) {
       setCopied(true);
@@ -146,25 +162,22 @@ export default function ImportExportPage() {
     } else {
       toast.error("Could not copy link", { description: "Copy it manually from the address field." });
     }
-  }, [shareLink]);
+  }, [shareLink, shareCode]);
 
   const handleCopyCode = useCallback(async () => {
-    if (!selected) return;
-    const shareData = { _v: 1, type: selected.type, name: selected.name, data: selected.data };
-    const code = encodeJsonPayload(shareData);
-    if (!code) {
-      toast.error("Could not create short code");
+    if (!shareCode) {
+      toast.error("Could not create share code");
       return;
     }
-    const ok = await copyTextToClipboard(code);
+    const ok = await copyTextToClipboard(shareCode);
     if (ok) {
       setCopied(true);
-      toast.success("Short code copied");
+      toast.success("Share code copied");
       setTimeout(() => setCopied(false), 2000);
     } else {
-      toast.error("Could not copy short code", { description: "Your browser blocked clipboard access." });
+      toast.error("Could not copy share code", { description: "Your browser blocked clipboard access." });
     }
-  }, [selected]);
+  }, [shareCode]);
 
   const handleImport = useCallback((codeOverride?: string) => {
     setImportError(null);
@@ -404,20 +417,32 @@ export default function ImportExportPage() {
 
                     <p className="text-[10px] text-muted-foreground text-center">Scan to import this build</p>
 
+                    {shareCode ? (
+                      <p className="w-full truncate rounded-md border border-border bg-muted/20 px-2 py-1 font-mono text-[10px] text-muted-foreground" title={shareCode}>
+                        {shareCode.slice(0, 48)}{shareCode.length > 48 ? "…" : ""}
+                      </p>
+                    ) : (
+                      <p className="text-[10px] text-red-400 text-center">Share code failed to generate</p>
+                    )}
+
                     {/* Share buttons */}
                     <div className="w-full space-y-2">
                       <button
-                        onClick={handleCopyLink}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors font-medium"
+                        type="button"
+                        onClick={() => void handleCopyLink()}
+                        disabled={!shareCode}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors font-medium disabled:opacity-50"
                       >
                         {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
                         {copied ? "Copied!" : "Copy Share Link"}
                       </button>
                       <button
-                        onClick={handleCopyCode}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
+                        type="button"
+                        onClick={() => void handleCopyCode()}
+                        disabled={!shareCode}
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
                       >
-                        <Clipboard className="h-3.5 w-3.5" /> Copy Short Code
+                        <Clipboard className="h-3.5 w-3.5" /> Copy Share Code
                       </button>
                     </div>
                   </>

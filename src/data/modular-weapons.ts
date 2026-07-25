@@ -45,12 +45,13 @@ export interface KitgunLoader {
 }
 
 // ── KITGUN CHAMBERS ─────────────────────────────────────────────────────
+/** Chamber Damage.Base from Module:Modular/data KitgunSecondary (wiki-locked B15). */
 export const kitgunChambers: KitgunChamber[] = [
   {
     id: "catchmoon_chamber", name: "Catchmoon",
     description: "Wide plasma projectile with infinite body punch through. Short range with damage falloff. Impact/Heat.",
     category: "projectile_shotgun", baseDamage: 256,
-    damageRatios: { impact: 0.256, heat: 0.744 },
+    damageRatios: { impact: 89 / 256, heat: 167 / 256 },
     triggerPrimary: "Auto", triggerSecondary: "Semi-Auto",
     baseCritChance: 0.21, baseCritMultiplier: 2.0, baseStatusChance: 0.21,
     magazineTiers: [5, 7, 9, 11, 13, 17, 23, 39],
@@ -58,17 +59,17 @@ export const kitgunChambers: KitgunChamber[] = [
   {
     id: "sporelacer_chamber", name: "Sporelacer",
     description: "Explosive spore projectiles with AoE on impact. Impact/Toxin damage.",
-    category: "projectile_shotgun", baseDamage: 256,
-    damageRatios: { impact: 0.30, toxin: 0.70 },
+    category: "projectile_shotgun", baseDamage: 90,
+    damageRatios: { impact: 21 / 90, toxin: 69 / 90 },
     triggerPrimary: "Auto", triggerSecondary: "Semi-Auto",
-    baseCritChance: 0.21, baseCritMultiplier: 2.0, baseStatusChance: 0.21,
+    baseCritChance: 0.21, baseCritMultiplier: 3.0, baseStatusChance: 0.21,
     magazineTiers: [5, 7, 9, 11, 13, 17, 23, 39],
   },
   {
     id: "tombfinger_chamber", name: "Tombfinger",
     description: "Precise projectile with explosion on impact. Primary charges for larger AoE. Impact/Puncture/Radiation.",
-    category: "projectile_rifle", baseDamage: 156,
-    damageRatios: { impact: 0.10, puncture: 0.10, radiation: 0.80 },
+    category: "projectile_rifle", baseDamage: 84,
+    damageRatios: { impact: 16 / 84, puncture: 9 / 84, radiation: 59 / 84 },
     triggerPrimary: "Charge", triggerSecondary: "Semi-Auto",
     baseCritChance: 0.24, baseCritMultiplier: 2.0, baseStatusChance: 0.24,
     magazineTiers: [9, 15, 19, 23, 29, 31, 35, 49],
@@ -77,7 +78,7 @@ export const kitgunChambers: KitgunChamber[] = [
     id: "rattleguts_chamber", name: "Rattleguts",
     description: "Rapid-fire hitscan automatic weapon. High fire rate, low per-shot damage. Impact/Puncture/Slash/Radiation.",
     category: "hitscan_auto", baseDamage: 33,
-    damageRatios: { impact: 0.162, puncture: 0.275, slash: 0.246, radiation: 0.317 },
+    damageRatios: { impact: 2 / 33, puncture: 10 / 33, slash: 8 / 33, radiation: 13 / 33 },
     triggerPrimary: "Auto", triggerSecondary: "Auto",
     baseCritChance: 0.19, baseCritMultiplier: 2.0, baseStatusChance: 0.19,
     magazineTiers: [29, 45, 57, 67, 83, 75, 111, 153],
@@ -86,7 +87,7 @@ export const kitgunChambers: KitgunChamber[] = [
     id: "gaze_chamber", name: "Gaze",
     description: "Continuous beam weapon. Secondary is single-target beam, primary chains to multiple enemies. Puncture/Radiation.",
     category: "beam", baseDamage: 18,
-    damageRatios: { puncture: 0.40, radiation: 0.60 },
+    damageRatios: { puncture: 7 / 18, radiation: 11 / 18 },
     triggerPrimary: "Held", triggerSecondary: "Held",
     baseCritChance: 0.25, baseCritMultiplier: 2.0, baseStatusChance: 0.25,
     magazineTiers: [23, 31, 37, 43, 51, 49, 85, 113],
@@ -94,8 +95,8 @@ export const kitgunChambers: KitgunChamber[] = [
   {
     id: "vermisplicer_chamber", name: "Vermisplicer",
     description: "Infested beam that fires homing tendrils. Secondary latches onto targets, primary chains. Puncture/Toxin.",
-    category: "beam", baseDamage: 18,
-    damageRatios: { puncture: 0.40, toxin: 0.60 },
+    category: "beam", baseDamage: 14,
+    damageRatios: { impact: 1.5 / 14, puncture: 3.5 / 14, slash: 4.5 / 14, toxin: 4.5 / 14 },
     triggerPrimary: "Held", triggerSecondary: "Held",
     baseCritChance: 0.25, baseCritMultiplier: 2.0, baseStatusChance: 0.25,
     magazineTiers: [23, 31, 37, 43, 51, 49, 85, 113],
@@ -110,9 +111,10 @@ export const kitgunGrips: KitgunGrip[] = [
     id: "grip_gibber", name: "Gibber", type: "secondary",
     description: "Lowest damage, highest fire rate. Spray-and-pray secondary.",
     bonuses: {
+      // projectile_shotgun deltas from wiki Catchmoon; projectile_rifle from Tombfinger
       projectile_shotgun: { damage: -96, fireRate: 3.17 },
-      projectile_rifle: { damage: -24, fireRate: 4.50 },
-      hitscan_auto: { damage: -12, fireRate: 12.00 },
+      projectile_rifle: { damage: -48, fireRate: 4.50 },
+      hitscan_auto: { damage: -11, fireRate: 12.00 },
       beam: { damage: -2, fireRate: 12.00 },
     },
   },
@@ -121,7 +123,7 @@ export const kitgunGrips: KitgunGrip[] = [
     description: "Low damage, high fire rate. Fast-firing secondary.",
     bonuses: {
       projectile_shotgun: { damage: -48, fireRate: 2.50 },
-      projectile_rifle: { damage: -12, fireRate: 3.67 },
+      projectile_rifle: { damage: -24, fireRate: 3.67 },
       hitscan_auto: { damage: -6, fireRate: 8.83 },
       beam: { damage: -1, fireRate: 12.00 },
     },
@@ -131,7 +133,7 @@ export const kitgunGrips: KitgunGrip[] = [
     description: "Balanced damage and fire rate. Versatile secondary grip.",
     bonuses: {
       projectile_shotgun: { damage: 34, fireRate: 1.83 },
-      projectile_rifle: { damage: 8, fireRate: 2.83 },
+      projectile_rifle: { damage: 16, fireRate: 2.83 },
       hitscan_auto: { damage: 6, fireRate: 6.67 },
       beam: { damage: 0, fireRate: 12.00 },
     },
@@ -141,7 +143,7 @@ export const kitgunGrips: KitgunGrip[] = [
     description: "High damage, low fire rate. Hard-hitting secondary.",
     bonuses: {
       projectile_shotgun: { damage: 102, fireRate: 1.50 },
-      projectile_rifle: { damage: 24, fireRate: 2.50 },
+      projectile_rifle: { damage: 48, fireRate: 2.50 },
       hitscan_auto: { damage: 19, fireRate: 5.17 },
       beam: { damage: 1, fireRate: 12.00 },
     },
@@ -151,7 +153,7 @@ export const kitgunGrips: KitgunGrip[] = [
     description: "Maximum damage, lowest fire rate. Big hits, slow shots.",
     bonuses: {
       projectile_shotgun: { damage: 204, fireRate: 1.17 },
-      projectile_rifle: { damage: 48, fireRate: 2.17 },
+      projectile_rifle: { damage: 96, fireRate: 2.17 },
       hitscan_auto: { damage: 38, fireRate: 3.67 },
       beam: { damage: 2, fireRate: 12.00 },
     },
@@ -406,7 +408,8 @@ export function buildZaw(strike: ZawStrike, grip: ZawGrip, link: ZawLink): Weapo
 export const ampPrisms: Weapon[] = [
   { id: "amp_raplak", name: "Raplak", category: "amp_prism", damage: 3000, impact: 0, puncture: 0, slash: 0, fireRate: 2.00, criticalChance: 0.38, criticalMultiplier: 2.6, statusChance: 0.10, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Semi-Auto", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
   { id: "amp_shwaak", name: "Shwaak", category: "amp_prism", damage: 3500, impact: 0, puncture: 0, slash: 0, fireRate: 1.33, criticalChance: 0.10, criticalMultiplier: 1.6, statusChance: 0.20, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Semi-Auto", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
-  { id: "amp_granmu", name: "Granmu", category: "amp_prism", damage: 1200, impact: 0, puncture: 0, slash: 0, fireRate: 1.00, criticalChance: 0.26, criticalMultiplier: 2.0, statusChance: 0.12, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Burst", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
+  // wiki Granmu Prism Direct Hit Void 1000 (Explosion 1400 separate)
+  { id: "amp_granmu", name: "Granmu", category: "amp_prism", damage: 1000, impact: 0, puncture: 0, slash: 0, fireRate: 1.00, criticalChance: 0.26, criticalMultiplier: 2.0, statusChance: 0.12, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Burst", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
   { id: "amp_rahn", name: "Rahn", category: "amp_prism", damage: 1000, impact: 0, puncture: 0, slash: 0, fireRate: 5.67, criticalChance: 0.30, criticalMultiplier: 2.0, statusChance: 0.04, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Auto", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
   { id: "amp_cantic", name: "Cantic", category: "amp_prism", damage: 1460, impact: 0, puncture: 0, slash: 0, fireRate: 2.67, criticalChance: 0.34, criticalMultiplier: 2.2, statusChance: 0.10, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Burst", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
   { id: "amp_lega", name: "Lega", category: "amp_prism", damage: 600, impact: 0, puncture: 0, slash: 0, fireRate: 7.50, criticalChance: 0.08, criticalMultiplier: 1.6, statusChance: 0.34, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Held", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },

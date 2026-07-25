@@ -28,6 +28,8 @@ export type ItemApplyMode =
   | "conditional_attack_speed_on_kill"
   /** Non-stacking buff active while sim kill stacks > 0 (Bladed Rounds, Gorgon Frenzy, …). */
   | "conditional_stat_on_kill"
+  /** Per-kill-stack buff (Galvanized Steel CD / Elementalist SC); capped via GALV_STACK_CAPS. */
+  | "conditional_stat_per_kill_stack"
   /** Buff from an aim/reload/cast/latch trigger, gated by the sim trigger-buffs toggle. */
   | "conditional_stat_on_trigger"
   /** Hunter Munitions-style chance to force a Slash proc on critical hits. */

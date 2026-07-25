@@ -807,12 +807,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
   ],
   "ogris": [
     {
-      "name": "Rocket Impact",
-      "blast": 100.0,
-      "totalDamage": 100.0,
-      "radius": 3.0
-    },
-    {
       "name": "Rocket Explosion",
       "blast": 600.0,
       "totalDamage": 600.0,
@@ -1104,12 +1098,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
   ],
   "prisma_angstrum": [
     {
-      "name": "Single Rocket Impact",
-      "blast": 200.0,
-      "totalDamage": 200.0,
-      "radius": 3.0
-    },
-    {
       "name": "Single Rocket Explosion",
       "blast": 250.0,
       "totalDamage": 250.0,
@@ -1208,12 +1196,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
     }
   ],
   "angstrum": [
-    {
-      "name": "Single Rocket Impact",
-      "blast": 200.0,
-      "totalDamage": 200.0,
-      "radius": 3.0
-    },
     {
       "name": "Single Rocket Explosion",
       "blast": 250.0,
@@ -1399,13 +1381,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 46.0,
       "radius": 1.6,
       "falloffReduction": 0.2
-    },
-    {
-      "name": "Lock-On Radial Attack",
-      "heat": 480.0,
-      "totalDamage": 480.0,
-      "radius": 3.0,
-      "falloffReduction": 0.2
     }
   ],
   "sonicor": [
@@ -1423,23 +1398,9 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 88.0,
       "radius": 2.4,
       "falloffReduction": 0.3
-    },
-    {
-      "name": "Fully Charged Explosion",
-      "radiation": 106.0,
-      "totalDamage": 106.0,
-      "radius": 9.6,
-      "falloffReduction": 0.9
     }
   ],
   "stug": [
-    {
-      "name": "Blob Embed",
-      "corrosive": 4.0,
-      "totalDamage": 4.0,
-      "radius": 2.0,
-      "falloffReduction": 1.0
-    },
     {
       "name": "Blob Explosion",
       "corrosive": 75.0,
@@ -1447,13 +1408,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "radius": 0.3,
       "falloffReduction": 0.3,
       "explosionDelay": 1.5
-    },
-    {
-      "name": "Incarnon Form Blob Embed",
-      "corrosive": 50.0,
-      "totalDamage": 50.0,
-      "radius": 2.0,
-      "falloffReduction": 1.0
     },
     {
       "name": "Incarnon Form Blob Explosion",
@@ -1811,15 +1765,15 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
   "dark_split_sword": [
     {
       "name": "Slam Attack",
-      "impact": 460.0,
-      "totalDamage": 460.0,
+      "impact": 232.0,
+      "totalDamage": 232.0,
       "radius": 8.0,
       "falloffReduction": 0.5
     },
     {
       "name": "Heavy Slam Attack",
-      "blast": 690.0,
-      "totalDamage": 690.0,
+      "blast": 462.0,
+      "totalDamage": 462.0,
       "radius": 9.0,
       "falloffReduction": 0.3
     }
@@ -5383,52 +5337,10 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
   ],
   "arbucep": [
     {
-      "name": "1st Attack",
-      "blast": 16.0,
-      "totalDamage": 16.0,
-      "radius": 2003.0,
-      "falloffReduction": 1.0
-    },
-    {
       "name": "1st Attack Radial Attack",
       "blast": 114.0,
       "totalDamage": 114.0,
-      "radius": 2003.0,
-      "falloffReduction": 1.0
-    },
-    {
-      "name": "2nd Attack Radial Attack",
-      "corrosive": 114.0,
-      "totalDamage": 114.0,
-      "radius": 2003.0,
-      "falloffReduction": 1.0
-    },
-    {
-      "name": "3rd Attack Radial Attack",
-      "gas": 114.0,
-      "totalDamage": 114.0,
-      "radius": 2003.0,
-      "falloffReduction": 1.0
-    },
-    {
-      "name": "4th Attack Radial Attack",
-      "magnetic": 114.0,
-      "totalDamage": 114.0,
-      "radius": 2003.0,
-      "falloffReduction": 1.0
-    },
-    {
-      "name": "5th Attack Radial Attack",
-      "radiation": 114.0,
-      "totalDamage": 114.0,
-      "radius": 2003.0,
-      "falloffReduction": 1.0
-    },
-    {
-      "name": "6th Attack Radial Attack",
-      "viral": 114.0,
-      "totalDamage": 114.0,
-      "radius": 2003.0,
+      "radius": 6.0,
       "falloffReduction": 1.0
     }
   ],

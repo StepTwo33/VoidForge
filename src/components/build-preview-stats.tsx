@@ -125,6 +125,15 @@ export function BuildPreviewStats({ type, data }: { type: string; data: unknown 
               isMelee={warframePreview.exalted.isMelee}
             />
           )}
+          {warframePreview.exaltedMelee && (
+            <WeaponPreviewSection
+              label={warframePreview.exaltedMelee.label}
+              weapon={warframePreview.exaltedMelee.weapon}
+              stats={warframePreview.exaltedMelee.stats}
+              baseStats={warframePreview.exaltedMelee.baseStats}
+              isMelee={warframePreview.exaltedMelee.isMelee}
+            />
+          )}
         </div>
       )}
 

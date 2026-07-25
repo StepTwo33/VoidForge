@@ -1,6 +1,7 @@
 import type { ItemApplyMode, ItemApplyTarget, VerifiedItemStatLine, VerifiedModBehavior } from "@/lib/codex/item-behavior-types";
 import { VERIFIED_MOD_BEHAVIORS } from "@/data/mod-behaviors";
 import { FACTION_STAT_TO_ID } from "@/lib/calc/combat-multipliers";
+import type { Mod, SetBonusLinkage, Weapon } from "@/lib/types";
 
 export type WeaponModAccumulators = {
   damageBonus: number;
@@ -10,7 +11,11 @@ export type WeaponModAccumulators = {
   multishotBonus: number;
   statusBonus: number;
   magBonus: number;
+  /** Absolute magazine rounds added after % mag mods (Stinging Truth). */
+  flatMagazineBonus: number;
   reloadBonus: number;
+  /** Absolute status chance added after multiplicative SC mods (Entropy Burst / Napalm). */
+  statusChanceFlatBonus: number;
   impactBonus: number;
   punctureBonus: number;
   slashBonus: number;
@@ -42,6 +47,12 @@ export type WeaponModAccumulators = {
   galvCritOnHeadshotPerStack: number;
   /** Non-stacking buffs active while kill stacks > 0 (statKey → summed bonus). */
   onKillStatBonuses: Record<string, number>;
+  /** Per-kill-stack buffs (statKey → bonus per stack); cap in onKillPerStackCap. */
+  onKillPerStackBonuses: Record<string, number>;
+  /** In-game stack cap for onKillPerStackBonuses (Galvanized Steel/Elementalist: 4). */
+  onKillPerStackCap: number;
+  /** +% Heavy Attack Wind Up Speed (shortens windup time). */
+  heavyAttackWindUpBonus: number;
   /** Aim/reload/cast/latch buffs gated by sim.applyTriggerBuffs (statKey → summed bonus). */
   triggerStatBonuses: Record<string, number>;
   /** Chance to force a Slash proc on crits (Hunter Munitions). */
@@ -61,6 +72,11 @@ export type ModApplyWeaponContext = {
   elementalMods: { type: string; value: number }[];
   comboDuration?: { add: (v: number) => void };
   heavyAttackEfficiency?: { add: (v: number) => void };
+  /** Sim stack counts for exclusives that decay (miss / grenade). */
+  simStacks?: {
+    criticalPrecision?: number;
+    criticalMutation?: number;
+  };
 };
 
 export function getVerifiedModBehavior(modId: string): VerifiedModBehavior | undefined {
@@ -88,6 +104,11 @@ const GALV_STACK_CAPS: Record<string, number> = {
   galvanized_shot: 3,
   galvanized_scope: 5,
   galvanized_crosshairs: 5,
+  split_flights: 4,
+  sentient_surge: 4,
+  strain_infection: 8,
+  galvanized_steel: 4,
+  galvanized_elementalist: 4,
 };
 
 function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): boolean {
@@ -140,6 +161,10 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
           return true;
         case "statusDuration":
           acc.statusDurationBonus += modValue;
+          return true;
+        case "heavyAttackSpeed":
+        case "heavyAttackWindUp":
+          acc.heavyAttackWindUpBonus += modValue;
           return true;
         default: {
           const factionId = FACTION_STAT_TO_ID[statKey];
@@ -204,9 +229,67 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
     case "conditional_stat_on_kill":
       acc.onKillStatBonuses[statKey] = (acc.onKillStatBonuses[statKey] ?? 0) + modValue;
       return true;
-    case "conditional_stat_on_trigger":
-      acc.triggerStatBonuses[statKey] = (acc.triggerStatBonuses[statKey] ?? 0) + modValue;
+    case "conditional_stat_per_kill_stack":
+      acc.onKillPerStackBonuses[statKey] = (acc.onKillPerStackBonuses[statKey] ?? 0) + modValue;
+      acc.onKillPerStackCap = GALV_STACK_CAPS[ctx.modId] ?? acc.onKillPerStackCap ?? 4;
       return true;
+    case "conditional_stat_on_trigger": {
+      // HP-cap exclusives: catalog `health` is a placeholder; assume wiki +360% cap.
+      if (ctx.modId === "dreadful_killshot" && statKey === "health") {
+        acc.triggerStatBonuses.damage = (acc.triggerStatBonuses.damage ?? 0) + 3.6;
+        acc.triggerStatBonuses.statusChance =
+          (acc.triggerStatBonuses.statusChance ?? 0) + 3.6;
+        return true;
+      }
+      if (ctx.modId === "necrophagic_vigor" && statKey === "health") {
+        acc.triggerStatBonuses.criticalChance =
+          (acc.triggerStatBonuses.criticalChance ?? 0) + 3.6;
+        acc.triggerStatBonuses.criticalMultiplier =
+          (acc.triggerStatBonuses.criticalMultiplier ?? 0) + 3.6;
+        return true;
+      }
+      // Proton Snap: catalog `damage` is wiki +Toxin (not base damage).
+      // Pain Points: catalog `damage` is weak-point damage stacks.
+      // Fired Up: catalog `damage` is per-hit Heat.
+      let key = statKey;
+      let value = modValue;
+      if (ctx.modId === "proton_snap" && statKey === "damage") {
+        key = "toxin";
+      }
+      if (ctx.modId === "pain_points" && statKey === "damage") {
+        key = "weakPointDamage";
+      }
+      if (ctx.modId === "fired_up" && statKey === "damage") {
+        key = "heat";
+      }
+      // Stack exclusives: catalog is per-stack; default max when trigger active.
+      // Critical Precision / Mutation accept sim stack counts for miss/grenade decay.
+      if (ctx.modId === "double_tap" && statKey === "damage") {
+        value = modValue * 20;
+      }
+      if (ctx.modId === "critical_mutation" && (statKey === "criticalChance" || statKey === "criticalMultiplier")) {
+        const stacks =
+          ctx.simStacks?.criticalMutation !== undefined
+            ? Math.min(10, Math.max(0, Math.floor(ctx.simStacks.criticalMutation)))
+            : 10;
+        value = modValue * stacks;
+      }
+      if (ctx.modId === "pain_points" && key === "weakPointDamage") {
+        value = modValue * 10;
+      }
+      if (ctx.modId === "critical_precision" && statKey === "criticalChance") {
+        const stacks =
+          ctx.simStacks?.criticalPrecision !== undefined
+            ? Math.min(50, Math.max(0, Math.floor(ctx.simStacks.criticalPrecision)))
+            : 50;
+        value = modValue * stacks;
+      }
+      if (ctx.modId === "fired_up" && key === "heat") {
+        value = modValue * 20;
+      }
+      acc.triggerStatBonuses[key] = (acc.triggerStatBonuses[key] ?? 0) + value;
+      return true;
+    }
     case "slash_on_crit":
       acc.slashOnCritChance += modValue;
       return true;
@@ -216,6 +299,16 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
     case "first_shot_damage":
       acc.firstShotDamageBonus += modValue;
       return true;
+    case "flat":
+      if (statKey === "statusChance") {
+        acc.statusChanceFlatBonus += modValue;
+        return true;
+      }
+      if (statKey === "magazine") {
+        acc.flatMagazineBonus += modValue;
+        return true;
+      }
+      return false;
     case "additive_percent":
       if (statKey === "comboDuration" && ctx.comboDuration) {
         ctx.comboDuration.add(modValue);
@@ -809,7 +902,6 @@ export function applyVerifiedModStatToRailjack(
       acc.turretRangeBonus += modValue;
       return true;
     case "turretProjectileSpeed":
-      acc.ordnanceSpeedBonus += modValue;
       acc.turretProjectileSpeedBonus += modValue;
       return true;
     case "ordnanceSpeed":
@@ -822,6 +914,52 @@ export function applyVerifiedModStatToRailjack(
     default:
       trackModPanel(stats, modId, statKey, modValue);
       return true;
+  }
+}
+
+/**
+ * Melee-slot mods that buff guns via loadout linkage (Sim5).
+ * Host melee behaviors keep combat keys on mod_panel so melee paper stays clean.
+ */
+export function applyCrossSlotMeleeWeaponBuffs(
+  acc: WeaponModAccumulators,
+  weapon: Weapon,
+  linkage: SetBonusLinkage | undefined,
+  allMods: Map<string, Mod>,
+): void {
+  const meleeSlots = linkage?.meleeMods;
+  if (!meleeSlots?.length) return;
+
+  const isSecondary = ["pistol", "secondary", "dual_pistols"].includes(weapon.category);
+  const isShotgun = weapon.category === "shotgun";
+
+  for (const slot of meleeSlots) {
+    const mod = allMods.get(slot.modId);
+    if (!mod) continue;
+    const rank = Math.min(Math.max(slot.rank ?? 0, 0), mod.maxRank);
+    const mult = rank + 1;
+    const pct = (key: string) => ((mod.stats[key] as number | undefined) ?? 0) * mult / 100;
+
+    if (isSecondary) {
+      if (mod.id === "combo_fury") {
+        acc.onKillStatBonuses.magazine =
+          (acc.onKillStatBonuses.magazine ?? 0) + pct("magazine");
+        acc.onKillStatBonuses.reloadSpeed =
+          (acc.onKillStatBonuses.reloadSpeed ?? 0) + pct("reloadSpeed");
+      }
+      if (mod.id === "mark_of_the_beast") {
+        acc.onKillStatBonuses.criticalChance =
+          (acc.onKillStatBonuses.criticalChance ?? 0) + pct("criticalChance");
+        acc.onKillStatBonuses.statusChance =
+          (acc.onKillStatBonuses.statusChance ?? 0) + pct("statusChance");
+      }
+      if (mod.id === "amalgam_furax_body_count") {
+        acc.fireRateBonus += pct("fireRate");
+      }
+    }
+    if (isShotgun && mod.id === "amalgam_ripkas_true_steel") {
+      acc.reloadBonus += pct("reloadSpeed");
+    }
   }
 }
 

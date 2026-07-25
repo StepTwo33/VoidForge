@@ -8,7 +8,7 @@ import { useMods, useWeapons, useArchwings, useNecramechs } from "@/lib/weapons/
 import { enrichWeapon } from "@/lib/weapons/weapon-enrich";
 import { filterArchmeleeMods } from "@/lib/mods/archmelee-mods";
 import { archgunModsForBuilder } from "@/lib/mods/archgun-weapon-augment-mods";
-import { isArchwingAugment } from "@/lib/mods/archwing-augment-mods";
+import { isArchwingAugment, normalizeArchwingId } from "@/lib/mods/archwing-augment-mods";
 import { Archwing, Necramech } from "@/data/archwing";
 import { calculateWeaponBuild } from "@/lib/calc/calculator";
 import { buildWeaponContributionContext } from "@/lib/calc/dps-contributions";
@@ -107,7 +107,15 @@ export default function ArchwingBuilderPage() {
     const restoreMods = (slots: { modId: string; rank: number; slotIndex: number }[]) =>
       slots.map((m) => { const mod = modsMap.get(m.modId); return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain }; });
     if (d.mode === "archwing") {
-      setSelectedArchwing(archwingList.find((a) => a.name === d.frameId) ?? null);
+      setSelectedArchwing(
+        archwingList.find(
+          (a) =>
+            a.name === d.frameId ||
+            a.id === d.frameId ||
+            a.id === normalizeArchwingId(String(d.frameId ?? "").toLowerCase().replace(/\s+/g, "_")) ||
+            a.name === String(d.frameId ?? "").replace(/^Odenata/i, "Odonata"),
+        ) ?? null,
+      );
       setArchwingMods(restoreMods(d.frameMods));
       setArchwingPolarities(d.framePolarities || {});
     } else {

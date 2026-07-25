@@ -16,6 +16,18 @@ export interface IncarnonEvolution {
   statChanges: Record<string, number>;
   /** Per-variant overrides (wiki tables list different values per variant, e.g. Bo vs Bo Prime). */
   variantStatChanges?: Record<string, Record<string, number>>;
+  /**
+   * Extra flat deltas applied only while Incarnon Form is active
+   * (e.g. Elemental Dominance doubling, "+Y% for Incarnon Form").
+   */
+  formStatChanges?: Record<string, number>;
+  /** Per-variant overrides for formStatChanges. */
+  variantFormStatChanges?: Record<string, Record<string, number>>;
+  /**
+   * Extra deltas for charge-mode Incarnon attacks only (e.g. Onos Devastation Cascade
+   * on the fully charged blast). Merged when merge options.chargeMode is true.
+   */
+  chargeStatChanges?: Record<string, number>;
 }
 
 export interface IncarnonForm {
@@ -28,6 +40,23 @@ export interface IncarnonForm {
   triggerType: string;
   magazine?: number;
   reloadTime?: number;
+  multishot?: number;
+  impact?: number;
+  puncture?: number;
+  slash?: number;
+  /** When set, form damage is this pure element (clears IPS). */
+  damageType?: string;
+  heat?: number;
+  cold?: number;
+  toxin?: number;
+  electricity?: number;
+  radiation?: number;
+  viral?: number;
+  corrosive?: number;
+  blast?: number;
+  gas?: number;
+  magnetic?: number;
+  tau?: number;
   specialMechanics?: Record<string, string>;
 }
 
@@ -340,8 +369,23 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     challenge: "Kill 100 enemies",
     category: "native",
     forms: [
-      { name: "Felarx", damage: 520.0, fireRate: 2.0, criticalChance: 0.2, criticalMultiplier: 2.0, statusChance: 0.16, triggerType: "Semi", magazine: 6, reloadTime: 2.2 },
-      { name: "Felarx Incarnon", damage: 260.0, fireRate: 2.0, criticalChance: 0.3, criticalMultiplier: 2.6, statusChance: 0.20, triggerType: "Semi", magazine: 60, reloadTime: 0, specialMechanics: { evolutionMode: "Semi-auto energy projectiles with punch through", modeSwitch: "Weakpoint hits charge transmutation" } },
+      { name: "Felarx", damage: 760.0, fireRate: 3.0, criticalChance: 0.2, criticalMultiplier: 2.0, statusChance: 0.055, triggerType: "Auto", magazine: 6, reloadTime: 3.7, multishot: 4, impact: 38, puncture: 68.4, slash: 83.6 },
+      {
+        // Wiki: Impact 200 + Radiation 400, Semi FR 1.5, 20%/3x/20%, mag 60
+        name: "Felarx Incarnon",
+        damage: 600,
+        fireRate: 1.5,
+        criticalChance: 0.2,
+        criticalMultiplier: 3.0,
+        statusChance: 0.2,
+        triggerType: "Semi",
+        magazine: 60,
+        reloadTime: 3.7,
+        multishot: 1,
+        impact: 200,
+        radiation: 400,
+        specialMechanics: { evolutionMode: "Semi-auto energy projectiles with punch through", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes.", statChanges: {} },
@@ -388,8 +432,21 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     challenge: "Kill 100 enemies with headshots",
     category: "native",
     forms: [
-      { name: "Laetum", damage: 160.0, fireRate: 2.5, criticalChance: 0.22, criticalMultiplier: 2.2, statusChance: 0.22, triggerType: "Semi", magazine: 12, reloadTime: 2.0 },
-      { name: "Laetum Incarnon", damage: 400.0, fireRate: 6.67, criticalChance: 0.22, criticalMultiplier: 2.2, statusChance: 0.22, triggerType: "Auto", magazine: 216, reloadTime: 2.0, specialMechanics: { evolutionMode: "Full-auto with explosive rounds", modeSwitch: "Headshot kills build evolution" } },
+      { name: "Laetum", damage: 160.0, fireRate: 2.5, criticalChance: 0.22, criticalMultiplier: 2.2, statusChance: 0.22, triggerType: "Semi", magazine: 12, reloadTime: 2.0, impact: 64, slash: 96 },
+      {
+        // Wiki: Auto Impact 100 + Radiation radial 300, FR 6.67, mag 216
+        name: "Laetum Incarnon",
+        damage: 100,
+        fireRate: 6.67,
+        criticalChance: 0.22,
+        criticalMultiplier: 2.2,
+        statusChance: 0.22,
+        triggerType: "Auto",
+        magazine: 216,
+        reloadTime: 2.0,
+        impact: 100,
+        specialMechanics: { evolutionMode: "Full-auto explosive rounds", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -414,8 +471,22 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     challenge: "Kill 100 enemies",
     category: "native",
     forms: [
-      { name: "Phenmor", damage: 76.0, fireRate: 4.5, criticalChance: 0.2, criticalMultiplier: 2.0, statusChance: 0.16, triggerType: "Auto", magazine: 60, reloadTime: 2.0 },
-      { name: "Phenmor Incarnon", damage: 152.0, fireRate: 4.5, criticalChance: 0.3, criticalMultiplier: 2.5, statusChance: 0.28, triggerType: "Auto", magazine: 60, reloadTime: 2.0, specialMechanics: { evolutionMode: "Fires seeking void projectiles", modeSwitch: "Kills build evolution gauge" } },
+      { name: "Phenmor", damage: 140.0, fireRate: 3.0, criticalChance: 0.2, criticalMultiplier: 2.0, statusChance: 0.2, triggerType: "Semi", magazine: 30, reloadTime: 2.8, puncture: 42, slash: 98 },
+      {
+        // Wiki: Slash 80 + Radiation 60, FR 13.33, mag 408, Auto, 3m punch-through
+        name: "Phenmor Incarnon",
+        damage: 140,
+        fireRate: 13.33,
+        criticalChance: 0.2,
+        criticalMultiplier: 2.0,
+        statusChance: 0.2,
+        triggerType: "Auto",
+        magazine: 408,
+        reloadTime: 2.8,
+        slash: 80,
+        radiation: 60,
+        specialMechanics: { evolutionMode: "Full-auto Slash/Radiation with punch-through", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -458,8 +529,21 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     challenge: "Kill 100 enemies",
     category: "native",
     forms: [
-      { name: "Onos", damage: 24.0, fireRate: 12.0, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.28, triggerType: "Held", magazine: 100, reloadTime: 2.4 },
-      { name: "Onos Incarnon", damage: 48.0, fireRate: 12.0, criticalChance: 0.28, criticalMultiplier: 2.5, statusChance: 0.4, triggerType: "Held", magazine: 100, reloadTime: 2.4, specialMechanics: { evolutionMode: "Chain lightning between enemies", modeSwitch: "Sustained damage builds evolution" } },
+      { name: "Onos", damage: 220.0, fireRate: 1.4, criticalChance: 0.26, criticalMultiplier: 2.4, statusChance: 0.22, triggerType: "Auto", magazine: 20, reloadTime: 2.0, puncture: 220 },
+      {
+        // Wiki Held beam default; full-charge Heat 2200 via resolveIncarnonActiveWeapon onosIncarnonMode
+        name: "Onos Incarnon",
+        damage: 30,
+        fireRate: 2,
+        criticalChance: 0.14,
+        criticalMultiplier: 1.6,
+        statusChance: 0.18,
+        triggerType: "Held",
+        magazine: 350,
+        reloadTime: 2.0,
+        radiation: 30,
+        specialMechanics: { evolutionMode: "Charging arm-cannon Radiation beam; full charge Heat blast", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -495,27 +579,17 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
       { tier: 5, slot: 1, name: "Elemental Flow", description: "Convert 100% of Physical Damage to Elemental.", statChanges: {} },
     ],
   },
-  // Thalys (native)
+  // Thalys (native melee) — form is buff-driven (+3 Range / +40% AS via wiki evolutions); forms[] unused for arsenal swap
   {
     weaponId: "thalys",
     weaponName: "Thalys",
     challenge: "Kill 100 enemies",
     category: "native",
     forms: [
-      { name: "Thalys", damage: 55.0, fireRate: 6.0, criticalChance: 0.22, criticalMultiplier: 2.0, statusChance: 0.18, triggerType: "Burst", magazine: 45, reloadTime: 1.8 },
-      { name: "Thalys Incarnon", damage: 110.0, fireRate: 6.0, criticalChance: 0.32, criticalMultiplier: 2.5, statusChance: 0.3, triggerType: "Auto", magazine: 45, reloadTime: 1.8, specialMechanics: { evolutionMode: "Rapid-fire with ricocheting shots", modeSwitch: "Kills build evolution" } },
+      { name: "Thalys", damage: 300, fireRate: 0.917, criticalChance: 0.3, criticalMultiplier: 2.2, statusChance: 0.24, triggerType: "Melee" },
+      { name: "Thalys Incarnon", damage: 300, fireRate: 0.917, criticalChance: 0.3, criticalMultiplier: 2.2, statusChance: 0.24, triggerType: "Melee", specialMechanics: { evolutionMode: "Void shards; +3 Range +40% AS", modeSwitch: "6x Combo + Heavy Attack" } },
     ],
-    evolutions: [
-      { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
-      { tier: 2, slot: 0, name: "Ready Retaliation", description: "+100% Damage when wielding Melee weapon.", statChanges: {} },
-      { tier: 2, slot: 1, name: "Lone Gun", description: "+60% Damage when no Primary equipped.", statChanges: {} },
-      { tier: 3, slot: 0, name: "Elemental Excess", description: "+200% Elemental Damage.", statChanges: {} },
-      { tier: 3, slot: 1, name: "Swift Transformation", description: "+50% Incarnon Buildup.", statChanges: {} },
-      { tier: 4, slot: 0, name: "Long Shot", description: "+100% Damage Falloff Range.", statChanges: {} },
-      { tier: 4, slot: 1, name: "Status Surge", description: "+50% Status Chance.", statChanges: { statusChance: 0.5 } },
-      { tier: 5, slot: 0, name: "Devouring Attrition", description: "50% chance to deal +2000% Damage on non-critical hits.", statChanges: { devouringAttrition: 20 } },
-      { tier: 5, slot: 1, name: "Elemental Flow", description: "Convert 100% of Physical Damage to Elemental.", statChanges: {} },
-    ],
+    evolutions: [],
   },
   // Boar Incarnon (genesis_primary)
   {
@@ -526,7 +600,21 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["boar", "boar_prime"],
     forms: [
       { name: "Boar", damage: 360.0, fireRate: 5.0, criticalChance: 0.15, criticalMultiplier: 2.0, statusChance: 0.3, triggerType: "Auto", magazine: 20, reloadTime: 2.7 },
-      { name: "Boar Incarnon", damage: 720.0, fireRate: 5.0, criticalChance: 0.25, criticalMultiplier: 2.5, statusChance: 0.45, triggerType: "Auto", magazine: 20, reloadTime: 2.7, specialMechanics: { evolutionMode: "Tighter spread, higher damage", modeSwitch: "Slam attack kills" } },
+      {
+        // Wiki: Heat 20 Held beam, FR 7.5, 18%/1.8x/20%, mag 150, MS 1 (drops shotgun pellets)
+        name: "Boar Incarnon",
+        damage: 20,
+        fireRate: 7.5,
+        criticalChance: 0.18,
+        criticalMultiplier: 1.8,
+        statusChance: 0.2,
+        triggerType: "Held",
+        magazine: 150,
+        reloadTime: 2.7,
+        multishot: 1,
+        heat: 20,
+        specialMechanics: { evolutionMode: "Held Heat beam", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -549,7 +637,23 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["boltor", "boltor_prime", "telos_boltor"],
     forms: [
       { name: "Boltor", damage: 60.0, fireRate: 8.75, criticalChance: 0.1, criticalMultiplier: 1.8, statusChance: 0.14, triggerType: "Auto", magazine: 60, reloadTime: 2.6 },
-      { name: "Boltor Incarnon", damage: 120.0, fireRate: 8.75, criticalChance: 0.2, criticalMultiplier: 2.3, statusChance: 0.28, triggerType: "Auto", magazine: 60, reloadTime: 2.6, specialMechanics: { evolutionMode: "Bolts explode on impact", modeSwitch: "Kills build evolution" } },
+      {
+        // Wiki: 4 IPS × 3 multishot, FR 10, 22%/2.8x/9.33%, mag 160
+        name: "Boltor Incarnon",
+        damage: 4,
+        fireRate: 10,
+        criticalChance: 0.22,
+        criticalMultiplier: 2.8,
+        statusChance: 0.0933,
+        triggerType: "Auto",
+        magazine: 160,
+        reloadTime: 2.6,
+        multishot: 3,
+        impact: 0.4,
+        puncture: 1.2,
+        slash: 2.4,
+        specialMechanics: { evolutionMode: "Slash-biased bolts with base Multishot 3", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -571,8 +675,23 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_primary",
     variants: ["braton", "braton_prime", "braton_vandal", "mk1_braton"],
     forms: [
-      { name: "Braton", damage: 24.0, fireRate: 8.75, criticalChance: 0.12, criticalMultiplier: 1.6, statusChance: 0.06, triggerType: "Auto", magazine: 50, reloadTime: 2.0 },
-      { name: "Braton Incarnon", damage: 80.0, fireRate: 4.0, criticalChance: 0.3, criticalMultiplier: 2.2, statusChance: 0.35, triggerType: "Semi", magazine: 50, reloadTime: 2.0, specialMechanics: { evolutionMode: "Semi-auto explosive shots", modeSwitch: "Headshot kills build evolution" } },
+      { name: "Braton", damage: 24.0, fireRate: 8.75, criticalChance: 0.12, criticalMultiplier: 1.6, statusChance: 0.06, triggerType: "Auto", magazine: 45, reloadTime: 2.0, impact: 7.92, puncture: 7.92, slash: 8.16 },
+      {
+        // Wiki base Braton form: IPS 50, FR 5, 30%/3x/12%, mag 200 + Heat AoE 50
+        name: "Braton Incarnon",
+        damage: 50,
+        fireRate: 5,
+        criticalChance: 0.3,
+        criticalMultiplier: 3.0,
+        statusChance: 0.12,
+        triggerType: "Auto",
+        magazine: 200,
+        reloadTime: 2.0,
+        impact: 20,
+        puncture: 2,
+        slash: 28,
+        specialMechanics: { evolutionMode: "Hitscan with radial Heat", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -594,8 +713,22 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_primary",
     variants: ["burston", "burston_prime"],
     forms: [
-      { name: "Burston", damage: 36.0, fireRate: 7.83, criticalChance: 0.18, criticalMultiplier: 1.6, statusChance: 0.28, triggerType: "Burst", magazine: 45, reloadTime: 2.0 },
-      { name: "Burston Incarnon", damage: 72.0, fireRate: 7.83, criticalChance: 0.28, criticalMultiplier: 2.2, statusChance: 0.42, triggerType: "Burst", magazine: 45, reloadTime: 2.0, specialMechanics: { evolutionMode: "5-round burst with punch-through", modeSwitch: "Headshot kills" } },
+      { name: "Burston", damage: 30.0, fireRate: 5.0, criticalChance: 0.06, criticalMultiplier: 1.6, statusChance: 0.18, triggerType: "Burst", magazine: 45, reloadTime: 2.0, impact: 10, puncture: 10, slash: 10 },
+      {
+        // Wiki base Burston: pure Heat 3, Auto FR 20, 30%/3x/30%, mag 600 (+ Heat radial; Prime uses 13 via radial sync)
+        name: "Burston Incarnon",
+        damage: 3,
+        fireRate: 20,
+        criticalChance: 0.3,
+        criticalMultiplier: 3.0,
+        statusChance: 0.3,
+        triggerType: "Auto",
+        magazine: 600,
+        reloadTime: 2.0,
+        damageType: "heat",
+        heat: 3,
+        specialMechanics: { evolutionMode: "Full-auto Heat with radial explosion", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -618,7 +751,23 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["dera", "dera_vandal"],
     forms: [
       { name: "Dera", damage: 30.0, fireRate: 11.25, criticalChance: 0.08, criticalMultiplier: 2.0, statusChance: 0.16, triggerType: "Burst", magazine: 45, reloadTime: 1.8 },
-      { name: "Dera Incarnon", damage: 60.0, fireRate: 11.25, criticalChance: 0.18, criticalMultiplier: 2.5, statusChance: 0.32, triggerType: "Burst", magazine: 45, reloadTime: 1.8, specialMechanics: { evolutionMode: "Crimson Overture - Enhanced burst fire", modeSwitch: "Kills build evolution" } },
+      {
+        // Wiki: IPS+Magnetic 330, FR 2, 22%/3x/18%, mag 50
+        name: "Dera Incarnon",
+        damage: 330,
+        fireRate: 2,
+        criticalChance: 0.22,
+        criticalMultiplier: 3.0,
+        statusChance: 0.18,
+        triggerType: "Semi",
+        magazine: 50,
+        reloadTime: 1.8,
+        impact: 40,
+        puncture: 130,
+        slash: 80,
+        magnetic: 80,
+        specialMechanics: { evolutionMode: "Heavy Magnetic bolts", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -641,7 +790,22 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["dread"],
     forms: [
       { name: "Dread", damage: 200.0, fireRate: 1.0, criticalChance: 0.5, criticalMultiplier: 2.0, statusChance: 0.2, triggerType: "Charge", magazine: 1, reloadTime: 0.9 },
-      { name: "Dread Incarnon", damage: 400.0, fireRate: 1.0, criticalChance: 0.6, criticalMultiplier: 2.5, statusChance: 0.35, triggerType: "Charge", magazine: 1, reloadTime: 0.9, specialMechanics: { evolutionMode: "Explosive arrows with 5m radius", modeSwitch: "Headshot kills" } },
+      {
+        // Wiki charged: Impact 100 + Slash 100 + Heat 200, FR 1.5, 50%/3x/30%, mag 20
+        name: "Dread Incarnon",
+        damage: 400,
+        fireRate: 1.5,
+        criticalChance: 0.5,
+        criticalMultiplier: 3.0,
+        statusChance: 0.3,
+        triggerType: "Charge",
+        magazine: 20,
+        reloadTime: 0.9,
+        impact: 100,
+        slash: 100,
+        heat: 200,
+        specialMechanics: { evolutionMode: "Larger Heat-charged arrows", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -663,8 +827,23 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_primary",
     variants: ["gorgon", "gorgon_wraith", "prisma_gorgon"],
     forms: [
-      { name: "Gorgon", damage: 33.0, fireRate: 12.5, criticalChance: 0.15, criticalMultiplier: 1.5, statusChance: 0.09, triggerType: "Auto", magazine: 90, reloadTime: 4.2 },
-      { name: "Gorgon Incarnon", damage: 66.0, fireRate: 12.5, criticalChance: 0.25, criticalMultiplier: 2.0, statusChance: 0.2, triggerType: "Auto", magazine: 90, reloadTime: 4.2, specialMechanics: { evolutionMode: "Spin-up creates void projectiles", modeSwitch: "Sustained fire builds evolution" } },
+      { name: "Gorgon", damage: 25.0, fireRate: 12.5, criticalChance: 0.17, criticalMultiplier: 1.5, statusChance: 0.09, triggerType: "Auto", magazine: 90, reloadTime: 4.2, impact: 18.75, puncture: 3.75, slash: 2.5 },
+      {
+        // Wiki: IPS 100, Auto Charge FR 0.833, 21%/1.9x/19%, mag 20 + Heat AoE 750
+        name: "Gorgon Incarnon",
+        damage: 100,
+        fireRate: 0.833,
+        criticalChance: 0.21,
+        criticalMultiplier: 1.9,
+        statusChance: 0.19,
+        triggerType: "Auto",
+        magazine: 20,
+        reloadTime: 4.2,
+        impact: 20,
+        puncture: 60,
+        slash: 20,
+        specialMechanics: { evolutionMode: "Embedding projectiles with delayed Heat explosion", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -686,8 +865,21 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_primary",
     variants: ["latron", "latron_prime", "latron_wraith"],
     forms: [
-      { name: "Latron", damage: 55.0, fireRate: 4.17, criticalChance: 0.25, criticalMultiplier: 2.0, statusChance: 0.15, triggerType: "Semi", magazine: 15, reloadTime: 2.4 },
-      { name: "Latron Incarnon", damage: 110.0, fireRate: 4.17, criticalChance: 0.35, criticalMultiplier: 2.5, statusChance: 0.28, triggerType: "Semi", magazine: 15, reloadTime: 2.4, specialMechanics: { evolutionMode: "Rounds split into 3 seeking projectiles", modeSwitch: "Headshot kills" } },
+      { name: "Latron", damage: 55.0, fireRate: 4.17, criticalChance: 0.12, criticalMultiplier: 2.0, statusChance: 0.12, triggerType: "Semi", magazine: 15, reloadTime: 2.4, impact: 8.25, puncture: 38.5, slash: 8.25 },
+      {
+        // Wiki base Latron form: Impact 50 projectile, FR 3.33, 32%/3x/24%, mag 40 (+ AoE Puncture/Heat)
+        name: "Latron Incarnon",
+        damage: 50,
+        fireRate: 3.33,
+        criticalChance: 0.32,
+        criticalMultiplier: 3.0,
+        statusChance: 0.24,
+        triggerType: "Semi",
+        magazine: 40,
+        reloadTime: 2.4,
+        impact: 50,
+        specialMechanics: { evolutionMode: "Ricocheting projectile with radial explosion", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -710,7 +902,21 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["paris", "paris_prime", "mk1_paris"],
     forms: [
       { name: "Paris", damage: 180.0, fireRate: 1.0, criticalChance: 0.35, criticalMultiplier: 2.0, statusChance: 0.1, triggerType: "Charge", magazine: 1, reloadTime: 1.0 },
-      { name: "Paris Incarnon", damage: 360.0, fireRate: 1.0, criticalChance: 0.45, criticalMultiplier: 2.5, statusChance: 0.22, triggerType: "Charge", magazine: 1, reloadTime: 1.0, specialMechanics: { evolutionMode: "Arrows create void tether between enemies", modeSwitch: "Headshot kills" } },
+      {
+        // Wiki charged: Impact 95 + Heat 365, FR 1, 40%/3x/20%, mag 20
+        name: "Paris Incarnon",
+        damage: 460,
+        fireRate: 1,
+        criticalChance: 0.4,
+        criticalMultiplier: 3.0,
+        statusChance: 0.2,
+        triggerType: "Charge",
+        magazine: 20,
+        reloadTime: 1.0,
+        impact: 95,
+        heat: 365,
+        specialMechanics: { evolutionMode: "Heat-charged arrows", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -732,8 +938,24 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_primary",
     variants: ["soma", "soma_prime"],
     forms: [
-      { name: "Soma", damage: 12.0, fireRate: 15.0, criticalChance: 0.3, criticalMultiplier: 3.0, statusChance: 0.1, triggerType: "Auto", magazine: 100, reloadTime: 3.0 },
-      { name: "Soma Incarnon", damage: 24.0, fireRate: 15.0, criticalChance: 0.4, criticalMultiplier: 3.5, statusChance: 0.2, triggerType: "Auto", magazine: 100, reloadTime: 3.0, specialMechanics: { evolutionMode: "Critical hits fire void ricochets", modeSwitch: "Critical hits build evolution" } },
+      { name: "Soma", damage: 12.0, fireRate: 15.0, criticalChance: 0.3, criticalMultiplier: 3.0, statusChance: 0.07, triggerType: "Auto", magazine: 100, reloadTime: 3.0, impact: 1.2, puncture: 4.8, slash: 6 },
+      {
+        // Wiki: 8-pellet shotgun, 8 dmg/pellet (0.48/2.24/5.28), FR 7, 10%/3x/2.5% per pellet, mag 200
+        name: "Soma Incarnon",
+        damage: 8,
+        fireRate: 7,
+        criticalChance: 0.1,
+        criticalMultiplier: 3.0,
+        statusChance: 0.025,
+        triggerType: "Auto",
+        magazine: 200,
+        reloadTime: 3.0,
+        multishot: 8,
+        impact: 0.48,
+        puncture: 2.24,
+        slash: 5.28,
+        specialMechanics: { evolutionMode: "Full-auto shotgun with 8 base Multishot", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -755,8 +977,22 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_primary",
     variants: ["strun", "strun_prime", "strun_wraith", "mk1_strun"],
     forms: [
-      { name: "Strun", damage: 300.0, fireRate: 2.5, criticalChance: 0.15, criticalMultiplier: 2.0, statusChance: 0.2, triggerType: "Semi", magazine: 6, reloadTime: 3.0 },
-      { name: "Strun Incarnon", damage: 600.0, fireRate: 2.5, criticalChance: 0.25, criticalMultiplier: 2.5, statusChance: 0.35, triggerType: "Semi", magazine: 6, reloadTime: 3.0, specialMechanics: { evolutionMode: "Concentrated void blast with infinite punch-through", modeSwitch: "Slam attack kills" } },
+      { name: "Strun", damage: 300.0, fireRate: 2.5, criticalChance: 0.075, criticalMultiplier: 1.5, statusChance: 0.05, triggerType: "Semi", magazine: 6, reloadTime: 3.75, multishot: 12, impact: 13.75, puncture: 3.75, slash: 7.5 },
+      {
+        // Wiki: Impact 100 projectile, FR 2, 44%/2.8x/40%, mag 40 + Blast/Slash/Puncture AoE
+        name: "Strun Incarnon",
+        damage: 100,
+        fireRate: 2,
+        criticalChance: 0.44,
+        criticalMultiplier: 2.8,
+        statusChance: 0.4,
+        triggerType: "Semi",
+        magazine: 40,
+        reloadTime: 3.75,
+        multishot: 1,
+        impact: 100,
+        specialMechanics: { evolutionMode: "Explosive projectile (loses shotgun multishot)", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -779,7 +1015,22 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["sybaris", "sybaris_prime", "dex_sybaris"],
     forms: [
       { name: "Sybaris", damage: 75.0, fireRate: 3.33, criticalChance: 0.3, criticalMultiplier: 2.0, statusChance: 0.25, triggerType: "Burst", magazine: 20, reloadTime: 2.0 },
-      { name: "Sybaris Incarnon", damage: 150.0, fireRate: 3.33, criticalChance: 0.4, criticalMultiplier: 2.5, statusChance: 0.4, triggerType: "Burst", magazine: 20, reloadTime: 2.0, specialMechanics: { evolutionMode: "Burst creates void precision strikes", modeSwitch: "Headshot kills" } },
+      {
+        // Wiki: IPS 90, 4-round Burst FR 3.33, 20%/3x/20%, mag 200, forced Blast
+        name: "Sybaris Incarnon",
+        damage: 90,
+        fireRate: 3.33,
+        criticalChance: 0.2,
+        criticalMultiplier: 3.0,
+        statusChance: 0.2,
+        triggerType: "Burst",
+        magazine: 200,
+        reloadTime: 2.0,
+        impact: 29.7,
+        puncture: 29.7,
+        slash: 30.6,
+        specialMechanics: { evolutionMode: "4-round burst with forced Blast", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -801,8 +1052,23 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_primary",
     variants: ["miter"],
     forms: [
-      { name: "Miter", damage: 250.0, fireRate: 2.5, criticalChance: 0.1, criticalMultiplier: 2.0, statusChance: 0.5, triggerType: "Charge", magazine: 20, reloadTime: 2.0 },
-      { name: "Miter Incarnon", damage: 500.0, fireRate: 2.5, criticalChance: 0.22, criticalMultiplier: 2.5, statusChance: 0.6, triggerType: "Auto", magazine: 20, reloadTime: 2.0, specialMechanics: { evolutionMode: "Rapid-fire bouncing saw blades", modeSwitch: "Kills build evolution" } },
+      { name: "Miter", damage: 100.0, fireRate: 2.5, criticalChance: 0.05, criticalMultiplier: 2.0, statusChance: 0.2, triggerType: "Charge", magazine: 20, reloadTime: 2.0, impact: 20, puncture: 10, slash: 70 },
+      {
+        // Wiki: IPS 60 Auto FR 3.33, 20%/3.3x/56%, mag 20 + Heat radial 80
+        name: "Miter Incarnon",
+        damage: 60,
+        fireRate: 3.33,
+        criticalChance: 0.2,
+        criticalMultiplier: 3.3,
+        statusChance: 0.56,
+        triggerType: "Auto",
+        magazine: 20,
+        reloadTime: 2.0,
+        impact: 12,
+        puncture: 6,
+        slash: 42,
+        specialMechanics: { evolutionMode: "Homing bouncing Heat explosives", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -824,8 +1090,37 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_primary",
     variants: ["torid"],
     forms: [
-      { name: "Torid", damage: 250.0, fireRate: 1.5, criticalChance: 0.15, criticalMultiplier: 2.0, statusChance: 0.25, triggerType: "Semi", magazine: 5, reloadTime: 1.7 },
-      { name: "Torid Incarnon", damage: 500.0, fireRate: 1.5, criticalChance: 0.28, criticalMultiplier: 2.5, statusChance: 0.4, triggerType: "Semi", magazine: 5, reloadTime: 1.7, specialMechanics: { evolutionMode: "Toxin grenades chain between enemies", modeSwitch: "Kills build evolution" } },
+      {
+        name: "Torid",
+        damage: 140,
+        fireRate: 1.5,
+        criticalChance: 0.15,
+        criticalMultiplier: 2.0,
+        statusChance: 0.23,
+        triggerType: "Semi",
+        magazine: 5,
+        reloadTime: 1.7,
+        damageType: "toxin",
+        toxin: 140,
+      },
+      {
+        // Wiki Incarnon Form: long-range toxin beam (Held), 51 toxin, 8 FR, 29% / 3.1x / 39%, 170 charge
+        name: "Torid Incarnon",
+        damage: 51,
+        fireRate: 8,
+        criticalChance: 0.29,
+        criticalMultiplier: 3.1,
+        statusChance: 0.39,
+        triggerType: "Held",
+        magazine: 170,
+        reloadTime: 1.7,
+        damageType: "toxin",
+        toxin: 51,
+        specialMechanics: {
+          evolutionMode: "Long-range Toxin beam; chain to nearby enemies",
+          modeSwitch: "Direct shots charge Incarnon; Alt-fire transmutes",
+        },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -848,7 +1143,23 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["vasto", "vasto_prime"],
     forms: [
       { name: "Vasto", damage: 65.0, fireRate: 4.17, criticalChance: 0.2, criticalMultiplier: 1.8, statusChance: 0.08, triggerType: "Semi", magazine: 6, reloadTime: 1.5 },
-      { name: "Vasto Incarnon", damage: 130.0, fireRate: 4.17, criticalChance: 0.32, criticalMultiplier: 2.3, statusChance: 0.18, triggerType: "Semi", magazine: 6, reloadTime: 1.5, specialMechanics: { evolutionMode: "Ricocheting void slugs", modeSwitch: "Headshot kills" } },
+      {
+        // Wiki: 30 IPS × 6 Burst, FR 2.5, 30%/2.8x/2.67%, mag 24
+        name: "Vasto Incarnon",
+        damage: 30,
+        fireRate: 2.5,
+        criticalChance: 0.3,
+        criticalMultiplier: 2.8,
+        statusChance: 0.0267,
+        triggerType: "Burst",
+        magazine: 24,
+        reloadTime: 1.5,
+        multishot: 6,
+        impact: 7.5,
+        puncture: 7.5,
+        slash: 15,
+        specialMechanics: { evolutionMode: "6-round Burst with base Multishot 6", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -870,8 +1181,22 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_secondary",
     variants: ["lex", "lex_prime"],
     forms: [
-      { name: "Lex", damage: 130.0, fireRate: 2.0, criticalChance: 0.25, criticalMultiplier: 2.0, statusChance: 0.1, triggerType: "Semi", magazine: 9, reloadTime: 2.35 },
-      { name: "Lex Incarnon", damage: 260.0, fireRate: 2.0, criticalChance: 0.35, criticalMultiplier: 2.5, statusChance: 0.2, triggerType: "Semi", magazine: 9, reloadTime: 2.35, specialMechanics: { evolutionMode: "Void precision shots with punch-through", modeSwitch: "Headshot kills" } },
+      { name: "Lex", damage: 130.0, fireRate: 1.08, criticalChance: 0.2, criticalMultiplier: 2.0, statusChance: 0.1, triggerType: "Semi", magazine: 6, reloadTime: 2.35, impact: 13, puncture: 104, slash: 13 },
+      {
+        // Wiki base Lex: Radiation 700 + Impact 300, FR 0.67, 30%/3x/22%, mag 20
+        name: "Lex Incarnon",
+        damage: 1000,
+        fireRate: 0.67,
+        criticalChance: 0.3,
+        criticalMultiplier: 3.0,
+        statusChance: 0.22,
+        triggerType: "Semi",
+        magazine: 20,
+        reloadTime: 2.35,
+        impact: 300,
+        radiation: 700,
+        specialMechanics: { evolutionMode: "Wide Radiation projectile with punch-through", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -894,7 +1219,23 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["lato", "lato_prime", "lato_vandal"],
     forms: [
       { name: "Lato", damage: 30.0, fireRate: 6.67, criticalChance: 0.1, criticalMultiplier: 1.8, statusChance: 0.08, triggerType: "Semi", magazine: 15, reloadTime: 1.4 },
-      { name: "Lato Incarnon", damage: 60.0, fireRate: 6.67, criticalChance: 0.22, criticalMultiplier: 2.3, statusChance: 0.18, triggerType: "Semi", magazine: 15, reloadTime: 1.4, specialMechanics: { evolutionMode: "Burst-fire void rounds", modeSwitch: "Headshot kills" } },
+      {
+        // Wiki: 64 IPS × Multishot 2, FR 3.5, 16%/2.6x/6%, mag 24
+        name: "Lato Incarnon",
+        damage: 64,
+        fireRate: 3.5,
+        criticalChance: 0.16,
+        criticalMultiplier: 2.6,
+        statusChance: 0.06,
+        triggerType: "Semi",
+        magazine: 24,
+        reloadTime: 1.4,
+        multishot: 2,
+        impact: 16,
+        puncture: 16,
+        slash: 32,
+        specialMechanics: { evolutionMode: "Ricocheting Multishot rounds", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -917,7 +1258,20 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["angstrum", "prisma_angstrum"],
     forms: [
       { name: "Angstrum", damage: 450.0, fireRate: 2.0, criticalChance: 0.16, criticalMultiplier: 2.0, statusChance: 0.22, triggerType: "Charge", magazine: 3, reloadTime: 2.5 },
-      { name: "Angstrum Incarnon", damage: 900.0, fireRate: 2.0, criticalChance: 0.26, criticalMultiplier: 2.5, statusChance: 0.35, triggerType: "Auto", magazine: 3, reloadTime: 2.5, specialMechanics: { evolutionMode: "Fires seeking void rockets", modeSwitch: "Kills build evolution" } },
+      {
+        // Wiki: Heat 30 Auto seeking fireballs, FR 6, 18%/1.8x/18%, mag 120
+        name: "Angstrum Incarnon",
+        damage: 30,
+        fireRate: 6,
+        criticalChance: 0.18,
+        criticalMultiplier: 1.8,
+        statusChance: 0.18,
+        triggerType: "Auto",
+        magazine: 120,
+        reloadTime: 2.5,
+        heat: 30,
+        specialMechanics: { evolutionMode: "Seeking Heat fireballs with ricochet", modeSwitch: "Direct hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -939,8 +1293,21 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_secondary",
     variants: ["atomos"],
     forms: [
-      { name: "Atomos", damage: 50.0, fireRate: 8.0, criticalChance: 0.15, criticalMultiplier: 1.7, statusChance: 0.21, triggerType: "Held", magazine: 70, reloadTime: 2.0 },
-      { name: "Atomos Incarnon", damage: 100.0, fireRate: 8.0, criticalChance: 0.25, criticalMultiplier: 2.2, statusChance: 0.35, triggerType: "Held", magazine: 70, reloadTime: 2.0, specialMechanics: { evolutionMode: "Void beam chains to additional targets", modeSwitch: "Sustained damage builds evolution" } },
+      { name: "Atomos", damage: 29.0, fireRate: 8.0, criticalChance: 0.15, criticalMultiplier: 1.7, statusChance: 0.21, triggerType: "Held", magazine: 70, reloadTime: 2.0, heat: 29 },
+      {
+        // Wiki: Impact 100 direct + Blast 450 radial, Semi FR 1.5, 18%/3x/41%, mag 21
+        name: "Atomos Incarnon",
+        damage: 100,
+        fireRate: 1.5,
+        criticalChance: 0.18,
+        criticalMultiplier: 3.0,
+        statusChance: 0.41,
+        triggerType: "Semi",
+        magazine: 21,
+        reloadTime: 2.0,
+        impact: 100,
+        specialMechanics: { evolutionMode: "Semi-auto grenades with Blast radial", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -963,7 +1330,23 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["bronco", "bronco_prime"],
     forms: [
       { name: "Bronco", damage: 280.0, fireRate: 5.0, criticalChance: 0.06, criticalMultiplier: 2.0, statusChance: 0.22, triggerType: "Semi", magazine: 4, reloadTime: 1.05 },
-      { name: "Bronco Incarnon", damage: 560.0, fireRate: 5.0, criticalChance: 0.18, criticalMultiplier: 2.5, statusChance: 0.38, triggerType: "Semi", magazine: 4, reloadTime: 1.05, specialMechanics: { evolutionMode: "Void slug with massive punch-through", modeSwitch: "Slam attack kills" } },
+      {
+        // Wiki: 22 IPS × Multishot 7, FR 2.5, 20%/3x/18.86%, mag 20
+        name: "Bronco Incarnon",
+        damage: 22,
+        fireRate: 2.5,
+        criticalChance: 0.2,
+        criticalMultiplier: 3.0,
+        statusChance: 0.1886,
+        triggerType: "Semi",
+        magazine: 20,
+        reloadTime: 1.05,
+        multishot: 7,
+        impact: 13.2,
+        puncture: 2.2,
+        slash: 6.6,
+        specialMechanics: { evolutionMode: "Ricocheting shotgun pellets", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -986,7 +1369,21 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["cestra"],
     forms: [
       { name: "Cestra", damage: 26.0, fireRate: 8.33, criticalChance: 0.06, criticalMultiplier: 1.6, statusChance: 0.2, triggerType: "Auto", magazine: 60, reloadTime: 2.0 },
-      { name: "Cestra Incarnon", damage: 52.0, fireRate: 8.33, criticalChance: 0.18, criticalMultiplier: 2.2, statusChance: 0.35, triggerType: "Auto", magazine: 60, reloadTime: 2.0, specialMechanics: { evolutionMode: "Homing void projectiles", modeSwitch: "Kills build evolution" } },
+      {
+        // Wiki: Impact 10 + Puncture 40, FR 6.67, 50%/3x/18%, mag 150
+        name: "Cestra Incarnon",
+        damage: 50,
+        fireRate: 6.67,
+        criticalChance: 0.5,
+        criticalMultiplier: 3.0,
+        statusChance: 0.18,
+        triggerType: "Auto",
+        magazine: 150,
+        reloadTime: 2.0,
+        impact: 10,
+        puncture: 40,
+        specialMechanics: { evolutionMode: "High-crit Auto bolts", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1008,8 +1405,23 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_secondary",
     variants: ["despair"],
     forms: [
-      { name: "Despair", damage: 58.0, fireRate: 3.33, criticalChance: 0.16, criticalMultiplier: 1.6, statusChance: 0.16, triggerType: "Auto", magazine: 10, reloadTime: 0.75 },
-      { name: "Despair Incarnon", damage: 116.0, fireRate: 3.33, criticalChance: 0.28, criticalMultiplier: 2.2, statusChance: 0.3, triggerType: "Auto", magazine: 10, reloadTime: 0.75, specialMechanics: { evolutionMode: "Void kunai that embed and explode", modeSwitch: "Headshot kills" } },
+      { name: "Despair", damage: 58.0, fireRate: 3.33, criticalChance: 0.16, criticalMultiplier: 1.6, statusChance: 0.16, triggerType: "Auto", magazine: 10, reloadTime: 0.75, impact: 2.9, puncture: 46.4, slash: 8.7 },
+      {
+        // Wiki: IPS 60, FR 3, 30%/3x/20%, mag 20 + Heat radial 160
+        name: "Despair Incarnon",
+        damage: 60,
+        fireRate: 3,
+        criticalChance: 0.3,
+        criticalMultiplier: 3.0,
+        statusChance: 0.2,
+        triggerType: "Auto",
+        magazine: 20,
+        reloadTime: 0.75,
+        impact: 3,
+        puncture: 48,
+        slash: 9,
+        specialMechanics: { evolutionMode: "Embedding projectiles with Heat explosion", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1032,7 +1444,22 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["dual_toxocyst"],
     forms: [
       { name: "Dual Toxocyst", damage: 70.0, fireRate: 1.0, criticalChance: 0.05, criticalMultiplier: 2.0, statusChance: 0.37, triggerType: "Semi", magazine: 12, reloadTime: 2.35 },
-      { name: "Dual Toxocyst Incarnon", damage: 140.0, fireRate: 1.0, criticalChance: 0.18, criticalMultiplier: 2.5, statusChance: 0.5, triggerType: "Semi", magazine: 12, reloadTime: 2.35, specialMechanics: { evolutionMode: "Frenzy on headshot, full-auto with increased fire rate", modeSwitch: "Headshot kills" } },
+      {
+        // Wiki: IPS 75 Auto, FR 4.5, 11%/3x/43%, mag 270
+        name: "Dual Toxocyst Incarnon",
+        damage: 75,
+        fireRate: 4.5,
+        criticalChance: 0.11,
+        criticalMultiplier: 3.0,
+        statusChance: 0.43,
+        triggerType: "Auto",
+        magazine: 270,
+        reloadTime: 2.35,
+        impact: 15,
+        puncture: 37.5,
+        slash: 22.5,
+        specialMechanics: { evolutionMode: "Auto fire with ricochet", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1055,7 +1482,20 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["furis", "mk1_furis"],
     forms: [
       { name: "Furis", damage: 18.0, fireRate: 10.0, criticalChance: 0.05, criticalMultiplier: 1.8, statusChance: 0.12, triggerType: "Auto", magazine: 35, reloadTime: 1.4 },
-      { name: "Furis Incarnon", damage: 36.0, fireRate: 10.0, criticalChance: 0.18, criticalMultiplier: 2.3, statusChance: 0.26, triggerType: "Auto", magazine: 35, reloadTime: 1.4, specialMechanics: { evolutionMode: "Health steal on hit", modeSwitch: "Kills build evolution" } },
+      {
+        // Wiki: Heat 100 Held beam, FR 12, 26%/3.4x/24%, mag 280
+        name: "Furis Incarnon",
+        damage: 100,
+        fireRate: 12,
+        criticalChance: 0.26,
+        criticalMultiplier: 3.4,
+        statusChance: 0.24,
+        triggerType: "Held",
+        magazine: 280,
+        reloadTime: 1.4,
+        heat: 100,
+        specialMechanics: { evolutionMode: "Wide Heat beam", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1077,8 +1517,21 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_secondary",
     variants: ["gammacor", "synoid_gammacor"],
     forms: [
-      { name: "Gammacor", damage: 16.0, fireRate: 12.0, criticalChance: 0.08, criticalMultiplier: 1.8, statusChance: 0.2, triggerType: "Held", magazine: 50, reloadTime: 1.8 },
-      { name: "Gammacor Incarnon", damage: 32.0, fireRate: 12.0, criticalChance: 0.2, criticalMultiplier: 2.3, statusChance: 0.36, triggerType: "Held", magazine: 50, reloadTime: 1.8, specialMechanics: { evolutionMode: "Magnetic void beam with energy restore", modeSwitch: "Sustained damage builds evolution" } },
+      { name: "Gammacor", damage: 16.0, fireRate: 12.0, criticalChance: 0.08, criticalMultiplier: 1.8, statusChance: 0.2, triggerType: "Held", magazine: 60, reloadTime: 1.4, magnetic: 16 },
+      {
+        // Wiki: Impact 80 Semi FR 1, 14%/1.8x/22%, mag 15 + Cold radial 660
+        name: "Gammacor Incarnon",
+        damage: 80,
+        fireRate: 1,
+        criticalChance: 0.14,
+        criticalMultiplier: 1.8,
+        statusChance: 0.22,
+        triggerType: "Semi",
+        magazine: 15,
+        reloadTime: 1.4,
+        impact: 80,
+        specialMechanics: { evolutionMode: "Pulling projectiles with Cold explosion", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1101,7 +1554,23 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["kunai", "mk1_kunai"],
     forms: [
       { name: "Kunai", damage: 46.0, fireRate: 3.33, criticalChance: 0.08, criticalMultiplier: 1.6, statusChance: 0.08, triggerType: "Auto", magazine: 10, reloadTime: 0.8 },
-      { name: "Kunai Incarnon", damage: 92.0, fireRate: 3.33, criticalChance: 0.2, criticalMultiplier: 2.2, statusChance: 0.2, triggerType: "Auto", magazine: 10, reloadTime: 0.8, specialMechanics: { evolutionMode: "Void kunai with seeking capability", modeSwitch: "Kills build evolution" } },
+      {
+        // Wiki: IPS 40 × Multishot 2, FR 3.33, 18%/2x/16%, mag 20
+        name: "Kunai Incarnon",
+        damage: 40,
+        fireRate: 3.33,
+        criticalChance: 0.18,
+        criticalMultiplier: 2.0,
+        statusChance: 0.16,
+        triggerType: "Auto",
+        magazine: 20,
+        reloadTime: 0.8,
+        multishot: 2,
+        impact: 8,
+        puncture: 14,
+        slash: 18,
+        specialMechanics: { evolutionMode: "Seeking Multishot kunai", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1124,7 +1593,22 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["sicarus", "sicarus_prime"],
     forms: [
       { name: "Sicarus", damage: 42.0, fireRate: 7.5, criticalChance: 0.16, criticalMultiplier: 2.0, statusChance: 0.1, triggerType: "Burst", magazine: 15, reloadTime: 2.0 },
-      { name: "Sicarus Incarnon", damage: 84.0, fireRate: 7.5, criticalChance: 0.28, criticalMultiplier: 2.5, statusChance: 0.24, triggerType: "Burst", magazine: 15, reloadTime: 2.0, specialMechanics: { evolutionMode: "5-round burst with void explosions", modeSwitch: "Headshot kills" } },
+      {
+        // Wiki: IPS 40, Burst FR 3.5, 20%/3x/20%, mag 120
+        name: "Sicarus Incarnon",
+        damage: 40,
+        fireRate: 3.5,
+        criticalChance: 0.2,
+        criticalMultiplier: 3.0,
+        statusChance: 0.2,
+        triggerType: "Burst",
+        magazine: 120,
+        reloadTime: 2.0,
+        impact: 28,
+        puncture: 6,
+        slash: 6,
+        specialMechanics: { evolutionMode: "Sustained Burst with Punch Through", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1146,8 +1630,22 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_secondary",
     variants: ["zylok", "zylok_prime"],
     forms: [
-      { name: "Zylok", damage: 84.0, fireRate: 3.33, criticalChance: 0.2, criticalMultiplier: 2.0, statusChance: 0.26, triggerType: "Duplex", magazine: 8, reloadTime: 1.2 },
-      { name: "Zylok Incarnon", damage: 168.0, fireRate: 3.33, criticalChance: 0.32, criticalMultiplier: 2.5, statusChance: 0.4, triggerType: "Duplex", magazine: 8, reloadTime: 1.2, specialMechanics: { evolutionMode: "Duplex void shots with guaranteed proc", modeSwitch: "Headshot kills" } },
+      { name: "Zylok", damage: 140.0, fireRate: 1.8, criticalChance: 0.08, criticalMultiplier: 2.0, statusChance: 0.26, triggerType: "Duplex", magazine: 8, reloadTime: 1.2, impact: 44.8, puncture: 16.8, slash: 78.4 },
+      {
+        // Wiki: Charge Impact 160 + Puncture 240, FR 1, 20%/2x/40%, mag 12 + Heat radial 600
+        name: "Zylok Incarnon",
+        damage: 400,
+        fireRate: 1,
+        criticalChance: 0.2,
+        criticalMultiplier: 2.0,
+        statusChance: 0.4,
+        triggerType: "Charge",
+        magazine: 12,
+        reloadTime: 1.2,
+        impact: 160,
+        puncture: 240,
+        specialMechanics: { evolutionMode: "Charged shot with radial Heat", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1446,7 +1944,20 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["vectis", "vectis_prime"],
     forms: [
       { name: "Vectis", damage: 225.0, fireRate: 1.5, criticalChance: 0.25, criticalMultiplier: 2.0, statusChance: 0.3, triggerType: "Sniper", magazine: 1, reloadTime: 1.0 },
-      { name: "Vectis Incarnon", damage: 450.0, fireRate: 1.5, criticalChance: 0.35, criticalMultiplier: 2.5, statusChance: 0.45, triggerType: "Semi", magazine: 30, reloadTime: 1.0, specialMechanics: { evolutionMode: "Slowing projectiles explode on headshots", modeSwitch: "Alt-fire while unscoped; weakpoint hits charge gauge" } },
+      {
+        // Wiki tooltip: Cold 5 projectile + form AoEs, FR 1.333, 30%/2.5x/30%, mag 45
+        name: "Vectis Incarnon",
+        damage: 5,
+        fireRate: 1.333,
+        criticalChance: 0.3,
+        criticalMultiplier: 2.5,
+        statusChance: 0.3,
+        triggerType: "Semi",
+        magazine: 45,
+        reloadTime: 1.0,
+        cold: 5,
+        specialMechanics: { evolutionMode: "Embedding Cold projectiles; explode on headshot", modeSwitch: "Weakpoint hits charge; Alt-fire while unscoped" },
+      },
     ],
     evolutions: getVectisIncarnonEvolutions(),
   },
@@ -1459,7 +1970,20 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["stug"],
     forms: [
       { name: "Stug", damage: 79.0, fireRate: 4.0, criticalChance: 0.05, criticalMultiplier: 1.5, statusChance: 0.0, triggerType: "Charge", magazine: 20, reloadTime: 2.0 },
-      { name: "Stug Incarnon", damage: 158.0, fireRate: 4.0, criticalChance: 0.15, criticalMultiplier: 2.0, statusChance: 0.25, triggerType: "Auto", magazine: 34, reloadTime: 2.0, specialMechanics: { evolutionMode: "Chaotic maelstrom of bouncing corrosive blobs", modeSwitch: "Direct hits charge gauge; alt-fire to transform" } },
+      {
+        // Wiki: Corrosive 50 direct + form blob radials, FR 4, 15%/2x/20%, mag 120
+        name: "Stug Incarnon",
+        damage: 50,
+        fireRate: 4,
+        criticalChance: 0.15,
+        criticalMultiplier: 2.0,
+        statusChance: 0.2,
+        triggerType: "Auto",
+        magazine: 120,
+        reloadTime: 2.0,
+        corrosive: 50,
+        specialMechanics: { evolutionMode: "Bouncing corrosive blobs", modeSwitch: "Direct hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: getStugIncarnonEvolutions(),
   },
@@ -1472,7 +1996,22 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     variants: ["ballistica", "ballistica_prime", "rakta_ballistica"],
     forms: [
       { name: "Ballistica", damage: 100.0, fireRate: 3.33, criticalChance: 0.025, criticalMultiplier: 1.5, statusChance: 0.1, triggerType: "Burst", magazine: 16, reloadTime: 2.0 },
-      { name: "Ballistica Incarnon", damage: 200.0, fireRate: 3.33, criticalChance: 0.12, criticalMultiplier: 2.0, statusChance: 0.28, triggerType: "Burst", magazine: 16, reloadTime: 2.0, specialMechanics: { evolutionMode: "Cross-shaped projectiles high in Slash Damage", modeSwitch: "Weakpoint hits charge gauge; alt-fire to transform" } },
+      {
+        // Wiki: Slash 640 Charge, FR 3.33, 20%/2x/20%, mag 18
+        // Wiki: single X-projectile (MS 1), Slash 640, Charge FR 3.33, 20%/2x/20%, mag 18
+        name: "Ballistica Incarnon",
+        damage: 640,
+        fireRate: 3.33,
+        criticalChance: 0.2,
+        criticalMultiplier: 2.0,
+        statusChance: 0.2,
+        triggerType: "Charge",
+        magazine: 18,
+        reloadTime: 2.0,
+        multishot: 1,
+        slash: 640,
+        specialMechanics: { evolutionMode: "Cross-shaped Slash projectiles", modeSwitch: "Weakpoint hits charge; Alt-fire transmutes" },
+      },
     ],
     evolutions: getBallisticaIncarnonEvolutions(),
   },

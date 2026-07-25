@@ -40,9 +40,9 @@ export const MOD_BEHAVIORS_RIFLE: Record<string, VerifiedModBehavior> = {
     line("fireRate", "weapon_dps", "multiplicative_percent", "Frail Momentum: fireRate \u2014 +15% Fire Rate, -2.5% Damage per rank"),
   ]),
   galvanized_aptitude: mod("galvanized_aptitude", [
-    line("damagePerStatus", "weapon_dps", "conditional_damage_per_status_on_kill", "Galvanized Aptitude: damagePerStatus \u2014 +80% Status Chance\\\\nOn Kill:\\\\n+40% Direct Damage per Status Type affecting the\u2026"),
-    line("duration", "mod_panel", "multiplicative_percent", "Galvanized Aptitude: duration \u2014 +80% Status Chance\\\\nOn Kill:\\\\n+40% Direct Damage per Status Type affecting the\u2026"),
-    line("statusChance", "weapon_dps", "conditional_damage_per_status_on_kill", "Galvanized Aptitude: statusChance \u2014 +80% Status Chance\\\\nOn Kill:\\\\n+40% Direct Damage per Status Type affecting the\u2026"),
+    line("damagePerStatus", "weapon_dps", "conditional_damage_per_status_on_kill", "wiki: Galvanized Aptitude — on-kill damage per status stack"),
+    line("duration", "mod_panel", "multiplicative_percent", "Galvanized Aptitude: buff duration (panel only)"),
+    line("statusChance", "weapon_dps", "multiplicative_percent", "wiki: Galvanized Aptitude — +80% Status Chance (always-on paper)"),
   ]),
   galvanized_chamber: mod("galvanized_chamber", [
     line("duration", "mod_panel", "multiplicative_percent", "Galvanized Chamber: duration \u2014 +80% Multishot\\\\nOn Kill:\\\\n+30% Multishot for 20s. Stacks up to 5x."),
@@ -50,9 +50,9 @@ export const MOD_BEHAVIORS_RIFLE: Record<string, VerifiedModBehavior> = {
     line("multishotOnKill", "weapon_dps", "conditional_multishot_on_kill", "Galvanized Chamber: multishotOnKill \u2014 +80% Multishot\\\\nOn Kill:\\\\n+30% Multishot for 20s. Stacks up to 5x."),
   ]),
   galvanized_savvy: mod("galvanized_savvy", [
-    line("damagePerStatus", "weapon_dps", "conditional_damage_per_status_on_kill", "Galvanized Savvy: damagePerStatus \u2014 +80% Status Chance\\\\nOn Kill:\\\\n+40% Direct Damage per Status Type affecting the\u2026"),
+    line("damagePerStatus", "weapon_dps", "conditional_damage_per_status_on_kill", "wiki: Galvanized Savvy — on-kill damage per status stack"),
     line("duration", "mod_panel", "multiplicative_percent", "Galvanized Savvy: duration \u2014 +80% Status Chance\\\\nOn Kill:\\\\n+40% Direct Damage per Status Type affecting the\u2026"),
-    line("statusChance", "weapon_dps", "conditional_damage_per_status_on_kill", "Galvanized Savvy: statusChance \u2014 +80% Status Chance\\\\nOn Kill:\\\\n+40% Direct Damage per Status Type affecting the\u2026"),
+    line("statusChance", "weapon_dps", "multiplicative_percent", "wiki: Galvanized Savvy — +80% Status Chance (always-on paper)"),
   ]),
   galvanized_scope: mod("galvanized_scope", [
     line("criticalChanceOnHeadshot", "weapon_dps", "conditional_crit_on_headshot", "wiki: Galvanized Scope \u2014 +120% Critical Chance when Aiming for 12s on Headshot"),
@@ -101,9 +101,6 @@ export const MOD_BEHAVIORS_RIFLE: Record<string, VerifiedModBehavior> = {
   ]),
   vigilante_offense: mod("vigilante_offense", [
     line("punchThrough", "mod_panel", "multiplicative_percent", "Vigilante Offense: punchThrough \u2014 +1.5 Punch Through (arsenal display only)"),
-  ]),
-  vigilante_offensive: mod("vigilante_offensive", [
-    line("multishot", "weapon_dps", "multiplicative_percent", "Vigilante Offensive: multishot \u2014 +10% Multishot per rank"),
   ]),
   vigilante_supplies: mod("vigilante_supplies", [
     line("ammoConversion", "mod_panel", "multiplicative_percent", "Vigilante Supplies: ammoConversion \u2014 Converts Secondary ammo pickups to 30% of Ammo Pick Up."),

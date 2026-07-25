@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { PageShell, PageMain, PageHero } from "@/components/page-shell";
 import { cn } from "@/lib/utils";
-import { Ban, Search, Shield, Heart, RotateCcw, Users } from "lucide-react";
+import { Ban, Search, Shield, Heart, RotateCcw, Users, Mail, MailX } from "lucide-react";
 import { useConfirmDialog } from "@/components/confirm-dialog-provider";
 
 interface AdminUser {
@@ -16,6 +16,7 @@ interface AdminUser {
   bannedAt: string | null;
   banReason: string | null;
   supporterAt: string | null;
+  newsletterOptIn: boolean;
   createdAt: string;
   _count: { builds: number };
 }
@@ -150,6 +151,7 @@ export default function AdminUsersPage() {
             users.map((user) => {
               const banned = Boolean(user.bannedAt);
               const isSupporter = Boolean(user.supporterAt);
+              const newsletterOn = user.newsletterOptIn !== false;
               return (
                 <div
                   key={user.id}
@@ -180,6 +182,16 @@ export default function AdminUsersPage() {
                             Supporter
                           </span>
                         )}
+                        <span
+                          className={cn(
+                            "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+                            newsletterOn
+                              ? "bg-emerald-500/15 text-emerald-400"
+                              : "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {newsletterOn ? "Newsletter" : "Unsubscribed"}
+                        </span>
                       </div>
                       <p className="mt-1 truncate text-xs text-muted-foreground">{user.email ?? "No email"}</p>
                       <p className="mt-1 text-[10px] text-muted-foreground/80">
@@ -210,6 +222,27 @@ export default function AdminUsersPage() {
                         >
                           <Ban className="h-3.5 w-3.5" />
                           Ban
+                        </button>
+                      )}
+                      {newsletterOn ? (
+                        <button
+                          type="button"
+                          disabled={actionLoading === user.id}
+                          onClick={() => runAction(user.id, "unsubscribeNewsletter")}
+                          className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary/60"
+                        >
+                          <MailX className="h-3.5 w-3.5" />
+                          Unsubscribe
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={actionLoading === user.id}
+                          onClick={() => runAction(user.id, "subscribeNewsletter")}
+                          className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20"
+                        >
+                          <Mail className="h-3.5 w-3.5" />
+                          Resubscribe
                         </button>
                       )}
                       {isFullAdmin && (

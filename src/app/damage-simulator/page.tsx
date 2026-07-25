@@ -111,6 +111,8 @@ export default function DamageSimulatorPage() {
   const [headshotDamageBonus, setHeadshotDamageBonus] = useState(0);
   const [factionBonuses, setFactionBonuses] = useState<Record<string, number>>({});
   const [applyHeadshots, setApplyHeadshots] = useState(false);
+  /** Latron Flensing Spikes — loaded from builds; 0.2 = −20% armor per Puncture stack. */
+  const [punctureArmorStripPerStack, setPunctureArmorStripPerStack] = useState(0);
   const [loadedBuildLabel, setLoadedBuildLabel] = useState<string | null>(null);
   const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>([]);
 
@@ -175,6 +177,7 @@ export default function DamageSimulatorPage() {
     setStatusDamageBonus(inputs.statusDamageBonus);
     setHeadshotDamageBonus(inputs.headshotDamageBonus);
     setFactionBonuses(inputs.factionBonuses);
+    setPunctureArmorStripPerStack(inputs.punctureArmorStripPerStack ?? 0);
     setLoadedBuildLabel(`${build.name} (${entry.name})`);
   }, []);
 
@@ -201,6 +204,8 @@ export default function DamageSimulatorPage() {
         headshotDamageBonus,
         factionBonuses,
         applyHeadshots,
+        punctureArmorStripPerStack:
+          punctureArmorStripPerStack > 0 ? punctureArmorStripPerStack : undefined,
       },
       selectedEnemy,
       enemyLevel,
@@ -208,7 +213,7 @@ export default function DamageSimulatorPage() {
   }, [
     selectedEnemy, enemyLevel, dmgTypes, totalRaw, fireRate, critChance, critMulti,
     multishot, statusChance, magazine, reloadTime, statusDamageBonus, headshotDamageBonus,
-    factionBonuses, applyHeadshots,
+    factionBonuses, applyHeadshots, punctureArmorStripPerStack,
   ]);
 
   const setDmg = (type: string, val: number) => setDmgTypes((prev) => ({ ...prev, [type]: val }));

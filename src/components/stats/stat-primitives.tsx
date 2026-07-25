@@ -2,38 +2,61 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function StatRow({ label, value, highlighted, color, tooltip }: {
-  label: string; value: string; highlighted?: boolean; color?: string; tooltip?: string;
+export function StatRow({ label, value, highlighted, color, tooltip, changed }: {
+  label: string; value: string; highlighted?: boolean; color?: string; tooltip?: string; changed?: boolean;
 }) {
   return (
-    <div className="flex justify-between items-center py-0.5 group" title={tooltip}>
-      <span className={`text-xs ${color || "text-muted-foreground"}`}>{label}</span>
-      <span className={highlighted ? "text-xs font-bold text-blue-400" : `text-xs font-mono ${color || ""}`}>
+    <div
+      className={cn(
+        "flex justify-between items-center py-0.5 px-1 -mx-1 rounded group transition-colors duration-500",
+        changed && "bg-amber-500/20 ring-1 ring-amber-500/35",
+      )}
+      title={tooltip}
+    >
+      <span className={cn("text-xs", color || "text-muted-foreground", changed && "text-amber-900 dark:text-amber-200")}>
+        {label}
+      </span>
+      <span
+        className={cn(
+          "text-xs font-mono",
+          highlighted ? "font-bold text-blue-400" : color || "",
+          changed && "font-semibold text-amber-950 dark:text-amber-100",
+        )}
+      >
         {value}
       </span>
     </div>
   );
 }
 
-export function CollapsibleSection({ title, defaultOpen, children }: {
-  title: string; defaultOpen?: boolean; children: React.ReactNode;
+export function CollapsibleSection({ title, defaultOpen, children, flash }: {
+  title: string; defaultOpen?: boolean; children: React.ReactNode; flash?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen ?? true);
   return (
-    <div>
+    <div
+      className={cn(
+        "rounded-md transition-colors duration-500",
+        flash && "bg-amber-500/10 ring-1 ring-amber-500/25 px-1 -mx-1",
+      )}
+    >
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 w-full text-left py-2.5 text-[10px] font-semibold tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+        className={cn(
+          "flex items-center gap-1 w-full text-left py-2.5 text-[10px] font-semibold tracking-wider transition-colors",
+          flash ? "text-amber-800 dark:text-amber-300" : "text-muted-foreground hover:text-foreground",
+        )}
       >
         {open ? <ChevronDown className="h-3 w-3 inline-block" /> : <ChevronRight className="h-3 w-3 inline-block" />}
         {title}
+        {flash && <span className="ml-1 text-[9px] font-normal tracking-normal opacity-80">updated</span>}
       </button>
       {open && <div className="ml-1 min-w-0 overflow-x-hidden">{children}</div>}
     </div>
   );
 }
-
 export function SimSlider({ label, value, min, max, onChange, suffix, tooltip }: {
   label: string; value: number; min: number; max: number;
   onChange: (v: number) => void; suffix?: string; tooltip?: string;

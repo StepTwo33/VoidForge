@@ -12,7 +12,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/auth";
 import { safeParseBuildJson } from "@/lib/builds/build-types";
 import { getSiteUrl } from "@/lib/site/site-metadata";
-import Image from "next/image";
+import { AvatarImage } from "@/components/game-asset-image";
 
 interface SharedBuild {
   id: string;
@@ -127,11 +127,10 @@ export default async function SharedBuildPage({ params }: { params: Promise<{ id
               <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-foreground">{build.name}</h1>
               <div className="flex items-center gap-2">
                 {build.author.image ? (
-                  <Image
+                  <AvatarImage
                     src={build.author.image}
                     alt={build.author.username}
-                    width={20}
-                    height={20}
+                    size={20}
                     className="w-5 h-5 rounded-full"
                   />
                 ) : (

@@ -11,6 +11,7 @@ import { getPersistenceDamageCap, scaleArcaneEffectLine } from "@/lib/calc/arcan
 import {
   estimateEnervateCritStacks,
   isArcaneMetadataStat,
+  arcaneEffectStackMultiplier,
   isArcaneProcChanceStat,
   scaleArcaneEffectForBuild,
 } from "@/lib/calc/arcane-proc-model";
@@ -25,6 +26,10 @@ export function effectiveArcaneStacks(
   const isStacking = def.trigger === "stacks";
 
   if (isWeapon) {
+    // Passive weapon arcanes (e.g. Cascadia Overcharge, Secondary Kinship) apply while
+    // equipped — they do not need sim kill/stack ramps. Proc/uptime scaling still
+    // happens in scaleArcaneEffectForBuild for onHit/conditional triggers.
+    if (def.trigger === "passive") return 1;
     if (simStacks <= 0) return 0;
     if (!isStacking) return 1;
     const cap = def.stackCap ?? def.maxRank + 1;
@@ -61,9 +66,7 @@ function resolveEffectValue(
     return scaleArcaneEffectForBuild(def, line, rank, stacks, simStacks, fireRate);
   }
   const rankScaled = scaleArcaneEffectLine(line, rank, def.maxRank);
-  const stackMult =
-    def.trigger === "stacks" || line.stacking ? Math.max(stacks, 1) : 1;
-  return rankScaled * stackMult;
+  return rankScaled * arcaneEffectStackMultiplier(def, line, stacks);
 }
 
 function applyWeaponDamage(stats: CalculatedStats, scaled: number): void {
@@ -124,6 +127,7 @@ function applyWeaponStatToBuild(
       }
       break;
     case "statusChance":
+    case "statusChancePerHit":
     case "ampStatusChance":
     case "elementalProcChance":
       stats.statusChance += baseStatusChance * scaled;
@@ -146,6 +150,7 @@ function applyWeaponStatToBuild(
       stats.comboCount += line.flat ? rawValue : 0;
       break;
     case "ammoEfficiency":
+      stats.ammoEfficiency = (stats.ammoEfficiency ?? 0) + scaled;
       break;
     default:
       break;
@@ -231,14 +236,25 @@ export function applyArcaneEffectsToWeapon(
   rank: number,
   simStacks: number,
   baseWeapon?: Weapon,
+  opts?: { applyHeadshots?: boolean; warframeArmor?: number },
 ): void {
   const def = getArcaneEffectDef(arcaneId);
   if (!def || def.effects.length === 0) return;
 
   const stacks = effectiveArcaneStacks(def, simStacks, true);
-  if (stacks <= 0) return;
+  // Zid-An Haras amp AE is always-on even at 0 sim stacks.
+  if (stacks <= 0 && arcaneId !== "zid_an_haras") return;
 
-  const handlerCtx = { def, arcaneId, rank, stacks, baseWeapon, simStacks };
+  const handlerCtx = {
+    def,
+    arcaneId,
+    rank,
+    stacks,
+    baseWeapon,
+    simStacks,
+    applyHeadshots: opts?.applyHeadshots,
+    warframeArmor: opts?.warframeArmor,
+  };
   if (applyCustomArcaneToWeapon(stats, handlerCtx)) return;
 
   const fireRate = stats.fireRate;
@@ -305,10 +321,11 @@ export function applyArcaneToWeaponFromMod(
   arcane: Mod,
   stacks: number = 1,
   baseWeapon?: Weapon,
+  opts?: { applyHeadshots?: boolean; warframeArmor?: number },
 ): void {
   const rank = arcane.maxRank;
   if (getArcaneEffectDef(arcane.id)) {
-    applyArcaneEffectsToWeapon(stats, arcane.id, rank, stacks, baseWeapon);
+    applyArcaneEffectsToWeapon(stats, arcane.id, rank, stacks, baseWeapon, opts);
     return;
   }
   // Fallback for arcanes missing from generated data

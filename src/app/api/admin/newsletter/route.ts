@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyFullAdmin } from "@/lib/auth/admin";
 import {
-  buildNewsletterHtml,
   createNewsletterUnsubscribeToken,
   getAppBaseUrl,
-  plainTextToNewsletterHtml,
+  isSafeHttpsUrl,
+  renderNewsletterEmail,
   sendNewsletterEmail,
+  type NewsletterCompose,
 } from "@/lib/auth/email";
 import { checkRateLimit } from "@/lib/auth/rate-limit";
 import { logServerError } from "@/lib/log-server-error";
@@ -16,22 +17,63 @@ export const maxDuration = 300;
 
 const SUBJECT_MAX = 120;
 const BODY_MAX = 20_000;
+const EYEBROW_MAX = 80;
+const PREHEADER_MAX = 200;
+const CTA_LABEL_MAX = 60;
+const CTA_URL_MAX = 500;
 const CHUNK = 8;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function parseCompose(body: { subject?: string; body?: string }) {
+type ComposeBody = {
+  subject?: string;
+  body?: string;
+  eyebrow?: string;
+  preheader?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+  confirm?: boolean;
+  testTo?: string;
+};
+
+function optionalString(value: unknown, max: number): string {
+  if (typeof value !== "string") return "";
+  return value.trim().slice(0, max);
+}
+
+function parseCompose(body: ComposeBody): { error: string } | NewsletterCompose {
   const subject = typeof body.subject === "string" ? body.subject.trim() : "";
   const textBody = typeof body.body === "string" ? body.body.trim() : "";
   if (!subject || !textBody) {
-    return { error: "Subject and body are required" as const };
+    return { error: "Subject and body are required" };
   }
   if (subject.length > SUBJECT_MAX) {
-    return { error: `Subject must be ${SUBJECT_MAX} characters or less` as const };
+    return { error: `Subject must be ${SUBJECT_MAX} characters or less` };
   }
   if (textBody.length > BODY_MAX) {
-    return { error: `Body must be ${BODY_MAX} characters or less` as const };
+    return { error: `Body must be ${BODY_MAX} characters or less` };
   }
-  return { subject, textBody };
+
+  const eyebrow = optionalString(body.eyebrow, EYEBROW_MAX);
+  const preheader = optionalString(body.preheader, PREHEADER_MAX);
+  const ctaLabel = optionalString(body.ctaLabel, CTA_LABEL_MAX);
+  const ctaUrl = optionalString(body.ctaUrl, CTA_URL_MAX);
+
+  if (ctaLabel || ctaUrl) {
+    if (!ctaLabel || !ctaUrl) {
+      return { error: "CTA requires both a label and an https URL" };
+    }
+    if (!isSafeHttpsUrl(ctaUrl)) {
+      return { error: "CTA URL must be a valid https:// link" };
+    }
+  }
+
+  return {
+    subject,
+    body: textBody,
+    ...(eyebrow ? { eyebrow } : {}),
+    ...(preheader ? { preheader } : {}),
+    ...(ctaLabel && ctaUrl ? { ctaLabel, ctaUrl } : {}),
+  };
 }
 
 // GET — subscriber count for the compose UI
@@ -66,7 +108,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: { subject?: string; body?: string; confirm?: boolean; testTo?: string };
+  let body: ComposeBody;
   try {
     body = await req.json();
   } catch {
@@ -77,10 +119,12 @@ export async function POST(req: NextRequest) {
   if ("error" in parsed) {
     return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
-  const { subject, textBody } = parsed;
+  const compose = parsed;
 
   const testTo = typeof body.testTo === "string" ? body.testTo.trim().toLowerCase() : "";
   const isTest = Boolean(testTo);
+  const base = getAppBaseUrl();
+  const profileUrl = `${base}/profile`;
 
   if (isTest) {
     if (!EMAIL_RE.test(testTo) || testTo.length > 254) {
@@ -95,17 +139,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const base = getAppBaseUrl();
-    const bodyHtml = plainTextToNewsletterHtml(textBody);
-    const unsubscribeUrl = `${base}/profile`;
-    const html = buildNewsletterHtml({
-      subject: `[TEST] ${subject}`,
-      bodyHtml,
-      unsubscribeUrl,
-    });
+    const html = renderNewsletterEmail(
+      { ...compose, subject: `[TEST] ${compose.subject}` },
+      { unsubscribeUrl: profileUrl, profileUrl },
+    );
 
     try {
-      await sendNewsletterEmail(testTo, `[TEST] ${subject}`, html);
+      await sendNewsletterEmail(testTo, `[TEST] ${compose.subject}`, html);
     } catch (e) {
       logServerError("[newsletter] test send failed", e);
       return NextResponse.json({ error: "Failed to send test email" }, { status: 502 });
@@ -138,8 +178,6 @@ export async function POST(req: NextRequest) {
     select: { id: true, email: true, name: true },
   });
 
-  const base = getAppBaseUrl();
-  const bodyHtml = plainTextToNewsletterHtml(textBody);
   let sent = 0;
   let failed = 0;
 
@@ -150,8 +188,8 @@ export async function POST(req: NextRequest) {
         const email = user.email!;
         const token = createNewsletterUnsubscribeToken(user.id);
         const unsubscribeUrl = `${base}/unsubscribe?token=${encodeURIComponent(token)}`;
-        const html = buildNewsletterHtml({ subject, bodyHtml, unsubscribeUrl });
-        await sendNewsletterEmail(email, subject, html);
+        const html = renderNewsletterEmail(compose, { unsubscribeUrl, profileUrl });
+        await sendNewsletterEmail(email, compose.subject, html);
       }),
     );
     for (const r of results) {

@@ -7,6 +7,7 @@ import { FRAME_HUB_GITHUB_URL } from "@/lib/site/site-links";
 const FOOTER_LINKS = [
   { href: FRAME_HUB_GITHUB_URL, label: "Open Source", external: true },
   { href: "/about", label: "About" },
+  { href: "/guides/how-to-mod", label: "How to Mod" },
   { href: "/support", label: "Support" },
   { href: "/terms", label: "Terms" },
   { href: "/privacy", label: "Privacy" },

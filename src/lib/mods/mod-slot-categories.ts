@@ -82,6 +82,7 @@ export const PRIMARY_WEAPON_EXILUS_MOD_IDS = new Set([
   "ambush_optics",
   "ammo_drum",
   "arrow_mutation",
+  "bhisaj_bal",
   "broad_eye",
   "cautious_shot",
   "counterbalance",
@@ -122,7 +123,6 @@ export const PRIMARY_WEAPON_EXILUS_MOD_IDS = new Set([
 export const SECONDARY_WEAPON_EXILUS_MOD_IDS = new Set([
   "agile_aim",
   "air_recon",
-  "bhisaj_bal",
   "double_barrel_drift",
   "eject_magazine",
   "energizing_shot",

@@ -27,7 +27,7 @@ import {
   calculateWeaponBuild,
   calculateWeaponBuildWithArcanes,
 } from "@/lib/calc/calculator";
-import { getPrimaryExaltedWeapon } from "@/lib/weapons/exalted-weapons";
+import { getMeleeExaltedWeapon, getPrimaryExaltedWeapon } from "@/lib/weapons/exalted-weapons";
 import { enrichWeapon } from "@/lib/weapons/weapon-enrich";
 import type {
   Ability,
@@ -58,6 +58,8 @@ export interface PublicBuildWarframePreview {
   arcaneRanks: number[];
   abilityEntries: AbilityTTKEntry[];
   exalted: PublicBuildWeaponPreview | null;
+  /** Titania Diwata (melee) when Dex Pixia is primary. */
+  exaltedMelee: PublicBuildWeaponPreview | null;
 }
 
 function helminthToAbility(h: HelminthAbility): Ability {
@@ -72,6 +74,8 @@ function helminthToAbility(h: HelminthAbility): Ability {
     range: h.range,
     radius: h.radius,
     castTime: h.castTime,
+    statusChance: h.statusChance,
+    damageType: h.damageType,
     miscStats: h.miscStats,
   };
 }
@@ -100,29 +104,62 @@ function resolveBuildAbilities(data: WarframeBuildData): { ability: Ability; slo
   return rows;
 }
 
+function resolveExaltedWeaponPreview(
+  weapon: Weapon,
+  mods: ModSlot[],
+  arcaneIds: (string | null)[] | undefined,
+  abilityStrength: number,
+  labelPrefix = "Exalted",
+): PublicBuildWeaponPreview | null {
+  const exaltedArcanes = resolveSavedArcaneSlots(arcaneIds, 2).filter((m): m is Mod => m != null);
+  if (mods.length === 0 && exaltedArcanes.length === 0) return null;
+  const modsMap = getEffectiveModsMap();
+  const base = enrichWeapon(weapon);
+  const calcOptions = { abilityStrength };
+  const sim = scenarioSimParams("midFight");
+  const stats =
+    exaltedArcanes.length > 0
+      ? calculateWeaponBuildWithArcanes(base, mods, modsMap, exaltedArcanes, undefined, sim, calcOptions)
+      : calculateWeaponBuild(base, mods, modsMap, undefined, sim, calcOptions);
+  const isMelee = base.category === "melee" || base.triggerType === "Melee";
+  return {
+    label: `${labelPrefix} — ${base.name}`,
+    weapon: base,
+    stats,
+    baseStats: calculateWeaponBuild(base, [], modsMap, undefined, sim, calcOptions),
+    isMelee,
+  };
+}
+
 function resolveExaltedPreview(
   data: WarframeBuildData,
   allWeapons: Weapon[],
+  abilityStrength = 1,
 ): PublicBuildWeaponPreview | null {
-  const exaltedMods = data.exaltedMods ?? [];
-  const exaltedArcanes = resolveSavedArcaneSlots(data.exaltedArcaneIds, 2).filter((m): m is Mod => m != null);
-  if (exaltedMods.length === 0 && exaltedArcanes.length === 0) return null;
   const exaltedWeapon = getPrimaryExaltedWeapon(data.warframeId, allWeapons);
   if (!exaltedWeapon) return null;
-  const modsMap = getEffectiveModsMap();
-  const base = enrichWeapon(exaltedWeapon);
-  const stats =
-    exaltedArcanes.length > 0
-      ? calculateWeaponBuildWithArcanes(base, exaltedMods, modsMap, exaltedArcanes, undefined, scenarioSimParams("midFight"))
-      : calculateWeaponBuild(base, exaltedMods, modsMap, undefined, scenarioSimParams("midFight"));
-  const isMelee = base.category === "melee" || base.triggerType === "Melee";
-  return {
-    label: `Exalted — ${base.name}`,
-    weapon: base,
-    stats,
-    baseStats: baseWeaponStats(exaltedWeapon),
-    isMelee,
-  };
+  return resolveExaltedWeaponPreview(
+    exaltedWeapon,
+    data.exaltedMods ?? [],
+    data.exaltedArcaneIds,
+    abilityStrength,
+  );
+}
+
+function resolveExaltedMeleePreview(
+  data: WarframeBuildData,
+  allWeapons: Weapon[],
+  abilityStrength = 1,
+): PublicBuildWeaponPreview | null {
+  const meleeWeapon = getMeleeExaltedWeapon(data.warframeId, allWeapons);
+  if (!meleeWeapon) return null;
+  return resolveExaltedWeaponPreview(
+    meleeWeapon,
+    data.exaltedMeleeMods ?? [],
+    data.exaltedMeleeArcaneIds,
+    abilityStrength,
+    "Exalted Melee",
+  );
 }
 
 export function resolvePublicBuildWarframePreview(
@@ -155,7 +192,8 @@ export function resolvePublicBuildWarframePreview(
     arcanes: resolveSavedArcaneSlots(d.arcaneIds, 2),
     arcaneRanks: d.arcaneRanks ?? [],
     abilityEntries,
-    exalted: resolveExaltedPreview(d, allWeapons),
+    exalted: resolveExaltedPreview(d, allWeapons, stats.abilityStrength),
+    exaltedMelee: resolveExaltedMeleePreview(d, allWeapons, stats.abilityStrength),
   };
 }
 

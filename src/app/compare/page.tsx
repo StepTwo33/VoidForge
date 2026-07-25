@@ -318,7 +318,14 @@ function BuildCompareTab() {
 
 /* ─── Loadout vs Loadout tab ─── */
 
-type SlotType = "warframe" | "primary" | "secondary" | "melee" | "exalted" | "companion";
+type SlotType =
+  | "warframe"
+  | "primary"
+  | "secondary"
+  | "melee"
+  | "exalted"
+  | "exaltedMelee"
+  | "companion";
 
 const SLOT_META: Record<SlotType, { label: string; icon: React.ReactNode; color: string }> = {
   warframe:  { label: "Warframe",  icon: <Shield className="h-4 w-4" />,    color: "text-purple-400" },
@@ -326,6 +333,7 @@ const SLOT_META: Record<SlotType, { label: string; icon: React.ReactNode; color:
   secondary: { label: "Secondary", icon: <Crosshair className="h-4 w-4" />, color: "text-cyan-400" },
   melee:     { label: "Melee",     icon: <Swords className="h-4 w-4" />,    color: "text-orange-400" },
   exalted:   { label: "Exalted",   icon: <Sparkles className="h-4 w-4" />,  color: "text-violet-400" },
+  exaltedMelee: { label: "Exalted Melee", icon: <Sparkles className="h-4 w-4" />, color: "text-fuchsia-400" },
   companion: { label: "Companion", icon: <Dog className="h-4 w-4" />,       color: "text-green-400" },
 };
 
@@ -525,7 +533,11 @@ function LoadoutCompareTab() {
   const aggregate = useMemo(() => {
     if (!statsA || !statsB) return null;
     const sumDps = (s: LoadoutStatsResult) =>
-      sustainedDps(s.primary) + sustainedDps(s.secondary) + sustainedDps(s.melee) + sustainedDps(s.exalted);
+      sustainedDps(s.primary) +
+      sustainedDps(s.secondary) +
+      sustainedDps(s.melee) +
+      sustainedDps(s.exalted) +
+      sustainedDps(s.exaltedMelee);
     const totalDpsA = sumDps(statsA);
     const totalDpsB = sumDps(statsB);
     const ehpA = statsA.warframe?.stats.effectiveHealth ?? 0;
@@ -594,7 +606,7 @@ function LoadoutCompareTab() {
       {/* Per-Slot Comparisons */}
       {statsA && statsB && (
         <div className="space-y-4">
-          {(["warframe", "primary", "secondary", "melee", "exalted", "companion"] as SlotType[]).map((slot) => (
+          {(["warframe", "primary", "secondary", "melee", "exalted", "exaltedMelee", "companion"] as SlotType[]).map((slot) => (
             <SlotSection key={slot} slot={slot} a={statsA} b={statsB} weapons={allWeapons} />
           ))}
         </div>

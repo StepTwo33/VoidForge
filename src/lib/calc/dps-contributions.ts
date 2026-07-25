@@ -88,6 +88,9 @@ function cloneLinkage(linkage?: SetBonusLinkage): SetBonusLinkage | undefined {
     secondaryMods: linkage.secondaryMods ? [...linkage.secondaryMods] : undefined,
     meleeMods: linkage.meleeMods ? [...linkage.meleeMods] : undefined,
     companionMods: linkage.companionMods ? [...linkage.companionMods] : undefined,
+    companionWeaponMods: linkage.companionWeaponMods
+      ? [...linkage.companionWeaponMods]
+      : undefined,
   };
 }
 
@@ -176,7 +179,14 @@ function modNominalLine(mod: Mod, rank: number): string {
 
 function externalBuffContributionCategory(buff: import("@/lib/types").WeaponExternalBuff): DpsContributionCategory {
   if (buff.elemental?.length) return "elemental";
-  if (buff.critChanceBonus || buff.critMultBonus || buff.critMultFlatBonus) return "crit";
+  if (
+    buff.critChanceBonus ||
+    buff.critChanceFlatBonus ||
+    buff.critMultBonus ||
+    buff.critMultFlatBonus
+  ) {
+    return "crit";
+  }
   if (buff.fireRateBonus) return "rate";
   if (buff.multishotBonus) return "multishot";
   if (buff.damageBonus || buff.damageMultBonus || buff.statusBonus) return "damage";
@@ -380,6 +390,39 @@ function enumerateSources(ctx: WeaponDpsCalcContext): OmitSource[] {
     });
   }
 
+  if (sim.applyHunterSetVsSlashDamage) {
+    sources.push({
+      id: "hunter-slash",
+      label: "Hunter vs Slash",
+      category: "external",
+      nominal: "+25%/piece companion dmg vs Slash",
+      tooltip: "Hunter set bonus on beast claws / sentinel weapons vs Slash-status targets.",
+      apply: (base) => {
+        const next = cloneCtx(base);
+        next.simParams = { ...(next.simParams ?? DEFAULT_SIM_PARAMS), applyHunterSetVsSlashDamage: false };
+        return next;
+      },
+    });
+  }
+
+  if (sim.applyMechaEmpoweredVsMarkedDamage) {
+    sources.push({
+      id: "mecha-marked",
+      label: "Mecha Empowered vs marked",
+      category: "external",
+      nominal: "+150% damage vs marked",
+      tooltip: "Mecha Empowered aura vs companion-marked enemies (requires ≥1 Mecha set piece).",
+      apply: (base) => {
+        const next = cloneCtx(base);
+        next.simParams = {
+          ...(next.simParams ?? DEFAULT_SIM_PARAMS),
+          applyMechaEmpoweredVsMarkedDamage: false,
+        };
+        return next;
+      },
+    });
+  }
+
   if ((sim.extraSynthSetPiecesOffWeapon ?? 0) > 0) {
     sources.push({
       id: "wf-synth-pieces",
@@ -513,6 +556,7 @@ export function buildWeaponContributionContext(params: {
   linkage?: SetBonusLinkage;
   rivenStatChanges?: Record<string, number>;
   buffContext?: WeaponBuffContext;
+  abilityStrength?: number;
 }): WeaponDpsCalcContext {
   const simParams = params.simParams ?? DEFAULT_SIM_PARAMS;
   const externalBuffs = resolveWeaponExternalBuffs(params.weapon, params.buffContext, simParams);
@@ -520,6 +564,7 @@ export function buildWeaponContributionContext(params: {
     {
       progenitorElement: params.progenitorElement,
       progenitorBonusPercent: params.progenitorBonusPercent,
+      abilityStrength: params.abilityStrength,
     },
     externalBuffs,
   );

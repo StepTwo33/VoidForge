@@ -46,8 +46,8 @@ export const MOD_BEHAVIORS_KDRIVE: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Sonic Boost: range \u2014 Every <LOWER_IS_BETTER>10s, boosting will release a shockwave, stunning enemies \u2026 (arsenal display only)"),
   ]),
   thrash_landing: mod("thrash_landing", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Thrash Landing: damage \u2014 Landing a trick releases an explosion dealing 40% Trick Score <DT_EXPLOSION_COLO\u2026"),
-    line("range", "mod_panel", "multiplicative_percent", "Thrash Landing: range \u2014 Landing a trick releases an explosion dealing 40% Trick Score <DT_EXPLOSION_COLO\u2026 (arsenal display only)"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Thrash Landing — trick-score explosion (not weapon paper damage)"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Thrash Landing — explosion range display"),
   ]),
   trail_blazer: mod("trail_blazer", [], "wiki: Trail Blazer \u2014 Tricks leave a trail inflicting 40 <DT_FIRE_COLOR>Heat Damage to enemies."),
   vapor_trail: mod("vapor_trail", [], "wiki: Vapor Trail \u2014 Add 11 Boost Speed. Consumes 10 Energy/s"),

@@ -9,10 +9,14 @@ mods_text = (ROOT / "src/data/mods.ts").read_text(encoding="utf-8")
 all_mod_ids = set(re.findall(r'"id":\s*"([^"]+)"', mods_text))
 
 verified_ids: set[str] = set()
+# Keys may be bare ids (serration_r3) or quoted (\"push_&_pull\") when they contain &.
+_mod_key = re.compile(r'^\s+(?:\"([^\"]+)\"|([\w]+)):\s*mod\(', re.M)
 for batch in (ROOT / "src/data/mod-behaviors/batches").glob("*.ts"):
-    verified_ids.update(re.findall(r"^\s+(\w+):\s*mod\(", batch.read_text(encoding="utf-8"), re.M))
+    for m in _mod_key.finditer(batch.read_text(encoding="utf-8")):
+        verified_ids.add(m.group(1) or m.group(2))
 manual = (ROOT / "src/data/mod-behaviors/verified-mods.ts").read_text(encoding="utf-8")
-verified_ids.update(re.findall(r"^\s+(\w+):\s*mod\(", manual, re.M))
+for m in _mod_key.finditer(manual):
+    verified_ids.add(m.group(1) or m.group(2))
 
 arcane_text = (ROOT / "src/data/arcane-behaviors.ts").read_text(encoding="utf-8")
 arcane_ids = re.findall(r'^\s+"([a-z0-9_]+)":\s*\{', arcane_text, re.M)

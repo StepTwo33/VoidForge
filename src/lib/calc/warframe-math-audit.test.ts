@@ -45,6 +45,30 @@ describe("base crit multiplier quantization (wiki Critical Hit)", () => {
     const bare = calculateWeaponBuild(weapon, [], modsMap());
     expect(bare.criticalMultiplier).toBeCloseTo(quantizeBaseCritMultiplier(1.6), 6);
   });
+
+  it("folds Critical Parallel into base before Vital Sense / Point Strike", () => {
+    const braton = allWeapons.find((w) => w.id === "braton");
+    const vital = allMods.find((m) => m.id === "vital_sense_r3");
+    const pointStrike = allMods.find((m) => m.id === "point_strike_r3");
+    if (!braton || !vital || !pointStrike) return;
+
+    const withCm = calculateWeaponBuild(
+      braton,
+      [{ modId: vital.id, rank: vital.maxRank, slotIndex: 0 }],
+      modsMap(),
+      { criticalMultiplier: 0.4 },
+    );
+    expect(withCm.criticalMultiplier).toBeCloseTo(4.401074481, 6);
+
+    const withCc = calculateWeaponBuild(
+      braton,
+      [{ modId: pointStrike.id, rank: pointStrike.maxRank, slotIndex: 0 }],
+      modsMap(),
+      { criticalChance: 0.16 },
+    );
+    // (0.12 + 0.16) × (1 + 1.5) — not 0.12×2.5 + 0.16
+    expect(withCc.criticalChance).toBeCloseTo(0.7, 6);
+  });
 });
 
 describe("damage quantization (wiki Damage/Calculation)", () => {
@@ -84,6 +108,31 @@ describe("elemental combo order (wiki: mods first, innate last)", () => {
     expect(types).not.toContain("radiation");
     expect(types).not.toContain("cold");
     expect(types).not.toContain("heat");
+  });
+
+  it("merges duplicate combined types from separate mod pairs (Viral+Viral → one Viral)", () => {
+    const lesion = allWeapons.find((w) => w.id === "lesion");
+    const fever = allMods.find((m) => m.id === "fever_strike_r3" || m.id === "fever_strike");
+    const north = allMods.find((m) => m.id === "north_wind_r3" || m.id === "north_wind");
+    const virulent = allMods.find((m) => m.id === "virulent_scourge");
+    const frost = allMods.find((m) => m.id === "vicious_frost");
+    if (!lesion || !fever || !north || !virulent || !frost) return;
+
+    const stats = calculateWeaponBuild(
+      lesion,
+      [
+        { modId: fever.id, rank: fever.maxRank, slotIndex: 0 },
+        { modId: north.id, rank: north.maxRank, slotIndex: 1 },
+        { modId: virulent.id, rank: virulent.maxRank, slotIndex: 2 },
+        { modId: frost.id, rank: frost.maxRank, slotIndex: 3 },
+      ],
+      modsMap(),
+    );
+
+    const viral = stats.elements.filter((e) => e.type === "viral");
+    expect(viral).toHaveLength(1);
+    expect(viral[0]!.value).toBeGreaterThan(0);
+    expect(stats.elements.filter((e) => e.type === "toxin" || e.type === "cold")).toHaveLength(0);
   });
 
   it("preserves residual base damage when IPS/element fields are missing", () => {
@@ -308,8 +357,10 @@ describe("Incarnon-form radials excluded until Incarnon is active", () => {
     if (!weapon) return;
     const bare = calculateWeaponBuild(weapon, [], modsMap());
     expect(bare.radialBurstDps ?? 0).toBe(0);
-    // With incarnon stat changes present, the Incarnon Form AoE contributes
-    const incarnon = calculateWeaponBuild(weapon, [], modsMap(), { damage: 10 });
+    // Form-active flag (not merely any evolution numeric) enables Incarnon Form AoE
+    const incarnon = calculateWeaponBuild(weapon, [], modsMap(), undefined, undefined, {
+      incarnonFormActive: true,
+    });
     expect(incarnon.radialBurstDps ?? 0).toBeGreaterThan(0);
   });
 });
@@ -385,13 +436,15 @@ describe("radial DPS inference (wiki: launchers, alt-fires, glaives)", () => {
     expect(airBurst?.burstDps ?? 0).toBe(0);
   });
 
-  it("launcher explosions folded into weapon damage are not double-counted (Kuva Bramma)", () => {
+  it("launcher direct-hit paper + radial explosion (Kuva Bramma, B17)", () => {
     const weapon = allWeapons.find((w) => w.id === "kuva_bramma");
     if (!weapon) return;
+    expect(weapon.damage).toBeCloseTo(187, 4);
+    expect(weapon.impact).toBeCloseTo(187, 4);
     const stats = calculateWeaponBuild(weapon, [], modsMap());
     const main = (stats.radialAttacks ?? []).find((a) => a.name === "Radial Attack");
-    expect(main?.includedInDirect).toBe(true);
-    expect(main?.burstDps ?? 0).toBe(0);
+    expect(main?.includedInDirect).toBe(false);
+    expect(main?.burstDps ?? 0).toBeGreaterThan(0);
     // Cluster bombs are extra damage on top and still counted.
     const cluster = (stats.radialAttacks ?? []).find((a) => /cluster/i.test(a.name));
     expect(cluster?.burstDps ?? 0).toBeGreaterThan(0);
@@ -457,6 +510,78 @@ describe("archgun Gravimag modes (wiki: Archwing vs Atmosphere)", () => {
   });
 });
 
+describe("alternate weapon modes (Staticor charged / DSS Heavy Blade)", () => {
+  it("Staticor default keeps uncharged explosion; charged overlay swaps radial only", async () => {
+    const { applyAlternateMode, weaponHasAlternateMode } = await import(
+      "@/lib/weapons/weapon-alternate-mode"
+    );
+    const { getWeaponRadialAttacks } = await import("@/lib/weapons/weapon-radial-utils");
+    const w = allWeapons.find((x) => x.id === "staticor")!;
+    expect(weaponHasAlternateMode(w)).toBe(true);
+    expect(w.damage).toBe(44);
+    expect(w.radiation).toBe(44);
+    expect(getWeaponRadialAttacks(w)[0]?.totalDamage).toBeCloseTo(88, 5);
+    expect(getWeaponRadialAttacks(w)[0]?.radius).toBeCloseTo(2.4, 5);
+    const charged = applyAlternateMode(w);
+    expect(charged.damage).toBe(44);
+    expect(charged.ammoCost).toBe(5);
+    expect(charged.chargeTime).toBe(1);
+    expect(charged.chargeMode).toBe("standard");
+    expect(charged.triggerType).toBe("Charge");
+    expect(getWeaponRadialAttacks(charged)[0]?.name).toBe("Fully Charged Explosion");
+    expect(getWeaponRadialAttacks(charged)[0]?.totalDamage).toBeCloseTo(106, 5);
+    expect(getWeaponRadialAttacks(charged)[0]?.radius).toBeCloseTo(9.6, 5);
+    expect(getWeaponRadialAttacks(charged)[0]?.falloffReduction).toBeCloseTo(0.9, 5);
+
+    // Wiki: EFR = 1 / (CT + 1/FR) = 1 / (1 + 1/3.5)
+    const chargedStats = calculateWeaponBuild(charged, [], modsMap());
+    expect(chargedStats.ammoCost).toBe(5);
+    expect(chargedStats.effectiveFireRate).toBeCloseTo(1 / (1 + 1 / 3.5000002), 4);
+    // Mag 48 / 5 ammo = 9.6 shots before reload
+    const efr = chargedStats.effectiveFireRate!;
+    const magTime = 48 / (5 * efr);
+    const cycle = magTime + 1.5;
+    const expectedSustain = chargedStats.burstDps * (magTime / cycle);
+    expect(chargedStats.sustainedDps).toBeCloseTo(expectedSustain, 2);
+  });
+
+  it("Dark Split-Sword default Dual Swords; Heavy Blade overlay swaps paper + stance + slams", async () => {
+    const { applyAlternateMode, weaponHasAlternateMode } = await import(
+      "@/lib/weapons/weapon-alternate-mode"
+    );
+    const { getWeaponRadialAttacks } = await import("@/lib/weapons/weapon-radial-utils");
+    const w = allWeapons.find((x) => x.id === "dark_split_sword")!;
+    expect(weaponHasAlternateMode(w)).toBe(true);
+    expect(w.stanceType).toBe("dual_swords");
+    expect(w.damage).toBe(116);
+    expect(w.puncture).toBe(56);
+    expect(w.slash).toBe(28);
+    expect(w.radiation).toBe(32);
+    expect(w.criticalChance).toBeCloseTo(0.25, 4);
+    expect(w.fireRate).toBeCloseTo(1.17, 4);
+    const dualSlams = getWeaponRadialAttacks(w);
+    expect(dualSlams[0]?.totalDamage).toBeCloseTo(232, 5);
+    expect(dualSlams[1]?.totalDamage).toBeCloseTo(462, 5);
+
+    const heavy = applyAlternateMode(w);
+    expect(heavy.stanceType).toBe("heavy_blade");
+    expect(heavy.damage).toBe(230);
+    expect(heavy.puncture).toBe(78);
+    expect(heavy.slash).toBe(52);
+    expect(heavy.radiation).toBe(100);
+    expect(heavy.criticalChance).toBeCloseTo(0.15, 4);
+    expect(heavy.criticalMultiplier).toBeCloseTo(2, 4);
+    expect(heavy.statusChance).toBeCloseTo(0.25, 4);
+    expect(heavy.fireRate).toBeCloseTo(0.917, 4);
+    const heavySlams = getWeaponRadialAttacks(heavy);
+    expect(heavySlams[0]?.totalDamage).toBeCloseTo(460, 5);
+    expect(heavySlams[1]?.totalDamage).toBeCloseTo(690, 5);
+
+    const stats = calculateWeaponBuild(heavy, [], modsMap());
+    expect(stats.moddedBaseDamage).toBeCloseTo(230, 3);
+  });
+});
+
 describe("Animal Instinct radar values (wiki: Animal Instinct stats)", () => {
   it.each([
     ["animal_instinct", 5, 30, 18],
@@ -492,5 +617,86 @@ describe("warframe Tenno armor EHP still uses AR/(AR+300)", () => {
     const dr = armor / (armor + 300);
     expect(dr).toBeCloseTo(0.5, 10);
     expect(enemyArmorDamageReduction(300)).not.toBeCloseTo(dr, 1);
+  });
+});
+
+/**
+ * Bare-weapon paper DPS goldens (Phase 1 accuracy audit).
+ * Locks wiki pipeline: CM quantize → avg crit → burst/sustained — no Galv/Incarnon.
+ */
+describe("bare weapon paper DPS goldens (Phase 1)", () => {
+  function bare(id: string) {
+    const weapon = allWeapons.find((w) => w.id === id);
+    expect(weapon).toBeDefined();
+    return { weapon: weapon!, stats: calculateWeaponBuild(weapon!, [], modsMap()) };
+  }
+
+  it("Braton: quantized IPS, CM, avg crit, burst and sustained DPS", () => {
+    const { weapon, stats } = bare("braton");
+    const cmq = quantizeBaseCritMultiplier(weapon.criticalMultiplier);
+    const avgCrit = avgCritMultiplier(weapon.criticalChance, cmq);
+
+    expect(stats.criticalMultiplier).toBeCloseTo(cmq, 10);
+    expect(stats.criticalChance).toBeCloseTo(0.12, 10);
+    expect(stats.moddedBaseDamage).toBeCloseTo(24, 10);
+    // Wiki IPS quantize can raise displayed total above catalog base
+    expect(stats.impact).toBeCloseTo(8.25, 10);
+    expect(stats.puncture).toBeCloseTo(8.25, 10);
+    expect(stats.slash).toBeCloseTo(8.25, 10);
+    expect(stats.totalDamage).toBeCloseTo(24.75, 10);
+    expect(stats.fireRate).toBeCloseTo(8.75, 10);
+    expect(stats.multishot).toBeCloseTo(1, 10);
+
+    const expectedBurst = stats.totalDamage * stats.multishot * stats.fireRate * avgCrit;
+    expect(stats.burstDps).toBeCloseTo(expectedBurst, 8);
+
+    const magTime = stats.magazine / stats.fireRate;
+    const expectedSustained = expectedBurst * (magTime / (magTime + stats.reloadTime));
+    expect(stats.sustainedDps).toBeCloseTo(expectedSustained, 8);
+  });
+
+  it("Lex: secondary semi-auto paper DPS cycle", () => {
+    const { weapon, stats } = bare("lex");
+    const cmq = quantizeBaseCritMultiplier(weapon.criticalMultiplier);
+    const avgCrit = avgCritMultiplier(weapon.criticalChance, cmq);
+
+    expect(stats.criticalMultiplier).toBeCloseTo(cmq, 10);
+    expect(stats.moddedBaseDamage).toBeCloseTo(130, 10);
+    expect(stats.totalDamage).toBeCloseTo(
+      stats.impact + stats.puncture + stats.slash,
+      8,
+    );
+    expect(stats.fireRate).toBeCloseTo(1.08, 10);
+
+    const expectedBurst = stats.totalDamage * stats.fireRate * avgCrit;
+    expect(stats.burstDps).toBeCloseTo(expectedBurst, 8);
+    const magTime = stats.magazine / stats.fireRate;
+    expect(stats.sustainedDps).toBeCloseTo(
+      expectedBurst * (magTime / (magTime + stats.reloadTime)),
+      8,
+    );
+  });
+
+  it("Skana: melee burst equals sustained (no reload cycle)", () => {
+    const { weapon, stats } = bare("skana");
+    const cmq = quantizeBaseCritMultiplier(weapon.criticalMultiplier);
+    const avgCrit = avgCritMultiplier(weapon.criticalChance, cmq);
+
+    expect(stats.criticalMultiplier).toBeCloseTo(cmq, 10);
+    expect(stats.moddedBaseDamage).toBeCloseTo(120, 10);
+    expect(stats.magazine).toBe(0);
+    expect(stats.burstDps).toBeCloseTo(
+      stats.totalDamage * stats.fireRate * avgCrit,
+      8,
+    );
+    expect(stats.sustainedDps).toBeCloseTo(stats.burstDps, 10);
+  });
+
+  it("Amprex: pure electricity innate is on the weapon row and in elements", () => {
+    const { weapon, stats } = bare("amprex");
+    expect(weapon.electricity).toBeGreaterThan(0);
+    expect(stats.elements.map((e) => e.type)).toEqual(["electricity"]);
+    expect(stats.elements[0]!.value).toBeCloseTo(weapon.electricity!, 5);
+    expect(stats.impact + stats.puncture + stats.slash).toBe(0);
   });
 });

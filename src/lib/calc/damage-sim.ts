@@ -17,6 +17,7 @@ import {
   getMod,
   HEALTH_MODIFIERS,
   heatArmorRemaining,
+  punctureArmorRemaining,
   scaleArmor,
   scaleHealth,
   scaleShield,
@@ -40,6 +41,8 @@ export interface DamageSimInputs {
   headshotDamageBonus: number;
   factionBonuses: Record<string, number>;
   applyHeadshots: boolean;
+  /** Latron Flensing Spikes — passed through to discrete TTK. */
+  punctureArmorStripPerStack?: number;
 }
 
 export interface DamageSimTypeRow {
@@ -137,6 +140,7 @@ export function simInputsToCalculatedStats(input: DamageSimInputs, enemyFaction:
     statusDamageBonus: input.statusDamageBonus,
     headshotDamageBonus: input.headshotDamageBonus,
     factionBonuses: { ...input.factionBonuses },
+    punctureArmorStripPerStack: input.punctureArmorStripPerStack,
   };
 }
 
@@ -186,6 +190,8 @@ export function runDamageSim(
   const corrosiveWeight = (input.dmgTypes.corrosive ?? 0) / totalRaw;
   const viralWeight = (input.dmgTypes.viral ?? 0) / totalRaw;
   const heatWeight = (input.dmgTypes.heat ?? 0) / totalRaw;
+  const punctureWeight = (input.dmgTypes.puncture ?? 0) / totalRaw;
+  const punctureStrip = input.punctureArmorStripPerStack ?? 0;
 
   // Prefer discrete peak stacks when the fight finishes; otherwise estimate from ~3s of procs.
   const corStacks =
@@ -197,10 +203,17 @@ export function runDamageSim(
       ? discrete.peakViralStacks!
       : Math.min(10, procsPerSec * viralWeight * 3);
   const heatActive = heatWeight > 0 && procsPerSec > 0;
+  const punctureStacks =
+    punctureStrip > 0
+      ? Math.min(1 / punctureStrip, procsPerSec * punctureWeight * 3)
+      : 0;
 
   const viralMult = viralHealthMultiplier(virStacks);
   const corrosiveStrippedArmor =
-    baseArmor * corrosiveArmorRemaining(corStacks) * heatArmorRemaining(heatActive);
+    baseArmor *
+    corrosiveArmorRemaining(corStacks) *
+    heatArmorRemaining(heatActive) *
+    punctureArmorRemaining(punctureStacks, punctureStrip);
   const armor = corrosiveStrippedArmor;
   const armorDR = enemyArmorDamageReduction(armor);
 

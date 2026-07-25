@@ -13,7 +13,10 @@ import type { Loadout } from "@/lib/types";
 import type { LoadoutStatsResult, LoadoutWeaponSlotStats } from "@/lib/builds/loadout-stats";
 import { useWeapons } from "@/lib/weapons/use-data";
 import { allWarframes } from "@/data/warframes";
-import { weaponDamageBuffAbilities } from "@/lib/weapons/weapon-external-buffs";
+import {
+  resolveAbilitiesWithHelminth,
+  weaponDamageBuffAbilities,
+} from "@/lib/weapons/weapon-external-buffs";
 import { formatMarginalPct, type DpsContribution } from "@/lib/calc/dps-contributions";
 import { ChevronDown, ChevronRight, Crosshair, Dog, Shield, Swords, Sparkles, Target, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -152,15 +155,21 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
 
   const abilityBuffOptions = useMemo(() => {
     try {
-      const wfId = loadout.warframeBuild?.warframeId;
-      if (!wfId) return [];
-      const wf = allWarframes.find((w) => w.id === wfId);
-      return weaponDamageBuffAbilities(wf?.abilities);
+      const wb = loadout.warframeBuild;
+      if (!wb?.warframeId) return [];
+      const wf = allWarframes.find((w) => w.id === wb.warframeId);
+      return weaponDamageBuffAbilities(
+        resolveAbilitiesWithHelminth(wf?.abilities, wb.helminthAbilityId, wb.helminthSlot),
+      );
     } catch (err) {
       console.warn("Loadout ability buff options failed", err);
       return [];
     }
-  }, [loadout.warframeBuild?.warframeId]);
+  }, [
+    loadout.warframeBuild?.warframeId,
+    loadout.warframeBuild?.helminthAbilityId,
+    loadout.warframeBuild?.helminthSlot,
+  ]);
 
   const enemy = useMemo(
     () => ENEMY_TYPES.find((e) => e.id === enemyId) ?? ENEMY_TYPES[0],
@@ -198,7 +207,8 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
 
   if (!stats) return null;
 
-  const hasAnyWeapon = stats.primary || stats.secondary || stats.melee || stats.exalted;
+  const hasAnyWeapon =
+    stats.primary || stats.secondary || stats.melee || stats.exalted || stats.exaltedMelee;
 
   if (!stats.warframe && !hasAnyWeapon && !stats.companion) {
     return null;
@@ -333,6 +343,13 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
         <WeaponRow label="Secondary" icon={<Crosshair className="h-3.5 w-3.5" />} color="text-cyan-400" entry={stats.secondary} showTtk={showTtk} />
         <WeaponRow label="Melee" icon={<Swords className="h-3.5 w-3.5" />} color="text-orange-400" entry={stats.melee} showTtk={showTtk} />
         <WeaponRow label="Exalted" icon={<Sparkles className="h-3.5 w-3.5" />} color="text-violet-400" entry={stats.exalted} showTtk={showTtk} />
+        <WeaponRow
+          label="Exalted Melee"
+          icon={<Sparkles className="h-3.5 w-3.5" />}
+          color="text-fuchsia-400"
+          entry={stats.exaltedMelee}
+          showTtk={showTtk}
+        />
 
         {stats.companion && (
           <div className="border border-green-500/25 rounded-lg overflow-hidden bg-green-500/[0.04]">

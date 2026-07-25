@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   DataOverride,
   deleteOverride,
+  deleteOverrides,
   exportOverrides,
   getOverrideForTarget,
   getOverrides,
@@ -62,6 +63,8 @@ export function DataFixesPanel({
   const [overrides, setOverrides] = useState<DataOverride[]>([]);
   const [showEditor, setShowEditor] = useState(Boolean(initialPrefill?.itemId || initialPrefill?.existingOverrideId));
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const [legacyLocalCount, setLegacyLocalCount] = useState(0);
   const [legacyUploading, setLegacyUploading] = useState(false);
   const [prefill, setPrefill] = useState<DataFixesPrefill | undefined>(initialPrefill);
@@ -115,6 +118,14 @@ export function DataFixesPanel({
     return list.sort((a, b) => b.timestamp - a.timestamp);
   }, [overrides, filterType, filterAction, searchQuery]);
 
+  const filteredIds = useMemo(() => filteredOverrides.map((o) => o.id), [filteredOverrides]);
+  const selectedVisibleCount = useMemo(
+    () => filteredIds.filter((id) => selectedIds.has(id)).length,
+    [filteredIds, selectedIds],
+  );
+  const allVisibleSelected = filteredIds.length > 0 && selectedVisibleCount === filteredIds.length;
+  const someVisibleSelected = selectedVisibleCount > 0 && !allVisibleSelected;
+
   const counts = useMemo(() => {
     const byAction = { modify: 0, add: 0, remove: 0 };
     for (const o of overrides) byAction[o.action]++;
@@ -127,6 +138,27 @@ export function DataFixesPanel({
     setPrefill(undefined);
   }, [refreshOverrides]);
 
+  const toggleSelected = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAllVisible = useCallback(() => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allVisibleSelected) {
+        for (const id of filteredIds) next.delete(id);
+      } else {
+        for (const id of filteredIds) next.add(id);
+      }
+      return next;
+    });
+  }, [allVisibleSelected, filteredIds]);
+
   const handleDelete = useCallback(
     async (id: string) => {
       const ok = await confirm({
@@ -138,6 +170,12 @@ export function DataFixesPanel({
       if (!ok) return;
       try {
         await deleteOverride(id);
+        setSelectedIds((prev) => {
+          if (!prev.has(id)) return prev;
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
         refreshOverrides();
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Failed to delete");
@@ -145,6 +183,29 @@ export function DataFixesPanel({
     },
     [confirm, refreshOverrides],
   );
+
+  const handleBulkDelete = useCallback(async () => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    const ok = await confirm({
+      title: `Delete ${ids.length} data fix${ids.length === 1 ? "" : "es"}?`,
+      description: "The site will revert to the original data for these items.",
+      confirmLabel: `Delete ${ids.length}`,
+      destructive: true,
+    });
+    if (!ok) return;
+    setBulkDeleting(true);
+    try {
+      const deleted = await deleteOverrides(ids);
+      setSelectedIds(new Set());
+      refreshOverrides();
+      toast.success(`Deleted ${deleted} fix${deleted === 1 ? "" : "es"}.`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete");
+    } finally {
+      setBulkDeleting(false);
+    }
+  }, [confirm, refreshOverrides, selectedIds]);
 
   const handleEdit = useCallback((ovr: DataOverride) => {
     setPrefill({
@@ -412,35 +473,86 @@ export function DataFixesPanel({
             </p>
           </div>
         )}
+        {filteredOverrides.length > 0 && (
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted/30 px-3 py-2">
+            <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={allVisibleSelected}
+                ref={(el) => {
+                  if (el) el.indeterminate = someVisibleSelected;
+                }}
+                onChange={toggleSelectAllVisible}
+                className="h-3.5 w-3.5 rounded border-border"
+              />
+              Select all{filterType !== "all" || filterAction !== "all" || searchQuery.trim() ? " visible" : ""}
+              <span className="text-muted-foreground/70">({filteredIds.length})</span>
+            </label>
+            {selectedIds.size > 0 && (
+              <>
+                <span className="text-xs text-muted-foreground">
+                  {selectedIds.size} selected
+                </span>
+                <button
+                  type="button"
+                  disabled={bulkDeleting}
+                  onClick={() => void handleBulkDelete()}
+                  className="ml-auto flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-60"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  {bulkDeleting ? "Deleting…" : `Delete ${selectedIds.size}`}
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
         {filteredOverrides.map((ovr) => {
           const isExpanded = expandedId === ovr.id;
+          const isSelected = selectedIds.has(ovr.id);
           return (
-            <div key={ovr.id} className="overflow-hidden rounded-xl border border-border bg-card">
-              <button
-                type="button"
-                onClick={() => setExpandedId(isExpanded ? null : ovr.id)}
-                className="flex w-full items-center gap-3 p-3 text-left"
-              >
-                <span className={cn("shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium", ACTION_CHIP[ovr.action])}>
-                  {OVERRIDE_ACTION_LABELS[ovr.action]}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <code className="truncate text-sm font-medium">{ovr.targetId}</code>
-                    <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] capitalize text-muted-foreground">
-                      {OVERRIDE_CATEGORY_LABELS[ovr.targetType]}
-                    </span>
+            <div
+              key={ovr.id}
+              className={cn(
+                "overflow-hidden rounded-xl border bg-card",
+                isSelected ? "border-purple-500/40 bg-purple-500/5" : "border-border",
+              )}
+            >
+              <div className="flex w-full items-center gap-2 p-3">
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleSelected(ovr.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label={`Select ${ovr.targetId}`}
+                  className="h-3.5 w-3.5 shrink-0 rounded border-border"
+                />
+                <button
+                  type="button"
+                  onClick={() => setExpandedId(isExpanded ? null : ovr.id)}
+                  className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                >
+                  <span className={cn("shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium", ACTION_CHIP[ovr.action])}>
+                    {OVERRIDE_ACTION_LABELS[ovr.action]}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <code className="truncate text-sm font-medium">{ovr.targetId}</code>
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] capitalize text-muted-foreground">
+                        {OVERRIDE_CATEGORY_LABELS[ovr.targetType]}
+                      </span>
+                    </div>
+                    {ovr.note && (
+                      <p className="mt-0.5 truncate text-[10px] text-muted-foreground">{ovr.note}</p>
+                    )}
                   </div>
-                  {ovr.note && (
-                    <p className="mt-0.5 truncate text-[10px] text-muted-foreground">{ovr.note}</p>
+                  {isExpanded ? (
+                    <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
                   )}
-                </div>
-                {isExpanded ? (
-                  <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
-                )}
-              </button>
+                </button>
+              </div>
               {isExpanded && (
                 <div className="space-y-3 border-t border-border p-3">
                   <p className="text-[10px] text-muted-foreground">

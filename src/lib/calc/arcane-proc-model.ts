@@ -14,6 +14,7 @@ const METADATA_STATS = new Set([
   "zoneDamagePerSec",
   "zoneDuration",
   "zoneRadius",
+  "zoneBuffRadius",
   "zoneProcChance",
   "procAuraRadius",
   "healthOrbPulse",
@@ -73,8 +74,44 @@ export function isArcaneMetadataStat(stat: string): boolean {
   return METADATA_STATS.has(stat);
 }
 
+/**
+ * Stack multiplier for an effect line.
+ * Per-stack bonuses (`stacking: true`) always × stacks.
+ * Duration/cooldown/radius windows and `constantAtAllRanks` caps do not × stacks
+ * (fixes Hot Shot 10s→500s, Fortification 10s→300s, Exhilarate 10s→30s).
+ */
+export function arcaneEffectStackMultiplier(
+  def: ArcaneEffectDef,
+  line: ArcaneEffectLine,
+  stacks: number,
+): number {
+  if (line.stacking) return Math.max(stacks, 1);
+  if (line.constantAtAllRanks) return 1;
+  // Window / radius / threshold metadata is never a per-stack multiplier.
+  if (
+    line.stat === "buffDuration" ||
+    line.stat === "cooldown" ||
+    line.stat === "bigCritThreshold" ||
+    line.stat === "zoneDuration" ||
+    line.stat === "zoneRadius" ||
+    line.stat === "zoneBuffRadius" ||
+    line.stat === "allyEnergyRadius" ||
+    line.stat === "allyHealRadius" ||
+    line.stat === "procAuraRadius" ||
+    line.stat === "coldSpreadRadius"
+  ) {
+    return 1;
+  }
+  if (def.trigger === "stacks") return Math.max(stacks, 1);
+  return 1;
+}
+
 export function isArcaneProcChanceStat(stat: string): boolean {
   if (PROC_CHANCE_STATS.has(stat)) return true;
+  // Status chance bonuses are real build stats — not proc rolls.
+  if (stat === "statusChance" || stat === "ampStatusChance" || stat === "statusChancePerHit") {
+    return false;
+  }
   if (stat.endsWith("Chance") && stat !== "criticalChance") return true;
   return false;
 }
@@ -145,9 +182,7 @@ export function scaleArcaneEffectForBuild(
   fireRate = 1,
 ): number {
   const rankScaled = scaleArcaneEffectLine(line, rank, def.maxRank);
-  const stackMult =
-    def.trigger === "stacks" || line.stacking ? Math.max(stacks, 1) : 1;
-  let value = rankScaled * stackMult;
+  let value = rankScaled * arcaneEffectStackMultiplier(def, line, stacks);
 
   if (isArcaneMetadataStat(line.stat) || isArcaneProcChanceStat(line.stat)) {
     return value;

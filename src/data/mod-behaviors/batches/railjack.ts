@@ -27,52 +27,52 @@ export const MOD_BEHAVIORS_RAILJACK: Record<string, VerifiedModBehavior> = {
   ]),
   hyperstrike: mod("hyperstrike", [
     line("turretDamage", "railjack_totals", "multiplicative_percent", "Hyperstrike: +75% Turret Damage"),
-    line("damage", "railjack_totals", "multiplicative_percent", "Hyperstrike: +75% Turret Damage"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Hyperstrike — alias of turretDamage (avoid double-count)"),
   ]),
   ion_burn: mod("ion_burn", [
     line("boostSpeed", "railjack_totals", "multiplicative_percent", "Ion Burn: +45% Boost Speed"),
   ]),
   predator: mod("predator", [
     line("turretCritChance", "railjack_totals", "multiplicative_percent", "Predator: +50% Turret Critical Chance"),
-    line("criticalChance", "railjack_totals", "multiplicative_percent", "Predator: +50% Turret Critical Chance"),
+    line("criticalChance", "mod_panel", "multiplicative_percent", "wiki: Predator — alias of turretCritChance (avoid double-count)"),
   ]),
   section_density: mod("section_density", [
     line("turretCritDamage", "railjack_totals", "multiplicative_percent", "Section Density: +50% Turret Critical Damage"),
-    line("criticalMultiplier", "railjack_totals", "multiplicative_percent", "Section Density: +50% Turret Critical Damage"),
+    line("criticalMultiplier", "mod_panel", "multiplicative_percent", "wiki: Section Density — alias of turretCritDamage (avoid double-count)"),
   ]),
   forward_artillery: mod("forward_artillery", [
     line("artilleryDamage", "railjack_totals", "multiplicative_percent", "Forward Artillery: +100% Forward Artillery Damage"),
-    line("damage", "railjack_totals", "multiplicative_percent", "Forward Artillery: +100% Forward Artillery Damage"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Forward Artillery — alias of artilleryDamage (not turret)"),
   ]),
   warhead: mod("warhead", [
     line("ordnanceDamage", "railjack_totals", "multiplicative_percent", "Warhead: +100% Ordnance Damage"),
-    line("damage", "railjack_totals", "multiplicative_percent", "Warhead: +100% Ordnance Damage"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Warhead — alias of ordnanceDamage (not turret)"),
   ]),
   ironclad_matrix: mod("ironclad_matrix", [
     line("armor", "railjack_totals", "multiplicative_percent", "Ironclad Matrix: +33.75% Hull and Armor"),
     line("shield", "railjack_totals", "multiplicative_percent", "Ironclad Matrix: +38.25% Shields and Shield Recharge"),
   ]),
   indomitable_matrix: mod("indomitable_matrix", [
-    line("armor", "railjack_totals", "multiplicative_percent", "Indomitable Matrix: breach mitigation + armor"),
-    line("shield", "railjack_totals", "multiplicative_percent", "Indomitable Matrix: shield recharge during breach"),
+    line("armor", "mod_panel", "multiplicative_percent", "wiki: Indomitable Matrix — breach-gated"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Indomitable Matrix — breach-gated"),
   ]),
   fortifying_fire: mod("fortifying_fire", [
-    line("shield", "railjack_totals", "multiplicative_percent", "Fortifying Fire: shield on crit (conditional)"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Fortifying Fire — shield on crit (conditional)"),
   ]),
   defensive_fire: mod("defensive_fire", [
-    line("shield", "railjack_totals", "multiplicative_percent", "Defensive Fire: max shields per kill (stacking)"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Defensive Fire — max shields per kill (stacking)"),
     line("duration", "mod_panel", "multiplicative_percent", "Defensive Fire: stack duration (display)"),
   ]),
   onslaught_matrix: mod("onslaught_matrix", [
-    line("damage", "railjack_totals", "multiplicative_percent", "Onslaught Matrix: +22% Turret Damage at full hull"),
-    line("turretDamage", "railjack_totals", "multiplicative_percent", "Onslaught Matrix: +22% Turret Damage at full hull"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Onslaught Matrix — full-hull gated (sim)"),
+    line("turretDamage", "mod_panel", "multiplicative_percent", "wiki: Onslaught Matrix — full-hull gated (sim)"),
   ]),
   crimson_fugue: mod("crimson_fugue", [
     line("damage", "railjack_totals", "multiplicative_percent", "Crimson Fugue: +27.5% Turret Damage per kill (5 stacks)"),
     line("duration", "mod_panel", "multiplicative_percent", "Crimson Fugue: stack duration (display)"),
   ]),
   protective_shots: mod("protective_shots", [
-    line("damage", "railjack_totals", "multiplicative_percent", "Protective Shots: +30% Turret Damage above 75% shields"),
+    line("damage", "railjack_totals", "multiplicative_percent", "Protective Shots: +30% Turret Damage above 75% shields (sim-gated)"),
   ]),
   waveband_disruptor: mod("waveband_disruptor", [
     line("shield", "mod_panel", "multiplicative_percent", "Waveband Disruptor: crits ignore shields (special)"),
@@ -104,6 +104,10 @@ export const MOD_BEHAVIORS_RAILJACK: Record<string, VerifiedModBehavior> = {
     line("factionSentient", "mod_panel", "multiplicative_percent", "Sentient Scalpel: x1.27 vs Sentient"),
   ]),
   raider_matrix: mod("raider_matrix", [
-    line("damage", "railjack_totals", "multiplicative_percent", "Raider Matrix: archwing slingshot damage bonus"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Raider Matrix — archwing slingshot (not RJ turret paper)"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Raider Matrix — archwing slingshot utility"),
+  ]),
+  ripload: mod("ripload", [
+    line("reloadSpeed", "mod_panel", "multiplicative_percent", "wiki: Ripload — ordnance reload time (not weapon reload / not yet modeled)"),
   ]),
 };

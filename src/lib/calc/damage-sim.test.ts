@@ -45,6 +45,25 @@ describe("damage sim Warframe math alignment", () => {
     expect(sim.armorDR).not.toBeCloseTo(sim.armor / (sim.armor + 300), 2);
   });
 
+  it("passes Flensing puncture strip into discrete TTK (shortens armored TTK)", () => {
+    const gunner = ENEMY_TYPES.find((e) => e.id === "heavy_gunner")!;
+    const input = {
+      ...baseInput,
+      dmgTypes: { puncture: 200 },
+      statusChance: 1,
+      fireRate: 8,
+      magazine: 100,
+    };
+    const bare = runDamageSim(input, gunner, 80)!;
+    const flensing = runDamageSim(
+      { ...input, punctureArmorStripPerStack: 0.2 },
+      gunner,
+      80,
+    )!;
+    expect(flensing.ttk).toBeLessThan(bare.ttk);
+    expect(flensing.corrosiveStrippedArmor).toBeLessThan(bare.corrosiveStrippedArmor);
+  });
+
   it("applies corrosive strip with −26%/−6% model, not 0.74^stacks", () => {
     const sim = runDamageSim(
       {

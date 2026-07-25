@@ -30,7 +30,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   artillery_cheap_shot: mod("artillery_cheap_shot", [], "wiki: Artillery Cheap Shot \u2014 Forward Artillery has a +90% chance to not consume Dome Charges"),
   ashensetmod: mod("ashensetmod", [], "wiki: Ashensetmod \u2014 catalog entry (stats in ability logic)"),
   assassin_posture: mod("assassin_posture", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Assassin Posture: damage \u2014 The companion will prioritize Eximus and other high-ranking enemies. +300% Overg\u2026"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Assassin Posture — overguard damage / priority (not base DPS)"),
   ]),
   argent_scourge: mod("argent_scourge", [], "wiki: Argent Scourge \u2014 Fighting form devised for Conclave."),
   atlantis_vulcan: mod("atlantis_vulcan", [], "wiki: Atlantis Vulcan \u2014 Rapid strikes, deceptive movements."),
@@ -55,10 +55,10 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   blind_justice: mod("blind_justice", [], "wiki: Blind Justice \u2014 Reverse grip style emphasizing slashing and impaling strikes."),
   blood_for_ammo: mod("blood_for_ammo", [], "wiki: Blood For Ammo \u2014 Mercy Kill refills Primary and Secondary Magazine by 100%"),
   blood_for_energy: mod("blood_for_energy", [
-    line("energy", "warframe_totals", "multiplicative_percent", "Blood For Energy: energy \u2014 50% chance to drop an Energy Orb on Mercy"),
+    line("energy", "mod_panel", "multiplicative_percent", "wiki: Blood For Energy — mercy energy orb drop (not max energy)"),
   ]),
   blood_for_life: mod("blood_for_life", [
-    line("health", "warframe_totals", "multiplicative_percent", "Blood For Life: health \u2014 100% chance to drop a Health Orb on Mercy"),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Blood For Life — mercy health orb drop (not max health)"),
   ]),
   blunderbuss_r3: mod("blunderbuss_r3", [
     line("criticalChance", "weapon_dps", "multiplicative_percent", "Blunderbuss: criticalChance \u2014 +90% Critical Chance"),
@@ -127,7 +127,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   ]),
   countermeasures: mod("countermeasures", [], "wiki: Countermeasures \u2014 Flares that distract enemy guided projectiles."),
   crash_shot: mod("crash_shot", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Crash Shot: damage \u2014 20% of Damage converted into <DT_IMPACT_COLOR>Impact"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Crash Shot — IPS convert (not always-on damage)"),
   ]),
   crashing_havoc: mod("crashing_havoc", [], "wiki: Crashing Havoc \u2014 Fighting form devised for Conclave."),
   crashing_timber: mod("crashing_timber", [], "wiki: Crashing Timber \u2014 Fighting form devised for Conclave."),
@@ -187,9 +187,8 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("cooldown", "mod_panel", "multiplicative_percent", "Fire Suppression: cooldown \u2014 Extinguish 1 fire\\\\nCooldown: <LOWER_IS_BETTER>200s"),
   ]),
   firewall: mod("firewall", [], "wiki: Firewall \u2014 Reduces damage by 75% while hacking"),
-  fizzbang_flourish: mod("fizzbang_flourish", [], "wiki: Fizzbang Flourish \u2014 Fireworks trigger when completing a trick over 200 points."),
   flak_shot: mod("flak_shot", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Flak Shot: damage \u2014 20% of Damage converted into <DT_SLASH_COLOR>Slash"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Flak Shot — IPS convert (not always-on damage)"),
   ]),
   flechette: mod("flechette", [
     line("puncture", "weapon_dps", "multiplicative_percent", "Flechette: puncture \u2014 +90% <DT_PUNCTURE_COLOR>Puncture"),
@@ -241,8 +240,8 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   harrowing_spire: mod("harrowing_spire", [], "wiki: Harrowing Spire \u2014 Relentless jabs and powerful sweeping lunges."),
   hawksetmod: mod("hawksetmod", [], "wiki: Hawksetmod \u2014 catalog entry (stats in ability logic)"),
   hit_and_run: mod("hit_and_run", [
-    line("duration", "mod_panel", "multiplicative_percent", "Hit And Run: duration \u2014 +60% Parkour Speed after a Mercy for 15s"),
-    line("parkourVelocity", "warframe_totals", "multiplicative_percent", "Hit And Run: parkourVelocity \u2014 +60% Parkour Speed after a Mercy for 15s"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Hit And Run — post-mercy parkour"),
+    line("parkourVelocity", "mod_panel", "multiplicative_percent", "wiki: Hit And Run — post-mercy parkour"),
   ]),
   hungering_blades: mod("hungering_blades", [], "wiki: Hungering Blades \u2014 Spectral weapons have a 100% chance to attack the same enemy a second time."),
   huntersetmod: mod("huntersetmod", [], "wiki: Huntersetmod \u2014 catalog entry (stats in ability logic)"),
@@ -259,8 +258,8 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("heat", "weapon_dps", "elemental_from_base_damage", "Incendiary Coat: heat \u2014 +90% <DT_FIRE_COLOR>Heat"),
   ]),
   indomitable_matrix: mod("indomitable_matrix", [
-    line("armor", "warframe_totals", "multiplicative_percent", "Indomitable Matrix: armor \u2014 <LOWER_IS_BETTER>-18% Breach Chance\\\\n+22% Shield Recharge during Breach\\\\n+30% \u2026"),
-    line("shield", "warframe_totals", "multiplicative_percent", "Indomitable Matrix: shield \u2014 <LOWER_IS_BETTER>-18% Breach Chance\\\\n+22% Shield Recharge during Breach\\\\n+30% \u2026"),
+    line("armor", "mod_panel", "multiplicative_percent", "wiki: Indomitable Matrix — breach-gated (railjack.ts owns apply)"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Indomitable Matrix — breach-gated (railjack.ts owns apply)"),
   ]),
   inner_might: mod("inner_might", [], "wiki: Inner Might \u2014 Allows Abilities to be cast without using Energy or Shields but requires 60s to recharge."),
   instant_secure: mod("instant_secure", [], "wiki: Instant Secure \u2014 Gain 15% Disinfection and gain 10,000 H\\u00f6llars"),
@@ -272,23 +271,23 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("boostSpeed", "mod_panel", "multiplicative_percent", "Ion Burn: boostSpeed \u2014 +45% Railjack Boost Speed"),
   ]),
   ironclad_matrix: mod("ironclad_matrix", [
-    line("armor", "warframe_totals", "multiplicative_percent", "Ironclad Matrix: armor \u2014 +33.75% Hull and Armor, +38.25% Max Shields and Shield Recharge"),
-    line("shield", "warframe_totals", "multiplicative_percent", "Ironclad Matrix: shield \u2014 +33.75% Hull and Armor, +38.25% Max Shields and Shield Recharge"),
+    line("armor", "mod_panel", "multiplicative_percent", "wiki: Ironclad Matrix — railjack.ts owns hull/armor/shield apply"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Ironclad Matrix — railjack.ts owns hull/armor/shield apply"),
   ]),
   jahu: mod("jahu", [], "wiki: Jahu \u2014 Corporeal laws are unwrit  As suns and love retreat"),
   keep_clean: mod("keep_clean", [], "wiki: Keep-Clean \u2014 There's no Clean like Keep-Clean"),
   khra: mod("khra", [], "wiki: Khra \u2014 To cosmic forms from tangent planes  We end as we began"),
   kill_switch: mod("kill_switch", [
-    line("duration", "mod_panel", "multiplicative_percent", "Kill Switch: duration \u2014 On Kill:\\\\n+50% Reload Speed for 3s"),
-    line("reloadSpeed", "weapon_dps", "multiplicative_percent", "Kill Switch: reloadSpeed \u2014 On Kill:\\\\n+50% Reload Speed for 3s"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Kill Switch — on-kill reload"),
+    line("reloadSpeed", "weapon_dps", "conditional_stat_on_kill", "wiki: Kill Switch — On Kill: +50% Reload Speed for 3s"),
   ]),
   killers_rush: mod("killers_rush", [], "wiki: Killer's Rush \u2014 catalog entry (stats in ability logic)"),
-  kitgun_riven_mod: mod("kitgun_riven_mod", [], "wiki: Kitgun Riven Mod \u2014 You will need to prove yourself before I reveal the beauty within this work."),
-  laser_sight: mod("laser_sight", [
-    line("criticalChance", "weapon_dps", "multiplicative_percent", "Laser Sight: criticalChance \u2014 On Headshot:\\\\n+120% Critical Chance when Aiming for 9s"),
-    line("duration", "mod_panel", "multiplicative_percent", "Laser Sight: duration \u2014 On Headshot:\\\\n+120% Critical Chance when Aiming for 9s"),
-  ]),
+
   lashing_coil: mod("lashing_coil", [], "wiki: Lashing Coil \u2014 Fighting form devised for Conclave."),
+  laser_sight: mod("laser_sight", [
+    line("criticalChance", "weapon_dps", "conditional_stat_on_trigger", "wiki: Laser Sight — On Headshot: +120% Critical Chance when Aiming for 9s"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Laser Sight — buff duration"),
+  ]),
   last_herald: mod("last_herald", [], "wiki: Last Herald \u2014 Fighting form devised for Conclave."),
   lingering_torment: mod("lingering_torment", [
     line("statusDuration", "weapon_dps", "multiplicative_percent", "Lingering Torment: statusDuration \u2014 +90% Status Duration (extends DoT ticks)"),
@@ -301,7 +300,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("reloadSpeed", "weapon_dps", "multiplicative_percent", "Loaded Capacity: reloadSpeed \u2014 +30% Magazine Capacity, -15% Reload Speed"),
   ]),
   lock_and_load: mod("lock_and_load", [
-    line("holsterRate", "mod_panel", "multiplicative_percent", "Lock And Load: holsterRate \u2014 +20% Magazine Reloaded/s when Holstered (arsenal display only)"),
+    line("holsterRate", "mod_panel", "multiplicative_percent", "Lock and Load: holsterRate \u2014 +20% Magazine Reloaded/s when Holstered (arsenal display only)"),
   ]),
   lohk: mod("lohk", [], "wiki: Lohk \u2014 From brooding gulfs are we beheld  By that which bears no name"),
   loose_chamber: mod("loose_chamber", [
@@ -317,7 +316,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("magnetic", "weapon_dps", "elemental_from_base_damage", "Magnetic Strafe: magnetic \u2014 +60% <DT_MAGNETIC_COLOR>Magnetic, +40% Fire Rate"),
   ]),
   magnetic_welt: mod("magnetic_welt", [
-    line("fireRate", "weapon_dps", "multiplicative_percent", "Magnetic Welt: fireRate \u2014  <DT_IMPACT_COLOR>Impact Status Effects have 35% chance to apply a <DT_MAGNETIC_\u2026"),
+    line("fireRate", "mod_panel", "multiplicative_percent", "wiki: Magnetic Welt — Impact→Magnetic proc chance (not fire rate)"),
   ]),
   magnetized_core: mod("magnetized_core", [
     line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "Magnetized Core: criticalMultiplier \u2014 +60% <DT_MAGNETIC_COLOR>Magnetic, +40% Critical Damage"),
@@ -336,14 +335,14 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   mending_soul: mod("mending_soul", [], "wiki: Mending Soul \u2014 The first 4 revives are instantaneous. Additional revives are 100% faster."),
   mending_unity: mod("mending_unity", [], "wiki: Mending Unity \u2014 Increases Affinity Radius by 25m."),
   momentary_pause: mod("momentary_pause", [
-    line("duration", "mod_panel", "multiplicative_percent", "Momentary Pause: duration \u2014 On Kill:\\\\n+15 Heal Rate for 10s, -25% from Health Orbs"),
-    line("health", "warframe_totals", "multiplicative_percent", "Momentary Pause: health \u2014 On Kill:\\\\n+15 Heal Rate for 10s, -25% from Health Orbs"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Momentary Pause — on-kill heal rate"),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Momentary Pause — on-kill heal (not max health)"),
   ]),
   mountains_edge: mod("mountains_edge", [], "wiki: Mountain's Edge \u2014 Sharp movements with wide reach."),
   munitions_vortex: mod("munitions_vortex", [], "wiki: Munitions Vortex \u2014 Vortex that absorbs incoming fire and detonates, releasing damage."),
   nano_applicator: mod("nano_applicator", [
-    line("duration", "mod_panel", "multiplicative_percent", "Nano-Applicator: duration \u2014 On Ability Cast:\\\\n+90% Status Chance when Aiming for 9s"),
-    line("statusChance", "weapon_dps", "multiplicative_percent", "Nano-Applicator: statusChance \u2014 On Ability Cast:\\\\n+90% Status Chance when Aiming for 9s"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Nano-Applicator — cast+aim gated SC"),
+    line("statusChance", "weapon_dps", "conditional_stat_on_trigger", "wiki: Nano-Applicator — On Ability Cast: +90% Status Chance when Aiming for 9s"),
   ]),
   naramon_transmute_core: mod("naramon_transmute_core", [], "wiki: Naramon Transmute Core \u2014 Ensures transmuted mod is of Naramon polarity and eliminates credit cost."),
   narrow_barrel: mod("narrow_barrel", [
@@ -355,22 +354,24 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   nirasetmod: mod("nirasetmod", [], "wiki: Nirasetmod \u2014 catalog entry (stats in ability logic)"),
   noble_cadence: mod("noble_cadence", [], "wiki: Noble Cadence \u2014 Fighting form devised for Conclave."),
   onslaught_matrix: mod("onslaught_matrix", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Onslaught Matrix: damage \u2014 +22% Turret Damage while 100% Hull\\\\n20% chance to Reflect 38% Damage while over\u2026"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Onslaught Matrix — full-hull gated (railjack.ts)"),
   ]),
   ordnance_cheap_shot: mod("ordnance_cheap_shot", [], "wiki: Ordnance Cheap Shot \u2014 Ordnance weapons have a +90% chance to not consume Munitions"),
   ordnance_velocity: mod("ordnance_velocity", [
     line("ordnanceSpeed", "mod_panel", "multiplicative_percent", "Ordnance Velocity: ordnanceSpeed \u2014 +60% Ordnance Projectile Speed"),
   ]),
   orgone_tuning_matrix: mod("orgone_tuning_matrix", [
-    line("heat", "weapon_dps", "elemental_from_base_damage", "Orgone Tuning Matrix: heat \u2014 +33.75% Forge Capacity, <LOWER_IS_BETTER>-22.5% Forge Cooldown, +22.5% Elemental\u2026"),
+    line("heat", "mod_panel", "multiplicative_percent", "wiki: Orgone Tuning Matrix — forge/heat capacity (not weapon heat)"),
   ]),
   oull: mod("oull", [], "wiki: Oull \u2014 Through endless faces, countless forms, a multitude unfolds.  (Mimics any Requiem Mod)"),
   out_of_sight: mod("out_of_sight", [
     line("range", "mod_panel", "multiplicative_percent", "Out Of Sight: range \u2014 Blinds enemies within 18m on Mercy Kill (arsenal display only)"),
   ]),
-  overloader: mod("overloader", [], "wiki: Overloader \u2014 +87% Maximum Ordnance Munitions"),
+  overloader: mod("overloader", [
+    line("magazine", "mod_panel", "multiplicative_percent", "wiki: Overloader — railjack.ts owns munitions capacity apply"),
+  ]),
   overwhelming_power: mod("overwhelming_power", [
-    line("abilityStrength", "warframe_totals", "multiplicative_percent", "Overwhelming Power: abilityStrength \u2014 Gain +5% Ability Strength for each enemy hit by the initial Tauron Strike for 30\u2026"),
+    line("abilityStrength", "mod_panel", "multiplicative_percent", "wiki: Overwhelming Power — Tauron Strike hit stacks (not always-on)"),
   ]),
   particle_ram: mod("particle_ram", [], "wiki: Particle Ram \u2014 Railjack Ram that deals damage to anything it touches when moving forward."),
   peculiar_audience: mod("peculiar_audience", [
@@ -382,7 +383,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Peculiar Growth: duration \u2014 Damaging an enemy will inflate the body part hit for 6s."),
   ]),
   persistent_posture: mod("persistent_posture", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Persistent Posture: damage \u2014 The companion will pick a target and then attack it relentlessly. +40% Impact Da\u2026"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Persistent Posture — impact bias / AI (not always-on base damage)"),
   ]),
   phoenix_blaze: mod("phoenix_blaze", [], "wiki: Phoenix Blaze \u2014 Wreathes the Railjack in fire, increasing Turret Damage and Speed."),
   phoenix_spirit: mod("phoenix_spirit", [], "wiki: Phoenix Spirit \u2014 Elemental Damage increased by |PERCENT|%."),
@@ -392,7 +393,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("damage", "weapon_dps", "multiplicative_percent", "Point Blank: damage \u2014 +90% Damage"),
   ]),
   power_drain: mod("power_drain", [
-    line("abilityStrength", "warframe_totals", "multiplicative_percent", "Power Drain: abilityStrength \u2014 Next ability cast after Mercy Kill gains +50% Ability Strength"),
+    line("abilityStrength", "mod_panel", "multiplicative_percent", "wiki: Power Drain — next cast after mercy (not always-on strength)"),
   ]),
   power_spike: mod("power_spike", [], "wiki: Power Spike \u2014 Melee Combo Counter now decays while out of combat by 5 every few seconds, instead of depleting completely."),
   predator: mod("predator", [
@@ -428,12 +429,12 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   ]),
   prismatic_beam: mod("prismatic_beam", [], "wiki: Prismatic Beam \u2014 Enemies struck by the Tauron Strike fire off smaller beams at other enemies within 20m."),
   prize_kill: mod("prize_kill", [
-    line("duration", "mod_panel", "multiplicative_percent", "Prize Kill: duration \u2014 On Kill:\\\\n-100% Shield Recharge Delay for 10s, -25% from Health Orbs"),
-    line("health", "warframe_totals", "multiplicative_percent", "Prize Kill: health \u2014 On Kill:\\\\n-100% Shield Recharge Delay for 10s, -25% from Health Orbs"),
-    line("shield", "warframe_totals", "multiplicative_percent", "Prize Kill: shield \u2014 On Kill:\\\\n-100% Shield Recharge Delay for 10s, -25% from Health Orbs"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Prize Kill — on-kill shield recharge"),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Prize Kill — on-kill health orb effect"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Prize Kill — on-kill shield recharge"),
   ]),
   protective_shots: mod("protective_shots", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Protective Shots: damage \u2014 +30% Turret Damage when Shields are above 75%"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Protective Shots — shield-gated (railjack sim)"),
   ]),
   protector_posture: mod("protector_posture", [
     line("range", "mod_panel", "multiplicative_percent", "Protector Posture: range \u2014 The companion will prioritize attacking enemies within 15m of the Warframe. Atta\u2026 (arsenal display only)"),
@@ -442,8 +443,8 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   quick_correct: mod("quick_correct", [], "wiki: Quick Correct \u2014 Gain 10% Disinfection and 10% chance to drop a Live Heartcell "),
   quicklock: mod("quicklock", [], "wiki: Quicklock \u2014 -112.5% Ordnance Lock-On Time"),
   raider_matrix: mod("raider_matrix", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Raider Matrix: damage \u2014 +22% Archwing Speed and Damage\\\\n+36% Archwing Shield and Armor\\\\n+67% Captured \u2026"),
-    line("shield", "warframe_totals", "multiplicative_percent", "Raider Matrix: shield \u2014 +22% Archwing Speed and Damage\\\\n+36% Archwing Shield and Armor\\\\n+67% Captured \u2026"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Raider Matrix — archwing slingshot (not gun/RJ paper)"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Raider Matrix — archwing slingshot utility"),
   ]),
   rain_of_arrows: mod("rain_of_arrows", [], "wiki: Rain Of Arrows \u2014 On dealing damage, fire an arrow at an enemy with 0.35s cooldown between arrows. 30s duration."),
   raptorsetmod: mod("raptorsetmod", [], "wiki: Raptorsetmod \u2014 catalog entry (stats in ability logic)"),
@@ -453,34 +454,34 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   rending_crane: mod("rending_crane", [], "wiki: Rending Crane \u2014 Downward cuts with an impact combo."),
   rending_wind: mod("rending_wind", [], "wiki: Rending Wind \u2014 Fighting form devised for Conclave."),
   repeater_clip: mod("repeater_clip", [
-    line("duration", "mod_panel", "multiplicative_percent", "Repeater Clip: duration \u2014 On Reload:\\\\n+105% Fire Rate when Aiming for 9s"),
-    line("fireRate", "weapon_dps", "multiplicative_percent", "Repeater Clip: fireRate \u2014 On Reload:\\\\n+105% Fire Rate when Aiming for 9s"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Repeater Clip — reload+aim gated fire rate"),
+    line("fireRate", "weapon_dps", "conditional_stat_on_trigger", "wiki: Repeater Clip — On Reload: +105% Fire Rate when Aiming for 9s"),
   ]),
   revo_reducer: mod("revo_reducer", [], "wiki: Revo Reducer \u2014 -60.8% Omni Revolite Consumption"),
   rifle_riven_mod: mod("rifle_riven_mod", [], "wiki: Rifle Riven Mod \u2014 You will need to prove yourself before I reveal the beauty within this work."),
   rift_waters: mod("rift_waters", [], "wiki: Rift Waters \u2014 Vortex strips enemy Overguard 25% per second."),
   ripload: mod("ripload", [
-    line("reloadSpeed", "weapon_dps", "multiplicative_percent", "Ripload: reloadSpeed \u2014 -63% Ordnance Reload Time"),
+    line("reloadSpeed", "mod_panel", "multiplicative_percent", "wiki: Ripload — ordnance reload time (not weapon reload)"),
   ]),
   ris: mod("ris", [], "wiki: Ris \u2014 In luminous space blackened stars  They gaze, accuse, deny"),
   rising_steel: mod("rising_steel", [], "wiki: Rising Steel \u2014 Fighting form devised for Conclave."),
   runtime: mod("runtime", [
-    line("duration", "mod_panel", "multiplicative_percent", "Runtime: duration \u2014 +75% Sprint Speed for 15s after Hacking"),
-    line("sprintSpeed", "warframe_totals", "multiplicative_percent", "Runtime: sprintSpeed \u2014 +75% Sprint Speed for 15s after Hacking"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Runtime — post-hack sprint"),
+    line("sprintSpeed", "mod_panel", "multiplicative_percent", "wiki: Runtime — post-hack sprint"),
   ]),
   sacrificesetmod: mod("sacrificesetmod", [], "wiki: Sacrificesetmod \u2014 catalog entry (stats in ability logic)"),
-  sampleantiqueupgrade: mod("sampleantiqueupgrade", [], "wiki: Sampleantiqueupgrade \u2014 +30,000 HEAL RATE"),
+
   scarlet_hurricane: mod("scarlet_hurricane", [], "wiki: Scarlet Hurricane \u2014 Fighting form devised for Conclave."),
   scattering_inferno_r3: mod("scattering_inferno_r3", [
     line("heat", "weapon_dps", "elemental_from_base_damage", "Scattering Inferno: heat \u2014 +60% <DT_FIRE_COLOR>Heat, +60% Status Chance"),
     line("statusChance", "weapon_dps", "multiplicative_percent", "Scattering Inferno: statusChance \u2014 +60% <DT_FIRE_COLOR>Heat, +60% Status Chance"),
   ]),
   scourging_warheads: mod("scourging_warheads", [
-    line("shield", "warframe_totals", "multiplicative_percent", "Scourging Warheads: shield \u2014 +76.5% chance for Ordnance to ignore enemy Shields"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Scourging Warheads — ordnance ignore shields (special)"),
   ]),
   section_density: mod("section_density", [
-    line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "Section Density: criticalMultiplier \u2014 +50% Turret Critical Damage"),
-    line("turretCritDamage", "mod_panel", "multiplicative_percent", "Section Density: turretCritDamage \u2014 +50% Turret Critical Damage"),
+    line("criticalMultiplier", "mod_panel", "multiplicative_percent", "wiki: Section Density — alias (railjack.ts owns turretCritDamage)"),
+    line("turretCritDamage", "mod_panel", "multiplicative_percent", "wiki: Section Density — railjack.ts owns apply"),
   ]),
   seeker_volley: mod("seeker_volley", [], "wiki: Seeker Volley \u2014 Fires a volley of homing missiles."),
   seeking_force_r3: mod("seeking_force_r3", [
@@ -506,19 +507,19 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("fireRate", "weapon_dps", "multiplicative_percent", "Shotgun Barrage: fireRate \u2014 +90% Fire Rate"),
   ]),
   shotgun_elementalist: mod("shotgun_elementalist", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Shotgun Elementalist: damage \u2014 +90% Status Damage, +60% Magazine Capacity"),
-    line("magazine", "weapon_dps", "multiplicative_percent", "Shotgun Elementalist: magazine \u2014 +90% Status Damage, +60% Magazine Capacity"),
+    line("statusDamage", "weapon_dps", "multiplicative_percent", "wiki: Shotgun Elementalist \u2014 +90% Status Damage"),
+    line("magazine", "weapon_dps", "multiplicative_percent", "wiki: Shotgun Elementalist \u2014 +60% Magazine Capacity"),
   ]),
   shotgun_riven_mod: mod("shotgun_riven_mod", [], "wiki: Shotgun Riven Mod \u2014 You will need to prove yourself before I reveal the beauty within this work."),
   shotgun_savvy: mod("shotgun_savvy", [
     line("statusChance", "weapon_dps", "multiplicative_percent", "Shotgun Savvy: statusChance \u2014 +90% Status Chance"),
   ]),
   shrapnel_shot: mod("shrapnel_shot", [
-    line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "Shrapnel Shot: criticalMultiplier \u2014 On Kill:\\\\n+99% Critical Damage when Aiming for 9s"),
-    line("duration", "mod_panel", "multiplicative_percent", "Shrapnel Shot: duration \u2014 On Kill:\\\\n+99% Critical Damage when Aiming for 9s"),
+    line("criticalMultiplier", "weapon_dps", "conditional_stat_on_trigger", "wiki: Shrapnel Shot — On Kill: +99% Critical Damage when Aiming for 9s"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Shrapnel Shot — buff duration"),
   ]),
   shred_shot: mod("shred_shot", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Shred Shot: damage \u2014 20% of Damage converted into <DT_PUNCTURE_COLOR>Puncture"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Shred Shot — IPS convert (not always-on damage)"),
   ]),
   shredder: mod("shredder", [
     line("slash", "weapon_dps", "multiplicative_percent", "Shredder: slash \u2014 +90% <DT_SLASH_COLOR>Slash"),
@@ -529,7 +530,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   slicing_feathers: mod("slicing_feathers", [], "wiki: Slicing Feathers \u2014 Twirling, acrobatic slashes with a refined touch."),
   sling_strength: mod("sling_strength", [], "wiki: Sling Strength \u2014 Switching to Warframe after a Chained Sling adds 40% Ability Strength for 20s."),
   snap_shot: mod("snap_shot", [
-    line("sprintSpeed", "warframe_totals", "multiplicative_percent", "Snap Shot: sprintSpeed \u2014 +20% Movement Speed when Aiming"),
+    line("sprintSpeed", "mod_panel", "multiplicative_percent", "wiki: Snap Shot — aiming-gated movement"),
   ]),
   soft_hands: mod("soft_hands", [
     line("accuracy", "mod_panel", "multiplicative_percent", "Soft Hands: accuracy \u2014 On Equip: \\\\n<LOWER_IS_BETTER>-40% Weapon Recoil and +40% Accuracy for 8s (arsenal display only)"),
@@ -574,16 +575,9 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("toxin", "weapon_dps", "elemental_from_base_damage", "Toxic Barrage: toxin \u2014 +60% <DT_POISON_COLOR>Toxin, +60% Status Chance"),
   ]),
   tranquil_cleave: mod("tranquil_cleave", [], "wiki: Tranquil Cleave \u2014 Powerful arcs with frenzied combo."),
-  transmute_core: mod("transmute_core", [], "wiki: Transmute Core \u2014 Ensures transmuted mod is of Madurai polarity and eliminates credit cost."),
   trojan_tracker: mod("trojan_tracker", [], "wiki: Trojan Tracker \u2014 Eliminating sneaky viruses since 1989"),
   turbo_protect: mod("turbo_protect", [], "wiki: Turbo Protect \u2014 Gain 10% Disinfection and 25% chance to drop an Antivirus mod"),
-  turret_velocity: mod("turret_velocity", [
-    line("range", "mod_panel", "multiplicative_percent", "Turret Velocity: range \u2014 +25.3% Turret Range, +55% Turret Projectile Speed (arsenal display only)"),
-    line("turretProjectileSpeed", "mod_panel", "multiplicative_percent", "Turret Velocity: turretProjectileSpeed \u2014 +25.3% Turret Range, +55% Turret Projectile Speed"),
-    line("turretRange", "mod_panel", "multiplicative_percent", "Turret Velocity: turretRange \u2014 +25.3% Turret Range, +55% Turret Projectile Speed"),
-  ]),
   umbrasetmod: mod("umbrasetmod", [], "wiki: Umbrasetmod \u2014 catalog entry (stats in ability logic)"),
-  unfused_artifact: mod("unfused_artifact", [], "wiki: Unfused Artifact \u2014 catalog entry (stats in ability logic)"),
   untraceable: mod("untraceable", [
     line("duration", "mod_panel", "multiplicative_percent", "Untraceable: duration \u2014 Invisible for 15s after Hacking"),
   ]),
@@ -602,11 +596,11 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   vome: mod("vome", [], "wiki: Vome \u2014 To cosmic madness laws submit  Though stalwart minds entreat"),
   votive_onslaught: mod("votive_onslaught", [], "wiki: Votive Onslaught \u2014 Precise, focused arcs and cuts not hampered by pity."),
   warhead: mod("warhead", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Warhead: damage \u2014 +100% Ordnance Damage"),
-    line("ordnanceDamage", "mod_panel", "multiplicative_percent", "Warhead: ordnanceDamage \u2014 +100% Ordnance Damage"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Warhead — alias (railjack.ts owns ordnanceDamage)"),
+    line("ordnanceDamage", "mod_panel", "multiplicative_percent", "wiki: Warhead — railjack.ts owns apply"),
   ]),
   waveband_disruptor: mod("waveband_disruptor", [
-    line("shield", "warframe_totals", "multiplicative_percent", "Waveband Disruptor: shield \u2014 +76.5% chance for Turret Critical Hits to ignore enemy Shields"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Waveband Disruptor — turret crits ignore shields (special)"),
   ]),
   wellspring: mod("wellspring", [], "wiki: Wellspring \u2014 First Ability creates a well of energy for 8s. Allies passing through the well gain 5 Energy/s for 30s."),
   worm_away: mod("worm_away", [], "wiki: Worm Away \u2014 Get rid of malware, spyware, wetware and worms"),

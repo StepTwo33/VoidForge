@@ -30,7 +30,18 @@ export async function PATCH(
 
   const target = await prisma.user.findUnique({
     where: { id },
-    select: { id: true, role: true, email: true, username: true, name: true, bannedAt: true, banReason: true, supporterAt: true, createdAt: true },
+    select: {
+      id: true,
+      role: true,
+      email: true,
+      username: true,
+      name: true,
+      bannedAt: true,
+      banReason: true,
+      supporterAt: true,
+      newsletterOptIn: true,
+      createdAt: true,
+    },
   });
   if (!target) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -63,6 +74,10 @@ export async function PATCH(
         return NextResponse.json({ error: "Only admins can revoke supporter badges." }, { status: 403 });
       }
       await revokeSupporter(id);
+    } else if (body.action === "unsubscribeNewsletter") {
+      await prisma.user.update({ where: { id }, data: { newsletterOptIn: false } });
+    } else if (body.action === "subscribeNewsletter") {
+      await prisma.user.update({ where: { id }, data: { newsletterOptIn: true } });
     } else {
       return NextResponse.json({ error: "Unknown action" }, { status: 400 });
     }
@@ -78,6 +93,7 @@ export async function PATCH(
         bannedAt: true,
         banReason: true,
         supporterAt: true,
+        newsletterOptIn: true,
         createdAt: true,
         _count: { select: { builds: true } },
       },

@@ -1,5 +1,23 @@
 import type { Weapon } from "@/lib/types";
 
+const EXALTED_DAMAGE_KEYS = [
+  "damage",
+  "impact",
+  "puncture",
+  "slash",
+  "heat",
+  "cold",
+  "toxin",
+  "electricity",
+  "radiation",
+  "viral",
+  "corrosive",
+  "blast",
+  "gas",
+  "magnetic",
+  "tau",
+] as const;
+
 /** Ability names that summon an exalted weapon (normalized lowercase). */
 const ABILITY_EXALTED_ALIASES: Record<string, string[]> = {
   "exalted blade": ["exalted blade", "slash dash"],
@@ -36,7 +54,7 @@ export function getExaltedWeaponsForWarframe(warframeId: string, weapons: Weapon
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/** Primary exalted weapon shown in the warframe builder mod section. */
+/** Primary exalted weapon shown in the warframe builder mod section (ranged / main). */
 export function getPrimaryExaltedWeapon(warframeId: string, weapons: Weapon[]): Weapon | null {
   const owned = getExaltedWeaponsForWarframe(warframeId, weapons);
   if (owned.length === 0) return null;
@@ -66,6 +84,32 @@ export function getPrimaryExaltedWeapon(warframeId: string, weapons: Weapon[]): 
     if (match) return match;
   }
   return owned[0];
+}
+
+/**
+ * Secondary melee exalted when a frame has two (Titania Diwata alongside Dex Pixia).
+ * Returns null when the primary is already melee or there is no second weapon.
+ */
+export function getMeleeExaltedWeapon(warframeId: string, weapons: Weapon[]): Weapon | null {
+  const owned = getExaltedWeaponsForWarframe(warframeId, weapons);
+  if (owned.length < 2) return null;
+  const primary = getPrimaryExaltedWeapon(warframeId, weapons);
+  const meleePrefer: Partial<Record<string, string>> = {
+    titania: "diwata",
+    titania_prime: "diwata_prime",
+  };
+  const preferred = meleePrefer[warframeId];
+  if (preferred) {
+    const match = owned.find((w) => w.id === preferred);
+    if (match && match.id !== primary?.id) return match;
+  }
+  return (
+    owned.find(
+      (w) =>
+        w.id !== primary?.id &&
+        (w.category === "melee" || w.category === "archmelee" || w.triggerType === "Melee"),
+    ) ?? null
+  );
 }
 
 /** Match an ability name to its exalted weapon, if any. */
@@ -101,4 +145,54 @@ export function getExaltedWeaponForAbility(
 
 export function warframeHasExaltedWeapons(warframeId: string, weapons: Weapon[]): boolean {
   return getExaltedWeaponsForWarframe(warframeId, weapons).length > 0;
+}
+
+/** Garuda Talons — always-on claws; wiki does not scale them with Ability Strength. */
+export function exaltedIgnoresAbilityStrength(weapon: Pick<Weapon, "isExalted" | "abilityName">): boolean {
+  if (!weapon.isExalted) return true;
+  return normalizeLabel(weapon.abilityName ?? "") === "passive";
+}
+
+/**
+ * Temple Lizzie / Exalted Solo: damage multiplier 1.25× is Serration-additive and
+ * scales with Strength → paper bonus = 1.25×STR − 1 (at 100% STR → +25%).
+ */
+export function exaltedUsesAdditiveStrengthBonus(weapon: Pick<Weapon, "id" | "abilityName">): boolean {
+  const id = weapon.id ?? "";
+  if (id === "lizzie") return true;
+  return normalizeLabel(weapon.abilityName ?? "") === "exalted solo";
+}
+
+/** Multiply exalted IPS / elements / damage by Ability Strength (1 = 100%). */
+export function scaleExaltedWeaponByStrength(weapon: Weapon, abilityStrength: number): Weapon {
+  if (!(abilityStrength > 0) || abilityStrength === 1) return weapon;
+  const next: Weapon = { ...weapon };
+  for (const key of EXALTED_DAMAGE_KEYS) {
+    const v = next[key];
+    if (typeof v === "number" && v !== 0) {
+      (next as unknown as Record<string, number>)[key] = v * abilityStrength;
+    }
+  }
+  return next;
+}
+
+/**
+ * Resolve how Ability Strength applies to an exalted weapon for paper DPS.
+ * Returns a (possibly scaled) weapon plus optional additive damage fraction.
+ */
+export function resolveExaltedStrengthForCalc(
+  weapon: Weapon,
+  abilityStrength: number | undefined,
+): { weapon: Weapon; additiveStrengthBonus: number } {
+  if (!weapon.isExalted || exaltedIgnoresAbilityStrength(weapon)) {
+    return { weapon, additiveStrengthBonus: 0 };
+  }
+  const str =
+    typeof abilityStrength === "number" && Number.isFinite(abilityStrength) && abilityStrength > 0
+      ? abilityStrength
+      : 1;
+  if (exaltedUsesAdditiveStrengthBonus(weapon)) {
+    return { weapon, additiveStrengthBonus: Math.max(0, 1.25 * str - 1) };
+  }
+  return { weapon: scaleExaltedWeaponByStrength(weapon, str), additiveStrengthBonus: 0 };
 }

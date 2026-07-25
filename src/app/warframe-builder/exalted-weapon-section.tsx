@@ -22,6 +22,8 @@ export function ExaltedWeaponSection({
   exaltedStats,
   exaltedBaseStats,
   exaltedContributionContext,
+  sectionTitle = "Exalted Weapon",
+  hideSiblingNote = false,
   onAddMod,
   onRemoveMod,
   onPolarize,
@@ -39,6 +41,9 @@ export function ExaltedWeaponSection({
   exaltedStats: CalculatedStats | null;
   exaltedBaseStats: CalculatedStats | null;
   exaltedContributionContext: WeaponDpsCalcContext | null;
+  sectionTitle?: string;
+  /** When true, skip the “Also moddable” note (sibling has its own grid). */
+  hideSiblingNote?: boolean;
   onAddMod: (slotIndex: number) => void;
   onRemoveMod: (slotIndex: number) => void;
   onPolarize: (slotIndex: number, polarity: string | null) => void;
@@ -59,12 +64,12 @@ export function ExaltedWeaponSection({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <Sparkles className="h-4 w-4 shrink-0 text-violet-400" aria-hidden />
-            <h2 className="text-sm font-semibold tracking-wide text-violet-300">Exalted Weapon</h2>
+            <h2 className="text-sm font-semibold tracking-wide text-violet-300">{sectionTitle}</h2>
             <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-medium text-violet-300 ring-1 ring-violet-500/25">
               {exaltedWeapon.name}
             </span>
           </div>
-          {exaltedWeapons.length > 1 && (
+          {!hideSiblingNote && exaltedWeapons.length > 1 && (
             <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
               Also moddable:{" "}
               {exaltedWeapons

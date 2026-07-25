@@ -26,9 +26,6 @@ export const MOD_BEHAVIORS_STANCE: Record<string, VerifiedModBehavior> = {
   stance_burning_wasp: mod("stance_burning_wasp", [
     line("damageBonus", "mod_panel", "multiplicative_percent", "Burning Wasp: damageBonus \u2014 Whip stance: Fast strikes"),
   ]),
-  stance_buzzing_sting: mod("stance_buzzing_sting", [
-    line("damageBonus", "mod_panel", "multiplicative_percent", "Buzzing Sting: damageBonus \u2014 Claw stance: Piercing strikes"),
-  ]),
   stance_carving_mantis: mod("stance_carving_mantis", [
     line("damageBonus", "mod_panel", "multiplicative_percent", "Carving Mantis: damageBonus \u2014 Strong slashes and quick stabs that keeps momentum forward."),
   ]),
@@ -53,14 +50,8 @@ export const MOD_BEHAVIORS_STANCE: Record<string, VerifiedModBehavior> = {
   stance_defiled_snapdragon: mod("stance_defiled_snapdragon", [
     line("damageBonus", "mod_panel", "multiplicative_percent", "Defiled Snapdragon: damageBonus \u2014 Blade whip stance: Snake-like strikes"),
   ]),
-  stance_fencing_stance: mod("stance_fencing_stance", [
-    line("damageBonus", "mod_panel", "multiplicative_percent", "Fencing Stance: damageBonus \u2014 Rapier stance: Basic thrusts"),
-  ]),
   stance_flailing_branch: mod("stance_flailing_branch", [
     line("damageBonus", "mod_panel", "multiplicative_percent", "Flailing Branch: damageBonus \u2014 Lifting strikes and whirlwind combos."),
-  ]),
-  stance_frictional_strike: mod("stance_frictional_strike", [
-    line("damageBonus", "mod_panel", "multiplicative_percent", "Frictional Strike: damageBonus \u2014 Fist stance: Basic combos"),
   ]),
   stance_gnashing_payara: mod("stance_gnashing_payara", [
     line("damageBonus", "mod_panel", "multiplicative_percent", "Gnashing Payara: damageBonus \u2014 Lunging punctures with impaling spirals."),
@@ -82,9 +73,6 @@ export const MOD_BEHAVIORS_STANCE: Record<string, VerifiedModBehavior> = {
   ]),
   stance_reaping_spiral: mod("stance_reaping_spiral", [
     line("damageBonus", "mod_panel", "multiplicative_percent", "Reaping Spiral: damageBonus \u2014 Far flung attacks and multi-hit combos."),
-  ]),
-  stance_rumbling_vault: mod("stance_rumbling_vault", [
-    line("damageBonus", "mod_panel", "multiplicative_percent", "Rumbling Vault: damageBonus \u2014 Heavy blade stance: Ground slams"),
   ]),
   stance_seismic_palm: mod("stance_seismic_palm", [
     line("damageBonus", "mod_panel", "multiplicative_percent", "Seismic Palm: damageBonus \u2014 Methodical strikes with reaching combos."),
@@ -116,9 +104,6 @@ export const MOD_BEHAVIORS_STANCE: Record<string, VerifiedModBehavior> = {
   stance_temporal_royale: mod("stance_temporal_royale", [
     line("damageBonus", "mod_panel", "multiplicative_percent", "Tempo Royale: damageBonus \u2014 Sweeping strikes and twisting slashes."),
   ]),
-  stance_transcending_recut: mod("stance_transcending_recut", [
-    line("damageBonus", "mod_panel", "multiplicative_percent", "Transcending Retribution: damageBonus \u2014 Katana stance: Heavy strikes"),
-  ]),
   stance_twirling_spire: mod("stance_twirling_spire", [
     line("damageBonus", "mod_panel", "multiplicative_percent", "Twirling Spire: damageBonus \u2014 A mix of sweeping attacks with precise strikes."),
   ]),
@@ -130,9 +115,6 @@ export const MOD_BEHAVIORS_STANCE: Record<string, VerifiedModBehavior> = {
   ]),
   stance_vulpine_mask: mod("stance_vulpine_mask", [
     line("damageBonus", "mod_panel", "multiplicative_percent", "Vulpine Mask: damageBonus \u2014 Rapier stance: Cunning strikes"),
-  ]),
-  stance_war_fan: mod("stance_war_fan", [
-    line("damageBonus", "mod_panel", "multiplicative_percent", "Sarafans Weave: damageBonus \u2014 Warfan stance: Elegant strikes"),
   ]),
   stance_wise_razor: mod("stance_wise_razor", [
     line("damageBonus", "mod_panel", "multiplicative_percent", "Wise Razor: damageBonus \u2014 Deftly executed sweeps and slashes."),

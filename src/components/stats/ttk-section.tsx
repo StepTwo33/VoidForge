@@ -14,7 +14,7 @@ const FACTION_COLORS: Record<string, string> = {
   Stalker: "text-purple-400",
 };
 
-export function TTKSection({ stats }: { stats: CalculatedStats }) {
+export function TTKSection({ stats, flash }: { stats: CalculatedStats; flash?: boolean }) {
   const [level, setLevel] = useState(100);
   const [selectedFaction, setSelectedFaction] = useState("all");
   const [expandedEnemy, setExpandedEnemy] = useState<string | null>(null);
@@ -31,7 +31,7 @@ export function TTKSection({ stats }: { stats: CalculatedStats }) {
   const fmt = (n: number) => n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${(n / 1e3).toFixed(1)}K` : n.toFixed(0);
 
   return (
-    <CollapsibleSection title="TIME TO KILL" defaultOpen={false}>
+    <CollapsibleSection title="TIME TO KILL" defaultOpen={false} flash={flash}>
       <div className="mb-2 min-w-0">
         <EnemyLevelControl value={level} onChange={setLevel} label="Enemy level" />
       </div>

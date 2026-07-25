@@ -72,13 +72,36 @@ export function radialAttacksPerSecond(
   return efr * stats.multishot;
 }
 
+/**
+ * Evolution-gated radials (e.g. Miter Sawblade Storm) merged from incarnonStatChanges.
+ * Excluded while Incarnon Form is active when the perk does not affect form.
+ */
+export function evolutionExtraRadials(
+  incarnonStatChanges: Record<string, number> | undefined,
+  incarnonFormActive: boolean,
+): WeaponRadialAttack[] {
+  if (incarnonFormActive || !incarnonStatChanges) return [];
+  const blast = incarnonStatChanges.sawbladeStormBlast;
+  if (blast == null || blast <= 0) return [];
+  return [
+    {
+      name: "Sawblade Storm Explosion",
+      blast,
+      totalDamage: blast,
+      radius: incarnonStatChanges.sawbladeStormRadius ?? 5,
+    },
+  ];
+}
+
 export function scaleRadialAttacksWithDps(
   baseWeapon: Weapon,
   stats: CalculatedStats,
   /** Whether Incarnon form is active (evolutions selected) — gates Incarnon-only radials. */
   incarnonActive = false,
+  /** Extra radials from selected evolutions (Sawblade Storm, etc.). */
+  extraRadials: WeaponRadialAttack[] = [],
 ): { attacks: ScaledRadialAttack[]; radialBurstDps: number; radialSustainedDps: number } {
-  const attacks = getWeaponRadialAttacks(baseWeapon);
+  const attacks = [...getWeaponRadialAttacks(baseWeapon), ...extraRadials];
   if (!attacks.length || !baseWeapon.damage) {
     return { attacks: [], radialBurstDps: 0, radialSustainedDps: 0 };
   }
@@ -157,8 +180,21 @@ export function scaleRadialAttacksWithDps(
   let radialSustainedDps = radialBurstDps;
   const efr = shotsPerSecond(stats);
   if (!isMelee && stats.magazine > 0 && efr > 0) {
-    const magTime = stats.magazine / efr;
-    const cycleTime = magTime + stats.reloadTime;
+    // Match direct sustained: ammo-restore + instant-reload (one opportunity / mag).
+    const restoreP = stats.ammoRestoreChance ?? 0;
+    const expectedRestore =
+      restoreP * (stats.ammoRestoreFlat ?? 0) +
+      restoreP * (stats.ammoRestoreMagFraction ?? 0) * stats.magazine;
+    const ae = Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 1);
+    const ammoCost = Math.max(0.01, stats.ammoCost ?? 1);
+    const ammoPerShot = ae >= 0.99 ? 1e-9 : ammoCost * (1 - ae);
+    const magTime = (stats.magazine + expectedRestore) / (ammoPerShot * efr);
+    const instantReloadChance = Math.min(
+      1,
+      (stats.instantReloadOnKillChance ?? 0) + (stats.instantReloadOnHeadshotChance ?? 0),
+    );
+    const effectiveReload = stats.reloadTime * (1 - instantReloadChance);
+    const cycleTime = magTime + effectiveReload;
     if (cycleTime > 0) {
       radialSustainedDps = radialBurstDps * (magTime / cycleTime);
     }

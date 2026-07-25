@@ -15,7 +15,7 @@ function mod(modId: string, stats: VerifiedItemStatLine[], descriptionOnly?: str
 
 export const MOD_BEHAVIORS_NECRAMECH: Record<string, VerifiedModBehavior> = {
   necramech_augur: mod("necramech_augur", [
-    line("shield", "warframe_totals", "multiplicative_percent", "Necramech Augur: shield \u2014 240% Energy spent on abilities is converted to Shields."),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Necramech Augur — energy spent converted to Shields (not max shield)"),
   ]),
   necramech_aviator: mod("necramech_aviator", [
     line("damageReduction", "mod_panel", "multiplicative_percent", "Necramech Aviator: damageReduction \u2014 Reduced damage by 40% while airborne"),
@@ -28,7 +28,7 @@ export const MOD_BEHAVIORS_NECRAMECH: Record<string, VerifiedModBehavior> = {
     line("abilityDuration", "warframe_totals", "multiplicative_percent", "Necramech Continuity: abilityDuration \u2014 +30% Ability Duration"),
   ]),
   necramech_deflection: mod("necramech_deflection", [
-    line("shield", "warframe_totals", "multiplicative_percent", "Necramech Deflection: shield \u2014 +90% Shield Recharge, -45% Shield Recharge Delay"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Necramech Deflection — shield recharge rate/delay (not capacity)"),
   ]),
   necramech_drift: mod("necramech_drift", [], "wiki: Necramech Drift \u2014 +60% Hover Efficiency"),
   necramech_efficiency: mod("necramech_efficiency", [], "wiki: Necramech Efficiency \u2014 +30% Engine Efficiency"),
@@ -66,7 +66,7 @@ export const MOD_BEHAVIORS_NECRAMECH: Record<string, VerifiedModBehavior> = {
   necramech_refuel: mod("necramech_refuel", [], "wiki: Necramech Refuel \u2014 +20% Engine Replenish"),
   necramech_repair: mod("necramech_repair", [
     line("cooldown", "mod_panel", "multiplicative_percent", "Necramech Repair: cooldown \u2014 Restore 10% Health/s over 3s when Health drops below 20%. 15s Cooldown."),
-    line("health", "warframe_totals", "multiplicative_percent", "Necramech Repair: health \u2014 Restore 10% Health/s over 3s when Health drops below 20%. 15s Cooldown."),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Necramech Repair — conditional heal below 20% HP (not max health)"),
   ]),
   necramech_seismic_wave: mod("necramech_seismic_wave", [
     line("damage", "mod_panel", "multiplicative_percent", "Necramech Seismic Wave: damage \u2014 +45% Slam Attack Damage"),

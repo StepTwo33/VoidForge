@@ -39,7 +39,6 @@ const GENERAL_MELEE_ONLY_IDS = new Set([
   "affinity_spike",
   "flowing_strikes",
   "fracturing_wind",
-  "kitgun_riven_mod",
   "melee_riven_mod",
   "peculiar_end",
   "power_spike",
@@ -52,7 +51,6 @@ const GENERAL_RIVEN_PLACEHOLDER: Record<string, Set<string>> = {
   rifle_riven_mod: PRIMARY_WEAPON_CATEGORIES,
   pistol_riven_mod: SECONDARY_WEAPON_CATEGORIES,
   melee_riven_mod: MELEE_WEAPON_CATEGORIES,
-  kitgun_riven_mod: SECONDARY_WEAPON_CATEGORIES,
   zaw_riven_mod: MELEE_WEAPON_CATEGORIES,
 };
 

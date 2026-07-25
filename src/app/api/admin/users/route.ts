@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
       bannedAt: true,
       banReason: true,
       supporterAt: true,
+      newsletterOptIn: true,
       createdAt: true,
       _count: { select: { builds: true } },
     },

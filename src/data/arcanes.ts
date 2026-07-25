@@ -1664,8 +1664,10 @@ export const allArcanes: Mod[] = [
     drain: 0,
     maxRank: 5,
     category: "arcane",
-    subCategory: "warframe",
-    stats: {},
+    subCategory: "secondary",
+    stats: {
+      criticalChance: 50,
+    },
     description: "While Overshields Active: +300% Critical Chance",
     rarity: "rare",
   },

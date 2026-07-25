@@ -24,7 +24,7 @@ STAT_FIXES: dict[str, dict[str, float]] = {
 }
 
 WARFRAME_ID_FIXES = {
-    "energy_field": "odenata",
+    "energy_field": "odonata",
 }
 
 

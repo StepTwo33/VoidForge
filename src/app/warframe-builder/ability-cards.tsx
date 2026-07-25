@@ -73,7 +73,12 @@ export function AbilityCard({
       )}
 
       <div className="mb-3">
-        <AbilityStatsBlock ability={ability} stats={stats} display={display} />
+        <AbilityStatsBlock
+          ability={ability}
+          stats={stats}
+          display={display}
+          hasExaltedWeapon={!!exaltedWeapon}
+        />
       </div>
 
       {exaltedWeapon && (
@@ -83,7 +88,7 @@ export function AbilityCard({
           </p>
           <p className="mt-0.5 text-xs font-medium">{exaltedWeapon.name}</p>
           <p className="text-[10px] text-muted-foreground">
-            Mod this weapon in the Exalted Weapon section below.
+            Modded DPS is in the Exalted Weapon section below (not the base damage row above).
           </p>
         </div>
       )}

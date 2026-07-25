@@ -20,9 +20,35 @@ export interface ShareableBuild {
   incarnonEvolutions?: Record<number, number>;
 }
 
+/** Local offline ids look like `1730000000000_abc1234`; cloud rows use Prisma cuid. */
+export function isLocalBuildId(id: string): boolean {
+  return /^\d{10,}_[a-z0-9]+$/i.test(id);
+}
+
+function bytesToBase64Url(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function base64UrlToBytes(hash: string): Uint8Array {
+  let b64 = hash.replace(/-/g, "+").replace(/_/g, "/");
+  while (b64.length % 4) b64 += "=";
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+/** URL-safe base64 of UTF-8 JSON (handles emoji / accents that break bare `btoa`). */
 export function encodeJsonPayload(data: unknown): string {
   try {
-    return btoa(JSON.stringify(data))
+    const json = JSON.stringify(data);
+    if (typeof TextEncoder !== "undefined") {
+      return bytesToBase64Url(new TextEncoder().encode(json));
+    }
+    // Legacy fallback: percent-encode then Latin1 for btoa
+    return btoa(unescape(encodeURIComponent(json)))
       .replace(/\+/g, "-")
       .replace(/\//g, "_")
       .replace(/=+$/, "");
@@ -33,11 +59,25 @@ export function encodeJsonPayload(data: unknown): string {
 
 export function decodeJsonPayload(hash: string): unknown | null {
   try {
-    let b64 = hash.replace(/-/g, "+").replace(/_/g, "/");
-    while (b64.length % 4) b64 += "=";
-    return JSON.parse(atob(b64));
+    const bytes = base64UrlToBytes(hash);
+    let json: string;
+    if (typeof TextDecoder !== "undefined") {
+      json = new TextDecoder().decode(bytes);
+    } else {
+      let binary = "";
+      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!);
+      json = decodeURIComponent(escape(binary));
+    }
+    return JSON.parse(json);
   } catch {
-    return null;
+    // Legacy Latin1-only payloads from older shares
+    try {
+      let b64 = hash.replace(/-/g, "+").replace(/_/g, "/");
+      while (b64.length % 4) b64 += "=";
+      return JSON.parse(atob(b64));
+    } catch {
+      return null;
+    }
   }
 }
 

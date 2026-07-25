@@ -195,6 +195,9 @@ export function normalizeWarframeBuild(d: WarframeBuildData): NonNullable<Loadou
     exaltedMods: d.exaltedMods ?? [],
     exaltedSlotPolarities: d.exaltedSlotPolarities ?? {},
     exaltedArcaneIds: d.exaltedArcaneIds ?? [null, null],
+    exaltedMeleeMods: d.exaltedMeleeMods ?? [],
+    exaltedMeleeSlotPolarities: d.exaltedMeleeSlotPolarities ?? {},
+    exaltedMeleeArcaneIds: d.exaltedMeleeArcaneIds ?? [null, null],
     dualFormBuilds: d.dualFormBuilds,
   };
 }

@@ -13,6 +13,7 @@ export function calculatedStatsToSimInputs(stats: CalculatedStats): {
   statusDamageBonus: number;
   headshotDamageBonus: number;
   factionBonuses: Record<string, number>;
+  punctureArmorStripPerStack?: number;
 } {
   const dmgTypes: Record<string, number> = {};
   if (stats.impact > 0) dmgTypes.impact = stats.impact;
@@ -37,6 +38,9 @@ export function calculatedStatsToSimInputs(stats: CalculatedStats): {
     statusDamageBonus: stats.statusDamageBonus ?? 0,
     headshotDamageBonus: stats.headshotDamageBonus ?? 0,
     factionBonuses: { ...(stats.factionBonuses ?? {}) },
+    ...(stats.punctureArmorStripPerStack
+      ? { punctureArmorStripPerStack: stats.punctureArmorStripPerStack }
+      : {}),
   };
 }
 

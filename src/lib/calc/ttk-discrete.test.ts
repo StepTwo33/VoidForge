@@ -5,6 +5,7 @@ import {
   ENEMY_TYPES,
   viralHealthMultiplier,
   corrosiveArmorRemaining,
+  punctureArmorRemaining,
   scaleArmor,
   simulateDiscreteTTK,
 } from "@/lib/calc/ttk";
@@ -140,5 +141,61 @@ describe("discrete TTK sim", () => {
 describe("corrosive remaining vs discrete peak", () => {
   it("10 stacks leave 20% armor", () => {
     expect(corrosiveArmorRemaining(10)).toBeCloseTo(0.2, 10);
+  });
+});
+
+describe("punctureArmorRemaining (Flensing Spikes)", () => {
+  it("removes 20% of original armor per stack; 5 stacks = full strip", () => {
+    expect(punctureArmorRemaining(0, 0.2)).toBe(1);
+    expect(punctureArmorRemaining(1, 0.2)).toBeCloseTo(0.8, 10);
+    expect(punctureArmorRemaining(5, 0.2)).toBeCloseTo(0, 10);
+    expect(punctureArmorRemaining(10, 0.2)).toBeCloseTo(0, 10);
+  });
+});
+
+describe("Flensing Spikes TTK", () => {
+  it("shortens TTK vs armored targets when puncture strip is active", () => {
+    const gunner = ENEMY_TYPES.find((e) => e.id === "heavy_gunner")!;
+    const base = bareStats({
+      totalDamage: 80,
+      puncture: 80,
+      fireRate: 8,
+      statusChance: 1,
+      multishot: 1,
+      magazine: 100,
+      reloadTime: 2,
+      moddedBaseDamage: 80,
+    });
+    const flensing = { ...base, punctureArmorStripPerStack: 0.2 };
+    const a = simulateDiscreteTTK(base, gunner, 80);
+    const b = simulateDiscreteTTK(flensing, gunner, 80);
+    expect(Number.isFinite(b.ttk)).toBe(true);
+    expect(b.ttk).toBeLessThan(a.ttk);
+  });
+});
+
+describe("shield → health overflow (Phase 4)", () => {
+  it("applies overkill past shields using health-type mods (not a no-op)", () => {
+    const crewman = ENEMY_TYPES.find((e) => e.id === "crewman" || e.id === "corpus_crewman");
+    const shielded =
+      crewman ??
+      ENEMY_TYPES.find((e) => e.shieldType !== "none" && e.baseShield > 0);
+    expect(shielded).toBeDefined();
+
+    // One huge shot: must break shields and deal health overflow in the same hit
+    const stats = bareStats({
+      totalDamage: 50_000,
+      impact: 50_000,
+      fireRate: 1,
+      multishot: 1,
+      statusChance: 0,
+      magazine: 10,
+      reloadTime: 2,
+      moddedBaseDamage: 50_000,
+    });
+    const r = simulateDiscreteTTK(stats, shielded!, 1);
+    expect(r.discrete).toBe(true);
+    expect(r.ttk).toBeLessThan(2);
+    expect(r.shotsToKill).toBe(1);
   });
 });

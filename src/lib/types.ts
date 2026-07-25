@@ -41,6 +41,10 @@ export interface Weapon {
   magazine: number;
   reloadTime: number;
   multishot: number;
+  /**
+   * Ammo consumed per shot (default 1). Staticor charged fire costs 5.
+   */
+  ammoCost?: number;
   triggerType: string;
   modSlots: number;
   hasPrimaryArcaneSlot: boolean;
@@ -85,6 +89,11 @@ export interface Weapon {
    * (and radial attacks, when provided) with the atmospheric values.
    */
   atmosphereStats?: WeaponAtmosphereStats;
+  /**
+   * Optional alternate fire/form overlay (e.g. Staticor charged, Dark Split-Sword
+   * Heavy Blade). Catalog default is the primary form; toggle merges these fields.
+   */
+  alternateModeStats?: WeaponAlternateModeStats;
 }
 
 /** Stat overrides applied when an archgun is deployed via Gravimag (atmosphere). */
@@ -111,6 +120,43 @@ export interface WeaponAtmosphereStats {
   reloadTime?: number;
   multishot?: number;
   /** Atmosphere-specific radial attack profiles (replace the Archwing ones). */
+  radialAttacks?: WeaponRadialAttack[];
+}
+
+/** Alternate fire / stance-form overlays (builder toggle; default catalog = off). */
+export interface WeaponAlternateModeStats {
+  /** Short UI label when the alternate mode is active. */
+  label: string;
+  damage?: number;
+  impact?: number;
+  puncture?: number;
+  slash?: number;
+  heat?: number;
+  cold?: number;
+  toxin?: number;
+  electricity?: number;
+  radiation?: number;
+  viral?: number;
+  corrosive?: number;
+  blast?: number;
+  gas?: number;
+  magnetic?: number;
+  fireRate?: number;
+  criticalChance?: number;
+  criticalMultiplier?: number;
+  statusChance?: number;
+  magazine?: number;
+  reloadTime?: number;
+  multishot?: number;
+  /** Ammo consumed per shot while this mode is active (e.g. Staticor charged = 5). */
+  ammoCost?: number;
+  /** Charge timing for effective fire rate while this mode is active. */
+  chargeTime?: number;
+  chargeMode?: "standard" | "bow" | "lanka";
+  triggerType?: string;
+  /** Melee form swap (e.g. Dual Swords → Heavy Blade). */
+  stanceType?: string;
+  /** Replace default radial profiles while alternate mode is on. */
   radialAttacks?: WeaponRadialAttack[];
 }
 
@@ -208,6 +254,8 @@ export interface SetBonusLinkage {
   secondaryMods?: ModSlot[];
   meleeMods?: ModSlot[];
   companionMods?: ModSlot[];
+  /** Beast claw / companion weapon mods (elementals for Mecha transferred DoT). */
+  companionWeaponMods?: ModSlot[];
 }
 
 export interface SetBonusSummaryLine {
@@ -253,6 +301,11 @@ export interface WeaponExternalBuffElemental {
   type: string;
   /** Fraction of base weapon damage, same as mod elemental (+0.6 = +60%). */
   bonusFraction: number;
+  /**
+   * When true, added after elemental combos (wiki Fireball Frenzy / Freeze Force /
+   * Shock Trooper / Venom Dose / Smite Infusion — parallel, does not combine).
+   */
+  parallel?: boolean;
 }
 
 /** Buff from warframe abilities, archon shards, or other loadout-wide sources. */
@@ -272,13 +325,45 @@ export interface WeaponExternalBuff {
    */
   damageMultBonus?: number;
   critChanceBonus?: number;
+  /**
+   * Flat add to final critical chance after relative mods
+   * (wiki: Wrathful Advance — e.g. +2.0 = +200% final CC).
+   */
+  critChanceFlatBonus?: number;
   critMultBonus?: number;
   /** Flat add to final crit multiplier after percent bonuses (+1.2 = +1.2×). */
   critMultFlatBonus?: number;
   statusBonus?: number;
   fireRateBonus?: number;
+  /** Additive reload-speed bonus (+0.7 = +70%; reduces reload time). */
+  reloadBonus?: number;
   multishotBonus?: number;
   elemental?: WeaponExternalBuffElemental[];
+  /**
+   * Extra hit as a fraction of modded total damage (Toxic Lash / Xata's Whisper).
+   * Paper DPS multiplies by (1 + fraction × elementalDip); does not dilute weapon elements.
+   */
+  extraHitDamageFraction?: number;
+  /** Toxic Lash: Extra Hit always procs Toxin (feeds DoT + faction triple-dip). */
+  extraHitGuaranteedToxin?: boolean;
+  /**
+   * Forced status proc on every hit (Valence Formation). Independent of status chance /
+   * damage weighting — stacks with normal weighted procs.
+   */
+  guaranteedStatusElement?: string;
+  /**
+   * Flat ability toxin cloud DPS (Contagion Cloud). Not weapon-modded; added to
+   * burst/sustained after direct DPS when sim enemies > 0.
+   */
+  abilityCloudDps?: number;
+  /**
+   * Projectile speed bonus fraction (Jet Stream). Display-only — does not change DPS.
+   */
+  projectileSpeedBonus?: number;
+  /**
+   * Sprint / move speed bonus fraction (Jet Stream). Applied to warframe totals in loadout.
+   */
+  sprintSpeedBonus?: number;
   nominal?: string;
 }
 
@@ -290,6 +375,14 @@ export interface WeaponCalculationOptions {
   progenitorBonusPercent?: number;
   /** Loadout-wide buffs applied after weapon mods (abilities, shards, …). */
   externalBuffs?: WeaponExternalBuff[];
+  /** When true, Incarnon Form radials contribute to DPS (form attack active). */
+  incarnonFormActive?: boolean;
+  /**
+   * Host Warframe Ability Strength (1 = 100%). Scales most exalted weapon base
+   * damage before mods. Garuda Talons (Passive) ignore this. Lizzie uses an
+   * additive 1.25×STR−1 pool instead of a flat base multiply.
+   */
+  abilityStrength?: number;
 }
 
 export interface ElementalDamage {
@@ -321,8 +414,129 @@ export interface SimulationParams {
   extraTekSetPiecesOffWeapon?: number;
   /** If Tek 4-set is complete and this is enabled, apply +60% damage vs marked enemies to primary DPS. */
   applyTekSetVsMarkedDamage?: boolean;
+  /**
+   * If Hunter set pieces are equipped and this is enabled, apply +25%/piece companion
+   * weapon damage vs Slash-status targets (beast claws / sentinel weapons only).
+   */
+  applyHunterSetVsSlashDamage?: boolean;
+  /**
+   * If Mecha Empowered is equipped and ≥1 Mecha set piece marks a target, apply
+   * +150% squad damage vs that marked enemy (optional DPS toggle).
+   */
+  applyMechaEmpoweredVsMarkedDamage?: boolean;
   /** Warframe ability names treated as active weapon damage buffs (e.g. "Roar", "Eclipse"). */
   activeWeaponAbilityBuffs?: string[];
+  /**
+   * Vex Armor Fury progress 0–1 (default 1 = max stacks). Multiplies the +275% Fury bonus.
+   */
+  vexArmorFuryFraction?: number;
+  /**
+   * Onos Incarnon Form attack: held Radiation beam (default) or full-charge Heat blast.
+   */
+  onosIncarnonMode?: "held" | "charge";
+  /**
+   * Arbucep attack cycle (1–6). Default / unset = 1st Attack (Blast).
+   * Wiki: Blast → Corrosive → Gas → Magnetic → Radiation → Viral.
+   */
+  arbucepAttackMode?: 1 | 2 | 3 | 4 | 5 | 6;
+  /**
+   * Toxic Lash + Spores synergy: Spore-afflicted target takes TWO Extra Hits
+   * (wiki), but still only one Toxin status stack.
+   */
+  toxicLashSporesOnTarget?: boolean;
+  /**
+   * Contagion Cloud (Toxic Lash augment): number of enemies assumed standing in
+   * active clouds. 0 = off (default). Contribution is ability toxin DPS × STR
+   * (×2 melee) × enemies — not folded into single-target TTK.
+   */
+  contagionCloudEnemies?: number;
+  /**
+   * Thrall Pact (Enthrall augment): active thrall count (0–7). 0 = off.
+   * Primary damage bonus = catalog% × Strength × thralls.
+   */
+  thrallCount?: number;
+  /**
+   * Thermal Transfer (Thermal Sunder augment): active polarity.
+   * cold = tap, heat = hold, blast = both (sum as parallel Blast).
+   * Requires "Thermal Sunder" in activeWeaponAbilityBuffs + augment equipped.
+   */
+  thermalTransferPolarity?: "cold" | "heat" | "blast";
+  /**
+   * Razorwing Blitz: ability-cast stacks while Razorwing is active (0–4). 0 = off.
+   * Fire/attack speed = 25% × stacks × Strength (Dex Pixia / Diwata only).
+   */
+  razorwingBlitzStacks?: number;
+  /**
+   * Critical Surge: meters teleported to a Reservoir (0 = off).
+   * Primary CC = min(250%, per-meter% × meters × Strength); in-game min teleport 10m.
+   */
+  criticalSurgeTeleportMeters?: number;
+  /**
+   * Furious Javelin: enemies hit by Radial Javelin (0 = off).
+   * Melee damage mult = per-enemy% × Strength × enemies (Eclipse-style; includes exalted).
+   */
+  furiousJavelinEnemies?: number;
+  /**
+   * Valence Formation: imbued element applied as parallel weapon elemental + guaranteed status.
+   * Requires "Valence Formation" in activeWeaponAbilityBuffs + augment equipped.
+   * Not × Strength (wiki rank table 50–200%).
+   */
+  valenceFormationElement?:
+    | "heat"
+    | "cold"
+    | "electricity"
+    | "toxin"
+    | "blast"
+    | "gas"
+    | "magnetic"
+    | "radiation"
+    | "viral"
+    | "corrosive";
+  /**
+   * Critical Precision (Tiberon): headshot stacks (0–50). Undefined = max when trigger on.
+   * Miss with full burst removes ~10 stacks (100% CC of the bonus track).
+   */
+  criticalPrecisionStacks?: number;
+  /**
+   * Critical Mutation (Catabolyst): kill stacks (0–10). Undefined = max when trigger on.
+   * Grenade hitting fewer than 3 enemies removes 1 stack (30% at R5).
+   */
+  criticalMutationStacks?: number;
+  /**
+   * Mecha Set: enemies hit by status-spread on mark-kill (0 = off). Amortizes
+   * transferred DoT DPS over mark cooldown; needs ≥1 Mecha piece via linkage.
+   */
+  mechaSpreadEnemies?: number;
+  /**
+   * Mecha Set: extra enemies from a second mark-kill cascade within the same
+   * amortized cooldown window (0 = off). Same tick math as first-hop spread;
+   * user-estimated — not mission AI.
+   */
+  mechaCascadeEnemies?: number;
+  /**
+   * Thalys Incarnon: number of enemies with embedded shards (0 = off).
+   * Papers form embed triggers + Chain Shatter heavy detonations.
+   */
+  shardHosts?: number;
+  /**
+   * Thalys Explosive Growth: how many of those hosts are fully grown and erupt
+   * at ×shardFullyGrownDamageMult on embed trigger (0 = off; clamped to hosts−1).
+   */
+  shardFullyGrownHosts?: number;
+  /**
+   * Innodem Swooping Lunge stacks (0–3). When unset and perk is equipped, paper
+   * assumes max (3).
+   */
+  airborneKillStacks?: number;
+  /**
+   * Destreza form: Heavy Attack kills granting +10% Puncture (0–30). 0 = off.
+   */
+  heavyKillStacks?: number;
+  /**
+   * Nyx Absorb: damage absorbed before release (0 = off). Drives post-blast
+   * additive weapon damage buff √(0.025% × STR × absorbed), capped at 400%.
+   */
+  absorbAbsorbedDamage?: number;
   /** Tenacious Bond: +1.2× crit damage when companion crit > 50%. Default on in loadout calcs. */
   applyTenaciousBondCrit?: boolean;
   /** Reinforced Bond: +60% fire rate when companion shields exceed threshold. Default on in loadout calcs. */
@@ -337,11 +551,26 @@ export interface SimulationParams {
   /** Include approximate stance damage multiplier on melee DPS. Default true. */
   applyStanceMultiplier?: boolean;
   /**
+   * Stance combo string direction (C6). Default / unset = Neutral (B1 lock).
+   * Forward / Forward Block / Block / Heavy / Slide use wiki hit-avg scalars.
+   */
+  stanceComboDirection?: "neutral" | "forward" | "forwardBlock" | "block" | "heavy" | "slide";
+  /**
+   * Stance DPS model (C6b). Default / unset = hit-avg (B1/C6).
+   * `cycle` = wiki Avg Dmg Multi/s (ΣDmg%/Duration) × Attack Speed.
+   */
+  stanceDpsModel?: "hitAvg" | "cycle";
+  /**
    * Treat aim/reload/cast/wall-latch trigger buffs as active
    * (Catalyzer Link, Spring-Loaded Chamber, Deadly Efficiency, …). Default false —
    * the in-game arsenal never includes them.
    */
   applyTriggerBuffs?: boolean;
+  /**
+   * Warframe armor used by Primary Bulwark (wiki: +% dmg per armor over 1000).
+   * Undefined / 0 = no Bulwark bonus on paper DPS.
+   */
+  warframeArmor?: number;
 }
 
 export const DEFAULT_SIM_PARAMS: SimulationParams = {
@@ -354,6 +583,8 @@ export const DEFAULT_SIM_PARAMS: SimulationParams = {
   extraSynthSetPiecesOffWeapon: 0,
   extraTekSetPiecesOffWeapon: 0,
   applyTekSetVsMarkedDamage: false,
+  applyHunterSetVsSlashDamage: false,
+  applyMechaEmpoweredVsMarkedDamage: false,
   targetFaction: undefined,
   applyHeadshots: false,
   applyStanceMultiplier: true,
@@ -384,7 +615,102 @@ export interface CalculatedStats {
   statusChancePerShot: number;
   magazine: number;
   reloadTime: number;
+  /** Ammo consumed per shot (default 1). Used with ammoEfficiency for sustained DPS. */
+  ammoCost?: number;
+  /**
+   * Chance not to consume ammo (0–1). Extends mag cycle in sustained DPS;
+   * ≥0.99 treated as no reload.
+   */
+  ammoEfficiency?: number;
   multishot: number;
+  /** Melee reach / falloff meters added by incarnon (and similar) — display only. */
+  range?: number;
+  /** Ammo reserve after incarnon set/add perks — display only (base ammo not always in weapon data). */
+  ammoMax?: number;
+  /** Punch Through meters from incarnon/rivens — display only (no DPS model). */
+  punchThrough?: number;
+  /** Projectile speed bonus fraction from incarnon/rivens — display only. */
+  projectileSpeed?: number;
+  /** Melee follow-through bonus fraction from incarnon — display only (no DPS model). */
+  followThrough?: number;
+  /** Accuracy bonus fraction from incarnon/rivens — display only (no DPS model). */
+  accuracy?: number;
+  /** Recoil change fraction from incarnon/rivens (negative = less recoil) — display only. */
+  recoil?: number;
+  /** Fraction of magazine reloaded per second while holstered (Incarnon) — display only. */
+  holsterReloadPerSec?: number;
+  /** Chance to instantly reload on kill (Incarnon) — display only. */
+  instantReloadOnKillChance?: number;
+  /** Chance to instantly reload on headshot / headshot-kill (Incarnon) — display only. */
+  instantReloadOnHeadshotChance?: number;
+  /** Zoom change fraction from incarnon/rivens (negative = less zoom) — display only. */
+  zoom?: number;
+  /** Movement speed fraction (not sprint) from incarnon — display only. */
+  movementSpeedBonus?: number;
+  /** Slam attack radius bonus fraction from incarnon — display only. */
+  slamRadius?: number;
+  /** Finisher damage bonus fraction from incarnon/rivens — display only. */
+  finisherDamage?: number;
+  /** Combo timer pauses while holstered (Standoff / Abiding Hold) — display only. */
+  comboTimerPauseWhenHolstered?: boolean;
+  /** Chance to restore ammo on perk trigger (kill / PT hit / Electric status) — display only. */
+  ammoRestoreChance?: number;
+  /** Flat rounds restored when ammoRestoreChance procs — display only. */
+  ammoRestoreFlat?: number;
+  /** Magazine fraction restored when ammoRestoreChance procs — display only. */
+  ammoRestoreMagFraction?: number;
+  /** Extra Incarnon charge from headshots (e.g. +50% → 0.5) — display only. */
+  incarnonHeadshotChargeBonus?: number;
+  /** Weapon is silent (enemies won't hear gunfire) — display only. */
+  silentWeapon?: boolean;
+  /** Melee combo granted when collecting ammo — display only. */
+  comboOnAmmoPickup?: number;
+  /** Extra mid-air jumps (Ternary Vault) — display only. */
+  extraJumps?: number;
+  /** Double-jump / jump strength bonus fraction — display only. */
+  jumpStrength?: number;
+  /** Heal regen per second from perk trigger — display only. */
+  healRegenPerSec?: number;
+  /** Status-chance vulnerability on marked/impaled targets (fraction) — display / paper SC. */
+  statusChanceVulnerability?: number;
+  /** Puncture status stacks applied while impaled — display only. */
+  punctureStatusOnImpale?: number;
+  /** Combo count chance bonus on finishers (fraction) — display only. */
+  finisherComboCountChance?: number;
+  /** Flat combo granted on finisher — display only. */
+  comboOnFinisher?: number;
+  /** Combo on Slash-status targets (Seeing Red) — display only. */
+  comboOnSlashStatus?: number;
+  /** Combo on Toxin-status targets (Alchemist's Wrath) — display only. */
+  comboOnToxinStatus?: number;
+  /** Combo on Cold-status targets (Master's Shatter) — display only. */
+  comboOnColdStatus?: number;
+  /** Combo on undamaged enemies (Wartime Nerve) — display only. */
+  comboOnUndamaged?: number;
+  /** Combo granted per slam-radius enemy hit — display only. */
+  comboPerSlamHit?: number;
+  /** Combo granted per slide-attack enemy hit — display only. */
+  comboPerSlideHit?: number;
+  /** Combo granted per N meters of continuous slide — display only. */
+  comboPerSlideMeters?: number;
+  /** Slide distance (m) required for comboPerSlideMeters — display only. */
+  comboSlideMeterInterval?: number;
+  /** Combo granted on shard damage tick — display only. */
+  comboOnShardDamage?: number;
+  /** Stun radius on finisher (m) — display only. */
+  stunRadiusOnFinisher?: number;
+  /** Knockdown radius on ground finisher (m) — display only. */
+  knockdownRadiusOnFinisher?: number;
+  /** Embedded shard duration (s) — display only. */
+  shardDuration?: number;
+  /** Extra crit chance while attacking shard weak spots — display only. */
+  shardWeakSpotCritBonus?: number;
+  /** Shard damage multiplier delta (e.g. −0.5) — display only. */
+  shardDamageMult?: number;
+  /** Fully grown shard erupt damage mult — display only. */
+  shardFullyGrownDamageMult?: number;
+  /** Lingering damage-field duration multiplier (Renewed Horror) — display only. */
+  lingeringFieldDurationMult?: number;
   // DPS
   burstDps: number;
   sustainedDps: number;
@@ -450,10 +776,16 @@ export interface CalculatedStats {
   vigilanteCritBonus?: number; // Vigilante set: chance to enhance crit tier (0.05 per mod)
   /** Incarnon Devouring/Devastating Attrition: avg bonus damage multiplier on non-crit hits (0.5 × +2000% = 10). */
   devouringAttritionBonus?: number;
+  /** Latron Flensing Spikes: fraction of original armor removed per Puncture status stack. */
+  punctureArmorStripPerStack?: number;
   /** Synth 4-set: +0.15 reload speed bonus applied to secondaries when complete. */
   synthSetReloadBonusApplied?: number;
   /** Tek 4-set: damage multiplier vs marked when sim + set complete (primary only). */
   tekSetVsMarkedDamageMultiplier?: number;
+  /** Hunter set: companion weapon damage multiplier vs Slash-status when sim toggle on. */
+  hunterSetVsSlashDamageMultiplier?: number;
+  /** Mecha Empowered: damage multiplier vs marked when sim toggle on (+150% → 2.5). */
+  mechaEmpoweredVsMarkedDamageMultiplier?: number;
   /** Cross-slot set detection (optional). */
   setBonusSummary?: SetBonusSummaryLine[];
   /** Mod-scaled radial / AoE attacks when the weapon has them. */
@@ -462,6 +794,26 @@ export interface CalculatedStats {
   radialBurstDps?: number;
   /** Radial burst DPS adjusted for reload/magazine cycle. */
   radialSustainedDps?: number;
+  /**
+   * Contagion Cloud ability toxin DPS contribution (sim-gated enemies × STR).
+   * Included in burstDps/sustainedDps totals when > 0; excluded from TTK.
+   */
+  contagionCloudDps?: number;
+  /**
+   * Mecha mark-kill status-spread DoT DPS (sim enemies × transferred ticks / CD).
+   * Included in burst/sustained; excluded from TTK.
+   */
+  mechaSpreadDps?: number;
+  /**
+   * Thalys shard embed-trigger + Chain Shatter detonation DPS (sim shardHosts).
+   * Included in burst/sustained; excluded from TTK.
+   */
+  shardChainDps?: number;
+  /**
+   * Residual Boils/Shock/Malodor/Viremia kitgun zone DPS (paper: stacks>0 = zone up).
+   * Included in burstDps/sustainedDps; flat unmodded zone damage.
+   */
+  residualZoneDps?: number;
   /** Accumulated arcane stat values for display / future modeling. */
   arcaneBonuses?: Record<string, number>;
   /** Unverified or panel-only mod stat values keyed as `modId::statKey`. */
@@ -475,6 +827,8 @@ export interface CalculatedStats {
    * (e.g. Amalgam Serration +55% at max → 0.55).
    */
   sprintSpeedBonus?: number;
+  /** Parkour velocity fraction from incarnon / weapon movement perks — display only. */
+  parkourVelocityBonus?: number;
   /** Elementalist-style status effect damage bonus (fraction). */
   statusDamageBonus?: number;
   /** Acuity / headshot damage bonus (fraction on top of base head multi). */
@@ -489,6 +843,27 @@ export interface CalculatedStats {
   factionBonuses?: Record<string, number>;
   /** Average stance damage mult applied to melee light DPS (1 = no stance). */
   stanceDamageMultiplier?: number;
+  /**
+   * Sum of Extra Hit fractions from abilities (Toxic Lash / Xata).
+   * Burst/sustained DPS multiply by (1 + this × factionHit) for Extra Hit's second faction dip.
+   */
+  extraHitDamageFraction?: number;
+  /** Toxic Lash Extra Hit: guaranteed Toxin proc / DoT path. */
+  extraHitGuaranteedToxin?: boolean;
+  /** Forced status element on every hit (Valence Formation). */
+  guaranteedStatusElement?: string;
+  /**
+   * How many Extra Hit damage instances per weapon hit (1, or 2 with Spores synergy).
+   * Does not multiply the guaranteed Toxin DoT stack count.
+   */
+  extraHitInstances?: number;
+  /**
+   * Sum of toxin mod bonuses as fraction of base (even when combined into Viral/etc.).
+   * Used for Toxic Lash Toxin tick type mult.
+   */
+  toxinModBonusFraction?: number;
+  /** Flat initial combo from Incarnon Adept Reflexes etc. */
+  incarnonInitialCombo?: number;
   /** Crit/status before Blood Rush / Weeping; used when combo count changes after arcanes. */
   preComboCriticalChance?: number;
   preComboStatusChance?: number;
@@ -531,6 +906,8 @@ export interface WarframeCalculatedStats {
   castingSpeedBonus: number;
   parkourVelocityBonus: number;
   healthRegenPerSec: number;
+  /** Additive shield recharge rate fraction (e.g. Arcane Aegis +30% → 0.30). */
+  shieldRechargeBonus?: number;
   elementalResistance: number;
   primaryShardBonus: number;
   secondaryShardBonus: number;
@@ -542,8 +919,10 @@ export interface WarframeCalculatedStats {
   setBonusSummary?: SetBonusSummaryLine[];
   /** Augur 6-set: percent of energy spent converted to shields (display / future EHP modeling). */
   augurEnergyToShieldsPercent?: number;
-  /** Hunter 6-set: companion damage bonus vs status-affected enemies (+150% → 150 here). */
+  /** Hunter set: companion damage bonus vs Slash-status enemies (+150% → 150 here). */
   hunterCompanionVsStatusDamagePercent?: number;
+  /** Mecha set piece count (for mark timing panel). */
+  mechaSetPieces?: number;
   /**
    * When Adaptation is equipped: typed DR stacks (see computeAdaptationSurvivability in UI).
    */
@@ -654,9 +1033,14 @@ export interface RailjackCalculatedStats {
   hull: number;
   armor: number;
   shield: number;
+  /** % of max shields recharged per second. */
   shieldRecharge: number;
+  /** Seconds removed from shield recharge delay (wiki mid). */
+  shieldRechargeDelayReduction?: number;
   speed: number;
   boostSpeed: number;
+  /** Equipped boost multiplier used to derive boostSpeed. */
+  boostMultiplier?: number;
   boostCost: number;
   fluxCapacity: number;
   avionicsCapacity: number;
@@ -671,6 +1055,20 @@ export interface RailjackCalculatedStats {
   munitionsCapacityBonus: number;
   turrets: RailjackArmamentComputed[];
   ordnance: RailjackArmamentComputed | null;
+  /** Tunguska / Forward Artillery paper (always equipped). */
+  artillery?: {
+    id: string;
+    name: string;
+    damage: number;
+    critChance: number;
+    critMultiplier: number;
+    statusChance: number;
+    chargeTime: number;
+    /** Average damage per charged shot (includes crit expectation). */
+    avgShotDamage: number;
+    /** Avg shot damage ÷ charge time (Dome Charge economy not modeled). */
+    estimatedDps: number;
+  };
   modBonuses?: Record<string, number>;
   /** Reactor battle-mod scaling from equipped reactor. */
   abilityStrengthBonus?: number;
@@ -688,6 +1086,28 @@ export interface RailjackCalculatedStats {
   tacticalAbilities?: RailjackAbilityComputed[];
   /** Extra turret damage from simulated active battle/tactical abilities. */
   abilityTurretDamageBonus?: number;
+  /** House unique traits currently applied to paper stats. */
+  activeHouseTraits?: { id: string; text: string }[];
+  /** Selected wreckage trait rolls (one per house component), including display-only. */
+  selectedHouseTraits?: { id: string; text: string }[];
+  /** Normalized Intrinsics ranks (0–10). */
+  intrinsics?: {
+    tactical: number;
+    piloting: number;
+    gunnery: number;
+    engineering: number;
+    command: number;
+  };
+  /** Paper / unlock effects derived from Intrinsics. */
+  intrinsicEffects?: {
+    dorsalVentralTurretDamageBonus: number;
+    battleEnergyCostMult: number;
+    tacticalCooldownReduction: number;
+    domeChargeForge: boolean;
+    ordnanceForge: boolean;
+    eliteCrewUnlocked: boolean;
+    panelNotes: string[];
+  };
 }
 
 export interface RailjackAbilityComputed {
@@ -726,6 +1146,9 @@ export interface Loadout {
     exaltedMods?: ModSlot[];
     exaltedSlotPolarities?: Record<number, string>;
     exaltedArcaneIds?: (string | null)[];
+    exaltedMeleeMods?: ModSlot[];
+    exaltedMeleeSlotPolarities?: Record<number, string>;
+    exaltedMeleeArcaneIds?: (string | null)[];
     /** Non-default form mod configs for dual-form warframes (e.g. Orion on Sirius & Orion). */
     dualFormBuilds?: Record<string, { mods: ModSlot[]; slotPolarities?: Record<number, string> }>;
   };

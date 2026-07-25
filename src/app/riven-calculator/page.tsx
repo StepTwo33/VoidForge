@@ -3,13 +3,13 @@
 import { useState, useMemo, useCallback } from "react";
 import { PageShell, PageMain, PageHero, FilterChip } from "@/components/page-shell";
 import { allWeapons } from "@/data/weapons";
-import { getDisposition } from "@/data/riven-dispositions";
+import { getDispositionInfo } from "@/data/riven-dispositions";
 import {
   RivenMod, RivenStat,
   evaluateRiven, getRivenGrade, getGradeColor,
   getRerollCost,
-  getStatsWithDisposition, getNegativeStats,
-  getStatTier, getStatTierColor,
+  getStatsWithDisposition, getNegativeStatsWithDisposition,
+  getStatTier, getStatTierColor, isValueInStatRange,
 } from "@/lib/calc/riven-calculator";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,12 +28,20 @@ function getWeaponTypeFromCategory(cat: string): string {
   return "Rifle";
 }
 
+function formatRangeHint(stat: RivenStat | undefined): string {
+  if (!stat) return "";
+  const lo = Math.min(Math.abs(stat.minValue), Math.abs(stat.maxValue));
+  const hi = Math.max(Math.abs(stat.minValue), Math.abs(stat.maxValue));
+  if (stat.type === "percent") return `${lo.toFixed(0)}–${hi.toFixed(0)}%`;
+  if (stat.type === "seconds") return `${lo.toFixed(1)}–${hi.toFixed(1)}s`;
+  return `${lo.toFixed(1)}–${hi.toFixed(1)}`;
+}
+
 export default function RivenCalculatorPage() {
   const [selectedWeaponType, setSelectedWeaponType] = useState<string | null>(null);
   const [selectedWeapon, setSelectedWeapon] = useState<string | null>(null);
   const [weaponSearch, setWeaponSearch] = useState("");
 
-  // Grader state
   const [graderPositives, setGraderPositives] = useState<{ name: string; value: number }[]>([]);
   const [graderNegative, setGraderNegative] = useState<{ name: string; value: number } | null>(null);
   const graderPolarity = "madurai";
@@ -54,21 +62,55 @@ export default function RivenCalculatorPage() {
     return weapons.sort((a, b) => a.name.localeCompare(b.name));
   }, [selectedWeaponType, weaponSearch]);
 
-  const disposition = selectedWeapon ? getDisposition(selectedWeapon) : 1.0;
+  const dispositionInfo = selectedWeapon
+    ? getDispositionInfo(selectedWeapon)
+    : { value: 1.0, known: false };
+  const disposition = dispositionInfo.value;
+
+  const rangeOptions = useMemo(
+    () => ({
+      positiveCount: Math.max(1, graderPositives.filter((s) => s.name).length || 2),
+      hasNegative: !!(graderNegative && graderNegative.name),
+      rank: graderRank,
+    }),
+    [graderPositives, graderNegative, graderRank],
+  );
+
+  const scaledPositivePool = useMemo(() => {
+    if (!selectedWeaponType) return [];
+    return getStatsWithDisposition(selectedWeaponType.toLowerCase(), disposition, rangeOptions);
+  }, [selectedWeaponType, disposition, rangeOptions]);
+
+  const scaledNegativePool = useMemo(
+    () => getNegativeStatsWithDisposition(disposition, rangeOptions),
+    [disposition, rangeOptions],
+  );
 
   const handleGrade = useCallback((): { score: number; grade: string; color: string } | null => {
     if (!selectedWeapon || graderPositives.length === 0) return null;
     const posStats: RivenStat[] = graderPositives
       .filter((s) => s.name)
-      .map((s) => ({
-        name: s.name,
-        type: "percent",
-        baseValue: s.value,
-        minValue: s.value * 0.5,
-        maxValue: s.value * 1.5,
-      }));
+      .map((s) => {
+        const pool = scaledPositivePool.find((p) => p.name === s.name);
+        return {
+          name: s.name,
+          type: pool?.type ?? "percent",
+          baseValue: s.value,
+          minValue: pool?.minValue ?? s.value * 0.5,
+          maxValue: pool?.maxValue ?? s.value * 1.5,
+        };
+      });
+    const negPool = graderNegative?.name
+      ? scaledNegativePool.find((p) => p.name === graderNegative.name)
+      : undefined;
     const negStat: RivenStat | null = graderNegative && graderNegative.name
-      ? { name: graderNegative.name, type: "percent", baseValue: -Math.abs(graderNegative.value), minValue: -Math.abs(graderNegative.value) * 1.5, maxValue: -Math.abs(graderNegative.value) * 0.5 }
+      ? {
+          name: graderNegative.name,
+          type: negPool?.type ?? "percent",
+          baseValue: -Math.abs(graderNegative.value),
+          minValue: negPool?.minValue ?? -Math.abs(graderNegative.value) * 1.5,
+          maxValue: negPool?.maxValue ?? -Math.abs(graderNegative.value) * 0.5,
+        }
       : null;
     const riven: RivenMod = {
       weaponName: selectedWeapon,
@@ -83,16 +125,24 @@ export default function RivenCalculatorPage() {
     const grade = getRivenGrade(score);
     const color = getGradeColor(grade);
     return { score, grade, color };
-  }, [selectedWeapon, graderPositives, graderNegative, graderPolarity, graderRank, graderRerolls, disposition]);
+  }, [
+    selectedWeapon,
+    graderPositives,
+    graderNegative,
+    graderPolarity,
+    graderRank,
+    graderRerolls,
+    disposition,
+    scaledPositivePool,
+    scaledNegativePool,
+  ]);
 
   const gradeResult = handleGrade();
 
   const availablePositiveStats = useMemo(() => {
-    if (!selectedWeaponType) return [];
-    const stats = getStatsWithDisposition(selectedWeaponType.toLowerCase(), disposition);
     const usedNames = new Set(graderPositives.map((s) => s.name));
-    return stats.filter((s) => !usedNames.has(s.name));
-  }, [selectedWeaponType, disposition, graderPositives]);
+    return scaledPositivePool.filter((s) => !usedNames.has(s.name));
+  }, [scaledPositivePool, graderPositives]);
 
   return (
     <PageShell>
@@ -101,7 +151,7 @@ export default function RivenCalculatorPage() {
           icon={Sparkles}
           accent="purple"
           title="Riven Grader"
-          description="Grade riven mods against disposition-scaled stat pools with tier rankings."
+          description="Enter the stats from your in-game riven to grade it against disposition-scaled ranges."
         />
 
         <div className="flex flex-wrap gap-2 mb-4">
@@ -116,7 +166,6 @@ export default function RivenCalculatorPage() {
           ))}
         </div>
 
-          {/* Weapon Search & Selection */}
           {selectedWeaponType && (
             <>
               <div className="relative mb-3">
@@ -132,8 +181,13 @@ export default function RivenCalculatorPage() {
                 <ScrollArea className="h-48 mb-4">
                   <div className="space-y-1 pr-4">
                     {filteredWeapons.map((w) => {
-                      const disp = getDisposition(w.name);
-                      const dispColor = disp >= 1.3 ? "text-green-400" : disp >= 1.0 ? "text-blue-400" : disp >= 0.8 ? "text-orange-400" : "text-red-400";
+                      const info = getDispositionInfo(w.name);
+                      const dispColor = !info.known
+                        ? "text-muted-foreground"
+                        : info.value >= 1.3 ? "text-green-400"
+                        : info.value >= 1.0 ? "text-blue-400"
+                        : info.value >= 0.8 ? "text-orange-400"
+                        : "text-red-400";
                       return (
                         <button
                           key={w.id}
@@ -141,35 +195,42 @@ export default function RivenCalculatorPage() {
                           className="w-full text-left p-2 rounded-lg border border-border hover:border-purple-500/50 hover:bg-purple-500/5 transition-all flex items-center justify-between"
                         >
                           <span className="text-sm font-medium">{w.name}</span>
-                          <span className={cn("text-xs font-mono", dispColor)}>{disp.toFixed(2)}</span>
+                          <span className={cn("text-xs font-mono", dispColor)}>
+                            {info.known ? info.value.toFixed(2) : "?"}
+                          </span>
                         </button>
                       );
                     })}
                   </div>
                 </ScrollArea>
               ) : (
-                <div className="flex items-center gap-3 mb-4 p-3 border border-purple-500/30 bg-purple-500/5 rounded-lg">
+                <div className="flex flex-wrap items-center gap-3 mb-4 p-3 border border-purple-500/30 bg-purple-500/5 rounded-lg">
                   <span className="font-medium">{selectedWeapon}</span>
                   <span className={cn(
                     "text-xs font-mono px-2 py-0.5 rounded",
+                    !dispositionInfo.known ? "bg-amber-500/10 text-amber-400" :
                     disposition >= 1.3 ? "bg-green-500/10 text-green-400" :
                     disposition >= 1.0 ? "bg-blue-500/10 text-blue-400" :
                     disposition >= 0.8 ? "bg-orange-500/10 text-orange-400" : "bg-red-500/10 text-red-400"
                   )}>
                     Disposition: {disposition.toFixed(2)}
+                    {!dispositionInfo.known ? " (unknown)" : ""}
                   </span>
                   <button onClick={() => { setSelectedWeapon(null); }} className="ml-auto text-muted-foreground hover:text-foreground">
                     <X className="h-4 w-4" />
                   </button>
+                  {!dispositionInfo.known && (
+                    <p className="w-full text-xs text-amber-400/90">
+                      No disposition on file for this weapon — ranges use 1.00 as a fallback.
+                    </p>
+                  )}
                 </div>
               )}
             </>
           )}
 
-          {/* Riven Grader */}
           {selectedWeapon && (
             <div className="space-y-4">
-              {/* Positive stats */}
               <div className="border border-border rounded-xl p-4 bg-card">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-muted-foreground">POSITIVE STATS ({graderPositives.length}/3)</h3>
@@ -182,65 +243,96 @@ export default function RivenCalculatorPage() {
                     </button>
                   )}
                 </div>
-                {graderPositives.map((stat, i) => (
-                  <div key={i} className="flex items-center gap-2 mb-2">
-                    <select
-                      value={stat.name}
-                      onChange={(e) => {
-                        const newStats = [...graderPositives];
-                        newStats[i] = { ...newStats[i], name: e.target.value };
-                        setGraderPositives(newStats);
-                      }}
-                      className="flex-1 bg-background border border-border rounded px-2 py-1.5 text-sm"
-                    >
-                      <option value="">Select stat...</option>
-                      {(stat.name ? [{ name: stat.name, minValue: 0, maxValue: 0 }, ...availablePositiveStats] : availablePositiveStats).map((s) => (
-                        <option key={s.name} value={s.name}>{s.name}</option>
-                      ))}
-                    </select>
-                    <Input
-                      type="number"
-                      value={stat.value || ""}
-                      onChange={(e) => {
-                        const newStats = [...graderPositives];
-                        newStats[i] = { ...newStats[i], value: parseFloat(e.target.value) || 0 };
-                        setGraderPositives(newStats);
-                      }}
-                      className="w-24 h-8 text-sm"
-                      placeholder="%"
-                    />
-                    <button onClick={() => setGraderPositives(graderPositives.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300">
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
+                {graderPositives.map((stat, i) => {
+                  const poolStat = scaledPositivePool.find((s) => s.name === stat.name);
+                  const outOfRange = poolStat && stat.name && stat.value !== 0 && !isValueInStatRange(stat.value, poolStat);
+                  return (
+                    <div key={i} className="mb-2">
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={stat.name}
+                          onChange={(e) => {
+                            const newStats = [...graderPositives];
+                            const picked = scaledPositivePool.find((s) => s.name === e.target.value);
+                            newStats[i] = {
+                              name: e.target.value,
+                              value: picked ? Math.round(((picked.minValue + picked.maxValue) / 2) * 10) / 10 : 0,
+                            };
+                            setGraderPositives(newStats);
+                          }}
+                          className="flex-1 bg-background border border-border rounded px-2 py-1.5 text-sm"
+                        >
+                          <option value="">Select stat...</option>
+                          {(stat.name
+                            ? [{ name: stat.name, minValue: 0, maxValue: 0, type: "percent" as const }, ...availablePositiveStats]
+                            : availablePositiveStats
+                          ).map((s) => (
+                            <option key={s.name} value={s.name}>{s.name}</option>
+                          ))}
+                        </select>
+                        <Input
+                          type="number"
+                          value={stat.value || ""}
+                          onChange={(e) => {
+                            const newStats = [...graderPositives];
+                            newStats[i] = { ...newStats[i], value: parseFloat(e.target.value) || 0 };
+                            setGraderPositives(newStats);
+                          }}
+                          className={cn("w-24 h-8 text-sm", outOfRange && "border-amber-500/60")}
+                          placeholder={poolStat?.type === "percent" ? "%" : poolStat?.type === "seconds" ? "s" : ""}
+                        />
+                        <button onClick={() => setGraderPositives(graderPositives.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300">
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                      {poolStat && (
+                        <p className={cn("text-[10px] mt-0.5 pl-0.5", outOfRange ? "text-amber-400" : "text-muted-foreground")}>
+                          Typical range @ disp {disposition.toFixed(2)}: {formatRangeHint(poolStat)}
+                          {outOfRange ? " — outside expected band" : ""}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
-              {/* Negative stat */}
               <div className="border border-border rounded-xl p-4 bg-card">
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3">NEGATIVE STAT (Optional)</h3>
                 {graderNegative ? (
-                  <div className="flex items-center gap-2">
-                    <select
-                      value={graderNegative.name}
-                      onChange={(e) => setGraderNegative({ ...graderNegative, name: e.target.value })}
-                      className="flex-1 bg-background border border-border rounded px-2 py-1.5 text-sm"
-                    >
-                      <option value="">Select stat...</option>
-                      {getNegativeStats().map((s) => (
-                        <option key={s.name} value={s.name}>{s.name}</option>
-                      ))}
-                    </select>
-                    <Input
-                      type="number"
-                      value={graderNegative.value || ""}
-                      onChange={(e) => setGraderNegative({ ...graderNegative, value: parseFloat(e.target.value) || 0 })}
-                      className="w-24 h-8 text-sm"
-                      placeholder="%"
-                    />
-                    <button onClick={() => setGraderNegative(null)} className="text-red-400 hover:text-red-300">
-                      <X className="h-4 w-4" />
-                    </button>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={graderNegative.name}
+                        onChange={(e) => {
+                          const picked = scaledNegativePool.find((s) => s.name === e.target.value);
+                          setGraderNegative({
+                            name: e.target.value,
+                            value: picked ? Math.round(Math.abs((picked.minValue + picked.maxValue) / 2) * 10) / 10 : 0,
+                          });
+                        }}
+                        className="flex-1 bg-background border border-border rounded px-2 py-1.5 text-sm"
+                      >
+                        <option value="">Select stat...</option>
+                        {scaledNegativePool.map((s) => (
+                          <option key={s.name} value={s.name}>{s.name}</option>
+                        ))}
+                      </select>
+                      <Input
+                        type="number"
+                        value={graderNegative.value || ""}
+                        onChange={(e) => setGraderNegative({ ...graderNegative, value: parseFloat(e.target.value) || 0 })}
+                        className="w-24 h-8 text-sm"
+                        placeholder="%"
+                      />
+                      <button onClick={() => setGraderNegative(null)} className="text-red-400 hover:text-red-300">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                    {graderNegative.name && (
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        Typical curse magnitude: {formatRangeHint(scaledNegativePool.find((s) => s.name === graderNegative.name))}
+                      </p>
+                    )}
                   </div>
                 ) : (
                   <button
@@ -252,7 +344,6 @@ export default function RivenCalculatorPage() {
                 )}
               </div>
 
-              {/* Grade Result */}
               {gradeResult && (
                 <div className="border rounded-xl p-6 bg-card" style={{ borderColor: gradeResult.color + "50" }}>
                   <div className="flex items-center justify-between">
@@ -275,10 +366,12 @@ export default function RivenCalculatorPage() {
                       );
                     })}
                   </div>
+                  <p className="text-[10px] text-muted-foreground mt-3">
+                    Grade is a community heuristic (stat weights + curse quality), not market price or DPS uplift.
+                  </p>
                 </div>
               )}
 
-              {/* Reroll Cost Reference */}
               <div className="border border-border rounded-xl p-4 bg-card">
                 <h3 className="text-sm font-semibold text-muted-foreground mb-2">REROLL KUVA COST</h3>
                 <div className="grid grid-cols-5 gap-1 text-xs">
@@ -296,4 +389,3 @@ export default function RivenCalculatorPage() {
     </PageShell>
   );
 }
-

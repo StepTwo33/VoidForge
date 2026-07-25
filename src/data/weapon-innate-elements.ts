@@ -155,8 +155,8 @@ export const WEAPON_FIRE_TIMING: Record<string, WeaponInnateFill> = {
   prisma_angstrum: { chargeTime: 0.5, chargeMode: "standard" },
   drakgoon: { chargeTime: 0.3, chargeMode: "standard" },
   lenz: { chargeTime: 1.2, chargeMode: "standard" },
-  balefire: { chargeTime: 0.5, chargeMode: "standard" },
-  balefire_prime: { chargeTime: 0.5, chargeMode: "standard" },
+  balefire: { chargeTime: 2.0, chargeMode: "standard" },
+  balefire_prime: { chargeTime: 2.0, chargeMode: "standard" },
   // Burst weapons (common 3-round)
   burston: { burstCount: 3, burstDelay: 0.04 },
   burston_prime: { burstCount: 3, burstDelay: 0.04 },

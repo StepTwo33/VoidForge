@@ -7,9 +7,9 @@ export function isArchwingAugment(
   return mod.category === "augment" && mod.subCategory === "archwing";
 }
 
-/** Match archwing ids; tolerates odonata/odenata spelling drift in legacy data. */
+/** Canonicalize archwing ids; maps legacy `odenata` misspelling → `odonata`. */
 export function normalizeArchwingId(archwingId: string): string {
-  return archwingId.replace(/^odonata/i, "odenata");
+  return archwingId.replace(/^odenata/i, "odonata");
 }
 
 export function archwingAugmentMatchesArchwing(

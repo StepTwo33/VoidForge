@@ -17,13 +17,13 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
   adhesive_blast: mod("adhesive_blast", [], "wiki: Adhesive Blast \u2014 Grenades have 100% chance to stick to surfaces."),
   aerial_ace: mod("aerial_ace", [], "wiki: Aerial Ace \u2014 On Kill:\\\\nRefresh Double Jump up to 6x while Airborne."),
   aero_agility: mod("aero_agility", [
-    line("reloadSpeed", "weapon_dps", "multiplicative_percent", "Aero Agility: reloadSpeed \u2014 100% Reload Speed while Aim Gliding"),
+    line("reloadSpeed", "weapon_dps", "conditional_stat_on_trigger", "wiki: Aero Agility — +100% Reload Speed while Aim Gliding"),
   ]),
   aero_periphery: mod("aero_periphery", [
     line("zoom", "mod_panel", "multiplicative_percent", "Aero Periphery: zoom \u2014 -50% Zoom while Aim Gliding (arsenal display only)"),
   ]),
   agile_aim: mod("agile_aim", [
-    line("sprintSpeed", "warframe_totals", "multiplicative_percent", "Agile Aim: sprintSpeed \u2014 +20% Movement Speed when Aiming"),
+    line("sprintSpeed", "mod_panel", "multiplicative_percent", "wiki: Agile Aim — aiming-gated movement"),
   ]),
   ambush_optics: mod("ambush_optics", [
     line("zoom", "mod_panel", "multiplicative_percent", "Ambush Optics: zoom \u2014 -50% Zoom (arsenal display only)"),
@@ -56,12 +56,13 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("statusChance", "weapon_dps", "multiplicative_percent", "Bhisaj-Bal: statusChance \u2014 Restore 300 Health for every 3 Status effects., +90% Status Chance"),
   ]),
   biotic_rounds: mod("biotic_rounds", [
-    line("duration", "mod_panel", "multiplicative_percent", "Biotic Rounds: duration \u2014 On Weak Point Kill:\\\\n+150% <DT_VIRAL_COLOR>Viral and <DT_MAGNETIC_COLOR>Magneti\u2026"),
-    line("statusChance", "weapon_dps", "multiplicative_percent", "Biotic Rounds: statusChance \u2014 On Weak Point Kill:\\\\n+150% <DT_VIRAL_COLOR>Viral and <DT_MAGNETIC_COLOR>Magneti\u2026"),
-    line("viral", "weapon_dps", "elemental_from_base_damage", "Biotic Rounds: viral \u2014 On Weak Point Kill:\\\\n+150% <DT_VIRAL_COLOR>Viral and <DT_MAGNETIC_COLOR>Magneti\u2026"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Biotic Rounds — weak-point-kill gated"),
+    line("viral", "weapon_dps", "conditional_stat_on_kill", "wiki: Biotic Rounds — On Weak Point Kill: +150% Viral for 15s"),
+    line("magnetic", "weapon_dps", "conditional_stat_on_kill", "wiki: Biotic Rounds — On Weak Point Kill: +150% Magnetic for 15s"),
+    line("statusChance", "weapon_dps", "conditional_stat_on_kill", "wiki: Biotic Rounds — On Weak Point Kill: +150% Status Chance for 15s"),
   ]),
   brain_storm: mod("brain_storm", [
-    line("ammoEfficiency", "mod_panel", "multiplicative_percent", "Brain Storm: ammoEfficiency \u2014 On Headshot:\\\\n+100% Ammo Efficiency for 0.5s"),
+    line("ammoEfficiency", "weapon_dps", "conditional_stat_on_trigger", "wiki: Brain Storm — On Headshot: +100% Ammo Efficiency for 0.5s"),
     line("duration", "mod_panel", "multiplicative_percent", "Brain Storm: duration \u2014 On Headshot:\\\\n+100% Ammo Efficiency for 0.5s"),
   ]),
   catalyzer_link: mod("catalyzer_link", [
@@ -73,14 +74,14 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("damageFirstShot", "weapon_dps", "first_shot_damage", "wiki: Charged Chamber \u2014 +40% Damage on first shot in Magazine (averaged over mag for DPS)"),
   ]),
   combat_reload: mod("combat_reload", [
-    line("duration", "mod_panel", "multiplicative_percent", "Combat Reload: duration \u2014 If 5 pellets are headshots, increase reload speed by +120% for 3s."),
-    line("reloadSpeed", "weapon_dps", "multiplicative_percent", "Combat Reload: reloadSpeed \u2014 If 5 pellets are headshots, increase reload speed by +120% for 3s."),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Combat Reload — headshot-pellet gated"),
+    line("reloadSpeed", "weapon_dps", "conditional_stat_on_trigger", "wiki: Combat Reload — If 5 pellets are headshots: +120% Reload Speed for 3s"),
   ]),
   combustion_beam: mod("combustion_beam", [
     line("explosionDamage", "mod_panel", "multiplicative_percent", "Combustion Beam: explosionDamage \u2014 Enemies killed explode, dealing 600 Damage shortly after death."),
   ]),
   comet_rounds: mod("comet_rounds", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Comet Rounds: damage \u2014 20% of Damage converted into <DT_IMPACT_COLOR>Impact"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Comet Rounds — IPS convert (not always-on damage)"),
   ]),
   continuous_misery: mod("continuous_misery", [
     line("statusDuration", "weapon_dps", "multiplicative_percent", "Continuous Misery: statusDuration \u2014 +100% Status Duration (extends DoT ticks)"),
@@ -89,8 +90,8 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("impact", "weapon_dps", "multiplicative_percent", "Crash Course: impact \u2014 +120% <DT_IMPACT_COLOR>Impact"),
   ]),
   critical_precision: mod("critical_precision", [
-    line("critBonusPerKill", "mod_panel", "multiplicative_percent", "Critical Precision: critBonusPerKill \u2014 Burst Fire Only: Headshots increase Critical Chance by 10% up to 500%. Missing w\u2026"),
-    line("criticalChance", "weapon_dps", "multiplicative_percent", "Critical Precision: criticalChance \u2014 Burst Fire Only: Headshots increase Critical Chance by 10% up to 500%. Missing w\u2026"),
+    line("critBonusPerKill", "mod_panel", "multiplicative_percent", "wiki: Critical Precision — duplicate stack display key"),
+    line("criticalChance", "weapon_dps", "conditional_stat_on_trigger", "wiki: Critical Precision — HS stacks +10% CC up to +500% (criticalPrecisionStacks; miss ≈ −10 stacks)"),
   ]),
   cryo_rounds_r3: mod("cryo_rounds_r3", [
     line("cold", "weapon_dps", "elemental_from_base_damage", "Cryo Rounds: cold \u2014 +90% <DT_FREEZE_COLOR>Cold"),
@@ -106,11 +107,11 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("accuracy", "mod_panel", "multiplicative_percent", "Directed Convergence: accuracy \u2014 +100% Accuracy when Aiming (arsenal display only)"),
   ]),
   double_tap: mod("double_tap", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Double Tap: damage \u2014 ON HIT:\\\\n20% Bonus Damage on next Shot for 2s.\\\\nStacks up to 20x outside of Co\u2026"),
-    line("duration", "mod_panel", "multiplicative_percent", "Double Tap: duration \u2014 ON HIT:\\\\n20% Bonus Damage on next Shot for 2s.\\\\nStacks up to 20x outside of Co\u2026"),
+    line("damage", "weapon_dps", "conditional_stat_on_trigger", "wiki: Double Tap — On Hit: +20% Damage/stack (cap 20; sim assumes max)"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Double Tap — stack window"),
   ]),
   dreadful_killshot: mod("dreadful_killshot", [
-    line("health", "warframe_totals", "multiplicative_percent", "Dreadful Killshot: health \u2014 Increased Damage and Status Chance by +20% for every 75 Warframe Health. Capped \u2026"),
+    line("health", "weapon_dps", "conditional_stat_on_trigger", "wiki: Dreadful Killshot — +20% Damage & SC per 75 current HP, cap +360% (sim assumes cap)"),
   ]),
   eagle_eye: mod("eagle_eye", [
     line("zoom", "mod_panel", "multiplicative_percent", "Eagle Eye: zoom \u2014 +40% Zoom (arsenal display only)"),
@@ -130,7 +131,7 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("projectileSpeed", "mod_panel", "multiplicative_percent", "Feathered Arrows: projectileSpeed \u2014 +60% Projectile Speed, -20% Damage"),
   ]),
   final_tap: mod("final_tap", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Final Tap: damage \u2014 On 4 Hits within 0.05s:\\\\n+100% Damage for 0.2s"),
+    line("damage", "weapon_dps", "conditional_stat_on_trigger", "wiki: Final Tap — On 4 Hits within 0.05s: +100% Damage for 0.2s"),
     line("duration", "mod_panel", "multiplicative_percent", "Final Tap: duration \u2014 On 4 Hits within 0.05s:\\\\n+100% Damage for 0.2s"),
   ]),
   firestorm: mod("firestorm", [
@@ -156,7 +157,7 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("recoil", "mod_panel", "multiplicative_percent", "Gun Glide: recoil \u2014 -20% Weapon Recoil, and +20% Accuracy when Sliding (arsenal display only)"),
   ]),
   harkonar_scope: mod("harkonar_scope", [
-    line("comboDuration", "weapon_dps", "multiplicative_percent", "Harkonar Scope: comboDuration \u2014 +12s Combo Duration"),
+    line("comboDuration", "weapon_dps", "additive_percent", "wiki: Harkonar Scope — +12s Combo Duration (flat seconds)"),
     line("duration", "mod_panel", "multiplicative_percent", "Harkonar Scope: duration \u2014 +12s Combo Duration"),
   ]),
   hata_satya: mod("hata_satya", [
@@ -213,8 +214,8 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("reloadSpeed", "weapon_dps", "multiplicative_percent", "Maximum Capacity: reloadSpeed \u2014 +30% Magazine Capacity, -15% Reload Speed"),
   ]),
   measured_burst: mod("measured_burst", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Measured Burst: damage \u2014 When Aiming:\\\\n-60% Fire Rate\\\\n+30% Damage"),
-    line("fireRate", "weapon_dps", "multiplicative_percent", "Measured Burst: fireRate \u2014 When Aiming:\\\\n-60% Fire Rate\\\\n+30% Damage"),
+    line("damage", "weapon_dps", "conditional_stat_on_trigger", "wiki: Measured Burst — When Aiming: +30% Damage"),
+    line("fireRate", "weapon_dps", "conditional_stat_on_trigger", "wiki: Measured Burst — When Aiming: −60% Fire Rate"),
   ]),
   mending_shot: mod("mending_shot", [
     line("energyOrbBonus", "mod_panel", "multiplicative_percent", "Mending Shot: energyOrbBonus \u2014 Shoot Health Orbs to obtain them with +110% extra effect."),
@@ -228,11 +229,12 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("magazine", "weapon_dps", "multiplicative_percent", "Metamorphic Magazine: magazine \u2014 +90% Magazine Capacity, +90% Ammo Maximum, Inflicting 20 cumulative attacks on a\u2026"),
   ]),
   motus_setup: mod("motus_setup", [
-    line("duration", "mod_panel", "multiplicative_percent", "Motus Setup: duration \u2014 100% Critical and Status Chance for 4s after landing from a Double or Bullet Jum\u2026"),
-    line("statusChance", "weapon_dps", "multiplicative_percent", "Motus Setup: statusChance \u2014 100% Critical and Status Chance for 4s after landing from a Double or Bullet Jum\u2026"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Motus Setup — post jump-land gated"),
+    line("criticalChance", "weapon_dps", "conditional_stat_on_trigger", "wiki: Motus Setup — +100% CC for 4s after Double/Bullet Jump land"),
+    line("statusChance", "weapon_dps", "conditional_stat_on_trigger", "wiki: Motus Setup — +100% SC for 4s after Double/Bullet Jump land"),
   ]),
   necrophagic_vigor: mod("necrophagic_vigor", [
-    line("health", "warframe_totals", "multiplicative_percent", "Necrophagic Vigor: health \u2014 Reloading drains up to half your Health based on ammo created, increasing Critic\u2026"),
+    line("health", "weapon_dps", "conditional_stat_on_trigger", "wiki: Necrophagic Vigor — +20% CC & CD per 20 HP drained on reload, cap +360% (sim assumes cap)"),
   ]),
   overview: mod("overview", [
     line("zoom", "mod_panel", "multiplicative_percent", "Overview: zoom \u2014 -60% Zoom while Aim Gliding (arsenal display only)"),
@@ -241,8 +243,8 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("puncture", "weapon_dps", "multiplicative_percent", "Piercing Hit: puncture \u2014 +90% <DT_PUNCTURE_COLOR>Puncture"),
   ]),
   plan_b: mod("plan_b", [
-    line("duration", "mod_panel", "multiplicative_percent", "Plan B: duration \u2014 On Hit:\\\\n+20% Secondary Weapon Fire Rate for 3s"),
-    line("fireRate", "weapon_dps", "multiplicative_percent", "Plan B: fireRate \u2014 On Hit:\\\\n+20% Secondary Weapon Fire Rate for 3s"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Plan B — on-hit secondary fire rate"),
+    line("fireRate", "mod_panel", "multiplicative_percent", "wiki: Plan B — on-hit secondary fire rate"),
   ]),
   point_strike_r3: mod("point_strike_r3", [
     line("criticalChance", "weapon_dps", "multiplicative_percent", "Point Strike: criticalChance \u2014 +150% Critical Chance"),
@@ -308,8 +310,8 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("reloadSpeed", "weapon_dps", "multiplicative_percent", "Radiated Reload: reloadSpeed \u2014 +60% <DT_RADIATION_COLOR>Radiation, +40% Reload Speed"),
   ]),
   recover: mod("recover", [
-    line("duration", "mod_panel", "multiplicative_percent", "Recover: duration \u2014 On Kill:\\\\n+15 Heal Rate for 10s, -25% from Health Orbs"),
-    line("health", "warframe_totals", "multiplicative_percent", "Recover: health \u2014 On Kill:\\\\n+15 Heal Rate for 10s, -25% from Health Orbs"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Recover — on-kill heal rate"),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Recover — on-kill heal (not max health)"),
   ]),
   rifle_ammo_mutation: mod("rifle_ammo_mutation", [
     line("ammoConversion", "mod_panel", "multiplicative_percent", "Rifle Ammo Mutation: ammoConversion \u2014 Converts Secondary ammo pickups to 50% of Ammo Pick Up."),
@@ -318,15 +320,15 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("statusChance", "weapon_dps", "multiplicative_percent", "Rifle Aptitude: statusChance \u2014 +90% Status Chance"),
   ]),
   rifle_elementalist: mod("rifle_elementalist", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Rifle Elementalist: damage \u2014 +90% Status Damage, +0.6 Punch Through"),
-    line("punchThrough", "mod_panel", "multiplicative_percent", "Rifle Elementalist: punchThrough \u2014 +90% Status Damage, +0.6 Punch Through (arsenal display only)"),
+    line("statusDamage", "weapon_dps", "multiplicative_percent", "wiki: Rifle Elementalist \u2014 +90% Status Damage"),
+    line("punchThrough", "mod_panel", "multiplicative_percent", "wiki: Rifle Elementalist \u2014 +0.6 Punch Through (arsenal display only)"),
   ]),
   rime_rounds_r3: mod("rime_rounds_r3", [
     line("cold", "weapon_dps", "elemental_from_base_damage", "Rime Rounds: cold \u2014 +60% <DT_FREEZE_COLOR>Cold, +60% Status Chance"),
     line("statusChance", "weapon_dps", "multiplicative_percent", "Rime Rounds: statusChance \u2014 +60% <DT_FREEZE_COLOR>Cold, +60% Status Chance"),
   ]),
   ripper_rounds: mod("ripper_rounds", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Ripper Rounds: damage \u2014 20% of Damage converted into <DT_PUNCTURE_COLOR>Puncture"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Ripper Rounds — IPS convert (not always-on damage)"),
   ]),
   rupture: mod("rupture", [
     line("impact", "weapon_dps", "multiplicative_percent", "Rupture: impact \u2014 +90% <DT_IMPACT_COLOR>Impact"),
@@ -339,11 +341,11 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("punchThrough", "mod_panel", "multiplicative_percent", "Semi-Rifle Cannonade: punchThrough \u2014 Only compatible with Semi-Auto Trigger. Fire Rate cannot be modified.\\\\n+240% Da\u2026 (arsenal display only)"),
   ]),
   sentient_barrage: mod("sentient_barrage", [
-    line("criticalChance", "mod_panel", "multiplicative_percent", "wiki: Sentient Barrage \u2014 +300% CC applies only to the next full-charge Alt-Fire discharge (panel only)"),
-    line("criticalMultiplier", "mod_panel", "multiplicative_percent", "wiki: Sentient Barrage \u2014 +300% CD applies only to the next full-charge Alt-Fire discharge (panel only)"),
+    line("criticalChance", "weapon_dps", "conditional_stat_on_trigger", "wiki: Sentient Barrage — +300% CC on next full-charge Alt-Fire discharge"),
+    line("criticalMultiplier", "weapon_dps", "conditional_stat_on_trigger", "wiki: Sentient Barrage — +300% CD on next full-charge Alt-Fire discharge"),
   ]),
   serrated_rounds: mod("serrated_rounds", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Serrated Rounds: damage \u2014 20% of Damage converted into <DT_SLASH_COLOR>Slash"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Serrated Rounds — IPS convert (not always-on damage)"),
   ]),
   serration_r3: mod("serration_r3", [
     line("damage", "weapon_dps", "multiplicative_percent", "Serration: damage \u2014 +165% Damage"),
@@ -361,10 +363,10 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("ammoConversion", "mod_panel", "multiplicative_percent", "Sniper Ammo Mutation: ammoConversion \u2014 Converts Secondary ammo pickups to 50% of Ammo Pick Up."),
   ]),
   soaring_strike: mod("soaring_strike", [
-    line("fireRate", "weapon_dps", "multiplicative_percent", "Soaring Strike: fireRate \u2014 +50% Fire Rate when Airborne"),
+    line("fireRate", "weapon_dps", "conditional_stat_on_trigger", "wiki: Soaring Strike — +50% Fire Rate when Airborne"),
   ]),
   spectral_serration: mod("spectral_serration", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Spectral Serration: damage \u2014 +330% Damage while Invisible"),
+    line("damage", "weapon_dps", "conditional_stat_on_trigger", "wiki: Spectral Serration — +330% Damage while Invisible"),
   ]),
   speed_trigger_r3: mod("speed_trigger_r3", [
     line("fireRate", "weapon_dps", "multiplicative_percent", "Speed Trigger: fireRate \u2014 +60% Fire Rate (x2 for Bows)"),
@@ -373,12 +375,12 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("multishot", "weapon_dps", "multiplicative_percent", "Split Chamber: multishot \u2014 +90% Multishot"),
   ]),
   split_flights: mod("split_flights", [
-    line("accuracy", "mod_panel", "multiplicative_percent", "Split Flights: accuracy \u2014 On Hit:\\\\n+100% Multishot\\\\n-180% Accuracy for 2s. Stacks up to 4x.\\\\n(Non-AOE B\u2026 (arsenal display only)"),
-    line("duration", "mod_panel", "multiplicative_percent", "Split Flights: duration \u2014 On Hit:\\\\n+100% Multishot\\\\n-180% Accuracy for 2s. Stacks up to 4x.\\\\n(Non-AOE B\u2026"),
-    line("multishot", "weapon_dps", "multiplicative_percent", "Split Flights: multishot \u2014 On Hit:\\\\n+100% Multishot\\\\n-180% Accuracy for 2s. Stacks up to 4x.\\\\n(Non-AOE B\u2026"),
+    line("accuracy", "mod_panel", "multiplicative_percent", "wiki: Split Flights — on-hit accuracy penalty"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Split Flights — stack duration"),
+    line("multishot", "weapon_dps", "conditional_stat_per_kill_stack", "wiki: Split Flights — On Hit: +100% Multishot/stack (cap 4; sim uses killStacks)"),
   ]),
   spontaneous_singularity: mod("spontaneous_singularity", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Spontaneous Singularity: damage \u2014 Orbs that strike targets will explode immediately with 90% Bonus Damage and a 18\u2026"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Spontaneous Singularity — orb-explode bonus (not always-on damage)"),
   ]),
   spring_loaded_chamber: mod("spring_loaded_chamber", [
     line("duration", "mod_panel", "multiplicative_percent", "Spring-Loaded Chamber: duration \u2014 On Reload:\\\\n+75% Fire Rate when Aiming for 9s"),
@@ -392,7 +394,7 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
   ]),
   sudden_justice: mod("sudden_justice", [
     line("duration", "mod_panel", "multiplicative_percent", "Sudden Justice: duration \u2014 On 2 Hits within 0.2s:\\\\n+30% Fire Rate for 2s"),
-    line("fireRate", "weapon_dps", "multiplicative_percent", "Sudden Justice: fireRate \u2014 On 2 Hits within 0.2s:\\\\n+30% Fire Rate for 2s"),
+    line("fireRate", "weapon_dps", "conditional_stat_on_trigger", "wiki: Sudden Justice — On 2 Hits within 0.2s: +30% Fire Rate for 2s"),
   ]),
   tactical_reload_r3: mod("tactical_reload_r3", [
     line("holsterRate", "mod_panel", "multiplicative_percent", "Tactical Reload: holsterRate \u2014 +20% Magazine Reloaded/s when Holstered (arsenal display only)"),
@@ -414,7 +416,7 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("magazine", "weapon_dps", "multiplicative_percent", "Thundermiter: magazine \u2014 +100% chance charged Projectiles explode, -60% Magazine Capacity"),
   ]),
   triple_tap: mod("triple_tap", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Triple Tap: damage \u2014 On 2 Hits within 0.02s:\\\\n+40% Damage for 0.2s"),
+    line("damage", "weapon_dps", "conditional_stat_on_trigger", "wiki: Triple Tap — On 2 Hits within 0.02s: +40% Damage for 0.2s"),
     line("duration", "mod_panel", "multiplicative_percent", "Triple Tap: duration \u2014 On 2 Hits within 0.02s:\\\\n+40% Damage for 0.2s"),
   ]),
   twitch: mod("twitch", [
@@ -422,13 +424,13 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Twitch: duration \u2014 On Equip: \\\\n<LOWER_IS_BETTER>-40% Weapon Recoil and +40% Accuracy for 8s"),
   ]),
   unseen_dread: mod("unseen_dread", [
-    line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "Unseen Dread: criticalMultiplier \u2014 Become invisible for 5 seconds when you strike 3 or more enemies with a single p\u2026"),
-    line("duration", "mod_panel", "multiplicative_percent", "Unseen Dread: duration \u2014 Become invisible for 5 seconds when you strike 3 or more enemies with a single p\u2026"),
+    line("criticalMultiplier", "weapon_dps", "conditional_stat_on_trigger", "wiki: Unseen Dread — +175% Critical Damage while invisible after multi-hit"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Unseen Dread — multi-hit invis duration"),
   ]),
   vanquished_prey: mod("vanquished_prey", [
-    line("duration", "mod_panel", "multiplicative_percent", "Vanquished Prey: duration \u2014 On Kill:\\\\n-100% Shield Recharge Delay for 10s, -25% from Health Orbs"),
-    line("health", "warframe_totals", "multiplicative_percent", "Vanquished Prey: health \u2014 On Kill:\\\\n-100% Shield Recharge Delay for 10s, -25% from Health Orbs"),
-    line("shield", "warframe_totals", "multiplicative_percent", "Vanquished Prey: shield \u2014 On Kill:\\\\n-100% Shield Recharge Delay for 10s, -25% from Health Orbs"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Vanquished Prey — on-kill shield recharge"),
+    line("health", "mod_panel", "multiplicative_percent", "wiki: Vanquished Prey — on-kill health orb effect"),
+    line("shield", "mod_panel", "multiplicative_percent", "wiki: Vanquished Prey — on-kill shield recharge"),
   ]),
   vile_precision: mod("vile_precision", [
     line("fireRate", "weapon_dps", "multiplicative_percent", "Vile Precision: fireRate \u2014 -90% Weapon Recoil, -36% Fire Rate (x2 for Bows)"),
@@ -438,8 +440,8 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "Vital Sense: criticalMultiplier \u2014 +120% Critical Damage"),
   ]),
   volatile_variant: mod("volatile_variant", [
-    line("punchThrough", "mod_panel", "multiplicative_percent", "Volatile Variant: punchThrough \u2014 Shots have +3 Punch Through and barbs explode instantly. Barbs that strike enemi\u2026 (arsenal display only)"),
-    line("range", "mod_panel", "multiplicative_percent", "Volatile Variant: range \u2014 Shots have +3 Punch Through and barbs explode instantly. Barbs that strike enemi\u2026 (arsenal display only)"),
-    line("statusChance", "weapon_dps", "multiplicative_percent", "Volatile Variant: statusChance \u2014 Shots have +3 Punch Through and barbs explode instantly. Barbs that strike enemi\u2026"),
+    line("punchThrough", "mod_panel", "multiplicative_percent", "wiki: Volatile Variant — barb explode / PT behavior"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Volatile Variant — barb explode range display"),
+    line("statusChance", "mod_panel", "multiplicative_percent", "wiki: Volatile Variant — barb explode SC (not always-on paper)"),
   ]),
 };
