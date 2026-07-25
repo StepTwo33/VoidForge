@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, Loader2, Megaphone, PenLine, Rss } from "lucide-react";
+import { ChevronRight, Loader2, Megaphone, PenLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatSiteUpdateTime, type SiteUpdateSummary } from "@/lib/site/site-updates";
 import {
@@ -11,6 +11,7 @@ import {
   HOME_SIDEBAR_TAB_ROW_CLASS,
 } from "@/lib/site/home-sidebar-layout";
 import { ContentPanel } from "@/components/page-shell";
+import { CopyRssFeedButton } from "@/components/copy-rss-feed-button";
 
 interface SiteUpdatesSidebarProps {
   variant?: "sidebar" | "inline";
@@ -123,14 +124,11 @@ export function SiteUpdatesSidebar({
               Manage
             </Link>
           )}
-          <a
-            href="/feeds/updates.xml"
-            className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground hover:text-amber-400 hover:underline"
-            title="RSS feed for site updates"
-          >
-            <Rss className="h-3 w-3" />
-            RSS
-          </a>
+          <CopyRssFeedButton
+            feedPath="/feeds/updates.xml"
+            title="Copy What's New RSS feed link"
+            className="hover:text-amber-400"
+          />
           <Link
             href="/updates"
             className="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary hover:underline"

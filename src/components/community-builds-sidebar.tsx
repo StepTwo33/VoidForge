@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, Loader2, Rss, Sparkles, TrendingUp } from "lucide-react";
+import { ChevronRight, Loader2, Sparkles, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PublicBuildSummary } from "@/lib/builds/build-types";
 import { PublicBuildRow } from "@/components/public-build-row";
@@ -12,6 +12,7 @@ import {
   HOME_SIDEBAR_TAB_ROW_CLASS,
 } from "@/lib/site/home-sidebar-layout";
 import { ContentPanel } from "@/components/page-shell";
+import { CopyRssFeedButton } from "@/components/copy-rss-feed-button";
 
 type SortMode = "recent" | "popular";
 
@@ -69,14 +70,11 @@ export function CommunityBuildsSidebar({
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <a
-            href="/feeds/builds.xml"
-            className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground hover:text-primary hover:underline"
-            title="RSS feed for top community builds"
-          >
-            <Rss className="h-3 w-3" />
-            RSS
-          </a>
+          <CopyRssFeedButton
+            feedPath="/feeds/builds.xml"
+            title="Copy community builds RSS feed link"
+            className="hover:text-primary"
+          />
           <Link
             href="/discover"
             className="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary hover:underline"
