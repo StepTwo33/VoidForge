@@ -1,7 +1,7 @@
 {
   "name": "framehub",
   "version": "0.1.0",
-  "description": "Open-source Warframe build planner (Frame Hub)",
+  "description": "Open calc and item-catalog verification source for Frame Hub (frame-hub.com)",
   "license": "MIT",
   "repository": {
     "type": "git",

@@ -1,9 +1,11 @@
 #!/bin/bash
+# Maintainer deploy helper for frame-hub.com — not public self-host documentation.
 # start.sh - Builds and starts Frame Hub in production with optional Cloudflare tunnel
 # Usage: ./start.sh [--dev]
 #   --dev   Skip build and run Next.js dev server instead
 #
-# Environment (all optional):
+# Environment:
+#   FRAMEHUB_MAINTAINER  Must be 1 (after .env load) to run the Next app
 #   PORT                 Default 3000
 #   DATABASE_URL         SQLite URL for Prisma; default file:./dev.db
 #   PUBLIC_DOMAIN        Shown in banner; default https://frame-hub.com
@@ -84,6 +86,14 @@ prepare_database() {
 }
 
 prepare_database
+
+if [ "${FRAMEHUB_MAINTAINER:-}" != "1" ]; then
+  echo "Frame Hub is not intended for self-hosting."
+  echo "Use the planner at https://frame-hub.com"
+  echo "To verify calculations and item catalogs: npm test"
+  echo "Maintainers: set FRAMEHUB_MAINTAINER=1 in .env to run the Next app."
+  exit 1
+fi
 
 # --- Optional: Dart → TypeScript data sync (host must have OVERFRAME_DART_DIR or sibling overframe-app) ---
 if [ "${OVERFRAME_SYNC_DATA:-}" = "1" ] && [ -f "$DIR/scripts/convert_data_v2.py" ]; then
