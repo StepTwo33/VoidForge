@@ -4482,7 +4482,7 @@ const RAW_MODS: Mod[] = [
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
-    "subCategory": "",
+    "subCategory": "weapon",
     "stats": {
       "reloadSpeed": 50
     },
@@ -4498,7 +4498,7 @@ const RAW_MODS: Mod[] = [
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
-    "subCategory": "",
+    "subCategory": "weapon",
     "stats": {
       "invulnerability": 2,
       "duration": 2.0
@@ -4514,7 +4514,7 @@ const RAW_MODS: Mod[] = [
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
-    "subCategory": "",
+    "subCategory": "weapon",
     "stats": {
       "comboPerHit": 1,
       "slash": 25.0,

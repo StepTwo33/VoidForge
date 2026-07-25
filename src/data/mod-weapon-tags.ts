@@ -272,7 +272,7 @@ export const MOD_EXCLUSIVE_WEAPON_IDS: Record<string, readonly string[]> = {
   "augment_garuda_blending_talons": ["garuda_prime_talons", "garuda_talons"],
   "augment_garuda_blood_forge": ["garuda_prime_talons", "garuda_talons"],
   "augment_garuda_dread_ward": ["garuda_prime_talons", "garuda_talons"],
-  "avenging_truth": ["silva_&_aegis"],
+  "avenging_truth": ["silva_&_aegis", "silva_&_aegis_prime"],
   "bhisaj_bal": ["paris_prime"],
   "biotic_rounds": ["ax_52"],
   "blade_of_truth": ["jaw_sword"],
@@ -342,7 +342,7 @@ export const MOD_EXCLUSIVE_WEAPON_IDS: Record<string, readonly string[]> = {
   "static_alacrity": ["staticor"],
   "static_discharge": ["prova", "prova_vandal"],
   "stinging_truth": ["viper", "viper_wraith"],
-  "stockpiled_blight": ["kunai"],
+  "stockpiled_blight": ["kunai", "mk1_kunai"],
   "sudden_justice": ["sybaris", "sybaris_prime"],
   "tether_grenades": ["penta"],
   "thermagnetic_shells": ["detron"],
@@ -356,7 +356,7 @@ export const MOD_EXCLUSIVE_WEAPON_IDS: Record<string, readonly string[]> = {
   "voltage_sequence": ["lanka"],
   "vulcan_blitz": ["jat_kittag"],
   "wild_frenzy": ["grakata"],
-  "winds_of_purity": ["furis"],
+  "winds_of_purity": ["furis", "mk1_furis"],
   "zazvat_kar": ["akstiletto_prime"],
 };
 

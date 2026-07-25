@@ -59,6 +59,8 @@ export function getWeaponModProfile(
 }
 
 function isKnownBeamWeapon(weaponId: string): boolean {
+  // Mutalist Quanta fires cubes, not a beam — do not match via /quanta/.
+  if (weaponId === "mutalist_quanta") return false;
   return /amprex|synoid|tigris_prime|glaxion|embolist|phage|convectrix|quanta|catabolyst|nukor|atomos|cycron|phantasma|onos|battacor/i.test(
     weaponId,
   );
@@ -87,6 +89,10 @@ export function modCompatibleWithWeaponProfile(
     return false;
   }
 
+  // Exclusive ownership wins: skip wiki incompat tags that would nullify
+  // a mod on its own listed weapon (e.g. POWER_WEAPON on beam exclusives).
+  const exclusiveOwned = isWeaponExclusiveMod(modId);
+
   const required = MOD_COMPATIBILITY_TAGS[modId];
   if (required?.length) {
     const normalized = normalizeRequiredTags(required);
@@ -95,11 +101,13 @@ export function modCompatibleWithWeaponProfile(
     }
   }
 
-  const profileBlocked = MOD_INCOMPATIBILITY_TAGS[modId];
-  if (profileBlocked?.length) {
-    for (const tag of profileBlocked) {
-      if (profile.tags.has(tag)) {
-        return false;
+  if (!exclusiveOwned) {
+    const profileBlocked = MOD_INCOMPATIBILITY_TAGS[modId];
+    if (profileBlocked?.length) {
+      for (const tag of profileBlocked) {
+        if (profile.tags.has(tag)) {
+          return false;
+        }
       }
     }
   }
