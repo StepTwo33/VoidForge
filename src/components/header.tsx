@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LogIn, User, Menu, X, ChevronDown, Swords, Wrench, LayoutGrid, Flag, Shield, Github, Users, Heart, Search } from "lucide-react";
+import { LogIn, User, Menu, X, ChevronDown, Swords, Wrench, LayoutGrid, Flag, Shield, Github, Users, Heart, Search, BookOpen } from "lucide-react";
 import { useEffect, useState, useRef, useCallback, useMemo, type FormEvent } from "react";
 import { ThemePicker } from "@/components/theme-picker";
 import { BrandMark } from "@/components/brand-mark";
@@ -497,6 +497,14 @@ export function Header() {
             Discover
           </Link>
 
+          <Link
+            href="/guides/how-to-mod"
+            className="flex items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+            How to Mod
+          </Link>
+
           {navGroups.map((group) => (
             <NavDropdown key={group.label} group={group} />
           ))}
@@ -605,6 +613,15 @@ export function Header() {
           >
             <Users className="h-4 w-4" />
             Discover
+          </Link>
+
+          <Link
+            href="/guides/how-to-mod"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          >
+            <BookOpen className="h-4 w-4" />
+            How to Mod
           </Link>
 
           {navGroups.map((group) => {
