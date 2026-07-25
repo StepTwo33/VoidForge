@@ -379,7 +379,7 @@ export const allCompanions: Companion[] = [
     "shield": 150,
     "armor": 200,
     "description": "Piercing hound with Batoten and Repo Audit",
-    "precept": "Repo Audit - Magnetic pulse that disarms nearby enemies"
+    "precept": "Repo Audit - Magnetic pulse that permanently disarms nearby enemies"
   },
   {
     "id": "hec_hound",

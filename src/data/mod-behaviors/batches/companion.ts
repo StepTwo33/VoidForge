@@ -72,7 +72,11 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "wiki: Bite — +220% CM at max"),
   ]),
   blast_shield: mod("blast_shield", [
-    line("range", "mod_panel", "multiplicative_percent", "Blast Shield: range \u2014 Overshields increased by +3000. Leap at an enemy within 10m dealing 30 <DT_IMPAC\u2026 (arsenal display only)"),
+    line("overshields", "mod_panel", "multiplicative_percent", "Blast Shield: overshields \u2014 Overshields increased by +3000"),
+    line("range", "mod_panel", "multiplicative_percent", "Blast Shield: range \u2014 Leap at an enemy within 10m (arsenal display only)"),
+    line("damage", "mod_panel", "multiplicative_percent", "Blast Shield: damage \u2014 Leap Impact Damage"),
+    line("knockdownRadius", "mod_panel", "multiplicative_percent", "Blast Shield: knockdownRadius \u2014 Knockdown radius"),
+    line("cooldown", "mod_panel", "multiplicative_percent", "Blast Shield: cooldown \u2014 Leap cooldown"),
   ]),
   botanist: mod("botanist", [
     line("duration", "mod_panel", "multiplicative_percent", "Botanist: duration \u2014 Oxylus Sentinel will automatically pick any plants within 50m over <LOWER_IS_BET\u2026"),
@@ -99,7 +103,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   ]),
   charm: mod("charm", [
     line("buffChance", "mod_panel", "multiplicative_percent", "Charm: buffChance \u2014 Smeeta Kavat has a 40% chance every 27s to bestow its owner with good fortune."),
-    line("duration", "mod_panel", "multiplicative_percent", "Charm: duration \u2014 Smeeta Kavat has a 40% chance every 27s to bestow its owner with good fortune."),
+    line("cooldown", "mod_panel", "multiplicative_percent", "Charm: cooldown \u2014 Smeeta Kavat has a 40% chance every 27s to bestow its owner with good fortune."),
   ]),
   chilling_claws: mod("chilling_claws", [
     line("cold", "weapon_dps", "elemental_from_base_damage", "Chilling Claws: cold \u2014 +330% <DT_FREEZE_COLOR>Cold, +330% Status Chance, Converts all elemental damage \u2026"),
@@ -171,11 +175,12 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("health", "warframe_totals", "multiplicative_percent", "wiki: Enhanced Vitality — +250% Health at max"),
   ]),
   equilibrium_audit: mod("equilibrium_audit", [
+    line("damage", "mod_panel", "multiplicative_percent", "Equilibrium Audit: damage \u2014 Unleashes a series of shockwaves that knockdown enemies within 15m and deal 300 damage"),
     line("range", "mod_panel", "multiplicative_percent", "Equilibrium Audit: range \u2014 Unleashes a series of shockwaves that knockdown enemies within 15m and deal 300 \u2026 (arsenal display only)"),
   ]),
   evasive_denial: mod("evasive_denial", [
     line("duration", "mod_panel", "multiplicative_percent", "Evasive Denial: duration \u2014 Teleports a safe distance away and engages a displacement field gaining 75% chan\u2026"),
-    line("heat", "mod_panel", "multiplicative_percent", "Evasive Denial: heat \u2014 Teleports a safe distance away and engages a displacement field gaining 75% chan\u2026"),
+    line("dodgeChance", "mod_panel", "multiplicative_percent", "Evasive Denial: dodgeChance \u2014 Teleports a safe distance away and engages a displacement field gaining 75% chan\u2026"),
   ]),
   fatal_attraction: mod("fatal_attraction", [
     line("cooldown", "mod_panel", "multiplicative_percent", "Fatal Attraction: cooldown \u2014 Enemies within 20m are drawn to you. Once they are within 6m, they detonate for \u2026"),
@@ -213,7 +218,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("cooldown", "mod_panel", "multiplicative_percent", "Guardian: cooldown \u2014 Restores 100% Shields when depleted, 30s cooldown"),
     line("shieldRestore", "mod_panel", "multiplicative_percent", "Guardian: shieldRestore \u2014 Restores 100% Shields when depleted, 30s cooldown"),
   ]),
-  hard_engag: mod("hard_engag", [
+  hard_engage: mod("hard_engage", [
     line("range", "mod_panel", "multiplicative_percent", "Hard Engage: range \u2014 Engages enemies within 10m with melee attacks, dealing 90 Impact Damage. Melee a\u2026 (arsenal display only)"),
     line("spinDamage", "mod_panel", "multiplicative_percent", "Hard Engage: spinDamage \u2014 Engages enemies within 10m with melee attacks, dealing 90 Impact Damage. Melee a\u2026"),
   ]),
@@ -433,7 +438,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("healthRegen", "mod_panel", "multiplicative_percent", "Repair Kit: healthRegen \u2014 +18 Companion Health Regen/s"),
   ]),
   repo_audit: mod("repo_audit", [
-    line("range", "mod_panel", "multiplicative_percent", "Repo Audit: range \u2014 Emits a magnetic pulse that disarms enemies within 30m. (arsenal display only)"),
+    line("damage", "mod_panel", "multiplicative_percent", "Repo Audit: damage \u2014 Magnetic pulse damage"),
+    line("range", "mod_panel", "multiplicative_percent", "Repo Audit: range \u2014 Emits a magnetic pulse that permanently disarms enemies within 30m. (arsenal display only)"),
   ]),
   resourceful_retriever: mod("resourceful_retriever", [
     line("resourcePickupDoubleChance", "companion_totals", "multiplicative_percent", "Resourceful Retriever: resourcePickupDoubleChance \u2014 18% chance to double Resource pickups"),
@@ -465,8 +471,9 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Scan Matter: duration \u2014 Reveals resource containers and mineral deposits within 60m. Automatically break\u2026"),
     line("range", "mod_panel", "multiplicative_percent", "Scan Matter: range \u2014 Reveals resource containers and mineral deposits within 60m. Automatically break\u2026 (arsenal display only)"),
   ]),
-  scan_organic: mod("scan_organic", [
-    line("scanChance", "mod_panel", "multiplicative_percent", "Scan Organic Lifeforms: scanChance \u2014 +10% Scan Chance per rank"),
+  scan_aquatic: mod("scan_aquatic", [
+    line("hotspotRange", "mod_panel", "multiplicative_percent", "Scan Aquatic Lifeforms: hotspotRange \u2014 Displays Fishing Hotspots within 100m"),
+    line("luminousDyeRange", "mod_panel", "multiplicative_percent", "Scan Aquatic Lifeforms: luminousDyeRange \u2014 Applies Luminous Dye to fish within 40m"),
   ]),
   scavenge: mod("scavenge", [
     line("ammoChance", "mod_panel", "multiplicative_percent", "Scavenge: ammoChance \u2014 +90% chance for the pet to pry open a locked locker."),

@@ -2453,7 +2453,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "cats_eye",
     "name": "Cat's Eye",
-    "polarity": "madurai",
+    "polarity": "penjaga",
     "drain": 0,
     "maxRank": 3,
     "category": "companion",
@@ -2476,8 +2476,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "beast",
     "stats": {
-      "buffChance": 27,
-      "duration": 6.75
+      "buffChance": 10,
+      "cooldown": 6.75
     },
     "description": "Smeeta Kavat has a 40% chance every 27s to bestow its owner with good fortune.",
     "rarity": "rare"
@@ -4988,21 +4988,22 @@ const RAW_MODS: Mod[] = [
 
 
   {
-    "id": "scan_organic",
-    "name": "Scan Organic Lifeforms",
+    "id": "scan_aquatic",
+    "name": "Scan Aquatic Lifeforms",
     "polarity": "penjaga",
-    "drain": 4,
-    "maxRank": 5,
+    "drain": 0,
+    "maxRank": 3,
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "scanChance": 10
+      "hotspotRange": 25.0,
+      "luminousDyeRange": 10.0
     },
-    "description": "+10% Scan Chance per rank",
-    "rarity": "uncommon"
+    "description": "Displays Fishing Hotspots within 100m and applies Luminous Dye to fish within 40m.",
+    "rarity": "common"
   },
   {
-    "id": "hard_engag",
+    "id": "hard_engage",
     "name": "Hard Engage",
     "polarity": "penjaga",
     "drain": 2,
@@ -5010,7 +5011,7 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "spinDamage": 20,
+      "spinDamage": 15,
       "range": 1.666667
     },
     "description": "Engages enemies within 10m with melee attacks, dealing 90 Impact Damage. Melee attacks are enhanced by Mods equipped in the Moa's weapon.",
@@ -14622,7 +14623,11 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "range": 1.666667
+      "overshields": 500,
+      "range": 1.666667,
+      "damage": 5,
+      "knockdownRadius": 0.833333,
+      "cooldown": 2.5
     },
     "description": "Overshields increased by +3000. Leap at an enemy within 10m dealing 30 <DT_IMPACT_COLOR>Impact Damage and knocking down other enemies within 5m and resets Overshields.",
     "rarity": "common"
@@ -14841,6 +14846,7 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
+      "damage": 50,
       "range": 2.5
     },
     "description": "Unleashes a series of shockwaves that knockdown enemies within 15m and deal 300 damage.",
@@ -14855,7 +14861,7 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "heat": 12.5,
+      "dodgeChance": 12.5,
       "duration": 1.333333
     },
     "description": "Teleports a safe distance away and engages a displacement field gaining 75% chance to dodge enemy fire for 8s.",
@@ -15264,9 +15270,10 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
+      "damage": 50,
       "range": 5.0
     },
-    "description": "Emits a magnetic pulse that disarms enemies within 30m.",
+    "description": "Emits a magnetic pulse dealing 50 <DT_MAGNETIC_COLOR>Magnetic Damage that permanently disarms enemies within 30m.",
     "rarity": "rare"
   },
   {
@@ -22232,6 +22239,8 @@ export const modsMap = new Map<string, Mod>(allMods.map(m => [m.id, m]));
 const MOD_ID_ALIASES: Record<string, string> = {
   augment_styanax_intrepid_stand: "intrepid_stand",
   augment_styanax_axios_javelin_aug: "axios_javelineers",
+  hard_engag: "hard_engage",
+  scan_organic: "scan_aquatic",
 };
 for (const [alias, canonical] of Object.entries(MOD_ID_ALIASES)) {
   const mod = modsMap.get(canonical);

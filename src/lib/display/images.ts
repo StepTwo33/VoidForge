@@ -40,7 +40,7 @@ const MOD_IMAGE_STEM_BY_NAME: Record<string, string> = {
   "Saxum Set Bonus": "Femursetmod",
   // Legacy catalog names → correct on-disk / wiki stems
   "Sprint Speed": "Sprint_Boost",
-  "Scan Organic Lifeforms": "Scan_Aquatic_Lifeforms",
+  "Scan Aquatic Lifeforms": "Scan_Aquatic_Lifeforms",
 };
 
 const MOD_STEM_SMALL_WORDS = new Set(["of", "the", "and"]);
