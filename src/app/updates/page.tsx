@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PageShell, PageMain, PageHero, ContentPanel } from "@/components/page-shell";
 import { fetchPublishedSiteUpdates } from "@/lib/site/site-updates-server";
 import { formatSiteUpdateTime } from "@/lib/site/site-updates";
+import { cn } from "@/lib/utils";
 
 export const metadata = {
   title: "What's New - Frame Hub",
@@ -31,10 +32,22 @@ export default async function UpdatesPage() {
             {updates.map((update) => (
               <li key={update.id}>
                 <Link href={`/updates/${update.id}`} className="group block">
-                  <ContentPanel className="transition-colors hover:border-primary/40 hover:bg-card/80">
-                    <time className="text-xs text-muted-foreground">
-                      {formatSiteUpdateTime(update.createdAt)}
-                    </time>
+                  <ContentPanel
+                    className={cn(
+                      "transition-colors hover:border-primary/40 hover:bg-card/80",
+                      update.featured && "border-amber-500/40 bg-amber-500/5",
+                    )}
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <time className="text-xs text-muted-foreground">
+                        {formatSiteUpdateTime(update.createdAt)}
+                      </time>
+                      {update.featured && (
+                        <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-400">
+                          Featured
+                        </span>
+                      )}
+                    </div>
                     <h2 className="mt-1 text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
                       {update.title}
                     </h2>

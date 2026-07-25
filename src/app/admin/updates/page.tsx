@@ -27,9 +27,10 @@ interface Draft {
   title: string;
   body: string;
   published: boolean;
+  featured: boolean;
 }
 
-const emptyDraft = (): Draft => ({ title: "", body: "", published: true });
+const emptyDraft = (): Draft => ({ title: "", body: "", published: true, featured: false });
 
 export default function AdminUpdatesPage() {
   const { confirm } = useConfirmDialog();
@@ -80,6 +81,7 @@ export default function AdminUpdatesPage() {
       title: update.title,
       body: update.body,
       published: update.published,
+      featured: update.featured,
     });
     setError(null);
   };
@@ -140,6 +142,7 @@ export default function AdminUpdatesPage() {
         title: update.title,
         body: update.body,
         published: !update.published,
+        featured: update.featured,
       }),
     });
     refresh();
@@ -232,15 +235,26 @@ export default function AdminUpdatesPage() {
               </p>
             </div>
 
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={draft.published}
-                onChange={(e) => setDraft((d) => ({ ...d, published: e.target.checked }))}
-                className="rounded border-border"
-              />
-              Published (visible on home page)
-            </label>
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-6">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={draft.published}
+                  onChange={(e) => setDraft((d) => ({ ...d, published: e.target.checked }))}
+                  className="rounded border-border"
+                />
+                Published (visible on home page)
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={draft.featured}
+                  onChange={(e) => setDraft((d) => ({ ...d, featured: e.target.checked }))}
+                  className="rounded border-border"
+                />
+                Featured (pin and highlight on What&apos;s New)
+              </label>
+            </div>
 
             {error && <p className="text-sm text-red-400">{error}</p>}
 
@@ -295,6 +309,11 @@ export default function AdminUpdatesPage() {
                           </>
                         )}
                       </span>
+                      {update.featured && (
+                        <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-400">
+                          Featured
+                        </span>
+                      )}
                     </div>
                     <p className="mt-1 text-[10px] text-muted-foreground">
                       {formatSiteUpdateTime(update.createdAt)} · @{update.author.username}

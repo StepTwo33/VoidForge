@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ContentPanel } from "@/components/page-shell";
 import {
   GuideCtaLink,
@@ -16,7 +17,9 @@ export default function HowToModBasicsPage() {
         </p>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
           <li>
-            Base capacity is low (around 30). You will feel cramped until you invest.
+            At max rank, capacity is usually around 30 before a potato (some items go
+            higher). Unranked or freshly Formad gear starts lower, so early builds feel
+            cramped.
           </li>
           <li>
             A <span className="font-medium text-foreground">Catalyst</span> (weapons) or{" "}
@@ -24,8 +27,10 @@ export default function HowToModBasicsPage() {
             similar) doubles capacity. This is the first real unlock for serious builds.
           </li>
           <li>
-            Mastery Rank 30+ adds a little extra capacity. Nice, but it does not replace a
-            potato.
+            Mastery Rank raises the{" "}
+            <span className="font-medium text-foreground">starting</span> capacity floor on
+            low-rank or freshly Formad gear. It does not raise the max on a finished
+            rank-30 item. Potatoes still matter.
           </li>
           <li>
             On warframes, a matching-polarity{" "}
@@ -43,8 +48,8 @@ export default function HowToModBasicsPage() {
         <h2 className="mb-3 text-lg font-semibold">Polarity &amp; Forma</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
           Polarities are the symbols on slots and mods. Match a mod to its polarity and the
-          drain is cut in half (rounded up). Mismatch costs more. An empty polarity is
-          neutral: no bonus, no penalty.
+          drain is cut in half (rounded up). Mismatch costs about 25% more (also rounded).
+          An empty polarity is neutral: no bonus, no penalty.
         </p>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
           <li>
@@ -99,14 +104,23 @@ export default function HowToModBasicsPage() {
       <ContentPanel>
         <h2 className="mb-3 text-lg font-semibold">Elemental combos</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Heat, Cold, Electricity, and Toxin combine in equip order into combos like Viral,
-          Corrosive, Magnetic, Radiation, Blast, and Gas. Decide the combo you want first,
-          then place mods so you get it.
+          Heat, Cold, Electricity, and Toxin combine into combos like Viral, Corrosive,
+          Magnetic, Radiation, Blast, and Gas. Combination follows mod placement order:
+          left to right, top row then bottom. Decide the combo you want first, then place
+          mods so you get it. Full combo table is in{" "}
+          <Link
+            href="/guides/how-to-mod/elements"
+            className="font-medium text-primary hover:text-primary/80"
+          >
+            Elements
+          </Link>
+          .
         </p>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
           <li>
-            Innate elements on the weapon count. A gun that already has Toxin will merge with
-            the next element you add.
+            Innate elements on the weapon count and combine{" "}
+            <span className="font-medium text-foreground">last</span>, after your elemental
+            mods. Placement still matters. If the combo looks wrong, check the builder.
           </li>
           <li>
             Common gun pattern: Viral + Heat. Corrosive for armored targets. Pick for the
@@ -135,8 +149,9 @@ export default function HowToModBasicsPage() {
           Pick the stronger legal option and free the other slot for something that multiplies
           a different part of the build.
         </p>
-        <div className="mt-4">
-          <GuideCtaLink href="/guides/how-to-mod/weapons">Next: Weapons</GuideCtaLink>
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-4">
+          <GuideCtaLink href="/guides/how-to-mod/elements">Next: Elements</GuideCtaLink>
+          <GuideCtaLink href="/guides/how-to-mod/weapons">Weapons</GuideCtaLink>
         </div>
       </ContentPanel>
     </>

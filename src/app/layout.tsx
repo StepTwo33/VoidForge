@@ -74,6 +74,14 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Frame Hub",
   },
+  alternates: {
+    types: {
+      "application/rss+xml": [
+        { url: "/feeds/updates.xml", title: `${SITE_NAME} What's New` },
+        { url: "/feeds/builds.xml", title: `${SITE_NAME} Top Builds` },
+      ],
+    },
+  },
   icons: {
     icon: [
       { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },

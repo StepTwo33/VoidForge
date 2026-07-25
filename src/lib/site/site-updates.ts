@@ -6,6 +6,7 @@ export interface SiteUpdateSummary {
   title: string;
   body: string;
   published: boolean;
+  featured: boolean;
   createdAt: number;
   updatedAt: number;
   author: {

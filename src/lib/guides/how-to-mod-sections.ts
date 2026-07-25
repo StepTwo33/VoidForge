@@ -1,19 +1,31 @@
 import {
   BookOpen,
   Crosshair,
+  Flame,
   GraduationCap,
+  Gem,
+  Hexagon,
+  PawPrint,
   Plane,
+  Rocket,
   Sparkles,
   User,
+  Wrench,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export type HowToModSectionId =
   | "overview"
   | "basics"
+  | "elements"
   | "weapons"
+  | "modular"
+  | "rivens"
+  | "arcanes"
   | "warframes"
-  | "archwing";
+  | "companions"
+  | "archwing"
+  | "railjack";
 
 export interface HowToModSectionDef {
   id: HowToModSectionId;
@@ -41,6 +53,13 @@ export const HOW_TO_MOD_SECTIONS: HowToModSectionDef[] = [
     description: "Capacity, Forma, stacking, and elements",
   },
   {
+    id: "elements",
+    href: `${HOW_TO_MOD_BASE}/elements`,
+    label: "Elements",
+    icon: Flame,
+    description: "Combo table, placement order, and mission picks",
+  },
+  {
     id: "weapons",
     href: `${HOW_TO_MOD_BASE}/weapons`,
     label: "Weapons",
@@ -48,11 +67,39 @@ export const HOW_TO_MOD_SECTIONS: HowToModSectionDef[] = [
     description: "Crit, status, and hybrid build paths",
   },
   {
+    id: "modular",
+    href: `${HOW_TO_MOD_BASE}/modular`,
+    label: "Modular",
+    icon: Wrench,
+    description: "Kitguns, Zaws, and Amps: parts first, then mods",
+  },
+  {
+    id: "rivens",
+    href: `${HOW_TO_MOD_BASE}/rivens`,
+    label: "Rivens",
+    icon: Gem,
+    description: "Disposition, rolls, and when a riven earns a slot",
+  },
+  {
+    id: "arcanes",
+    href: `${HOW_TO_MOD_BASE}/arcanes`,
+    label: "Arcanes",
+    icon: Hexagon,
+    description: "Parallel power slots for frames, guns, and amps",
+  },
+  {
     id: "warframes",
     href: `${HOW_TO_MOD_BASE}/warframes`,
     label: "Warframes",
     icon: User,
-    description: "Ability stats, Aura, Exilus, and companions",
+    description: "Ability stats, Aura, Exilus, and shards",
+  },
+  {
+    id: "companions",
+    href: `${HOW_TO_MOD_BASE}/companions`,
+    label: "Companions",
+    icon: PawPrint,
+    description: "Precepts, survival, and companion weapons",
   },
   {
     id: "archwing",
@@ -60,6 +107,13 @@ export const HOW_TO_MOD_SECTIONS: HowToModSectionDef[] = [
     label: "Archwing & Mech",
     icon: Plane,
     description: "Archwing and Necramech modding essentials",
+  },
+  {
+    id: "railjack",
+    href: `${HOW_TO_MOD_BASE}/railjack`,
+    label: "Railjack",
+    icon: Rocket,
+    description: "Plexus grids and ship-modding habits",
   },
 ];
 

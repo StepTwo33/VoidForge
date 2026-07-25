@@ -212,12 +212,13 @@ model SiteUpdate {
   title     String
   body      String
   published Boolean  @default(true)
+  featured  Boolean  @default(false)
   authorId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
-  @@index([published, createdAt])
+  @@index([published, featured, createdAt])
 }
 
 /** Staff data fixes — shared globally; one override per target (type + id). */

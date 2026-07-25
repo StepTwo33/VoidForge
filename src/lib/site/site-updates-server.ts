@@ -6,6 +6,7 @@ type SiteUpdateRow = {
   title: string;
   body: string;
   published: boolean;
+  featured: boolean;
   createdAt: Date;
   updatedAt: Date;
   author: { username: string | null; name: string | null };
@@ -17,6 +18,7 @@ export function toSiteUpdateSummary(row: SiteUpdateRow): SiteUpdateSummary {
     title: row.title,
     body: row.body,
     published: row.published,
+    featured: row.featured,
     createdAt: row.createdAt.getTime(),
     updatedAt: row.updatedAt.getTime(),
     author: {
@@ -31,6 +33,7 @@ const selectFields = {
   title: true,
   body: true,
   published: true,
+  featured: true,
   createdAt: true,
   updatedAt: true,
   author: { select: { username: true, name: true } },
@@ -40,7 +43,7 @@ export async function fetchPublishedSiteUpdates(limit = 30): Promise<SiteUpdateS
   try {
     const rows = await prisma.siteUpdate.findMany({
       where: { published: true },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
       take: Math.min(Math.max(limit, 1), 50),
       select: selectFields,
     });

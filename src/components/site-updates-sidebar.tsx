@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, Loader2, Megaphone, PenLine } from "lucide-react";
+import { ChevronRight, Loader2, Megaphone, PenLine, Rss } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatSiteUpdateTime, type SiteUpdateSummary } from "@/lib/site/site-updates";
 import {
@@ -24,9 +24,21 @@ function UpdateCard({ update, compact }: { update: SiteUpdateSummary; compact?: 
   return (
     <Link
       href={`/updates/${update.id}`}
-      className="group block rounded-lg border border-border/50 bg-background/40 p-3 transition-colors hover:border-primary/40 hover:bg-background/60"
+      className={cn(
+        "group block rounded-lg border p-3 transition-colors",
+        update.featured
+          ? "border-amber-500/40 bg-amber-500/10 hover:border-amber-500/60 hover:bg-amber-500/15"
+          : "border-border/50 bg-background/40 hover:border-primary/40 hover:bg-background/60",
+      )}
     >
-      <time className="text-[10px] text-muted-foreground">{formatSiteUpdateTime(update.createdAt)}</time>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <time className="text-[10px] text-muted-foreground">{formatSiteUpdateTime(update.createdAt)}</time>
+        {update.featured && (
+          <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-400">
+            Featured
+          </span>
+        )}
+      </div>
       <h3
         className={cn(
           "mt-1 font-semibold leading-snug text-foreground transition-colors group-hover:text-primary",
@@ -111,6 +123,14 @@ export function SiteUpdatesSidebar({
               Manage
             </Link>
           )}
+          <a
+            href="/feeds/updates.xml"
+            className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground hover:text-amber-400 hover:underline"
+            title="RSS feed for site updates"
+          >
+            <Rss className="h-3 w-3" />
+            RSS
+          </a>
           <Link
             href="/updates"
             className="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary hover:underline"

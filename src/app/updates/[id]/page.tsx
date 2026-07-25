@@ -55,7 +55,14 @@ export default async function SiteUpdatePage({
               <Megaphone className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">{posted}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-xs text-muted-foreground">{posted}</p>
+                {update.featured && (
+                  <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-400">
+                    Featured
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground/80">
                 {formatSiteUpdateTime(update.createdAt)} · @{update.author.username}
               </p>

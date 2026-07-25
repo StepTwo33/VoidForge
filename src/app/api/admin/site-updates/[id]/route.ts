@@ -13,6 +13,7 @@ function toSummary(
     title: string;
     body: string;
     published: boolean;
+    featured: boolean;
     createdAt: Date;
     updatedAt: Date;
     author: { username: string | null; name: string | null };
@@ -23,6 +24,7 @@ function toSummary(
     title: row.title,
     body: row.body,
     published: row.published,
+    featured: row.featured,
     createdAt: row.createdAt.getTime(),
     updatedAt: row.updatedAt.getTime(),
     author: {
@@ -37,20 +39,24 @@ const selectFields = {
   title: true,
   body: true,
   published: true,
+  featured: true,
   createdAt: true,
   updatedAt: true,
   author: { select: { username: true, name: true } },
 } as const;
 
-function parsePayload(body: unknown): { title: string; body: string; published: boolean } | null {
+function parsePayload(
+  body: unknown,
+): { title: string; body: string; published: boolean; featured: boolean } | null {
   if (!body || typeof body !== "object") return null;
   const b = body as Record<string, unknown>;
   const title = typeof b.title === "string" ? b.title.trim() : "";
   const text = typeof b.body === "string" ? b.body.trim() : "";
   const published = b.published !== false;
+  const featured = b.featured === true;
   if (!title || !text) return null;
   if (title.length > SITE_UPDATE_TITLE_MAX || text.length > SITE_UPDATE_BODY_MAX) return null;
-  return { title, body: text, published };
+  return { title, body: text, published, featured };
 }
 
 // PATCH /api/admin/site-updates/[id]
@@ -84,6 +90,7 @@ export async function PATCH(
         title: payload.title,
         body: payload.body,
         published: payload.published,
+        featured: payload.featured,
       },
       select: selectFields,
     });
