@@ -2,10 +2,10 @@
 
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { promptDeployRefresh } from "@/lib/site/deploy-refresh";
 
 const BUILD_STORAGE_KEY = "framehub_build_id";
 const CHECK_INTERVAL_MS = 60_000;
-const RELOAD_DELAY_MS = 1200;
 
 function isStaleClientError(message: string): boolean {
   const m = message.toLowerCase();
@@ -17,25 +17,18 @@ function isStaleClientError(message: string): boolean {
   );
 }
 
-function reloadSoon(reason: string) {
-  toast.info(reason, { duration: RELOAD_DELAY_MS + 500 });
-  window.setTimeout(() => {
-    window.location.reload();
-  }, RELOAD_DELAY_MS);
-}
-
 /**
- * Detects a new production build and reloads the tab so users get fresh JS/HTML
- * without needing a manual hard refresh (Ctrl+Shift+R).
+ * Detects a new production build and prompts to refresh.
+ * Does not auto-reload — that would wipe in-progress builder state.
  */
 export function DeployRefreshNotifier() {
-  const reloading = useRef(false);
+  const prompted = useRef(false);
 
   useEffect(() => {
-    const triggerReload = (reason: string) => {
-      if (reloading.current) return;
-      reloading.current = true;
-      reloadSoon(reason);
+    const offerRefresh = (message: string) => {
+      if (prompted.current) return;
+      prompted.current = true;
+      promptDeployRefresh(message);
     };
 
     const checkBuild = async () => {
@@ -48,7 +41,7 @@ export function DeployRefreshNotifier() {
         const prev = sessionStorage.getItem(BUILD_STORAGE_KEY);
         sessionStorage.setItem(BUILD_STORAGE_KEY, buildId);
         if (prev && prev !== buildId) {
-          triggerReload("Frame Hub was updated. Reloading…");
+          offerRefresh("Frame Hub was updated");
         }
       } catch {
         // ignore network errors during deploy
@@ -65,7 +58,10 @@ export function DeployRefreshNotifier() {
 
     const onError = (event: ErrorEvent) => {
       if (isStaleClientError(event.message || "")) {
-        triggerReload("This page is from an older version. Reloading…");
+        offerRefresh("This tab is on an older version");
+        toast.warning("Something failed because of an old page version. Refresh when you can.", {
+          duration: 8000,
+        });
       }
     };
 
@@ -75,7 +71,7 @@ export function DeployRefreshNotifier() {
           ? event.reason.message
           : String(event.reason ?? "");
       if (isStaleClientError(msg)) {
-        triggerReload("This page is from an older version. Reloading…");
+        offerRefresh("This tab is on an older version");
       }
     };
 

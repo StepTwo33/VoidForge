@@ -1,45 +1,39 @@
 "use client";
 
 import { useEffect } from "react";
+import { promptDeployRefresh } from "@/lib/site/deploy-refresh";
 
 /**
- * Register the PWA service worker and force clients onto the newest SW after deploy.
- * updateViaCache: "none" prevents browsers from using a cached sw.js for up to 24h.
+ * Register the PWA service worker. New workers stay in waiting until the user
+ * chooses Refresh (see deploy-refresh toast) so open builders are not wiped.
  */
 export function PWARegister() {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-
-    let refreshing = false;
-    const onControllerChange = () => {
-      if (refreshing) return;
-      refreshing = true;
-      window.location.reload();
-    };
-    navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
 
     let updateTimer: ReturnType<typeof setInterval> | undefined;
 
     navigator.serviceWorker
       .register("/sw.js", { updateViaCache: "none" })
       .then((registration) => {
-        // Ask the browser to re-fetch sw.js periodically while the tab is open.
         updateTimer = setInterval(() => {
           void registration.update();
         }, 60_000);
 
-        const askWaitingToActivate = () => {
-          registration.waiting?.postMessage({ type: "SKIP_WAITING" });
+        const onWaitingWorker = () => {
+          if (registration.waiting && navigator.serviceWorker.controller) {
+            promptDeployRefresh("Frame Hub was updated");
+          }
         };
 
-        if (registration.waiting) askWaitingToActivate();
+        if (registration.waiting) onWaitingWorker();
 
         registration.addEventListener("updatefound", () => {
           const worker = registration.installing;
           if (!worker) return;
           worker.addEventListener("statechange", () => {
             if (worker.state === "installed" && navigator.serviceWorker.controller) {
-              askWaitingToActivate();
+              onWaitingWorker();
             }
           });
         });
@@ -49,7 +43,6 @@ export function PWARegister() {
       });
 
     return () => {
-      navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
       if (updateTimer) clearInterval(updateTimer);
     };
   }, []);
