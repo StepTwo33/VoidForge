@@ -109,6 +109,65 @@ export function verifyNewsletterUnsubscribeToken(token: string): string | null {
 }
 
 /** Opt-in email when a mod checks “Also email the reporter” on resolve / won't fix. */
+export async function sendBuildDeletedEmail(params: {
+  to: string;
+  ownerName: string;
+  buildName: string;
+  buildType: string;
+  reason?: string;
+}): Promise<void> {
+  if (!process.env.RESEND_API_KEY) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[email] RESEND_API_KEY missing; skipping build deletion notification");
+    }
+    return;
+  }
+
+  const base = getAppBaseUrl();
+  const profileUrl = `${base}/profile`;
+  const subject = `Your build was removed: ${params.buildName}`;
+  const reason = params.reason?.trim();
+  const reasonBlock = reason
+    ? `
+        <div style="margin: 16px 0 0; padding: 14px 16px; background: #0f172a; border: 1px solid #334155; border-radius: 8px;">
+          <p style="color: #64748b; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin: 0 0 8px;">Reason from moderation</p>
+          <p style="color: #e2e8f0; font-size: 14px; line-height: 1.55; margin: 0; white-space: pre-wrap;">${escapeHtml(reason)}</p>
+        </div>`
+    : `
+        <p style="color: #94a3b8; font-size: 14px; line-height: 1.5; margin: 16px 0 0;">
+          No additional reason was provided. If you think this was a mistake, reply to this email or contact support.
+        </p>`;
+
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h1 style="margin: 0; font-size: 22px; color: #e2e8f0;">
+          <span style="color: #22d3ee;">Frame</span><span style="color: #94a3b8;">Hub</span>
+        </h1>
+      </div>
+      <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px;">
+        <p style="color: #f1f5f9; font-size: 16px; font-weight: 600; margin: 0 0 12px;">Build removed by moderation</p>
+        <p style="color: #94a3b8; font-size: 14px; line-height: 1.5; margin: 0 0 16px;">
+          A moderator removed one of your public builds from Frame Hub. The build is permanently deleted and is no longer listed on your profile or in community builds.
+        </p>
+        <table style="width: 100%; font-size: 13px; color: #cbd5e1; border-collapse: collapse;">
+          <tr><td style="padding: 4px 0; color: #64748b;">Build</td><td style="padding: 4px 0;">${escapeHtml(params.buildName)}</td></tr>
+          <tr><td style="padding: 4px 0; color: #64748b;">Type</td><td style="padding: 4px 0;">${escapeHtml(params.buildType)}</td></tr>
+        </table>
+        ${reasonBlock}
+        <p style="margin: 20px 0 0;">
+          <a href="${profileUrl}" style="display: inline-block; background: #0ea5e9; color: #0f172a; text-decoration: none; font-size: 13px; font-weight: 600; padding: 10px 18px; border-radius: 8px;">Open your profile</a>
+        </p>
+      </div>
+      <p style="color: #475569; font-size: 11px; text-align: center; margin-top: 24px;">
+        Hi ${escapeHtml(params.ownerName)}, you received this because a build on your Frame Hub account was removed by staff.
+      </p>
+    </div>
+  `;
+
+  await sendEmail(params.to, subject, html);
+}
+
 export async function sendReportStatusEmail(params: {
   to: string;
   reporterName: string;

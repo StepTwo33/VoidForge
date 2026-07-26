@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { ChevronRight, ThumbsUp, Trash2 } from "lucide-react";
 import { buildOpenUrl } from "@/lib/builds/build-url";
 import { useStaffRole } from "@/lib/auth/use-staff";
@@ -19,26 +20,41 @@ export type PublicProfileBuild = {
 
 export function PublicProfileBuilds({ builds }: { builds: PublicProfileBuild[] }) {
   const isStaff = useStaffRole();
-  const { confirm } = useConfirmDialog();
+  const { prompt } = useConfirmDialog();
   const router = useRouter();
   const [rows, setRows] = useState(builds);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleStaffDelete = async (build: PublicProfileBuild) => {
-    const ok = await confirm({
+    const reason = await prompt({
       title: "Delete this build?",
-      description: `"${build.name}" will be permanently removed from this user's account. This cannot be undone.`,
-      confirmLabel: "Delete build",
+      description: `"${build.name}" will be permanently removed. The owner will get an email with your reason (if you add one).`,
+      inputLabel: "Reason for the owner (optional)",
+      placeholder: "e.g. Spam / misleading / guideline issue",
+      confirmLabel: "Delete & notify",
       destructive: true,
     });
-    if (!ok) return;
+    if (reason === null) return;
 
     setDeletingId(build.id);
     try {
-      const res = await fetch(`/api/builds/${build.id}`, { method: "DELETE" });
-      if (!res.ok) return;
+      const res = await fetch(`/api/builds/${build.id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: reason.trim(), notifyOwner: true }),
+      });
+      if (!res.ok) {
+        toast.error("Could not delete build");
+        return;
+      }
+      const data = (await res.json().catch(() => ({}))) as { notified?: boolean };
       setRows((prev) => prev.filter((b) => b.id !== build.id));
       router.refresh();
+      toast.success(
+        data.notified
+          ? "Build deleted — owner emailed"
+          : "Build deleted (no email sent; owner may have no address)",
+      );
     } finally {
       setDeletingId(null);
     }
