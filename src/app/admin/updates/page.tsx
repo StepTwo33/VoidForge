@@ -225,13 +225,20 @@ export default function AdminUpdatesPage() {
               <textarea
                 value={draft.body}
                 onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value.slice(0, SITE_UPDATE_BODY_MAX) }))}
-                rows={6}
-                placeholder="What changed? Keep it short — this shows in the home page sidebar."
+                rows={14}
+                placeholder="What changed? Full posts are fine — the home sidebar shows a short preview with Read more."
                 maxLength={SITE_UPDATE_BODY_MAX}
                 className="w-full rounded-md border border-border/60 bg-background/50 px-3 py-2 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
-              <p className="mt-1 text-[10px] text-muted-foreground text-right">
-                {draft.body.length}/{SITE_UPDATE_BODY_MAX}
+              <p
+                className={
+                  draft.body.length >= SITE_UPDATE_BODY_MAX
+                    ? "mt-1 text-[10px] text-right font-medium text-amber-500"
+                    : "mt-1 text-[10px] text-muted-foreground text-right"
+                }
+              >
+                {draft.body.length.toLocaleString()}/{SITE_UPDATE_BODY_MAX.toLocaleString()}
+                {draft.body.length >= SITE_UPDATE_BODY_MAX ? " (limit reached)" : ""}
               </p>
             </div>
 

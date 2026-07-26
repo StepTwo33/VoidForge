@@ -1,5 +1,42 @@
 export const SITE_UPDATE_TITLE_MAX = 120;
-export const SITE_UPDATE_BODY_MAX = 2000;
+/** Long enough for full changelog-style What's New posts (was 2000 and silently cut paste). */
+export const SITE_UPDATE_BODY_MAX = 16000;
+
+export type SiteUpdatePayload = {
+  title: string;
+  body: string;
+  published: boolean;
+  featured: boolean;
+};
+
+export function parseSiteUpdatePayload(
+  raw: unknown,
+): { ok: true; data: SiteUpdatePayload } | { ok: false; error: string } {
+  if (!raw || typeof raw !== "object") {
+    return { ok: false, error: "Invalid payload" };
+  }
+  const b = raw as Record<string, unknown>;
+  const title = typeof b.title === "string" ? b.title.trim() : "";
+  const text = typeof b.body === "string" ? b.body.trim() : "";
+  const published = b.published !== false;
+  const featured = b.featured === true;
+  if (!title || !text) {
+    return { ok: false, error: "Title and body are required" };
+  }
+  if (title.length > SITE_UPDATE_TITLE_MAX) {
+    return {
+      ok: false,
+      error: `Title must be ${SITE_UPDATE_TITLE_MAX} characters or fewer`,
+    };
+  }
+  if (text.length > SITE_UPDATE_BODY_MAX) {
+    return {
+      ok: false,
+      error: `Body must be ${SITE_UPDATE_BODY_MAX.toLocaleString()} characters or fewer`,
+    };
+  }
+  return { ok: true, data: { title, body: text, published, featured } };
+}
 
 export interface SiteUpdateSummary {
   id: string;
