@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/auth";
+import { verifyAdmin } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
 import { safeParseBuildJson } from "@/lib/builds/build-types";
 
-// DELETE /api/builds/[id]
+// DELETE /api/builds/[id] — owner, or staff (admin/moderator) moderation
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -14,13 +15,19 @@ export async function DELETE(
   }
 
   const { id } = await params;
+  const { isAdmin } = await verifyAdmin();
 
-  const build = await prisma.build.findFirst({
-    where: { id, userId: session.user.id },
+  const build = await prisma.build.findUnique({
+    where: { id },
+    select: { id: true, userId: true },
   });
 
   if (!build) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (build.userId !== session.user.id && !isAdmin) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   await prisma.build.delete({ where: { id } });
