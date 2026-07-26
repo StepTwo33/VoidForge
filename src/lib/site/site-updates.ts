@@ -1,6 +1,6 @@
 export const SITE_UPDATE_TITLE_MAX = 120;
-/** Long enough for full changelog-style What's New posts (was 2000 and silently cut paste). */
-export const SITE_UPDATE_BODY_MAX = 16000;
+/** Soft ceiling for abuse prevention. No HTML maxLength — paste must not be silently cut. */
+export const SITE_UPDATE_BODY_MAX = 100_000;
 
 export type SiteUpdatePayload = {
   title: string;

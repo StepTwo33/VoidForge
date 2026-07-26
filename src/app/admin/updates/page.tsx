@@ -97,6 +97,16 @@ export default function AdminUpdatesPage() {
       setError("Title and body are required.");
       return;
     }
+    if (draft.title.length > SITE_UPDATE_TITLE_MAX) {
+      setError(`Title must be ${SITE_UPDATE_TITLE_MAX} characters or fewer.`);
+      return;
+    }
+    if (draft.body.length > SITE_UPDATE_BODY_MAX) {
+      setError(
+        `Body must be ${SITE_UPDATE_BODY_MAX.toLocaleString()} characters or fewer (currently ${draft.body.length.toLocaleString()}).`,
+      );
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -224,21 +234,22 @@ export default function AdminUpdatesPage() {
               <label className="mb-1 block text-xs font-medium text-muted-foreground">Body</label>
               <textarea
                 value={draft.body}
-                onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value.slice(0, SITE_UPDATE_BODY_MAX) }))}
-                rows={14}
-                placeholder="What changed? Full posts are fine — the home sidebar shows a short preview with Read more."
-                maxLength={SITE_UPDATE_BODY_MAX}
+                onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value }))}
+                rows={16}
+                placeholder="What changed? Paste the full post. Home/RSS show a short preview; the update page keeps the whole body."
                 className="w-full rounded-md border border-border/60 bg-background/50 px-3 py-2 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
               <p
                 className={
-                  draft.body.length >= SITE_UPDATE_BODY_MAX
+                  draft.body.length > SITE_UPDATE_BODY_MAX
                     ? "mt-1 text-[10px] text-right font-medium text-amber-500"
                     : "mt-1 text-[10px] text-muted-foreground text-right"
                 }
               >
-                {draft.body.length.toLocaleString()}/{SITE_UPDATE_BODY_MAX.toLocaleString()}
-                {draft.body.length >= SITE_UPDATE_BODY_MAX ? " (limit reached)" : ""}
+                {draft.body.length.toLocaleString()} characters
+                {draft.body.length > SITE_UPDATE_BODY_MAX
+                  ? ` (over ${SITE_UPDATE_BODY_MAX.toLocaleString()} limit)`
+                  : ""}
               </p>
             </div>
 
