@@ -1,5 +1,7 @@
 // Railjack data: components, armaments, and base stats
 
+import { namedEliteCrew } from "@/data/railjack-crew";
+
 export interface RailjackComponent {
   id: string;
   name: string;
@@ -248,6 +250,19 @@ export function findRailjackEliteCrew(id: string): RailjackEliteCrew | undefined
   return railjackEliteCrew.find((c) => c.id === id);
 }
 
+// Re-export crew helpers (canonical definitions live in railjack-crew.ts)
+export {
+  namedEliteCrew,
+  findNamedEliteCrew,
+  tickerCrewTemplates,
+  adversaryCrewProfiles,
+  computeCrewPaperBonuses,
+  normalizeCrewSlots,
+  type RailjackCrewSlot,
+  type CrewRole,
+  type CrewSource,
+} from "@/data/railjack-crew";
+
 /** Normalize Mk IV ids to Mk III trait keys (same house unique pool). */
 export function railjackTraitComponentKey(id: string): string {
   return id.replace(/_mk4$/, "_mk3");
@@ -380,6 +395,7 @@ export interface RailjackPreset {
   battleMods: string[];
 }
 
+/** @deprecated Prefer NamedEliteCrew from railjack-crew.ts */
 export interface RailjackEliteCrew {
   id: string;
   name: string;
@@ -420,7 +436,7 @@ export const railjackPresets: RailjackPreset[] = [
     shieldId: "zetki_shield_mk3",
     engineId: "vidar_engine_mk3",
     platingId: "lavan_plating_mk3",
-    turretIds: ["zetki_laith_mk4", "zetki_pulsar_mk4", "zetki_cryophon_mk4"],
+    turretIds: ["zetki_laith_mk4", "zetki_pulsar_mk4"],
     ordnanceId: "sigma_tycho_seeker_mk3",
     integratedMods: [
       "ironclad_matrix", "conic_nozzle", "crimson_fugue", "forward_artillery", "predator",
@@ -438,7 +454,7 @@ export const railjackPresets: RailjackPreset[] = [
     shieldId: "lavan_shield_mk3",
     engineId: "vidar_engine_mk3",
     platingId: "lavan_plating_mk3",
-    turretIds: ["zetki_vort_mk4", "zetki_photor_mk4", "zetki_glazio_mk4"],
+    turretIds: ["zetki_vort_mk4", "zetki_photor_mk4"],
     ordnanceId: "sigma_tycho_seeker_mk3",
     integratedMods: [
       "onslaught_matrix", "ion_burn", "fortifying_fire", "conic_nozzle", "forward_artillery",
@@ -449,12 +465,15 @@ export const railjackPresets: RailjackPreset[] = [
   },
 ];
 
-export const railjackEliteCrew: RailjackEliteCrew[] = [
-  { id: "vena", name: "Vena", description: "Garuda Protoframe — queen of gore.", competency: { piloting: 0, gunnery: 2, repair: 0, combat: 5, endurance: 5 }, vendorCost: "both", requiresCommandRank: 10 },
-  { id: "ryoku", name: "Ryoku", description: "Ash Protoframe — Scoria's deadliest assassin.", competency: { piloting: 0, gunnery: 2, repair: 2, combat: 5, endurance: 3 }, vendorCost: "both", requiresCommandRank: 10 },
-  { id: "latrox_une", name: "Latrox Une", description: "Corpus researcher and Deimos ally.", competency: { piloting: 0, gunnery: 0, repair: 5, combat: 3, endurance: 4 }, vendorCost: "both", requiresCommandRank: 10 },
-  { id: "jarka_lar", name: "Jarka Lar", description: "Freed from the Grineer Queens.", competency: { piloting: 0, gunnery: 2, repair: 0, combat: 5, endurance: 5 }, vendorCost: "both", requiresCommandRank: 10 },
-];
+/** Named elite crew (Command 10). Canonical list: namedEliteCrew. */
+export const railjackEliteCrew: RailjackEliteCrew[] = namedEliteCrew.map((c) => ({
+  id: c.id,
+  name: c.name,
+  description: c.description,
+  competency: c.competency,
+  vendorCost: c.vendorCost,
+  requiresCommandRank: c.requiresCommandRank,
+}));
 
 // Helper to identify Railjack-relevant mods from the "general" category
 // In-game these map to Integrated, Battle, and Tactical Plexus mods

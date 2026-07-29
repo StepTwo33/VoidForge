@@ -213,7 +213,7 @@ export interface RailjackBuildData {
   shieldId?: string;
   engineId?: string;
   platingId?: string;
-  /** Nose / Dorsal / Ventral turret hardpoints. */
+  /** Nose + Swivel turret hardpoints. */
   turretIds?: (string | undefined)[];
   /** @deprecated Use turretIds[0] — kept for older saves. */
   turretId?: string;
@@ -224,7 +224,21 @@ export interface RailjackBuildData {
   integratedPolarities: Record<number, string>;
   battlePolarities: Record<number, string>;
   tacticalPolarities: Record<number, string>;
-  /** Elite crew member (Update 43 protoframes). */
+  /** Mission crew slots A/B/C (Command 1/3/5). */
+  crewSlots?: ({
+    role: "pilot" | "gunner" | "engineer" | "defender";
+    source: "ticker" | "elite" | "adversary";
+    profileId: string;
+    competency?: {
+      piloting: number;
+      gunnery: number;
+      repair: number;
+      combat: number;
+      endurance: number;
+    };
+    eliteTraitId?: string;
+  } | null)[];
+  /** @deprecated Use crewSlots — single elite pick from older saves. */
   eliteCrewId?: string;
   /** Selected Mk III house unique trait rolls. */
   reactorTraitId?: string;

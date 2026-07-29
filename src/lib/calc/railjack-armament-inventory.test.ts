@@ -34,6 +34,18 @@ describe("railjack armament inventory", () => {
     expect(findRailjackArmament("zetki_tycho_seeker")?.id).toBe("sigma_tycho_seeker_mk3");
   });
 
+  it("ordnance families are only Milati, Tycho Seeker, and Galvarc", () => {
+    const families = new Set(
+      allOrdnance.map((o) => {
+        if (o.id.includes("milati")) return "milati";
+        if (o.id.includes("tycho_seeker")) return "tycho_seeker";
+        if (o.id.includes("galvarc")) return "galvarc";
+        return o.id;
+      }),
+    );
+    expect([...families].sort()).toEqual(["galvarc", "milati", "tycho_seeker"]);
+  });
+
   it("generates Mk IV for Cryophon / Glazio house turrets", () => {
     expect(findRailjackArmament("zetki_cryophon_mk4")?.tier).toBe("mk4");
     expect(findRailjackArmament("lavan_glazio_mk4")?.damage).toBe(Math.round(2317 * 1.5));

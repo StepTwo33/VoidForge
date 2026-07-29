@@ -2,7 +2,6 @@ import { getEffectiveModsMap } from "@/lib/weapons/effective-data";
 import {
   findRailjackArmament,
   findRailjackComponent,
-  findRailjackEliteCrew,
   getRailjackComponentTraits,
   railjackBaseStats,
   tunguskaCannon,
@@ -11,13 +10,17 @@ import {
   type RailjackHouseTrait,
 } from "@/data/railjack";
 import {
+  computeCrewPaperBonuses,
+  normalizeCrewSlots,
+  type RailjackCrewSlot,
+} from "@/data/railjack-crew";
+import {
   intrinsicPaperEffects,
   normalizeIntrinsics,
   type RailjackIntrinsicPaperEffects,
   type RailjackIntrinsics,
 } from "@/data/railjack-intrinsics";
 import {
-  crewBonusesFromCompetency,
   RAILJACK_PLEXUS_ABILITIES,
   summarizeEquippedAbilities,
   type RailjackAbilitySummary,
@@ -61,7 +64,7 @@ export interface RailjackBuildInput {
   reactorTraitId?: string;
   shieldTraitId?: string;
   engineTraitId?: string;
-  /** Nose / Dorsal / Ventral turret hardpoints (length 1–3; legacy 1–2 supported). */
+  /** Nose + Swivel turret hardpoints (length 1–2; legacy longer arrays keep first two). */
   turretIds?: (string | undefined)[];
   /** Legacy single-turret saves. */
   turretId?: string;
@@ -69,6 +72,9 @@ export interface RailjackBuildInput {
   integratedMods?: EquippedMod[];
   battleMods?: EquippedMod[];
   tacticalMods?: EquippedMod[];
+  /** Mission crew slots A/B/C. */
+  crewSlots?: (RailjackCrewSlot | null)[];
+  /** @deprecated Prefer crewSlots. */
   eliteCrewId?: string;
   /** Player Intrinsics ranks (0–10 per tree). Dirac/grid removed U29.10. */
   intrinsics?: Partial<RailjackIntrinsics>;
@@ -92,10 +98,10 @@ function modStatFraction(perRank: number, rank: number): number {
   return (perRank * (rank + 1)) / 100;
 }
 
-const TURRET_HARDPOINT_COUNT = 3;
+const TURRET_HARDPOINT_COUNT = 2;
 
 function resolveTurretIds(input: RailjackBuildInput): (string | undefined)[] {
-  const slots: (string | undefined)[] = [undefined, undefined, undefined];
+  const slots: (string | undefined)[] = [undefined, undefined];
   if (input.turretIds?.length) {
     for (let i = 0; i < TURRET_HARDPOINT_COUNT; i++) {
       slots[i] = input.turretIds[i];
@@ -342,8 +348,8 @@ export function calculateRailjackBuild(
   const shield = input.shieldId ? findRailjackComponent(input.shieldId) : undefined;
   const engine = input.engineId ? findRailjackComponent(input.engineId) : undefined;
   const plating = input.platingId ? findRailjackComponent(input.platingId) : undefined;
-  const eliteCrew = input.eliteCrewId ? findRailjackEliteCrew(input.eliteCrewId) : undefined;
-  const crewBonuses = eliteCrew ? crewBonusesFromCompetency(eliteCrew.competency) : undefined;
+  const crewSlots = normalizeCrewSlots(input.crewSlots, input.eliteCrewId);
+  const crewPaper = computeCrewPaperBonuses(crewSlots);
 
   // Plating / shields: wiki absolute equipped values (replace baseline).
   if (plating) {
@@ -370,11 +376,12 @@ export function calculateRailjackBuild(
   const intrinsics = normalizeIntrinsics(input.intrinsics);
   const intrinsicFx = intrinsicPaperEffects(intrinsics);
 
-  if (crewBonuses) {
-    acc.turretDamageBonus += crewBonuses.turretDamageBonus;
-    acc.speedBonus += crewBonuses.speedBonus;
-    acc.hullBonus += crewBonuses.hullBonus;
-  }
+  // Pilot competency speed (any engine). Elite piloting trait: house engines only.
+  const engineIsHouse =
+    !!engine &&
+    (engine.tier === "lavan" || engine.tier === "vidar" || engine.tier === "zetki");
+  const eliteEngineSpeed = engineIsHouse ? crewPaper.houseEngineSpeedBonus : 0;
+  acc.speedBonus += crewPaper.speedBonus + eliteEngineSpeed;
 
   const battleSummaries = summarizeEquippedAbilities(input.battleMods ?? [], "battle");
   const tacticalSummaries = summarizeEquippedAbilities(input.tacticalMods ?? [], "tactical");
@@ -451,18 +458,21 @@ export function calculateRailjackBuild(
   const totalExtraTurretDamage = extraTurretDamageBonus + houseTurretDamageBonus;
 
   const turretIds = resolveTurretIds(input);
-  // Nose=0, Dorsal=1, Ventral=2 — Gunnery 1 +50% applies to Dorsal/Ventral only.
+  // Nose=0, Swivel=1 — Gunnery 1 +50% applies to the swivel only.
+  // Elite gunnery trait: +50% on Lavan/Vidar/Zetki turrets (not Sigma).
   const turrets = turretIds
     .map((id, slotIndex) => {
       if (!id) return undefined;
       const armament = findRailjackArmament(id);
       if (!armament || armament.type !== "turret") return undefined;
       const gunnerySlotBonus =
-        (slotIndex === 1 || slotIndex === 2) ? intrinsicFx.dorsalVentralTurretDamageBonus : 0;
+        slotIndex === 1 ? intrinsicFx.dorsalVentralTurretDamageBonus : 0;
+      const eliteHouseTurret =
+        armament.house !== "sigma" ? crewPaper.houseTurretDamageBonus : 0;
       return computeRailjackArmamentStats(
         armament,
         acc,
-        totalExtraTurretDamage + gunnerySlotBonus,
+        totalExtraTurretDamage + gunnerySlotBonus + eliteHouseTurret,
       );
     })
     .filter((t): t is RailjackArmamentComputed => !!t);
@@ -515,7 +525,15 @@ export function calculateRailjackBuild(
     abilityStrengthBonus: reactor?.stats.abilityStrength,
     abilityRangeBonus: reactor?.stats.abilityRange,
     abilityDurationBonus: reactor?.stats.abilityDuration,
-    crewBonuses,
+    crewBonuses: {
+      speedBonus: crewPaper.speedBonus + eliteEngineSpeed,
+      houseEngineSpeedBonus: eliteEngineSpeed,
+      houseTurretDamageBonus: crewPaper.houseTurretDamageBonus,
+      panelNotes: crewPaper.panelNotes,
+      turretDamageBonus: 0,
+      hullBonus: 0,
+      repairSpeedBonus: 0,
+    },
     battleAbilities,
     tacticalAbilities,
     abilityTurretDamageBonus: extraTurretDamageBonus,
@@ -528,6 +546,8 @@ export function calculateRailjackBuild(
       domeChargeForge: intrinsicFx.domeChargeForge,
       ordnanceForge: intrinsicFx.ordnanceForge,
       eliteCrewUnlocked: intrinsicFx.eliteCrewUnlocked,
+      unusualCrewUnlocked: intrinsicFx.unusualCrewUnlocked,
+      crewSlotsUnlocked: intrinsicFx.crewSlotsUnlocked,
       panelNotes: intrinsicFx.panelNotes,
     },
   };

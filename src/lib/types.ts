@@ -1074,12 +1074,21 @@ export interface RailjackCalculatedStats {
   abilityStrengthBonus?: number;
   abilityRangeBonus?: number;
   abilityDurationBonus?: number;
-  /** Passive bonuses from elite crew competency. */
+  /** Wiki-faithful crew paper bonuses + panel notes. */
   crewBonuses?: {
-    turretDamageBonus: number;
+    /** Pilot role → ship speed (piloting competency table). */
     speedBonus: number;
-    hullBonus: number;
-    repairSpeedBonus: number;
+    /** Elite piloting trait on house engines. */
+    houseEngineSpeedBonus: number;
+    /** Elite gunnery trait on house turrets. */
+    houseTurretDamageBonus: number;
+    panelNotes: string[];
+    /** @deprecated Always 0 — kept for older UI bindings. */
+    turretDamageBonus?: number;
+    /** @deprecated Always 0. */
+    hullBonus?: number;
+    /** @deprecated Always 0. */
+    repairSpeedBonus?: number;
   };
   /** Equipped battle/tactical abilities with scaled costs/cooldowns. */
   battleAbilities?: RailjackAbilityComputed[];
@@ -1106,6 +1115,8 @@ export interface RailjackCalculatedStats {
     domeChargeForge: boolean;
     ordnanceForge: boolean;
     eliteCrewUnlocked: boolean;
+    unusualCrewUnlocked?: boolean;
+    crewSlotsUnlocked?: number;
     panelNotes: string[];
   };
 }
