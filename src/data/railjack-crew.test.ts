@@ -194,12 +194,17 @@ describe("railjack crew weapons", () => {
     ).toBe(true);
   });
 
-  it("filters adversary weapons by family including dual_coda", () => {
+  it("filters adversary weapons by family including dual_coda, melee, and primary", () => {
     const sample = [
       allWeapons.find((w) => w.id === "kuva_kohm")!,
+      allWeapons.find((w) => w.id === "kuva_karak")!, // primary category
+      allWeapons.find((w) => w.id === "kuva_shildeg")!, // melee
+      allWeapons.find((w) => w.id === "kuva_bramma")!, // bow-like primary — still adversary-owned
       allWeapons.find((w) => w.id === "tenet_cycron")!,
+      allWeapons.find((w) => w.id === "tenet_envoy")!, // launcher
       allWeapons.find((w) => w.id === "dual_coda_torxica")!,
-      allWeapons.find((w) => w.id === "kuva_ayanga")!,
+      allWeapons.find((w) => w.id === "coda_hema")!, // primary
+      allWeapons.find((w) => w.id === "kuva_ayanga")!, // archgun — excluded
       allWeapons.find((w) => w.id === "braton")!,
     ].filter(Boolean);
 
@@ -207,11 +212,38 @@ describe("railjack crew weapons", () => {
     const sister = filterAdversaryWeapons("sister_of_parvos", sample).map((w) => w.id);
     const coda = filterAdversaryWeapons("technocyte_coda", sample).map((w) => w.id);
 
-    expect(lich).toContain("kuva_kohm");
+    expect(lich).toEqual(
+      expect.arrayContaining(["kuva_kohm", "kuva_karak", "kuva_shildeg", "kuva_bramma"]),
+    );
     expect(lich).not.toContain("kuva_ayanga");
-    expect(sister).toEqual(["tenet_cycron"]);
-    expect(coda).toContain("dual_coda_torxica");
+    expect(lich).not.toContain("braton");
+    expect(sister).toEqual(expect.arrayContaining(["tenet_cycron", "tenet_envoy"]));
+    expect(coda).toEqual(expect.arrayContaining(["dual_coda_torxica", "coda_hema"]));
     expect(coda).not.toContain("braton");
+  });
+
+  it("includes FrameHub primary-category rifles for ticker crew", () => {
+    expect(
+      isRailjackCrewAssignableWeapon({
+        id: "kuva_karak",
+        name: "Kuva Karak",
+        category: "primary",
+      }),
+    ).toBe(true);
+    expect(
+      isRailjackCrewAssignableWeapon({
+        id: "kuva_bramma",
+        name: "Kuva Bramma",
+        category: "primary",
+      }),
+    ).toBe(false);
+    expect(
+      isRailjackCrewAssignableWeapon({
+        id: "kuva_shildeg",
+        name: "Kuva Shildeg",
+        category: "melee",
+      }),
+    ).toBe(false);
   });
 
   it("enforces unique weapon ids across crew slots", () => {

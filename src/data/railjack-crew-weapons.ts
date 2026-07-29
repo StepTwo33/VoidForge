@@ -11,8 +11,18 @@ import {
 } from "@/lib/weapons/weapon-progenitor";
 import type { CrewWeaponLoadout, RailjackCrewSlot } from "@/data/railjack-crew";
 
-/** Wiki: rifle, shotgun, or secondary — not bows, spearguns, thrown, arm-cannons. */
-const CREW_ASSIGNABLE_CATEGORIES = new Set(["rifle", "shotgun", "pistol", "secondary"]);
+/**
+ * Wiki: rifle, shotgun, or secondary — not bows, spearguns, thrown, arm-cannons.
+ * FrameHub stores many rifles as `primary` / `launcher`, so those count as assignable.
+ */
+const CREW_ASSIGNABLE_CATEGORIES = new Set([
+  "rifle",
+  "shotgun",
+  "pistol",
+  "secondary",
+  "primary",
+  "launcher",
+]);
 
 const CREW_EXCLUDED_CATEGORIES = new Set([
   "bow",
@@ -26,7 +36,7 @@ const CREW_EXCLUDED_CATEGORIES = new Set([
   "zaw_strike",
 ]);
 
-/** Spearguns / thrown / arm-cannons that may sit in rifle/pistol categories. */
+/** Spearguns / thrown / arm-cannons / bows that may sit in primary/secondary categories. */
 const CREW_EXCLUDED_WEAPON_IDS = new Set([
   "ferrox",
   "tenet_ferrox",
@@ -50,6 +60,7 @@ const CREW_EXCLUDED_WEAPON_IDS = new Set([
   "athodai", // arm-cannon-ish secondary
   "sepia",
   "cyanex",
+  "kuva_bramma", // bow (stored as primary)
 ]);
 
 const CREW_EXCLUDED_NAME_FRAGMENTS = [
@@ -92,6 +103,11 @@ export function isRailjackCrewAssignableWeapon(weapon: Pick<Weapon, "id" | "name
   return true;
 }
 
+/**
+ * Converted adversaries keep their own Kuva / Tenet / Coda weapon (including melee /
+ * primary / launcher). Do not apply ticker rifle/shotgun/secondary eligibility.
+ * Archguns are not boarding loadouts.
+ */
 export function filterAdversaryWeapons(
   profileId: string,
   weapons: Weapon[],
@@ -101,8 +117,8 @@ export function filterAdversaryWeapons(
   return weapons.filter(
     (w) =>
       weaponMatchesAdversaryFamily(w.id, family) &&
-      isRailjackCrewAssignableWeapon(w) &&
-      w.category !== "archgun",
+      w.category !== "archgun" &&
+      w.category !== "archmelee",
   );
 }
 
