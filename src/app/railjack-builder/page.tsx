@@ -4,7 +4,8 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { PageShell } from "@/components/page-shell";
 import { ModSlotCard } from "@/components/mod-slot";
 import { ModPicker } from "@/components/mod-picker";
-import { useMods } from "@/lib/weapons/use-data";
+import { useMods, useWeapons } from "@/lib/weapons/use-data";
+import { computeCrewBoardingDps } from "@/lib/calc/railjack-crew-boarding";
 import {
   allReactors, allShieldArrays, allEngines, allPlating,
   allTurrets, allOrdnance,
@@ -23,6 +24,7 @@ import {
   findTickerTemplate,
   normalizeCrewSlots,
   resolveCrewCompetency,
+  resolveSlotEliteTraitId,
   crewSlotUnlocked,
   type RailjackCrewSlot,
 } from "@/data/railjack-crew";
@@ -71,6 +73,7 @@ const TURRET_SLOT_LABELS = ["Nose", "Swivel"] as const;
 
 export default function RailjackBuilderPage() {
   const { mods: allMods, modsMap } = useMods();
+  const weapons = useWeapons();
   // Component state
   const [selectedReactor, setSelectedReactor] = useState<RailjackComponent | null>(null);
   const [selectedShield, setSelectedShield] = useState<RailjackComponent | null>(null);
@@ -794,6 +797,12 @@ export default function RailjackBuilderPage() {
                   if (slot?.source === "adversary") profileName = findAdversaryCrew(slot.profileId)?.name ?? slot.profileId;
                   const competency = slot ? resolveCrewCompetency(slot) : undefined;
                   const editing = activeCrewEditor === slotIdx;
+                  const traitId = slot ? resolveSlotEliteTraitId(slot) : undefined;
+                  const weapon = slot?.weaponLoadout?.weaponId
+                    ? weapons.find((w) => w.id === slot.weaponLoadout!.weaponId)
+                    : undefined;
+                  const boarding =
+                    slot && weapon ? computeCrewBoardingDps(slot, weapon, modsMap) : null;
                   return (
                     <div key={slotIdx} className={cn("rounded-lg border p-2.5", unlocked ? "border-border bg-card" : "border-border/40 opacity-60")}>
                       <div className="flex items-start justify-between gap-2">
@@ -822,7 +831,12 @@ export default function RailjackBuilderPage() {
                           {competency && (
                             <p className="text-[10px] text-muted-foreground/80 mt-0.5">
                               P{competency.piloting} G{competency.gunnery} R{competency.repair} C{competency.combat} E{competency.endurance}
-                              {slot?.eliteTraitId ? ` · ${findEliteTrait(slot.eliteTraitId)?.competency ?? "trait"}` : ""}
+                              {traitId ? ` · ${findEliteTrait(traitId)?.competency ?? "trait"}` : ""}
+                            </p>
+                          )}
+                          {boarding && (
+                            <p className="text-[10px] text-orange-600 dark:text-orange-400 mt-0.5">
+                              {weapon!.name} · Boarding DPS {Math.round(boarding.boardingDps).toLocaleString()}
                             </p>
                           )}
                         </button>
@@ -846,8 +860,13 @@ export default function RailjackBuilderPage() {
                       {editing && unlocked && (
                         <CrewSlotEditor
                           slot={slot}
+                          slotIndex={slotIdx}
+                          allSlots={crewSlots}
                           commandRank={intrinsics.command}
                           defaultRole={roleDefault}
+                          weapons={weapons}
+                          mods={allMods}
+                          modsMap={modsMap}
                           onChange={(next) => {
                             beginNewRailjackDraft();
                             setCrewSlots((prev) => {

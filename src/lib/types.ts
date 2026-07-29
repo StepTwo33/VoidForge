@@ -1078,10 +1078,12 @@ export interface RailjackCalculatedStats {
   crewBonuses?: {
     /** Pilot role → ship speed (piloting competency table). */
     speedBonus: number;
-    /** Elite piloting trait on house engines. */
+    /** Elite piloting trait applied to equipped engine (0 if house mismatch). */
     houseEngineSpeedBonus: number;
-    /** Elite gunnery trait on house turrets. */
+    /** Max elite gunnery trait across houses (display); per-turret applied in armament stats. */
     houseTurretDamageBonus: number;
+    houseEngineSpeedByHouse?: Partial<Record<"lavan" | "vidar" | "zetki", number>>;
+    houseTurretDamageByHouse?: Partial<Record<"lavan" | "vidar" | "zetki", number>>;
     panelNotes: string[];
     /** @deprecated Always 0 — kept for older UI bindings. */
     turretDamageBonus?: number;

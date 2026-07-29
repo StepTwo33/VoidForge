@@ -4,8 +4,11 @@
  * @see https://wiki.warframe.com/w/Railjack/Intrinsics/Command
  */
 
+import type { ModSlot } from "@/lib/types";
+
 export type CrewRole = "pilot" | "gunner" | "engineer" | "defender";
 export type CrewSource = "ticker" | "elite" | "adversary";
+export type RailjackHouseId = "lavan" | "vidar" | "zetki";
 
 export interface CrewCompetency {
   piloting: number;
@@ -15,6 +18,17 @@ export interface CrewCompetency {
   endurance: number;
 }
 
+/** Per-crew weapon loadout (boarding). */
+export interface CrewWeaponLoadout {
+  weaponId: string;
+  mods: ModSlot[];
+  slotPolarities?: Record<number, string>;
+  hasOrokinCatalyst?: boolean;
+  /** Adversary / Kuva-Tenet-Coda progenitor. */
+  progenitorElement?: string;
+  progenitorBonusPercent?: number;
+}
+
 export interface RailjackCrewSlot {
   role: CrewRole;
   source: CrewSource;
@@ -22,8 +36,12 @@ export interface RailjackCrewSlot {
   profileId: string;
   /** ticker / elite — ranks 0–5 per competency */
   competency?: CrewCompetency;
-  /** Elite trait when source is elite (or Command-10 ticker elite hire) */
+  /**
+   * Elite trait id (ticker elite hires). Named elites use fixed wiki traits via
+   * `defaultTraitId` — UI should not free-pick those.
+   */
   eliteTraitId?: string;
+  weaponLoadout?: CrewWeaponLoadout;
 }
 
 export type EliteTraitCompetency =
@@ -45,23 +63,65 @@ export interface RailjackEliteTrait {
   effect: EliteTraitPaperEffect;
   /** Fraction applied when effect is paper (e.g. 0.25, 0.5). */
   value?: number;
+  /** When set, paper bonus applies only to this house. */
+  house?: RailjackHouseId;
 }
 
-/** Wiki elite traits keyed by highest competency. */
+/** Legacy combined ids → first house variant (migration). */
+const ELITE_TRAIT_ID_ALIASES: Record<string, string> = {
+  elite_piloting_engine_speed: "elite_piloting_vidar_engines",
+  elite_gunnery_turret_damage: "elite_gunnery_vidar_turrets",
+};
+
+/** Random ticker-elite traits keyed by highest competency (per-house paper). */
 export const RAILJACK_ELITE_TRAITS: RailjackEliteTrait[] = [
   {
-    id: "elite_piloting_engine_speed",
+    id: "elite_piloting_lavan_engines",
     competency: "piloting",
-    text: "+25% speed for Vidar/Lavan/Zetki engines",
+    text: "+25% speed for Lavan engines",
     effect: "house_engine_speed",
     value: 0.25,
+    house: "lavan",
   },
   {
-    id: "elite_gunnery_turret_damage",
+    id: "elite_piloting_vidar_engines",
+    competency: "piloting",
+    text: "+25% speed for Vidar engines",
+    effect: "house_engine_speed",
+    value: 0.25,
+    house: "vidar",
+  },
+  {
+    id: "elite_piloting_zetki_engines",
+    competency: "piloting",
+    text: "+25% speed for Zetki engines",
+    effect: "house_engine_speed",
+    value: 0.25,
+    house: "zetki",
+  },
+  {
+    id: "elite_gunnery_lavan_turrets",
     competency: "gunnery",
-    text: "+50% damage for Vidar/Lavan/Zetki turrets",
+    text: "+50% damage for Lavan turrets",
     effect: "house_turret_damage",
     value: 0.5,
+    house: "lavan",
+  },
+  {
+    id: "elite_gunnery_vidar_turrets",
+    competency: "gunnery",
+    text: "+50% damage for Vidar turrets",
+    effect: "house_turret_damage",
+    value: 0.5,
+    house: "vidar",
+  },
+  {
+    id: "elite_gunnery_zetki_turrets",
+    competency: "gunnery",
+    text: "+50% damage for Zetki turrets",
+    effect: "house_turret_damage",
+    value: 0.5,
+    house: "zetki",
   },
   {
     id: "elite_repair_move_speed",
@@ -88,6 +148,12 @@ export const RAILJACK_ELITE_TRAITS: RailjackEliteTrait[] = [
     effect: "panel_only",
   },
   {
+    id: "elite_combat_crit_chance_rifles",
+    competency: "combat",
+    text: "+150% Critical Chance with Rifles",
+    effect: "panel_only",
+  },
+  {
     id: "elite_endurance_protective_shield",
     competency: "endurance",
     text: "Activates a protective shield when taking near lethal damage (60s CD)",
@@ -101,8 +167,15 @@ export const RAILJACK_ELITE_TRAITS: RailjackEliteTrait[] = [
   },
 ];
 
+export function resolveEliteTraitId(id: string | undefined | null): string | undefined {
+  if (!id) return undefined;
+  return ELITE_TRAIT_ID_ALIASES[id] ?? id;
+}
+
 export function findEliteTrait(id: string): RailjackEliteTrait | undefined {
-  return RAILJACK_ELITE_TRAITS.find((t) => t.id === id);
+  const resolved = resolveEliteTraitId(id);
+  if (!resolved) return undefined;
+  return RAILJACK_ELITE_TRAITS.find((t) => t.id === resolved);
 }
 
 export function eliteTraitsForCompetency(
@@ -267,6 +340,7 @@ export interface NamedEliteCrew {
   defaultTraitId: string;
 }
 
+/** Wiki Unique Elite Crew — fixed traits (not free-picked). */
 export const namedEliteCrew: NamedEliteCrew[] = [
   {
     id: "vena",
@@ -275,7 +349,7 @@ export const namedEliteCrew: NamedEliteCrew[] = [
     competency: { piloting: 0, gunnery: 2, repair: 0, combat: 5, endurance: 5 },
     vendorCost: "both",
     requiresCommandRank: 10,
-    defaultTraitId: "elite_combat_crit_damage",
+    defaultTraitId: "elite_endurance_kill_heal",
   },
   {
     id: "ryoku",
@@ -293,7 +367,7 @@ export const namedEliteCrew: NamedEliteCrew[] = [
     competency: { piloting: 0, gunnery: 0, repair: 5, combat: 3, endurance: 4 },
     vendorCost: "both",
     requiresCommandRank: 10,
-    defaultTraitId: "elite_repair_heal_allies",
+    defaultTraitId: "elite_endurance_protective_shield",
   },
   {
     id: "jarka_lar",
@@ -302,12 +376,24 @@ export const namedEliteCrew: NamedEliteCrew[] = [
     competency: { piloting: 0, gunnery: 2, repair: 0, combat: 5, endurance: 5 },
     vendorCost: "both",
     requiresCommandRank: 10,
-    defaultTraitId: "elite_endurance_protective_shield",
+    defaultTraitId: "elite_combat_crit_chance_rifles",
   },
 ];
 
 export function findNamedEliteCrew(id: string): NamedEliteCrew | undefined {
   return namedEliteCrew.find((c) => c.id === id);
+}
+
+/** Named elites have a locked wiki trait — do not offer a free picker. */
+export function namedEliteFixedTraitId(profileId: string): string | undefined {
+  return findNamedEliteCrew(profileId)?.defaultTraitId;
+}
+
+export function resolveSlotEliteTraitId(slot: RailjackCrewSlot): string | undefined {
+  if (slot.source === "elite") {
+    return namedEliteFixedTraitId(slot.profileId) ?? resolveEliteTraitId(slot.eliteTraitId);
+  }
+  return resolveEliteTraitId(slot.eliteTraitId);
 }
 
 export interface AdversaryCrewProfile {
@@ -367,12 +453,28 @@ export const DEFAULT_CREW_ROLES: CrewRole[] = ["pilot", "gunner", "engineer"];
 export interface RailjackCrewPaperBonuses {
   /** From Pilot role piloting competency. */
   speedBonus: number;
-  /** Elite piloting trait — house engines only (applied in calculator). */
+  /** Elite piloting trait bonus by house (fraction). */
+  houseEngineSpeedByHouse: Partial<Record<RailjackHouseId, number>>;
+  /** Elite gunnery trait bonus by house (fraction). */
+  houseTurretDamageByHouse: Partial<Record<RailjackHouseId, number>>;
+  /**
+   * @deprecated Max across houses — prefer house-specific maps.
+   * Kept so older UI bindings keep compiling.
+   */
   houseEngineSpeedBonus: number;
-  /** Elite gunnery trait — house turrets only (applied in calculator). */
+  /** @deprecated Max across houses. */
   houseTurretDamageBonus: number;
   /** Panel-only competency summaries for UI. */
   panelNotes: string[];
+}
+
+export function componentHouseFromId(id: string | undefined): RailjackHouseId | "sigma" | undefined {
+  if (!id) return undefined;
+  if (id.includes("lavan")) return "lavan";
+  if (id.includes("vidar")) return "vidar";
+  if (id.includes("zetki")) return "zetki";
+  if (id.includes("sigma")) return "sigma";
+  return undefined;
 }
 
 export function resolveCrewCompetency(slot: RailjackCrewSlot): CrewCompetency | undefined {
@@ -392,6 +494,8 @@ export function computeCrewPaperBonuses(
 ): RailjackCrewPaperBonuses {
   const result: RailjackCrewPaperBonuses = {
     speedBonus: 0,
+    houseEngineSpeedByHouse: {},
+    houseTurretDamageByHouse: {},
     houseEngineSpeedBonus: 0,
     houseTurretDamageBonus: 0,
     panelNotes: [],
@@ -441,25 +545,31 @@ export function computeCrewPaperBonuses(
       );
     }
 
-    if (slot.eliteTraitId) {
-      const trait = findEliteTrait(slot.eliteTraitId);
-      if (trait?.effect === "house_engine_speed") {
-        result.houseEngineSpeedBonus = Math.max(
-          result.houseEngineSpeedBonus,
-          trait.value ?? 0,
-        );
+    const traitId = resolveSlotEliteTraitId(slot);
+    if (traitId) {
+      const trait = findEliteTrait(traitId);
+      if (trait?.effect === "house_engine_speed" && trait.house) {
+        const prev = result.houseEngineSpeedByHouse[trait.house] ?? 0;
+        result.houseEngineSpeedByHouse[trait.house] = Math.max(prev, trait.value ?? 0);
         result.panelNotes.push(`Elite trait: ${trait.text}`);
-      } else if (trait?.effect === "house_turret_damage") {
-        result.houseTurretDamageBonus = Math.max(
-          result.houseTurretDamageBonus,
-          trait.value ?? 0,
-        );
+      } else if (trait?.effect === "house_turret_damage" && trait.house) {
+        const prev = result.houseTurretDamageByHouse[trait.house] ?? 0;
+        result.houseTurretDamageByHouse[trait.house] = Math.max(prev, trait.value ?? 0);
         result.panelNotes.push(`Elite trait: ${trait.text}`);
       } else if (trait) {
         result.panelNotes.push(`Elite trait: ${trait.text}`);
       }
     }
   }
+
+  result.houseEngineSpeedBonus = Math.max(
+    0,
+    ...Object.values(result.houseEngineSpeedByHouse),
+  );
+  result.houseTurretDamageBonus = Math.max(
+    0,
+    ...Object.values(result.houseTurretDamageByHouse),
+  );
 
   return result;
 }
@@ -482,6 +592,18 @@ export function migrateEliteCrewIdToSlots(
   return slots;
 }
 
+function cloneWeaponLoadout(loadout: CrewWeaponLoadout | undefined): CrewWeaponLoadout | undefined {
+  if (!loadout?.weaponId) return undefined;
+  return {
+    weaponId: loadout.weaponId,
+    mods: (loadout.mods ?? []).map((m) => ({ ...m })),
+    slotPolarities: loadout.slotPolarities ? { ...loadout.slotPolarities } : undefined,
+    hasOrokinCatalyst: loadout.hasOrokinCatalyst,
+    progenitorElement: loadout.progenitorElement,
+    progenitorBonusPercent: loadout.progenitorBonusPercent,
+  };
+}
+
 export function normalizeCrewSlots(
   slots: (RailjackCrewSlot | null | undefined)[] | undefined,
   eliteCrewId?: string | null,
@@ -491,12 +613,17 @@ export function normalizeCrewSlots(
     for (let i = 0; i < 3; i++) {
       const s = slots[i];
       if (!s) continue;
+      const eliteTraitId =
+        s.source === "elite"
+          ? namedEliteFixedTraitId(s.profileId) ?? resolveEliteTraitId(s.eliteTraitId)
+          : resolveEliteTraitId(s.eliteTraitId);
       const normalized: RailjackCrewSlot = {
         role: s.source === "adversary" ? "defender" : s.role,
         source: s.source,
         profileId: s.profileId,
         competency: s.competency ? { ...s.competency } : undefined,
-        eliteTraitId: s.eliteTraitId,
+        eliteTraitId,
+        weaponLoadout: cloneWeaponLoadout(s.weaponLoadout),
       };
       out[i] = normalized;
     }

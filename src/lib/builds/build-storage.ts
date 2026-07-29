@@ -237,6 +237,14 @@ export interface RailjackBuildData {
       endurance: number;
     };
     eliteTraitId?: string;
+    weaponLoadout?: {
+      weaponId: string;
+      mods: ModSlot[];
+      slotPolarities?: Record<number, string>;
+      hasOrokinCatalyst?: boolean;
+      progenitorElement?: string;
+      progenitorBonusPercent?: number;
+    };
   } | null)[];
   /** @deprecated Use crewSlots — single elite pick from older saves. */
   eliteCrewId?: string;

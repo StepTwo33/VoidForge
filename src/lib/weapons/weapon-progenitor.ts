@@ -37,7 +37,12 @@ export const PROGENITOR_ELEMENT_LABELS: Record<string, string> = {
 
 export function weaponSupportsProgenitor(weapon: Weapon): boolean {
   const id = weapon.id;
-  return id.startsWith("kuva_") || id.startsWith("tenet_") || id.startsWith("coda_");
+  return (
+    id.startsWith("kuva_") ||
+    id.startsWith("tenet_") ||
+    id.startsWith("coda_") ||
+    id.startsWith("dual_coda_")
+  );
 }
 
 export const PROGENITOR_BONUS_MIN = 25;

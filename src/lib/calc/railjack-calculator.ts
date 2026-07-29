@@ -10,9 +10,11 @@ import {
   type RailjackHouseTrait,
 } from "@/data/railjack";
 import {
+  componentHouseFromId,
   computeCrewPaperBonuses,
   normalizeCrewSlots,
   type RailjackCrewSlot,
+  type RailjackHouseId,
 } from "@/data/railjack-crew";
 import {
   intrinsicPaperEffects,
@@ -376,11 +378,12 @@ export function calculateRailjackBuild(
   const intrinsics = normalizeIntrinsics(input.intrinsics);
   const intrinsicFx = intrinsicPaperEffects(intrinsics);
 
-  // Pilot competency speed (any engine). Elite piloting trait: house engines only.
-  const engineIsHouse =
-    !!engine &&
-    (engine.tier === "lavan" || engine.tier === "vidar" || engine.tier === "zetki");
-  const eliteEngineSpeed = engineIsHouse ? crewPaper.houseEngineSpeedBonus : 0;
+  // Pilot competency speed (any engine). Elite piloting trait: matching house only.
+  const engineHouse = componentHouseFromId(engine?.id) as RailjackHouseId | "sigma" | undefined;
+  const eliteEngineSpeed =
+    engineHouse === "lavan" || engineHouse === "vidar" || engineHouse === "zetki"
+      ? (crewPaper.houseEngineSpeedByHouse[engineHouse] ?? 0)
+      : 0;
   acc.speedBonus += crewPaper.speedBonus + eliteEngineSpeed;
 
   const battleSummaries = summarizeEquippedAbilities(input.battleMods ?? [], "battle");
@@ -467,8 +470,11 @@ export function calculateRailjackBuild(
       if (!armament || armament.type !== "turret") return undefined;
       const gunnerySlotBonus =
         slotIndex === 1 ? intrinsicFx.dorsalVentralTurretDamageBonus : 0;
+      const turretHouse = armament.house;
       const eliteHouseTurret =
-        armament.house !== "sigma" ? crewPaper.houseTurretDamageBonus : 0;
+        turretHouse === "lavan" || turretHouse === "vidar" || turretHouse === "zetki"
+          ? (crewPaper.houseTurretDamageByHouse[turretHouse] ?? 0)
+          : 0;
       return computeRailjackArmamentStats(
         armament,
         acc,
@@ -529,6 +535,8 @@ export function calculateRailjackBuild(
       speedBonus: crewPaper.speedBonus + eliteEngineSpeed,
       houseEngineSpeedBonus: eliteEngineSpeed,
       houseTurretDamageBonus: crewPaper.houseTurretDamageBonus,
+      houseEngineSpeedByHouse: crewPaper.houseEngineSpeedByHouse,
+      houseTurretDamageByHouse: crewPaper.houseTurretDamageByHouse,
       panelNotes: crewPaper.panelNotes,
       turretDamageBonus: 0,
       hullBonus: 0,
