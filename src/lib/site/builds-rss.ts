@@ -4,6 +4,9 @@ import { buildRssDocument, type RssItem } from "@/lib/site/rss";
 
 export const BUILDS_FEED_LIMIT = 25;
 
+/** Same floor as Discover / sidebar “Top rated” (`sort=popular`). */
+export const TOP_BUILDS_MIN_UPVOTES = 1;
+
 type BuildsOrderBy =
   | [{ upvoteCount: "desc" }, { updatedAt: "desc" }, { id: "desc" }]
   | [{ updatedAt: "desc" }, { id: "desc" }];
@@ -13,6 +16,8 @@ export async function buildCommunityBuildsRss(opts: {
   title: string;
   description: string;
   orderBy: BuildsOrderBy;
+  /** When set, only include builds with at least this many upvotes. */
+  minUpvotes?: number;
 }): Promise<string> {
   let builds: Array<{
     id: string;
@@ -26,7 +31,13 @@ export async function buildCommunityBuildsRss(opts: {
 
   try {
     builds = await prisma.build.findMany({
-      where: { isPublic: true, user: { bannedAt: null } },
+      where: {
+        isPublic: true,
+        user: { bannedAt: null },
+        ...(opts.minUpvotes != null && opts.minUpvotes > 0
+          ? { upvoteCount: { gte: opts.minUpvotes } }
+          : {}),
+      },
       orderBy: opts.orderBy,
       take: BUILDS_FEED_LIMIT,
       select: {

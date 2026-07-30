@@ -81,6 +81,9 @@ export async function GET(req: NextRequest) {
     const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
     where.updatedAt = { gte: since };
     where.upvoteCount = { gte: 1 };
+  } else if (sort === "popular") {
+    // Top rated: only builds that have actually been upvoted
+    where.upvoteCount = { gte: 1 };
   }
 
   // `id` tie-breaker keeps cursor pagination stable when sort keys collide.
