@@ -72,6 +72,9 @@ export const WARFRAME_EXILUS_MOD_IDS = new Set([
   "shock_absorbers",
   "warm_coat",
   "mecha_pulse_r3",
+  "amars_anguish",
+  "boreals_anguish",
+  "niras_anguish",
 ]);
 
 /** Primary weapon Exilus slot (utility — ammo mutation, terminal velocity, etc.). */

@@ -9622,6 +9622,21 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
+    "id": "amars_anguish",
+    "name": "Amar's Anguish",
+    "polarity": "vazarin",
+    "drain": 4,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "parkourVelocity": 2.5,
+      "sprintSpeed": 2.5
+    },
+    "description": "+15% to Parkour Velocity\\n+15% Sprint Speed",
+    "rarity": "common"
+  },
+  {
     "id": "amars_contempt",
     "name": "Amar's Contempt",
     "polarity": "madurai",
@@ -9635,6 +9650,21 @@ const RAW_MODS: Mod[] = [
     },
     "description": "+90% Melee Damage\\n+30% Slash",
     "rarity": "rare"
+  },
+  {
+    "id": "amars_hatred",
+    "name": "Amar's Hatred",
+    "polarity": "vazarin",
+    "drain": 4,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "armor": 4.1667,
+      "abilityStrength": 2.5
+    },
+    "description": "+25% Armor\\n+15% Ability Strength",
+    "rarity": "uncommon"
   },
   {
     "id": "auger_strike",
@@ -9696,6 +9726,21 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
+    "id": "boreals_anguish",
+    "name": "Boreal's Anguish",
+    "polarity": "vazarin",
+    "drain": 4,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "gravityReduction": 12.5,
+      "aimGlide": 10.0
+    },
+    "description": "-75% Gravity while Aim Gliding\\n+60% Aim Glide/Wall Latch Duration",
+    "rarity": "common"
+  },
+  {
     "id": "boreals_contempt",
     "name": "Boreal's Contempt",
     "polarity": "madurai",
@@ -9709,6 +9754,21 @@ const RAW_MODS: Mod[] = [
     },
     "description": "+90% Melee Damage\\n+60% Status Damage",
     "rarity": "rare"
+  },
+  {
+    "id": "boreals_hatred",
+    "name": "Boreal's Hatred",
+    "polarity": "vazarin",
+    "drain": 4,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "shield": 10.8333,
+      "abilityEfficiency": 2.5
+    },
+    "description": "+65% Shield Capacity\\n+15% Ability Efficiency",
+    "rarity": "uncommon"
   },
   {
     "id": "bright_purity",
@@ -10334,6 +10394,21 @@ const RAW_MODS: Mod[] = [
     "rarity": "uncommon"
   },
   {
+    "id": "niras_anguish",
+    "name": "Nira's Anguish",
+    "polarity": "vazarin",
+    "drain": 4,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "parkourVelocity": 2.5,
+      "aimGlide": 2.5
+    },
+    "description": "+15% to Parkour Velocity\\n+15% Aim Glide/Wall Latch Duration",
+    "rarity": "common"
+  },
+  {
     "id": "niras_contempt",
     "name": "Nira's Contempt",
     "polarity": "madurai",
@@ -10347,6 +10422,21 @@ const RAW_MODS: Mod[] = [
     },
     "description": "+90% Melee Damage\\n+60% Status Chance",
     "rarity": "rare"
+  },
+  {
+    "id": "niras_hatred",
+    "name": "Nira's Hatred",
+    "polarity": "vazarin",
+    "drain": 4,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "health": 5.8333,
+      "abilityDuration": 2.5
+    },
+    "description": "+35% Health\\n+15% Ability Duration",
+    "rarity": "uncommon"
   },
   {
     "id": "opportunitys_reach",

@@ -42,6 +42,18 @@ export function resolveCompanionClawId(companion: Companion): string | undefined
   return COMPANION_CLAW_BY_ID[companion.id] ?? COMPANION_CLAW_BY_NAME[companion.name];
 }
 
+/** Hound model → default melee weapon id. */
+export const HOUND_WEAPON_BY_ID: Record<string, string> = {
+  bhaira_hound: "lacerten",
+  dorma_hound: "batoten",
+  hec_hound: "akaten",
+};
+
+export function resolveHoundWeaponId(companion: Companion): string | undefined {
+  if (companion.type !== "hound") return undefined;
+  return HOUND_WEAPON_BY_ID[companion.id];
+}
+
 /** @deprecated Use COMPANION_CLAW_BY_ID / resolveCompanionClawId */
 export const COMPANION_CLAW_MAP: Record<string, string> = {
   "Chesa Kubrow": "chesa_claws",

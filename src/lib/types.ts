@@ -1215,6 +1215,16 @@ export interface Loadout {
     hasCatalyst: boolean;
     isMR30?: boolean;
     slotPolarities?: Record<number, string>;
+    /** MOA / Hound modular part selection. */
+    parts?: {
+      kind: "moa" | "hound";
+      model: string;
+      core: string;
+      bracket: string;
+      gyro?: string;
+      stabilizer?: string;
+      isGilded?: boolean;
+    };
   };
   /** Modular preset occupying one weapon slot (mutually exclusive with that slot's normal weapon build). */
   modularBuild?: ModularBuildData & {

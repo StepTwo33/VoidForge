@@ -203,6 +203,18 @@ export interface CompanionBuildData {
   hasCatalyst?: boolean;
   isMR30: boolean;
   slotPolarities: Record<number, string>;
+  /** Custom pet display name (arsenal import). */
+  customName?: string;
+  /** MOA / Hound modular part selection. */
+  parts?: {
+    kind: "moa" | "hound";
+    model: string;
+    core: string;
+    bracket: string;
+    gyro?: string;
+    stabilizer?: string;
+    isGilded?: boolean;
+  };
 }
 
 export type { ModularBuildData };

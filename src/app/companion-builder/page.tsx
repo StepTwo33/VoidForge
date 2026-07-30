@@ -74,11 +74,55 @@ function getCompanionModSubCategory(companionType: string): string[] {
   }
 }
 
-import { getCompanionWeapons, resolveDefaultCompanionWeapon } from "@/lib/weapons/companion-weapons";
+import { getCompanionWeapons, resolveDefaultCompanionWeapon, resolveHoundWeaponId } from "@/lib/weapons/companion-weapons";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
+import {
+  houndBrackets,
+  houndCores,
+  houndModels,
+  houndStabilizers,
+  moaBrackets,
+  moaCores,
+  moaGyros,
+  moaModels,
+  type ModularCompanionParts,
+} from "@/data/companion-parts";
+import {
+  defaultPartsForCompanion,
+  resolveCompanionParts,
+} from "@/lib/companions/companion-parts-resolve";
+
+function PartSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: Array<{ id: string; name: string }>;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <label className="flex flex-col gap-1 text-xs">
+      <span className="text-muted-foreground tracking-wider font-semibold">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-md border border-border bg-card px-2 py-1.5 text-sm text-foreground"
+      >
+        {options.map((o) => (
+          <option key={o.id} value={o.id}>
+            {o.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
 
 function StatRow({ label, value, highlighted, color }: { label: string; value: string; highlighted?: boolean; color?: string }) {
   return (
@@ -129,6 +173,7 @@ export default function CompanionBuilderPage() {
   const [modPickerTarget, setModPickerTarget] = useState<"companion" | "weapon">("companion");
   const [weaponRivenStatsMap, setWeaponRivenStatsMap] = useState<Record<number, Record<string, number>>>();
   const [applyHunterVsSlash, setApplyHunterVsSlash] = useState(false);
+  const [companionParts, setCompanionParts] = useState<ModularCompanionParts | null>(null);
 
   const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags }: SaveBuildDialogValues) => {
     if (!selectedCompanion) return;
@@ -143,6 +188,7 @@ export default function CompanionBuilderPage() {
       hasCatalyst,
       isMR30,
       slotPolarities,
+      ...(companionParts ? { parts: companionParts } : {}),
     };
     const build: SavedBuild = {
       id: currentBuildId || generateBuildId(),
@@ -166,20 +212,26 @@ export default function CompanionBuilderPage() {
     } else {
       toast.success("Build saved locally", { description: "Log in to sync builds to your account" });
     }
-  }, [selectedCompanion, equippedMods, selectedWeapon, weaponMods, weaponSlotPolarities, hasReactor, hasCatalyst, isMR30, slotPolarities, currentBuildId]);
+  }, [selectedCompanion, equippedMods, selectedWeapon, weaponMods, weaponSlotPolarities, hasReactor, hasCatalyst, isMR30, slotPolarities, companionParts, currentBuildId]);
 
   const handleLoadBuild = useCallback((build: SavedBuild) => {
     const d = build.data as CompanionBuildData;
     const comp = allCompanions.find((c) => c.id === d.companionId);
     if (!comp) { toast.error("Companion not found"); return; }
     setSelectedCompanion(comp);
+    const loadedParts = d.parts ?? defaultPartsForCompanion(comp) ?? null;
+    setCompanionParts(loadedParts);
     setEquippedMods(d.mods.map((m) => {
       const mod = modsMap.get(m.modId);
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
     }));
     const weaponCandidates = getCompanionWeapons(comp, allWeapons);
-    if (d.weaponId) {
-      setSelectedWeapon(weaponCandidates.find((w) => w.id === d.weaponId) ?? null);
+    const resolvedWeaponId =
+      d.weaponId ??
+      (loadedParts ? resolveCompanionParts(loadedParts)?.weaponId : undefined) ??
+      resolveHoundWeaponId(comp);
+    if (resolvedWeaponId) {
+      setSelectedWeapon(weaponCandidates.find((w) => w.id === resolvedWeaponId) ?? null);
     } else if ((d.weaponMods || []).length > 0) {
       setSelectedWeapon(resolveDefaultCompanionWeapon(comp, allWeapons));
     } else {
@@ -192,7 +244,12 @@ export default function CompanionBuilderPage() {
     setHasReactor(d.hasReactor);
     setHasCatalyst(d.hasCatalyst ?? false);
     setIsMR30(d.isMR30);
-    setSlotPolarities(d.slotPolarities || {});
+    const resolved = loadedParts ? resolveCompanionParts(loadedParts) : null;
+    setSlotPolarities(
+      Object.keys(d.slotPolarities || {}).length > 0
+        ? d.slotPolarities
+        : (resolved?.defaultSlotPolarities ?? {}),
+    );
     setWeaponSlotPolarities(d.weaponSlotPolarities || {});
     setCurrentBuildId(build.id);
     setBuildName(build.name);
@@ -228,8 +285,8 @@ export default function CompanionBuilderPage() {
 
   const calculatedStats = useMemo<CompanionCalculatedStats | null>(() => {
     if (!selectedCompanion) return null;
-    return calculateCompanionBuild(selectedCompanion, equippedMods);
-  }, [selectedCompanion, equippedMods]);
+    return calculateCompanionBuild(selectedCompanion, equippedMods, modsMap, companionParts);
+  }, [selectedCompanion, equippedMods, modsMap, companionParts]);
 
   const baseCapacity = (hasReactor ? 60 : 30) + (isMR30 ? 10 : 0);
   const capacityUsed = useMemo(() => {
@@ -343,17 +400,44 @@ export default function CompanionBuilderPage() {
     setSelectedCompanion(companion);
     setEquippedMods([]);
     setHasReactor(false);
-    setSelectedWeapon(null);
+    const parts = defaultPartsForCompanion(companion) ?? null;
+    setCompanionParts(parts);
+    const resolved = parts ? resolveCompanionParts(parts) : null;
+    const weaponId = resolved?.weaponId ?? resolveHoundWeaponId(companion);
+    const weaponCandidates = getCompanionWeapons(companion, allWeapons);
+    setSelectedWeapon(weaponId ? weaponCandidates.find((w) => w.id === weaponId) ?? null : null);
     setWeaponMods([]);
     setHasCatalyst(false);
     setWeaponSlotPolarities({});
     setWeaponRivenStatsMap(undefined);
-    setSlotPolarities({});
+    setSlotPolarities(resolved?.defaultSlotPolarities ?? {});
     setCurrentBuildId(null);
     setBuildName(`${companion.name} Build`);
     setBuildDescription("");
     setShowCompanionList(false);
-  }, []);
+  }, [allWeapons]);
+
+  const updateCompanionParts = useCallback((patch: Partial<ModularCompanionParts>) => {
+    setCompanionParts((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...patch };
+      const resolved = resolveCompanionParts(next);
+      if (resolved) {
+        setSlotPolarities((slots) =>
+          Object.keys(slots).length === 0 ? resolved.defaultSlotPolarities : slots,
+        );
+        if (resolved.weaponId) {
+          const weapon = allWeapons.find((w) => w.id === resolved.weaponId);
+          if (weapon) setSelectedWeapon(weapon);
+        }
+        if (resolved.companionId && selectedCompanion?.id !== resolved.companionId) {
+          const nextComp = allCompanions.find((c) => c.id === resolved.companionId);
+          if (nextComp) setSelectedCompanion(nextComp);
+        }
+      }
+      return next;
+    });
+  }, [allCompanions, allWeapons, selectedCompanion?.id]);
 
   const handleOpenModPicker = useCallback((slotIndex: number) => {
     setActiveSlotIndex(slotIndex);
@@ -595,6 +679,81 @@ export default function CompanionBuilderPage() {
                 className="w-full h-24 p-3 bg-card border border-border rounded-lg text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-muted-foreground/60 shadow-sm"
               />
             </div>
+
+            {companionParts && (selectedCompanion.type === "moa" || selectedCompanion.type === "hound") && (
+              <div className="mb-4 p-3 border border-border rounded-lg bg-card">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">
+                    {companionParts.kind === "moa" ? "MOA PARTS" : "HOUND PARTS"}
+                  </span>
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={companionParts.isGilded !== false}
+                      onChange={(e) => updateCompanionParts({ isGilded: e.target.checked })}
+                    />
+                    Gilded
+                  </label>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {companionParts.kind === "moa" ? (
+                    <>
+                      <PartSelect
+                        label="Model"
+                        value={companionParts.model}
+                        options={moaModels}
+                        onChange={(id) => updateCompanionParts({ model: id })}
+                      />
+                      <PartSelect
+                        label="Core"
+                        value={companionParts.core}
+                        options={moaCores}
+                        onChange={(id) => updateCompanionParts({ core: id })}
+                      />
+                      <PartSelect
+                        label="Gyro"
+                        value={companionParts.gyro ?? moaGyros[0].id}
+                        options={moaGyros}
+                        onChange={(id) => updateCompanionParts({ gyro: id })}
+                      />
+                      <PartSelect
+                        label="Bracket"
+                        value={companionParts.bracket}
+                        options={moaBrackets}
+                        onChange={(id) => updateCompanionParts({ bracket: id })}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <PartSelect
+                        label="Model"
+                        value={companionParts.model}
+                        options={houndModels}
+                        onChange={(id) => updateCompanionParts({ model: id })}
+                      />
+                      <PartSelect
+                        label="Core"
+                        value={companionParts.core}
+                        options={houndCores}
+                        onChange={(id) => updateCompanionParts({ core: id })}
+                      />
+                      <PartSelect
+                        label="Bracket"
+                        value={companionParts.bracket}
+                        options={houndBrackets}
+                        onChange={(id) => updateCompanionParts({ bracket: id })}
+                      />
+                      <PartSelect
+                        label="Stabilizer"
+                        value={companionParts.stabilizer ?? houndStabilizers[0].id}
+                        options={houndStabilizers}
+                        onChange={(id) => updateCompanionParts({ stabilizer: id })}
+                      />
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
 
             {selectedCompanion.precept && (
               <div className="mb-4 p-3 border border-cyan-500/20 rounded-lg bg-cyan-500/5">

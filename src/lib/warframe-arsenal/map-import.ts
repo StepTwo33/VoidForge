@@ -1,7 +1,7 @@
 import type ArsenalData from "@wfcd/arsenal-parser";
 import type { ModUnion } from "@wfcd/items";
 import type { Companion, Loadout, ModSlot, ModularBuildData } from "@/lib/types";
-import { resolveCompanionClawId } from "@/lib/weapons/companion-weapons";
+import { resolveCompanionClawId, resolveHoundWeaponId } from "@/lib/weapons/companion-weapons";
 import {
   findArcaneByName,
   findCompanionByName,
@@ -18,12 +18,14 @@ import {
   findWarframeByLotusPath,
   findWeaponByLotusPath,
   lotusItemName,
+  mapCompanionPartsFromArsenal,
   mapModularPartsFromArsenal,
   parseProgenitorFromRawWeapon,
   readAbilityOverride,
   readRawWeaponFields,
   resolveHelminthOverride,
 } from "@/lib/warframe-arsenal/lotus-resolve";
+import { resolveCompanionParts } from "@/lib/companions/companion-parts-resolve";
 import { resolveRivenUpgrade } from "@/lib/warframe-arsenal/riven-resolve";
 
 export interface ArsenalImportWarning {
@@ -143,6 +145,9 @@ function resolveCompanionWeaponId(companion: Companion, weaponUniqueName?: strin
   if (fromLotus) return fromLotus;
   if (BEAST_COMPANION_TYPES.has(companion.type)) {
     return resolveCompanionClawId(companion);
+  }
+  if (companion.type === "hound") {
+    return resolveHoundWeaponId(companion);
   }
   return undefined;
 }
@@ -430,13 +435,24 @@ export function mapArsenalToImportPayload(
       ? parseCustomItemName(companionItemName)
       : loadout.companion.name;
 
-    const fhCompanion =
+    const mappedParts = mapCompanionPartsFromArsenal(rawFields.modularParts);
+    const partsResolved = mappedParts ? resolveCompanionParts(mappedParts) : undefined;
+
+    let fhCompanion =
       findCompanionByLotusPath(companionUniqueName, companionItemName) ??
       findCompanionByName(
         labelFromUnknown(loadout.companion.companion) ||
           labelFromUnknown(loadout.companion) ||
           "Companion",
       );
+
+    if (!fhCompanion && partsResolved) {
+      fhCompanion = partsResolved.companion;
+    }
+    if (fhCompanion && partsResolved && partsResolved.companionId !== fhCompanion.id) {
+      // Prefer modular model identity when parts fully resolve.
+      fhCompanion = partsResolved.companion;
+    }
 
     if (!fhCompanion) {
       warnings.push({
@@ -452,7 +468,9 @@ export function mapArsenalToImportPayload(
         loadout.roboticweapon,
         warnings,
       );
-      const weaponId = resolveCompanionWeaponId(fhCompanion, rawCompanionWeaponFields.uniqueName);
+      const weaponId =
+        resolveCompanionWeaponId(fhCompanion, rawCompanionWeaponFields.uniqueName) ??
+        partsResolved?.weaponId;
       const companionArcanes = mapArcaneIds(loadout.companion.upgrades.arcanes, warnings);
       const catalogName = fhCompanion.name;
       const customName =
@@ -469,6 +487,10 @@ export function mapArsenalToImportPayload(
         hasReactor: false,
         hasCatalyst: false,
         isMR30: (loadout.companion.xp ?? 0) >= 900_000,
+        ...(mappedParts ? { parts: mappedParts } : {}),
+        ...(partsResolved?.defaultSlotPolarities
+          ? { slotPolarities: partsResolved.defaultSlotPolarities }
+          : {}),
       };
     }
   }

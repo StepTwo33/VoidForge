@@ -21,6 +21,11 @@ describe("warframe arsenal catalog match", () => {
     expect(findModByName("Primed Point Blank")?.id).toBe("primed_point_blank");
     expect(findModByName("Serration")?.id).toBeTruthy();
   });
+
+  it("finds Archon Amar's Hatred warframe set mod", () => {
+    expect(findModByName("Amar's Hatred")?.id).toBe("amars_hatred");
+    expect(findModByName("Amar's Anguish")?.id).toBe("amars_anguish");
+  });
 });
 
 describe("warframe arsenal lotus resolve", () => {
@@ -33,12 +38,39 @@ describe("warframe arsenal lotus resolve", () => {
     expect(result?.helminthSlot).toBe(2);
   });
 
+  it("resolves Infested Mobility from wiki HelminthSpeedAbility suffix", () => {
+    const result = resolveHelminthOverride({
+      ability: "/Lotus/Powersuits/PowersuitAbilities/HelminthSpeedAbility",
+      index: 1,
+    });
+    expect(result?.helminthAbilityId).toBe("helminth_infested_mobility");
+    expect(result?.helminthSlot).toBe(0);
+  });
+
   it("resolves subsumed Roar from ability path", () => {
     const result = resolveHelminthOverride({
       ability: "/Lotus/Powersuits/PowersuitAbilities/RhinoRoarAbility",
       index: 2,
     });
     expect(result?.helminthAbilityId).toBe("subsume_rhino");
+    expect(result?.helminthSlot).toBe(1);
+  });
+
+  it("resolves Ophanim Eyes from ChoirEyesAbility codename", () => {
+    const result = resolveHelminthOverride({
+      ability: "/Lotus/Powersuits/Choir/Abilities/ChoirEyesAbility",
+      index: 4,
+    });
+    expect(result?.helminthAbilityId).toBe("subsume_jade");
+    expect(result?.helminthSlot).toBe(3);
+  });
+
+  it("resolves Rest & Rage from YinYangTargetAbility codename", () => {
+    const result = resolveHelminthOverride({
+      ability: "/Lotus/Powersuits/YinYang/Abilities/YinYangTargetAbility",
+      index: 2,
+    });
+    expect(result?.helminthAbilityId).toBe("subsume_equinox");
     expect(result?.helminthSlot).toBe(1);
   });
 

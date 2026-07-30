@@ -167,6 +167,13 @@ describe("warframe power/survivability remainder (wiki max rank, Phase M10)", ()
     expect(withMod("gladiator_aegis").totalArmor / bare.totalArmor).toBeCloseTo(1.4, 5);
   });
 
+  it("Amar's Hatred R5: +25% armor, +15% ability strength", () => {
+    const bare = calculateWarframeBuild(requireFrame("excalibur"), [], modsMap());
+    const stats = withMod("amars_hatred");
+    expect(stats.totalArmor / bare.totalArmor).toBeCloseTo(1.25, 5);
+    expect(stats.abilityStrength).toBeCloseTo(1.15, 5);
+  });
+
   it("Carnis Carapace R5: +55% armor, +20% health", () => {
     const bare = calculateWarframeBuild(requireFrame("excalibur"), [], modsMap());
     const stats = withMod("carnis_carapace");

@@ -71,12 +71,22 @@ export const UMBRAL_MOD_IDS = [
   "umbra_intensify",
 ] as const;
 
+/** Archon Amar set: warframe Hatred + Exilus Anguish + melee Contempt. */
+export const AMAR_SET_MOD_IDS = ["amars_hatred", "amars_anguish", "amars_contempt"] as const;
+/** Archon Boreal set: warframe Hatred + Exilus Anguish + melee Contempt. */
+export const BOREAL_SET_MOD_IDS = ["boreals_hatred", "boreals_anguish", "boreals_contempt"] as const;
+/** Archon Nira set: warframe Hatred + Exilus Anguish + melee Contempt. */
+export const NIRA_SET_MOD_IDS = ["niras_hatred", "niras_anguish", "niras_contempt"] as const;
+
 const AUGUR_SET = new Set<string>(AUGUR_SET_MOD_IDS);
 const HUNTER_SET = new Set<string>(HUNTER_SET_MOD_IDS);
 const MECHA_SET = new Set<string>(MECHA_SET_MOD_IDS);
 const SYNTH_SET = new Set<string>(SYNTH_SET_MOD_IDS);
 const TEK_SET = new Set<string>(TEK_SET_MOD_IDS);
 const UMBRAL_SET = new Set<string>(UMBRAL_MOD_IDS);
+const AMAR_SET = new Set<string>(AMAR_SET_MOD_IDS);
+const BOREAL_SET = new Set<string>(BOREAL_SET_MOD_IDS);
+const NIRA_SET = new Set<string>(NIRA_SET_MOD_IDS);
 
 /** Umbral set bonus multiplier for a mod's primary stat (1 = no bonus). Tau Resistance is excluded by caller. */
 export function getUmbralSetBonusMultiplier(modId: string, umbralCount: number): number {
@@ -403,6 +413,14 @@ export function buildWeaponSetBonusSummary(
   ];
 }
 
+export function countArchonSetPieces(
+  setMembers: Set<string>,
+  warframeMods?: ModSlot[],
+  meleeMods?: ModSlot[],
+): number {
+  return countSetModsInSlots(concatSlots(warframeMods, meleeMods), setMembers);
+}
+
 export function buildWarframeSetBonusSummary(
   warframeMods: ModSlot[],
   linkage?: SetBonusLinkage,
@@ -413,6 +431,9 @@ export function buildWarframeSetBonusSummary(
   const mecha = countMechaSetPieces(warframeMods, linkage?.companionMods);
   const synth = countSynthSetPieces(linkage, warframeMods);
   const tek = countTekSetPieces(linkage, warframeMods);
+  const amar = countArchonSetPieces(AMAR_SET, warframeMods, linkage?.meleeMods);
+  const boreal = countArchonSetPieces(BOREAL_SET, warframeMods, linkage?.meleeMods);
+  const nira = countArchonSetPieces(NIRA_SET, warframeMods, linkage?.meleeMods);
 
   return [
     {
@@ -482,6 +503,30 @@ export function buildWarframeSetBonusSummary(
       required: 4,
       active: tek >= 4,
       description: "4-piece: Kavat marks +10s; +60% damage to marked enemies",
+    },
+    {
+      setId: "amar",
+      label: "Amar",
+      pieces: amar,
+      required: 3,
+      active: amar >= 3,
+      description: "3-piece: Teleport to a target within 10m on using a Heavy Attack",
+    },
+    {
+      setId: "boreal",
+      label: "Boreal",
+      pieces: boreal,
+      required: 3,
+      active: boreal >= 3,
+      description: "3-piece: Reduces damage taken by 20% while airborne",
+    },
+    {
+      setId: "nira",
+      label: "Nira",
+      pieces: nira,
+      required: 3,
+      active: nira >= 3,
+      description: "3-piece: Increase damage from Slam Attacks by +100%",
     },
   ];
 }

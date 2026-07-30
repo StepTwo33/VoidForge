@@ -31,6 +31,14 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   aero_vantage: mod("aero_vantage", [
     line("gravityReduction", "mod_panel", "multiplicative_percent", "Aero Vantage: gravityReduction \u2014 -100% Gravity while Aim Gliding"),
   ]),
+  amars_anguish: mod("amars_anguish", [
+    line("parkourVelocity", "warframe_totals", "multiplicative_percent", "Amar's Anguish: parkourVelocity \u2014 +15% Parkour Velocity\\n+15% Sprint Speed"),
+    line("sprintSpeed", "warframe_totals", "multiplicative_percent", "Amar's Anguish: sprintSpeed \u2014 +15% Parkour Velocity\\n+15% Sprint Speed"),
+  ]),
+  amars_hatred: mod("amars_hatred", [
+    line("armor", "warframe_totals", "multiplicative_percent", "Amar's Hatred: armor \u2014 +25% Armor\\n+15% Ability Strength"),
+    line("abilityStrength", "warframe_totals", "multiplicative_percent", "Amar's Hatred: abilityStrength \u2014 +25% Armor\\n+15% Ability Strength"),
+  ]),
   aerodynamic: mod("aerodynamic", [
     line("airborneDamageReduction", "mod_panel", "multiplicative_percent", "Aerodynamic: airborneDamageReduction \u2014 Squad takes 24% reduced damage while airborne, gains +6s Aim Glide and +12s Wall\u2026"),
     line("damage", "mod_panel", "multiplicative_percent", "Aerodynamic: damage \u2014 Squad takes 24% reduced damage while airborne, gains +6s Aim Glide and +12s Wall\u2026"),
@@ -176,6 +184,14 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   ]),
   aviator: mod("aviator", [
     line("damageReduction", "mod_panel", "multiplicative_percent", "Aviator: damageReduction \u2014 Reduced damage by 60% while airborne"),
+  ]),
+  boreals_anguish: mod("boreals_anguish", [
+    line("gravityReduction", "mod_panel", "multiplicative_percent", "Boreal's Anguish: gravityReduction \u2014 -75% Gravity while Aim Gliding\\n+60% Aim Glide/Wall Latch Duration"),
+    line("aimGlide", "mod_panel", "multiplicative_percent", "Boreal's Anguish: aimGlide \u2014 -75% Gravity while Aim Gliding\\n+60% Aim Glide/Wall Latch Duration"),
+  ]),
+  boreals_hatred: mod("boreals_hatred", [
+    line("shield", "warframe_totals", "multiplicative_percent", "Boreal's Hatred: shield \u2014 +65% Shield Capacity\\n+15% Ability Efficiency"),
+    line("abilityEfficiency", "warframe_totals", "multiplicative_percent", "Boreal's Hatred: abilityEfficiency \u2014 +65% Shield Capacity\\n+15% Ability Efficiency"),
   ]),
   battering_maneuver: mod("battering_maneuver", [
     line("bulletJump", "mod_panel", "multiplicative_percent", "Battering Maneuver: bulletJump \u2014 +18% to Parkour Velocity, +18% Aim Glide/Wall Latch Duration, +60% <DT_IMPACT_CO\u2026"),
@@ -383,6 +399,14 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   ]),
   motus_signal: mod("motus_signal", [
     line("bulletJump", "mod_panel", "multiplicative_percent", "Motus Signal: bulletJump \u2014 Increase Double Jump strength by +200%."),
+  ]),
+  niras_anguish: mod("niras_anguish", [
+    line("parkourVelocity", "warframe_totals", "multiplicative_percent", "Nira's Anguish: parkourVelocity \u2014 +15% Parkour Velocity\\n+15% Aim Glide/Wall Latch Duration"),
+    line("aimGlide", "mod_panel", "multiplicative_percent", "Nira's Anguish: aimGlide \u2014 +15% Parkour Velocity\\n+15% Aim Glide/Wall Latch Duration"),
+  ]),
+  niras_hatred: mod("niras_hatred", [
+    line("health", "warframe_totals", "multiplicative_percent", "Nira's Hatred: health \u2014 +35% Health\\n+15% Ability Duration"),
+    line("abilityDuration", "warframe_totals", "multiplicative_percent", "Nira's Hatred: abilityDuration \u2014 +35% Health\\n+15% Ability Duration"),
   ]),
   narrow_minded: mod("narrow_minded", [
     line("abilityDuration", "warframe_totals", "multiplicative_percent", "Narrow Minded: abilityDuration \u2014 +99% Ability Duration\\\\n-66% Ability Range"),

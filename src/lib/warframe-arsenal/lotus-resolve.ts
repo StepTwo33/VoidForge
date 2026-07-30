@@ -1,5 +1,16 @@
 import { find } from "@wfcd/items/utilities";
 import { archwings, necramechs } from "@/data/archwing";
+import {
+  houndBrackets,
+  houndCores,
+  houndModels,
+  houndStabilizers,
+  moaBrackets,
+  moaCores,
+  moaGyros,
+  moaModels,
+  type ModularCompanionParts,
+} from "@/data/companion-parts";
 import { allHelminthAbilities } from "@/data/helminth";
 import {
   ampBraces,
@@ -20,21 +31,10 @@ import {
   labelFromUnknown,
   parseCustomItemName,
 } from "@/lib/warframe-arsenal/catalog-match";
+import { HELMINTH_LOTUS_SUFFIX_TO_ID } from "@/lib/warframe-arsenal/helminth-lotus-aliases";
 
 const normalize = (value: string): string =>
   value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-
-/** DE ability paths for Helminth-unique abilities → FrameHub helminth ids. */
-const HELMINTH_LOTUS_SUFFIX_TO_ID: Record<string, string> = {
-  HelminthStrengthAbility: "helminth_empower",
-  HelminthMobilityAbility: "helminth_infested_mobility",
-  HelminthSummonAbility: "helminth_masters_summons",
-  HelminthShieldAbility: "helminth_rebuild_shields",
-  HelminthPerspicacityAbility: "helminth_perspicacity",
-  HelminthAmmoAbility: "helminth_energized_munitions",
-  HelminthMarkAbility: "helminth_marked_for_death",
-  HelminthSonarAbility: "helminth_golden_instinct",
-};
 
 const helminthByName = new Map(allHelminthAbilities.map((a) => [normalize(a.name), a.id]));
 
@@ -175,7 +175,16 @@ function findCompanionByPathHint(uniqueName: string): ReturnType<typeof findComp
     { pattern: /helminthcharger|helminth.?charger/, name: "Helminth Charger" },
     { pattern: /smeeta/, name: "Smeeta Kavat" },
     { pattern: /adarza/, name: "Adarza Kavat" },
-    { pattern: /vedica/, name: "Vedica Venari" },
+    { pattern: /vasca/, name: "Vasca Kavat" },
+    // MOA models
+    { pattern: /lambeo/, name: "Lambeo Moa" },
+    { pattern: /olaro|oloro/, name: "Oloro Moa" },
+    { pattern: /para(?![a-z])|paramoa|moapara/, name: "Para Moa" },
+    { pattern: /nychus|nidus.?moa|moanychus/, name: "Nychus Moa" },
+    // Hound models
+    { pattern: /bhaira/, name: "Bhaira Hound" },
+    { pattern: /dorma/, name: "Dorma Hound" },
+    { pattern: /hechound|\bhec\b|houndhec/, name: "Hec Hound" },
   ];
 
   for (const { pattern, name } of hints) {
@@ -301,6 +310,97 @@ function modularPartFromPathHint(path: string): ModularPartRef | undefined {
   const kronsh = /kronsh/i.test(segment) ? modularPartsByName.get("kronsh") : undefined;
   if (kronsh) return kronsh;
   return undefined;
+}
+
+type CompanionPartHit = {
+  kind: "moa" | "hound";
+  slot: "model" | "core" | "gyro" | "bracket" | "stabilizer";
+  id: string;
+};
+
+function indexCompanionParts(): Array<{ stem: string; hit: CompanionPartHit }> {
+  const out: Array<{ stem: string; hit: CompanionPartHit }> = [];
+  const add = (name: string, hit: CompanionPartHit, lotusPath?: string) => {
+    out.push({ stem: normalize(name).replace(/\s+/g, ""), hit });
+    if (lotusPath) {
+      const seg = lotusPath.split("/").pop() ?? "";
+      out.push({ stem: seg.toLowerCase(), hit });
+    }
+  };
+  for (const p of moaModels) add(p.name, { kind: "moa", slot: "model", id: p.id }, p.lotusPath);
+  for (const p of moaCores) add(p.name, { kind: "moa", slot: "core", id: p.id }, p.lotusPath);
+  for (const p of moaGyros) add(p.name, { kind: "moa", slot: "gyro", id: p.id }, p.lotusPath);
+  for (const p of moaBrackets) add(p.name, { kind: "moa", slot: "bracket", id: p.id }, p.lotusPath);
+  for (const p of houndModels) add(p.name, { kind: "hound", slot: "model", id: p.id }, p.lotusPath);
+  for (const p of houndCores) add(p.name, { kind: "hound", slot: "core", id: p.id }, p.lotusPath);
+  for (const p of houndBrackets) add(p.name, { kind: "hound", slot: "bracket", id: p.id }, p.lotusPath);
+  for (const p of houndStabilizers) {
+    add(p.name, { kind: "hound", slot: "stabilizer", id: p.id }, p.lotusPath);
+  }
+  // Nychus head path uses MoaPetHeadMelee
+  out.push({
+    stem: "moapetheadmelee",
+    hit: { kind: "moa", slot: "model", id: "moa_model_nychus" },
+  });
+  return out;
+}
+
+const companionPartIndex = indexCompanionParts();
+
+function matchCompanionPartPath(pathOrName: string): CompanionPartHit | undefined {
+  const compact = normalize(pathOrName).replace(/\s+/g, "");
+  const segment = (pathOrName.split("/").pop() ?? pathOrName).toLowerCase();
+  let best: CompanionPartHit | undefined;
+  let bestLen = 0;
+  for (const { stem, hit } of companionPartIndex) {
+    if (!stem) continue;
+    if (segment.includes(stem) || compact.includes(stem) || stem.includes(segment)) {
+      if (stem.length > bestLen) {
+        best = hit;
+        bestLen = stem.length;
+      }
+    }
+  }
+  return best;
+}
+
+/** Map DE companion modularParts to FrameHub MOA/Hound part selection. */
+export function mapCompanionPartsFromArsenal(
+  parts: Record<string, unknown> | undefined,
+): ModularCompanionParts | undefined {
+  if (!parts) return undefined;
+
+  const collected: Partial<Record<CompanionPartHit["slot"], string>> = {};
+  let kind: "moa" | "hound" | undefined;
+
+  for (const part of Object.values(parts)) {
+    const path =
+      typeof part === "string"
+        ? part
+        : typeof part === "object" && part && "uniqueName" in part
+          ? String((part as { uniqueName: string }).uniqueName)
+          : undefined;
+    const display = partNameFromLotus(part) ?? (path ? lotusItemName(path) : undefined);
+    const hit =
+      (path ? matchCompanionPartPath(path) : undefined) ??
+      (display ? matchCompanionPartPath(display) : undefined);
+    if (!hit) continue;
+    kind = hit.kind;
+    collected[hit.slot] = hit.id;
+  }
+
+  if (!kind || !collected.model || !collected.core || !collected.bracket) return undefined;
+  if (kind === "moa" && !collected.gyro) return undefined;
+  if (kind === "hound" && !collected.stabilizer) return undefined;
+
+  return {
+    kind,
+    model: collected.model,
+    core: collected.core,
+    bracket: collected.bracket,
+    ...(kind === "moa" ? { gyro: collected.gyro } : { stabilizer: collected.stabilizer }),
+    isGilded: true,
+  };
 }
 
 /** Map DE modularParts / parser parts to FrameHub modular build parts. */
