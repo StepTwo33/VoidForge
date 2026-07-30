@@ -1,7 +1,9 @@
 import type ArsenalData from "@wfcd/arsenal-parser";
 import type { ModUnion } from "@wfcd/items";
-import type { Companion, Loadout, ModSlot, ModularBuildData } from "@/lib/types";
+import type { Companion, Loadout, Mod, ModSlot, ModularBuildData } from "@/lib/types";
 import { resolveCompanionClawId, resolveHoundWeaponId } from "@/lib/weapons/companion-weapons";
+import { isAuraMod } from "@/lib/mods/aura-mods";
+import { isWarframeExilusMod } from "@/lib/mods/mod-slot-categories";
 import {
   findArcaneByName,
   findCompanionByName,
@@ -27,6 +29,11 @@ import {
 } from "@/lib/warframe-arsenal/lotus-resolve";
 import { resolveCompanionParts } from "@/lib/companions/companion-parts-resolve";
 import { resolveRivenUpgrade } from "@/lib/warframe-arsenal/riven-resolve";
+
+/** Warframe builder layout: 0=Aura, 1–8=regular, 9=Exilus. */
+export const WARFRAME_IMPORT_AURA_SLOT = 0;
+export const WARFRAME_IMPORT_EXILUS_SLOT = 9;
+export const WARFRAME_IMPORT_REGULAR_SLOTS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 
 export interface ArsenalImportWarning {
   kind: "warframe" | "weapon" | "companion" | "mod" | "arcane" | "helminth" | "modular" | "archwing";
@@ -161,25 +168,29 @@ function normalizeCompanionLabel(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
-function mapUpgradeMods(
+type ResolvedUpgradeMod = {
+  modId: string;
+  rank: number;
+  fhMod?: Mod;
+  rivenStats?: Record<string, number>;
+};
+
+function resolveUpgradeEntries(
   mods: ModUnion[],
   warnings: ArsenalImportWarning[],
   options?: { keepStances?: boolean },
-): { mods: ModSlot[]; stanceModId?: string } {
-  const slots: ModSlot[] = [];
+): { entries: ResolvedUpgradeMod[]; stanceModId?: string } {
+  const entries: ResolvedUpgradeMod[] = [];
   let stanceModId: string | undefined;
-  let slotIndex = 0;
 
   for (const entry of mods) {
     const riven = resolveRivenUpgrade(entry);
     if (riven) {
-      slots.push({
+      entries.push({
         modId: riven.modId,
         rank: riven.rank,
-        slotIndex,
         ...(Object.keys(riven.rivenStats).length > 0 ? { rivenStats: riven.rivenStats } : {}),
       });
-      slotIndex += 1;
       continue;
     }
 
@@ -197,15 +208,86 @@ function mapUpgradeMods(
       continue;
     }
 
-    slots.push({
+    entries.push({
       modId: fhMod.id,
       rank: Math.min(modRank(entry), fhMod.maxRank),
-      slotIndex,
+      fhMod,
     });
-    slotIndex += 1;
   }
 
+  return { entries, stanceModId };
+}
+
+function mapUpgradeMods(
+  mods: ModUnion[],
+  warnings: ArsenalImportWarning[],
+  options?: { keepStances?: boolean },
+): { mods: ModSlot[]; stanceModId?: string } {
+  const { entries, stanceModId } = resolveUpgradeEntries(mods, warnings, options);
+  const slots: ModSlot[] = entries.map((entry, slotIndex) => ({
+    modId: entry.modId,
+    rank: entry.rank,
+    slotIndex,
+    ...(entry.rivenStats ? { rivenStats: entry.rivenStats } : {}),
+  }));
   return { mods: slots, stanceModId };
+}
+
+/**
+ * Place warframe mods into builder slots by type (not arsenal list order).
+ * Aura → 0, Exilus → 9, remaining fill 1–8. Extra exilus can sit in regular slots (in-game legal).
+ */
+export function mapWarframeUpgradeMods(
+  mods: ModUnion[],
+  warnings: ArsenalImportWarning[],
+): { mods: ModSlot[] } {
+  const { entries } = resolveUpgradeEntries(mods, warnings);
+
+  let aura: ResolvedUpgradeMod | undefined;
+  let exilus: ResolvedUpgradeMod | undefined;
+  const regular: ResolvedUpgradeMod[] = [];
+
+  for (const entry of entries) {
+    const mod = entry.fhMod;
+    if (mod && isAuraMod(mod)) {
+      if (!aura) aura = entry;
+      else warnings.push({ kind: "mod", label: `${mod.name} (extra aura skipped)` });
+      continue;
+    }
+    if (mod && isWarframeExilusMod(mod)) {
+      if (!exilus) {
+        exilus = entry;
+        continue;
+      }
+      // Second+ exilus mods may occupy regular slots.
+      regular.push(entry);
+      continue;
+    }
+    regular.push(entry);
+  }
+
+  const slots: ModSlot[] = [];
+  const toSlot = (entry: ResolvedUpgradeMod, slotIndex: number): ModSlot => ({
+    modId: entry.modId,
+    rank: entry.rank,
+    slotIndex,
+    ...(entry.rivenStats ? { rivenStats: entry.rivenStats } : {}),
+  });
+
+  if (aura) slots.push(toSlot(aura, WARFRAME_IMPORT_AURA_SLOT));
+  if (exilus) slots.push(toSlot(exilus, WARFRAME_IMPORT_EXILUS_SLOT));
+
+  let regularCursor = 0;
+  for (const entry of regular) {
+    if (regularCursor >= WARFRAME_IMPORT_REGULAR_SLOTS.length) {
+      warnings.push({ kind: "mod", label: `${entry.fhMod?.name ?? entry.modId} (no free regular slot)` });
+      continue;
+    }
+    slots.push(toSlot(entry, WARFRAME_IMPORT_REGULAR_SLOTS[regularCursor]));
+    regularCursor += 1;
+  }
+
+  return { mods: slots };
 }
 
 function mapArcaneIds(
@@ -411,7 +493,7 @@ export function mapArsenalToImportPayload(
     warnings.push({ kind: "warframe", label: wfLabel });
   }
 
-  const wfMapped = mapUpgradeMods(loadout.warframe.upgrades.mods, warnings);
+  const wfMapped = mapWarframeUpgradeMods(loadout.warframe.upgrades.mods, warnings);
   const wfArcanes = mapArcaneIds(loadout.warframe.upgrades.arcanes, warnings);
 
   const helminthOverride = readAbilityOverride(rawNormal?.warframe);
