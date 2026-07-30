@@ -233,7 +233,10 @@ async function inflateToUtf8(bytes: Uint8Array): Promise<string | null> {
     if (typeof DecompressionStream === "undefined") return null;
     const stream = new DecompressionStream("deflate");
     const writer = stream.writable.getWriter();
-    await writer.write(bytes);
+    // Copy into a fresh ArrayBuffer-backed view — TS DOM typings reject Uint8Array<ArrayBufferLike>.
+    const input = new Uint8Array(bytes.length);
+    input.set(bytes);
+    await writer.write(input);
     await writer.close();
     const reader = stream.readable.getReader();
     const chunks: Uint8Array[] = [];
