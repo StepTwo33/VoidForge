@@ -406,26 +406,23 @@ function ProteaPowerRecorderPassive({ abilityStrength }: { abilityStrength: numb
 }
 
 function StyanaxHoplitePassive({ moddedShield }: { moddedShield: number }) {
-  const maxShields = Math.max(2000, Math.ceil(moddedShield + 1200));
-  const [currentShields, setCurrentShields] = useState(Math.round(moddedShield));
-  const cc = computeStyanaxHopliteCritChance(currentShields);
-  const speargunCc = computeStyanaxHopliteCritChance(currentShields, { speargun: true });
+  const shields = Math.max(0, Math.round(moddedShield));
+  const cc = computeStyanaxHopliteCritChance(shields);
+  const speargunCc = computeStyanaxHopliteCritChance(shields, { speargun: true });
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Current Shields"
-        value={currentShields}
-        min={0}
-        max={maxShields}
-        onChange={setCurrentShields}
-        tooltip="Styanax Hoplite: +1% weapon Critical Chance per 40 shields (includes Overshields)."
+      <StatRow
+        label="At Full Shields"
+        value={shields.toFixed(0)}
+        color="text-muted-foreground"
+        tooltip="Uses this build’s modded Shield capacity. Overshields are not included here."
       />
       <StatRow
         label="Hoplite CC"
         value={`+${(cc * 100).toFixed(0)}%`}
         color="text-sky-400"
-        tooltip="Additive weapon crit chance (primary/secondary/melee)."
+        tooltip="Styanax Hoplite: +1% weapon Critical Chance per 40 shields (additive; primary/secondary/melee)."
       />
       <StatRow
         label="w/ Speargun"
