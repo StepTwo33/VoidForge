@@ -36,7 +36,7 @@ import { incarnonDataMap } from "@/data/incarnon";
 import { cn } from "@/lib/utils";
 import { appendReturnTo } from "@/lib/site/nav-return";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, WeaponBuildData, persistSavedBuild, resolveSavedArcaneSlots, resolveArcaneById } from "@/lib/builds/build-storage";
-import { extractBuildFromUrl, ShareableBuild } from "@/lib/builds/build-url";
+import { extractBuildFromUrlAsync, ShareableBuild } from "@/lib/builds/build-url";
 import { shareBuilderBuild } from "@/lib/builds/share-build";
 import { toast } from "sonner";
 import { getWeaponImage } from "@/lib/display/images";
@@ -140,54 +140,60 @@ export default function WeaponBuilderPage() {
 
   // Load build from URL ?build= param
   useEffect(() => {
+    let cancelled = false;
     queueMicrotask(() => {
-      if (allWeapons.length === 0) return;
-      const params = new URLSearchParams(window.location.search);
-      const shared = extractBuildFromUrl(params);
-      if (!shared || shared.type !== "weapon") return;
-      const weapon = allWeapons.find((w) => w.id === shared.itemId);
-      if (!weapon) return;
-      if (isCompanionWeaponCategory(weapon.category)) {
-        toast.error("Companion weapons are built in Companion Builder", {
-          description: `${weapon.name} — open Companion Builder to configure this weapon.`,
-          action: {
-            label: "Open",
-            onClick: () => {
-              window.location.href = "/companion-builder";
+      void (async () => {
+        if (allWeapons.length === 0) return;
+        const params = new URLSearchParams(window.location.search);
+        const shared = await extractBuildFromUrlAsync(params);
+        if (cancelled || !shared || shared.type !== "weapon") return;
+        const weapon = allWeapons.find((w) => w.id === shared.itemId);
+        if (!weapon) return;
+        if (isCompanionWeaponCategory(weapon.category)) {
+          toast.error("Companion weapons are built in Companion Builder", {
+            description: `${weapon.name} — open Companion Builder to configure this weapon.`,
+            action: {
+              label: "Open",
+              onClick: () => {
+                window.location.href = "/companion-builder";
+              },
             },
-          },
+          });
+          const url = new URL(window.location.href);
+          url.searchParams.delete("build");
+          const qs = url.searchParams.toString();
+          window.history.replaceState({}, "", qs ? `${url.pathname}?${qs}` : url.pathname);
+          return;
+        }
+        setSelectedWeapon(weapon);
+        setShowWeaponList(false);
+        const mods: EquippedMod[] = shared.mods.map((m, i) => {
+          const mod = modsMap.get(m.id);
+          return { modId: m.id, modName: mod?.name ?? "", rank: m.rank, slotIndex: i, polarity: mod?.polarity, drain: mod?.drain };
         });
+        setEquippedMods(mods);
+        if (shared.arcanes) {
+          setEquippedArcanes(shared.arcanes.map((id) => (id ? resolveArcaneById(id) : null)));
+        }
+        setCurrentBuildId(null);
+        setBuildName(`${weapon.name} Build`);
+        setBuildDescription("");
+        if (shared.progenitorElement) setProgenitorElement(shared.progenitorElement);
+        if (shared.progenitorBonusPercent != null) setProgenitorBonusPercent(shared.progenitorBonusPercent);
+        if (shared.hasOrokinCatalyst != null) setHasOrokinCatalyst(shared.hasOrokinCatalyst);
+        if (shared.isMR30 != null) setIsMR30(shared.isMR30);
+        if (shared.slotPolarities) setSlotPolarities(shared.slotPolarities);
+        const sharedIncarnon = (shared as ShareableBuild & { incarnonEvolutions?: Record<number, number> }).incarnonEvolutions;
+        if (sharedIncarnon) setSelectedEvolutions(sharedIncarnon);
         const url = new URL(window.location.href);
         url.searchParams.delete("build");
         const qs = url.searchParams.toString();
         window.history.replaceState({}, "", qs ? `${url.pathname}?${qs}` : url.pathname);
-        return;
-      }
-      setSelectedWeapon(weapon);
-      setShowWeaponList(false);
-      const mods: EquippedMod[] = shared.mods.map((m, i) => {
-        const mod = modsMap.get(m.id);
-        return { modId: m.id, modName: mod?.name ?? "", rank: m.rank, slotIndex: i, polarity: mod?.polarity, drain: mod?.drain };
-      });
-      setEquippedMods(mods);
-      if (shared.arcanes) {
-        setEquippedArcanes(shared.arcanes.map((id) => (id ? resolveArcaneById(id) : null)));
-      }
-      setCurrentBuildId(null);
-      setBuildName(`${weapon.name} Build`);
-      setBuildDescription("");
-      if (shared.progenitorElement) setProgenitorElement(shared.progenitorElement);
-      if (shared.progenitorBonusPercent != null) setProgenitorBonusPercent(shared.progenitorBonusPercent);
-      if (shared.hasOrokinCatalyst != null) setHasOrokinCatalyst(shared.hasOrokinCatalyst);
-      if (shared.isMR30 != null) setIsMR30(shared.isMR30);
-      if (shared.slotPolarities) setSlotPolarities(shared.slotPolarities);
-      const sharedIncarnon = (shared as ShareableBuild & { incarnonEvolutions?: Record<number, number> }).incarnonEvolutions;
-      if (sharedIncarnon) setSelectedEvolutions(sharedIncarnon);
-      const url = new URL(window.location.href);
-      url.searchParams.delete("build");
-      const qs = url.searchParams.toString();
-      window.history.replaceState({}, "", qs ? `${url.pathname}?${qs}` : url.pathname);
+      })();
     });
+    return () => {
+      cancelled = true;
+    };
   }, [allWeapons]);
 
   const buildWeaponData = useCallback((): WeaponBuildData | null => {

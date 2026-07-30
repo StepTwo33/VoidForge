@@ -24,7 +24,7 @@ import {
   KitgunChamber, KitgunGrip, KitgunLoader, ZawStrike, ZawGrip, ZawLink, AmpScaffold, AmpBrace,
 } from "@/data/modular-weapons";
 import { cn } from "@/lib/utils";
-import { extractBuildFromUrl } from "@/lib/builds/build-url";
+import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
 import { resolveArcaneById } from "@/lib/builds/build-storage";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
@@ -157,55 +157,61 @@ export default function ModularBuilderPage() {
 
   // Load build from ?build= share link (e.g. from /build/[id] page)
   useEffect(() => {
+    let cancelled = false;
     queueMicrotask(() => {
-      const params = new URLSearchParams(window.location.search);
-      const shared = extractBuildFromUrl(params);
-      if (!shared || shared.type !== "modular" || !shared.modularType || !shared.parts) return;
-      const mt = shared.modularType as ModularType;
-      setModularType(mt);
-      if (mt === "kitgun") {
-        setKitgunChamber(kitgunChambers.find((c) => c.id === shared.parts!.chamber) ?? null);
-        setKitgunGrip(kitgunGrips.find((g) => g.id === shared.parts!.grip) ?? null);
-        setKitgunLoader(kitgunLoaders.find((l) => l.id === shared.parts!.loader) ?? null);
-      } else if (mt === "zaw") {
-        setZawStrike(zawStrikes.find((s) => s.id === shared.parts!.strike) ?? null);
-        setZawGripSel(zawGrips.find((g) => g.id === shared.parts!.grip) ?? null);
-        setZawLinkSel(zawLinks.find((l) => l.id === shared.parts!.link) ?? null);
-      } else {
-        setAmpPrism(ampPrisms.find((p) => p.id === shared.parts!.prism) ?? null);
-        setAmpScaffold(ampScaffolds.find((s) => s.id === shared.parts!.scaffold) ?? null);
-        setAmpBrace(ampBraces.find((b) => b.id === shared.parts!.brace) ?? null);
-      }
-      setEquippedMods(
-        shared.mods.map((m, idx) => {
-          const mod = modsMap.get(m.id);
-          return {
-            modId: m.id,
-            modName: mod?.name ?? "",
-            rank: m.rank,
-            slotIndex: m.slotIndex ?? idx,
-            polarity: mod?.polarity,
-            drain: mod?.drain,
-          };
-        })
-      );
-      setHasOrokinCatalyst(shared.hasOrokinCatalyst ?? false);
-      setIsMR30(shared.isMR30 ?? false);
-      if (shared.arcanes?.length) {
-        setEquippedArcanes(shared.arcanes.map((id) => (id ? resolveArcaneById(id) : null)));
-      } else {
-        setEquippedArcanes([null, null]);
-      }
-      const pol: Record<number, string> = {};
-      if (shared.slotPolarities) {
-        for (const [k, v] of Object.entries(shared.slotPolarities)) {
-          pol[Number(k)] = v;
+      void (async () => {
+        const params = new URLSearchParams(window.location.search);
+        const shared = await extractBuildFromUrlAsync(params);
+        if (cancelled || !shared || shared.type !== "modular" || !shared.modularType || !shared.parts) return;
+        const mt = shared.modularType as ModularType;
+        setModularType(mt);
+        if (mt === "kitgun") {
+          setKitgunChamber(kitgunChambers.find((c) => c.id === shared.parts!.chamber) ?? null);
+          setKitgunGrip(kitgunGrips.find((g) => g.id === shared.parts!.grip) ?? null);
+          setKitgunLoader(kitgunLoaders.find((l) => l.id === shared.parts!.loader) ?? null);
+        } else if (mt === "zaw") {
+          setZawStrike(zawStrikes.find((s) => s.id === shared.parts!.strike) ?? null);
+          setZawGripSel(zawGrips.find((g) => g.id === shared.parts!.grip) ?? null);
+          setZawLinkSel(zawLinks.find((l) => l.id === shared.parts!.link) ?? null);
+        } else {
+          setAmpPrism(ampPrisms.find((p) => p.id === shared.parts!.prism) ?? null);
+          setAmpScaffold(ampScaffolds.find((s) => s.id === shared.parts!.scaffold) ?? null);
+          setAmpBrace(ampBraces.find((b) => b.id === shared.parts!.brace) ?? null);
         }
-      }
-      setSlotPolarities(pol);
-      window.history.replaceState({}, "", window.location.pathname);
-      toast.info("Build loaded from link", { description: "Modular configuration applied" });
+        setEquippedMods(
+          shared.mods.map((m, idx) => {
+            const mod = modsMap.get(m.id);
+            return {
+              modId: m.id,
+              modName: mod?.name ?? "",
+              rank: m.rank,
+              slotIndex: m.slotIndex ?? idx,
+              polarity: mod?.polarity,
+              drain: mod?.drain,
+            };
+          })
+        );
+        setHasOrokinCatalyst(shared.hasOrokinCatalyst ?? false);
+        setIsMR30(shared.isMR30 ?? false);
+        if (shared.arcanes?.length) {
+          setEquippedArcanes(shared.arcanes.map((id) => (id ? resolveArcaneById(id) : null)));
+        } else {
+          setEquippedArcanes([null, null]);
+        }
+        const pol: Record<number, string> = {};
+        if (shared.slotPolarities) {
+          for (const [k, v] of Object.entries(shared.slotPolarities)) {
+            pol[Number(k)] = v;
+          }
+        }
+        setSlotPolarities(pol);
+        window.history.replaceState({}, "", window.location.pathname);
+        toast.info("Build loaded from link", { description: "Modular configuration applied" });
+      })();
     });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const buildModularData = (): ModularBuildData => {

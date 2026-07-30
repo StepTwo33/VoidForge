@@ -47,7 +47,7 @@ import {
   getPrimaryExaltedWeapon,
 } from "@/lib/weapons/exalted-weapons";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, WarframeBuildData, persistSavedBuild, resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
-import { extractBuildFromUrl } from "@/lib/builds/build-url";
+import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
 import { shareBuilderBuild } from "@/lib/builds/share-build";
 import { toast } from "sonner";
 import { getWarframeImage } from "@/lib/display/images";
@@ -161,47 +161,53 @@ export default function WarframeBuilderPage() {
 
   // Load build from URL ?build= param (hash share links)
   useEffect(() => {
+    let cancelled = false;
     queueMicrotask(() => {
-      const params = new URLSearchParams(window.location.search);
-      const shared = extractBuildFromUrl(params);
-      if (!shared || shared.type !== "warframe") return;
-      const wf = allWarframes.find((w) => w.id === shared.itemId);
-      if (!wf) return;
-      setSelectedWarframe(wf);
-      setShowWarframeList(false);
-      setEquippedMods(shared.mods.map((m, i) => {
-        const mod = modsMap.get(m.id);
-        return { modId: m.id, modName: mod?.name ?? "", rank: m.rank, slotIndex: m.slotIndex ?? i, polarity: mod?.polarity, drain: mod?.drain };
-      }));
-      if (shared.arcanes) {
-        setEquippedArcanes(resolveSavedArcaneSlots(shared.arcanes.map((id) => id || null), 2));
-      }
-      if (shared.shards && shared.shards.length > 0) {
-        const restored: (EquippedArchonShard | null)[] = [...EMPTY_SHARDS];
-        shared.shards.forEach((s, i) => {
-          if (i >= restored.length) return;
-          const def = allArchonShards.find((sh) => sh.id === s.id);
-          if (!def) return;
-          restored[i] = {
-            shardId: def.id,
-            shardColor: def.color,
-            shardTier: def.tier,
-            selectedBonus: s.bonus,
-            bonusValue: def.statBonuses[s.bonus] ?? 0,
-            slotIndex: i,
-          };
-        });
-        setEquippedShards(restored);
-      }
-      setCurrentBuildId(null);
-      setBuildName(`${wf.name} Build`);
-      setBuildDescription("");
-      const url = new URL(window.location.href);
-      url.searchParams.delete("build");
-      const qs = url.searchParams.toString();
-      window.history.replaceState({}, "", qs ? `${url.pathname}?${qs}` : url.pathname);
+      void (async () => {
+        const params = new URLSearchParams(window.location.search);
+        const shared = await extractBuildFromUrlAsync(params);
+        if (cancelled || !shared || shared.type !== "warframe") return;
+        const wf = allWarframes.find((w) => w.id === shared.itemId);
+        if (!wf) return;
+        setSelectedWarframe(wf);
+        setShowWarframeList(false);
+        setEquippedMods(shared.mods.map((m, i) => {
+          const mod = modsMap.get(m.id);
+          return { modId: m.id, modName: mod?.name ?? "", rank: m.rank, slotIndex: m.slotIndex ?? i, polarity: mod?.polarity, drain: mod?.drain };
+        }));
+        if (shared.arcanes) {
+          setEquippedArcanes(resolveSavedArcaneSlots(shared.arcanes.map((id) => id || null), 2));
+        }
+        if (shared.shards && shared.shards.length > 0) {
+          const restored: (EquippedArchonShard | null)[] = [...EMPTY_SHARDS];
+          shared.shards.forEach((s, i) => {
+            if (i >= restored.length) return;
+            const def = allArchonShards.find((sh) => sh.id === s.id);
+            if (!def) return;
+            restored[i] = {
+              shardId: def.id,
+              shardColor: def.color,
+              shardTier: def.tier,
+              selectedBonus: s.bonus,
+              bonusValue: def.statBonuses[s.bonus] ?? 0,
+              slotIndex: i,
+            };
+          });
+          setEquippedShards(restored);
+        }
+        setCurrentBuildId(null);
+        setBuildName(`${wf.name} Build`);
+        setBuildDescription("");
+        const url = new URL(window.location.href);
+        url.searchParams.delete("build");
+        const qs = url.searchParams.toString();
+        window.history.replaceState({}, "", qs ? `${url.pathname}?${qs}` : url.pathname);
+      })();
     });
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, []); // intentionally once on mount (warframe/mod catalogs are sync)
 
   const currentFormSlice = useCallback((): DualFormBuildSlice => ({
     mods: equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
