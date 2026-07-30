@@ -102,12 +102,11 @@ import {
   computeVorunaUlfrunCooldownRemaining,
   computeUrielLegionPassive,
   computeUrielDemonResurrectRemaining,
-  scaledAbilityEnergyCost,
   type MesaSidearmStyle,
   type NovaSpeedState,
   type ChromaElement,
 } from "@/lib/codex/ability-misc-stats";
-import { augurShieldsFromEnergySpent, computeMechaSetMarkStats } from "@/lib/calc/set-bonuses";
+import { computeMechaSetMarkStats } from "@/lib/calc/set-bonuses";
 import { CollapsibleSection, SimSlider, StatRow } from "./stat-primitives";
 
 function GaussPassiveBattery() {
@@ -2040,44 +2039,6 @@ function VorunaWolvesPassivePanel() {
   );
 }
 
-function AugurCastShieldsPanel({
-  convertPercent,
-  abilityEfficiency,
-}: {
-  convertPercent: number;
-  abilityEfficiency: number;
-}) {
-  const pieces = Math.round(convertPercent / 40);
-  const [baseCost, setBaseCost] = useState(25);
-  const spent = scaledAbilityEnergyCost(baseCost, abilityEfficiency);
-  const shields = augurShieldsFromEnergySpent(spent, pieces);
-
-  return (
-    <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Base Cast Cost"
-        value={baseCost}
-        min={0}
-        max={100}
-        onChange={setBaseCost}
-        tooltip="Augur converts Energy actually spent (after Ability Efficiency) into Shields. Cap 175% EFF / floor 25% cost."
-      />
-      <StatRow
-        label="Energy Spent"
-        value={spent.toFixed(1)}
-        color="text-muted-foreground"
-        tooltip={`At ${(abilityEfficiency * 100).toFixed(0)}% Ability Efficiency.`}
-      />
-      <StatRow
-        label="Shields / Cast"
-        value={`+${shields.toFixed(1)}`}
-        color="text-sky-400"
-        tooltip={`${pieces} Augur piece${pieces === 1 ? "" : "s"} × ${convertPercent}% of ${spent.toFixed(1)} Energy. Can create Overshields.`}
-      />
-    </div>
-  );
-}
-
 function MechaMarkTimingPanel({ pieces }: { pieces: number }) {
   const mark = computeMechaSetMarkStats(pieces);
   if (!mark) return null;
@@ -2435,17 +2396,12 @@ export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equ
               </div>
             ))}
             {(stats.augurEnergyToShieldsPercent ?? 0) > 0 && (
-              <>
-                <StatRow
-                  label="Augur (shields)"
-                  value={`${stats.augurEnergyToShieldsPercent}% of energy → shields`}
-                  color="text-sky-400"
-                />
-                <AugurCastShieldsPanel
-                  convertPercent={stats.augurEnergyToShieldsPercent ?? 0}
-                  abilityEfficiency={stats.abilityEfficiency}
-                />
-              </>
+              <StatRow
+                label="Augur (shields)"
+                value={`${stats.augurEnergyToShieldsPercent}% of energy → shields`}
+                color="text-sky-400"
+                tooltip="Shields gained per cast are shown on each ability card from that ability’s energy cost."
+              />
             )}
             {(stats.hunterCompanionVsStatusDamagePercent ?? 0) > 0 && (
               <StatRow
@@ -2496,12 +2452,16 @@ export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equ
                 <span className="text-[10px] text-muted-foreground font-mono">R{info.rank}/{info.maxRank}</span>
               </div>
               {info.applied.map((line, i) => (
-                <StatRow
-                  key={`a-${i}`}
-                  label={line.label}
-                  value={line.value}
-                  color={line.active === false ? "text-muted-foreground" : "text-purple-400"}
-                />
+                <div key={`a-${i}`} className="py-0.5">
+                  <StatRow
+                    label={line.label}
+                    value={line.value}
+                    color={line.active === false ? "text-muted-foreground" : "text-purple-400"}
+                  />
+                  {line.note && (
+                    <p className="text-[9px] text-muted-foreground/80 pl-0.5">{line.note}</p>
+                  )}
+                </div>
               ))}
               {info.conditional.map((line, i) => (
                 <div key={`c-${i}-${line.label}`} className="py-0.5">

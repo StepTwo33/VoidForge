@@ -6,6 +6,7 @@ import type { Ability, WarframeCalculatedStats, Weapon } from "@/lib/types";
 import type { HelminthAbility } from "@/data/helminth";
 import { formatAbilityDescription } from "@/lib/display/ability-text";
 import { scaledAbilityEnergyCost } from "@/lib/codex/ability-misc-stats";
+import { augurShieldsFromEnergySpent } from "@/lib/calc/set-bonuses";
 import {
   AbilityCardShell,
   AbilitySlotBadge,
@@ -14,6 +15,28 @@ import {
   AbilityDamageTypeChip,
   AbilityStatsBlock,
 } from "@/components/ability-display";
+
+function AugurShieldsOnCast({
+  energySpent,
+  convertPercent,
+}: {
+  energySpent: number;
+  convertPercent: number;
+}) {
+  const pieces = Math.round(convertPercent / 40);
+  const shields = augurShieldsFromEnergySpent(energySpent, pieces);
+  if (shields <= 0) return null;
+
+  return (
+    <p
+      className="mt-1 text-right text-[10px] leading-snug text-sky-400"
+      title={`${pieces} Augur piece${pieces === 1 ? "" : "s"} convert ${convertPercent}% of energy spent into shields (can create Overshields).`}
+    >
+      +{shields % 1 === 0 ? shields.toFixed(0) : shields.toFixed(1)} shields
+      <span className="text-muted-foreground"> · Augur</span>
+    </p>
+  );
+}
 
 export function AbilityCard({
   ability,
@@ -38,6 +61,7 @@ export function AbilityCard({
   const display = { warframeId, abilityName: ability.name };
   const effectiveCost = scaledAbilityEnergyCost(ability.energyCost, eff);
   const slotNum = gameSlot ?? index + 1;
+  const augurPct = stats?.augurEnergyToShieldsPercent ?? 0;
 
   return (
     <AbilityCardShell slot={slotNum} className="flex h-full flex-col">
@@ -51,7 +75,12 @@ export function AbilityCard({
             </div>
           </div>
         </div>
-        <AbilityEnergyChip baseCost={ability.energyCost} effectiveCost={effectiveCost} />
+        <div className="shrink-0">
+          <AbilityEnergyChip baseCost={ability.energyCost} effectiveCost={effectiveCost} />
+          {augurPct > 0 && (
+            <AugurShieldsOnCast energySpent={effectiveCost} convertPercent={augurPct} />
+          )}
+        </div>
       </div>
 
       <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
@@ -133,6 +162,7 @@ export function HelminthAbilityCard({
   const eff = stats?.abilityEfficiency ?? 1;
   const effectiveCost = scaledAbilityEnergyCost(ability.energyCost, eff);
   const display = { warframeId: undefined, abilityName: ability.name, helminth: true as const };
+  const augurPct = stats?.augurEnergyToShieldsPercent ?? 0;
 
   return (
     <AbilityCardShell slot={gameSlot} variant="helminth" className="flex h-full flex-col">
@@ -148,7 +178,12 @@ export function HelminthAbilityCard({
             </p>
           </div>
         </div>
-        <AbilityEnergyChip baseCost={ability.energyCost} effectiveCost={effectiveCost} />
+        <div className="shrink-0">
+          <AbilityEnergyChip baseCost={ability.energyCost} effectiveCost={effectiveCost} />
+          {augurPct > 0 && (
+            <AugurShieldsOnCast energySpent={effectiveCost} convertPercent={augurPct} />
+          )}
+        </div>
       </div>
 
       <p className="mb-3 text-xs leading-relaxed text-muted-foreground">

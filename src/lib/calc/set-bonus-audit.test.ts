@@ -74,6 +74,29 @@ describe("Augur set (wiki: +40% energy→shields per piece)", () => {
   });
 });
 
+describe("Archon Amar / Boreal / Nira set summary", () => {
+  it("marks Amar active with a single equipped piece", () => {
+    const slots = [{ modId: "amars_hatred", rank: 5, slotIndex: 1 }];
+    const line = buildWarframeSetBonusSummary(slots).find((s) => s.setId === "amar")!;
+    expect(line.pieces).toBe(1);
+    expect(line.active).toBe(true);
+    expect(line.description).toMatch(/1\/3/);
+  });
+
+  it("shows full Amar set bonus text at 3 pieces", () => {
+    const slots = [
+      { modId: "amars_hatred", rank: 5, slotIndex: 1 },
+      { modId: "amars_anguish", rank: 5, slotIndex: 9 },
+    ];
+    const line = buildWarframeSetBonusSummary(slots, {
+      meleeMods: [{ modId: "amars_contempt", rank: 5, slotIndex: 0 }],
+    }).find((s) => s.setId === "amar")!;
+    expect(line.pieces).toBe(3);
+    expect(line.active).toBe(true);
+    expect(line.description).toMatch(/Teleport/i);
+  });
+});
+
 describe("Hunter set (wiki: +25% companion dmg per piece vs Slash)", () => {
   it("scales with piece count", () => {
     const excal = allWarframes.find((w) => w.id === "excalibur")!;

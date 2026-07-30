@@ -279,7 +279,8 @@ function fmtStatValue(stat: string, scaled: number, flat?: boolean): string {
   }
   const isFlatResource = ["health", "shield", "energy"].includes(stat);
   if (isFlatResource) return `+${scaled.toFixed(0)}`;
-  return fmtPct(scaled, scaled % 1 !== 0 ? 1 : 0);
+  const decimals = scaled !== 0 && Math.abs(scaled) < 1 ? 2 : scaled % 1 !== 0 ? 1 : 0;
+  return fmtPct(scaled, decimals);
 }
 
 function triggerNote(trigger: ArcaneTrigger, stackCap?: number | null): string | undefined {

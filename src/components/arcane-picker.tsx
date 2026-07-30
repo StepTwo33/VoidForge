@@ -9,6 +9,7 @@ import { Search, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getArcaneImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
+import { getArcaneDisplayInfo } from "@/lib/display/arcane-display";
 
 import { RARITY_BADGE_COLORS } from "@/lib/display/rarity-badge-colors";
 interface ArcaneSlotProps {
@@ -19,12 +20,42 @@ interface ArcaneSlotProps {
   onRemove: () => void;
 }
 
+function ArcaneEffectSummary({ arcane, rank }: { arcane: Mod; rank: number }) {
+  const info = useMemo(() => getArcaneDisplayInfo(arcane, rank), [arcane, rank]);
+  const lines = [...info.applied, ...info.conditional].slice(0, 3);
+
+  if (lines.length === 0) {
+    const desc = info.description;
+    if (!desc) return null;
+    return (
+      <p className="text-[10px] leading-snug text-purple-300/80 line-clamp-2 pr-4">
+        {desc}
+      </p>
+    );
+  }
+
+  return (
+    <ul className="space-y-0.5 pr-4">
+      {lines.map((line, i) => (
+        <li key={`${line.label}-${i}`} className="text-[10px] leading-snug text-purple-300/90">
+          <span className="text-muted-foreground">{line.label}</span>
+          {" "}
+          <span className="font-mono">{line.value}</span>
+          {line.note ? (
+            <span className="text-muted-foreground/80"> · {line.note}</span>
+          ) : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function ArcaneSlotCard({ arcane, rank, label, onAdd, onRemove }: ArcaneSlotProps) {
   if (!arcane) {
     return (
       <button
         onClick={onAdd}
-        className="w-full h-16 border border-dashed border-purple-500/30 rounded-lg flex items-center justify-center gap-2 text-muted-foreground hover:border-purple-500/50 hover:text-purple-400 hover:bg-purple-500/5 transition-all"
+        className="w-full min-h-16 border border-dashed border-purple-500/30 rounded-lg flex items-center justify-center gap-2 text-muted-foreground hover:border-purple-500/50 hover:text-purple-400 hover:bg-purple-500/5 transition-all"
       >
         <Plus className="h-4 w-4" />
         <span className="text-xs">{label}</span>
@@ -33,18 +64,21 @@ export function ArcaneSlotCard({ arcane, rank, label, onAdd, onRemove }: ArcaneS
   }
 
   return (
-    <div className="relative w-full h-16 border border-purple-500/30 rounded-lg p-3 bg-purple-500/5">
+    <div className="relative w-full min-h-16 border border-purple-500/30 rounded-lg p-3 bg-purple-500/5">
       <button
         onClick={onRemove}
         className="absolute top-1 right-1 p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors"
       >
         <X className="h-3 w-3" />
       </button>
-      <div className="flex items-center gap-2 h-full">
-        <GameAssetImage src={getArcaneImage(arcane.name)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/20 shrink-0" hideOnError />
-        <div className="flex-1 min-w-0">
-          <span className="text-sm font-medium truncate block">{arcane.name}</span>
-          <span className="text-[10px] text-muted-foreground">Rank {rank}/{arcane.maxRank}</span>
+      <div className="flex items-start gap-2">
+        <GameAssetImage src={getArcaneImage(arcane.name)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/20 shrink-0 mt-0.5" hideOnError />
+        <div className="flex-1 min-w-0 space-y-1">
+          <div>
+            <span className="text-sm font-medium truncate block">{arcane.name}</span>
+            <span className="text-[10px] text-muted-foreground">Rank {rank}/{arcane.maxRank}</span>
+          </div>
+          <ArcaneEffectSummary arcane={arcane} rank={rank} />
         </div>
       </div>
     </div>

@@ -509,24 +509,40 @@ export function buildWarframeSetBonusSummary(
       label: "Amar",
       pieces: amar,
       required: 3,
-      active: amar >= 3,
-      description: "3-piece: Teleport to a target within 10m on using a Heavy Attack",
+      // Highlight when any pieces are equipped (set bonus itself needs 3)
+      active: amar >= 1,
+      description:
+        amar >= 3
+          ? "Teleport to a target within 10m on using a Heavy Attack"
+          : amar >= 1
+            ? `${amar}/3 equipped — need ${3 - amar} more for Heavy Attack teleport`
+            : "3-piece: Teleport to a target within 10m on using a Heavy Attack",
     },
     {
       setId: "boreal",
       label: "Boreal",
       pieces: boreal,
       required: 3,
-      active: boreal >= 3,
-      description: "3-piece: Reduces damage taken by 20% while airborne",
+      active: boreal >= 1,
+      description:
+        boreal >= 3
+          ? "Reduces damage taken by 20% while airborne"
+          : boreal >= 1
+            ? `${boreal}/3 equipped — need ${3 - boreal} more for airborne damage reduction`
+            : "3-piece: Reduces damage taken by 20% while airborne",
     },
     {
       setId: "nira",
       label: "Nira",
       pieces: nira,
       required: 3,
-      active: nira >= 3,
-      description: "3-piece: Increase damage from Slam Attacks by +100%",
+      active: nira >= 1,
+      description:
+        nira >= 3
+          ? "Increase damage from Slam Attacks by +100%"
+          : nira >= 1
+            ? `${nira}/3 equipped — need ${3 - nira} more for +100% Slam Attack damage`
+            : "3-piece: Increase damage from Slam Attacks by +100%",
     },
   ];
 }
