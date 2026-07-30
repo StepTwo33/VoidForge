@@ -71,8 +71,16 @@ export function CommunityBuildsSidebar({
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <CopyRssFeedButton
-            feedPath="/feeds/builds.xml"
-            title="Copy community builds RSS feed link"
+            feedPath={
+              sort === "popular"
+                ? "/feeds/builds.xml"
+                : "/feeds/builds-recent.xml"
+            }
+            title={
+              sort === "popular"
+                ? "Copy top-rated builds RSS feed link"
+                : "Copy latest builds RSS feed link"
+            }
             className="hover:text-primary"
           />
           <Link

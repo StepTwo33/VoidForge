@@ -78,6 +78,7 @@ export const metadata: Metadata = {
     types: {
       "application/rss+xml": [
         { url: "/feeds/updates.xml", title: `${SITE_NAME} What's New` },
+        { url: "/feeds/builds-recent.xml", title: `${SITE_NAME} Latest Builds` },
         { url: "/feeds/builds.xml", title: `${SITE_NAME} Top Builds` },
       ],
     },

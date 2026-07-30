@@ -3,7 +3,7 @@ import { getSiteUrl } from "@/lib/site/site-metadata";
 import { RSS_RESPONSE_HEADERS } from "@/lib/site/rss";
 import {
   buildCommunityBuildsRss,
-  topBuildsRssTitle,
+  latestBuildsRssTitle,
 } from "@/lib/site/builds-rss";
 
 export const dynamic = "force-dynamic";
@@ -12,9 +12,9 @@ export async function GET() {
   const siteUrl = getSiteUrl();
   const xml = await buildCommunityBuildsRss({
     siteUrl,
-    title: topBuildsRssTitle(),
-    description: "Highest-voted public builds shared on Frame Hub.",
-    orderBy: [{ upvoteCount: "desc" }, { updatedAt: "desc" }, { id: "desc" }],
+    title: latestBuildsRssTitle(),
+    description: "Recently updated public builds shared on Frame Hub.",
+    orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
   });
 
   return new NextResponse(xml, { headers: RSS_RESPONSE_HEADERS });
