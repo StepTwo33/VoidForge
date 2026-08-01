@@ -13,7 +13,7 @@ function trimSlash(s: string): string {
  * Optional `TRUSTED_HOSTS` (comma-separated hostnames, no scheme): when set,
  * forwarded host must match one of them or we fall back to `nextUrl.origin`.
  *
- * Production: set `AUTH_URL` to your public origin (e.g. https://frame-hub.com).
+ * Production: set `AUTH_URL` to your public origin (e.g. https://void-forge.org).
  */
 export function getPublicOrigin(req: NextRequest): string {
   const auth = process.env.AUTH_URL?.trim();

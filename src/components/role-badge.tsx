@@ -11,7 +11,7 @@ export function RoleBadge({ role, className, size = "sm" }: RoleBadgeProps) {
   const isAdmin = role === "admin";
   return (
     <span
-      title={isAdmin ? "Frame Hub administrator" : "Frame Hub moderator"}
+      title={isAdmin ? "Voidforge administrator" : "Voidforge moderator"}
       className={cn(
         "inline-flex items-center gap-1 rounded-full font-semibold uppercase ring-1",
         isAdmin

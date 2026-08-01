@@ -245,7 +245,7 @@ export function DataFixesPanel({
         .join("\n");
       byType[o.targetType].push(`  // ${o.note || "Added via data fix"}\n${lines},`);
     }
-    let ts = `// Exported from Frame Hub Data Fixes — ${new Date().toISOString().slice(0, 10)}\n\n`;
+    let ts = `// Exported from Voidforge Data Fixes — ${new Date().toISOString().slice(0, 10)}\n\n`;
     for (const [type, entries] of Object.entries(byType)) {
       ts += `// ── ${type.toUpperCase()} ──\n${entries.join("\n")}\n\n`;
     }

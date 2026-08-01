@@ -59,7 +59,7 @@ export default function SignInPage() {
                         </div>
                         <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
                         <p className="text-sm text-muted-foreground mt-1.5">
-                            Sign in to your FrameHub account
+                            Sign in to your Voidforge account
                         </p>
                     </div>
 

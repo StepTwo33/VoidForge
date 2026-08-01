@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { Github, Heart } from "lucide-react";
-import { FRAME_HUB_GITHUB_URL } from "@/lib/site/site-links";
+import { VOIDFORGE_GITHUB_URL } from "@/lib/site/site-links";
 
 const FOOTER_LINKS = [
-  { href: FRAME_HUB_GITHUB_URL, label: "Open Source", external: true },
+  { href: VOIDFORGE_GITHUB_URL, label: "Open Source", external: true },
   { href: "/about", label: "About" },
   { href: "/guides/how-to-mod", label: "How to Mod" },
   { href: "/support", label: "Support" },
@@ -23,9 +23,8 @@ export function Footer() {
         <div className="flex flex-col items-center justify-between gap-3 sm:flex-row sm:items-center">
           <div className="text-center sm:text-left">
             <Link href="/" className="inline-flex items-center transition-opacity hover:opacity-90">
-              <span className="text-base font-bold tracking-tight">
-                <span className="text-primary">Frame</span>
-                <span className="text-foreground">Hub</span>
+              <span className="text-base font-bold tracking-tight text-primary">
+                Voidforge
               </span>
             </Link>
             <p className="mt-0.5 text-xs text-muted-foreground">
@@ -65,7 +64,7 @@ export function Footer() {
 
         <p className="mt-3 border-t border-border/40 pt-2.5 text-center text-[10px] leading-snug text-muted-foreground/60">
           Warframe and the Warframe logo are registered trademarks of Digital Extremes Ltd.
-          Frame Hub is not affiliated with Digital Extremes.
+          Voidforge is not affiliated with Digital Extremes.
         </p>
       </div>
     </footer>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Swords, Shield, Bug, Wrench, BarChart3, Users, User, Github, Info, BookOpen, FolderOpen, Plane, Rocket } from "lucide-react";
-import { FRAME_HUB_GITHUB_URL } from "@/lib/site/site-links";
+import { VOIDFORGE_GITHUB_URL } from "@/lib/site/site-links";
 import { PageShell, PageMain, PageHero, ContentPanel } from "@/components/page-shell";
 
 export default function AboutPage() {
@@ -13,15 +13,15 @@ export default function AboutPage() {
           icon={Info}
           accent="primary"
           title="About"
-          highlight="Frame Hub"
+          highlight="Voidforge"
           description="A Warframe build planner and theorycrafting toolkit."
         />
 
         <div className="space-y-6">
           <ContentPanel>
-            <h2 className="mb-3 text-lg font-semibold">What is Frame Hub?</h2>
+            <h2 className="mb-3 text-lg font-semibold">What is Voidforge?</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Frame Hub is a free build planner for Digital Extremes&apos; Warframe.
+              Voidforge is a free build planner for Digital Extremes&apos; Warframe.
               It lets you theorycraft weapon, warframe, companion, archwing, railjack, and modular weapon builds
               with real-time stat calculations, elemental combo resolution, damage simulation, and
               time-to-kill estimates against every enemy faction. Browse the Codex to verify mod, arcane, and
@@ -66,16 +66,16 @@ export default function AboutPage() {
               Open Source
             </h2>
             <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
-              Frame Hub is open source under the MIT license. You can browse the code, file issues, suggest features, or contribute pull requests on GitHub.
+              Voidforge is open source under the MIT license. You can browse the code, file issues, suggest features, or contribute pull requests on GitHub.
             </p>
             <a
-              href={FRAME_HUB_GITHUB_URL}
+              href={VOIDFORGE_GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
             >
               <Github className="h-4 w-4" />
-              github.com/StepTwo33/FrameHub
+              github.com/StepTwo33/Voidforge
             </a>
           </ContentPanel>
 
@@ -86,7 +86,7 @@ export default function AboutPage() {
               <a href="https://wiki.warframe.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                 Official Warframe Wiki
               </a>{" "}
-              and verified against in-game values. Frame Hub is not affiliated with or endorsed by Digital Extremes.
+              and verified against in-game values. Voidforge is not affiliated with or endorsed by Digital Extremes.
             </p>
           </ContentPanel>
 
@@ -96,7 +96,7 @@ export default function AboutPage() {
               Found incorrect data or a missing entry? Use the{" "}
               <Link href="/report-issue" className="text-amber-400 hover:underline">Report Issue</Link>{" "}
               page to flag stat discrepancies or missing items. Staff and moderators review reports and can apply
-              data corrections through the Codex and Data Fixes tools. Frame Hub is built with Next.js, TypeScript, and Tailwind CSS.
+              data corrections through the Codex and Data Fixes tools. Voidforge is built with Next.js, TypeScript, and Tailwind CSS.
             </p>
           </ContentPanel>
 
@@ -164,7 +164,7 @@ export default function AboutPage() {
 
           <p className="text-center text-xs text-muted-foreground/70">
             Warframe and the Warframe logo are registered trademarks of Digital Extremes Ltd.
-            Frame Hub is a fan-made tool and is not affiliated with, endorsed, or sponsored by Digital Extremes.
+            Voidforge is a fan-made tool and is not affiliated with, endorsed, or sponsored by Digital Extremes.
           </p>
         </div>
       </PageMain>

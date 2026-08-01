@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const API = "https://wiki.warframe.com/api.php";
-const HEADERS = { "User-Agent": "FrameHub/1.0 (https://frame-hub.com)" };
+const HEADERS = { "User-Agent": "Voidforge/1.0 (https://void-forge.org)" };
 
 const PAGES = [
   "Gravitic Slash",

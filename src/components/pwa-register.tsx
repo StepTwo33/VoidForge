@@ -22,7 +22,7 @@ export function PWARegister() {
 
         const onWaitingWorker = () => {
           if (registration.waiting && navigator.serviceWorker.controller) {
-            promptDeployRefresh("Frame Hub was updated");
+            promptDeployRefresh("Voidforge was updated");
           }
         };
 

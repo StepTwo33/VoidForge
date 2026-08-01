@@ -7,7 +7,7 @@ type RawRivenUpgrade = {
   curses?: RivenBuff[];
 };
 
-/** DE upgrade tags → FrameHub riven stat keys (decimal fractions, e.g. 0.44 = +44%). */
+/** DE upgrade tags → Voidforge riven stat keys (decimal fractions, e.g. 0.44 = +44%). */
 const RIVEN_TAG_TO_STAT: Record<string, string> = {
   WeaponDamageAmountMod: "damage",
   WeaponCritChanceMod: "criticalChance",

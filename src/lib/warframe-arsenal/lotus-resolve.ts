@@ -207,7 +207,7 @@ export function findNecramechByLotusPath(uniqueName?: string) {
   return id ? { id, name } : undefined;
 }
 
-/** Map DE abilityOverride to FrameHub helminth fields (0-based slot). */
+/** Map DE abilityOverride to Voidforge helminth fields (0-based slot). */
 export function resolveHelminthOverride(override?: {
   ability?: string;
   index?: number;
@@ -241,7 +241,7 @@ export function resolveHelminthOverride(override?: {
 }
 
 function normalizeAbilitySlot(index: number): number {
-  // DE uses 1–4 in the Twitch payload; FrameHub uses 0–3.
+  // DE uses 1–4 in the Twitch payload; Voidforge uses 0–3.
   if (index >= 1 && index <= 4) return index - 1;
   if (index >= 0 && index <= 3) return index;
   return Math.max(0, Math.min(3, index));
@@ -364,7 +364,7 @@ function matchCompanionPartPath(pathOrName: string): CompanionPartHit | undefine
   return best;
 }
 
-/** Map DE companion modularParts to FrameHub MOA/Hound part selection. */
+/** Map DE companion modularParts to Voidforge MOA/Hound part selection. */
 export function mapCompanionPartsFromArsenal(
   parts: Record<string, unknown> | undefined,
 ): ModularCompanionParts | undefined {
@@ -403,7 +403,7 @@ export function mapCompanionPartsFromArsenal(
   };
 }
 
-/** Map DE modularParts / parser parts to FrameHub modular build parts. */
+/** Map DE modularParts / parser parts to Voidforge modular build parts. */
 export function mapModularPartsFromArsenal(
   parts: Record<string, unknown> | undefined,
 ): { data: ModularBuildData; slot: "primary" | "secondary" | "melee" } | undefined {

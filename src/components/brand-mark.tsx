@@ -7,7 +7,7 @@ type BrandMarkProps = {
   priority?: boolean;
 };
 
-/** Circular Frame Hub logo from generated PWA assets. */
+/** Circular Voidforge logo from generated PWA assets. */
 export function BrandMark({ size = 32, className, priority }: BrandMarkProps) {
   return (
     <Image

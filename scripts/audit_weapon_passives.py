@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare FrameHub weapon passives against wiki.warframe.com/w/Weapons/Passives."""
+"""Compare Voidforge weapon passives against wiki.warframe.com/w/Weapons/Passives."""
 from __future__ import annotations
 
 import json
@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PASSIVES_PATH = ROOT / "src/data/weapon-passives.ts"
 WEAPONS_PATH = ROOT / "src/data/weapons.ts"
-UA = {"User-Agent": "FrameHub/1.0 (weapon passive audit)"}
+UA = {"User-Agent": "Voidforge/1.0 (weapon passive audit)"}
 
 # Wiki display name -> framehub id (manual fixes for punctuation / primes)
 NAME_OVERRIDES: dict[str, str] = {

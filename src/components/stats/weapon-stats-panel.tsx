@@ -242,7 +242,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             />
             {showOverflow && (
               <p className="text-[9px] text-amber-500/90 mt-1.5 leading-snug">
-                Note: values above ~2.147B can wrap to large negatives in-game (signed 32-bit). FrameHub shows uncapped math.
+                Note: values above ~2.147B can wrap to large negatives in-game (signed 32-bit). Voidforge shows uncapped math.
               </p>
             )}
           </CollapsibleSection>
@@ -829,7 +829,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
               )}
               {showOverflow && (
                 <p className="text-[9px] text-amber-500/90 mt-1.5 leading-snug">
-                  Note: DPS above ~2.147B can wrap to large negatives in-game (signed 32-bit). FrameHub shows uncapped math.
+                  Note: DPS above ~2.147B can wrap to large negatives in-game (signed 32-bit). Voidforge shows uncapped math.
                 </p>
               )}
             </>

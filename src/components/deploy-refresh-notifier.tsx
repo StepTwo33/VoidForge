@@ -41,7 +41,7 @@ export function DeployRefreshNotifier() {
         const prev = sessionStorage.getItem(BUILD_STORAGE_KEY);
         sessionStorage.setItem(BUILD_STORAGE_KEY, buildId);
         if (prev && prev !== buildId) {
-          offerRefresh("Frame Hub was updated");
+          offerRefresh("Voidforge was updated");
         }
       } catch {
         // ignore network errors during deploy

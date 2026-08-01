@@ -1,17 +1,19 @@
 import type { NextConfig } from "next";
 
-if (process.env.FRAMEHUB_MAINTAINER !== "1") {
+const isMaintainer =
+  process.env.FRAMEHUB_MAINTAINER === "1" || process.env.VOIDFORGE_MAINTAINER === "1";
+if (!isMaintainer) {
   throw new Error(
     [
-      "Frame Hub is not intended for self-hosting.",
-      "Use the planner at https://frame-hub.com",
+      "Voidforge is not intended for self-hosting.",
+      "Use the planner at https://void-forge.org",
       "To verify calculations and item catalogs: npm test",
-      "Maintainers: set FRAMEHUB_MAINTAINER=1 to run the Next app.",
+      "Maintainers: set FRAMEHUB_MAINTAINER=1 or VOIDFORGE_MAINTAINER=1 to run the Next app.",
     ].join("\n"),
   );
 }
 
-/** HSTS is best enabled at Cloudflare (or your TLS terminator) so local HTTP dev is unaffected. */
+/** Security response headers. HSTS only in production so local HTTP `next dev` stays usable. */
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -21,6 +23,15 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
   },
+  ...(process.env.NODE_ENV === "production"
+    ? [
+        {
+          key: "Strict-Transport-Security",
+          // 1 year; enable Always Use HTTPS + HSTS in Cloudflare too (edge covers HTTP→HTTPS).
+          value: "max-age=31536000; includeSubDomains",
+        },
+      ]
+    : []),
 ];
 
 const nextConfig: NextConfig = {

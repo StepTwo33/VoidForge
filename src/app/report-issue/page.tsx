@@ -579,7 +579,7 @@ export default function ReportIssuePage() {
         <div className="text-center mt-8 pb-4">
           <p className="text-[11px] text-muted-foreground">
             Need to reach us directly?{" "}
-            <a href="mailto:support@frame-hub.com" className="text-primary hover:underline">support@frame-hub.com</a>
+            <a href="mailto:support@void-forge.org" className="text-primary hover:underline">support@void-forge.org</a>
             {" "}·{" "}
             <a href="https://discord.gg/bqQXaYdTjS" target="_blank" rel="noopener noreferrer" className="text-[#5865F2] hover:underline">Discord</a>
           </p>

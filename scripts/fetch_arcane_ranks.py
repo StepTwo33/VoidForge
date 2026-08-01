@@ -7,7 +7,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-HEADERS = {"User-Agent": "FrameHub/1.0"}
+HEADERS = {"User-Agent": "Voidforge/1.0"}
 
 
 def fetch_module() -> str:

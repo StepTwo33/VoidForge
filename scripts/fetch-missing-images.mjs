@@ -10,7 +10,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 const OFFICIAL_WIKI_API = "https://wiki.warframe.com/api.php";
 const FANDOM_WIKI_API = "https://warframe.fandom.com/api.php";
-const WIKI_HEADERS = { "User-Agent": "FrameHub/1.0 (https://frame-hub.com)" };
+const WIKI_HEADERS = { "User-Agent": "Voidforge/1.0 (https://void-forge.org)" };
 const DELAY_MS = 300; // polite delay between requests
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -19,7 +19,7 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-/** Match FrameHub local paths: spaces → "_", roman numerals uppercase (avoids Ruhang_Ii vs Ruhang_II on Windows). */
+/** Match Voidforge local paths: spaces → "_", roman numerals uppercase (avoids Ruhang_Ii vs Ruhang_II on Windows). */
 function imageStem(name) {
   return name
     .replace(/ /g, "_")

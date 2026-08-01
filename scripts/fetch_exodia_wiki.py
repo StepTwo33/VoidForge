@@ -3,7 +3,7 @@ import json, re, urllib.parse, urllib.request
 
 params = {"action": "parse", "page": "Module:Arcane/data", "prop": "wikitext", "format": "json"}
 url = "https://wiki.warframe.com/api.php?" + urllib.parse.urlencode(params)
-with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "FrameHub/1.0"}), timeout=120) as r:
+with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Voidforge/1.0"}), timeout=120) as r:
     text = json.loads(r.read())["parse"]["wikitext"]["*"]
 
 for name in [

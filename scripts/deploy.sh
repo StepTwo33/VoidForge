@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Maintainer deploy helper for frame-hub.com — not public self-host documentation.
+# Maintainer deploy helper for void-forge.org — not public self-host documentation.
 # Server deploy: fetch latest code, discard local npm drift, install, build.
 #
 # Usage (on the server, from repo root):
@@ -8,7 +8,7 @@
 #
 # Do NOT run `npm install` on the server by hand — it rewrites package-lock.json
 # and blocks the next `git pull`. This script uses `npm ci` from the committed lockfile.
-# Requires FRAMEHUB_MAINTAINER=1 in the server .env before build/start.
+# Requires FRAMEHUB_MAINTAINER=1 or VOIDFORGE_MAINTAINER=1 in the server .env before build/start.
 
 set -euo pipefail
 

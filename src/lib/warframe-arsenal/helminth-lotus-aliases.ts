@@ -1,5 +1,5 @@
 /**
- * DE ability path suffixes → FrameHub helminth ability ids.
+ * DE ability path suffixes → Voidforge helminth ability ids.
  * Sourced from wiki Module:InternalNames (display name → allHelminthAbilities).
  * Legacy guessed suffixes kept as fallbacks for older arsenal payloads.
  */

@@ -51,8 +51,8 @@ export function WarframePlayerSync({ onImported, className }: WarframePlayerSync
         } catch {
           setError(
             res.ok
-              ? "FrameHub returned an invalid response. Try again in a moment."
-              : `FrameHub request failed (${res.status}). Try again in a moment.`,
+              ? "Voidforge returned an invalid response. Try again in a moment."
+              : `Voidforge request failed (${res.status}). Try again in a moment.`,
           );
           return;
         }
@@ -63,7 +63,7 @@ export function WarframePlayerSync({ onImported, className }: WarframePlayerSync
       }
       setResult(data as ArsenalImportPayload);
     } catch {
-      setError("Could not reach FrameHub. Check your connection and try again.");
+      setError("Could not reach Voidforge. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -209,7 +209,7 @@ function ImportPreview({
         className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
       >
         <Check className="h-4 w-4" />
-        Import into FrameHub loadouts
+        Import into Voidforge loadouts
       </button>
     </div>
   );

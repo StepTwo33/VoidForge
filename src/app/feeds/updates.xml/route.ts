@@ -16,7 +16,7 @@ export async function GET() {
 
   const xml = buildRssDocument({
     title: `${SITE_NAME} — What's New`,
-    description: "Updates and announcements from the Frame Hub team.",
+    description: "Updates and announcements from the Voidforge team.",
     link: `${siteUrl}/updates`,
     items: updates.map((u) => {
       const link = `${siteUrl}/updates/${u.id}`;

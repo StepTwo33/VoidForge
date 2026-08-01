@@ -68,7 +68,7 @@ export default function HowToModOverviewPage() {
       </ContentPanel>
 
       <ContentPanel>
-        <h2 className="mb-3 text-lg font-semibold">Practice in FrameHub</h2>
+        <h2 className="mb-3 text-lg font-semibold">Practice in Voidforge</h2>
         <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
           Try swaps here and watch the numbers before you spend Forma in-game. When a build
           feels right, copy it into your Arsenal.

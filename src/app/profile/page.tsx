@@ -592,7 +592,7 @@ export default function ProfilePage() {
                   <p className="text-sm">{user.username ? `@${user.username}` : <span className="text-muted-foreground italic">No username set</span>}</p>
                   {publicProfileHref && (
                     <Link href={publicProfileHref} className="text-xs text-primary hover:underline break-all">
-                      frame-hub.app{publicProfileHref}
+                      void-forge.org{publicProfileHref}
                     </Link>
                   )}
                 </div>
@@ -730,7 +730,7 @@ export default function ProfilePage() {
                 <div className="min-w-0">
                   <p className="text-sm font-medium">Newsletters</p>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Occasional product news from news@frame-hub.com. Report status and account
+                    Occasional product news from news@void-forge.org. Report status and account
                     emails from support are separate and always sent when needed.
                   </p>
                 </div>

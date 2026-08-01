@@ -19,7 +19,7 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[1]
 MODS_DIR = ROOT / "public/images/mods"
 MODS_TS = ROOT / "src/data/mods.ts"
-UA = {"User-Agent": "FrameHub/1.0 (https://frame-hub.com)"}
+UA = {"User-Agent": "Voidforge/1.0 (https://void-forge.org)"}
 
 MOD_IMAGE_STEM_BY_NAME = {
     "Endless Lull": "Endless_Lullaby",

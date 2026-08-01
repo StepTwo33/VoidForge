@@ -297,7 +297,7 @@ async function fetchJson<T>(path: string): Promise<T | null> {
     const res = await fetch(url, {
       headers: {
         Accept: "application/json",
-        "User-Agent": "FrameHub-Bot/0.1 (https://frame-hub.com)",
+        "User-Agent": "Voidforge-Bot/0.1 (https://void-forge.org)",
       },
       cache: "no-store",
       signal: AbortSignal.timeout(20_000),

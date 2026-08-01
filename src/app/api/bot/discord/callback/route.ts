@@ -38,12 +38,12 @@ export async function GET(req: NextRequest) {
   const expiresAt = new Date(Date.now() + (tokens.expires_in ?? 604800) * 1000);
   const avatar = discordAvatarUrl(discordUser);
 
-  // One Discord account → one FrameHub user
+  // One Discord account → one Voidforge user
   const existingDiscord = await prisma.discordUserLink.findUnique({
     where: { discordId: discordUser.id },
   });
   if (existingDiscord && existingDiscord.userId !== userId) {
-    return fail("That Discord account is already linked to another FrameHub user.");
+    return fail("That Discord account is already linked to another Voidforge user.");
   }
 
   await prisma.discordUserLink.upsert({

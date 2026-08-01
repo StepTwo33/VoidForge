@@ -8,7 +8,7 @@ import { ThemePicker } from "@/components/theme-picker";
 import { BrandMark } from "@/components/brand-mark";
 import { AvatarImage } from "@/components/game-asset-image";
 import { Input } from "@/components/ui/input";
-import { FRAME_HUB_GITHUB_URL } from "@/lib/site/site-links";
+import { VOIDFORGE_GITHUB_URL } from "@/lib/site/site-links";
 import { bestBuildCatalogMatch, buildDiscoverUrl, searchBuildCatalog, type BuildSearchItem } from "@/lib/builds/build-search";
 import type { PublicBuildSummary } from "@/lib/builds/build-types";
 
@@ -482,8 +482,7 @@ export function Header() {
         <Link href="/" className="flex shrink-0 items-center gap-2 text-xl font-bold tracking-tight">
           <BrandMark size={28} className="ring-1 ring-primary/20" />
           <span>
-            <span className="text-primary">Frame</span>
-            <span className="text-muted-foreground">Hub</span>
+            <span className="text-primary">Voidforge</span>
           </span>
         </Link>
 
@@ -546,7 +545,7 @@ export function Header() {
             )}
 
             <a
-              href={FRAME_HUB_GITHUB_URL}
+              href={VOIDFORGE_GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="p-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
@@ -683,7 +682,7 @@ export function Header() {
               </Link>
             )}
             <a
-              href={FRAME_HUB_GITHUB_URL}
+              href={VOIDFORGE_GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setMobileOpen(false)}

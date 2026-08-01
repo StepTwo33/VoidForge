@@ -26,7 +26,7 @@ export function BuildShareCard({
 
   const discordText = [
     `**${buildName}** — ${itemName} (${type})`,
-    `by ${author} on Frame Hub`,
+    `by ${author} on Voidforge`,
     description?.trim() ? `> ${description.trim().slice(0, 180)}` : null,
     pageUrl,
   ]

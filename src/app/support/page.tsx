@@ -52,8 +52,8 @@ export default function SupportPage() {
           icon={Heart}
           accent="rose"
           title="Support"
-          highlight="Frame Hub"
-          description="Frame Hub is free and open source. If you find it useful, you can chip in — any amount helps."
+          highlight="Voidforge"
+          description="Voidforge is free and open source. If you find it useful, you can chip in — any amount helps."
         />
 
         <ContentPanel className="p-6 sm:p-8 text-center">
@@ -69,7 +69,7 @@ export default function SupportPage() {
                 Sign in before you donate
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                We link supporter badges to your Frame Hub account by matching your donation email.{" "}
+                We link supporter badges to your Voidforge account by matching your donation email.{" "}
                 <Link href="/signin" className="text-primary hover:underline">Sign in</Link> first so we know which profile to credit.
               </p>
             </div>
@@ -125,7 +125,7 @@ export default function SupportPage() {
 
           <p className="mt-8 text-xs text-muted-foreground/80 leading-relaxed">
             Donations are voluntary gifts, not purchases. Verified donations through Buy Me a Coffee using the same
-            email as your Frame Hub account earn a cosmetic <strong className="font-medium text-foreground/80">Supporter</strong> badge
+            email as your Voidforge account earn a cosmetic <strong className="font-medium text-foreground/80">Supporter</strong> badge
             on your public profile. The badge does not unlock features or special access.
             If you donate with a different email, contact us via{" "}
             <Link href="/report-issue" className="text-primary hover:underline">Report Issue</Link>{" "}

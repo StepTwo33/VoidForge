@@ -67,7 +67,7 @@ export default function HowToModRivensPage() {
         <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
           <li>
             Grade the roll against disposition ranges before you decide it is &quot;god
-            tier&quot; or trash. FrameHub&apos;s Riven Grader does that against scaled
+            tier&quot; or trash. Voidforge&apos;s Riven Grader does that against scaled
             pools.
           </li>
           <li>

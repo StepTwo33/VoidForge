@@ -1,4 +1,4 @@
-# FrameHub architecture (for maintainers)
+# Voidforge architecture (for maintainers)
 
 Short map of where things live. Prefer small, targeted changes over rewrites.
 

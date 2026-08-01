@@ -121,7 +121,7 @@ export async function fetchAndMapWarframeArsenal(platform: WarframePlatform, acc
 
   if (!loadoutHasImportableContent(mapped.loadout)) {
     throw new ArsenalFetchError(
-      "Loadout data was retrieved but could not be mapped to FrameHub items.",
+      "Loadout data was retrieved but could not be mapped to Voidforge items.",
       "not_found",
     );
   }

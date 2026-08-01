@@ -474,7 +474,7 @@ function assignWeaponSlot(
   else loadout.meleeBuild = mapped.build;
 }
 
-/** Map parsed Twitch arsenal data into a FrameHub loadout import payload. */
+/** Map parsed Twitch arsenal data into a Voidforge loadout import payload. */
 export function mapArsenalToImportPayload(
   arsenal: ArsenalData,
   rawPayload?: { loadOuts?: RawLoadouts },

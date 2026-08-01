@@ -26,7 +26,7 @@ export default function AdminNewsletterPage() {
   const [testing, setTesting] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [origin, setOrigin] = useState("https://frame-hub.com");
+  const [origin, setOrigin] = useState("https://void-forge.org");
 
   const refreshCount = useCallback(() => {
     fetch("/api/admin/newsletter")
@@ -76,7 +76,7 @@ export default function AdminNewsletterPage() {
     const previewSubject = subject.trim() || "Newsletter subject";
     const previewBody =
       body.trim() ||
-      "Your message will appear here.\n\nUse **bold**, *italic*, [links](https://frame-hub.com), and blank lines for paragraphs.";
+      "Your message will appear here.\n\nUse **bold**, *italic*, [links](https://void-forge.org), and blank lines for paragraphs.";
     return buildNewsletterPreviewDocument(
       {
         subject: previewSubject,
@@ -135,7 +135,7 @@ export default function AdminNewsletterPage() {
     const ok = await confirm({
       title: `Send newsletter to ${subscribers} subscriber${subscribers === 1 ? "" : "s"}?`,
       description:
-        "This emails every opted-in user from news@frame-hub.com. Transactional support mail is not used.",
+        "This emails every opted-in user from news@void-forge.org. Transactional support mail is not used.",
       confirmLabel: "Send newsletter",
     });
     if (!ok) return;
@@ -203,7 +203,7 @@ export default function AdminNewsletterPage() {
           <div>
             <h1 className="text-xl font-bold">Newsletter</h1>
             <p className="text-xs text-muted-foreground">
-              Send from news@frame-hub.com · {subscribers} opted-in subscriber
+              Send from news@void-forge.org · {subscribers} opted-in subscriber
               {subscribers === 1 ? "" : "s"}
             </p>
           </div>
@@ -217,7 +217,7 @@ export default function AdminNewsletterPage() {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 maxLength={120}
-                placeholder="What's new on FrameHub"
+                placeholder="What's new on Voidforge"
                 className={fieldClass}
               />
             </div>
@@ -276,7 +276,7 @@ export default function AdminNewsletterPage() {
                   value={ctaUrl}
                   onChange={(e) => setCtaUrl(e.target.value)}
                   maxLength={500}
-                  placeholder="https://frame-hub.com/…"
+                  placeholder="https://void-forge.org/…"
                   className={fieldClass}
                 />
               </div>

@@ -222,7 +222,7 @@ describe("railjack crew weapons", () => {
     expect(coda).not.toContain("braton");
   });
 
-  it("includes FrameHub primary-category rifles for ticker crew", () => {
+  it("includes Voidforge primary-category rifles for ticker crew", () => {
     expect(
       isRailjackCrewAssignableWeapon({
         id: "kuva_karak",

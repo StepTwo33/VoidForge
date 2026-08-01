@@ -12,7 +12,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 EFFECTS = REPO / "src" / "data" / "arcane-effects.ts"
 ARCANES = REPO / "src" / "data" / "arcanes.ts"
-HEADERS = {"User-Agent": "FrameHub/1.0"}
+HEADERS = {"User-Agent": "Voidforge/1.0"}
 
 
 def slugify(name: str) -> str:

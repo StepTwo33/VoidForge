@@ -132,7 +132,7 @@ export default function ImportExportPage() {
     setShareCode(code);
     setShareLink(link);
 
-    // Always encode an absolute import URL so QR scans land on FrameHub (never raw base64).
+    // Always encode an absolute import URL so QR scans land on Voidforge (never raw base64).
     import("qrcode").then((QRCode) => {
       QRCode.toDataURL(link, {
         width: 280,

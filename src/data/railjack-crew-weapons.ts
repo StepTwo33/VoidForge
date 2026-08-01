@@ -13,7 +13,7 @@ import type { CrewWeaponLoadout, RailjackCrewSlot } from "@/data/railjack-crew";
 
 /**
  * Wiki: rifle, shotgun, or secondary — not bows, spearguns, thrown, arm-cannons.
- * FrameHub stores many rifles as `primary` / `launcher`, so those count as assignable.
+ * Voidforge stores many rifles as `primary` / `launcher`, so those count as assignable.
  */
 const CREW_ASSIGNABLE_CATEGORIES = new Set([
   "rifle",

@@ -967,7 +967,7 @@ export default function CompanionBuilderPage() {
                                     Orange/red+ are tier hit values; Avg hit only blends tiers your CC can roll.
                                   </p>                                  {showOverflow && (
                                     <p className="text-[9px] text-amber-500/90 mt-1.5 leading-snug">
-                                      Note: values above ~2.147B can wrap to large negatives in-game (signed 32-bit). FrameHub shows uncapped math.
+                                      Note: values above ~2.147B can wrap to large negatives in-game (signed 32-bit). Voidforge shows uncapped math.
                                     </p>
                                   )}
                                 </>

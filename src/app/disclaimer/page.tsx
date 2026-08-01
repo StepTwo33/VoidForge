@@ -13,7 +13,7 @@ export default function DisclaimerPage() {
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-2">Fan-Made Tool</h2>
               <p>
-                Frame Hub is an independent, fan-made tool created for the Warframe community.
+                Voidforge is an independent, fan-made tool created for the Warframe community.
                 It is not produced, endorsed, supported, or affiliated with Digital Extremes Ltd.
                 in any way. All game-related content, including but not limited to weapon names,
                 mod names, warframe names, ability descriptions, and stat values, are the intellectual
@@ -24,7 +24,7 @@ export default function DisclaimerPage() {
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-2">Accuracy of Data</h2>
               <p>
-                While we strive to keep all game data accurate and up-to-date, Frame Hub relies on
+                While we strive to keep all game data accurate and up-to-date, Voidforge relies on
                 community-sourced information primarily from the{" "}
                 <a href="https://wiki.warframe.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                   Official Warframe Wiki
@@ -53,7 +53,7 @@ export default function DisclaimerPage() {
               <h2 className="text-lg font-semibold text-foreground mb-2">Trademarks</h2>
               <p>
                 Warframe&reg;, the Warframe logo, and all associated game content are registered trademarks
-                and copyrights of Digital Extremes Ltd. Use of these names and images on Frame Hub is for
+                and copyrights of Digital Extremes Ltd. Use of these names and images on Voidforge is for
                 identification and informational purposes only and does not imply endorsement.
               </p>
             </section>
@@ -62,7 +62,7 @@ export default function DisclaimerPage() {
               <h2 className="text-lg font-semibold text-foreground mb-2">Community Content</h2>
               <p>
                 User-submitted build names, descriptions, profile bios, usernames, and avatar images are provided
-                by community members. Frame Hub does not endorse user-generated content and may remove or restrict
+                by community members. Voidforge does not endorse user-generated content and may remove or restrict
                 content that violates our Terms.
               </p>
             </section>
@@ -71,7 +71,7 @@ export default function DisclaimerPage() {
               <h2 className="text-lg font-semibold text-foreground mb-2">Community Builds</h2>
               <p>
                 Builds shared through Discover or public profile pages reflect individual players&apos; choices and
-                opinions. They are not recommendations from Frame Hub or Digital Extremes. Always verify a build
+                opinions. They are not recommendations from Voidforge or Digital Extremes. Always verify a build
                 suits your own goals, mastery, and in-game resources before investing forma, catalysts, or rivens.
               </p>
             </section>
@@ -79,8 +79,8 @@ export default function DisclaimerPage() {
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-2">No Warranty</h2>
               <p>
-                Frame Hub is provided &quot;as is&quot; without warranty of any kind. The authors and
-                contributors of Frame Hub shall not be held liable for any damages arising from
+                Voidforge is provided &quot;as is&quot; without warranty of any kind. The authors and
+                contributors of Voidforge shall not be held liable for any damages arising from
                 the use of this tool, including but not limited to incorrect build advice,
                 wasted in-game resources, or any other consequences of relying on the
                 information provided by this Service.

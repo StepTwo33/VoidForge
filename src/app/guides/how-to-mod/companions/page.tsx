@@ -31,7 +31,7 @@ export default function HowToModCompanionsPage() {
           </li>
           <li>
             Many precepts are family- or companion-specific. Moas, Hounds, sentinels, and
-            beasts each have their own eligible sets. If FrameHub blocks a precept, it is
+            beasts each have their own eligible sets. If Voidforge blocks a precept, it is
             usually eligibility, not a bug.
           </li>
           <li>

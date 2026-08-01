@@ -166,7 +166,7 @@ export function buildNewsletterHtml(params: BuildNewsletterHtmlParams): string {
       <div style="max-width: 560px; margin: 0 auto;">
         <div style="text-align: center; margin-bottom: 28px;">
           <h1 style="margin: 0; font-size: 24px; letter-spacing: -0.02em; color: #e2e8f0;">
-            <span style="color: #22d3ee;">Frame</span><span style="color: #94a3b8;">Hub</span>
+            <span style="color: #22d3ee;">Voidforge</span>
           </h1>
           <p style="color: #64748b; font-size: 12px; margin: 10px 0 0; letter-spacing: 0.04em; text-transform: uppercase;">${escapeHtml(eyebrow)}</p>
           <div style="width: 40px; height: 3px; background: #22d3ee; border-radius: 2px; margin: 16px auto 0;"></div>
@@ -179,7 +179,7 @@ export function buildNewsletterHtml(params: BuildNewsletterHtmlParams): string {
           ${ctaBlock}
         </div>
         <p style="color: #475569; font-size: 11px; text-align: center; margin: 28px 0 0; line-height: 1.55;">
-          You are receiving this because you opted in to FrameHub newsletters.<br/>
+          You are receiving this because you opted in to Voidforge newsletters.<br/>
           <a href="${escapeHtml(params.unsubscribeUrl)}" style="color: #64748b;">Unsubscribe</a>
           · Manage preferences in your
           <a href="${escapeHtml(params.profileUrl)}" style="color: #64748b;">profile settings</a>

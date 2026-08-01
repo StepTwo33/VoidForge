@@ -15,7 +15,7 @@ OUT_DIR = ROOT / "public" / "icons"
 PUBLIC_DIR = ROOT / "public"
 APP_DIR = ROOT / "src" / "app"
 
-SITE_NAME = "Frame Hub"
+SITE_NAME = "Voidforge"
 SITE_TAGLINE = "Warframe Build Planner"
 SITE_DESCRIPTION = (
     "Plan and optimize Warframe builds with real-time stat calculations for "

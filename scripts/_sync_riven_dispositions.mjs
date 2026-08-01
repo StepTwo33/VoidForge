@@ -8,7 +8,7 @@ import fs from "fs";
 function get(url) {
   return new Promise((resolve, reject) => {
     https
-      .get(url, { headers: { "User-Agent": "FrameHubDispositionSync/1.0" } }, (res) => {
+      .get(url, { headers: { "User-Agent": "VoidforgeDispositionSync/1.0" } }, (res) => {
         if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
           get(res.headers.location).then(resolve, reject);
           return;

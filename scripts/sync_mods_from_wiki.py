@@ -20,7 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 MODS_TS = ROOT / "src/data/mods.ts"
 WIKI_CACHE = Path(__file__).resolve().parent / "_wiki_mods_data.lua"
-UA = {"User-Agent": "FrameHub/1.0 (https://frame-hub.com)"}
+UA = {"User-Agent": "Voidforge/1.0 (https://void-forge.org)"}
 
 # Wiki UpgradeType -> framehub stat key (when not inferable from description element)
 UPGRADE_TYPE_STAT: dict[str, str] = {

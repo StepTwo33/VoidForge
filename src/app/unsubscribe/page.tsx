@@ -47,7 +47,7 @@ function UnsubscribeInner() {
           <CheckCircle2 className="h-10 w-10 text-green-400 mx-auto mb-4" />
           <h1 className="text-xl font-bold mb-2">Unsubscribed</h1>
           <p className="text-sm text-muted-foreground mb-6">
-            You will no longer receive FrameHub newsletters. Transactional emails (like report
+            You will no longer receive Voidforge newsletters. Transactional emails (like report
             updates) are unaffected.
           </p>
           <Link href="/profile" className="text-sm text-primary hover:underline">

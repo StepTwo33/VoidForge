@@ -18,7 +18,7 @@ except ImportError:
     Image = None  # type: ignore[misc, assignment]
 
 ROOT = Path(__file__).resolve().parents[1]
-UA = {"User-Agent": "FrameHub/1.0 (https://frame-hub.com)"}
+UA = {"User-Agent": "Voidforge/1.0 (https://void-forge.org)"}
 MODS_DIR = ROOT / "public/images/mods"
 WEAPONS_DIR = ROOT / "public/images/weapons"
 ARCANES_DIR = ROOT / "public/images/arcanes"

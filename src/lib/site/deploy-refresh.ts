@@ -5,7 +5,7 @@ const PENDING_KEY = "framehub_deploy_refresh_pending";
 let toastShown = false;
 
 /** Soft prompt only — never force-reload; builders may have unsaved work. */
-export function promptDeployRefresh(message = "Frame Hub was updated"): void {
+export function promptDeployRefresh(message = "Voidforge was updated"): void {
   if (typeof window === "undefined") return;
   if (toastShown || sessionStorage.getItem(PENDING_KEY) === "1") {
     toastShown = true;

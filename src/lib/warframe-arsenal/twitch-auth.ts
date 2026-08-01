@@ -114,6 +114,6 @@ export function warframeArsenalRequestHeaders(jwt: string): HeadersInit {
     Origin: origin,
     Referer: origin,
     Authorization: `Bearer ${jwt}`,
-    "User-Agent": "FrameHub/1.0 (Warframe Arsenal Twitch Extension)",
+    "User-Agent": "Voidforge/1.0 (Warframe Arsenal Twitch Extension)",
   };
 }

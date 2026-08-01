@@ -13,7 +13,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-2">1. Acceptance of Terms</h2>
               <p>
-                By accessing and using Frame Hub (&quot;the Service&quot;), you agree to be bound by these Terms of Service.
+                By accessing and using Voidforge (&quot;the Service&quot;), you agree to be bound by these Terms of Service.
                 If you do not agree to these terms, please do not use the Service.
               </p>
             </section>
@@ -21,9 +21,9 @@ export default function TermsPage() {
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-2">2. Description of Service</h2>
               <p>
-                Frame Hub is a free, fan-made build planning tool for the video game Warframe by Digital Extremes Ltd.
+                Voidforge is a free, fan-made build planning tool for the video game Warframe by Digital Extremes Ltd.
                 The Service provides build calculators, stat simulations, a game-data Codex, loadout management,
-                community build sharing, and related tools. Frame Hub is not affiliated with, endorsed by, or
+                community build sharing, and related tools. Voidforge is not affiliated with, endorsed by, or
                 sponsored by Digital Extremes.
               </p>
             </section>
@@ -41,7 +41,7 @@ export default function TermsPage() {
               <h2 className="text-lg font-semibold text-foreground mb-2">4. User Content</h2>
               <p>
                 Builds, profile bios, usernames, avatar images, and other content you publish are your responsibility.
-                By saving builds to the cloud or making them public, you grant Frame Hub a non-exclusive license to store,
+                By saving builds to the cloud or making them public, you grant Voidforge a non-exclusive license to store,
                 display, and serve that content as part of the Service. You retain ownership of your content.
               </p>
               <p className="mt-2">
@@ -82,8 +82,8 @@ export default function TermsPage() {
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-2">7. Donations</h2>
               <p>
-                Frame Hub may offer optional voluntary donations through Buy Me a Coffee. Donations are gifts,
-                not payment for goods or services. Verified donations using the same email as your Frame Hub account
+                Voidforge may offer optional voluntary donations through Buy Me a Coffee. Donations are gifts,
+                not payment for goods or services. Verified donations using the same email as your Voidforge account
                 may earn a cosmetic Supporter badge on your public profile. The badge does not unlock features,
                 priority support, or moderation privileges.
               </p>
@@ -93,8 +93,8 @@ export default function TermsPage() {
               <h2 className="text-lg font-semibold text-foreground mb-2">8. Intellectual Property</h2>
               <p>
                 Warframe, its logo, and all related game assets are the property of Digital Extremes Ltd.
-                Frame Hub uses game data for informational and fan-community purposes under fair use.
-                The Frame Hub application code and design are the property of their respective authors.
+                Voidforge uses game data for informational and fan-community purposes under fair use.
+                The Voidforge application code and design are the property of their respective authors.
               </p>
             </section>
 
@@ -110,7 +110,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-2">10. Limitation of Liability</h2>
               <p>
-                In no event shall Frame Hub or its contributors be liable for any indirect, incidental,
+                In no event shall Voidforge or its contributors be liable for any indirect, incidental,
                 special, or consequential damages arising from the use of or inability to use the Service.
               </p>
             </section>

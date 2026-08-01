@@ -69,14 +69,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const build = await getBuild(id);
 
-  if (!build) return { title: "Build Not Found - Frame Hub" };
+  if (!build) return { title: "Build Not Found - Voidforge" };
 
   const preview = summarizeBuildPreview(build.type, build.data);
   const desc =
     build.description?.trim() ||
     `${preview.itemName} ${build.type} build by ${build.author.username}` +
       (preview.modSummary ? ` · ${preview.modSummary}` : "");
-  const title = `${build.name} — ${preview.itemName} | Frame Hub`;
+  const title = `${build.name} — ${preview.itemName} | Voidforge`;
 
   return {
     title,
@@ -85,8 +85,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       title,
       description: desc.slice(0, 200),
       type: "article",
-      siteName: "Frame Hub",
-      images: [{ url: "/og-embed.png", width: 1200, height: 630, alt: "Frame Hub" }],
+      siteName: "Voidforge",
+      images: [{ url: "/og-embed.png", width: 1200, height: 630, alt: "Voidforge" }],
     },
     twitter: {
       card: "summary_large_image",

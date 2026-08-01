@@ -74,7 +74,7 @@ export function PWAInstallPrompt() {
           <Download className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium">Install Frame Hub</p>
+          <p className="text-sm font-medium">Install Voidforge</p>
           <p className="text-xs text-muted-foreground mt-0.5">
             Add to your desktop for quick access
           </p>

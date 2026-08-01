@@ -22,15 +22,15 @@ export type { NewsletterCompose, BuildNewsletterHtmlParams } from "@/lib/auth/ne
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const SUPPORT_FROM =
-  process.env.EMAIL_FROM_SUPPORT?.trim() || "FrameHub <support@frame-hub.com>";
+  process.env.EMAIL_FROM_SUPPORT?.trim() || "Voidforge <support@void-forge.org>";
 const NEWSLETTER_FROM =
-  process.env.EMAIL_FROM_NEWSLETTER?.trim() || "FrameHub News <news@frame-hub.com>";
+  process.env.EMAIL_FROM_NEWSLETTER?.trim() || "Voidforge News <news@void-forge.org>";
 
 export async function sendVerificationEmail(email: string, code: string): Promise<void> {
   const { error } = await resend.emails.send({
     from: SUPPORT_FROM,
     to: email,
-    subject: "Your FrameHub verification code",
+    subject: "Your Voidforge verification code",
     html: verificationTemplate(code),
   });
 
@@ -142,13 +142,13 @@ export async function sendBuildDeletedEmail(params: {
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
       <div style="text-align: center; margin-bottom: 24px;">
         <h1 style="margin: 0; font-size: 22px; color: #e2e8f0;">
-          <span style="color: #22d3ee;">Frame</span><span style="color: #94a3b8;">Hub</span>
+          <span style="color: #22d3ee;">Voidforge</span>
         </h1>
       </div>
       <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px;">
         <p style="color: #f1f5f9; font-size: 16px; font-weight: 600; margin: 0 0 12px;">Build removed by moderation</p>
         <p style="color: #94a3b8; font-size: 14px; line-height: 1.5; margin: 0 0 16px;">
-          A moderator removed one of your public builds from Frame Hub. The build is permanently deleted and is no longer listed on your profile or in community builds.
+          A moderator removed one of your public builds from Voidforge. The build is permanently deleted and is no longer listed on your profile or in community builds.
         </p>
         <table style="width: 100%; font-size: 13px; color: #cbd5e1; border-collapse: collapse;">
           <tr><td style="padding: 4px 0; color: #64748b;">Build</td><td style="padding: 4px 0;">${escapeHtml(params.buildName)}</td></tr>
@@ -160,7 +160,7 @@ export async function sendBuildDeletedEmail(params: {
         </p>
       </div>
       <p style="color: #475569; font-size: 11px; text-align: center; margin-top: 24px;">
-        Hi ${escapeHtml(params.ownerName)}, you received this because a build on your Frame Hub account was removed by staff.
+        Hi ${escapeHtml(params.ownerName)}, you received this because a build on your Voidforge account was removed by staff.
       </p>
     </div>
   `;
@@ -191,7 +191,7 @@ export async function sendReportStatusEmail(params: {
     : `Update on your report: ${params.itemName}`;
   const headline = isResolved ? "Report marked resolved" : "Report closed (won't fix)";
   const bodyText = isResolved
-    ? "A moderator reviewed your data issue report and marked it as resolved. Thank you for helping improve Frame Hub."
+    ? "A moderator reviewed your data issue report and marked it as resolved. Thank you for helping improve Voidforge."
     : "A moderator reviewed your report and marked it as won't fix. If you still believe there is an error, you can submit a new report with more detail.";
 
   const reply = params.adminReply?.trim();
@@ -207,7 +207,7 @@ export async function sendReportStatusEmail(params: {
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
       <div style="text-align: center; margin-bottom: 24px;">
         <h1 style="margin: 0; font-size: 22px; color: #e2e8f0;">
-          <span style="color: #22d3ee;">Frame</span><span style="color: #94a3b8;">Hub</span>
+          <span style="color: #22d3ee;">Voidforge</span>
         </h1>
       </div>
       <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 24px;">
@@ -224,7 +224,7 @@ export async function sendReportStatusEmail(params: {
         </p>
       </div>
       <p style="color: #475569; font-size: 11px; text-align: center; margin-top: 24px;">
-        Hi ${escapeHtml(params.reporterName)}, you received this because you submitted this report while signed in to Frame Hub.
+        Hi ${escapeHtml(params.reporterName)}, you received this because you submitted this report while signed in to Voidforge.
       </p>
     </div>
   `;
@@ -237,7 +237,7 @@ function verificationTemplate(code: string): string {
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
       <div style="text-align: center; margin-bottom: 32px;">
         <h1 style="margin: 0; font-size: 24px; color: #e2e8f0;">
-          <span style="color: #22d3ee;">Frame</span><span style="color: #94a3b8;">Hub</span>
+          <span style="color: #22d3ee;">Voidforge</span>
         </h1>
       </div>
       <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 32px; text-align: center;">

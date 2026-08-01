@@ -1,7 +1,7 @@
-/// Frame Hub Service Worker
-/// v10: auto-activate updates + never cache sw.js consumers on stale scripts.
+/// Voidforge Service Worker
+/// v11: Voidforge rebrand + auto-activate updates.
 
-const CACHE_NAME = "framehub-v10";
+const CACHE_NAME = "voidforge-v11";
 
 const PRECACHE_URLS = [
   "/icons/icon-192x192.png",

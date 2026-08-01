@@ -112,7 +112,7 @@ export function SiteUpdatesSidebar({
             What&apos;s New
           </h2>
           <p className="mt-0.5 text-[10px] text-muted-foreground">
-            Updates from the Frame Hub team
+            Updates from the Voidforge team
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">

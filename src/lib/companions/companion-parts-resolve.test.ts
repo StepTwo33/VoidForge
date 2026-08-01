@@ -42,7 +42,7 @@ describe("companion parts resolve", () => {
 });
 
 describe("companion parts arsenal map", () => {
-  it("maps MOA modularParts paths to FrameHub part ids", () => {
+  it("maps MOA modularParts paths to Voidforge part ids", () => {
     const mapped = mapCompanionPartsFromArsenal({
       HEAD: "/Lotus/Types/Friendly/Pets/MoaPets/MoaPetParts/MoaPetHeadLambeo",
       CORE: "Drex",

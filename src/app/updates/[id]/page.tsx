@@ -13,12 +13,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const update = await fetchPublishedSiteUpdate(id);
-  if (!update) return { title: "Update Not Found - Frame Hub" };
+  if (!update) return { title: "Update Not Found - Voidforge" };
 
   const excerpt = update.body.slice(0, 160).replace(/\s+/g, " ").trim();
   return {
-    title: `${update.title} - Frame Hub`,
-    description: excerpt || "Frame Hub site update",
+    title: `${update.title} - Voidforge`,
+    description: excerpt || "Voidforge site update",
   };
 }
 

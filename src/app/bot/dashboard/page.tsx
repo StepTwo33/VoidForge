@@ -215,7 +215,7 @@ export default function BotDashboardPage() {
         {!status?.authenticated && (
           <Panel>
             <p className="text-sm text-muted-foreground mb-4">
-              Sign in to FrameHub to configure the bot for your servers.
+              Sign in to Voidforge to configure the bot for your servers.
             </p>
             <Button asChild>
               <Link href="/signin?callbackUrl=/bot/dashboard">Sign in</Link>
@@ -437,7 +437,7 @@ export default function BotDashboardPage() {
 
         <p className="mt-10 text-xs text-muted-foreground">
           <Link href="/bot" className="underline underline-offset-2 hover:text-foreground">
-            ← About FrameHub Bot
+            ← About Voidforge Bot
           </Link>
         </p>
       </PageMain>

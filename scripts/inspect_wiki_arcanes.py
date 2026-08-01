@@ -4,7 +4,7 @@ import re
 import urllib.parse
 import urllib.request
 
-HEADERS = {"User-Agent": "FrameHub/1.0"}
+HEADERS = {"User-Agent": "Voidforge/1.0"}
 params = {"action": "parse", "page": "Module:Arcane/data", "prop": "wikitext", "format": "json"}
 url = "https://wiki.warframe.com/api.php?" + urllib.parse.urlencode(params)
 with urllib.request.urlopen(urllib.request.Request(url, headers=HEADERS), timeout=120) as r:

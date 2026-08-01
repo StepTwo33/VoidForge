@@ -14,7 +14,7 @@ export async function GET() {
   const xml = await buildCommunityBuildsRss({
     siteUrl,
     title: topBuildsRssTitle(),
-    description: "Highest-voted public builds on Frame Hub (same pool as Discover → Top rated).",
+    description: "Highest-voted public builds on Voidforge (same pool as Discover → Top rated).",
     orderBy: [{ upvoteCount: "desc" }, { updatedAt: "desc" }, { id: "desc" }],
     minUpvotes: TOP_BUILDS_MIN_UPVOTES,
   });

@@ -27,7 +27,7 @@ function toSummary(
     createdAt: row.createdAt.getTime(),
     updatedAt: row.updatedAt.getTime(),
     author: {
-      username: row.author.username || row.author.name || "Frame Hub",
+      username: row.author.username || row.author.name || "Voidforge",
       profileSlug: row.author.username,
     },
   };

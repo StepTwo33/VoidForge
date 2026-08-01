@@ -13,7 +13,7 @@ REPO = Path(__file__).resolve().parents[1]
 EFFECTS_TS = REPO / "src" / "data" / "arcane-effects.ts"
 ARCANES_TS = REPO / "src" / "data" / "arcanes.ts"
 MANUAL = REPO / "src" / "data" / "arcane-manual-overrides.json"
-HEADERS = {"User-Agent": "FrameHub/1.0 (arcane audit)"}
+HEADERS = {"User-Agent": "Voidforge/1.0 (arcane audit)"}
 
 
 def slugify(name: str) -> str:

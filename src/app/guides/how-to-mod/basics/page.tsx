@@ -96,7 +96,7 @@ export default function HowToModBasicsPage() {
           </li>
         </ul>
         <GuideTip>
-          In FrameHub, swap one mod at a time and watch DPS or ability stats. If the number
+          In Voidforge, swap one mod at a time and watch DPS or ability stats. If the number
           barely moves, you found a double additive.
         </GuideTip>
       </ContentPanel>
@@ -143,7 +143,7 @@ export default function HowToModBasicsPage() {
           A lot of mods are exclusive with their upgraded cousins. You cannot run Point Blank
           and Primed Point Blank together, or Continuity and Primed Continuity. Umbral sets,
           Archon variants, and some Galvanized lines have the same kind of rule. If the game
-          (or FrameHub) blocks a second mod, it is usually exclusivity, not a bug.
+          (or Voidforge) blocks a second mod, it is usually exclusivity, not a bug.
         </p>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           Pick the stronger legal option and free the other slot for something that multiplies

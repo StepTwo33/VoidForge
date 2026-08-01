@@ -5,8 +5,8 @@ import { formatSiteUpdateTime } from "@/lib/site/site-updates";
 import { cn } from "@/lib/utils";
 
 export const metadata = {
-  title: "What's New - Frame Hub",
-  description: "Updates and announcements from the Frame Hub team.",
+  title: "What's New - Voidforge",
+  description: "Updates and announcements from the Voidforge team.",
 };
 
 export default async function UpdatesPage() {
@@ -18,7 +18,7 @@ export default async function UpdatesPage() {
         <PageHero
           title="What's"
           highlight="New"
-          description="Updates and announcements from the Frame Hub team."
+          description="Updates and announcements from the Voidforge team."
           iconName="megaphone"
           accent="amber"
         />

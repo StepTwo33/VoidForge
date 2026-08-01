@@ -1,11 +1,11 @@
 {
   "name": "framehub",
   "version": "0.1.0",
-  "description": "Open calc and item-catalog verification source for Frame Hub (frame-hub.com)",
+  "description": "Open calc and item-catalog verification source for Voidforge (void-forge.org)",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/StepTwo33/FrameHub.git"
+    "url": "https://github.com/StepTwo33/VoidForge.git"
   },
   "scripts": {
     "dev": "next dev",

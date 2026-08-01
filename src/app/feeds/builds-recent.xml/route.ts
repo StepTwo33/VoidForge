@@ -13,7 +13,7 @@ export async function GET() {
   const xml = await buildCommunityBuildsRss({
     siteUrl,
     title: latestBuildsRssTitle(),
-    description: "Recently updated public builds shared on Frame Hub.",
+    description: "Recently updated public builds shared on Voidforge.",
     orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
   });
 

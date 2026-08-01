@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PASSIVES_PATH = ROOT / "src/data/weapon-passives.ts"
 WEAPONS_PATH = ROOT / "src/data/weapons.ts"
 WIKI_CACHE = ROOT / "scripts/_wiki_weapon_passives.wikitext"
-UA = {"User-Agent": "FrameHub/1.0 (weapon passive build)"}
+UA = {"User-Agent": "Voidforge/1.0 (weapon passive build)"}
 
 NAME_OVERRIDES: dict[str, str] = {
     "Ack & Brunt": "ack_&_brunt",

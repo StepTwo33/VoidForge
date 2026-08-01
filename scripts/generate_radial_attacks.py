@@ -13,7 +13,7 @@ REPO = Path(__file__).resolve().parents[1]
 OUT = REPO / "src" / "data" / "weapon-radial-attacks.ts"
 WEAPONS_TS = REPO / "src" / "data" / "weapons.ts"
 SLOTS = ("primary", "secondary", "melee", "archwing", "companion", "modular", "misc")
-HEADERS = {"User-Agent": "FrameHub/1.0 (radial attack generator)"}
+HEADERS = {"User-Agent": "Voidforge/1.0 (radial attack generator)"}
 DAMAGE_KEYS = (
     "impact", "puncture", "slash", "heat", "cold", "toxin", "electricity",
     "radiation", "viral", "corrosive", "blast", "gas", "magnetic", "tau",

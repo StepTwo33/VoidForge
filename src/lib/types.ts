@@ -1,4 +1,4 @@
-// Core data types for FrameHub
+// Core data types for Voidforge
 
 export interface Mod {
   id: string;

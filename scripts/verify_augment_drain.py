@@ -16,7 +16,7 @@ from wiki_modbox_parser import parse_modbox  # noqa: E402
 
 MODS_TS = ROOT / "src/data/mods.ts"
 WIKI = "https://wiki.warframe.com/api.php"
-UA = {"User-Agent": "FrameHub/1.0 (https://frame-hub.com)"}
+UA = {"User-Agent": "Voidforge/1.0 (https://void-forge.org)"}
 
 
 def wiki_api(params: dict) -> dict:

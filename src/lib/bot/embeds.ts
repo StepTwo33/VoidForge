@@ -100,7 +100,7 @@ export function embedSortie(s: SortieData | null): EmbedPayload {
       { name: "Missions", value: missionLines(missions) },
       { name: "Expires", value: fmtTime(s.expiry), inline: true },
     ],
-    footer: { text: "FrameHub Bot · Sortie" },
+    footer: { text: "Voidforge Bot · Sortie" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -117,7 +117,7 @@ export function embedArchon(a: ArchonHuntData | null): EmbedPayload {
       { name: "Missions", value: missionLines(a.missions) },
       { name: "Expires", value: fmtTime(a.expiry), inline: true },
     ],
-    footer: { text: "FrameHub Bot · Archon Hunt" },
+    footer: { text: "Voidforge Bot · Archon Hunt" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -135,7 +135,7 @@ export function embedArbitration(a: ArbitrationData | null): EmbedPayload {
       { name: "Enemy", value: a.enemy ?? "?", inline: true },
       { name: "Expires", value: fmtTime(a.expiry), inline: true },
     ],
-    footer: { text: "FrameHub Bot · Arbitration" },
+    footer: { text: "Voidforge Bot · Arbitration" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -177,7 +177,7 @@ export function embedBaro(b: BaroData | null): EmbedPayload {
       { name: active ? "Leaves" : "Arrives", value: fmtTime(active ? b.expiry : b.activation), inline: true },
       { name: "Inventory", value: invText.slice(0, 1024) || "_none_" },
     ],
-    footer: { text: "FrameHub Bot · Void Trader" },
+    footer: { text: "Voidforge Bot · Void Trader" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -201,7 +201,7 @@ export function embedCycles(snap: WorldstateSnapshot): EmbedPayload {
       cycleField("Earth", snap.earthCycle),
       cycleField("Zariman", snap.zarimanCycle),
     ],
-    footer: { text: `FrameHub Bot · ${snap.platform.toUpperCase()}` },
+    footer: { text: `Voidforge Bot · ${snap.platform.toUpperCase()}` },
     timestamp: new Date().toISOString(),
   };
 }
@@ -231,7 +231,7 @@ export function embedVarzia(v: VaultTraderData | null): EmbedPayload {
       { name: "Active until", value: fmtTime(v.expiry), inline: true },
       { name: "Offerings", value: invText.slice(0, 1024) },
     ],
-    footer: { text: "FrameHub Bot · Varzia" },
+    footer: { text: "Voidforge Bot · Varzia" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -269,7 +269,7 @@ export function embedDarvo(deals: DailyDeal[]): EmbedPayload {
     title: "Darvo's Daily Deal",
     color: COLORS.darvo,
     fields,
-    footer: { text: "FrameHub Bot · Darvo" },
+    footer: { text: "Voidforge Bot · Darvo" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -306,7 +306,7 @@ export function embedTeshin(sp: SteelPathData | null): EmbedPayload {
         inline: true,
       },
     ],
-    footer: { text: "FrameHub Bot · Steel Path" },
+    footer: { text: "Voidforge Bot · Steel Path" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -347,7 +347,7 @@ export function embedNightwave(nw: NightwaveData | null): EmbedPayload {
         : []),
       { name: "Season ends", value: fmtTime(nw.expiry), inline: true },
     ],
-    footer: { text: "FrameHub Bot · Nora Night" },
+    footer: { text: "Voidforge Bot · Nora Night" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -396,7 +396,7 @@ export function embedBounties(snap: WorldstateSnapshot): EmbedPayload {
     description: "Syndicate bounty boards just rotated (or were refreshed).",
     color: COLORS.bounties,
     fields,
-    footer: { text: "FrameHub Bot · Bounties" },
+    footer: { text: "Voidforge Bot · Bounties" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -450,7 +450,7 @@ export function embedAlerts(alerts: AlertData[], newIds?: string[]): EmbedPayloa
     title: newIds?.length ? "New alert" + (list.length > 1 ? "s" : "") : "Alerts",
     color: COLORS.alerts,
     fields,
-    footer: { text: "FrameHub Bot · Alerts" },
+    footer: { text: "Voidforge Bot · Alerts" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -485,7 +485,7 @@ export function embedInvasions(invasions: InvasionData[], newIds?: string[]): Em
     title: newIds?.length ? "New invasion" + (list.length > 1 ? "s" : "") : "Invasions",
     color: COLORS.invasions,
     fields,
-    footer: { text: "FrameHub Bot · Invasions" },
+    footer: { text: "Voidforge Bot · Invasions" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -511,7 +511,7 @@ export function embedFissures(fissures: FissureData[], newIds?: string[]): Embed
     title: newIds?.length ? "New void fissure" + (list.length > 1 ? "s" : "") : "Void Fissures",
     description: lines.join("\n").slice(0, 4096),
     color: COLORS.fissures,
-    footer: { text: "FrameHub Bot · Fissures" },
+    footer: { text: "Voidforge Bot · Fissures" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -545,7 +545,7 @@ export function embedEvents(events: EventGoalData[], newIds?: string[]): EmbedPa
     title: newIds?.length ? "New event" + (list.length > 1 ? "s" : "") : "Events & goals",
     color: COLORS.events,
     fields,
-    footer: { text: "FrameHub Bot · Events" },
+    footer: { text: "Voidforge Bot · Events" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -566,7 +566,7 @@ export function embedNews(news: NewsData[], newIds?: string[]): EmbedPayload {
     title: newIds?.length ? "Warframe news" : "Latest Warframe news",
     description: lines.join("\n").slice(0, 4096),
     color: COLORS.news,
-    footer: { text: "FrameHub Bot · News" },
+    footer: { text: "Voidforge Bot · News" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -597,7 +597,7 @@ export function embedArchimedea(archimedeas: ArchimedeaData[]): EmbedPayload {
     title: "Archimedea — weekly rotation",
     color: COLORS.archimedea,
     fields,
-    footer: { text: "FrameHub Bot · Archimedea" },
+    footer: { text: "Voidforge Bot · Archimedea" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -618,7 +618,7 @@ export function embedSentientOutpost(o: SentientOutpostData | null): EmbedPayloa
       { name: "Mission", value: o.mission.type ?? "Skirmish", inline: true },
       ...(o.expiry ? [{ name: "Despawns", value: fmtTime(o.expiry), inline: true }] : []),
     ],
-    footer: { text: "FrameHub Bot · Veil Proxima" },
+    footer: { text: "Voidforge Bot · Veil Proxima" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -638,7 +638,7 @@ export function embedConstruction(c: ConstructionProgressData | null): EmbedPayl
       { name: "Balor Fomorian", value: `${c.fomorianProgress ?? "?"}%`, inline: true },
       { name: "Razorback Armada", value: `${c.razorbackProgress ?? "?"}%`, inline: true },
     ],
-    footer: { text: "FrameHub Bot · Construction" },
+    footer: { text: "Voidforge Bot · Construction" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -662,7 +662,7 @@ export function embedSimaris(s: SimarisData | null): EmbedPayload {
           : "_none_",
       },
     ],
-    footer: { text: "FrameHub Bot · Simaris" },
+    footer: { text: "Voidforge Bot · Simaris" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -727,7 +727,7 @@ export function embedWorldstate(snap: WorldstateSnapshot): EmbedPayload {
     title: `Worldstate (${snap.platform.toUpperCase()})`,
     color: COLORS.worldstate,
     fields,
-    footer: { text: "FrameHub Bot · /worldstate" },
+    footer: { text: "Voidforge Bot · /worldstate" },
     timestamp: new Date().toISOString(),
   };
 }
@@ -794,9 +794,9 @@ export function embedForEventType(
 export function embedTestPing(channelLabel: string): EmbedPayload {
   return {
     title: "Test ping",
-    description: `FrameHub Bot can post to **${channelLabel}**. Alerts configured for this channel will appear here.`,
+    description: `Voidforge Bot can post to **${channelLabel}**. Alerts configured for this channel will appear here.`,
     color: COLORS.test,
-    footer: { text: "FrameHub Bot · Dashboard test" },
+    footer: { text: "Voidforge Bot · Dashboard test" },
     timestamp: new Date().toISOString(),
   };
 }
