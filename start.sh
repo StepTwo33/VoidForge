@@ -10,7 +10,7 @@
 #   DATABASE_URL         SQLite URL for Prisma; default file:./dev.db
 #   PUBLIC_DOMAIN        Shown in banner; default https://void-forge.org
 #   CLOUDFLARED_CONFIG   Tunnel config file; default ~/.cloudflared/config-voidforge.yml
-#   CLOUDFLARED_TUNNEL   Named tunnel to run; default void-forge (legacy: frame-hub)
+#   CLOUDFLARED_TUNNEL   Named tunnel to run; default frame-hub
 #   SKIP_TUNNEL          Set to 1 to skip Cloudflare (local or no creds)
 #   OVERFRAME_SYNC_DATA  Set to 1 to run scripts/convert_data_v2.py before build (needs Dart data path)
 
@@ -19,10 +19,6 @@ set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$DIR"
 
-PORT="${PORT:-3000}"
-DOMAIN="${PUBLIC_DOMAIN:-https://void-forge.org}"
-TUNNEL_CONFIG="${CLOUDFLARED_CONFIG:-$HOME/.cloudflared/config-voidforge.yml}"
-TUNNEL_NAME="${CLOUDFLARED_TUNNEL:-void-forge}"
 DEV_MODE=false
 TUNNEL_PID=""
 
@@ -38,7 +34,26 @@ cleanup() {
 }
 trap cleanup SIGINT SIGTERM
 
-# --- Load env + apply Prisma migrations (same DB file the app uses) ---
+# --- Load env before reading PORT / tunnel settings (must be before defaults below) ---
+load_env_files() {
+  for env_file in .env .env.local .env.production; do
+    if [ -f "$DIR/$env_file" ]; then
+      set -a
+      # shellcheck disable=SC1090
+      source "$DIR/$env_file"
+      set +a
+    fi
+  done
+}
+
+load_env_files
+
+PORT="${PORT:-3000}"
+DOMAIN="${PUBLIC_DOMAIN:-https://void-forge.org}"
+TUNNEL_CONFIG="${CLOUDFLARED_CONFIG:-$HOME/.cloudflared/config-voidforge.yml}"
+TUNNEL_NAME="${CLOUDFLARED_TUNNEL:-frame-hub}"
+
+# --- Apply Prisma migrations (same DB file the app uses) ---
 resolve_db_path() {
   local url="${DATABASE_URL:-file:./dev.db}"
   local db_path="${url#file:}"
@@ -54,15 +69,6 @@ repair_database_schema() {
 }
 
 prepare_database() {
-  for env_file in .env .env.local .env.production; do
-    if [ -f "$DIR/$env_file" ]; then
-      set -a
-      # shellcheck disable=SC1090
-      source "$DIR/$env_file"
-      set +a
-    fi
-  done
-
   export DATABASE_URL="${DATABASE_URL:-file:./dev.db}"
 
   local db_path
