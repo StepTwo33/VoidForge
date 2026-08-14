@@ -295,6 +295,24 @@ function calculateStatusProcs(
     });
   }
 
+  // Prototype Shock Coils: extra Electric proc on hit, independent of modded damage types.
+  const extraElec = stats.extraElectricProcChance ?? 0;
+  if (extraElec > 0) {
+    const duration = STATUS_INFO.electricity.duration * durMult;
+    const ticks = Math.floor(duration) + 1;
+    const typeMult = 1 + elementalTypeBonus(stats, "electricity", moddedBaseDamage);
+    const dpt = DOT_TICK_FRACTION.electricity * dotBase * typeMult;
+    procs.push({
+      type: "electricity",
+      chance: Math.min(extraElec, 1),
+      damagePerTick: dpt,
+      duration,
+      ticks,
+      totalDamage: dpt * ticks,
+      description: "Extra Electric on hit (Prototype Shock Coils)",
+    });
+  }
+
   // Toxic Lash: guaranteed Toxin proc; tick = 0.5 × Extra Hit × toxin mods × Elementalist × faction³
   const tlFrac = stats.extraHitDamageFraction ?? 0;
   if (stats.extraHitGuaranteedToxin && tlFrac > 0 && stats.totalDamage > 0) {
@@ -722,6 +740,7 @@ export function calculateWeaponBuild(
     heavyAttackWindUpBonus: 0,
     triggerStatBonuses: {},
     slashOnCritChance: 0,
+    extraElectricProcChance: 0,
     slashOnImpactProcChance: 0,
     firstShotDamageBonus: 0,
   };
@@ -750,6 +769,10 @@ export function calculateWeaponBuild(
       let modValue = absoluteRankUnits
         ? value * multiplier * setMult
         : (value * multiplier * setMult) / 100.0;
+      // wiki Prototype Shock Coils: extra Electric proc chance is 20% at every rank.
+      if (line?.mode === "electric_on_hit") {
+        modValue = (value * setMult) / 100.0;
+      }
       if (statName === "fireRate") modValue *= bowFireRateMult;
       applyVerifiedModStatToWeapon(stats, {
         modId: modSlot.modId,
@@ -961,6 +984,8 @@ export function calculateWeaponBuild(
 
   // Hunter Munitions-style forced Slash procs on crits (adds to status proc DPS below).
   stats.slashOnCritChance = weaponModAcc.slashOnCritChance;
+  // Prototype Shock Coils: extra Electric proc on hit, independent of damage types.
+  stats.extraElectricProcChance = weaponModAcc.extraElectricProcChance;
   // Internal Bleeding / Hemorrhage: Impact procs can add a Slash proc.
   stats.slashOnImpactProcChance = weaponModAcc.slashOnImpactProcChance;
   // Charged/Primed Chamber: first-shot damage, averaged over the magazine for DPS.

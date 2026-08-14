@@ -220,6 +220,8 @@ export const FIELD_LABELS: Record<string, string> = {
   weakPointDamage: "Weak point damage",
   criticalMultiplier: "Crit multiplier",
   slashOnCrit: "Slash proc chance on crit",
+  extraElectricProcChance: "Extra Electric proc chance on hit",
+  falloffDistance: "Falloff distance",
   slashOnImpactProc: "Slash proc chance on Impact proc",
   damageFirstShot: "Damage on first shot in magazine",
   statusChance: "Status chance",

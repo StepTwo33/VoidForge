@@ -34,6 +34,8 @@ export type ItemApplyMode =
   | "conditional_stat_on_trigger"
   /** Hunter Munitions-style chance to force a Slash proc on critical hits. */
   | "slash_on_crit"
+  /** Prototype Shock Coils-style chance to force an Electric proc on hit (independent of damage types). */
+  | "electric_on_hit"
   /** Internal Bleeding-style chance for Impact procs to add a Slash proc (×2 under 2.5 fire rate). */
   | "slash_on_impact_proc"
   /** Charged/Primed Chamber: bonus damage on the first shot of each magazine (averaged over mag for DPS). */

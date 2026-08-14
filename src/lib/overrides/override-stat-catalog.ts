@@ -131,6 +131,8 @@ const MOD_STAT_GROUPS: Record<string, string> = {
   cold: "Weapon — elemental",
   toxin: "Weapon — elemental",
   electricity: "Weapon — elemental",
+  extraElectricProcChance: "Weapon — offense",
+  falloffDistance: "Weapon — utility",
   blast: "Weapon — elemental",
   radiation: "Weapon — elemental",
   gas: "Weapon — elemental",

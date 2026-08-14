@@ -103,6 +103,7 @@ function emptyWeaponAcc(): WeaponModAccumulators {
     heavyAttackWindUpBonus: 0,
     triggerStatBonuses: {},
     slashOnCritChance: 0,
+    extraElectricProcChance: 0,
     slashOnImpactProcChance: 0,
     firstShotDamageBonus: 0,
   };

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { allMods } from "@/data/mods";
 import { allWeapons } from "@/data/weapons";
 import { MOD_EXCLUSIVE_WEAPON_IDS } from "@/data/mod-weapon-tags";
+import { getModImage } from "@/lib/display/images";
 import {
   isMeleeWeaponExilusMod,
   isPrimaryWeaponExilusMod,
@@ -132,5 +133,37 @@ describe("mod eligibility inventory", () => {
       expect(mod.subCategory).toBe("weapon");
       expect(warframeAugmentEligibleInBuilder(mod, "warframe", "garuda")).toBe(false);
     }
+  });
+
+  it("equips Amir's Shockwave Nightwave augments only on their EFV weapons", () => {
+    expect(MOD_EXCLUSIVE_WEAPON_IDS.prototype_shock_coils).toEqual(["efv_8_mars"]);
+    expect(MOD_EXCLUSIVE_WEAPON_IDS.overpressured_rounds).toEqual(["efv_5_jupiter"]);
+
+    const proto = modsById.get("prototype_shock_coils")!;
+    const over = modsById.get("overpressured_rounds")!;
+    const mars = weaponsById.get("efv_8_mars")!;
+    const jupiter = weaponsById.get("efv_5_jupiter")!;
+
+    expect(proto.polarity).toBe("madurai");
+    expect(over.polarity).toBe("madurai");
+    expect(proto.drain).toBe(2);
+    expect(over.drain).toBe(2);
+    expect(proto.maxRank).toBe(5);
+    expect(over.maxRank).toBe(5);
+    expect(getModImage(proto.name)).toBe("/images/mods/Prototype_Shock_Coils.png");
+    expect(getModImage(over.name)).toBe("/images/mods/Overpressured_Rounds.png");
+
+    expect(
+      modEligibleForWeaponSlot(proto, "secondary", mars.category, "regular", getWeaponModProfile(mars)),
+    ).toBe(true);
+    expect(
+      modEligibleForWeaponSlot(over, "primary", jupiter.category, "regular", getWeaponModProfile(jupiter)),
+    ).toBe(true);
+    expect(
+      modEligibleForWeaponSlot(proto, "primary", jupiter.category, "regular", getWeaponModProfile(jupiter)),
+    ).toBe(false);
+    expect(
+      modEligibleForWeaponSlot(over, "secondary", mars.category, "regular", getWeaponModProfile(mars)),
+    ).toBe(false);
   });
 });

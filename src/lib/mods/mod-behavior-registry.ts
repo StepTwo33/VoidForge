@@ -57,6 +57,8 @@ export type WeaponModAccumulators = {
   triggerStatBonuses: Record<string, number>;
   /** Chance to force a Slash proc on crits (Hunter Munitions). */
   slashOnCritChance: number;
+  /** Chance to force an extra Electric proc on hit (Prototype Shock Coils; independent of damage types). */
+  extraElectricProcChance: number;
   /** Chance for Impact procs to add a Slash proc (Internal Bleeding / Hemorrhage; ×2 under 2.5 fire rate). */
   slashOnImpactProcChance: number;
   /** Bonus damage on the first shot of each magazine (Charged/Primed Chamber). */
@@ -292,6 +294,9 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
     }
     case "slash_on_crit":
       acc.slashOnCritChance += modValue;
+      return true;
+    case "electric_on_hit":
+      acc.extraElectricProcChance += modValue;
       return true;
     case "slash_on_impact_proc":
       acc.slashOnImpactProcChance += modValue;

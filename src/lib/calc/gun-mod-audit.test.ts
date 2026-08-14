@@ -8,6 +8,7 @@ import { allMods } from "@/data/mods";
 import { allWeapons } from "@/data/weapons";
 import { calculateWeaponBuild, quantizeDamageValue } from "@/lib/calc/calculator";
 import { quantizeBaseCritMultiplier } from "@/lib/calc/crit-utils";
+import { getModStatDisplayLines } from "@/lib/display/mod-display";
 import { DEFAULT_SIM_PARAMS } from "@/lib/types";
 
 const modsMap = () => new Map(allMods.map((m) => [m.id, m]));
@@ -204,6 +205,51 @@ describe("primary remainder (wiki max rank, Phase M1)", () => {
   it("Hunter Munitions R5: +30% slash-on-crit chance", () => {
     const stats = withMod("braton", "hunter_munitions");
     expect(stats.slashOnCritChance).toBeCloseTo(0.3, 8);
+  });
+
+  it("Prototype Shock Coils R5: +90% electricity and 20% extra Electric proc at every rank", () => {
+    const weapon = requireWeapon("efv_8_mars");
+    const stats = withMod("efv_8_mars", "prototype_shock_coils");
+    const scale = stats.moddedBaseDamage / 32;
+    expect(stats.elements.find((e) => e.type === "electricity")?.value).toBeCloseTo(
+      quantizeDamageValue(weapon.damage * 0.9, scale),
+      8,
+    );
+    expect(stats.extraElectricProcChance).toBeCloseTo(0.2, 8);
+    const extra = stats.statusProcs.find((p) =>
+      p.description.includes("Prototype Shock Coils"),
+    );
+    expect(extra?.type).toBe("electricity");
+    expect(extra?.chance).toBeCloseTo(0.2, 8);
+
+    const rank0 = calculateWeaponBuild(
+      weapon,
+      [{ modId: "prototype_shock_coils", rank: 0, slotIndex: 0 }],
+      modsMap(),
+    );
+    expect(rank0.extraElectricProcChance).toBeCloseTo(0.2, 8);
+    expect(rank0.elements.find((e) => e.type === "electricity")?.value).toBeLessThan(
+      stats.elements.find((e) => e.type === "electricity")!.value,
+    );
+  });
+
+  it("Prototype Shock Coils extra Electric proc displays 20% at rank 0 and rank 5", () => {
+    const mod = requireMod("prototype_shock_coils");
+    const r0 = getModStatDisplayLines(mod, 0).find((l) => l.statKey === "extraElectricProcChance");
+    const r5 = getModStatDisplayLines(mod, 5).find((l) => l.statKey === "extraElectricProcChance");
+    expect(r0?.atRank).toMatch(/\+20%/);
+    expect(r5?.atRank).toMatch(/\+20%/);
+  });
+
+  it("Overpressured Rounds: falloff is panel-only (no paper DPS change)", () => {
+    const weapon = requireWeapon("efv_5_jupiter");
+    const bare = calculateWeaponBuild(weapon, [], modsMap());
+    const stats = withMod("efv_5_jupiter", "overpressured_rounds");
+    expect(VERIFIED_MOD_BEHAVIORS.overpressured_rounds?.stats.every((s) => s.target === "mod_panel")).toBe(
+      true,
+    );
+    expect(stats.moddedBaseDamage).toBeCloseTo(bare.moddedBaseDamage, 8);
+    expect(stats.burstDps).toBeCloseTo(bare.burstDps, 5);
   });
 
   it("Primed Cryo Rounds R10: +165% cold from base", () => {

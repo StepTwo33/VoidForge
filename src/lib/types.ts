@@ -767,6 +767,8 @@ export interface CalculatedStats {
   triggerStatBonuses?: Record<string, number>;
   /** Chance to force a Slash proc on critical hits (Hunter Munitions). */
   slashOnCritChance?: number;
+  /** Chance to force an extra Electric proc on hit (Prototype Shock Coils). */
+  extraElectricProcChance?: number;
   /** Chance for Impact procs to add a Slash proc (Internal Bleeding / Hemorrhage). */
   slashOnImpactProcChance?: number;
   /** Bonus damage on first shot of each magazine (Charged/Primed Chamber), averaged into DPS. */

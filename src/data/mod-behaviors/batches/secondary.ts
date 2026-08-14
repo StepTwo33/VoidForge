@@ -264,6 +264,10 @@ export const MOD_BEHAVIORS_SECONDARY: Record<string, VerifiedModBehavior> = {
   primed_steady_hands: mod("primed_steady_hands", [
     line("recoil", "mod_panel", "multiplicative_percent", "Primed Steady Hands: recoil \u2014 -85% Weapon Recoil (arsenal display only)"),
   ]),
+  prototype_shock_coils: mod("prototype_shock_coils", [
+    line("electricity", "weapon_dps", "elemental_from_base_damage", "wiki: Prototype Shock Coils — +90% Electricity at R5"),
+    line("extraElectricProcChance", "weapon_dps", "electric_on_hit", "wiki: Prototype Shock Coils — 20% extra Electric status on hit at all ranks, independent of modded damage types"),
+  ]),
   pummel: mod("pummel", [
     line("impact", "weapon_dps", "multiplicative_percent", "Pummel: impact \u2014 +120% <DT_IMPACT_COLOR>Impact"),
   ]),

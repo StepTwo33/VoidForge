@@ -6797,6 +6797,20 @@ const RAW_MODS: Mod[] = [
     "rarity": "uncommon"
   },
   {
+    "id": "overpressured_rounds",
+    "name": "Overpressured Rounds",
+    "polarity": "madurai",
+    "drain": 2,
+    "maxRank": 5,
+    "category": "primary",
+    "subCategory": "weapon",
+    "stats": {
+      "falloffDistance": 20
+    },
+    "description": "Rifle kills add 120% Falloff Distance and decrease Spread for next attack with Buckshot. Buckshot kills restore 50% of the current Magazine.",
+    "rarity": "rare"
+  },
+  {
     "id": "photon_overcharge",
     "name": "Photon Overcharge",
     "polarity": "vazarin",
@@ -8793,6 +8807,21 @@ const RAW_MODS: Mod[] = [
     },
     "description": "-85% Weapon Recoil",
     "rarity": "legendary"
+  },
+  {
+    "id": "prototype_shock_coils",
+    "name": "Prototype Shock Coils",
+    "polarity": "madurai",
+    "drain": 2,
+    "maxRank": 5,
+    "category": "secondary",
+    "subCategory": "weapon",
+    "stats": {
+      "electricity": 15,
+      "extraElectricProcChance": 20
+    },
+    "description": "Adds +90% <DT_ELECTRICITY_COLOR>Electric damage, and shots have a 20% base chance to apply extra Electric status independent of modded damage types",
+    "rarity": "rare"
   },
   {
     "id": "pummel",

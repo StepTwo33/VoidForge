@@ -239,6 +239,9 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
   overview: mod("overview", [
     line("zoom", "mod_panel", "multiplicative_percent", "Overview: zoom \u2014 -60% Zoom while Aim Gliding (arsenal display only)"),
   ]),
+  overpressured_rounds: mod("overpressured_rounds", [
+    line("falloffDistance", "mod_panel", "multiplicative_percent", "wiki: Overpressured Rounds — Rifle kill: +120% Buckshot falloff distance and reduced spread for next Buckshot (not always-on paper)"),
+  ]),
   piercing_hit: mod("piercing_hit", [
     line("puncture", "weapon_dps", "multiplicative_percent", "Piercing Hit: puncture \u2014 +90% <DT_PUNCTURE_COLOR>Puncture"),
   ]),

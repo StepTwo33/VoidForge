@@ -36,7 +36,10 @@ PROFILE_INCOMPAT_TAGS = {
 MOD_WIKI_NAME_ALIASES: dict[str, str] = {}
 
 # Manual exclusive-weapon overrides when wiki match fails.
-MOD_EXCLUSIVE_WEAPON_OVERRIDES: dict[str, list[str]] = {}
+MOD_EXCLUSIVE_WEAPON_OVERRIDES: dict[str, list[str]] = {
+    "overpressured_rounds": ["efv_5_jupiter"],
+    "prototype_shock_coils": ["efv_8_mars"],
+}
 
 # Stances mis-parsed as weapon-exclusive when wiki Type is a weapon name.
 MOD_EXCLUSIVE_WEAPON_BLOCKLIST = frozenset({"atlantis_vulcan", "mafic_rain"})
