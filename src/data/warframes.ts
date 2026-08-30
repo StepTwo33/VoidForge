@@ -3752,7 +3752,7 @@ export const allWarframes: Warframe[] = [
     "name": "Kullervo",
     "health": 1005,
     "shield": 0,
-    "armor": 550,
+    "armor": 650,
     "energy": 175,
     "sprintSpeed": 1.1,
     "description": "(TAP) Kullervo charges a Heavy Attack, then teleports to his target and strikes. His rage-filled focus temporarily increases his Melee Critical Chance. (HOLD) Teleport to any marked target.",
