@@ -1,11 +1,13 @@
 /// Voidforge Service Worker
-/// v11: Voidforge rebrand + auto-activate updates.
+/// v13: Voidforge icon refresh (square + circle) + auto-activate updates.
 
-const CACHE_NAME = "voidforge-v11";
+const CACHE_NAME = "voidforge-v13";
 
 const PRECACHE_URLS = [
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
+  "/icons/icon-circle-192x192.png",
+  "/icons/icon-circle-512x512.png",
   "/icons/maskable-192x192.png",
   "/icons/maskable-512x512.png",
   "/og-embed.png",

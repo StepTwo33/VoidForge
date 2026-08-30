@@ -7,11 +7,11 @@ type BrandMarkProps = {
   priority?: boolean;
 };
 
-/** Circular Voidforge logo from generated PWA assets. */
+/** Circular Voidforge mark (vortex crop). Square PWA icons live under /icons/icon-*.png. */
 export function BrandMark({ size = 32, className, priority }: BrandMarkProps) {
   return (
     <Image
-      src="/icons/icon-192x192.png"
+      src="/icons/icon-circle-192x192.png"
       alt=""
       width={size}
       height={size}
