@@ -1,7 +1,7 @@
 /// Voidforge Service Worker
-/// v13: Voidforge icon refresh (square + circle) + auto-activate updates.
+/// v14: Voidforge square icons preserve rounded-corner alpha.
 
-const CACHE_NAME = "voidforge-v13";
+const CACHE_NAME = "voidforge-v14";
 
 const PRECACHE_URLS = [
   "/icons/icon-192x192.png",

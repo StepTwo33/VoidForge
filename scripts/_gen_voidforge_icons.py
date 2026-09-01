@@ -1,17 +1,23 @@
 from PIL import Image, ImageDraw
 from pathlib import Path
 
-src_path = Path(
-    r"C:\Users\jason\.cursor\projects\c-Users-jason-Documents-framehub\assets"
-    r"\c__Users_jason_AppData_Roaming_Cursor_User_workspaceStorage_"
-    r"73ff8d0b3a6bbd86b3de2578b8842fd7_images_IMG_5565-removebg-preview-"
-    r"2c875063-f05f-4235-8f88-780fa650a93a.png"
-)
 out_dir = Path(r"C:\Users\jason\Documents\framehub\public\icons")
 public = Path(r"C:\Users\jason\Documents\framehub\public")
 bg = (10, 10, 26, 255)  # #0a0a1a
 
+# Prefer committed master; fall back to one-off import path.
+src_candidates = [
+    out_dir / "voidforge-icon-source.png",
+    Path(
+        r"C:\Users\jason\.cursor\projects\c-Users-jason-Documents-framehub\assets"
+        r"\c__Users_jason_AppData_Roaming_Cursor_User_workspaceStorage_"
+        r"73ff8d0b3a6bbd86b3de2578b8842fd7_images_IMG_5565-removebg-preview-"
+        r"2c875063-f05f-4235-8f88-780fa650a93a.png"
+    ),
+]
+src_path = next(p for p in src_candidates if p.exists())
 src = Image.open(src_path).convert("RGBA")
+print("source", src_path, src.size)
 
 
 def square_pad(im: Image.Image, fill=(0, 0, 0, 0)) -> Image.Image:
@@ -24,6 +30,11 @@ def square_pad(im: Image.Image, fill=(0, 0, 0, 0)) -> Image.Image:
 
 def resize(im: Image.Image, size: int) -> Image.Image:
     return im.resize((size, size), Image.Resampling.LANCZOS)
+
+
+def rounded_square_icon(im: Image.Image, size: int) -> Image.Image:
+    """Preserve source alpha so painted rounded corners stay rounded at export size."""
+    return resize(im, size)
 
 
 def to_circle(im: Image.Image) -> Image.Image:
@@ -53,14 +64,16 @@ def make_maskable(im: Image.Image, size: int, safe: float = 0.8) -> Image.Image:
     return canvas
 
 
-squared = square_pad(src, (0, 0, 0, 0))
+# Only pad when importing a non-square asset; keep committed master as-is.
+squared = src if src.size[0] == src.size[1] else square_pad(src, (0, 0, 0, 0))
 opaque_master = Image.new("RGBA", squared.size, bg)
 opaque_master.alpha_composite(squared)
 circle_master = to_circle(opaque_master)
 
 master_path = out_dir / "voidforge-icon-source.png"
-squared.save(master_path, "PNG")
-print("saved", master_path, squared.size)
+if src_path != master_path:
+    squared.save(master_path, "PNG")
+    print("saved", master_path, squared.size)
 
 circle_src_path = out_dir / "voidforge-icon-circle-source.png"
 circle_master.save(circle_src_path, "PNG")
@@ -75,12 +88,7 @@ targets = {
     "icon-512x512.png": 512,
 }
 for name, size in targets.items():
-    if name.startswith("icon-"):
-        canvas = Image.new("RGBA", (size, size), bg)
-        canvas.alpha_composite(resize(squared, size))
-        out = canvas
-    else:
-        out = resize(opaque_master, size)
+    out = rounded_square_icon(squared, size)
     path = out_dir / name
     out.save(path, "PNG", optimize=True)
     print("wrote", path.name, out.size, path.stat().st_size)
@@ -99,7 +107,7 @@ for size in (32, 64, 128, 192, 512):
     print("wrote", path.name, out.size, path.stat().st_size)
 
 ico_sizes = [16, 32, 48]
-ico_images = [resize(opaque_master, s) for s in ico_sizes]
+ico_images = [rounded_square_icon(squared, s) for s in ico_sizes]
 ico_path = public / "favicon.ico"
 ico_images[0].save(
     ico_path,
