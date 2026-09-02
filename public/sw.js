@@ -1,7 +1,7 @@
 /// Voidforge Service Worker
-/// v14: Voidforge square icons preserve rounded-corner alpha.
+/// v15: Richer Discord/Twitter OG card + rounded square icons.
 
-const CACHE_NAME = "voidforge-v14";
+const CACHE_NAME = "voidforge-v15";
 
 const PRECACHE_URLS = [
   "/icons/icon-192x192.png",

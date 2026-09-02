@@ -117,11 +117,63 @@ ico_images[0].save(
 )
 print("wrote favicon.ico", ico_path.stat().st_size)
 
-og = Image.new("RGBA", (1200, 630), bg)
-icon_og = resize(opaque_master, 420)
-ox = (1200 - icon_og.size[0]) // 2
-oy = (630 - icon_og.size[1]) // 2
+# Discord/Twitter OG: landscape card with nebula fill (not a lonely icon on black).
+W, H = 1200, 630
+og = Image.new("RGBA", (W, H), bg)
+
+# Soft full-bleed backdrop from a heavily blurred, cover-scaled copy of the art.
+cover = opaque_master.copy()
+scale = max(W / cover.size[0], H / cover.size[1]) * 1.15
+cw, ch = int(cover.size[0] * scale), int(cover.size[1] * scale)
+cover = cover.resize((cw, ch), Image.Resampling.LANCZOS)
+left = (cw - W) // 2
+top = (ch - H) // 2
+cover = cover.crop((left, top, left + W, top + H))
+try:
+    from PIL import ImageFilter
+
+    cover = cover.filter(ImageFilter.GaussianBlur(radius=28))
+except Exception:
+    pass
+# Darken so the sharp icon reads on top
+dim = Image.new("RGBA", (W, H), (10, 10, 26, 160))
+og.alpha_composite(cover)
+og.alpha_composite(dim)
+
+# Primary mark — larger, slightly above center
+icon_og = rounded_square_icon(squared, 460)
+ox = (W - icon_og.size[0]) // 2
+oy = 48
 og.alpha_composite(icon_og, (ox, oy))
+
+# Tagline under the mark
+try:
+    from PIL import ImageFont
+
+    draw = ImageDraw.Draw(og)
+    tagline = "Warframe Build Planner"
+    font = None
+    for cand in (
+        "C:/Windows/Fonts/segoeuib.ttf",
+        "C:/Windows/Fonts/arialbd.ttf",
+        "C:/Windows/Fonts/arial.ttf",
+    ):
+        if Path(cand).exists():
+            font = ImageFont.truetype(cand, 36)
+            break
+    if font is None:
+        font = ImageFont.load_default()
+    bbox = draw.textbbox((0, 0), tagline, font=font)
+    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    tx = (W - tw) // 2
+    ty = oy + icon_og.size[1] + 18
+    # Soft glow
+    for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+        draw.text((tx + dx, ty + dy), tagline, font=font, fill=(80, 120, 200, 180))
+    draw.text((tx, ty), tagline, font=font, fill=(210, 220, 255, 255))
+except Exception as e:
+    print("og tagline skipped:", e)
+
 og_path = public / "og-embed.png"
 og.save(og_path, "PNG", optimize=True)
 print("wrote og-embed.png", og.size, og_path.stat().st_size)
