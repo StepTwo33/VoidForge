@@ -342,12 +342,39 @@ export function modMatchesPrimaryWeaponClass(
   return true;
 }
 
+/** Categories that must never appear in ground-weapon / archgun builders. */
+const NON_GROUND_WEAPON_MOD_CATEGORIES = new Set([
+  "necramech",
+  "archwing",
+  "operator",
+  "railjack",
+  "parazon",
+  "requiem",
+  "conclave",
+  "nightwave",
+  "tektolyst",
+  "utility",
+  "set",
+  "kdrive",
+  "stance",
+]);
+
+/** True when a mod belongs to a non-ground-weapon family (category or Railjack allowlist). */
+export function isNonGroundWeaponMod(mod: Pick<Mod, "id" | "category">): boolean {
+  if (NON_GROUND_WEAPON_MOD_CATEGORIES.has(mod.category)) return true;
+  // ID allowlist wins even if a data override rewrites category back to primary/general.
+  if (isAllowlistedRailjackPlexusMod(mod)) return true;
+  return false;
+}
+
 /** Category filter for weapon mod pickers (regular + typed categories). */
 export function modMatchesWeaponBuilderCategory(
   mod: Mod,
   builderCategory: string,
   weaponId?: string,
 ): boolean {
+  if (isNonGroundWeaponMod(mod)) return false;
+
   if (
     isWeaponExclusiveMod(mod.id) &&
     mod.category !== "stance" &&
@@ -358,23 +385,6 @@ export function modMatchesWeaponBuilderCategory(
     return true;
   }
 
-  if (mod.category === "stance") return false;
-  if (
-    mod.category === "necramech" ||
-    mod.category === "archwing" ||
-    mod.category === "operator" ||
-    mod.category === "railjack" ||
-    mod.category === "parazon" ||
-    mod.category === "requiem" ||
-    mod.category === "conclave" ||
-    mod.category === "nightwave" ||
-    mod.category === "tektolyst" ||
-    mod.category === "utility" ||
-    mod.category === "set" ||
-    mod.category === "kdrive"
-  ) {
-    return false;
-  }
   if (builderCategory !== "archmelee" && mod.category === "archmelee") return false;
   if (builderCategory !== "archgun" && mod.category === "archgun") return false;
 
@@ -419,6 +429,9 @@ export function modEligibleForWeaponSlot(
   slotType: WeaponModSlotType,
   weaponProfile?: WeaponModProfile,
 ): boolean {
+  // Hard deny first — covers Exilus early-returns and category overrides.
+  if (isNonGroundWeaponMod(mod)) return false;
+
   const weaponId = weaponProfile?.weaponId;
 
   if (!tomeModEligibleForWeaponSlot(mod, weaponId, slotType)) return false;
