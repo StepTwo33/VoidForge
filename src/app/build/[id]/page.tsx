@@ -124,7 +124,7 @@ export default async function SharedBuildPage({ params }: { params: Promise<{ id
                   Updated {new Date(build.updatedAt).toLocaleDateString()}
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-foreground break-words">{build.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-foreground break-words [overflow-wrap:anywhere]">{build.name}</h1>
               <div className="flex items-center gap-2">
                 {build.author.image ? (
                   <AvatarImage
@@ -188,7 +188,7 @@ export default async function SharedBuildPage({ params }: { params: Promise<{ id
                 <h2 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
                   Author notes
                 </h2>
-                <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                   {build.description}
                 </div>
               </section>

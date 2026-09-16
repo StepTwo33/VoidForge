@@ -83,7 +83,7 @@ export function PublicProfileBuilds({ builds }: { builds: PublicProfileBuild[] }
             className="flex min-h-11 flex-1 items-center gap-3 p-4 min-w-0 hover:bg-muted/30 transition-colors"
           >
             <div className="flex-1 min-w-0">
-              <div className="font-medium text-sm truncate break-words group-hover:text-primary transition-colors">
+              <div className="font-medium text-sm truncate break-words [overflow-wrap:anywhere] group-hover:text-primary transition-colors">
                 {build.name}
               </div>
               <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-2">

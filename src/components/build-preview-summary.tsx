@@ -24,7 +24,7 @@ export function BuildPreviewSummary({ preview }: { preview: BuildPreviewData }) 
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             {preview.typeLabel}
           </p>
-          <p className="text-lg font-semibold text-foreground break-words">{preview.itemName}</p>
+          <p className="text-lg font-semibold text-foreground break-words [overflow-wrap:anywhere]">{preview.itemName}</p>
           <p className="text-xs text-muted-foreground">{preview.modSummary}</p>
         </div>
       </div>

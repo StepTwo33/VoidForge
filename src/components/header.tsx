@@ -479,7 +479,7 @@ export function Header() {
     <header className="page-ambient-ignore sticky top-0 z-50 border-b border-border/60 bg-card/70 shadow-sm shadow-[var(--shadow-color)] backdrop-blur-xl transition-colors duration-300 pt-[env(safe-area-inset-top,0px)]">
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
       <div className="flex h-14 w-full items-center gap-2 px-3.5 sm:px-5 lg:gap-3 lg:px-6">
-        <Link href="/" className="flex min-w-0 shrink items-center gap-2 text-xl font-bold tracking-tight">
+        <Link href="/" className="tap-target inline-flex min-h-11 min-w-0 shrink items-center gap-2 text-xl font-bold tracking-tight">
           <BrandMark size={28} className="shrink-0 ring-1 ring-primary/20" />
           <span className="truncate">
             <span className="text-primary">Voidforge</span>

@@ -209,7 +209,7 @@ export default function DiscoverPage() {
           <div className="flex items-center justify-between gap-2">
             <button
               type="button"
-              className="inline-flex min-h-10 items-center gap-1.5 text-sm font-medium text-foreground sm:pointer-events-none"
+              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-foreground sm:pointer-events-none"
               onClick={() => setFiltersOpen((o) => !o)}
               aria-expanded={filtersOpen}
             >
@@ -219,7 +219,7 @@ export default function DiscoverPage() {
             {(sort !== "recent" || tagFilter || typeFilter !== "all" || searchQuery.trim() || itemFilter) && (
               <button
                 type="button"
-                className="min-h-10 text-xs font-medium text-primary hover:underline"
+                className="inline-flex min-h-11 items-center text-xs font-medium text-primary hover:underline"
                 onClick={() => {
                   setSort("recent");
                   setTagFilter("");
