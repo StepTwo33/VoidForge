@@ -169,7 +169,7 @@ function isNonWeaponGeneralFamily(mod: Mod): boolean {
   if (text.includes("fighting form devised for conclave") || text.includes("conclave")) {
     return true;
   }
-  // Digimods / Nightwave antivirus novelty mods
+  // Technocyte Coda Parazon Antivirus / Potency digimods (if miscategorized as general)
   if (
     /\b(bytes?|malware|spyware|wetware|cyber-crime|disinfection|h[oö]llars|antivirus)\b/i.test(
       text,
@@ -350,8 +350,9 @@ const NON_GROUND_WEAPON_MOD_CATEGORIES = new Set([
   "railjack",
   "parazon",
   "requiem",
+  "antivirus",
+  "potency",
   "conclave",
-  "nightwave",
   "tektolyst",
   "utility",
   "set",

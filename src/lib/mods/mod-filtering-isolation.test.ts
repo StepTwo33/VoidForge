@@ -146,14 +146,15 @@ describe("cross-builder mod isolation", () => {
     expect(leftover).toEqual([]);
   });
 
-  it("railjack / operator / parazon / conclave / nightwave stay out of ground weapons", () => {
+  it("railjack / operator / parazon / coda digimods stay out of ground weapons", () => {
     const deniedCats = new Set([
       "railjack",
       "operator",
       "parazon",
       "requiem",
+      "antivirus",
+      "potency",
       "conclave",
-      "nightwave",
       "tektolyst",
       "utility",
       "set",

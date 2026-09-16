@@ -166,4 +166,44 @@ describe("mod eligibility inventory", () => {
       modEligibleForWeaponSlot(over, "secondary", mars.category, "regular", getWeaponModProfile(mars)),
     ).toBe(false);
   });
+
+  it("equips Time Tempests Nightwave augments only on Venato / Velox families", () => {
+    expect(MOD_EXCLUSIVE_WEAPON_IDS.sentient_incision).toEqual(["venato", "venato_prime"]);
+    expect(MOD_EXCLUSIVE_WEAPON_IDS.velox_conclusion).toEqual(["velox", "velox_prime"]);
+
+    const incision = modsById.get("sentient_incision")!;
+    const conclusion = modsById.get("velox_conclusion")!;
+    const venato = weaponsById.get("venato")!;
+    const velox = weaponsById.get("velox")!;
+    const venatoPrime = weaponsById.get("venato_prime")!;
+    const veloxPrime = weaponsById.get("velox_prime")!;
+
+    expect(incision.polarity).toBe("naramon");
+    expect(conclusion.polarity).toBe("madurai");
+    expect(incision.drain).toBe(2);
+    expect(conclusion.drain).toBe(2);
+    expect(incision.maxRank).toBe(5);
+    expect(conclusion.maxRank).toBe(5);
+    expect(getModImage(incision.name)).toBe("/images/mods/Sentient_Incision.png");
+    expect(getModImage(conclusion.name)).toBe("/images/mods/Velox_Conclusion.png");
+
+    expect(
+      modEligibleForWeaponSlot(incision, "melee", venato.category, "regular", getWeaponModProfile(venato)),
+    ).toBe(true);
+    expect(
+      modEligibleForWeaponSlot(incision, "melee", venatoPrime.category, "regular", getWeaponModProfile(venatoPrime)),
+    ).toBe(true);
+    expect(
+      modEligibleForWeaponSlot(conclusion, "secondary", velox.category, "regular", getWeaponModProfile(velox)),
+    ).toBe(true);
+    expect(
+      modEligibleForWeaponSlot(conclusion, "secondary", veloxPrime.category, "regular", getWeaponModProfile(veloxPrime)),
+    ).toBe(true);
+    expect(
+      modEligibleForWeaponSlot(incision, "secondary", velox.category, "regular", getWeaponModProfile(velox)),
+    ).toBe(false);
+    expect(
+      modEligibleForWeaponSlot(conclusion, "melee", venato.category, "regular", getWeaponModProfile(venato)),
+    ).toBe(false);
+  });
 });
