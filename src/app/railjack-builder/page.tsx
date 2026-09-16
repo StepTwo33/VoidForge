@@ -813,7 +813,7 @@ export default function RailjackBuilderPage() {
                           className="min-h-11 flex-1 min-w-0 py-1 text-left"
                         >
                           <div className="flex items-center gap-1.5">
-                            <Users className="h-3 w-3 text-violet-400 shrink-0" />
+                            <Users className="h-3 w-3 shrink-0 text-violet-800 dark:text-violet-400" />
                             <span className="text-xs font-medium">Slot {label}</span>
                             {!unlocked && (
                               <span className="text-[10px] text-amber-600 dark:text-amber-300">

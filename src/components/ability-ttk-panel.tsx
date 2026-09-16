@@ -6,11 +6,11 @@ import { cn } from "@/lib/utils";
 import { EnemyLevelControl } from "@/components/enemy-level-control";
 
 const FACTION_COLORS: Record<string, string> = {
-  Grineer: "text-red-400",
-  Corpus: "text-blue-300",
-  Infested: "text-green-400",
-  Corrupted: "text-yellow-400",
-  Stalker: "text-purple-400",
+  Grineer: "text-red-700 dark:text-red-400",
+  Corpus: "text-blue-700 dark:text-blue-300",
+  Infested: "text-green-700 dark:text-green-400",
+  Corrupted: "text-yellow-700 dark:text-yellow-400",
+  Stalker: "text-purple-700 dark:text-purple-400",
 };
 
 function fmt(n: number) {
@@ -44,7 +44,7 @@ export function AbilityTTKPanel({ entries }: { entries: AbilityTTKEntry[] }) {
   if (entries.length === 0) return null;
 
   return (
-    <div className="border border-border rounded-xl p-4 bg-card space-y-3">
+    <div className="min-w-0 space-y-3 rounded-xl border border-border bg-card p-4">
       <div>
         <h3 className="text-[10px] font-semibold tracking-wider text-muted-foreground mb-1">
           ABILITY TIME TO KILL
@@ -63,7 +63,7 @@ export function AbilityTTKPanel({ entries }: { entries: AbilityTTKEntry[] }) {
             type="button"
             onClick={() => setSelectedFaction(f)}
             className={cn(
-              "text-[9px] px-1.5 py-0.5 rounded border transition-all",
+              "inline-flex min-h-11 items-center text-[9px] px-2.5 py-1.5 rounded border transition-all",
               selectedFaction === f
                 ? "border-primary text-primary bg-primary/10"
                 : "border-border/50 text-muted-foreground hover:text-foreground",
@@ -83,24 +83,24 @@ export function AbilityTTKPanel({ entries }: { entries: AbilityTTKEntry[] }) {
               <button
                 type="button"
                 onClick={() => setExpandedKey(open ? null : entry.key)}
-                className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-muted/20 transition-colors"
+                className="w-full flex min-h-11 items-center gap-2 px-3 py-2 text-left hover:bg-muted/20 transition-colors"
               >
                 <span className="text-[10px] font-mono text-muted-foreground shrink-0">
                   {entry.slot}
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-orange-300 truncate">
+                    <span className="text-xs font-medium text-orange-800 dark:text-orange-300 truncate">
                       {entry.abilityName}
                     </span>
                     {entry.helminth && (
-                      <span className="text-[9px] text-emerald-400/80 shrink-0">Helminth</span>
+                      <span className="text-[9px] text-emerald-700/90 dark:text-emerald-400/80 shrink-0">Helminth</span>
                     )}
                   </div>
                   <p className="text-[10px] text-muted-foreground truncate">{entry.damageSummary}</p>
                 </div>
                 {best && (
-                  <span className="text-[10px] font-mono text-amber-400 shrink-0">
+                  <span className="text-[10px] font-mono text-amber-800 dark:text-amber-400 shrink-0">
                     {best.ttk === Infinity ? "∞" : `${best.ttk.toFixed(2)}s`}
                   </span>
                 )}
@@ -109,10 +109,10 @@ export function AbilityTTKPanel({ entries }: { entries: AbilityTTKEntry[] }) {
               {open && (
                 <div className="px-3 pb-2 space-y-0.5 border-t border-border/40">
                   {results.map((r) => (
-                    <div key={r.enemy.id} className="flex justify-between items-center py-0.5">
+                    <div key={r.enemy.id} className="flex min-w-0 items-center justify-between gap-2 py-1">
                       <span
                         className={cn(
-                          "text-[10px] truncate",
+                          "min-w-0 truncate text-[10px]",
                           FACTION_COLORS[r.enemy.faction] || "text-muted-foreground",
                         )}
                       >
@@ -122,12 +122,12 @@ export function AbilityTTKPanel({ entries }: { entries: AbilityTTKEntry[] }) {
                         className={cn(
                           "text-[10px] font-mono shrink-0 ml-2",
                           r.ttk < 1
-                            ? "text-green-400"
+                            ? "text-green-700 dark:text-green-400"
                             : r.ttk < 5
-                              ? "text-yellow-400"
+                              ? "text-yellow-700 dark:text-yellow-400"
                               : r.ttk < 15
-                                ? "text-orange-400"
-                                : "text-red-400",
+                                ? "text-orange-700 dark:text-orange-400"
+                                : "text-red-700 dark:text-red-400",
                         )}
                       >
                         {r.ttk === Infinity ? "∞" : r.ttk < 0.01 ? "<0.01s" : `${r.ttk.toFixed(2)}s`}
@@ -142,7 +142,7 @@ export function AbilityTTKPanel({ entries }: { entries: AbilityTTKEntry[] }) {
                   {best && (
                     <div className="pt-1 mt-1 border-t border-border/30 text-[9px] text-muted-foreground flex justify-between">
                       <span>Best target DPS</span>
-                      <span className="font-mono text-amber-300/90">{fmt(best.sustainedDps)}</span>
+                      <span className="font-mono text-amber-800 dark:text-amber-300/90">{fmt(best.sustainedDps)}</span>
                     </div>
                   )}
                 </div>

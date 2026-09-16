@@ -7,11 +7,11 @@ import { EnemyLevelControl } from "@/components/enemy-level-control";
 import { CollapsibleSection, StatRow } from "./stat-primitives";
 
 const FACTION_COLORS: Record<string, string> = {
-  Grineer: "text-red-400",
-  Corpus: "text-blue-300",
-  Infested: "text-green-400",
-  Corrupted: "text-yellow-400",
-  Stalker: "text-purple-400",
+  Grineer: "text-red-700 dark:text-red-400",
+  Corpus: "text-blue-700 dark:text-blue-300",
+  Infested: "text-green-700 dark:text-green-400",
+  Corrupted: "text-yellow-700 dark:text-yellow-400",
+  Stalker: "text-purple-700 dark:text-purple-400",
 };
 
 export function TTKSection({ stats, flash }: { stats: CalculatedStats; flash?: boolean }) {
@@ -40,7 +40,7 @@ export function TTKSection({ stats, flash }: { stats: CalculatedStats; flash?: b
           <button
             key={f}
             onClick={() => setSelectedFaction(f)}
-            className={`text-[9px] px-1.5 py-0.5 rounded border transition-all ${selectedFaction === f
+            className={`inline-flex min-h-11 items-center text-[9px] px-2.5 py-1.5 rounded border transition-all ${selectedFaction === f
                 ? "border-primary text-primary bg-primary/10"
                 : "border-border/50 text-muted-foreground hover:text-foreground"
               }`}
@@ -54,12 +54,12 @@ export function TTKSection({ stats, flash }: { stats: CalculatedStats; flash?: b
           <div key={r.enemy.id}>
             <button
               onClick={() => setExpandedEnemy(expandedEnemy === r.enemy.id ? null : r.enemy.id)}
-              className="w-full flex justify-between items-center py-0.5 hover:bg-muted/30 rounded px-1 -mx-1 transition-colors"
+              className="w-full flex min-h-11 min-w-0 justify-between items-center gap-2 py-1.5 hover:bg-muted/30 rounded px-1 -mx-1 transition-colors"
             >
-              <span className={`text-[10px] ${FACTION_COLORS[r.enemy.faction] || "text-muted-foreground"}`}>
+              <span className={`min-w-0 truncate text-[10px] ${FACTION_COLORS[r.enemy.faction] || "text-muted-foreground"}`}>
                 {r.enemy.name}
               </span>
-              <span className={`text-[10px] font-mono ${r.ttk < 1 ? "text-green-400" : r.ttk < 5 ? "text-yellow-400" : r.ttk < 15 ? "text-orange-400" : "text-red-400"
+              <span className={`text-[10px] font-mono ${r.ttk < 1 ? "text-green-700 dark:text-green-400" : r.ttk < 5 ? "text-yellow-700 dark:text-yellow-400" : r.ttk < 15 ? "text-orange-700 dark:text-orange-400" : "text-red-700 dark:text-red-400"
                 }`}>
                 {r.ttk === Infinity ? "∞" : r.ttk < 0.01 ? "<0.01s" : `${r.ttk.toFixed(2)}s`}
               </span>
@@ -77,22 +77,22 @@ export function TTKSection({ stats, flash }: { stats: CalculatedStats; flash?: b
                 {r.scaledShield > 0 && (
                   <div className="flex justify-between text-[9px]">
                     <span className="text-muted-foreground">Shield</span>
-                    <span className="font-mono text-cyan-300">{fmt(r.scaledShield)}</span>
+                    <span className="font-mono text-cyan-700 dark:text-cyan-300">{fmt(r.scaledShield)}</span>
                   </div>
                 )}
                 {r.scaledArmor > 0 && (
                   <div className="flex justify-between text-[9px]">
                     <span className="text-muted-foreground">Armor</span>
-                    <span className="font-mono">{fmt(r.scaledArmor)} <span className="text-red-400">({r.armorDR.toFixed(1)}% DR)</span></span>
+                    <span className="font-mono">{fmt(r.scaledArmor)} <span className="text-red-700 dark:text-red-400">({r.armorDR.toFixed(1)}% DR)</span></span>
                   </div>
                 )}
                 <div className="flex justify-between text-[9px]">
                   <span className="text-muted-foreground">Burst DPS</span>
-                  <span className="font-mono text-amber-300">{fmt(r.burstDps)}</span>
+                  <span className="font-mono text-amber-800 dark:text-amber-300">{fmt(r.burstDps)}</span>
                 </div>
                 <div className="flex justify-between text-[9px]">
                   <span className="text-muted-foreground">Sustained DPS</span>
-                  <span className="font-mono text-amber-300">{fmt(r.sustainedDps)}</span>
+                  <span className="font-mono text-amber-800 dark:text-amber-300">{fmt(r.sustainedDps)}</span>
                 </div>
               </div>
             )}

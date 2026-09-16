@@ -253,7 +253,7 @@ export function CrewSlotEditor({
   const modCategory = selectedWeapon ? getModCategory(selectedWeapon.category) : "primary";
 
   return (
-    <div className="mt-2 pt-2 border-t border-border/50 space-y-2 text-xs">
+    <div className="mt-2 min-w-0 space-y-2 border-t border-border/50 pt-2 text-xs">
       <div className="flex flex-wrap gap-1">
         {SOURCES.map((s) => {
           const locked =
@@ -266,9 +266,9 @@ export function CrewSlotEditor({
               disabled={locked}
               onClick={() => onChange(ensureSlot({ source: s.id }))}
               className={cn(
-                "px-2 py-1 rounded border text-[10px]",
+                "inline-flex min-h-11 items-center px-2.5 py-1.5 rounded border text-[10px]",
                 source === s.id
-                  ? "border-violet-500/50 bg-violet-500/10 text-violet-300"
+                  ? "border-violet-500/50 bg-violet-500/10 text-violet-800 dark:text-violet-300"
                   : "border-border text-muted-foreground",
                 locked && "opacity-40 cursor-not-allowed",
               )}
@@ -286,10 +286,10 @@ export function CrewSlotEditor({
         })}
       </div>
 
-      <label className="block">
+      <label className="block min-w-0">
         <span className="text-[10px] text-muted-foreground">Role</span>
         <select
-          className="mt-0.5 w-full rounded border border-border bg-background px-2 py-1 text-xs"
+          className="mt-0.5 min-h-11 w-full rounded border border-border bg-background px-2 py-2 text-xs"
           value={role}
           disabled={source === "adversary"}
           onChange={(e) => onChange(ensureSlot({ role: e.target.value as CrewRole }))}
@@ -302,10 +302,10 @@ export function CrewSlotEditor({
         </select>
       </label>
 
-      <label className="block">
+      <label className="block min-w-0">
         <span className="text-[10px] text-muted-foreground">Profile</span>
         <select
-          className="mt-0.5 w-full rounded border border-border bg-background px-2 py-1 text-xs"
+          className="mt-0.5 min-h-11 w-full rounded border border-border bg-background px-2 py-2 text-xs"
           value={profileId}
           onChange={(e) => onChange(ensureSlot({ profileId: e.target.value }))}
         >
@@ -334,13 +334,13 @@ export function CrewSlotEditor({
         <div>
           <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
             <span>Competency</span>
-            <span className={cn(usedPoints > maxPoints && "text-red-400")}>
+            <span className={cn(usedPoints > maxPoints && "text-red-700 dark:text-red-400")}>
               {usedPoints} / {maxPoints}
             </span>
           </div>
-          <div className="grid grid-cols-5 gap-1">
+          <div className="grid grid-cols-5 gap-1.5 min-w-0">
             {COMP_KEYS.map((key) => (
-              <label key={key} className="text-center">
+              <label key={key} className="min-w-0 text-center">
                 <span className="text-[9px] uppercase text-muted-foreground">{key.slice(0, 1)}</span>
                 <input
                   type="number"
@@ -348,7 +348,7 @@ export function CrewSlotEditor({
                   max={5}
                   value={competency[key]}
                   onChange={(e) => setCompetency(key, Number(e.target.value))}
-                  className="mt-0.5 w-full rounded border border-border bg-background px-1 py-0.5 text-center text-[11px] font-mono"
+                  className="mt-0.5 min-h-11 w-full rounded border border-border bg-background px-1 py-1.5 text-center font-mono text-base [appearance:textfield] sm:text-[11px] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </label>
             ))}
@@ -370,16 +370,16 @@ export function CrewSlotEditor({
 
       {fixedNamedTrait && (
         <div className="rounded border border-violet-500/30 bg-violet-500/5 px-2 py-1.5">
-          <p className="text-[10px] font-medium text-violet-300">Fixed elite trait</p>
+          <p className="text-[10px] font-medium text-violet-800 dark:text-violet-300">Fixed elite trait</p>
           <p className="text-[10px] text-muted-foreground mt-0.5">{fixedNamedTrait.text}</p>
         </div>
       )}
 
       {traitOptions.length > 0 && (
-        <label className="block">
+        <label className="block min-w-0">
           <span className="text-[10px] text-muted-foreground">Elite trait</span>
           <select
-            className="mt-0.5 w-full rounded border border-border bg-background px-2 py-1 text-xs"
+            className="mt-0.5 min-h-11 w-full rounded border border-border bg-background px-2 py-2 text-xs"
             value={working.eliteTraitId ?? ""}
             onChange={(e) =>
               onChange(ensureSlot({ eliteTraitId: e.target.value || undefined }))
@@ -405,7 +405,7 @@ export function CrewSlotEditor({
             {selectedWeapon && (
               <button
                 type="button"
-                className="text-[10px] text-muted-foreground hover:text-foreground"
+                className="inline-flex min-h-11 items-center px-1 text-[10px] text-muted-foreground hover:text-foreground"
                 onClick={() => setShowMods((v) => !v)}
               >
                 {showMods ? "Hide mods" : "Mods"}
@@ -414,7 +414,7 @@ export function CrewSlotEditor({
             {selectedWeapon && (
               <button
                 type="button"
-                className="text-[10px] text-muted-foreground hover:text-red-400"
+                className="inline-flex min-h-11 items-center px-1 text-[10px] text-muted-foreground hover:text-red-700 dark:hover:text-red-400"
                 onClick={() => updateLoadout(null)}
               >
                 Clear
@@ -427,7 +427,7 @@ export function CrewSlotEditor({
           type="button"
           onClick={() => setShowWeaponPicker((v) => !v)}
           className={cn(
-            "w-full rounded border p-2 text-left text-xs transition-all",
+            "w-full min-h-11 rounded border p-2 text-left text-xs transition-all",
             selectedWeapon
               ? "border-orange-500/40 bg-orange-500/5"
               : "border-dashed border-border hover:border-orange-500/30",
@@ -465,7 +465,7 @@ export function CrewSlotEditor({
               value={weaponSearch}
               onChange={(e) => setWeaponSearch(e.target.value)}
               placeholder="Search weapons…"
-              className="w-full rounded border border-border bg-background px-2 py-1 text-xs"
+              className="w-full min-h-11 rounded border border-border bg-background px-2 py-2 text-xs"
             />
             <div className="max-h-40 overflow-y-auto space-y-1">
               {filteredWeapons.map((w) => {
@@ -477,7 +477,7 @@ export function CrewSlotEditor({
                     disabled={taken}
                     onClick={() => selectWeapon(w)}
                     className={cn(
-                      "w-full rounded border p-1.5 text-left text-[11px]",
+                      "w-full min-h-11 rounded border px-2 py-1.5 text-left text-[11px]",
                       selectedWeapon?.id === w.id
                         ? "border-orange-500/50 bg-orange-500/10"
                         : "border-border hover:border-orange-500/30",
