@@ -67,13 +67,13 @@ function FormaPolarizeButton({
         inline ? "relative" : "absolute bottom-1.5 right-1.5 z-10",
         polarized
           ? cn(
-              "h-10 w-10 p-1.5 sm:h-8 sm:w-8",
+              "h-11 w-11 p-1.5 sm:h-8 sm:w-8",
               active
                 ? "border-primary/50 bg-primary/10 ring-1 ring-primary/30"
                 : "border-border/60 bg-card/80 text-muted-foreground hover:border-primary/35 hover:bg-secondary/70 hover:text-foreground"
             )
           : cn(
-              "h-10 min-w-10 gap-1 px-2 text-[10px] font-medium leading-none text-muted-foreground sm:h-7 sm:min-w-0",
+              "h-11 min-w-11 gap-1 px-2 text-[10px] font-medium leading-none text-muted-foreground sm:h-7 sm:min-w-0",
               active
                 ? "border-amber-600/70 bg-amber-500/15 text-amber-950 ring-1 ring-amber-500/30 dark:border-amber-400/60 dark:bg-amber-500/20 dark:text-amber-200"
                 : "border-border/70 bg-muted/30 hover:border-amber-600/40 hover:bg-amber-500/10 hover:text-amber-900 dark:hover:border-amber-500/40 dark:hover:text-amber-300"
@@ -118,7 +118,7 @@ function PolarityPicker({
             type="button"
             onClick={() => { onPolarize(p); onClose(); }}
             className={cn(
-              "flex min-h-10 min-w-10 items-center justify-center rounded border p-2 transition-all sm:min-h-0 sm:min-w-0 sm:p-1.5",
+              "flex min-h-11 min-w-11 items-center justify-center rounded border p-2 transition-all sm:min-h-0 sm:min-w-0 sm:p-1.5",
               slotPolarity === p ? "border-yellow-500/60 bg-yellow-500/15" : "border-border hover:border-yellow-500/40"
             )}
             title={polarityNames[p] || p}
@@ -199,7 +199,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
     )}>
       <button
         onClick={onRemove}
-        className="absolute top-1 right-1 z-10 inline-flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive sm:h-8 sm:w-8"
+        className="absolute top-1 right-1 z-10 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive sm:h-8 sm:w-8"
         aria-label="Remove mod"
       >
         <X className="h-3.5 w-3.5" />
@@ -263,7 +263,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
             ⚡{effectiveDrain}
           </span>
           {mod.subCategory === "riven" && onEditRiven && (
-            <button onClick={(e) => { e.stopPropagation(); onEditRiven(); }} className="inline-flex h-10 w-10 items-center justify-center rounded-md text-purple-700 transition-colors hover:bg-purple-500/10 hover:text-purple-600 dark:text-purple-400 dark:hover:text-purple-300 sm:h-8 sm:w-8" title="Edit Riven Stats" aria-label="Edit riven stats">
+            <button onClick={(e) => { e.stopPropagation(); onEditRiven(); }} className="inline-flex h-11 w-11 items-center justify-center rounded-md text-purple-700 transition-colors hover:bg-purple-500/10 hover:text-purple-600 dark:text-purple-400 dark:hover:text-purple-300 sm:h-8 sm:w-8" title="Edit Riven Stats" aria-label="Edit riven stats">
               <Pencil className="h-3.5 w-3.5" />
             </button>
           )}

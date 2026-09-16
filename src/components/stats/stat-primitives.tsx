@@ -10,17 +10,17 @@ export function StatRow({ label, value, highlighted, color, tooltip, changed }: 
   return (
     <div
       className={cn(
-        "group -mx-1 flex items-center justify-between rounded px-1.5 py-1 transition-colors duration-500",
+        "group -mx-1 flex min-w-0 items-center justify-between gap-2 rounded px-1.5 py-1 transition-colors duration-500",
         changed && "bg-amber-500/20 ring-1 ring-amber-500/35",
       )}
       title={tooltip}
     >
-      <span className={cn("text-xs leading-snug", color || "text-muted-foreground", changed && "text-amber-900 dark:text-amber-200")}>
+      <span className={cn("min-w-0 flex-1 break-words text-xs leading-snug", color || "text-muted-foreground", changed && "text-amber-900 dark:text-amber-200")}>
         {label}
       </span>
       <span
         className={cn(
-          "stat-readable text-xs font-mono tabular-nums",
+          "stat-readable shrink-0 text-xs font-mono tabular-nums",
           highlighted ? "font-bold text-primary" : color || "text-foreground",
           changed && "font-semibold text-amber-950 dark:text-amber-100",
         )}
@@ -45,7 +45,7 @@ export function CollapsibleSection({ title, defaultOpen, children, flash }: {
       <button
         onClick={() => setOpen(!open)}
         className={cn(
-          "flex min-h-10 w-full items-center gap-1.5 py-2 text-left text-[11px] font-semibold uppercase tracking-wider transition-colors",
+          "flex min-h-11 w-full items-center gap-1.5 py-2 text-left text-[11px] font-semibold uppercase tracking-wider transition-colors sm:min-h-0",
           flash ? "text-amber-800 dark:text-amber-300" : "text-muted-foreground hover:text-foreground",
         )}
       >
@@ -83,7 +83,7 @@ export function SimSlider({ label, value, min, max, onChange, suffix, tooltip }:
             const v = Number(e.target.value);
             if (!isNaN(v)) onChange(clamp(v));
           }}
-          className="h-10 w-14 shrink-0 rounded border border-border bg-background px-1.5 py-0.5 text-right font-mono text-[11px] tabular-nums [appearance:textfield] sm:h-8 sm:w-12 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="h-11 w-14 shrink-0 rounded border border-border bg-background px-1.5 py-0.5 text-right font-mono text-[11px] tabular-nums [appearance:textfield] sm:h-8 sm:w-12 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
         {suffix && <span className="shrink-0 text-[10px] text-muted-foreground">{suffix}</span>}
       </div>

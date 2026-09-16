@@ -45,7 +45,12 @@ export function SavedBuildsDialog({
         </DialogHeader>
         <div className="flex-1 overflow-y-auto px-6 pb-6 min-h-0">
           {builds.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">{emptyMessage}</p>
+            <div className="rounded-lg border border-dashed border-border/70 px-3 py-8 text-center">
+              <p className="text-sm font-medium text-foreground">{emptyMessage}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Save a build from the builder to see it here.
+              </p>
+            </div>
           ) : (
             <div className="space-y-2">
               {builds.map((build) => (
@@ -56,15 +61,23 @@ export function SavedBuildsDialog({
                     hoverBorder,
                   )}
                 >
-                  <button onClick={() => onLoad(build)} className="flex-1 text-left">
-                    <span className="text-sm font-medium">{build.name}</span>
-                    <div className="text-[10px] text-muted-foreground mt-0.5">
-                      {getSubtitle(build)}
-                    </div>
+                  <button
+                    type="button"
+                    onClick={() => onLoad(build)}
+                    className="flex min-h-11 flex-1 items-center text-left"
+                  >
+                    <span className="min-w-0">
+                      <span className="text-sm font-medium">{build.name}</span>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">
+                        {getSubtitle(build)}
+                      </div>
+                    </span>
                   </button>
                   <button
+                    type="button"
                     onClick={() => onDelete(build.id)}
-                    className="p-1.5 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors"
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive"
+                    aria-label="Delete saved build"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>

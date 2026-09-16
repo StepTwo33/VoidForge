@@ -234,10 +234,10 @@ export default function ArchwingBuilderPage() {
           <h1 className="text-xl sm:text-3xl font-bold">Archwing & Necramech Builder</h1>
           <div className="flex items-center gap-2">
             <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 sm:min-h-9 sm:py-1.5" title="Save Build">
-              <Save className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Save</span>
+              <Save className="h-3.5 w-3.5" /> <span>Save</span>
             </button>
             <button onClick={() => { setSavedBuilds(getSavedBuilds("archwing")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-9 sm:py-1.5" title="Load Build">
-              <FolderOpen className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Load</span>
+              <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
             </button>
           </div>
         </div>

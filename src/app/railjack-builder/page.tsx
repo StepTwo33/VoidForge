@@ -391,11 +391,11 @@ export default function RailjackBuilderPage() {
               placeholder="Build name..."
               className="h-11 w-full max-w-[12rem] rounded-lg border border-border bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground sm:h-9 sm:w-40"
             />
-            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 sm:min-h-9 sm:py-1.5" title="Save Build">
-              <Save className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Save</span>
+            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 sm:min-h-9 sm:min-w-0 sm:py-1.5" title="Save Build">
+              <Save className="h-3.5 w-3.5" /> <span>Save</span>
             </button>
-            <button onClick={() => { setSavedBuilds(getSavedBuilds("railjack")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-9 sm:py-1.5" title="Load Build">
-              <FolderOpen className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Load</span>
+            <button onClick={() => { setSavedBuilds(getSavedBuilds("railjack")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-9 sm:min-w-0 sm:py-1.5" title="Load Build">
+              <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
             </button>
           </div>
         </div>
@@ -703,7 +703,7 @@ export default function RailjackBuilderPage() {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    className="inline-flex min-h-10 items-center rounded-md px-2.5 text-[10px] text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    className="inline-flex min-h-11 items-center rounded-md px-2.5 text-[10px] text-muted-foreground hover:bg-secondary hover:text-foreground"
                     onClick={() => {
                       beginNewRailjackDraft();
                       setIntrinsics({ ...DEFAULT_RAILJACK_INTRINSICS });
@@ -713,7 +713,7 @@ export default function RailjackBuilderPage() {
                   </button>
                   <button
                     type="button"
-                    className="inline-flex min-h-10 items-center rounded-md px-2.5 text-[10px] text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    className="inline-flex min-h-11 items-center rounded-md px-2.5 text-[10px] text-muted-foreground hover:bg-secondary hover:text-foreground"
                     onClick={() => {
                       beginNewRailjackDraft();
                       setIntrinsics({
@@ -810,7 +810,7 @@ export default function RailjackBuilderPage() {
                           type="button"
                           disabled={!unlocked}
                           onClick={() => setActiveCrewEditor(editing ? null : slotIdx)}
-                          className="text-left flex-1 min-w-0"
+                          className="min-h-11 flex-1 min-w-0 py-1 text-left"
                         >
                           <div className="flex items-center gap-1.5">
                             <Users className="h-3 w-3 text-violet-400 shrink-0" />
@@ -843,7 +843,7 @@ export default function RailjackBuilderPage() {
                         {slot && unlocked && (
                           <button
                             type="button"
-                            className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md text-[10px] text-muted-foreground hover:bg-destructive/10 hover:text-red-700 dark:hover:text-red-400"
+                            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-[10px] text-muted-foreground hover:bg-destructive/10 hover:text-red-700 dark:hover:text-red-400"
                             onClick={() => {
                               beginNewRailjackDraft();
                               setCrewSlots((prev) => {

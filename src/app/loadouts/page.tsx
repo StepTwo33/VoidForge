@@ -634,7 +634,7 @@ export default function LoadoutsPage() {
                         <button
                           type="button"
                           onClick={() => handleSaveEdit(loadout.id)}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-green-400 hover:bg-green-500/10 sm:h-10 sm:w-10"
+                          className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-green-700 hover:bg-green-500/10 dark:text-green-400 sm:h-10 sm:w-10"
                           aria-label="Save name"
                         >
                           <Check className="h-4 w-4" />
@@ -642,7 +642,7 @@ export default function LoadoutsPage() {
                         <button
                           type="button"
                           onClick={handleCancelEdit}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-red-400 hover:bg-red-500/10 sm:h-10 sm:w-10"
+                          className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-red-700 hover:bg-red-500/10 dark:text-red-400 sm:h-10 sm:w-10"
                           aria-label="Cancel"
                         >
                           <X className="h-4 w-4" />

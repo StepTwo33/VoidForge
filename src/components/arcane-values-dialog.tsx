@@ -98,7 +98,7 @@ export function ArcaneValuesDialog({
         {!effects || effects.effects.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No effect lines in data yet. Use{" "}
-            <a href={advancedHref} className="text-purple-400 hover:underline">
+            <a href={advancedHref} className="text-purple-800 hover:underline dark:text-purple-400">
               Data Fixes
             </a>{" "}
             to add them.
@@ -121,14 +121,14 @@ export function ArcaneValuesDialog({
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Why this change?"
-            className="mt-0.5 h-8 w-full rounded border border-border bg-background px-2 text-sm"
+            className="mt-0.5 min-h-11 w-full rounded border border-border bg-background px-2 text-sm sm:min-h-9"
           />
         </label>
 
         <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
           <a
             href={advancedHref}
-            className="text-[11px] text-muted-foreground hover:text-purple-400"
+            className="inline-flex min-h-11 items-center text-[11px] text-muted-foreground hover:text-purple-800 dark:hover:text-purple-400 sm:min-h-0"
           >
             More options in Data Fixes →
           </a>
