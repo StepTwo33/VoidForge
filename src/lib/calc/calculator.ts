@@ -83,11 +83,19 @@ const DIRECT_ELEMENT_MOD_STATS = [
 ] as const;
 
 function resolveElementalCombos(rawElements: { type: string; value: number }[]): ElementalDamage[] {
-  // Work with a mutable list of pending elements in mod order
-  const pending: { type: string; value: number }[] = rawElements.map(e => ({ ...e }));
+  // Wiki Damage / Calculating Bonuses: same primary type collapses to its first
+  // occurrence (mod slot or earlier innate). Later Heat/Elec/etc. mods and a matching
+  // innate (e.g. Alternox Electricity after Stormbringer) add damage there instead of
+  // forming a second combine site.
+  const pending: { type: string; value: number }[] = [];
+  for (const e of rawElements) {
+    const existing = pending.find((p) => p.type === e.type);
+    if (existing) existing.value += e.value;
+    else pending.push({ ...e });
+  }
   const result: ElementalDamage[] = [];
 
-  // Try to combine from left to right
+  // Combine left→right (mod order; innate already appended / coalesced above).
   let i = 0;
   while (i < pending.length) {
     let combined = false;
