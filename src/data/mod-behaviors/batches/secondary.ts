@@ -382,7 +382,7 @@ export const MOD_BEHAVIORS_SECONDARY: Record<string, VerifiedModBehavior> = {
     line("ammoMaximum", "mod_panel", "multiplicative_percent", "Trick Mag: ammoMaximum \u2014 +90% Ammo Maximum"),
   ]),
   velox_conclusion: mod("velox_conclusion", [
-    line("abilityStrength", "mod_panel", "multiplicative_percent", "wiki: Velox Conclusion — on-hit Ability Strength stacks to 60%, consumed on next cast (not always-on)"),
+    line("abilityStrength", "mod_panel", "multiplicative_percent", "wiki: Velox Conclusion — next-cast STR via applyNightwaveWeaponAugmentEffects when applyTriggerBuffs (max stacks)"),
   ]),
   vile_discharge: mod("vile_discharge", [
     line("storedDamage", "mod_panel", "multiplicative_percent", "Vile Discharge: storedDamage \u2014 Damage is accumulated up to 30,000. Use Alt-fire to launch an explosive vile sac\u2026"),

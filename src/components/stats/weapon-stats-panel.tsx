@@ -348,6 +348,15 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             tooltip="Magazine fraction reloaded per second while holstered (display; swap-gated — not in same-weapon sustained DPS)."
           />
         )}
+        {(stats.abilityStrengthNextCastBonus ?? 0) > 0 && (
+          <StatRow
+            label="Next Cast Strength"
+            value={`+${((stats.abilityStrengthNextCastBonus ?? 0) * 100).toFixed(0)}%`}
+            color="text-amber-300"
+            changed={flash.has("abilityStrengthNextCastBonus")}
+            tooltip="Velox Conclusion: Ability Strength for the next ability cast (sim Trigger buffs = max stacks). Consumed on cast."
+          />
+        )}
         {stats.instantReloadOnKillChance != null && stats.instantReloadOnKillChance > 0 && (
           <StatRow
             label="Instant Reload (Kill)"

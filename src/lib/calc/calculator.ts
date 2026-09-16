@@ -9,6 +9,7 @@ import {
 } from './melee-combo';
 import { enrichWeapon } from '../weapons/weapon-enrich';
 import { resolveExaltedStrengthForCalc } from '../weapons/exalted-weapons';
+import { sentientIncisionElementForFaction } from './sentient-incision';
 
 export { avgCritMultiplier, quantizeBaseCritMultiplier } from './crit-utils';
 import {
@@ -600,6 +601,47 @@ function applyParallelExternalElementals(
   }
 }
 
+/**
+ * Nightwave weapon augments that need sim/faction context beyond verified stat modes:
+ * - Sentient Incision → parallel weakness elemental
+ * - Velox Conclusion → next-cast Ability Strength (max stacks when trigger buffs on)
+ */
+function applyNightwaveWeaponAugmentEffects(
+  equippedMods: ModSlot[],
+  allMods: Map<string, Mod>,
+  sim: SimulationParams,
+  parallelElementals: { type: string; bonusFraction: number }[],
+  stats: CalculatedStats,
+): void {
+  for (const slot of equippedMods) {
+    const mod = allMods.get(slot.modId);
+    if (!mod) continue;
+    const rank = Math.min(Math.max(slot.rank ?? 0, 0), mod.maxRank);
+    const mult = rank + 1;
+
+    if (slot.modId === "sentient_incision") {
+      const perRank = mod.stats.damage ?? 0;
+      const bonusFraction = (perRank * mult) / 100;
+      const elem = sentientIncisionElementForFaction(sim.targetFaction);
+      if (elem && bonusFraction > 0) {
+        parallelElementals.push({ type: elem, bonusFraction });
+      }
+      continue;
+    }
+
+    if (slot.modId === "velox_conclusion") {
+      // Catalog abilityStrength is % per hit per rank (0.1 → R5 = 0.6% / hit).
+      // Cap is always 100 hits × per-hit → R5 = +60% next cast.
+      const perHitFraction = ((mod.stats.abilityStrength ?? 0) * mult) / 100;
+      const maxBonus = perHitFraction * 100;
+      if (sim.applyTriggerBuffs && maxBonus > 0) {
+        stats.abilityStrengthNextCastBonus =
+          (stats.abilityStrengthNextCastBonus ?? 0) + maxBonus;
+      }
+    }
+  }
+}
+
 // ── Main Weapon Calculator ──────────────────────────────────────────────
 export function calculateWeaponBuild(
   rawWeapon: Weapon,
@@ -817,6 +859,13 @@ export function calculateWeaponBuild(
     externalDamageMult,
     externalExtraHit,
     parallelElementals,
+  );
+  applyNightwaveWeaponAugmentEffects(
+    orderedMods,
+    allMods,
+    sim,
+    parallelElementals,
+    stats,
   );
   // Toxin mod % (pre-combine) for Toxic Lash tick type mult.
   let toxinModBonus = 0;

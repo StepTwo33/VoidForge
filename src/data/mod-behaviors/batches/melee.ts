@@ -341,7 +341,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Seismic Wave — slam-only (not light DPS)"),
   ]),
   sentient_incision: mod("sentient_incision", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Sentient Incision — +120% uncombinable elemental matching target weakness (faction-gated; not flat paper damage)"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Sentient Incision — +120% parallel weakness elemental via applyNightwaveWeaponAugmentEffects (not Serration)"),
   ]),
   serrated_edges: mod("serrated_edges", [
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Serrated Edges — IPS convert (not always-on damage)"),
