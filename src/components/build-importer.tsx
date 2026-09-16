@@ -219,38 +219,48 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
   const validMatchCount = matches.filter((m) => m.mod !== null).length;
 
   return (
-    <div className="border border-blue-500/30 rounded-xl p-5 bg-card">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-blue-400">IMPORT BUILD</h2>
-        <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+    <div className="min-w-0 w-full overflow-hidden border border-blue-500/30 rounded-xl bg-card p-4 sm:p-5">
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <h2 className="text-sm font-semibold text-blue-700 dark:text-blue-400">IMPORT BUILD</h2>
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
+          aria-label="Close import"
+        >
           <X className="h-4 w-4" />
         </button>
       </div>
 
       {/* Mode tabs */}
-      <div className="flex gap-1.5 mb-4">
+      <div className="mb-4 flex flex-wrap gap-1.5">
         <button
+          type="button"
           onClick={() => { setMode("text"); setMatches([]); }}
-          className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-colors",
-            mode === "text" ? "bg-blue-600 border-blue-600 text-white" : "border-border text-muted-foreground hover:text-foreground")}
+          className={cn(
+            "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-colors",
+            mode === "text" ? "border-blue-600 bg-blue-600 text-white" : "border-border text-muted-foreground hover:text-foreground",
+          )}
         >
           <Type className="h-3.5 w-3.5" /> Mod Picker
         </button>
         <button
+          type="button"
           onClick={() => { setMode("text"); setMatches([]); setTextInput(""); }}
-          className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-colors",
-            mode === "text" && textInput !== undefined ? "border-border text-muted-foreground hover:text-foreground" : "border-border text-muted-foreground hover:text-foreground")}
-          // This is handled within the text mode itself
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
         >
           <Search className="h-3.5 w-3.5" /> Paste Names
         </button>
         <button
+          type="button"
           onClick={() => { setMode("screenshot"); setMatches([]); setSelectedMods([]); }}
-          className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-colors",
-            mode === "screenshot" ? "bg-blue-600 border-blue-600 text-white" : "border-border text-muted-foreground hover:text-foreground")}
+          className={cn(
+            "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-colors",
+            mode === "screenshot" ? "border-blue-600 bg-blue-600 text-white" : "border-border text-muted-foreground hover:text-foreground",
+          )}
         >
           <Camera className="h-3.5 w-3.5" /> Screenshot
-          <span className="text-[9px] px-1 py-0.5 rounded bg-amber-500/20 text-amber-400">BETA</span>
+          <span className="rounded bg-amber-500/20 px-1 py-0.5 text-[9px] text-amber-800 dark:text-amber-400">BETA</span>
         </button>
       </div>
 
@@ -261,12 +271,20 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
             <label className="text-xs text-muted-foreground mb-1.5 block">
               Add mods one by one ({selectedMods.length}/{numSlots})
             </label>
-            <div className="flex flex-wrap gap-1.5 mb-2">
+            {selectedMods.length === 0 && (
+              <p className="mb-2 text-xs text-muted-foreground">No mods selected yet — search below or paste a list.</p>
+            )}
+            <div className="mb-2 flex flex-wrap gap-1.5">
               {selectedMods.map((mod, i) => (
-                <span key={`${mod.id}-${i}`} className="flex items-center gap-1 px-2 py-1 text-xs rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/30">
-                  {mod.name}
-                  <button onClick={() => handleRemoveMod(i)} className="hover:text-red-400">
-                    <X className="h-3 w-3" />
+                <span key={`${mod.id}-${i}`} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-blue-500/30 bg-blue-500/10 px-2.5 py-1.5 text-xs text-blue-700 dark:text-blue-400 sm:min-h-0">
+                  <span className="max-w-[12rem] truncate sm:max-w-none">{mod.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveMod(i)}
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:text-red-700 dark:hover:text-red-400 sm:min-h-0 sm:min-w-0"
+                    aria-label={`Remove ${mod.name}`}
+                  >
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 </span>
               ))}
@@ -279,7 +297,7 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
                 onFocus={() => setShowSuggestions(true)}
                 placeholder="Type a mod name..."
                 disabled={selectedMods.length >= numSlots}
-                className="w-full h-9 pl-8 pr-3 bg-background border border-border rounded-lg text-sm focus:outline-none focus:border-blue-500/50 disabled:opacity-50"
+                className="min-h-11 h-11 w-full rounded-lg border border-border bg-background py-2 pl-8 pr-3 text-base focus:border-blue-500/50 focus:outline-none disabled:opacity-50 sm:h-9 sm:min-h-9 sm:text-sm"
               />
               {showSuggestions && suggestions.length > 0 && (
                 <div className="absolute z-50 mt-1 w-full bg-card border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -287,10 +305,10 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
                     <button
                       key={mod.id}
                       onClick={() => handleAddMod(mod)}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted/50 transition-colors flex items-center justify-between"
+                      className="flex min-h-11 w-full min-w-0 items-center justify-between gap-2 px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted/50"
                     >
-                      <span>{mod.name}</span>
-                      <span className="text-[10px] text-muted-foreground capitalize">{mod.category}</span>
+                      <span className="min-w-0 truncate">{mod.name}</span>
+                      <span className="shrink-0 text-[10px] capitalize text-muted-foreground">{mod.category}</span>
                     </button>
                   ))}
                 </div>
@@ -301,7 +319,7 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
           {selectedMods.length > 0 && (
             <button
               onClick={handleImportSelected}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
             >
               <Upload className="h-4 w-4" /> Import {selectedMods.length} Mod{selectedMods.length !== 1 ? "s" : ""}
             </button>
@@ -320,13 +338,13 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
               placeholder={"Paste mod names, one per line or comma-separated:\nSerration, Split Chamber, Heavy Caliber\nVital Sense, Point Strike"}
-              className="w-full h-24 px-3 py-2 bg-background border border-border rounded-lg text-sm resize-none focus:outline-none focus:border-blue-500/50"
+              className="h-24 w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-base focus:border-blue-500/50 focus:outline-none sm:text-sm"
             />
           </div>
           <button
             onClick={handleParseBulk}
             disabled={!textInput.trim()}
-            className="w-full py-2 bg-muted hover:bg-muted/80 disabled:opacity-50 text-foreground rounded-lg text-sm font-medium transition-colors"
+            className="min-h-11 w-full rounded-lg bg-muted py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/80 disabled:opacity-50"
           >
             Match Mod Names
           </button>
@@ -337,7 +355,7 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
         <div className="space-y-3">
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-blue-500/50 transition-colors"
+            className="min-h-[11rem] cursor-pointer rounded-xl border-2 border-dashed border-border p-8 text-center transition-colors hover:border-blue-500/50"
           >
             {isProcessing ? (
               <div className="flex flex-col items-center gap-2">
@@ -366,7 +384,7 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
             }}
           />
           {ocrError && (
-            <div className="flex items-center gap-2 p-2 bg-red-500/10 border border-red-500/30 rounded-lg text-xs text-red-400">
+            <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 p-2.5 text-xs text-red-700 dark:text-red-400">
               <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
               {ocrError}
             </div>
@@ -377,31 +395,31 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
       {/* Match results */}
       {matches.length > 0 && (
         <div className="mt-4 border border-border rounded-lg overflow-hidden">
-          <div className="px-3 py-2 bg-muted/30 text-xs font-semibold text-muted-foreground flex items-center justify-between">
-            <span>Detected Mods ({validMatchCount} matched)</span>
+          <div className="flex flex-wrap items-center justify-between gap-2 bg-muted/30 px-3 py-2 text-xs font-semibold text-muted-foreground">
+            <span className="min-w-0">Detected Mods ({validMatchCount} matched)</span>
             {matches.some((m) => m.confidence === "none") && (
-              <span className="text-amber-400">{matches.filter((m) => m.confidence === "none").length} unmatched</span>
+              <span className="shrink-0 text-amber-800 dark:text-amber-400">{matches.filter((m) => m.confidence === "none").length} unmatched</span>
             )}
           </div>
-          <div className="divide-y divide-border max-h-60 overflow-y-auto">
+          <div className="max-h-60 divide-y divide-border overflow-y-auto">
             {matches.map((m, i) => (
-              <div key={i} className="px-3 py-2 flex items-center gap-3 text-sm">
+              <div key={i} className="flex min-h-11 min-w-0 flex-wrap items-center gap-2 px-3 py-2 text-sm sm:gap-3">
                 <div className={cn(
-                  "w-1.5 h-1.5 rounded-full flex-shrink-0",
+                  "h-1.5 w-1.5 shrink-0 rounded-full",
                   m.confidence === "high" ? "bg-green-400" :
                   m.confidence === "medium" ? "bg-amber-400" :
                   m.confidence === "low" ? "bg-orange-400" : "bg-red-400"
                 )} />
-                <div className="flex-1 min-w-0">
-                  <span className="text-muted-foreground line-through text-xs mr-2">{m.inputName}</span>
+                <div className="min-w-0 flex-1 break-words">
+                  <span className="mr-2 text-xs text-muted-foreground line-through break-all">{m.inputName}</span>
                   {m.mod ? (
-                    <span className="font-medium">{m.mod.name}</span>
+                    <span className="font-medium break-words">{m.mod.name}</span>
                   ) : (
-                    <span className="text-red-400 italic">No match</span>
+                    <span className="italic text-red-700 dark:text-red-400">No match</span>
                   )}
                 </div>
                 {m.mod && (
-                  <span className="text-[10px] text-muted-foreground capitalize">{m.mod.category}</span>
+                  <span className="shrink-0 text-[10px] capitalize text-muted-foreground">{m.mod.category}</span>
                 )}
               </div>
             ))}
@@ -410,7 +428,7 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
             <div className="p-3 border-t border-border">
               <button
                 onClick={handleImportMatches}
-                className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
               >
                 <Check className="h-4 w-4" /> Import {Math.min(validMatchCount, numSlots)} Mod{Math.min(validMatchCount, numSlots) !== 1 ? "s" : ""}
               </button>

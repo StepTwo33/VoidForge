@@ -314,11 +314,11 @@ export default function ImportExportPage() {
           title="Share Builds"
           description="Export build codes to share with friends, or import builds from a code or URL."
           actions={
-            <div className="flex gap-1">
+            <div className="flex w-full min-w-0 gap-1 sm:w-auto">
               <button
                 onClick={() => setMode("export")}
                 className={cn(
-                  "min-h-11 rounded-lg border px-4 py-2 text-sm transition-all",
+                  "inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border px-4 py-2 text-sm transition-all sm:flex-none",
                   mode === "export" ? "border-primary bg-primary text-primary-foreground shadow-sm" : "border-border/70 text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -327,7 +327,7 @@ export default function ImportExportPage() {
               <button
                 onClick={() => setMode("import")}
                 className={cn(
-                  "min-h-11 rounded-lg border px-4 py-2 text-sm transition-all",
+                  "inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border px-4 py-2 text-sm transition-all sm:flex-none",
                   mode === "import" ? "border-primary bg-primary text-primary-foreground shadow-sm" : "border-border/70 text-muted-foreground hover:text-foreground",
                 )}
               >
