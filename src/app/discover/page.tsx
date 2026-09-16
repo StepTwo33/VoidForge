@@ -12,7 +12,7 @@ import {
   ContentPanel,
   EmptyState,
 } from "@/components/page-shell";
-import { Search, Loader2, Users, X, Sparkles } from "lucide-react";
+import { Search, Loader2, Users, X, Sparkles, ChevronDown } from "lucide-react";
 import type { PublicBuildSummary } from "@/lib/builds/build-types";
 import {
   buildDiscoverUrl,
@@ -21,6 +21,15 @@ import {
   type BuildSearchItem,
 } from "@/lib/builds/build-search";
 import { BUILD_TAG_OPTIONS, tagLabel } from "@/lib/builds/build-tags";
+
+const TAG_TOOLTIPS: Record<string, string> = {
+  eda: "EDA / ETA — Deep & Temporal Archimedea weekly challenge builds",
+  steel_path: "Steel Path — high-level endless / SP content",
+  level_cap: "Level Cap — enemy level scaling / endurance focus",
+  budget: "Budget — low forma / accessible mods",
+  beginner: "Beginner — easy to assemble and play",
+  endgame: "Endgame — high investment / late-game content",
+};
 
 const BUILD_TYPES = [
   { id: "all", label: "All" },
@@ -57,6 +66,7 @@ export default function DiscoverPage() {
   const [itemFilter, setItemFilter] = useState<BuildSearchItem | null>(urlItem);
   const [itemSearch, setItemSearch] = useState("");
   const [showItemSuggestions, setShowItemSuggestions] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [builds, setBuilds] = useState<(PublicBuildSummary & { voted?: boolean })[]>([]);
   const [featured, setFeatured] = useState<(PublicBuildSummary & { voted?: boolean })[]>([]);
   const [loading, setLoading] = useState(true);
@@ -196,7 +206,39 @@ export default function DiscoverPage() {
         )}
 
         <ContentPanel className="mb-6 space-y-4">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              className="inline-flex min-h-10 items-center gap-1.5 text-sm font-medium text-foreground sm:pointer-events-none"
+              onClick={() => setFiltersOpen((o) => !o)}
+              aria-expanded={filtersOpen}
+            >
+              Filters
+              <ChevronDown className={`h-4 w-4 transition-transform sm:hidden ${filtersOpen ? "rotate-180" : ""}`} />
+            </button>
+            {(sort !== "recent" || tagFilter || typeFilter !== "all" || searchQuery.trim() || itemFilter) && (
+              <button
+                type="button"
+                className="min-h-10 text-xs font-medium text-primary hover:underline"
+                onClick={() => {
+                  setSort("recent");
+                  setTagFilter("");
+                  setTypeFilter("all");
+                  setSearchQuery("");
+                  setItemFilter(null);
+                  setItemSearch("");
+                  syncUrl({ sort: "recent", tagFilter: "", typeFilter: "all", searchQuery: "", itemFilter: null });
+                }}
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+
+          <div className={`space-y-4 ${filtersOpen ? "block" : "hidden"} sm:block`}>
+          <div>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Sort</p>
+            <div className="flex flex-wrap gap-2">
             {(["recent", "popular"] as const).map((s) => (
               <FilterChip
                 key={s}
@@ -209,9 +251,12 @@ export default function DiscoverPage() {
                 {s === "recent" ? "Most Recent" : "Top Rated"}
               </FilterChip>
             ))}
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-1.5">
+          <div>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Tags</p>
+            <div className="flex flex-wrap gap-2">
             <FilterChip
               active={!tagFilter}
               onClick={() => {
@@ -225,6 +270,7 @@ export default function DiscoverPage() {
               <FilterChip
                 key={t.id}
                 active={tagFilter === t.id}
+                title={TAG_TOOLTIPS[t.id] ?? t.label}
                 onClick={() => {
                   const next = tagFilter === t.id ? "" : t.id;
                   setTagFilter(next);
@@ -234,10 +280,11 @@ export default function DiscoverPage() {
                 {t.label}
               </FilterChip>
             ))}
+            </div>
           </div>
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative min-w-0">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={searchQuery}
               onChange={(e) => {
@@ -251,12 +298,12 @@ export default function DiscoverPage() {
                 }
               }}
               placeholder="Search build names and descriptions…"
-              className="border-border/60 bg-background/50 pl-9"
+              className="min-w-0 truncate border-border/60 bg-background/50 pl-10 pr-3"
             />
           </div>
 
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative min-w-0">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={itemFilter ? itemFilter.name : itemSearch}
               onChange={(e) => {
@@ -278,7 +325,7 @@ export default function DiscoverPage() {
                 }
               }}
               placeholder="Filter by weapon, warframe, companion…"
-              className="border-border/60 bg-background/50 pl-9 pr-9"
+              className="min-w-0 truncate border-border/60 bg-background/50 pl-10 pr-9"
             />
             {(itemFilter || itemSearch) && (
               <button
@@ -317,7 +364,9 @@ export default function DiscoverPage() {
             )}
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div>
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Type</p>
+            <div className="flex flex-wrap gap-2">
             {BUILD_TYPES.map((t) => (
               <FilterChip
                 key={t.id}
@@ -331,6 +380,8 @@ export default function DiscoverPage() {
                 {t.label}
               </FilterChip>
             ))}
+            </div>
+          </div>
           </div>
         </ContentPanel>
 

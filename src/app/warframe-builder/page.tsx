@@ -736,7 +736,7 @@ export default function WarframeBuilderPage() {
   return (
     <PageShell>
 
-      <main className="flex-1 container mx-auto px-4 py-6">
+      <main className="container mx-auto flex-1 px-3.5 py-5 sm:px-4 sm:py-6">
         {showWarframeList || !selectedWarframe ? (
           <ItemPickerScreen
             icon={Shield}
@@ -803,7 +803,7 @@ export default function WarframeBuilderPage() {
                     <span>SH {wf.shield}</span>
                     <span>AR {wf.armor}</span>
                     <span>EN {wf.energy}</span>
-                    <span>SPD {wf.sprintSpeed}</span>
+                    <span>SPD {Number(wf.sprintSpeed).toFixed(2)}</span>
                   </div>
                 }
               />
@@ -835,31 +835,31 @@ export default function WarframeBuilderPage() {
                       setSaveDialogDefaultPublic(buildIsPublic);
                       setSaveDialogOpen(true);
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md text-muted-foreground hover:text-green-400 hover:bg-green-500/10 transition-all font-medium"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs sm:min-h-0 sm:py-1.5 text-muted-foreground hover:text-green-400 hover:bg-green-500/10 transition-all font-medium"
                     title="Save Build"
                   >
-                    <Save className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Save</span>
+                    <Save className="h-3.5 w-3.5" /> <span className="inline">Save</span>
                   </button>
-                  <button onClick={() => { setSavedBuilds(getSavedBuilds("warframe")); setShowSavedBuilds(true); }} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md text-muted-foreground hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium" title="Load Build">
-                    <FolderOpen className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Load</span>
+                  <button onClick={() => { setSavedBuilds(getSavedBuilds("warframe")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs sm:min-h-0 sm:py-1.5 text-muted-foreground hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium" title="Load Build">
+                    <FolderOpen className="h-3.5 w-3.5" /> <span className="inline">Load</span>
                   </button>
                   <div className="w-px h-4 bg-border mx-1" />
                   <button
                     onClick={() => setShowImporter(!showImporter)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all font-medium",
+                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       showImporter
                         ? "bg-blue-500/10 text-blue-400"
                         : "text-muted-foreground hover:text-blue-400 hover:bg-blue-500/10"
                     )}
                     title="Import Build"
                   >
-                    <Upload className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Import</span>
+                    <Upload className="h-3.5 w-3.5" /> <span className="inline">Import</span>
                   </button>
                   <button
                     onClick={handleShareBuild}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all font-medium",
+                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       shareCopied
                         ? "bg-green-500/10 text-green-400"
                         : "text-muted-foreground hover:text-purple-400 hover:bg-purple-500/10"
@@ -867,7 +867,7 @@ export default function WarframeBuilderPage() {
                     title="Copy shareable link"
                   >
                     {shareCopied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
-                    <span className="hidden sm:inline">{shareCopied ? "Copied!" : "Share"}</span>
+                    <span className="inline">{shareCopied ? "Copied!" : "Share"}</span>
                   </button>
                 </BuilderActionGroup>
 
@@ -875,26 +875,26 @@ export default function WarframeBuilderPage() {
                   <button
                     onClick={() => setIsMR30(!isMR30)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all font-medium",
+                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       isMR30
                         ? "bg-amber-500/10 text-amber-400"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
                     )}
                   >
                     <Star className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">MR 30+</span>
+                    <span className="inline">MR 30+</span>
                   </button>
                   <button
                     onClick={() => setHasOrokinReactor(!hasOrokinReactor)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all font-medium",
+                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       hasOrokinReactor
                         ? "bg-yellow-500/10 text-yellow-400"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
                     )}
                   >
                     <Zap className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Reactor</span>
+                    <span className="inline">Reactor</span>
                   </button>
                 </BuilderActionGroup>
 
@@ -905,9 +905,9 @@ export default function WarframeBuilderPage() {
                     `/report-issue?type=warframe&name=${encodeURIComponent(selectedWarframe.name)}&id=${encodeURIComponent(selectedWarframe.id)}`,
                     builderReturnTo,
                   )}
-                  className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-1.5 text-xs font-medium text-amber-400/70 transition-colors hover:bg-amber-500/5 hover:text-amber-400"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-2 text-xs font-medium text-amber-800/80 transition-colors hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 sm:min-h-0 sm:py-1.5"
                 >
-                  <Flag className="h-3 w-3" /> <span className="hidden sm:inline">Report</span>
+                  <Flag className="h-3 w-3" /> <span className="inline">Report</span>
                 </a>
               </BuilderActionBar>
             </BuilderItemHeader>
@@ -937,27 +937,37 @@ export default function WarframeBuilderPage() {
                       </p>
                     </div>
                   )}
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-sm font-semibold tracking-wider text-muted-foreground">
+                  <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                    <h2 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">
                       MOD CONFIGURATION{dualFormConfig ? ` — ${dualFormConfig.forms.find((f) => f.id === activeDualFormId)?.label ?? ""}` : ""}
                     </h2>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className={cn(
-                        "text-xs font-mono",
-                        capacityUsed > totalCapacity ? "text-red-400" : "text-muted-foreground"
+                        "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
+                        capacityUsed > totalCapacity ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
                       )}>
+                        <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
                         {capacityUsed} / {totalCapacity}
                       </span>
                       {auraBonus > 0 && (
-                        <span className="text-[10px] text-green-400/70">+{auraBonus} aura</span>
+                        <span className="text-[10px] text-green-700/80 dark:text-green-400/70">+{auraBonus} aura</span>
+                      )}
+                      {calculatedStats && (
+                        <span className="hidden text-[10px] font-mono tabular-nums text-muted-foreground sm:inline">
+                          STR {(calculatedStats.abilityStrength * 100).toFixed(0)}%
+                          {" · "}DUR {(calculatedStats.abilityDuration * 100).toFixed(0)}%
+                          {" · "}EFF {(calculatedStats.abilityEfficiency * 100).toFixed(0)}%
+                          {" · "}RNG {(calculatedStats.abilityRange * 100).toFixed(0)}%
+                        </span>
                       )}
                     </div>
                   </div>
 
+
                   {/* Aura + Exilus — top row (matches in-game warframe mod layout) */}
-                  <div className="grid grid-cols-2 gap-2 mb-2">
+                  <div className="mb-2 grid grid-cols-2 gap-2 min-w-0">
                     <div>
-                      <span className="text-[10px] font-semibold text-purple-400 tracking-wider mb-1 block">AURA</span>
+                      <span className="mb-1 block text-[10px] font-semibold tracking-wider text-purple-700 dark:text-purple-400">AURA</span>
                       {(() => {
                         const equipped = equippedMods.find((m) => m.slotIndex === AURA_SLOT);
                         const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
@@ -977,7 +987,10 @@ export default function WarframeBuilderPage() {
                       })()}
                     </div>
                     <div>
-                      <span className="text-[10px] font-semibold text-cyan-400 tracking-wider mb-1 block">EXILUS</span>
+                      <span className="mb-1 block text-[10px] font-semibold tracking-wider text-cyan-700 dark:text-cyan-400" title="Utility / mobility mods — not Aura">
+                        EXILUS
+                        <span className="ml-1.5 hidden font-normal normal-case tracking-normal text-muted-foreground sm:inline">utility</span>
+                      </span>
                       {(() => {
                         const equipped = equippedMods.find((m) => m.slotIndex === EXILUS_SLOT);
                         const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
@@ -1092,7 +1105,7 @@ export default function WarframeBuilderPage() {
                           : undefined
                       }
                     />
-                    <div className="grid auto-rows-fr items-stretch gap-4 sm:grid-cols-2">
+                    <div className="grid auto-rows-fr items-stretch gap-2.5 sm:grid-cols-2 sm:gap-3">
                       {abilityDisplayEntries.map((entry) => {
                         const slotIndex = entry.gameSlot - 1;
                         const hasHelminth = helminthSlot != null && helminthAbility != null;
@@ -1241,7 +1254,7 @@ export default function WarframeBuilderPage() {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:self-start lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:overflow-y-auto lg:overscroll-contain">
                 <WarframeStatsPanel
                   stats={calculatedStats}
                   warframe={selectedWarframe}

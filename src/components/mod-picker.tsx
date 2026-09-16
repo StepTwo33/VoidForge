@@ -7,12 +7,13 @@ import { isArchmeleeMod } from "@/lib/mods/archmelee-mods";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { Search, Plus, X } from "lucide-react";
 import { PolarityIcon } from "@/components/polarity-icon";
 import { getModImage, getArcaneImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
+import { EmptyState } from "@/components/page-shell";
 import { getBlockedModIds } from "@/data/mod-exclusions";
 import { cleanModDescription, getModStatDisplayLines } from "@/lib/display/mod-display";
 
@@ -290,10 +291,28 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                         ? "Select Companion Precept"
                         : "Select Mod"}
           </DialogTitle>
+          {!isArcaneBrowse && (
+            <DialogDescription className="text-xs text-muted-foreground">
+              {slotType === "exilus"
+                ? "Warframe Exilus — utility / mobility mods only (not Aura)."
+                : slotType === "weapon_exilus_primary" || slotType === "weapon_exilus_secondary" || slotType === "weapon_exilus_melee"
+                  ? "Weapon Exilus — mods eligible for this Exilus slot on the selected weapon."
+                  : slotType === "aura"
+                    ? "Aura slot — aura mods only."
+                    : weaponCategory === "shotgun"
+                      ? "Shotgun pool — rifle-only mods stay filtered out."
+                      : "Eligible mods for this slot."}
+            </DialogDescription>
+          )}
+          {!isArcaneBrowse && helminthAbility?.abilityName && (
+            <p className="mt-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-2 text-[11px] leading-snug text-emerald-950 dark:text-emerald-200">
+              Helminth unlock — <span className="font-semibold">{helminthAbility.abilityName} Augment</span> is available in this list while that ability is subsumed.
+            </p>
+          )}
         </DialogHeader>
 
         {selectedMod ? (
-          <div className="p-6 space-y-4">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-6">
             <div className="border border-border rounded-lg p-4 bg-secondary/30">
               <div className="flex items-center gap-3 mb-2">
                 <GameAssetImage
@@ -304,8 +323,8 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                   className="w-12 h-12 rounded object-contain bg-muted/20 shrink-0"
                   hideOnError
                 />
-                <div className="flex-1 flex items-center justify-between">
-                  <h4 className="font-semibold">{selectedMod.name}</h4>
+                <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                  <h4 className="min-w-0 truncate font-semibold">{selectedMod.name}</h4>
                   <Badge variant="outline" className={cn("text-[10px]", RARITY_BADGE_COLORS[selectedMod.rarity])}>
                     {selectedMod.rarity}
                   </Badge>
@@ -346,14 +365,16 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                           <div key={key} className="flex items-center justify-between text-xs p-1.5 rounded bg-background">
                             <span className="text-muted-foreground">{statDef?.label || key}</span>
                             <div className="flex items-center gap-2">
-                              <span className={value >= 0 ? "text-green-400" : "text-red-400"}>
+                              <span className={value >= 0 ? "cmp-win" : "cmp-lose"}>
                                 {value >= 0 ? "+" : ""}{(value * 100).toFixed(1)}%
                               </span>
                               <button
+                                type="button"
                                 onClick={() => setRivenStats((prev) => { const n = { ...prev }; delete n[key]; return n; })}
-                                className="text-muted-foreground hover:text-red-400 transition-colors"
+                                className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-red-400 sm:h-9 sm:w-9"
+                                aria-label="Remove riven stat"
                               >
-                                <X className="h-3 w-3" />
+                                <X className="h-3.5 w-3.5" />
                               </button>
                             </div>
                           </div>
@@ -366,7 +387,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                       <select
                         value={rivenStatKey}
                         onChange={(e) => setRivenStatKey(e.target.value)}
-                        className="flex-1 text-xs bg-background border border-border rounded px-2 py-1.5"
+                        className="min-h-11 min-w-0 flex-1 rounded border border-border bg-background px-2 py-2 text-xs sm:min-h-9 sm:py-1.5"
                       >
                         <option value="">Select stat...</option>
                         {rivenPool.filter((s) => !(s.key in rivenStats)).map((s) => (
@@ -379,7 +400,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                         placeholder="% value"
                         value={rivenStatValue}
                         onChange={(e) => setRivenStatValue(e.target.value)}
-                        className="w-24 text-xs bg-background border border-border rounded px-2 py-1.5"
+                        className="h-11 w-24 shrink-0 rounded border border-border bg-background px-2 text-xs sm:h-9"
                       />
                       <button
                         onClick={() => {
@@ -390,7 +411,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                           setRivenStatValue("");
                         }}
                         disabled={!rivenStatKey || !rivenStatValue}
-                        className="px-3 py-1.5 text-xs rounded bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-40 transition-colors"
+                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded bg-purple-600 text-xs text-white transition-colors hover:bg-purple-700 disabled:opacity-40 sm:h-9 sm:w-9"
                       >
                         <Plus className="h-3 w-3" />
                       </button>
@@ -441,8 +462,8 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                     type="button"
                     onClick={() => setBrowseTab("mods")}
                     className={cn(
-                      "flex-1 text-xs py-1.5 rounded-md transition-colors",
-                      browseTab === "mods" ? "bg-background text-foreground font-medium" : "text-muted-foreground hover:text-foreground",
+                      "min-h-11 flex-1 rounded-md text-sm transition-colors",
+                      browseTab === "mods" ? "bg-background font-medium text-foreground" : "text-muted-foreground hover:text-foreground",
                     )}
                   >
                     Mods
@@ -451,8 +472,8 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                     type="button"
                     onClick={() => setBrowseTab("arcanes")}
                     className={cn(
-                      "flex-1 text-xs py-1.5 rounded-md transition-colors",
-                      browseTab === "arcanes" ? "bg-background text-foreground font-medium" : "text-muted-foreground hover:text-foreground",
+                      "min-h-11 flex-1 rounded-md text-sm transition-colors",
+                      browseTab === "arcanes" ? "bg-background font-medium text-foreground" : "text-muted-foreground hover:text-foreground",
                     )}
                   >
                     Arcanes
@@ -477,7 +498,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                       type="button"
                       onClick={() => setStatFilter(option.id)}
                       className={cn(
-                        "rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ring-1",
+                        "inline-flex min-h-11 items-center rounded-full px-3 py-2.5 text-xs font-medium transition-colors ring-1 lg:min-h-8 lg:px-2.5 lg:py-1 lg:text-[11px]",
                         statFilter === option.id
                           ? "bg-primary text-primary-foreground ring-primary/40"
                           : "bg-secondary/40 text-muted-foreground ring-border hover:text-foreground hover:bg-secondary/70",
@@ -489,16 +510,23 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                 </div>
               )}
               {!isArcaneBrowse && (
-                <div className="mt-2 flex items-center justify-between gap-3">
-                  <p className="text-xs text-muted-foreground">
-                    {displayedMods.length} mods available
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                  <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+                    {displayedMods.length === 0
+                      ? (search.trim() ? "No mods match this search" : "No mods in this filter")
+                      : (
+                        <>
+                          <span className="font-mono tabular-nums text-foreground">{displayedMods.length}</span>
+                          {" "}mods — tap to equip
+                        </>
+                      )}
                   </p>
                   <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                     Sort
                     <select
                       value={sortId}
                       onChange={(e) => setSortId(e.target.value as ModSortId)}
-                      className="rounded-md border border-border bg-background px-2 py-1 text-[11px] text-foreground"
+                      className="min-h-11 rounded-md border border-border bg-background px-2.5 py-2 text-xs text-foreground sm:min-h-8 sm:py-1 sm:text-[11px]"
                     >
                       <option value="name">Name (A–Z)</option>
                       <option value="drain-asc">Drain (low → high)</option>
@@ -508,8 +536,15 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                 </div>
               )}
               {isArcaneBrowse && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  {filteredArcanes.length} arcanes available
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {filteredArcanes.length === 0
+                    ? (search.trim() ? "No arcanes match this search" : "No arcanes available")
+                    : (
+                      <>
+                        <span className="font-mono tabular-nums text-foreground">{filteredArcanes.length}</span>
+                        {" "}arcanes — tap to equip
+                      </>
+                    )}
                 </p>
               )}
             </div>
@@ -520,7 +555,37 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
               aria-label={isArcaneBrowse ? "Arcane list" : "Mod list"}
             >
               <div className="space-y-1">
-                {isArcaneBrowse ? filteredArcanes.map((arcane) => {
+                {isArcaneBrowse && filteredArcanes.length === 0 ? (
+                  <EmptyState
+                    icon={Search}
+                    title="No arcanes found"
+                    description={search.trim() ? `Nothing matches “${search.trim()}”.` : "No arcanes available for this slot."}
+                    className="border-0 bg-transparent py-10"
+                  />
+                ) : !isArcaneBrowse && displayedMods.length === 0 ? (
+                  <EmptyState
+                    icon={Search}
+                    title={
+                      slotType === "exilus" || String(slotType).startsWith("weapon_exilus")
+                        ? "No Exilus mods found"
+                        : weaponCategory === "shotgun"
+                          ? "No shotgun mods found"
+                          : "No mods found"
+                    }
+                    description={
+                      search.trim()
+                        ? `Nothing matches “${search.trim()}”. Try clearing search or filters.`
+                        : slotType === "exilus"
+                          ? "This slot only lists warframe Exilus (utility) mods."
+                          : String(slotType).startsWith("weapon_exilus")
+                            ? "No mods are eligible for this weapon’s Exilus slot with the current filters."
+                            : weaponCategory === "shotgun"
+                              ? "Shotgun filtering is on — rifle-class mods won’t appear here. Clear search/filters or pick a different weapon."
+                              : "No mods match the current filters."
+                    }
+                    className="border-0 bg-transparent py-10"
+                  />
+                ) : isArcaneBrowse ? filteredArcanes.map((arcane) => {
                   const isEquipped = equippedArcaneIds.includes(arcane.id);
                   return (
                     <button
@@ -534,10 +599,10 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                           : "border-border hover:border-purple-500/50 hover:bg-purple-500/5 hover:scale-[1.01] cursor-pointer shadow-sm",
                       )}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
                           <GameAssetImage src={getArcaneImage(arcane.name)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/20 shrink-0" hideOnError />
-                          <span className="text-sm font-medium">{arcane.name}</span>
+                          <span className="truncate text-sm font-medium">{arcane.name}</span>
                         </div>
                         <Badge variant="outline" className={cn("text-[10px]", RARITY_BADGE_COLORS[arcane.rarity])}>
                           {arcane.rarity}
@@ -568,13 +633,13 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                           : "border-border hover:border-blue-500/50 hover:bg-blue-500/5 hover:scale-[1.01] cursor-pointer shadow-sm"
                       )}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
                           <GameAssetImage src={getModImage(mod.name)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/20 shrink-0" hideOnError />
                           <PolarityIcon polarity={mod.polarity} size={14} />
-                          <span className="text-sm font-medium">{mod.name}</span>
+                          <span className="truncate text-sm font-medium">{mod.name}</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex shrink-0 items-center gap-1.5">
                           {!hasStats && (
                             <span className="text-[10px] text-yellow-500/70">utility</span>
                           )}

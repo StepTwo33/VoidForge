@@ -43,7 +43,7 @@ export default async function SiteUpdatePage({
       <PageMain maxWidth="md">
         <Link
           href="/updates"
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
+          className="mb-6 inline-flex min-h-11 items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
         >
           <ArrowLeft className="h-4 w-4" />
           All updates
@@ -66,7 +66,7 @@ export default async function SiteUpdatePage({
               <p className="text-xs text-muted-foreground/80">
                 {formatSiteUpdateTime(update.createdAt)} · @{update.author.username}
               </p>
-              <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
+              <h1 className="mt-2 break-words text-2xl font-bold tracking-tight sm:text-3xl">
                 {update.title}
               </h1>
             </div>

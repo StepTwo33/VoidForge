@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -46,38 +46,56 @@ import { accentTone } from "@/lib/display/accent-tones";
 import { cn } from "@/lib/utils";
 
 export function CodexDetailCard({ children, onClose }: { children: ReactNode; onClose: () => void }) {
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    const prevOverscroll = document.body.style.overscrollBehavior;
+    document.body.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.body.style.overscrollBehavior = prevOverscroll;
+    };
+  }, []);
+
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-end p-3 sm:p-4 lg:p-6"
+      className="fixed inset-0 z-[60] flex items-end justify-stretch overscroll-none sm:items-end sm:justify-end sm:p-4 sm:pb-[max(1rem,env(safe-area-inset-bottom,0px))] lg:p-6 lg:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]"
       role="dialog"
+      aria-modal="true"
       aria-label="Selected entry details"
     >
+      <button
+        type="button"
+        aria-label="Dismiss details"
+        className="absolute inset-0 bg-background/55 backdrop-blur-[1px]"
+        onClick={onClose}
+      />
       <ContentPanel
         className={cn(
-          "pointer-events-auto flex w-full max-w-sm flex-col overflow-hidden",
-          "max-h-[min(72vh,calc(100vh-5rem))] shadow-2xl shadow-[var(--shadow-color)]",
-          "border-border/80 bg-card/95 backdrop-blur-md",
+          "relative z-[1] flex w-full flex-col overflow-hidden rounded-none border-x-0 border-b-0 sm:max-w-md sm:rounded-xl sm:border",
+          "max-h-[min(88dvh,calc(100dvh-3.5rem-env(safe-area-inset-top,0px)))] pb-[env(safe-area-inset-bottom,0px)] shadow-2xl shadow-[var(--shadow-color)] sm:max-h-[min(72vh,calc(100dvh-5rem-env(safe-area-inset-top,0px)))] sm:pb-0",
+          "border-border/80 bg-card/98 backdrop-blur-md",
         )}
       >
-        <div className="flex shrink-0 items-center justify-between border-b border-border/60 px-3 py-1.5">
+        <div className="flex shrink-0 items-center justify-between border-b border-border/60 px-3 py-2">
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center gap-1 rounded-md px-1 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-2.5 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground sm:min-h-0 sm:py-1 sm:text-[10px]"
           >
-            <ArrowLeft className="h-3 w-3" />
+            <ArrowLeft className="h-3.5 w-3.5" />
             Back to list
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground sm:h-8 sm:w-8"
             aria-label="Close detail card"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto p-3">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3 sm:p-3">{children}</div>
       </ContentPanel>
     </div>
   );
@@ -600,7 +618,7 @@ export function ArcaneDetailPanel({
               </button>
             )}
           </div>
-          <div className={cn(compact ? "max-h-24" : "max-h-32", "overflow-y-auto space-y-1")}>
+          <div className={cn(compact ? "max-h-none overflow-visible" : "max-h-32 overflow-y-auto", "space-y-1")}>
             {effects.effects.map((line) => {
               const scaled = scaleArcaneEffectLine(line, rank, effects.maxRank);
               const suffix = line.flat ? "" : "%";

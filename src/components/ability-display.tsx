@@ -279,19 +279,19 @@ export function AbilitiesSectionHeader({
   formLabel?: string;
 }) {
   return (
-    <div className="mb-4 flex items-center gap-3">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
-        <Sparkles className="h-4 w-4 text-primary" />
+    <div className="mb-2.5 flex items-center gap-2.5">
+      <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 ring-1 ring-primary/20">
+        <Sparkles className="h-3.5 w-3.5 text-primary" />
       </div>
-      <div>
+      <div className="min-w-0">
         <h2 className="text-sm font-semibold tracking-wide text-foreground">
           Abilities
           {formLabel && (
             <span className="ml-2 font-normal text-primary">{formLabel}</span>
           )}
         </h2>
-        <p className="text-[10px] text-muted-foreground">
-          Stats update with your current build · one Helminth subsume per loadout
+        <p className="text-[10px] leading-tight text-muted-foreground">
+          Live with your build · one Helminth subsume
         </p>
       </div>
     </div>

@@ -116,7 +116,7 @@ export default async function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased overflow-x-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col overflow-x-hidden scroll-smooth antialiased [scroll-padding-top:4.5rem]`}
         suppressHydrationWarning
       >
         <TooltipProvider>

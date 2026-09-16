@@ -42,7 +42,7 @@ function UpdateCard({ update, compact }: { update: SiteUpdateSummary; compact?: 
       </div>
       <h3
         className={cn(
-          "mt-1 font-semibold leading-snug text-foreground transition-colors group-hover:text-primary",
+          "mt-1 break-words font-semibold leading-snug text-foreground transition-colors group-hover:text-primary",
           compact ? "text-xs" : "text-sm",
         )}
       >
@@ -119,7 +119,7 @@ export function SiteUpdatesSidebar({
           {isAdmin && (
             <Link
               href="/admin/updates"
-              className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground hover:text-primary hover:underline"
+              className="inline-flex min-h-11 items-center gap-0.5 px-1 text-[10px] font-medium text-muted-foreground hover:text-primary hover:underline"
             >
               Manage
             </Link>
@@ -131,7 +131,7 @@ export function SiteUpdatesSidebar({
           />
           <Link
             href="/updates"
-            className="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary hover:underline"
+            className="inline-flex min-h-11 items-center gap-0.5 px-1 text-[10px] font-medium text-primary hover:underline"
           >
             View all
             <ChevronRight className="h-3 w-3" />
@@ -168,7 +168,7 @@ export function SiteUpdatesSidebar({
         <div className="border-t border-border/60 px-3 py-2.5">
           <Link
             href="/admin/updates"
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-border/60 bg-background/50 px-2 py-2 text-[10px] font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-md border border-border/60 bg-background/50 px-2 py-2 text-[10px] font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
           >
             <PenLine className="h-3 w-3" />
             Manage updates

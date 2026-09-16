@@ -24,7 +24,7 @@ export function BuildPreviewSummary({ preview }: { preview: BuildPreviewData }) 
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             {preview.typeLabel}
           </p>
-          <p className="text-lg font-semibold text-foreground">{preview.itemName}</p>
+          <p className="text-lg font-semibold text-foreground break-words">{preview.itemName}</p>
           <p className="text-xs text-muted-foreground">{preview.modSummary}</p>
         </div>
       </div>
@@ -79,8 +79,8 @@ export function BuildPreviewSummary({ preview }: { preview: BuildPreviewData }) 
       )}
 
       {preview.modChips.length === 0 && preview.arcaneChips.length === 0 && preview.extraLines.length === 0 && (
-        <p className={cn("text-sm italic text-muted-foreground")}>
-          This build has no equipped mods to preview. Open it in the builder to see the full setup.
+        <p className={cn("text-sm text-muted-foreground")}>
+          No equipped mods to preview yet. Open this build in the builder to review the full setup.
         </p>
       )}
     </div>

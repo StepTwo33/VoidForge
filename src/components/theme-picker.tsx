@@ -82,7 +82,7 @@ export function ThemePicker() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-2 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all"
+        className="tap-target inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-2 text-xs text-muted-foreground transition-all hover:border-primary/50 hover:text-foreground"
         title="Appearance"
       >
         <span
@@ -93,7 +93,7 @@ export function ThemePicker() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-popover shadow-elevation z-50 overflow-hidden">
+        <div className="absolute right-0 top-full z-50 mt-2 max-h-[min(24rem,calc(100dvh-4.5rem))] w-56 overflow-hidden rounded-xl border border-border bg-popover shadow-elevation">
           {/* Dark / Light toggle */}
           <div className="px-3 py-2.5 border-b border-border">
             <span className="text-[10px] font-semibold tracking-wider text-muted-foreground block mb-2">APPEARANCE</span>
@@ -101,7 +101,7 @@ export function ThemePicker() {
               <button
                 onClick={() => selectMode("light")}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
+                  "inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors sm:min-h-9 sm:py-1.5",
                   mode === "light"
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -112,7 +112,7 @@ export function ThemePicker() {
               <button
                 onClick={() => selectMode("dark")}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors",
+                  "inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors sm:min-h-9 sm:py-1.5",
                   mode === "dark"
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -127,13 +127,13 @@ export function ThemePicker() {
           <div className="px-3 py-2 border-b border-border">
             <span className="text-[10px] font-semibold tracking-wider text-muted-foreground">COLOR THEME</span>
           </div>
-          <div className="p-1.5 max-h-64 overflow-y-auto">
+          <div className="max-h-[min(14rem,calc(100dvh-12rem))] overflow-y-auto overscroll-contain p-1.5 [scrollbar-width:thin] sm:max-h-64">
             {THEMES.map((theme) => (
               <button
                 key={theme.id}
                 onClick={() => selectTheme(theme.id)}
                 className={cn(
-                  "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all",
+                  "flex min-h-11 w-full items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left transition-all sm:min-h-0 sm:py-2",
                   current === theme.id
                     ? "bg-primary/10 text-foreground"
                     : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"

@@ -61,17 +61,17 @@ export function BuildShareCard({
         <button
           type="button"
           onClick={() => copy("url")}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:border-primary/40 hover:text-primary transition-colors"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:border-primary/40 hover:text-primary transition-colors"
         >
-          {copied === "url" ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Link2 className="h-3.5 w-3.5" />}
+          {copied === "url" ? <Check className="h-3.5 w-3.5 text-green-700 dark:text-green-400" /> : <Link2 className="h-3.5 w-3.5" />}
           {copied === "url" ? "Copied link" : "Copy link"}
         </button>
         <button
           type="button"
           onClick={() => copy("discord")}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:border-primary/40 hover:text-primary transition-colors"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:border-primary/40 hover:text-primary transition-colors"
         >
-          {copied === "discord" ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied === "discord" ? <Check className="h-3.5 w-3.5 text-green-700 dark:text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
           {copied === "discord" ? "Copied Discord text" : "Copy Discord text"}
         </button>
       </div>

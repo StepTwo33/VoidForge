@@ -81,7 +81,7 @@ export function BuildVoteButton({
       disabled={loading || !canVote}
       title={canVote ? (voted ? "Remove upvote" : "Upvote") : "Sign in to upvote"}
       className={cn(
-        "inline-flex items-center gap-1 rounded-md border transition-colors font-medium",
+        "inline-flex min-h-11 items-center gap-1 rounded-md border transition-colors font-medium",
         pad,
         voted
           ? "border-primary/50 bg-primary/10 text-primary"
@@ -191,7 +191,7 @@ export function PublicBuildRow({
     >
       <Link
         href={buildOpenUrl(build.type, build.id)}
-        className="flex flex-1 items-center gap-3 p-3 sm:p-4 min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-inset"
+        className="flex min-h-11 flex-1 items-center gap-3 p-3 sm:p-4 min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-inset"
       >
         {showThumbnails && (
           <BuildItemThumbnail type={build.type} itemId={build.itemId} compact={compact} />
@@ -202,7 +202,7 @@ export function PublicBuildRow({
               {itemDisplay.itemName}
             </div>
           )}
-          <div className="font-medium truncate group-hover:text-primary transition-colors">{build.name}</div>
+          <div className="font-medium truncate break-words group-hover:text-primary transition-colors">{build.name}</div>
           {!compact && build.description && (
             <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{build.description}</p>
           )}
@@ -244,7 +244,7 @@ export function PublicBuildRow({
                     router.push(`/u/${build.author.profileSlug}`);
                   }
                 }}
-                className="hover:text-primary transition-colors cursor-pointer"
+                className="inline-flex min-h-11 items-center hover:text-primary transition-colors cursor-pointer"
               >
                 @{build.author.username}
               </span>
@@ -276,7 +276,7 @@ export function PublicBuildRow({
               onLoad();
             }}
             title="Load in builder"
-            className="p-2 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
           >
             <Download className="h-3.5 w-3.5" />
           </button>

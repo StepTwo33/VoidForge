@@ -318,7 +318,7 @@ export default function ImportExportPage() {
               <button
                 onClick={() => setMode("export")}
                 className={cn(
-                  "rounded-lg border px-3 py-1.5 text-sm transition-all",
+                  "min-h-11 rounded-lg border px-4 py-2 text-sm transition-all",
                   mode === "export" ? "border-primary bg-primary text-primary-foreground shadow-sm" : "border-border/70 text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -327,7 +327,7 @@ export default function ImportExportPage() {
               <button
                 onClick={() => setMode("import")}
                 className={cn(
-                  "rounded-lg border px-3 py-1.5 text-sm transition-all",
+                  "min-h-11 rounded-lg border px-4 py-2 text-sm transition-all",
                   mode === "import" ? "border-primary bg-primary text-primary-foreground shadow-sm" : "border-border/70 text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -339,9 +339,9 @@ export default function ImportExportPage() {
 
           {/* ── EXPORT / SHARE MODE ─────────────────────────────── */}
           {mode === "export" && (
-            <div className="grid gap-6 md:grid-cols-[1fr_300px]">
+            <div className="grid min-w-0 gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,300px)]">
               {/* Build selector */}
-              <div className="border border-border rounded-xl bg-card overflow-hidden">
+              <div className="min-w-0 border border-border rounded-xl bg-card overflow-hidden">
                 <div className="px-4 py-3 border-b border-border">
                   <h2 className="text-[10px] font-semibold tracking-wider text-muted-foreground mb-2">SELECT A BUILD TO SHARE</h2>
                   <div className="relative">
@@ -350,7 +350,7 @@ export default function ImportExportPage() {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search builds..."
-                      className="w-full h-8 pl-8 pr-3 bg-background border border-border rounded-lg text-sm focus:outline-none focus:border-primary/50"
+                      className="w-full h-11 min-h-11 pl-8 pr-3 bg-background border border-border rounded-lg text-base focus:outline-none focus:border-primary/50 sm:text-sm"
                     />
                   </div>
                 </div>
@@ -370,7 +370,7 @@ export default function ImportExportPage() {
                           key={item.id}
                           onClick={() => setSelected(isSelected ? null : item)}
                           className={cn(
-                            "w-full text-left px-4 py-3 flex items-center gap-3 transition-colors",
+                            "flex min-h-11 w-full items-center gap-3 px-4 py-3 text-left transition-colors",
                             isSelected ? "bg-primary/10" : "hover:bg-muted/30"
                           )}
                         >
@@ -398,7 +398,7 @@ export default function ImportExportPage() {
               </div>
 
               {/* QR + share panel */}
-              <div className="border border-border rounded-xl bg-card p-4 flex flex-col items-center gap-4">
+              <div className="flex min-w-0 flex-col items-center gap-4 overflow-hidden border border-border rounded-xl bg-card p-4">
                 {selected ? (
                   <>
                     <h3 className="text-sm font-semibold text-center truncate w-full">{selected.name}</h3>
@@ -407,10 +407,10 @@ export default function ImportExportPage() {
                     {/* QR Code */}
                     {qrDataUrl ? (
                       <div className="bg-white/10 p-3 rounded-xl">
-                        <QrCodeImage src={qrDataUrl} alt="QR Code" width={240} height={240} className="w-[240px] h-[240px]" />
+                        <QrCodeImage src={qrDataUrl} alt="QR Code" width={240} height={240} className="h-auto w-full max-w-[240px] aspect-square" />
                       </div>
                     ) : (
-                      <div className="w-[240px] h-[240px] bg-muted/20 rounded-xl flex items-center justify-center">
+                      <div className="flex aspect-square w-full max-w-[240px] items-center justify-center rounded-xl bg-muted/20">
                         <QrCode className="h-12 w-12 text-muted-foreground/30" />
                       </div>
                     )}
@@ -422,7 +422,7 @@ export default function ImportExportPage() {
                         {shareCode.slice(0, 48)}{shareCode.length > 48 ? "…" : ""}
                       </p>
                     ) : (
-                      <p className="text-[10px] text-red-400 text-center">Share code failed to generate</p>
+                      <p className="text-[10px] text-red-700 dark:text-red-400 text-center">Share code failed to generate</p>
                     )}
 
                     {/* Share buttons */}
@@ -431,7 +431,7 @@ export default function ImportExportPage() {
                         type="button"
                         onClick={() => void handleCopyLink()}
                         disabled={!shareCode}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors font-medium disabled:opacity-50"
+                        className="w-full min-h-11 flex items-center justify-center gap-2 px-3 py-2 text-xs rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors font-medium disabled:opacity-50"
                       >
                         {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
                         {copied ? "Copied!" : "Copy Share Link"}
@@ -440,7 +440,7 @@ export default function ImportExportPage() {
                         type="button"
                         onClick={() => void handleCopyCode()}
                         disabled={!shareCode}
-                        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                        className="w-full min-h-11 flex items-center justify-center gap-2 px-3 py-2 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
                       >
                         <Clipboard className="h-3.5 w-3.5" /> Copy Share Code
                       </button>
@@ -468,19 +468,19 @@ export default function ImportExportPage() {
                   value={importCode}
                   onChange={(e) => { setImportCode(e.target.value); setImportError(null); setImportSuccess(null); }}
                   placeholder="Paste a share link or code here..."
-                  className="w-full h-32 bg-background border border-border rounded-lg p-3 text-sm font-mono resize-none focus:outline-none focus:border-primary/50"
+                  className="h-32 w-full resize-none rounded-lg border border-border bg-background p-3 font-mono text-base focus:border-primary/50 focus:outline-none sm:text-sm"
                 />
-                <div className="flex gap-2 mt-3">
+                <div className="flex flex-wrap gap-2 mt-3">
                   <button
                     onClick={handlePaste}
-                    className="flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
+                    className="min-h-11 flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <Clipboard className="h-3.5 w-3.5" /> Paste from Clipboard
                   </button>
                   {importCode && (
                     <button
                       onClick={() => { setImportCode(""); setImportError(null); setImportSuccess(null); }}
-                      className="flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
+                      className="min-h-11 flex items-center gap-1.5 px-3 py-2 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <X className="h-3.5 w-3.5" /> Clear
                     </button>
@@ -488,7 +488,7 @@ export default function ImportExportPage() {
                   <button
                     onClick={() => handleImport()}
                     disabled={!importCode.trim()}
-                    className="flex items-center gap-1.5 px-4 py-2 text-xs rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors ml-auto font-medium disabled:opacity-50"
+                    className="min-h-11 flex items-center gap-1.5 px-4 py-2 text-xs rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground transition-colors ml-auto font-medium disabled:opacity-50"
                   >
                     <Upload className="h-3.5 w-3.5" /> Import Build
                   </button>
@@ -497,15 +497,15 @@ export default function ImportExportPage() {
 
               {importError && (
                 <div className="flex items-center gap-2 p-3 border border-red-500/30 bg-red-500/5 rounded-lg">
-                  <AlertCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
-                  <span className="text-sm text-red-400">{importError}</span>
+                  <AlertCircle className="h-4 w-4 text-red-700 dark:text-red-400 flex-shrink-0" />
+                  <span className="text-sm text-red-700 dark:text-red-400">{importError}</span>
                 </div>
               )}
 
               {importSuccess && (
                 <div className="flex items-center gap-2 p-3 border border-green-500/30 bg-green-500/5 rounded-lg">
-                  <Check className="h-4 w-4 text-green-400 flex-shrink-0" />
-                  <span className="text-sm text-green-400">{importSuccess}</span>
+                  <Check className="h-4 w-4 text-green-700 dark:text-green-400 flex-shrink-0" />
+                  <span className="text-sm text-green-700 dark:text-green-400">{importSuccess}</span>
                 </div>
               )}
 

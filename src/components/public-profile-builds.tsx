@@ -62,9 +62,12 @@ export function PublicProfileBuilds({ builds }: { builds: PublicProfileBuild[] }
 
   if (rows.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground text-center py-12 rounded-xl border border-dashed border-border">
-        No public builds yet.
-      </p>
+      <div className="rounded-xl border border-dashed border-border px-4 py-12 text-center">
+        <p className="text-sm font-medium text-foreground">No public builds yet</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Builds shared to the community will show up here.
+        </p>
+      </div>
     );
   }
 
@@ -77,10 +80,10 @@ export function PublicProfileBuilds({ builds }: { builds: PublicProfileBuild[] }
         >
           <Link
             href={buildOpenUrl(build.type, build.id)}
-            className="flex flex-1 items-center gap-3 p-4 min-w-0 hover:bg-muted/30 transition-colors"
+            className="flex min-h-11 flex-1 items-center gap-3 p-4 min-w-0 hover:bg-muted/30 transition-colors"
           >
             <div className="flex-1 min-w-0">
-              <div className="font-medium text-sm truncate group-hover:text-primary transition-colors">
+              <div className="font-medium text-sm truncate break-words group-hover:text-primary transition-colors">
                 {build.name}
               </div>
               <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-2">
@@ -106,7 +109,7 @@ export function PublicProfileBuilds({ builds }: { builds: PublicProfileBuild[] }
               onClick={() => handleStaffDelete(build)}
               disabled={deletingId === build.id}
               title="Delete build (staff)"
-              className="px-3.5 shrink-0 border-l border-border flex items-center justify-center text-muted-foreground hover:bg-destructive/15 hover:text-destructive transition-colors disabled:opacity-50"
+              className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center border-l border-border px-3.5 text-muted-foreground hover:bg-destructive/15 hover:text-destructive transition-colors disabled:opacity-50"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>

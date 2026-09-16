@@ -71,14 +71,14 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
 
             <div className="flex-1 text-center sm:text-left">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <h1 className="text-2xl font-bold">{user.name ?? user.username ?? "Tenno"}</h1>
+                <h1 className="text-2xl font-bold break-words">{user.name ?? user.username ?? "Tenno"}</h1>
                 {user.role === "admin" && <RoleBadge role="admin" />}
                 {user.role === "moderator" && <RoleBadge role="moderator" />}
                 {isSupporter(user) && <SupporterBadge />}
               </div>
-              {user.username && <p className="text-primary text-sm mt-1">@{user.username}</p>}
+              {user.username && <p className="text-primary text-sm mt-1 break-words">@{user.username}</p>}
               {user.bio ? (
-                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{user.bio}</p>
+                <p className="text-sm text-muted-foreground mt-3 leading-relaxed break-words">{user.bio}</p>
               ) : (
                 <p className="text-sm text-muted-foreground/80 mt-3">No bio yet.</p>
               )}

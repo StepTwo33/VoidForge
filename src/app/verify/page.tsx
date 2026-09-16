@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
 import { MailCheck, Loader2, RefreshCw } from "lucide-react";
 
@@ -119,8 +120,17 @@ function VerifyForm() {
     if (!email) {
         return (
             <PageShell>
-                <div className="container mx-auto px-4 py-16 text-center">
-                    <p className="text-muted-foreground">No email address provided.</p>
+                <div className="container mx-auto px-3.5 py-10 text-center sm:px-4 sm:py-16">
+                    <p className="text-sm text-muted-foreground">
+                        No email address provided.{" "}
+                        <Link
+                            href="/signup"
+                            className="inline-flex min-h-11 items-center text-primary underline-offset-2 hover:underline"
+                        >
+                            Return to signup
+                        </Link>{" "}
+                        and try again.
+                    </p>
                 </div>
             </PageShell>
         );
@@ -128,7 +138,7 @@ function VerifyForm() {
 
     return (
         <PageShell>
-            <div className="container mx-auto flex items-center justify-center px-4 py-16">
+            <div className="container mx-auto flex items-center justify-center px-3.5 py-10 sm:px-4 sm:py-16">
                 <div className="w-full max-w-md text-center">
                     <div className="mb-8">
                         <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10">
@@ -137,11 +147,11 @@ function VerifyForm() {
                         <h1 className="text-2xl font-bold">Verify your email</h1>
                         <p className="mt-1 text-sm text-muted-foreground">
                             We sent a 6-digit code to{" "}
-                            <span className="font-medium text-foreground">{email}</span>
+                            <span className="break-all font-medium text-foreground">{email}</span>
                         </p>
                     </div>
 
-                    <div className="mb-6 flex justify-center gap-2" onPaste={handlePaste}>
+                    <div className="mb-6 flex justify-center gap-1.5 sm:gap-2" onPaste={handlePaste}>
                         {code.map((digit, i) => (
                             <input
                                 key={i}
@@ -152,19 +162,19 @@ function VerifyForm() {
                                 value={digit}
                                 onChange={(e) => handleChange(i, e.target.value)}
                                 onKeyDown={(e) => handleKeyDown(i, e)}
-                                className="h-14 w-12 rounded-lg border border-border bg-background text-center text-lg font-bold transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
+                                className="h-12 min-h-11 w-10 min-w-10 rounded-lg border border-border bg-background text-center text-lg font-bold transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 sm:h-14 sm:w-12 sm:min-w-11"
                             />
                         ))}
                     </div>
 
                     {error && (
-                        <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-xs text-destructive">
+                        <div className="mb-4 rounded-lg border border-red-500/25 bg-red-500/10 p-3 text-xs text-red-700 dark:border-destructive/20 dark:bg-destructive/10 dark:text-destructive">
                             {error}
                         </div>
                     )}
 
                     {resent && (
-                        <div className="mb-4 rounded-lg border border-green-500/20 bg-green-500/10 p-3 text-xs text-green-400">
+                        <div className="mb-4 rounded-lg border border-green-500/25 bg-green-500/10 p-3 text-xs text-green-800 dark:text-green-400">
                             A new code has been sent to your email
                         </div>
                     )}
@@ -172,7 +182,7 @@ function VerifyForm() {
                     <button
                         onClick={() => handleSubmit()}
                         disabled={loading || code.some((d) => !d)}
-                        className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="mb-4 flex w-full min-h-11 items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {loading ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -185,7 +195,7 @@ function VerifyForm() {
                     <button
                         onClick={handleResend}
                         disabled={resending}
-                        className="mx-auto flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                        className="mx-auto flex w-full min-h-11 items-center justify-center gap-1.5 rounded-lg text-xs text-muted-foreground transition-colors hover:text-foreground sm:w-auto"
                     >
                         {resending ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
@@ -208,7 +218,7 @@ export default function VerifyPage() {
     return (
         <Suspense fallback={
             <PageShell>
-                <div className="container mx-auto px-4 py-16 text-center">
+                <div className="container mx-auto px-3.5 py-10 text-center sm:px-4 sm:py-16">
                     <div className="mx-auto h-12 w-12 animate-pulse rounded-full bg-muted" />
                 </div>
             </PageShell>

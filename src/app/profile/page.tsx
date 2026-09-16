@@ -67,7 +67,7 @@ const typeColors: Record<string, string> = {
   modular: "text-orange-400 border-orange-500/30",
   archwing: "text-teal-400 border-teal-500/30",
   railjack: "text-rose-400 border-rose-500/30",
-  loadout: "text-green-400 border-green-500/30",
+  loadout: "text-green-700 dark:text-green-400 border-green-500/30",
 };
 
 export default function ProfilePage() {
@@ -366,18 +366,27 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <PageShell>
-        <div className="container mx-auto max-w-md px-4 py-16 text-center">
-          <LogIn className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Sign in to view your profile</h1>
-          <p className="text-muted-foreground text-sm mb-6">
-            Sign in to save builds to the cloud and access them from anywhere.
-          </p>
-          <a
-            href="/signin"
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-          >
-            <LogIn className="h-4 w-4" /> Sign in
-          </a>
+        <div className="container mx-auto max-w-md px-3.5 py-12 text-center sm:px-4 sm:py-16">
+          <div className="rounded-2xl border border-dashed border-border/70 surface-panel px-6 py-10">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
+              <LogIn className="h-7 w-7 text-primary" />
+            </div>
+            <h1 className="mb-2 text-xl font-bold sm:text-2xl">Sign in to view your profile</h1>
+            <p className="mx-auto mb-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
+              Sign in to unlock cloud features:
+            </p>
+            <ul className="mx-auto mb-6 max-w-xs space-y-1.5 text-left text-xs text-muted-foreground">
+              <li className="flex gap-2"><span className="text-primary">•</span> Save builds across devices</li>
+              <li className="flex gap-2"><span className="text-primary">•</span> List builds on Discover</li>
+              <li className="flex gap-2"><span className="text-primary">•</span> Track reports &amp; public profile</li>
+            </ul>
+            <a
+              href="/signin"
+              className="inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              <LogIn className="h-4 w-4" /> Sign in
+            </a>
+          </div>
         </div>
       </PageShell>
     );
@@ -394,8 +403,8 @@ export default function ProfilePage() {
           <div className={cn(
             "fixed top-20 right-4 z-50 px-4 py-2.5 rounded-lg border text-sm font-medium shadow-lg animate-in slide-in-from-top-2 fade-in duration-200",
             saveMessage.type === "success"
-              ? "bg-green-500/10 border-green-500/30 text-green-400"
-              : "bg-red-500/10 border-red-500/30 text-red-400"
+              ? "bg-green-500/10 border-green-500/30 text-green-700 dark:text-green-400"
+              : "bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-400"
           )}>
             {saveMessage.type === "success" ? <Check className="inline h-3.5 w-3.5 mr-1.5" /> : <X className="inline h-3.5 w-3.5 mr-1.5" />}
             {saveMessage.text}
@@ -513,7 +522,7 @@ export default function ProfilePage() {
                 await fetch("/api/auth/signout", { method: "POST" });
                 window.location.href = "/";
               }}
-              className="px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors cursor-pointer"
+              className="inline-flex min-h-11 items-center rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:border-destructive/30 hover:text-destructive cursor-pointer"
             >
               Sign out
             </button>
@@ -525,7 +534,7 @@ export default function ProfilePage() {
           <button
             onClick={() => setActiveTab("builds")}
             className={cn(
-              "px-4 py-1.5 text-xs font-medium rounded-md transition-all",
+              "inline-flex min-h-11 items-center rounded-md px-4 py-2 text-xs font-medium transition-all",
               activeTab === "builds" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -534,7 +543,7 @@ export default function ProfilePage() {
           <button
             onClick={() => setActiveTab("reports")}
             className={cn(
-              "px-4 py-1.5 text-xs font-medium rounded-md transition-all",
+              "inline-flex min-h-11 items-center rounded-md px-4 py-2 text-xs font-medium transition-all",
               activeTab === "reports" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -543,7 +552,7 @@ export default function ProfilePage() {
           <button
             onClick={() => setActiveTab("settings")}
             className={cn(
-              "px-4 py-1.5 text-xs font-medium rounded-md transition-all",
+              "inline-flex min-h-11 items-center rounded-md px-4 py-2 text-xs font-medium transition-all",
               activeTab === "settings" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -561,7 +570,7 @@ export default function ProfilePage() {
                   <UserIcon className="h-3.5 w-3.5" /> USERNAME
                 </label>
                 {!editingUsername && (
-                  <button onClick={() => { setEditingUsername(true); setUsernameInput(user.username ?? ""); }} className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                  <button onClick={() => { setEditingUsername(true); setUsernameInput(user.username ?? ""); }} className="inline-flex min-h-11 items-center gap-1 px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
                     <Pencil className="h-3 w-3" /> Edit
                   </button>
                 )}
@@ -574,14 +583,14 @@ export default function ProfilePage() {
                       onChange={(e) => setUsernameInput(e.target.value)}
                       maxLength={24}
                       placeholder="your-handle"
-                      className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:border-primary/50"
+                      className="min-h-11 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary/50 focus:outline-none"
                       autoFocus
                       onKeyDown={(e) => { if (e.key === "Enter") handleSaveUsername(); if (e.key === "Escape") setEditingUsername(false); }}
                     />
-                    <button onClick={handleSaveUsername} disabled={saving} className="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                    <button onClick={handleSaveUsername} disabled={saving} className="inline-flex min-h-11 items-center rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
                       {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
                     </button>
-                    <button onClick={() => setEditingUsername(false)} className="px-3 py-2 border border-border rounded-lg text-xs text-muted-foreground hover:text-foreground transition-colors">
+                    <button onClick={() => setEditingUsername(false)} className="inline-flex min-h-11 items-center rounded-lg border border-border px-3 text-xs text-muted-foreground transition-colors hover:text-foreground">
                       Cancel
                     </button>
                   </div>
@@ -606,7 +615,7 @@ export default function ProfilePage() {
                   <UserIcon className="h-3.5 w-3.5" /> DISPLAY NAME
                 </label>
                 {!editingName && (
-                  <button onClick={() => { setEditingName(true); setNameInput(user.name ?? ""); }} className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                  <button onClick={() => { setEditingName(true); setNameInput(user.name ?? ""); }} className="inline-flex min-h-11 items-center gap-1 px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
                     <Pencil className="h-3 w-3" /> Edit
                   </button>
                 )}
@@ -618,14 +627,14 @@ export default function ProfilePage() {
                     onChange={(e) => setNameInput(e.target.value)}
                     maxLength={50}
                     placeholder="Your display name"
-                    className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:border-primary/50"
+                    className="min-h-11 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary/50 focus:outline-none"
                     autoFocus
                     onKeyDown={(e) => { if (e.key === "Enter") handleSaveName(); if (e.key === "Escape") setEditingName(false); }}
                   />
-                  <button onClick={handleSaveName} disabled={saving} className="px-3 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                  <button onClick={handleSaveName} disabled={saving} className="inline-flex min-h-11 items-center rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
                     {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
                   </button>
-                  <button onClick={() => setEditingName(false)} className="px-3 py-2 border border-border rounded-lg text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  <button onClick={() => setEditingName(false)} className="inline-flex min-h-11 items-center rounded-lg border border-border px-3 text-xs text-muted-foreground transition-colors hover:text-foreground">
                     Cancel
                   </button>
                 </div>
@@ -641,7 +650,7 @@ export default function ProfilePage() {
                   <FileText className="h-3.5 w-3.5" /> BIO
                 </label>
                 {!editingBio && (
-                  <button onClick={() => { setEditingBio(true); setBioInput(user.bio ?? ""); }} className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                  <button onClick={() => { setEditingBio(true); setBioInput(user.bio ?? ""); }} className="inline-flex min-h-11 items-center gap-1 px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
                     <Pencil className="h-3 w-3" /> Edit
                   </button>
                 )}
@@ -660,10 +669,10 @@ export default function ProfilePage() {
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] text-muted-foreground">{bioInput.length}/300</span>
                     <div className="flex gap-2">
-                      <button onClick={handleSaveBio} disabled={saving} className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                      <button onClick={handleSaveBio} disabled={saving} className="inline-flex min-h-11 items-center rounded-lg bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
                         {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Save"}
                       </button>
-                      <button onClick={() => setEditingBio(false)} className="px-3 py-1.5 border border-border rounded-lg text-xs text-muted-foreground hover:text-foreground transition-colors">
+                      <button onClick={() => setEditingBio(false)} className="inline-flex min-h-11 items-center rounded-lg border border-border px-3 text-xs text-muted-foreground transition-colors hover:text-foreground">
                         Cancel
                       </button>
                     </div>
@@ -691,7 +700,7 @@ export default function ProfilePage() {
                   <button
                     onClick={() => avatarInputRef.current?.click()}
                     disabled={avatarUploading}
-                    className="block px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50"
+                    className="inline-flex min-h-11 items-center rounded-lg border border-border px-3 text-xs text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground disabled:opacity-50"
                   >
                     {avatarUploading ? "Uploading..." : "Upload new picture"}
                   </button>
@@ -757,7 +766,7 @@ export default function ProfilePage() {
 
             {/* Danger Zone */}
             <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/5 space-y-3">
-              <label className="text-xs font-semibold text-red-400 flex items-center gap-1.5">
+              <label className="text-xs font-semibold text-red-700 dark:text-red-400 flex items-center gap-1.5">
                 <Trash2 className="h-3.5 w-3.5" /> DANGER ZONE
               </label>
               <p className="text-xs text-muted-foreground leading-relaxed">
@@ -772,7 +781,7 @@ export default function ProfilePage() {
                     setDeleteConfirmInput("");
                     setDeleteError(null);
                   }}
-                  className="px-3 py-2 text-xs rounded-lg border border-red-500/40 text-red-400 hover:bg-red-500/10 transition-colors font-medium"
+                  className="inline-flex min-h-11 items-center rounded-lg border border-red-500/40 px-3 text-xs font-medium text-red-700 dark:text-red-400 transition-colors hover:bg-red-500/10"
                 >
                   Delete account…
                 </button>
@@ -788,7 +797,7 @@ export default function ProfilePage() {
                     placeholder={user.username || user.email || "confirm"}
                     autoFocus
                   />
-                  {deleteError && <p className="text-xs text-red-400">{deleteError}</p>}
+                  {deleteError && <p className="text-xs text-red-700 dark:text-red-400">{deleteError}</p>}
                   <div className="flex gap-2">
                     <button
                       type="button"
@@ -814,7 +823,7 @@ export default function ProfilePage() {
                           setDeletingAccount(false);
                         }
                       }}
-                      className="px-3 py-2 text-xs rounded-lg bg-red-600 text-white hover:bg-red-500 disabled:opacity-50 font-medium transition-colors"
+                      className="inline-flex min-h-11 items-center rounded-lg bg-red-600 px-3 text-xs font-medium text-white transition-colors hover:bg-red-500 disabled:opacity-50"
                     >
                       {deletingAccount ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Delete forever"}
                     </button>
@@ -826,7 +835,7 @@ export default function ProfilePage() {
                         setDeleteConfirmInput("");
                         setDeleteError(null);
                       }}
-                      className="px-3 py-2 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors"
+                      className="inline-flex min-h-11 items-center rounded-lg border border-border px-3 text-xs text-muted-foreground transition-colors hover:text-foreground"
                     >
                       Cancel
                     </button>
@@ -850,7 +859,7 @@ export default function ProfilePage() {
                 ))}
               </div>
             ) : reports.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-xl border border-dashed border-border bg-card/30">
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/70 surface-panel px-4 py-14 text-center">
                 <Flag className="h-10 w-10 text-muted-foreground/40 mb-4" />
                 <p className="text-sm text-muted-foreground mb-4">No reports yet, or none tied to this account.</p>
                 <Link
@@ -865,10 +874,10 @@ export default function ProfilePage() {
                 {reports.map((r) => {
                   const statusCfg =
                     r.status === "resolved"
-                      ? { label: "Resolved", Icon: CheckCircle2, className: "text-green-400 bg-green-500/10 border-green-500/25" }
+                      ? { label: "Resolved", Icon: CheckCircle2, className: "text-green-700 dark:text-green-400 bg-green-500/10 border-green-500/25" }
                       : r.status === "wontfix"
                         ? { label: "Won't fix", Icon: Ban, className: "text-zinc-400 bg-zinc-500/10 border-zinc-500/25" }
-                        : { label: "Open", Icon: CircleDot, className: "text-amber-400 bg-amber-500/10 border-amber-500/25" };
+                        : { label: "Open", Icon: CircleDot, className: "text-amber-700 dark:text-amber-400 bg-amber-500/10 border-amber-500/25" };
                   const SIcon = statusCfg.Icon;
                   return (
                     <li
@@ -923,7 +932,7 @@ export default function ProfilePage() {
           <div className="flex gap-2 mb-6 flex-wrap animate-in fade-in slide-in-from-bottom-2 duration-300">
             <button
               onClick={() => setFilter("all")}
-              className={`px-3 py-1.5 text-xs rounded-lg border transition-all ${filter === "all" ? "border-primary text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground"}`}
+              className={`inline-flex min-h-11 items-center rounded-lg border px-3 text-xs transition-all ${filter === "all" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
             >
               All ({builds.length})
             </button>
@@ -933,7 +942,7 @@ export default function ProfilePage() {
                 <button
                   key={t}
                   onClick={() => setFilter(t)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-all ${filter === t ? `${typeColors[t]} bg-white/5` : "border-border text-muted-foreground hover:text-foreground"}`}
+                  className={`inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 text-xs transition-all ${filter === t ? `${typeColors[t]} bg-white/5` : "border-border text-muted-foreground hover:text-foreground"}`}
                 >
                   <Icon className="h-3 w-3" />
                   {t.charAt(0).toUpperCase() + t.slice(1)} ({buildCounts[t] || 0})
@@ -950,22 +959,24 @@ export default function ProfilePage() {
               ))}
             </div>
           ) : filteredBuilds.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 px-4 text-center rounded-2xl border border-dashed border-border bg-card/30 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="w-20 h-20 rounded-full bg-primary/5 border border-primary/10 flex items-center justify-center mb-6">
-                <Shield className="h-10 w-10 text-primary/40" />
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/70 surface-panel px-4 py-16 text-center animate-in fade-in slide-in-from-bottom-4 duration-500 sm:py-20">
+              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
+                <Shield className="h-8 w-8 text-primary/70" />
               </div>
-              <h2 className="text-xl font-bold mb-2">Your Arsenal is Empty</h2>
-              <p className="text-muted-foreground text-sm max-w-sm mb-8">
+              <h2 className="mb-2 text-lg font-bold sm:text-xl">
+                {builds.length === 0 ? "No cloud builds yet" : "Nothing in this filter"}
+              </h2>
+              <p className="mb-6 max-w-sm text-sm leading-relaxed text-muted-foreground">
                 {builds.length === 0
-                  ? "You haven't saved any builds to your account yet. Head over to the builder to start experimenting."
-                  : `No saved builds found for the "${filter}" category.`}
+                  ? "Save a build from any builder to see it here across devices."
+                  : `No “${filter}” builds saved. Try All or another type.`}
               </p>
               {builds.length === 0 && (
                 <Link
                   href="/weapon-builder"
-                  className="px-6 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-all hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-0.5"
+                  className="inline-flex h-11 items-center rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >
-                  Create your first build
+                  Open weapon builder
                 </Link>
               )}
             </div>
@@ -987,8 +998,8 @@ export default function ProfilePage() {
                         <Icon className="h-4 w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate group-hover:text-primary transition-colors flex items-center gap-2">
-                          {build.name}
+                        <div className="flex min-w-0 items-center gap-2 text-sm font-medium group-hover:text-primary transition-colors">
+                          <span className="truncate">{build.name}</span>
                           {build.isPublic ? (
                             <span className="text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
                               Public
@@ -1011,7 +1022,7 @@ export default function ProfilePage() {
                       type="button"
                       onClick={() => handleTogglePublic(build)}
                       title={build.isPublic ? "Remove from community listing" : "List in Community Builds"}
-                      className="px-3 shrink-0 border-l border-border flex items-center justify-center hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors text-[10px] font-medium"
+                      className="flex min-w-14 shrink-0 items-center justify-center border-l border-border px-3 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                     >
                       {build.isPublic ? "Unlist" : "List"}
                     </button>
@@ -1019,7 +1030,7 @@ export default function ProfilePage() {
                       type="button"
                       onClick={() => handleDelete(build.id)}
                       title="Delete build"
-                      className="px-3 shrink-0 border-l border-border flex items-center justify-center hover:bg-destructive/15 text-muted-foreground hover:text-destructive transition-colors"
+                      className="flex min-w-11 shrink-0 items-center justify-center border-l border-border px-3 text-muted-foreground transition-colors hover:bg-destructive/15 hover:text-destructive"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>

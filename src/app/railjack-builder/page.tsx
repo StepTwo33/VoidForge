@@ -381,20 +381,20 @@ export default function RailjackBuilderPage() {
     <PageShell>
       <main className="container mx-auto px-4 py-8">
         {/* Title bar */}
-        <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-          <h1 className="text-xl sm:text-3xl font-bold">Railjack Builder</h1>
-          <div className="flex items-center gap-2">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h1 className="min-w-0 text-xl font-bold sm:text-3xl">Railjack Builder</h1>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             <input
               type="text"
               value={buildName}
               onChange={(e) => setBuildName(e.target.value)}
               placeholder="Build name..."
-              className="px-3 py-1.5 text-xs rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground w-40"
+              className="h-11 w-full max-w-[12rem] rounded-lg border border-border bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground sm:h-9 sm:w-40"
             />
-            <button onClick={() => setSaveDialogOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-green-400 hover:border-green-500/50 transition-all" title="Save Build">
+            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 sm:min-h-9 sm:py-1.5" title="Save Build">
               <Save className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Save</span>
             </button>
-            <button onClick={() => { setSavedBuilds(getSavedBuilds("railjack")); setShowSavedBuilds(true); }} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-blue-400 hover:border-blue-500/50 transition-all" title="Load Build">
+            <button onClick={() => { setSavedBuilds(getSavedBuilds("railjack")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-9 sm:py-1.5" title="Load Build">
               <FolderOpen className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Load</span>
             </button>
           </div>
@@ -419,7 +419,7 @@ export default function RailjackBuilderPage() {
               <button
                 key={p.id}
                 onClick={() => applyRailjackPreset(p.id)}
-                className="px-3 py-1.5 text-xs rounded-lg border border-rose-500/30 text-rose-800 hover:bg-rose-500/10 transition-colors dark:text-rose-300"
+                className="inline-flex min-h-11 items-center rounded-lg border border-rose-500/30 px-3 py-2 text-xs text-rose-800 transition-colors hover:bg-rose-500/10 sm:min-h-9 sm:py-1.5 dark:text-rose-300"
               >
                 Load {p.name} ({p.owner})
               </button>
@@ -445,7 +445,7 @@ export default function RailjackBuilderPage() {
                   <div className="flex justify-between"><span className="text-muted-foreground">Recharge Delay −</span><span className="font-mono">{computedStats.shieldRechargeDelayReduction}s</span></div>
                 )}
                 <div className="flex justify-between"><span className="text-muted-foreground">Speed</span><span className="font-mono">{computedStats.speed} m/s</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Boost Speed</span><span className="font-mono">{computedStats.boostSpeed} m/s</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Boost Speed</span><span className="font-mono">{Number(computedStats.boostSpeed).toFixed(1)} m/s</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Boost Mult</span><span className="font-mono">{(computedStats.boostMultiplier ?? 0).toFixed(2)}×</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Boost Cost</span><span className="font-mono">{computedStats.boostCost}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Flux Capacity</span><span className="font-mono">{computedStats.fluxCapacity}</span></div>
@@ -703,7 +703,7 @@ export default function RailjackBuilderPage() {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    className="text-[10px] text-muted-foreground hover:text-foreground"
+                    className="inline-flex min-h-10 items-center rounded-md px-2.5 text-[10px] text-muted-foreground hover:bg-secondary hover:text-foreground"
                     onClick={() => {
                       beginNewRailjackDraft();
                       setIntrinsics({ ...DEFAULT_RAILJACK_INTRINSICS });
@@ -713,7 +713,7 @@ export default function RailjackBuilderPage() {
                   </button>
                   <button
                     type="button"
-                    className="text-[10px] text-muted-foreground hover:text-foreground"
+                    className="inline-flex min-h-10 items-center rounded-md px-2.5 text-[10px] text-muted-foreground hover:bg-secondary hover:text-foreground"
                     onClick={() => {
                       beginNewRailjackDraft();
                       setIntrinsics({
@@ -843,7 +843,7 @@ export default function RailjackBuilderPage() {
                         {slot && unlocked && (
                           <button
                             type="button"
-                            className="text-[10px] text-muted-foreground hover:text-red-400"
+                            className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md text-[10px] text-muted-foreground hover:bg-destructive/10 hover:text-red-700 dark:hover:text-red-400"
                             onClick={() => {
                               beginNewRailjackDraft();
                               setCrewSlots((prev) => {
@@ -977,7 +977,7 @@ export default function RailjackBuilderPage() {
                     <span className="text-sm font-medium">{selectedOrdnance?.name ?? "Select ordnance (Milati / Tycho / Galvarc)"}</span>
                     {selectedOrdnance && (
                       <p className="text-[10px] text-muted-foreground mt-0.5">
-                        DMG {selectedOrdnance.damage} • CC {(selectedOrdnance.critChance * 100).toFixed(0)}% • FR {selectedOrdnance.fireRate}
+                        DMG {selectedOrdnance.damage} • CC {(selectedOrdnance.critChance * 100).toFixed(0)}% • FR {Number(selectedOrdnance.fireRate).toFixed(2)}
                       </p>
                     )}
                   </button>
@@ -994,7 +994,7 @@ export default function RailjackBuilderPage() {
                               setShowOrdnancePicker(false);
                             }}
                             className={cn(
-                              "p-2 rounded-lg border text-left transition-all text-xs",
+                              "min-h-11 rounded-lg border p-2.5 text-left text-xs transition-all",
                               selectedOrdnance?.id === o.id
                                 ? "border-purple-500/50 bg-purple-500/10 text-purple-400"
                                 : "border-border hover:border-purple-500/30",
@@ -1002,7 +1002,7 @@ export default function RailjackBuilderPage() {
                           >
                             <span className="font-medium">{o.name}</span>
                             <div className="text-[10px] text-muted-foreground mt-0.5">
-                              DMG {o.damage} • CC {(o.critChance * 100).toFixed(0)}% • FR {o.fireRate}
+                              DMG {o.damage} • CC {(o.critChance * 100).toFixed(0)}% • FR {Number(o.fireRate).toFixed(2)}
                             </div>
                           </button>
                         ))}
@@ -1020,7 +1020,7 @@ export default function RailjackBuilderPage() {
               <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">PLEXUS MODS</h2>
 
               {/* Tab selector */}
-              <div className="flex gap-2 mb-4">
+              <div className="mb-4 flex flex-wrap gap-2">
                 {(["integrated", "battle", "tactical"] as PlexusTab[]).map((tab) => {
                   const count = tab === "integrated" ? integratedMods.length : tab === "battle" ? battleMods.length : tacticalMods.length;
                   const max = tab === "integrated" ? INTEGRATED_SLOTS : tab === "battle" ? BATTLE_SLOTS : TACTICAL_SLOTS;
@@ -1029,7 +1029,7 @@ export default function RailjackBuilderPage() {
                       key={tab}
                       onClick={() => setPlexusTab(tab)}
                       className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-medium border transition-all capitalize",
+                        "inline-flex min-h-11 items-center rounded-lg border px-3 py-2 text-sm font-medium capitalize transition-all sm:min-h-9 sm:px-4",
                         plexusTab === tab
                           ? "bg-rose-500/10 border-rose-500/50 text-rose-400"
                           : "border-border text-muted-foreground hover:text-foreground"
@@ -1044,16 +1044,20 @@ export default function RailjackBuilderPage() {
 
               {/* Capacity — Integrated only */}
               {plexusTab === "integrated" && (
-                <div className="flex items-center justify-end gap-2 mb-3">
-                  {auraBonus > 0 && (
-                    <span className="text-[10px] text-green-400/70">+{auraBonus} aura</span>
-                  )}
-                  <span className={cn(
-                    "text-xs font-mono",
-                    capacityUsed > maxCapacity ? "text-red-400" : "text-muted-foreground"
-                  )}>
-                    {capacityUsed} / {maxCapacity}
-                  </span>
+                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                  <h3 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">INTEGRATED</h3>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {auraBonus > 0 && (
+                      <span className="text-[10px] text-green-700/80 dark:text-green-400/70">+{auraBonus} aura</span>
+                    )}
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
+                      capacityUsed > maxCapacity ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
+                    )}>
+                      <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
+                      {capacityUsed} / {maxCapacity}
+                    </span>
+                  </div>
                 </div>
               )}
               {plexusTab !== "integrated" && (
@@ -1089,7 +1093,7 @@ export default function RailjackBuilderPage() {
                       );
                     })()}
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {Array.from({ length: 8 }, (_, idx) => {
                       const i = idx + 1;
                       const equipped = integratedMods.find((m) => m.slotIndex === i);
@@ -1114,7 +1118,7 @@ export default function RailjackBuilderPage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                   {PLEXUS_ABILITY_SLOT_CATEGORIES.map((category, i) => {
                     const equipped = currentMods.find((m) => m.slotIndex === i);
                     const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
@@ -1277,7 +1281,7 @@ export default function RailjackBuilderPage() {
                   <div className="text-xs font-medium text-orange-400 mb-1.5">Forward Artillery — {computedStats.artillery.name}</div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                     <div className="flex justify-between"><span className="text-muted-foreground">Damage</span><span className="font-mono">{computedStats.artillery.damage}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Avg Shot</span><span className="font-mono text-cyan-400">{computedStats.artillery.avgShotDamage}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Avg Shot</span><span className="font-mono text-cyan-400">{Number(computedStats.artillery.avgShotDamage).toLocaleString(undefined, { maximumFractionDigits: 1 })}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Chance</span><span className="font-mono">{(computedStats.artillery.critChance * 100).toFixed(0)}%</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Multi</span><span className="font-mono">{computedStats.artillery.critMultiplier.toFixed(1)}x</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Charge</span><span className="font-mono">{computedStats.artillery.chargeTime}s</span></div>
@@ -1295,7 +1299,7 @@ export default function RailjackBuilderPage() {
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Chance</span><span className="font-mono">{(turret.critChance * 100).toFixed(1)}%</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Multi</span><span className="font-mono">{turret.critMultiplier.toFixed(1)}x</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="font-mono">{(turret.statusChance * 100).toFixed(1)}%</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Fire Rate</span><span className="font-mono">{turret.fireRate}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Fire Rate</span><span className="font-mono">{Number(turret.fireRate).toFixed(2)}</span></div>
                   </div>
                 </div>
               ))}
@@ -1308,7 +1312,7 @@ export default function RailjackBuilderPage() {
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Chance</span><span className="font-mono">{(computedStats.ordnance.critChance * 100).toFixed(1)}%</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Multi</span><span className="font-mono">{computedStats.ordnance.critMultiplier.toFixed(1)}x</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="font-mono">{(computedStats.ordnance.statusChance * 100).toFixed(1)}%</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Fire Rate</span><span className="font-mono">{computedStats.ordnance.fireRate}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Fire Rate</span><span className="font-mono">{Number(computedStats.ordnance.fireRate).toFixed(2)}</span></div>
                   </div>
                 </div>
               )}

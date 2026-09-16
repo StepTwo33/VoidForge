@@ -96,7 +96,7 @@ export function WarframePlayerSync({ onImported, className }: WarframePlayerSync
           href={WARFRAME_ACCOUNT_SETTINGS_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+          className="mt-3 inline-flex min-h-11 items-center gap-1.5 text-sm text-primary hover:underline"
         >
           Open Warframe account settings
           <ExternalLink className="h-3.5 w-3.5" />
@@ -111,7 +111,7 @@ export function WarframePlayerSync({ onImported, className }: WarframePlayerSync
               type="button"
               onClick={() => setPlatform(p)}
               className={cn(
-                "rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
+                "min-h-11 rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
                 platform === p
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border text-muted-foreground hover:text-foreground",
@@ -131,7 +131,7 @@ export function WarframePlayerSync({ onImported, className }: WarframePlayerSync
               setError(null);
             }}
             placeholder="Your Warframe display name"
-            className="max-w-md"
+            className="max-w-md min-h-11 w-full text-base sm:text-sm"
             onKeyDown={(e) => {
               if (e.key === "Enter") void retrieve();
             }}
@@ -142,14 +142,14 @@ export function WarframePlayerSync({ onImported, className }: WarframePlayerSync
           type="button"
           onClick={() => void retrieve()}
           disabled={loading || !account.trim()}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50 sm:w-auto"
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
           Retrieve loadouts
         </button>
 
         {error && (
-          <div className="flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-sm text-red-400">
+          <div className="flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-sm text-red-700 dark:text-red-400">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -206,7 +206,7 @@ function ImportPreview({
         type="button"
         onClick={onImport}
         disabled={slots.length === 0}
-        className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800 disabled:opacity-50 sm:w-auto"
       >
         <Check className="h-4 w-4" />
         Import into Voidforge loadouts
@@ -219,8 +219,8 @@ function WarningList({ warnings }: { warnings: ArsenalImportWarning[] }) {
   const preview = warnings.slice(0, 8);
   const extra = warnings.length - preview.length;
   return (
-    <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-200/90">
-      <p className="font-medium text-amber-300">{warnings.length} item(s) could not be mapped automatically</p>
+    <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-900 dark:text-amber-200/90">
+      <p className="font-medium text-amber-900 dark:text-amber-200">{warnings.length} item(s) could not be mapped automatically</p>
       <ul className="mt-2 list-inside list-disc space-y-0.5">
         {preview.map((w, i) => (
           <li key={`${w.kind}-${w.label}-${i}`}>

@@ -47,8 +47,8 @@ export default function SignInPage() {
 
     return (
         <PageShell>
-            <div className="container mx-auto flex flex-1 items-center justify-center px-4 py-16 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                <div className="w-full max-w-md p-8 sm:p-10 bg-card/60 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl relative overflow-hidden">
+            <div className="container mx-auto flex flex-1 items-center justify-center px-3.5 py-10 animate-in fade-in slide-in-from-bottom-8 duration-700 sm:px-4 sm:py-16">
+                <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border/50 surface-panel p-6 shadow-2xl sm:p-10">
                     {/* Decorative Background Blob */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -z-10" />
 
@@ -66,7 +66,7 @@ export default function SignInPage() {
                     {/* Email/Password Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label htmlFor="email" className="block text-xs font-medium text-muted-foreground mb-1.5">
+                            <label htmlFor="email" className="mb-1.5 block text-xs font-medium text-muted-foreground">
                                 Email
                             </label>
                             <div className="relative">
@@ -78,13 +78,13 @@ export default function SignInPage() {
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="tenno@example.com"
                                     required
-                                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                                    className="h-11 w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-base transition-all placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 sm:text-sm"
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label htmlFor="password" className="block text-xs font-medium text-muted-foreground mb-1.5">
+                            <label htmlFor="password" className="mb-1.5 block text-xs font-medium text-muted-foreground">
                                 Password
                             </label>
                             <div className="relative">
@@ -96,12 +96,12 @@ export default function SignInPage() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
                                     required
-                                    className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-border bg-background text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all"
+                                    className="h-11 w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-12 text-base transition-all placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 sm:text-sm"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                    className="absolute right-1 top-1/2 inline-flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
                                 >
                                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                 </button>
@@ -117,7 +117,7 @@ export default function SignInPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                            className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {loading ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -145,7 +145,7 @@ export default function SignInPage() {
                     {/* Google OAuth */}
                     <a
                         href="/api/auth/signin/google"
-                        className="w-full py-2.5 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all flex items-center justify-center gap-2"
+                        className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-border text-sm font-medium text-muted-foreground transition-all hover:border-foreground/30 hover:text-foreground"
                     >
                         <svg className="h-4 w-4" viewBox="0 0 24 24">
                             <path

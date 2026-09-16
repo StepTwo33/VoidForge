@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { AccentColor } from "@/components/page-shell";
-import { FilterChip, PageHero } from "@/components/page-shell";
+import { EmptyState, FilterChip, PageHero } from "@/components/page-shell";
 
 const PICKER_ACCENT: Record<
   AccentColor,
@@ -124,12 +124,12 @@ export function ItemPickerScreen({
       <PageHero icon={icon} accent={accent} title={title} description={description} />
 
       {showTabs && (
-        <div className="mb-3 flex gap-1 rounded-lg border border-border/60 bg-card/40 p-1">
+        <div className="mb-3 flex gap-1 rounded-xl border border-border/60 bg-card/40 p-1 surface-panel">
           <button
             type="button"
             onClick={() => onPickerTabChange("catalog")}
             className={cn(
-              "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+              "min-h-11 flex-1 rounded-lg px-3 text-sm font-medium transition-colors",
               !onSaved
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
@@ -141,40 +141,67 @@ export function ItemPickerScreen({
             type="button"
             onClick={() => onPickerTabChange("saved")}
             className={cn(
-              "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+              "min-h-11 flex-1 rounded-lg px-3 text-sm font-medium transition-colors",
               onSaved
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            Saved
+            Saved builds
           </button>
         </div>
       )}
 
       {!onSaved && (
-        <div className="mb-4 overflow-hidden rounded-xl border border-border/60 bg-card/50 p-4 shadow-sm backdrop-blur-sm ring-1 ring-border/30">
-          {filters && <div className="mb-4 flex flex-wrap gap-2">{filters}</div>}
+        <div className="mb-4 overflow-hidden rounded-xl border border-border/60 surface-panel p-3.5 shadow-sm ring-1 ring-border/30 sm:p-4">
+          {filters && <div className="mb-3 flex max-w-full flex-wrap gap-2 sm:mb-4">{filters}</div>}
 
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder={searchPlaceholder}
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="border-border/60 bg-background/50 pl-9"
+              className="border-border/60 bg-background/60 pl-9"
+              aria-label={searchPlaceholder}
             />
           </div>
 
           <p className="mt-3 text-xs text-muted-foreground">
-            <span className="font-mono font-medium text-foreground">{count}</span> results
+            {count === 0 ? (
+              search.trim()
+                ? "No matches — try a different search or clear filters"
+                : "Nothing in this filter — try another category"
+            ) : (
+              <>
+                <span className="font-mono font-medium tabular-nums text-foreground">{count}</span>
+                {" "}to pick from — tap a row to open the builder
+              </>
+            )}
           </p>
         </div>
       )}
 
       <div className="overflow-hidden rounded-xl border border-border/60 bg-card/40 ring-1 ring-border/30">
-        <ScrollArea className="h-[60vh]">
-          <div className="space-y-1.5 p-2 pr-3">{onSaved ? savedPanel : children}</div>
+        <ScrollArea className="h-[min(60vh,32rem)] sm:h-[60vh]">
+          <div className="space-y-2 p-2 pr-3">
+            {onSaved ? (
+              savedPanel
+            ) : count === 0 ? (
+              <EmptyState
+                icon={icon}
+                title={search.trim() ? "No matches" : "Nothing here"}
+                description={
+                  search.trim()
+                    ? `No results for “${search.trim()}”. Clear the search or pick another filter.`
+                    : "Try another category filter, or clear filters to see the full list."
+                }
+                className="border-0 bg-transparent py-10 sm:py-14"
+              />
+            ) : (
+              children
+            )}
+          </div>
         </ScrollArea>
       </div>
     </div>
@@ -222,8 +249,8 @@ export function ItemPickerRow({
       type="button"
       onClick={onClick}
       className={cn(
-        "group w-full rounded-lg border border-border/60 bg-background/30 p-3 text-left transition-all duration-200",
-        "hover:-translate-y-px hover:shadow-md",
+        "group w-full rounded-xl border border-border/60 bg-background/30 p-3 text-left transition-all duration-200 active:scale-[0.99]",
+        "[@media(hover:hover)]:hover:-translate-y-px hover:shadow-md",
         colors.rowHover,
         className,
       )}
@@ -242,7 +269,7 @@ export function ItemPickerRow({
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <span className="truncate text-sm font-semibold transition-colors group-hover:text-foreground">
+            <span className="truncate text-sm font-semibold leading-snug transition-colors group-hover:text-foreground">
               {title}
             </span>
             {badge}
@@ -271,12 +298,12 @@ export function BuilderItemHeader({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 space-y-4">
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-card/50 p-3 shadow-sm backdrop-blur-sm ring-1 ring-border/30 sm:p-4">
+    <div className="mb-5 space-y-3 sm:mb-6 sm:space-y-4">
+      <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-border/60 surface-panel p-3 shadow-sm ring-1 ring-border/30 sm:gap-3 sm:p-4">
         <button
           type="button"
           onClick={onChange}
-          className="rounded-lg border border-border/70 bg-background/50 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+          className="inline-flex min-h-11 items-center rounded-lg border border-border/70 bg-background/50 px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
         >
           ← {changeLabel}
         </button>
@@ -297,7 +324,7 @@ export function BuilderActionBar({ children, className }: { children: React.Reac
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-3",
+        "flex flex-wrap items-center gap-2 sm:gap-3",
         className,
       )}
     >
@@ -308,7 +335,7 @@ export function BuilderActionBar({ children, className }: { children: React.Reac
 
 export function BuilderActionGroup({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-wrap items-center gap-1 rounded-xl border border-border/60 bg-card/60 p-1 shadow-sm ring-1 ring-border/30">
+    <div className="flex flex-wrap items-center gap-0.5 rounded-xl border border-border/60 bg-card/60 p-1 shadow-sm ring-1 ring-border/30 surface-panel">
       {children}
     </div>
   );

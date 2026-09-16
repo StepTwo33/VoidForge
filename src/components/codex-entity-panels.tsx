@@ -290,11 +290,11 @@ export function CodexNecramechRow({
 
 function StatGrid({ items, compact }: { items: { label: string; value: string }[]; compact?: boolean }) {
   return (
-    <div className="grid grid-cols-2 gap-1.5 text-xs">
+    <div className={cn("grid gap-1 text-xs", compact ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3")}>
       {items.map(({ label, value }) => (
-        <div key={label} className="rounded border border-border/60 p-1.5">
-          <p className="text-[10px] uppercase text-muted-foreground">{label}</p>
-          <p className={cn("font-mono", compact ? "text-sm" : "text-base")}>{value}</p>
+        <div key={label} className="rounded border border-border/60 px-1.5 py-1">
+          <p className="text-[9px] uppercase leading-tight text-muted-foreground">{label}</p>
+          <p className={cn("font-mono tabular-nums leading-tight", compact ? "text-xs" : "text-sm")}>{value}</p>
         </div>
       ))}
     </div>
@@ -452,7 +452,7 @@ export function WeaponDetailPanel({ weapon, compact, returnTo }: { weapon: Weapo
       {radialAttacks.length > 0 && (
         <div>
           <PanelHeading>Radial / AoE attacks</PanelHeading>
-          <div className={cn("space-y-2", compact ? "max-h-40" : "max-h-52", "overflow-y-auto")}>
+          <div className={cn("space-y-2", compact ? "max-h-none overflow-visible" : "max-h-52 overflow-y-auto")}>
             {radialAttacks.map((attack, idx) => (
               <div key={`${attack.name}-${idx}`} className="rounded border border-border/60 p-2 text-xs">
                 <p className="font-medium">{attack.name}</p>
@@ -629,7 +629,7 @@ export function WarframeDetailPanel({
       {warframe.abilities.length > 0 && (
         <div>
           <PanelHeading>Abilities</PanelHeading>
-          <ul className={cn("space-y-2", compact ? "max-h-36" : "max-h-48", "overflow-y-auto")}>
+          <ul className={cn("space-y-2", compact ? "max-h-none overflow-visible" : "max-h-48 overflow-y-auto")}>
             {warframe.abilities.map((ab) => (
               <li key={ab.name} className="rounded border border-border/60 p-2">
                 <p className="text-sm font-medium">{ab.name}</p>

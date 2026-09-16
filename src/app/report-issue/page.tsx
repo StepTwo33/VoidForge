@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { PageShell } from "@/components/page-shell";
+import { PageShell, PageMain, PageHero } from "@/components/page-shell";
 import { OverrideCategory, OVERRIDE_CATEGORIES } from "@/lib/overrides/data-overrides";
 import { dataFixesHref } from "@/lib/overrides/data-fixes-url";
 import { DataFixesPanel, prefillFromReport } from "@/components/data-fixes-panel";
@@ -244,42 +244,48 @@ export default function ReportIssuePage() {
 
   return (
     <PageShell>
-      <main className="flex-1 container mx-auto px-4 py-6">
-        <div className="max-w-4xl mx-auto">
+      <PageMain maxWidth="lg">
           {returnTo && (
             <NavBack href={returnTo} label={returnLabel(returnTo)} className="mb-4" />
           )}
+          <PageHero
+            icon={Flag}
+            accent="amber"
+            title="Report"
+            highlight="Issue"
+            description="Flag incorrect stats, missing items, or data problems. Staff review reports and can apply fixes."
+          />
           {/* Tab Toggle */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-6">
-            <div className="flex gap-1">
+          <div className="mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-4">
+            <div className="flex flex-wrap gap-1">
               <button
                 onClick={() => setActiveTab("reports")}
-                className={cn("flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg transition-colors", activeTab === "reports" ? "bg-amber-600 text-white" : "text-muted-foreground hover:text-foreground")}
+                className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-lg px-4 py-2 text-sm transition-colors", activeTab === "reports" ? "bg-amber-600 text-white" : "text-muted-foreground hover:text-foreground")}
               >
-                <Flag className="h-4 w-4" /> Reports {openCount > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20">{openCount}</span>}
+                <Flag className="h-4 w-4" /> Reports {openCount > 0 && <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px]">{openCount}</span>}
               </button>
               {isAdmin && (
                 <button
                   onClick={() => setActiveTab("overrides")}
-                  className={cn("flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg transition-colors", activeTab === "overrides" ? "bg-purple-600 text-white" : "text-muted-foreground hover:text-foreground")}
+                  className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-lg px-4 py-2 text-sm transition-colors", activeTab === "overrides" ? "bg-purple-600 text-white" : "text-muted-foreground hover:text-foreground")}
                 >
-                  <Wrench className="h-4 w-4" /> Data Fixes {overrideCount > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20">{overrideCount}</span>}
+                  <Wrench className="h-4 w-4" /> Data Fixes {overrideCount > 0 && <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px]">{overrideCount}</span>}
                 </button>
               )}
             </div>
             {activeTab === "reports" && (
-              <div className="sm:ml-auto flex gap-2 flex-wrap">
+              <div className="flex flex-wrap gap-2 sm:ml-auto">
                 {isAdmin && (
-                  <button onClick={handleExport} className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground transition-colors">
+                  <button onClick={handleExport} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
                     <Download className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Export</span>
                   </button>
                 )}
                 <button
                   onClick={() => setShowForm(!showForm)}
-                  className={cn("flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg transition-colors", showForm ? "bg-red-600 text-white" : "bg-amber-600 text-white hover:bg-amber-700")}
+                  className={cn("inline-flex min-h-11 items-center gap-1 rounded-lg px-3 py-2 text-xs transition-colors", showForm ? "bg-red-700 text-white dark:bg-red-600" : "bg-amber-600 text-white hover:bg-amber-700")}
                 >
                   {showForm ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-                  {showForm ? "Cancel" : "Report Issue"}
+                  {showForm ? "Cancel" : "New Report"}
                 </button>
               </div>
             )}
@@ -290,12 +296,12 @@ export default function ReportIssuePage() {
           {/* New Report Form */}
           {showForm && (
             <div className="border border-amber-500/30 rounded-xl p-5 bg-card mb-6">
-              <h2 className="text-sm font-semibold text-amber-400 mb-4">NEW ISSUE REPORT</h2>
+              <h2 className="mb-4 text-sm font-semibold text-amber-800 dark:text-amber-400">NEW ISSUE REPORT</h2>
 
               {/* Reporter */}
               <div className="mb-4">
                 <label className="text-xs text-muted-foreground mb-1 block">Reporter Name (optional)</label>
-                <Input value={formReporter} onChange={(e) => setFormReporter(e.target.value)} placeholder="Your name..." className="h-8 text-sm" />
+                <Input value={formReporter} onChange={(e) => setFormReporter(e.target.value)} placeholder="Your name..." className="h-11 min-h-11 text-sm" />
               </div>
 
               {/* Item Type */}
@@ -307,8 +313,8 @@ export default function ReportIssuePage() {
                       key={t}
                       onClick={() => { setFormType(t); setFormItemName(""); setFormItemId(""); setItemSearch(""); }}
                       className={cn(
-                        "px-2.5 py-1 text-xs rounded-lg border capitalize transition-colors",
-                        formType === t ? "bg-amber-600 border-amber-600 text-white" : "border-border text-muted-foreground"
+                        "min-h-11 rounded-lg border px-2.5 py-2 text-xs capitalize transition-colors",
+                        formType === t ? "border-amber-600 bg-amber-600 text-white" : "border-border text-muted-foreground"
                       )}
                     >
                       {t.replace("_", " ")}
@@ -330,7 +336,7 @@ export default function ReportIssuePage() {
                       setShowItemPicker(true);
                     }}
                     placeholder={`Search ${formType}s or type a name...`}
-                    className="h-8 text-sm pl-8"
+                    className="h-11 min-h-11 pl-8 text-sm"
                   />
                 </div>
                 {showItemPicker && itemSuggestions.length > 0 && (
@@ -339,7 +345,7 @@ export default function ReportIssuePage() {
                       <button
                         key={s.id}
                         onClick={() => { setFormItemName(s.name); setFormItemId(s.id); setShowItemPicker(false); setItemSearch(""); }}
-                        className="w-full text-left px-3 py-1.5 text-sm hover:bg-muted transition-colors"
+                        className="flex min-h-11 w-full items-center px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
                       >
                         {s.name} <span className="text-[10px] text-muted-foreground">({s.id})</span>
                       </button>
@@ -351,15 +357,15 @@ export default function ReportIssuePage() {
               {/* Issue Flags */}
               <div className="mb-4">
                 <label className="text-xs text-muted-foreground mb-2 block">Issues (check all that apply)</label>
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-1 gap-1.5 min-[380px]:grid-cols-2">
                   {ISSUE_FLAGS.map((flag) => (
                     <button
                       key={flag.key}
                       onClick={() => toggleIssue(flag.key)}
                       className={cn(
-                        "flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border transition-colors text-left",
+                        "flex min-h-11 items-center gap-2 rounded-lg border px-3 py-2 text-left text-xs transition-colors",
                         formIssues[flag.key as keyof typeof formIssues]
-                          ? "border-amber-500/50 bg-amber-500/10 text-amber-300"
+                          ? "border-amber-500/50 bg-amber-500/10 text-amber-900 dark:text-amber-300"
                           : "border-border text-muted-foreground"
                       )}
                     >
@@ -381,7 +387,7 @@ export default function ReportIssuePage() {
                   <label className="text-xs text-muted-foreground">Stat Discrepancies</label>
                   <button
                     onClick={() => setFormDiscrepancies([...formDiscrepancies, { stat: "", currentValue: "", expectedValue: "" }])}
-                    className="text-[10px] text-amber-400 hover:text-amber-300 flex items-center gap-0.5"
+                    className="inline-flex min-h-11 items-center gap-0.5 text-[10px] text-amber-800 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300"
                   >
                     <Plus className="h-2.5 w-2.5" /> Add
                   </button>
@@ -396,7 +402,7 @@ export default function ReportIssuePage() {
                         setFormDiscrepancies(next);
                       }}
                       placeholder="Stat name"
-                      className="h-7 text-xs flex-1 min-w-[100px]"
+                      className="h-11 min-h-11 min-w-[100px] flex-1 text-xs"
                     />
                     <Input
                       value={d.currentValue}
@@ -406,7 +412,7 @@ export default function ReportIssuePage() {
                         setFormDiscrepancies(next);
                       }}
                       placeholder="Shows as"
-                      className="h-7 text-xs w-20 sm:w-24"
+                      className="h-11 min-h-11 w-full min-w-[5.5rem] flex-1 text-xs sm:w-24 sm:flex-none"
                     />
                     <Input
                       value={d.expectedValue}
@@ -416,9 +422,9 @@ export default function ReportIssuePage() {
                         setFormDiscrepancies(next);
                       }}
                       placeholder="Should be"
-                      className="h-7 text-xs w-20 sm:w-24"
+                      className="h-11 min-h-11 w-full min-w-[5.5rem] flex-1 text-xs sm:w-24 sm:flex-none"
                     />
-                    <button onClick={() => setFormDiscrepancies(formDiscrepancies.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300">
+                    <button onClick={() => setFormDiscrepancies(formDiscrepancies.filter((_, j) => j !== i))} className="inline-flex min-h-11 min-w-11 items-center justify-center text-red-700 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" aria-label="Remove discrepancy">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -432,14 +438,14 @@ export default function ReportIssuePage() {
                   value={formComment}
                   onChange={(e) => setFormComment(e.target.value)}
                   placeholder="Describe the issue in detail..."
-                  className="w-full h-20 bg-background border border-border rounded-lg p-2.5 text-sm resize-none"
+                  className="h-24 w-full resize-none rounded-lg border border-border bg-background p-3 text-sm"
                 />
               </div>
 
               <button
                 onClick={handleSubmit}
                 disabled={!formItemName.trim()}
-                className="w-full py-2 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+                className="flex w-full min-h-11 items-center justify-center rounded-lg bg-amber-600 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700 disabled:opacity-50"
               >
                 Submit Report
               </button>
@@ -450,12 +456,12 @@ export default function ReportIssuePage() {
           <div className="flex gap-2 mb-4 flex-wrap items-center">
             <div className="relative w-full sm:w-auto sm:flex-1 sm:max-w-xs">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search reports..." className="h-8 text-xs pl-8" />
+              <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search reports..." className="h-11 min-h-11 pl-8 text-xs" />
             </div>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="bg-background border border-border rounded-lg px-2 py-1 text-xs"
+              className="min-h-11 rounded-lg border border-border bg-background px-2 py-2 text-xs"
             >
               <option value="all">All Status</option>
               <option value="open">Open</option>
@@ -465,7 +471,7 @@ export default function ReportIssuePage() {
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="bg-background border border-border rounded-lg px-2 py-1 text-xs"
+              className="min-h-11 rounded-lg border border-border bg-background px-2 py-2 text-xs"
             >
               <option value="all">All Types</option>
               {ITEM_TYPES.map((t) => <option key={t} value={t}>{t.replace("_", " ")}</option>)}
@@ -476,9 +482,16 @@ export default function ReportIssuePage() {
           {/* Report List */}
           <div className="space-y-2">
             {filteredReports.length === 0 && (
-              <div className="text-center py-12 text-muted-foreground">
-                <AlertTriangle className="h-8 w-8 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">No reports yet. Click &quot;Report Issue&quot; to flag a problem.</p>
+              <div className="py-12 text-center text-muted-foreground">
+                <AlertTriangle className="mx-auto mb-3 h-8 w-8 opacity-50" />
+                <p className="text-sm font-medium text-foreground/80">
+                  {reports.length === 0 ? "No reports yet." : "No reports match these filters."}
+                </p>
+                <p className="mt-1 text-xs">
+                  {reports.length === 0
+                    ? 'Click "New Report" to flag incorrect stats or missing items.'
+                    : "Try clearing search or status filters."}
+                </p>
               </div>
             )}
             {filteredReports.map((report) => {
@@ -489,13 +502,13 @@ export default function ReportIssuePage() {
                 <div key={report.id} className="border border-border rounded-xl bg-card overflow-hidden">
                   <button
                     onClick={() => setExpandedReport(isExpanded ? null : report.id)}
-                    className="w-full text-left p-3 flex items-center gap-3"
+                    className="flex min-h-11 w-full items-center gap-3 p-3 text-left"
                   >
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: STATUS_COLORS[report.status] }} />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm truncate">{report.itemName}</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted capitalize">{report.itemType.replace("_", " ")}</span>
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="truncate text-sm font-medium">{report.itemName}</span>
+                        <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] capitalize">{report.itemType.replace("_", " ")}</span>
                       </div>
                       <div className="text-[10px] text-muted-foreground mt-0.5">
                         {report.reporterName} · {new Date(report.createdAt).toLocaleDateString()}
@@ -511,7 +524,7 @@ export default function ReportIssuePage() {
                       {activeIssues.length > 0 && (
                         <div className="flex gap-1.5 flex-wrap">
                           {activeIssues.map((label) => (
-                            <span key={label} className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400">{label}</span>
+                            <span key={label} className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] text-amber-800 dark:text-amber-400">{label}</span>
                           ))}
                         </div>
                       )}
@@ -525,9 +538,9 @@ export default function ReportIssuePage() {
                               {discrepancies.map((d: { stat: string; currentValue: string; expectedValue: string }, i: number) => (
                                 <div key={i} className="flex gap-2 text-xs">
                                   <span className="font-medium">{d.stat}:</span>
-                                  <span className="text-red-400">{d.currentValue}</span>
+                                  <span className="text-red-700 dark:text-red-400">{d.currentValue}</span>
                                   <span className="text-muted-foreground">→</span>
-                                  <span className="text-green-400">{d.expectedValue}</span>
+                                  <span className="text-green-800 dark:text-green-400">{d.expectedValue}</span>
                                 </div>
                               ))}
                             </div>
@@ -538,19 +551,19 @@ export default function ReportIssuePage() {
                       {report.comment && <p className="text-sm text-muted-foreground">{report.comment}</p>}
 
                       {isAdmin && (
-                        <div className="flex gap-2 pt-2 border-t border-border">
+                        <div className="flex flex-wrap gap-2 border-t border-border pt-2">
                           {report.status === "open" && (<>
-                            <button onClick={() => handleResolve(report.id)} className="flex items-center gap-1 px-2 py-1 text-[10px] rounded bg-green-500/10 text-green-400 hover:bg-green-500/20">
+                            <button onClick={() => handleResolve(report.id)} className="inline-flex min-h-11 items-center gap-1 rounded bg-green-500/10 px-2.5 py-1.5 text-[10px] text-green-800 hover:bg-green-500/20 dark:text-green-400">
                               <Check className="h-3 w-3" /> Resolve
                             </button>
-                            <button onClick={() => handleWontfix(report.id)} className="flex items-center gap-1 px-2 py-1 text-[10px] rounded bg-gray-500/10 text-gray-400 hover:bg-gray-500/20">
+                            <button onClick={() => handleWontfix(report.id)} className="inline-flex min-h-11 items-center gap-1 rounded bg-gray-500/10 px-2.5 py-1.5 text-[10px] text-gray-700 hover:bg-gray-500/20 dark:text-gray-400">
                               <X className="h-3 w-3" /> Won&apos;t Fix
                             </button>
                           </>)}
-                          <button onClick={() => handleCreateOverrideFromReport(report)} className="flex items-center gap-1 px-2 py-1 text-[10px] rounded bg-purple-500/10 text-purple-400 hover:bg-purple-500/20">
+                          <button onClick={() => handleCreateOverrideFromReport(report)} className="inline-flex min-h-11 items-center gap-1 rounded bg-purple-500/10 px-2.5 py-1.5 text-[10px] text-purple-800 hover:bg-purple-500/20 dark:text-purple-400">
                             <Edit3 className="h-3 w-3" /> Create Fix
                           </button>
-                          <button onClick={() => handleDelete(report.id)} className="flex items-center gap-1 px-2 py-1 text-[10px] rounded bg-red-500/10 text-red-400 hover:bg-red-500/20 ml-auto">
+                          <button onClick={() => handleDelete(report.id)} className="ml-auto inline-flex min-h-11 items-center gap-1 rounded bg-red-500/10 px-2.5 py-1.5 text-[10px] text-red-700 hover:bg-red-500/20 dark:text-red-400">
                             <Trash2 className="h-3 w-3" /> Delete
                           </button>
                         </div>
@@ -573,18 +586,16 @@ export default function ReportIssuePage() {
             />
           )}
 
-        </div>
-
         {/* Contact footer */}
-        <div className="text-center mt-8 pb-4">
-          <p className="text-[11px] text-muted-foreground">
-            Need to reach us directly?{" "}
-            <a href="mailto:support@void-forge.org" className="text-primary hover:underline">support@void-forge.org</a>
-            {" "}·{" "}
-            <a href="https://discord.gg/bqQXaYdTjS" target="_blank" rel="noopener noreferrer" className="text-[#5865F2] hover:underline">Discord</a>
+        <div className="mt-8 pb-4 text-center">
+          <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+            <span>Need to reach us directly?</span>
+            <a href="mailto:support@void-forge.org" className="inline-flex min-h-11 items-center break-all text-primary underline-offset-2 hover:underline">support@void-forge.org</a>
+            <span aria-hidden>·</span>
+            <a href="https://discord.gg/bqQXaYdTjS" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[#5865F2] underline-offset-2 hover:underline">Discord</a>
           </p>
         </div>
-      </main>
+      </PageMain>
     </PageShell>
   );
 }
