@@ -80,7 +80,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
     <ConfirmDialogContext.Provider value={{ confirm, prompt }}>
       {children}
       <Dialog open={pending != null} onOpenChange={handleOpenChange}>
-        <DialogContent showCloseButton={false} className="sm:max-w-md">
+        <DialogContent showCloseButton={false} className="max-w-[calc(100%-2rem)] sm:max-w-md">
           {pending && (
             <>
               <DialogHeader>
@@ -98,6 +98,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                     value={promptValue}
                     onChange={(e) => setPromptValue(e.target.value)}
                     placeholder={pending.options.placeholder}
+                    className="min-h-11 text-base sm:text-sm"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === "Enter") finish(promptValue);
@@ -105,10 +106,11 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                   />
                 </div>
               )}
-              <DialogFooter>
+              <DialogFooter className="gap-2 sm:gap-2">
                 <Button
                   type="button"
                   variant="outline"
+                  className="min-h-11"
                   onClick={() => finish(pending.kind === "prompt" ? null : false)}
                 >
                   {pending.options.cancelLabel ?? "Cancel"}
@@ -116,6 +118,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                 <Button
                   type="button"
                   variant={pending.options.destructive ? "destructive" : "default"}
+                  className="min-h-11"
                   onClick={() => finish(pending.kind === "prompt" ? promptValue : true)}
                 >
                   {pending.options.confirmLabel ??

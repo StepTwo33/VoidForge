@@ -26,7 +26,7 @@ function UpdateCard({ update, compact }: { update: SiteUpdateSummary; compact?: 
     <Link
       href={`/updates/${update.id}`}
       className={cn(
-        "group block rounded-lg border p-3 transition-colors",
+        "group block min-h-11 rounded-lg border p-3 transition-colors",
         update.featured
           ? "border-amber-500/40 bg-amber-500/10 hover:border-amber-500/60 hover:bg-amber-500/15"
           : "border-border/50 bg-background/40 hover:border-primary/40 hover:bg-background/60",
@@ -35,7 +35,7 @@ function UpdateCard({ update, compact }: { update: SiteUpdateSummary; compact?: 
       <div className="flex flex-wrap items-center gap-1.5">
         <time className="text-[10px] text-muted-foreground">{formatSiteUpdateTime(update.createdAt)}</time>
         {update.featured && (
-          <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-400">
+          <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-400">
             Featured
           </span>
         )}
@@ -108,7 +108,7 @@ export function SiteUpdatesSidebar({
       <div className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
         <div className="min-w-0">
           <h2 className="flex items-center gap-1.5 text-sm font-semibold">
-            <Megaphone className="h-4 w-4 shrink-0 text-amber-400" />
+            <Megaphone className="h-4 w-4 shrink-0 text-amber-700 dark:text-amber-400" />
             What&apos;s New
           </h2>
           <p className="mt-0.5 text-[10px] text-muted-foreground">
@@ -127,7 +127,7 @@ export function SiteUpdatesSidebar({
           <CopyRssFeedButton
             feedPath="/feeds/updates.xml"
             title="Copy What's New RSS feed link"
-            className="hover:text-amber-400"
+            className="hover:text-amber-700 dark:hover:text-amber-400"
           />
           <Link
             href="/updates"
@@ -141,7 +141,7 @@ export function SiteUpdatesSidebar({
 
       {isSidebar && (
         <div className={HOME_SIDEBAR_TAB_ROW_CLASS}>
-          <div className="inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-primary/10 px-2 py-1.5 text-[10px] font-medium text-primary">
+          <div className="inline-flex min-h-11 flex-1 items-center justify-center gap-1 rounded-md bg-primary/10 px-2 py-2 text-[10px] font-medium text-primary">
             <Megaphone className="h-3 w-3 shrink-0" />
             Latest
           </div>
