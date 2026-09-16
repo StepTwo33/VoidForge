@@ -138,8 +138,23 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
         if (isSetBonusMod(m)) return false;
         // Stance mods should never appear in regular mod slots
         if (m.category === "stance") return false;
-        // Necramech/archwing/operator mods should not leak into normal weapon builders
-        if (m.category === "necramech" || m.category === "archwing" || m.category === "operator") return false;
+        // Necramech/archwing/operator/etc mods should not leak into normal weapon builders
+        if (
+          m.category === "necramech" ||
+          m.category === "archwing" ||
+          m.category === "operator" ||
+          m.category === "railjack" ||
+          m.category === "parazon" ||
+          m.category === "requiem" ||
+          m.category === "conclave" ||
+          m.category === "nightwave" ||
+          m.category === "tektolyst" ||
+          m.category === "utility" ||
+          m.category === "set" ||
+          m.category === "kdrive"
+        ) {
+          return false;
+        }
         if (category !== "archmelee" && (m.category === "archmelee" || isArchmeleeMod(m))) return false;
         if (category !== "archgun" && m.category === "archgun") return false;
         // Riven mods: only show the riven matching the specific weapon category

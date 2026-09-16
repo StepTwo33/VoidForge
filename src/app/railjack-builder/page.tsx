@@ -45,7 +45,6 @@ function defaultTraitId(componentId: string): string | undefined {
 import {
   filterRailjackModsForSlot,
   INTEGRATED_AURA_SLOT,
-  isVerifiedRailjackPlexusMod,
   migratePlexusModsToSlots,
   PLEXUS_ABILITY_SLOT_CATEGORIES,
   PLEXUS_ABILITY_SLOT_LABELS,
@@ -135,9 +134,9 @@ export default function RailjackBuilderPage() {
   const currentPolarities = plexusTab === "integrated" ? integratedPolarities : plexusTab === "battle" ? battlePolarities : tacticalPolarities;
   const setCurrentPolarities = plexusTab === "integrated" ? setIntegratedPolarities : plexusTab === "battle" ? setBattlePolarities : setTacticalPolarities;
 
-  // Railjack mods from the "general" category (wiki allowlists + fallback)
+  // Railjack plexus mods (recategorized from general)
   const railjackMods = useMemo(() => {
-    return allMods.filter((m) => m.category === "general" && isVerifiedRailjackPlexusMod(m));
+    return allMods.filter((m) => m.category === "railjack");
   }, [allMods]);
 
   // Capacity — Integrated only (Battle/Tactical do not use capacity)
