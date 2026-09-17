@@ -29,7 +29,7 @@ function AugurShieldsOnCast({
 
   return (
     <p
-      className="mt-1 text-right text-[10px] leading-snug text-sky-400"
+      className="mt-1 text-right text-[10px] leading-snug text-sky-700 dark:text-sky-400"
       title={`${pieces} Augur piece${pieces === 1 ? "" : "s"} convert ${convertPercent}% of energy spent into shields (can create Overshields).`}
     >
       +{shields % 1 === 0 ? shields.toFixed(0) : shields.toFixed(1)} shields

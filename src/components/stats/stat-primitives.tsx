@@ -4,9 +4,57 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/** Map dark-first Tailwind text tokens to light+dark pairs for readable light mode. */
+const LIGHT_SAFE_TEXT: Record<string, string> = {
+  "text-sky-400": "text-sky-700 dark:text-sky-400",
+  "text-violet-400": "text-violet-700 dark:text-violet-400",
+  "text-violet-300": "text-violet-800 dark:text-violet-300",
+  "text-yellow-400": "text-yellow-700 dark:text-yellow-400",
+  "text-yellow-300": "text-yellow-800 dark:text-yellow-300",
+  "text-emerald-400": "text-emerald-700 dark:text-emerald-400",
+  "text-lime-400": "text-lime-700 dark:text-lime-400",
+  "text-lime-300": "text-lime-800 dark:text-lime-300",
+  "text-pink-400": "text-pink-700 dark:text-pink-400",
+  "text-pink-300": "text-pink-800 dark:text-pink-300",
+  "text-fuchsia-400": "text-fuchsia-700 dark:text-fuchsia-400",
+  "text-cyan-400": "text-cyan-700 dark:text-cyan-400",
+  "text-cyan-300": "text-cyan-800 dark:text-cyan-300",
+  "text-rose-400": "text-rose-700 dark:text-rose-400",
+  "text-rose-300": "text-rose-800 dark:text-rose-300",
+  "text-amber-400": "text-amber-800 dark:text-amber-400",
+  "text-amber-300": "text-amber-800 dark:text-amber-300",
+  "text-green-400": "text-green-700 dark:text-green-400",
+  "text-orange-400": "text-orange-700 dark:text-orange-400",
+  "text-orange-300": "text-orange-800 dark:text-orange-300",
+  "text-red-400": "text-red-700 dark:text-red-400",
+  "text-teal-400": "text-teal-700 dark:text-teal-400",
+  "text-blue-400": "text-blue-700 dark:text-blue-400",
+  "text-purple-400": "text-purple-700 dark:text-purple-400",
+  "text-purple-300": "text-purple-800 dark:text-purple-300",
+  "text-slate-400": "text-slate-700 dark:text-slate-300",
+  "text-stone-400": "text-stone-700 dark:text-stone-300",
+};
+
+export function toLightSafeTextColor(color?: string): string | undefined {
+  if (!color) return color;
+  if (color.includes("dark:")) return color;
+  return color
+    .split(/\s+/)
+    .map((token) => {
+      const m = token.match(/^(text-[a-z]+-\d+)(\/\d+)?$/);
+      if (!m) return token;
+      const mapped = LIGHT_SAFE_TEXT[m[1]];
+      if (!mapped) return token;
+      const op = m[2] || "";
+      return op ? mapped.replace(/(text-[a-z]+-\d+)/g, `$1${op}`) : mapped;
+    })
+    .join(" ");
+}
+
 export function StatRow({ label, value, highlighted, color, tooltip, changed }: {
   label: string; value: string; highlighted?: boolean; color?: string; tooltip?: string; changed?: boolean;
 }) {
+  const safeColor = toLightSafeTextColor(color);
   return (
     <div
       className={cn(
@@ -15,13 +63,13 @@ export function StatRow({ label, value, highlighted, color, tooltip, changed }: 
       )}
       title={tooltip}
     >
-      <span className={cn("min-w-0 flex-1 break-words text-xs leading-snug", color || "text-muted-foreground", changed && "text-amber-900 dark:text-amber-200")}>
+      <span className={cn("min-w-0 flex-1 break-words text-xs leading-snug", safeColor || "text-muted-foreground", changed && "text-amber-900 dark:text-amber-200")}>
         {label}
       </span>
       <span
         className={cn(
           "stat-readable shrink-0 text-xs font-mono tabular-nums",
-          highlighted ? "font-bold text-primary" : color || "text-foreground",
+          highlighted ? "font-bold text-primary" : safeColor || "text-foreground",
           changed && "font-semibold text-amber-950 dark:text-amber-100",
         )}
       >

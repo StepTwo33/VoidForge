@@ -81,7 +81,7 @@ export function BuildVoteButton({
       disabled={loading || !canVote}
       title={canVote ? (voted ? "Remove upvote" : "Upvote") : "Sign in to upvote"}
       className={cn(
-        "inline-flex min-h-11 items-center gap-1 rounded-md border transition-colors font-medium",
+        "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md border transition-colors font-medium",
         pad,
         voted
           ? "border-primary/50 bg-primary/10 text-primary"

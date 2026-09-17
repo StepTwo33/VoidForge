@@ -105,7 +105,7 @@ export function SiteUpdatesSidebar({
       padding={false}
       className={cn(isSidebar && HOME_SIDEBAR_PANEL_CLASS, className)}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-border/60 px-4 py-3">
         <div className="min-w-0">
           <h2 className="flex items-center gap-1.5 text-sm font-semibold">
             <Megaphone className="h-4 w-4 shrink-0 text-amber-700 dark:text-amber-400" />
@@ -115,7 +115,7 @@ export function SiteUpdatesSidebar({
             Updates from the Voidforge team
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-x-1 gap-y-0.5">
           {isAdmin && (
             <Link
               href="/admin/updates"

@@ -663,14 +663,14 @@ export default function WeaponBuilderPage() {
                       setSaveDialogDefaultPublic(buildIsPublic);
                       setSaveDialogOpen(true);
                     }}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs sm:min-h-0 sm:py-1.5 text-muted-foreground hover:text-green-400 hover:bg-green-500/10 transition-all font-medium"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs sm:min-h-0 sm:py-1.5 text-muted-foreground hover:text-green-700 dark:hover:text-green-400 hover:bg-green-500/10 transition-all font-medium"
                     title="Save Build"
                   >
                     <Save className="h-3.5 w-3.5" /> <span className="inline">Save</span>
                   </button>
                   <button
                     onClick={() => { setSavedBuilds(getSavedBuilds("weapon")); setShowSavedBuilds(true); }}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs sm:min-h-0 sm:py-1.5 text-muted-foreground hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs sm:min-h-0 sm:py-1.5 text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium"
                     title="Load Build"
                   >
                     <FolderOpen className="h-3.5 w-3.5" /> <span className="inline">Load</span>
@@ -681,8 +681,8 @@ export default function WeaponBuilderPage() {
                     className={cn(
                       "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       showImporter
-                        ? "bg-blue-500/10 text-blue-400"
-                        : "text-muted-foreground hover:text-blue-400 hover:bg-blue-500/10"
+                        ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
+                        : "text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10"
                     )}
                     title="Import Build"
                   >
@@ -693,8 +693,8 @@ export default function WeaponBuilderPage() {
                     className={cn(
                       "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       shareCopied
-                        ? "bg-green-500/10 text-green-400"
-                        : "text-muted-foreground hover:text-purple-400 hover:bg-purple-500/10"
+                        ? "bg-green-500/10 text-green-700 dark:text-green-400"
+                        : "text-muted-foreground hover:text-purple-700 dark:hover:text-purple-400 hover:bg-purple-500/10"
                     )}
                     title="Copy shareable link"
                   >
@@ -721,7 +721,7 @@ export default function WeaponBuilderPage() {
                     className={cn(
                       "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       hasOrokinCatalyst
-                        ? "bg-blue-500/10 text-blue-400"
+                        ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
                     )}
                   >

@@ -63,9 +63,9 @@ export function ExaltedWeaponSection({
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <Sparkles className="h-4 w-4 shrink-0 text-violet-400" aria-hidden />
-            <h2 className="text-sm font-semibold tracking-wide text-violet-300">{sectionTitle}</h2>
-            <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-medium text-violet-300 ring-1 ring-violet-500/25">
+            <Sparkles className="h-4 w-4 shrink-0 text-violet-700 dark:text-violet-400" aria-hidden />
+            <h2 className="text-sm font-semibold tracking-wide text-violet-800 dark:text-violet-300">{sectionTitle}</h2>
+            <span className="rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-medium text-violet-800 dark:text-violet-300 ring-1 ring-violet-500/25">
               {exaltedWeapon.name}
             </span>
           </div>
@@ -138,7 +138,7 @@ export function ExaltedWeaponSection({
       )}
 
       {exaltedStats && (
-        <div className="mt-4 border-t border-violet-500/15 pt-4 [&>div]:border-0 [&>div]:bg-transparent [&>div]:p-0 [&_h3]:text-violet-300/80">
+        <div className="mt-4 border-t border-violet-500/15 pt-4 [&>div]:border-0 [&>div]:bg-transparent [&>div]:p-0 [&_h3]:text-violet-800/80 dark:[&_h3]:text-violet-300/80">
           <WeaponStatsPanel
             stats={exaltedStats}
             baseStats={exaltedBaseStats}
