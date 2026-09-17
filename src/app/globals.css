@@ -633,6 +633,7 @@
 .page-ambient {
   position: relative;
   isolation: isolate;
+  overflow-x: clip;
   background-color: var(--background);
 }
 

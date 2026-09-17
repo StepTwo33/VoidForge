@@ -249,7 +249,7 @@ export function ItemPickerRow({
       type="button"
       onClick={onClick}
       className={cn(
-        "group w-full rounded-xl border border-border/60 bg-background/30 p-3 text-left transition-all duration-200 active:scale-[0.99]",
+        "group min-h-11 w-full rounded-xl border border-border/60 bg-background/30 p-3 text-left transition-all duration-200 active:scale-[0.99]",
         "[@media(hover:hover)]:hover:-translate-y-px hover:shadow-md",
         colors.rowHover,
         className,
