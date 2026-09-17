@@ -42,7 +42,7 @@ export function HelminthPickerDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="flex max-h-[85vh] min-h-0 max-w-lg flex-col overflow-hidden p-0">
+      <DialogContent className="flex max-h-[85vh] min-h-0 w-full max-w-[calc(100%-2rem)] flex-col overflow-hidden p-0 sm:max-w-lg">
         <DialogHeader className="shrink-0 space-y-1.5 p-6 pb-0">
           <DialogTitle className="pr-8 text-base leading-snug sm:text-lg">
             {hasCurrentHelminth

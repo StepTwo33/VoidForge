@@ -28,7 +28,7 @@ export function ShardPickerDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {selectedShard ? `${selectedShard.name} — Select Bonus` : "Select Archon Shard"}
