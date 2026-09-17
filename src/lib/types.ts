@@ -769,6 +769,11 @@ export interface CalculatedStats {
   slashOnCritChance?: number;
   /** Chance to force an extra Electric proc on hit (Prototype Shock Coils). */
   extraElectricProcChance?: number;
+  /**
+   * Next-cast Ability Strength bonus from Velox Conclusion (and similar).
+   * Fraction (0.6 = +60%). Sim-gated by applyTriggerBuffs (assumes max stacks).
+   */
+  abilityStrengthNextCastBonus?: number;
   /** Chance for Impact procs to add a Slash proc (Internal Bleeding / Hemorrhage). */
   slashOnImpactProcChance?: number;
   /** Bonus damage on first shot of each magazine (Charged/Primed Chamber), averaged into DPS. */

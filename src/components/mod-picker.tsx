@@ -36,6 +36,7 @@ import {
 } from "@/lib/mods/mod-slot-categories";
 import {
   modEligibleForWeaponSlot,
+  isNonGroundWeaponMod,
   type WeaponModSlotType,
 } from "@/lib/mods/mod-weapon-eligibility";
 import { getWeaponModProfile } from "@/lib/mods/weapon-mod-tags";
@@ -137,10 +138,8 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
     } else {
       categoryMods = mods.filter((m) => {
         if (isSetBonusMod(m)) return false;
-        // Stance mods should never appear in regular mod slots
-        if (m.category === "stance") return false;
-        // Necramech/archwing/operator mods should not leak into normal weapon builders
-        if (m.category === "necramech" || m.category === "archwing" || m.category === "operator") return false;
+        // Stance / Railjack / Focus / Parazon / etc. never leak into weapon/frame pickers here.
+        if (isNonGroundWeaponMod(m) && category !== "archwing") return false;
         if (category !== "archmelee" && (m.category === "archmelee" || isArchmeleeMod(m))) return false;
         if (category !== "archgun" && m.category === "archgun") return false;
         // Riven mods: only show the riven matching the specific weapon category
@@ -164,6 +163,20 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
         if (category === "companion") return m.category === "companion";
         return m.category === category;
       });
+    }
+
+    // Belt-and-suspenders: never show Railjack/Focus/etc in ground weapon pickers.
+    if (
+      category === "primary" ||
+      category === "secondary" ||
+      category === "melee" ||
+      category === "archgun" ||
+      category === "archmelee" ||
+      slotType === "weapon_exilus_primary" ||
+      slotType === "weapon_exilus_secondary" ||
+      slotType === "weapon_exilus_melee"
+    ) {
+      categoryMods = categoryMods.filter((m) => !isNonGroundWeaponMod(m));
     }
 
     categoryMods = categoryMods.filter((m) => m.category !== "arcane");

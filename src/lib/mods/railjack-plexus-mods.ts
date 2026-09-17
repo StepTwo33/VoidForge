@@ -41,7 +41,6 @@ export const RAILJACK_INTEGRATED_MOD_IDS = new Set([
   "ordnance_cheap_shot",
   "ordnance_velocity",
   "overloader",
-  "lock_and_load",
   "ripload",
   "scourging_warheads",
   "warhead",
@@ -152,11 +151,18 @@ export function filterRailjackModsForSlot(
 }
 
 /** Prefer explicit wiki allowlists; keep keyword fallback for unknown general mods. */
+export function isAllowlistedRailjackPlexusMod(mod: Pick<{ id: string }, "id">): boolean {
+  return (
+    RAILJACK_AURA_MOD_IDS.has(mod.id) ||
+    RAILJACK_INTEGRATED_MOD_IDS.has(mod.id) ||
+    RAILJACK_BATTLE_MOD_IDS.has(mod.id) ||
+    RAILJACK_TACTICAL_MOD_IDS.has(mod.id)
+  );
+}
+
+/** Prefer explicit wiki allowlists; keep keyword fallback for unknown general mods. */
 export function isVerifiedRailjackPlexusMod(mod: RailjackModRef): boolean {
-  if (RAILJACK_AURA_MOD_IDS.has(mod.id)) return true;
-  if (RAILJACK_INTEGRATED_MOD_IDS.has(mod.id)) return true;
-  if (RAILJACK_BATTLE_MOD_IDS.has(mod.id)) return true;
-  if (RAILJACK_TACTICAL_MOD_IDS.has(mod.id)) return true;
+  if (isAllowlistedRailjackPlexusMod(mod)) return true;
   return isRailjackMod(mod);
 }
 

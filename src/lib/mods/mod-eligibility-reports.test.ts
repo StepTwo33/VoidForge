@@ -34,6 +34,10 @@ describe("polarity spot-checks", () => {
   it("Galvanized Elementalist is Vazarin", () => {
     expect(modsById.get("galvanized_elementalist")?.polarity).toBe("vazarin");
   });
+
+  it("Galvanized Aptitude is Vazarin", () => {
+    expect(modsById.get("galvanized_aptitude")?.polarity).toBe("vazarin");
+  });
 });
 
 describe("Primed Sure Footed", () => {
@@ -109,14 +113,22 @@ describe("shotgun vs rifle mod class filtering", () => {
     for (const weaponId of ["strun", "sobek"]) {
       expect(primaryEligible(weaponId, "hells_chamber")).toBe(true);
       expect(primaryEligible(weaponId, "point_blank_r3")).toBe(true);
+      expect(primaryEligible(weaponId, "accelerated_blast_r3")).toBe(true);
+      expect(primaryEligible(weaponId, "blunderbuss_r3")).toBe(true);
       expect(primaryEligible(weaponId, "serration_r3")).toBe(false);
     }
   });
 
-  it("allows Serration on Braton; denies Hell's Chamber and Point Blank", () => {
-    expect(primaryEligible("braton", "serration_r3")).toBe(true);
-    expect(primaryEligible("braton", "hells_chamber")).toBe(false);
-    expect(primaryEligible("braton", "point_blank_r3")).toBe(false);
+  it("allows Serration on Braton / Acceltra Prime; denies shotgun and Railjack", () => {
+    for (const weaponId of ["braton", "acceltra_prime"]) {
+      expect(primaryEligible(weaponId, "serration_r3")).toBe(true);
+      expect(primaryEligible(weaponId, "hells_chamber")).toBe(false);
+      expect(primaryEligible(weaponId, "point_blank_r3")).toBe(false);
+      expect(primaryEligible(weaponId, "accelerated_blast_r3")).toBe(false);
+      expect(primaryEligible(weaponId, "blunderbuss_r3")).toBe(false);
+      expect(primaryEligible(weaponId, "battle_forge")).toBe(false);
+      expect(primaryEligible(weaponId, "blackout_pulse")).toBe(false);
+    }
   });
 
   it("Point Blank is categorized as shotgun", () => {

@@ -6,6 +6,7 @@ import {
   isTomeCanticleMod,
   isTomeMod,
 } from "@/lib/mods/mod-slot-categories";
+import { isAllowlistedRailjackPlexusMod } from "@/lib/mods/railjack-plexus-mods";
 import { isTomeWeapon } from "@/lib/weapons/tome-weapons";
 import {
   isWeaponExclusiveMod,
@@ -40,7 +41,6 @@ const GENERAL_MELEE_ONLY_IDS = new Set([
   "flowing_strikes",
   "fracturing_wind",
   "melee_riven_mod",
-  "peculiar_end",
   "power_spike",
   "spectral_blades",
   "zaw_riven_mod",
@@ -53,6 +53,132 @@ const GENERAL_RIVEN_PLACEHOLDER: Record<string, Set<string>> = {
   melee_riven_mod: MELEE_WEAPON_CATEGORIES,
   zaw_riven_mod: MELEE_WEAPON_CATEGORIES,
 };
+
+/**
+ * Shotgun-only mods that are still miscategorized as `general` in mods.ts.
+ * Keep as an id allowlist (not a mass category rewrite) so rifle builders deny them.
+ */
+const SHOTGUN_ONLY_MOD_IDS = new Set([
+  "accelerated_blast_r3",
+  "ammo_stock_r3",
+  "amalgam_shotgun_barrage",
+  "atomic_fallout",
+  "blunderbuss_r3",
+  "breach_loader",
+  "charged_shell_r3",
+  "chilling_grasp_r3",
+  "chilling_reload",
+  "cleanse_corpus_r3",
+  "cleanse_grineer_r3",
+  "cleanse_infested_r3",
+  "cleanse_orokin",
+  "cleanse_the_murmur",
+  "contagious_spread_r3",
+  "crash_shot",
+  "critical_meltdown",
+  "cryo_coating",
+  "disruptor",
+  "fatal_acceleration",
+  "flechette",
+  "frigid_blast_r3",
+  "full_contact",
+  "incendiary_coat_r3",
+  "loaded_capacity",
+  "loose_chamber",
+  "magnetic_strafe",
+  "magnetized_core",
+  "nano_applicator",
+  "primed_ammo_stock",
+  "primed_blunderbuss",
+  "primed_cleanse_corpus",
+  "primed_cleanse_grineer",
+  "primed_cleanse_infested",
+  "primed_cleanse_orokin",
+  "primed_cleanse_the_murmur",
+  "primed_shotgun_ammo_mutation",
+  "ravage_r3",
+  "repeater_clip",
+  "scattering_inferno_r3",
+  "seeking_force_r3",
+  "semi_shotgun_cannonade",
+  "shell_compression",
+  "shell_shock_r3",
+  "shotgun_barrage",
+  "shotgun_elementalist",
+  "shotgun_riven_mod",
+  "shotgun_savvy",
+  "shrapnel_shot",
+  "shred_shot",
+  "shredder",
+  "sweeping_serration",
+  "tactical_pump_r3",
+  "tainted_shell_r10",
+  "toxic_barrage_r3",
+]);
+
+/** Placeholder / non-equipable junk that must never appear in weapon pickers. */
+const GENERAL_JUNK_MOD_IDS = new Set([
+  "amarsetmod",
+  "ashensetmod",
+  "augursetmod",
+  "bonebladesetmod",
+  "borealsetmod",
+  "femursetmod",
+  "gladiatorsetmod",
+  "hawksetmod",
+  "huntersetmod",
+  "mechasetmod",
+  "nirasetmod",
+  "raptorsetmod",
+  "sacrificesetmod",
+  "spidersetmod",
+  "strainsetmod",
+  "synthsetmod",
+  "teksetmod",
+  "umbrasetmod",
+  "vigilantesetmod",
+]);
+
+/** Requiem mods (Parazon) — not ground-weapon equippable. */
+const REQUIEM_MOD_IDS = new Set([
+  "fass",
+  "jahu",
+  "khra",
+  "lohk",
+  "netra",
+  "oull",
+  "ris",
+  "vome",
+  "xata",
+]);
+
+/** True when this mod is shotgun-class regardless of catalog category. */
+export function isShotgunOnlyMod(mod: Pick<Mod, "id" | "name" | "category">): boolean {
+  if (mod.category === "shotgun") return true;
+  if (SHOTGUN_ONLY_MOD_IDS.has(mod.id)) return true;
+  const blob = `${mod.id} ${mod.name}`.toLowerCase();
+  return blob.includes("shotgun");
+}
+
+function isNonWeaponGeneralFamily(mod: Mod): boolean {
+  if (GENERAL_JUNK_MOD_IDS.has(mod.id) || mod.id.endsWith("setmod")) return true;
+  if (REQUIEM_MOD_IDS.has(mod.id)) return true;
+  if (mod.id.endsWith("_posture") || mod.id.includes("posture")) return true;
+  if (isAllowlistedRailjackPlexusMod(mod)) return true;
+  const text = modText(mod);
+  if (text.includes("fighting form devised for conclave") || text.includes("conclave")) {
+    return true;
+  }
+  // Technocyte Coda Parazon Antivirus / Potency digimods (if miscategorized as general)
+  if (
+    /\b(bytes?|malware|spyware|wetware|cyber-crime|disinfection|h[oö]llars|antivirus)\b/i.test(
+      text,
+    )
+  ) {
+    return true;
+  }
+  return false;
+}
 
 export function isPrimaryWeaponCategory(category: string): boolean {
   return PRIMARY_WEAPON_CATEGORIES.has(category);
@@ -77,6 +203,8 @@ export function generalModAppliesToWeaponCategory(
 ): boolean {
   if (mod.category !== "general") return true;
 
+  if (isNonWeaponGeneralFamily(mod)) return false;
+
   if (GENERAL_MELEE_ONLY_IDS.has(mod.id)) {
     return isMeleeWeaponCategory(weaponCategory);
   }
@@ -84,6 +212,11 @@ export function generalModAppliesToWeaponCategory(
   const rivenScope = GENERAL_RIVEN_PLACEHOLDER[mod.id];
   if (rivenScope) {
     return rivenScope.has(weaponCategory);
+  }
+
+  // Shotgun-only generals never appear on non-shotgun weapons.
+  if (isShotgunOnlyMod(mod) && weaponCategory !== "shotgun") {
+    return false;
   }
 
   const text = modText(mod);
@@ -192,20 +325,47 @@ export function resolvePrimaryWeaponClass(
 
 /**
  * After builder-category match: shotgun weapons deny rifle/primary/bow/launcher mods;
- * non-shotgun primaries deny typed shotgun mods. `general` is handled separately.
+ * non-shotgun primaries deny shotgun-class mods (typed category or known shotgun ids).
  */
 export function modMatchesPrimaryWeaponClass(
-  mod: Pick<Mod, "category">,
+  mod: Pick<Mod, "id" | "name" | "category">,
   weaponClass: string,
 ): boolean {
-  if (mod.category === "general") return true;
   if (weaponClass === "shotgun") {
-    return !NON_SHOTGUN_PRIMARY_MOD_CATEGORIES.has(mod.category);
+    if (NON_SHOTGUN_PRIMARY_MOD_CATEGORIES.has(mod.category)) return false;
+    return true;
   }
   if (isPrimaryWeaponCategory(weaponClass) || weaponClass === "sniper") {
-    return mod.category !== "shotgun";
+    if (isShotgunOnlyMod(mod)) return false;
+    return true;
   }
   return true;
+}
+
+/** Categories that must never appear in ground-weapon / archgun builders. */
+const NON_GROUND_WEAPON_MOD_CATEGORIES = new Set([
+  "necramech",
+  "archwing",
+  "operator",
+  "railjack",
+  "parazon",
+  "requiem",
+  "antivirus",
+  "potency",
+  "conclave",
+  "tektolyst",
+  "utility",
+  "set",
+  "kdrive",
+  "stance",
+]);
+
+/** True when a mod belongs to a non-ground-weapon family (category or Railjack allowlist). */
+export function isNonGroundWeaponMod(mod: Pick<Mod, "id" | "category">): boolean {
+  if (NON_GROUND_WEAPON_MOD_CATEGORIES.has(mod.category)) return true;
+  // ID allowlist wins even if a data override rewrites category back to primary/general.
+  if (isAllowlistedRailjackPlexusMod(mod)) return true;
+  return false;
 }
 
 /** Category filter for weapon mod pickers (regular + typed categories). */
@@ -214,6 +374,8 @@ export function modMatchesWeaponBuilderCategory(
   builderCategory: string,
   weaponId?: string,
 ): boolean {
+  if (isNonGroundWeaponMod(mod)) return false;
+
   if (
     isWeaponExclusiveMod(mod.id) &&
     mod.category !== "stance" &&
@@ -224,10 +386,6 @@ export function modMatchesWeaponBuilderCategory(
     return true;
   }
 
-  if (mod.category === "stance") return false;
-  if (mod.category === "necramech" || mod.category === "archwing" || mod.category === "operator") {
-    return false;
-  }
   if (builderCategory !== "archmelee" && mod.category === "archmelee") return false;
   if (builderCategory !== "archgun" && mod.category === "archgun") return false;
 
@@ -272,6 +430,9 @@ export function modEligibleForWeaponSlot(
   slotType: WeaponModSlotType,
   weaponProfile?: WeaponModProfile,
 ): boolean {
+  // Hard deny first — covers Exilus early-returns and category overrides.
+  if (isNonGroundWeaponMod(mod)) return false;
+
   const weaponId = weaponProfile?.weaponId;
 
   if (!tomeModEligibleForWeaponSlot(mod, weaponId, slotType)) return false;

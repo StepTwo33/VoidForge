@@ -387,7 +387,7 @@ export function WeaponSimControls({
                 </select>
               </label>
             )}
-            <label className="block text-[10px] text-muted-foreground" title="Bane / Expel / Smite apply (1+bonus) on hits and squared on DoTs">
+            <label className="block text-[10px] text-muted-foreground" title="Bane / Expel / Smite apply (1+bonus) on hits and squared on DoTs. Sentient Incision picks its parallel weakness element from this faction.">
               Target faction
               <select
                 value={simParams.targetFaction ?? ""}
@@ -403,8 +403,14 @@ export function WeaponSimControls({
                 <option value="Grineer">Grineer</option>
                 <option value="Corpus">Corpus</option>
                 <option value="Infested">Infested</option>
+                <option value="Infested Deimos">Infested Deimos</option>
                 <option value="Corrupted">Corrupted / Orokin</option>
+                <option value="Sentient">Sentient</option>
                 <option value="Murmur">The Murmur</option>
+                <option value="Narmer">Narmer</option>
+                <option value="Scaldra">Scaldra</option>
+                <option value="Techrot">Techrot</option>
+                <option value="Anarchs">Anarchs</option>
               </select>
             </label>
             <label className="flex items-center gap-2 text-[10px] text-muted-foreground cursor-pointer">

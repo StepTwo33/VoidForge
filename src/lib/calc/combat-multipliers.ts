@@ -40,6 +40,9 @@ export function normalizeFactionName(faction: string | undefined | null): string
   if (f.includes("infest")) return "infested";
   if (f.includes("sentient")) return "sentient";
   if (f.includes("narmer")) return "narmer";
+  if (f.includes("scaldra")) return "grineer";
+  if (f.includes("techrot")) return "corpus";
+  if (f.includes("anarch")) return "anarchs";
   return f;
 }
 
