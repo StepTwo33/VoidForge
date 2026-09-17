@@ -336,7 +336,7 @@ export function DataFixesPanel({
           </p>
           <Link
             href="/admin/data-fixes"
-            className="text-xs font-medium text-purple-800 hover:text-purple-700 dark:text-purple-400"
+            className="inline-flex min-h-11 items-center text-xs font-medium text-purple-800 hover:text-purple-700 dark:text-purple-400"
           >
             Open full Data Fixes hub →
           </Link>
@@ -368,14 +368,14 @@ export function DataFixesPanel({
               type="button"
               onClick={() => void handleUploadLegacy()}
               disabled={legacyUploading}
-              className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700 disabled:opacity-60"
+              className="min-h-11 rounded-lg bg-amber-600 px-3 text-xs font-medium text-white hover:bg-amber-700 disabled:opacity-60"
             >
               {legacyUploading ? "Uploading…" : "Upload to server"}
             </button>
             <button
               type="button"
               onClick={handleExportLegacy}
-              className="rounded-lg border border-amber-500/40 px-3 py-1.5 text-xs text-amber-900 hover:bg-amber-500/10 dark:text-amber-200"
+              className="min-h-11 rounded-lg border border-amber-500/40 px-3 text-xs text-amber-900 hover:bg-amber-500/10 dark:text-amber-200"
             >
               Export browser JSON
             </button>
@@ -390,13 +390,13 @@ export function DataFixesPanel({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by ID, note, or author…"
-            className="h-8 pl-8 text-xs"
+            className="min-h-11 h-11 pl-8 text-xs"
           />
         </div>
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          className="h-8 rounded-lg border border-border bg-background px-2 text-xs"
+          className="min-h-11 h-11 rounded-lg border border-border bg-background px-2 text-xs"
         >
           <option value="all">All types</option>
           {OVERRIDE_CATEGORIES.map((c) => (
@@ -406,7 +406,7 @@ export function DataFixesPanel({
         <select
           value={filterAction}
           onChange={(e) => setFilterAction(e.target.value)}
-          className="h-8 rounded-lg border border-border bg-background px-2 text-xs"
+          className="min-h-11 h-11 rounded-lg border border-border bg-background px-2 text-xs"
         >
           <option value="all">All actions</option>
           <option value="modify">{OVERRIDE_ACTION_LABELS.modify}</option>
@@ -417,21 +417,21 @@ export function DataFixesPanel({
           <button
             type="button"
             onClick={handleImport}
-            className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+            className="flex min-h-11 items-center gap-1 rounded-lg border border-border px-3 text-xs text-muted-foreground hover:text-foreground"
           >
             <Upload className="h-3.5 w-3.5" /> Import
           </button>
           <button
             type="button"
             onClick={() => void handleExportJson()}
-            className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+            className="flex min-h-11 items-center gap-1 rounded-lg border border-border px-3 text-xs text-muted-foreground hover:text-foreground"
           >
             <Download className="h-3.5 w-3.5" /> JSON
           </button>
           <button
             type="button"
             onClick={handleExportTypeScript}
-            className="flex items-center gap-1 rounded-lg border border-purple-500/40 px-3 py-1.5 text-xs text-purple-800 hover:text-purple-700 dark:text-purple-400"
+            className="flex min-h-11 items-center gap-1 rounded-lg border border-purple-500/40 px-3 text-xs text-purple-800 hover:text-purple-700 dark:text-purple-400"
           >
             <Download className="h-3.5 w-3.5" /> .ts export
           </button>
@@ -439,7 +439,7 @@ export function DataFixesPanel({
             type="button"
             onClick={() => (showEditor ? (setShowEditor(false), setPrefill(undefined)) : startNewFix())}
             className={cn(
-              "flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+              "flex min-h-11 items-center gap-1 rounded-lg px-3 text-xs font-medium transition-colors",
               showEditor ? "bg-red-600 text-white" : "bg-purple-600 text-white hover:bg-purple-700",
             )}
           >
@@ -497,7 +497,7 @@ export function DataFixesPanel({
                   type="button"
                   disabled={bulkDeleting}
                   onClick={() => void handleBulkDelete()}
-                  className="ml-auto flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-60"
+                  className="ml-auto flex min-h-11 items-center gap-1 rounded-lg bg-red-600 px-3 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-60"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   {bulkDeleting ? "Deleting…" : `Delete ${selectedIds.size}`}
@@ -530,7 +530,7 @@ export function DataFixesPanel({
                 <button
                   type="button"
                   onClick={() => setExpandedId(isExpanded ? null : ovr.id)}
-                  className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                  className="flex min-h-11 min-w-0 flex-1 items-center gap-3 text-left"
                 >
                   <span className={cn("shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium", ACTION_CHIP[ovr.action])}>
                     {OVERRIDE_ACTION_LABELS[ovr.action]}
@@ -570,14 +570,14 @@ export function DataFixesPanel({
                     <button
                       type="button"
                       onClick={() => handleEdit(ovr)}
-                      className="flex items-center gap-1 rounded bg-purple-500/10 px-2 py-1 text-[10px] text-purple-800 hover:bg-purple-500/20 dark:text-purple-400"
+                      className="flex min-h-11 items-center gap-1 rounded-lg bg-purple-500/10 px-3 text-xs text-purple-800 hover:bg-purple-500/20 dark:text-purple-400"
                     >
                       <Wrench className="h-3 w-3" /> Edit
                     </button>
                     <button
                       type="button"
                       onClick={() => void handleDelete(ovr.id)}
-                      className="ml-auto flex items-center gap-1 rounded bg-red-500/10 px-2 py-1 text-[10px] text-red-700 hover:bg-red-500/20 dark:text-red-400"
+                      className="ml-auto flex min-h-11 items-center gap-1 rounded-lg bg-red-500/10 px-3 text-xs text-red-700 hover:bg-red-500/20 dark:text-red-400"
                     >
                       <Trash2 className="h-3 w-3" /> Delete
                     </button>

@@ -536,7 +536,7 @@ export function Header() {
             {isAdmin && (
               <Link
                 href="/admin/reports"
-                className="relative flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm text-red-700/80 hover:text-red-800 transition-colors rounded-lg hover:bg-red-500/5 dark:text-red-400/70 dark:hover:text-red-400"
+                className="relative flex min-h-11 items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium text-red-700 hover:text-red-800 transition-colors rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/15 dark:text-red-400 dark:hover:text-red-300"
               >
                 <Shield className="h-3.5 w-3.5" />
                 Admin
@@ -674,10 +674,10 @@ export function Header() {
               <Link
                 href="/admin/reports"
                 onClick={() => setMobileOpen(false)}
-                className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-red-700/80 transition-colors hover:bg-secondary hover:text-red-800 dark:text-red-400/70 dark:hover:text-red-400"
+                className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-red-700 transition-colors border border-red-500/30 bg-red-500/10 hover:bg-red-500/15 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
               >
                 <Shield className="h-4 w-4" />
-                Admin Reports
+                Admin
                 <AdminOpenReportsBadge count={openReportCount} />
               </Link>
             )}
