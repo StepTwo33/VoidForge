@@ -285,7 +285,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="max-w-2xl max-h-[85vh] min-h-0 flex flex-col overflow-hidden p-0">
+      <DialogContent className="flex max-h-[85vh] min-h-0 w-full max-w-[calc(100%-2rem)] flex-col overflow-hidden p-0 sm:max-w-2xl">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>
             {isArcaneBrowse

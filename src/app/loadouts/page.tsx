@@ -819,7 +819,7 @@ export default function LoadoutsPage() {
           if (!open) setPickerLoadoutId(null);
         }}
       >
-        <DialogContent className="max-w-lg max-h-[85vh] flex flex-col p-0 gap-0 sm:max-w-lg">
+        <DialogContent className="flex max-h-[85vh] w-full max-w-[calc(100%-2rem)] flex-col gap-0 p-0 sm:max-w-lg">
           <DialogHeader className="p-5 pb-0 shrink-0">
             <DialogTitle className="text-left">Fill {SLOT_CONFIG[pickerSlot]?.label} slot</DialogTitle>
             <p className="text-xs text-muted-foreground text-left font-normal pt-1">

@@ -87,7 +87,7 @@ export function ArcaneValuesDialog({
 
   return (
     <Dialog open={open} onOpenChange={(next) => !saving && onOpenChange(next)}>
-      <DialogContent className="sm:max-w-lg" showCloseButton={!saving}>
+      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-lg" showCloseButton={!saving}>
         <DialogHeader>
           <DialogTitle>Edit base values — {arcaneName}</DialogTitle>
           <DialogDescription>
