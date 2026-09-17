@@ -303,7 +303,7 @@ export function FeatureCard({
   const inner = (
     <div
       className={cn(
-        "group flex h-full flex-col rounded-xl border border-border/60 surface-panel p-4 sm:p-6",
+        "group flex min-h-11 h-full flex-col rounded-xl border border-border/60 surface-panel p-4 sm:p-6",
         "transition-all duration-300 active:scale-[0.99] hover:-translate-y-1 hover:shadow-xl",
         colors.hoverBorder,
         colors.hoverBg,
@@ -344,13 +344,13 @@ export function FeatureCard({
 
   if (external) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className="group block h-full">
+      <a href={href} target="_blank" rel="noopener noreferrer" className="group block h-full min-h-11">
         {inner}
       </a>
     );
   }
   return (
-    <Link href={href} className="group block h-full">
+    <Link href={href} className="group block h-full min-h-11">
       {inner}
     </Link>
   );

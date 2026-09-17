@@ -71,9 +71,10 @@ export default function SignUpPage() {
     return (
         <PageShell>
             <div className="container mx-auto flex flex-1 items-center justify-center px-3.5 py-10 animate-in fade-in slide-in-from-bottom-8 duration-700 sm:px-4 sm:py-16">
-                <div className="w-full max-w-md">
+                <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-border/50 surface-panel p-6 shadow-2xl sm:p-10">
+                    <div className="pointer-events-none absolute top-0 left-1/2 -z-10 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-[80px]" />
                     {/* Header */}
-                    <div className="text-center mb-8">
+                    <div className="relative mb-8 text-center">
                         <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 mb-4">
                             <UserPlus className="h-7 w-7 text-primary" />
                         </div>
