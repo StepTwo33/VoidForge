@@ -610,7 +610,7 @@ export default function WeaponBuilderPage() {
                 title={
                   <>
                     {weapon.name}
-                    {incarnonDataMap.has(weapon.id) && <Flame className="ml-1 inline h-3 w-3 text-orange-400" />}
+                    {incarnonDataMap.has(weapon.id) && <Flame className="ml-1 inline h-3 w-3 text-orange-700 dark:text-orange-400" />}
                   </>
                 }
                 badge={
@@ -709,7 +709,7 @@ export default function WeaponBuilderPage() {
                     className={cn(
                       "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       isMR30
-                        ? "bg-amber-500/10 text-amber-400"
+                        ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
                     )}
                   >
@@ -734,7 +734,7 @@ export default function WeaponBuilderPage() {
                       className={cn(
                         "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                         gravimagMode
-                          ? "bg-cyan-500/10 text-cyan-400"
+                          ? "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                           : "text-muted-foreground hover:text-foreground hover:bg-accent"
                       )}
                       title={gravimagMode
@@ -760,7 +760,7 @@ export default function WeaponBuilderPage() {
                       className={cn(
                         "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                         alternateMode
-                          ? "bg-amber-500/10 text-amber-400"
+                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
                           : "text-muted-foreground hover:text-foreground hover:bg-accent"
                       )}
                       title={
@@ -913,7 +913,7 @@ export default function WeaponBuilderPage() {
                         </button>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium">{stanceMod.name}</span>
-                          <span className="text-[10px] text-amber-400">
+                          <span className="text-[10px] text-amber-700 dark:text-amber-400">
                             +{Math.abs(modCapacityAtRank(stanceMod.drain, stanceMod.maxRank))} capacity
                           </span>
                         </div>
@@ -924,7 +924,7 @@ export default function WeaponBuilderPage() {
                     ) : (
                       <button
                         onClick={() => setStancePickerOpen(true)}
-                        className="w-full h-14 border border-dashed border-amber-500/30 rounded-lg flex items-center justify-center gap-2 text-muted-foreground hover:border-amber-500/50 hover:text-amber-400 hover:bg-amber-500/5 transition-all"
+                        className="w-full h-14 border border-dashed border-amber-500/30 rounded-lg flex items-center justify-center gap-2 text-muted-foreground hover:border-amber-500/50 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-amber-500/5 transition-all"
                       >
                         <Plus className="h-4 w-4" />
                         <span className="text-xs">Add Stance</span>
@@ -940,7 +940,7 @@ export default function WeaponBuilderPage() {
                   return (
                     <div className="mt-6">
                       <h2 className="text-sm font-semibold tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-                        <Gem className="h-4 w-4 text-purple-400" />
+                        <Gem className="h-4 w-4 text-purple-700 dark:text-purple-400" />
                         ARCANES
                       </h2>
                       <div className={cn("grid gap-2", arcaneConfig.slots === 2 ? "grid-cols-2" : "grid-cols-1")}>

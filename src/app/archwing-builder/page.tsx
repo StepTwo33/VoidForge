@@ -258,7 +258,7 @@ export default function ArchwingBuilderPage() {
               className={cn(
                 "inline-flex min-h-11 items-center rounded-lg border px-4 py-2.5 text-sm font-medium capitalize transition-all sm:min-h-9 sm:py-2",
                 mode === m
-                  ? "bg-cyan-500/10 border-cyan-500/50 text-cyan-400"
+                  ? "bg-cyan-500/10 border-cyan-500/50 text-cyan-700 dark:text-cyan-400"
                   : "border-border text-muted-foreground hover:text-foreground"
               )}
             >
@@ -289,7 +289,7 @@ export default function ArchwingBuilderPage() {
                     className={cn(
                       "min-h-11 rounded-lg border p-3 text-left transition-all",
                       selectedArchwing?.id === aw.id
-                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                         : "border-border hover:border-cyan-500/30"
                     )}
                   >
@@ -311,7 +311,7 @@ export default function ArchwingBuilderPage() {
                     className={cn(
                       "min-h-11 rounded-lg border p-3 text-left transition-all",
                       selectedNecramech?.id === nm.id
-                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                         : "border-border hover:border-cyan-500/30"
                     )}
                   >
@@ -336,7 +336,7 @@ export default function ArchwingBuilderPage() {
                       onClick={() => setIsMR30(!isMR30)}
                       className={cn(
                         "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
-                        isMR30 ? "bg-amber-500/10 border-amber-500/50 text-amber-400" : "border-border text-muted-foreground"
+                        isMR30 ? "bg-amber-500/10 border-amber-500/50 text-amber-700 dark:text-amber-400" : "border-border text-muted-foreground"
                       )}
                     >
                       <Star className="h-3.5 w-3.5" /> MR 30+
@@ -345,7 +345,7 @@ export default function ArchwingBuilderPage() {
                       onClick={() => setHasReactor(!hasReactor)}
                       className={cn(
                         "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
-                        hasReactor ? "bg-blue-500/10 border-blue-500/50 text-blue-400" : "border-border text-muted-foreground"
+                        hasReactor ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400" : "border-border text-muted-foreground"
                       )}
                     >
                       <Zap className="h-3.5 w-3.5" /> Reactor
@@ -422,12 +422,12 @@ export default function ArchwingBuilderPage() {
                     className={cn(
                       "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                       selectedWeapon?.id === w.id
-                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                         : "border-border hover:border-cyan-500/30"
                     )}
                   >
                     <span className="font-medium">{w.name}</span>
-                    <span className={cn("ml-1.5 text-[10px]", w.category === "archgun" ? "text-blue-400" : "text-green-400")}>
+                    <span className={cn("ml-1.5 text-[10px]", w.category === "archgun" ? "text-blue-700 dark:text-blue-400" : "text-green-700 dark:text-green-400")}>
                       {w.category}
                     </span>
                     <div className="text-[10px] text-muted-foreground mt-0.5">
@@ -447,7 +447,7 @@ export default function ArchwingBuilderPage() {
                       onClick={() => setHasCatalyst(!hasCatalyst)}
                       className={cn(
                         "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
-                        hasCatalyst ? "bg-blue-500/10 border-blue-500/50 text-blue-400" : "border-border text-muted-foreground"
+                        hasCatalyst ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400" : "border-border text-muted-foreground"
                       )}
                     >
                       <Zap className="h-3.5 w-3.5" /> Catalyst

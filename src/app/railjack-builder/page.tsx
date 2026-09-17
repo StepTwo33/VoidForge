@@ -465,31 +465,31 @@ export default function RailjackBuilderPage() {
                   <h3 className="text-[10px] font-semibold tracking-wider text-muted-foreground mb-1.5">PLEXUS / CREW BONUSES</h3>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
                     {computedStats.turretDamageBonus > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Turret Damage</span><span className="font-mono text-cyan-400">+{(computedStats.turretDamageBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Turret Damage</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{(computedStats.turretDamageBonus * 100).toFixed(0)}%</span></div>
                     )}
                     {computedStats.turretCritBonus > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Turret Crit</span><span className="font-mono text-cyan-400">+{(computedStats.turretCritBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Turret Crit</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{(computedStats.turretCritBonus * 100).toFixed(0)}%</span></div>
                     )}
                     {computedStats.turretCritDmgBonus > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Turret Crit DMG</span><span className="font-mono text-cyan-400">+{(computedStats.turretCritDmgBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Turret Crit DMG</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{(computedStats.turretCritDmgBonus * 100).toFixed(0)}%</span></div>
                     )}
                     {computedStats.ordnanceDamageBonus > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Ordnance Damage</span><span className="font-mono text-cyan-400">+{(computedStats.ordnanceDamageBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Ordnance Damage</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{(computedStats.ordnanceDamageBonus * 100).toFixed(0)}%</span></div>
                     )}
                     {computedStats.artilleryDamageBonus > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Artillery Damage</span><span className="font-mono text-cyan-400">+{(computedStats.artilleryDamageBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Artillery Damage</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{(computedStats.artilleryDamageBonus * 100).toFixed(0)}%</span></div>
                     )}
                     {computedStats.munitionsCapacityBonus > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Munitions Capacity</span><span className="font-mono text-cyan-400">+{(computedStats.munitionsCapacityBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Munitions Capacity</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{(computedStats.munitionsCapacityBonus * 100).toFixed(0)}%</span></div>
                     )}
                     {(computedStats.abilityTurretDamageBonus ?? 0) > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Ability Turret DMG</span><span className="font-mono text-cyan-400">+{((computedStats.abilityTurretDamageBonus ?? 0) * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Ability Turret DMG</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{((computedStats.abilityTurretDamageBonus ?? 0) * 100).toFixed(0)}%</span></div>
                     )}
                     {(computedStats.crewBonuses?.speedBonus ?? 0) > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Crew Pilot Speed</span><span className="font-mono text-cyan-400">+{((computedStats.crewBonuses!.speedBonus) * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Crew Pilot Speed</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{((computedStats.crewBonuses!.speedBonus) * 100).toFixed(0)}%</span></div>
                     )}
                     {(computedStats.crewBonuses?.houseTurretDamageBonus ?? 0) > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Elite House Turrets</span><span className="font-mono text-cyan-400">+{((computedStats.crewBonuses!.houseTurretDamageBonus) * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Elite House Turrets</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{((computedStats.crewBonuses!.houseTurretDamageBonus) * 100).toFixed(0)}%</span></div>
                     )}
                   </div>
                   {(computedStats.crewBonuses?.panelNotes?.length ?? 0) > 0 && (
@@ -506,13 +506,13 @@ export default function RailjackBuilderPage() {
                   <h3 className="text-[10px] font-semibold tracking-wider text-muted-foreground mb-1.5">REACTOR BATTLE SCALING</h3>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
                     {computedStats.abilityStrengthBonus ? (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Strength</span><span className="font-mono text-orange-400">+{(computedStats.abilityStrengthBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Strength</span><span className="font-mono text-orange-700 dark:text-orange-400">+{(computedStats.abilityStrengthBonus * 100).toFixed(0)}%</span></div>
                     ) : null}
                     {computedStats.abilityRangeBonus ? (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Range</span><span className="font-mono text-orange-400">+{(computedStats.abilityRangeBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Range</span><span className="font-mono text-orange-700 dark:text-orange-400">+{(computedStats.abilityRangeBonus * 100).toFixed(0)}%</span></div>
                     ) : null}
                     {computedStats.abilityDurationBonus ? (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Duration</span><span className="font-mono text-orange-400">+{(computedStats.abilityDurationBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Duration</span><span className="font-mono text-orange-700 dark:text-orange-400">+{(computedStats.abilityDurationBonus * 100).toFixed(0)}%</span></div>
                     ) : null}
                   </div>
                 </div>
@@ -532,7 +532,7 @@ export default function RailjackBuilderPage() {
                   )}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <Zap className="h-3.5 w-3.5 text-orange-400" />
+                    <Zap className="h-3.5 w-3.5 text-orange-700 dark:text-orange-400" />
                     <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">REACTOR</span>
                   </div>
                   <span className="text-sm font-medium">{selectedReactor?.name ?? "None"}</span>
@@ -555,7 +555,7 @@ export default function RailjackBuilderPage() {
                   )}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <Shield className="h-3.5 w-3.5 text-cyan-400" />
+                    <Shield className="h-3.5 w-3.5 text-cyan-700 dark:text-cyan-400" />
                     <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">SHIELD ARRAY</span>
                   </div>
                   <span className="text-sm font-medium">{selectedShield?.name ?? "None"}</span>
@@ -577,7 +577,7 @@ export default function RailjackBuilderPage() {
                   )}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <Gauge className="h-3.5 w-3.5 text-green-400" />
+                    <Gauge className="h-3.5 w-3.5 text-green-700 dark:text-green-400" />
                     <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">ENGINES</span>
                   </div>
                   <span className="text-sm font-medium">{selectedEngine?.name ?? "None"}</span>
@@ -599,7 +599,7 @@ export default function RailjackBuilderPage() {
                   )}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <Shield className="h-3.5 w-3.5 text-amber-400" />
+                    <Shield className="h-3.5 w-3.5 text-amber-700 dark:text-amber-400" />
                     <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">HULL (PLATING)</span>
                   </div>
                   <span className="text-sm font-medium">{selectedPlating?.name ?? "None"}</span>
@@ -888,7 +888,7 @@ export default function RailjackBuilderPage() {
               <div className="space-y-3">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <Crosshair className="h-3.5 w-3.5 text-red-400" />
+                    <Crosshair className="h-3.5 w-3.5 text-red-700 dark:text-red-400" />
                     <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">NOSE + SWIVEL</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -940,7 +940,7 @@ export default function RailjackBuilderPage() {
                             className={cn(
                               "p-2 rounded-lg border text-left transition-all text-xs",
                               selectedTurrets[activeTurretSlot]?.id === t.id
-                                ? "border-red-500/50 bg-red-500/10 text-red-400"
+                                ? "border-red-500/50 bg-red-500/10 text-red-700 dark:text-red-400"
                                 : "border-border hover:border-red-500/30",
                             )}
                           >
@@ -957,7 +957,7 @@ export default function RailjackBuilderPage() {
 
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <Crosshair className="h-3.5 w-3.5 text-purple-400" />
+                    <Crosshair className="h-3.5 w-3.5 text-purple-700 dark:text-purple-400" />
                     <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">ORDNANCE</span>
                   </div>
                   <button
@@ -995,7 +995,7 @@ export default function RailjackBuilderPage() {
                             className={cn(
                               "min-h-11 rounded-lg border p-2.5 text-left text-xs transition-all",
                               selectedOrdnance?.id === o.id
-                                ? "border-purple-500/50 bg-purple-500/10 text-purple-400"
+                                ? "border-purple-500/50 bg-purple-500/10 text-purple-700 dark:text-purple-400"
                                 : "border-border hover:border-purple-500/30",
                             )}
                           >
@@ -1030,7 +1030,7 @@ export default function RailjackBuilderPage() {
                       className={cn(
                         "inline-flex min-h-11 items-center rounded-lg border px-3 py-2 text-sm font-medium capitalize transition-all sm:min-h-9 sm:px-4",
                         plexusTab === tab
-                          ? "bg-rose-500/10 border-rose-500/50 text-rose-400"
+                          ? "bg-rose-500/10 border-rose-500/50 text-rose-700 dark:text-rose-400"
                           : "border-border text-muted-foreground hover:text-foreground"
                       )}
                     >
@@ -1069,7 +1069,7 @@ export default function RailjackBuilderPage() {
               {plexusTab === "integrated" ? (
                 <div className="space-y-2">
                   <div>
-                    <span className="text-[10px] font-semibold text-purple-400 tracking-wider mb-1 block">AURA</span>
+                    <span className="text-[10px] font-semibold text-purple-700 dark:text-purple-400 tracking-wider mb-1 block">AURA</span>
                     {(() => {
                       const equipped = integratedMods.find((m) => m.slotIndex === INTEGRATED_AURA_SLOT);
                       const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
@@ -1123,7 +1123,7 @@ export default function RailjackBuilderPage() {
                     const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
                     return (
                       <div key={`${plexusTab}-${category}`}>
-                        <span className="text-[10px] font-semibold text-rose-400/80 tracking-wider mb-1 block">
+                        <span className="text-[10px] font-semibold text-rose-700/80 dark:text-rose-400/80 tracking-wider mb-1 block">
                           {PLEXUS_ABILITY_SLOT_LABELS[category]}
                         </span>
                         <ModSlotCard
@@ -1259,7 +1259,7 @@ export default function RailjackBuilderPage() {
                         <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{ability.category}</span>
                       </div>
                       <p className="text-[10px] text-muted-foreground mt-1">{ability.description}</p>
-                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-[10px] font-mono text-cyan-400">
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-[10px] font-mono text-cyan-700 dark:text-cyan-400">
                         {ability.energyCost !== undefined && <span>Energy {ability.energyCost}</span>}
                         {ability.cooldownSec !== undefined && <span>CD {ability.cooldownSec}s</span>}
                         {ability.turretDamageWhileActive !== undefined && (
@@ -1277,24 +1277,24 @@ export default function RailjackBuilderPage() {
               <h3 className="text-xs font-semibold text-muted-foreground mb-3">ARMAMENT STATS (WITH PLEXUS)</h3>
               {computedStats.artillery && (
                 <div>
-                  <div className="text-xs font-medium text-orange-400 mb-1.5">Forward Artillery — {computedStats.artillery.name}</div>
+                  <div className="text-xs font-medium text-orange-700 dark:text-orange-400 mb-1.5">Forward Artillery — {computedStats.artillery.name}</div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                     <div className="flex justify-between"><span className="text-muted-foreground">Damage</span><span className="font-mono">{computedStats.artillery.damage}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Avg Shot</span><span className="font-mono text-cyan-400">{Number(computedStats.artillery.avgShotDamage).toLocaleString(undefined, { maximumFractionDigits: 1 })}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Avg Shot</span><span className="font-mono text-cyan-700 dark:text-cyan-400">{Number(computedStats.artillery.avgShotDamage).toLocaleString(undefined, { maximumFractionDigits: 1 })}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Chance</span><span className="font-mono">{(computedStats.artillery.critChance * 100).toFixed(0)}%</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Multi</span><span className="font-mono">{computedStats.artillery.critMultiplier.toFixed(1)}x</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Charge</span><span className="font-mono">{computedStats.artillery.chargeTime}s</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Est. DPS</span><span className="font-mono text-cyan-400">{computedStats.artillery.estimatedDps}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Est. DPS</span><span className="font-mono text-cyan-700 dark:text-cyan-400">{computedStats.artillery.estimatedDps}</span></div>
                   </div>
                   <p className="text-[10px] text-muted-foreground mt-1.5">Paper only — Dome Charge economy not modeled.</p>
                 </div>
               )}
               {computedStats.turrets.map((turret, index) => (
                 <div key={turret.id} className={cn((index > 0 || computedStats.artillery) && "mt-3 pt-3 border-t border-border/50")}>
-                  <div className="text-xs font-medium text-red-400 mb-1.5">Turret {index + 1} — {turret.name}</div>
+                  <div className="text-xs font-medium text-red-700 dark:text-red-400 mb-1.5">Turret {index + 1} — {turret.name}</div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                     <div className="flex justify-between"><span className="text-muted-foreground">Damage</span><span className="font-mono">{turret.damage}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Est. DPS</span><span className="font-mono text-cyan-400">{turret.estimatedDps}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Est. DPS</span><span className="font-mono text-cyan-700 dark:text-cyan-400">{turret.estimatedDps}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Chance</span><span className="font-mono">{(turret.critChance * 100).toFixed(1)}%</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Multi</span><span className="font-mono">{turret.critMultiplier.toFixed(1)}x</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="font-mono">{(turret.statusChance * 100).toFixed(1)}%</span></div>
@@ -1304,10 +1304,10 @@ export default function RailjackBuilderPage() {
               ))}
               {computedStats.ordnance && (
                 <div className={cn((computedStats.turrets.length > 0 || computedStats.artillery) && "mt-3 pt-3 border-t border-border/50")}>
-                  <div className="text-xs font-medium text-purple-400 mb-1.5">Ordnance — {computedStats.ordnance.name}</div>
+                  <div className="text-xs font-medium text-purple-700 dark:text-purple-400 mb-1.5">Ordnance — {computedStats.ordnance.name}</div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                     <div className="flex justify-between"><span className="text-muted-foreground">Damage</span><span className="font-mono">{computedStats.ordnance.damage}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Est. DPS</span><span className="font-mono text-cyan-400">{computedStats.ordnance.estimatedDps}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Est. DPS</span><span className="font-mono text-cyan-700 dark:text-cyan-400">{computedStats.ordnance.estimatedDps}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Chance</span><span className="font-mono">{(computedStats.ordnance.critChance * 100).toFixed(1)}%</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Multi</span><span className="font-mono">{computedStats.ordnance.critMultiplier.toFixed(1)}x</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="font-mono">{(computedStats.ordnance.statusChance * 100).toFixed(1)}%</span></div>
