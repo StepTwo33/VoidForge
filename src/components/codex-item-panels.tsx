@@ -362,7 +362,7 @@ export function ModDetailPanel({ mod, compact, returnTo }: { mod: Mod; compact?:
               return (
                 <li key={statKey} className="flex justify-between gap-2 text-xs">
                   <span className="text-muted-foreground">{getModStatLabel(statKey)}</span>
-                  <span className="font-mono text-emerald-400 text-right">
+                  <span className="font-mono text-emerald-800 text-right dark:text-emerald-400">
                     {r0?.atRank ?? "—"}
                     <span className="text-muted-foreground/70"> → </span>
                     {rMax?.atMax ?? "—"}
@@ -626,7 +626,7 @@ export function ArcaneDetailPanel({
               return (
                 <div key={line.stat} className="flex justify-between gap-2 text-xs">
                   <span className="truncate text-muted-foreground">{getArcaneStatLabel(line.stat)}</span>
-                  <span className="shrink-0 font-mono text-emerald-400">{display}</span>
+                  <span className="shrink-0 font-mono text-emerald-800 dark:text-emerald-400">{display}</span>
                 </div>
               );
             })}

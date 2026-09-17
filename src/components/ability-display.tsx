@@ -1365,7 +1365,7 @@ export function AbilityStatsBlock({
   }
   if (ability.miscStats?.channeled === true) {
     rows.push(
-      <div key="channeled" className="px-1.5 py-0.5 text-[10px] font-medium text-violet-400">
+      <div key="channeled" className="px-1.5 py-0.5 text-[10px] font-medium text-violet-800 dark:text-violet-400">
         Channeled
       </div>,
     );

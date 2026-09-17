@@ -56,21 +56,21 @@ export function CodexActionLinks({
           href={wikiUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 rounded border border-border px-2 py-1 text-[10px] text-muted-foreground hover:border-purple-500/40 hover:text-purple-800 dark:hover:text-purple-300"
+          className="inline-flex min-h-11 items-center gap-1 rounded border border-border px-2.5 py-2 text-xs text-muted-foreground hover:border-purple-500/40 hover:text-purple-800 dark:hover:text-purple-300 sm:min-h-0 sm:px-2 sm:py-1 sm:text-[10px]"
         >
           <ExternalLink className="h-2.5 w-2.5" /> Wiki
         </a>
       )}
       <a
         href={returnTo ? appendReturnTo(reportHref, returnTo) : reportHref}
-        className="inline-flex items-center gap-1 rounded border border-amber-500/30 px-2 py-1 text-[10px] text-amber-800/80 hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400"
+        className="inline-flex min-h-11 items-center gap-1 rounded border border-amber-500/30 px-2.5 py-2 text-xs text-amber-800/80 hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 sm:min-h-0 sm:px-2 sm:py-1 sm:text-[10px]"
       >
         <Flag className="h-2.5 w-2.5" /> Report
       </a>
       {isStaff && (
         <Link
           href={returnTo ? appendReturnTo(overrideHref, returnTo) : overrideHref}
-          className="inline-flex items-center gap-1 rounded border border-purple-500/30 px-2 py-1 text-[10px] text-purple-800/80 hover:bg-purple-500/5 hover:text-purple-900 dark:text-purple-400/70 dark:hover:text-purple-400"
+          className="inline-flex min-h-11 items-center gap-1 rounded border border-purple-500/30 px-2.5 py-2 text-xs text-purple-800/80 hover:bg-purple-500/5 hover:text-purple-900 dark:text-purple-400/70 dark:hover:text-purple-400 sm:min-h-0 sm:px-2 sm:py-1 sm:text-[10px]"
         >
           <Wrench className="h-2.5 w-2.5" /> {editValuesLabel ?? "Edit in Data Fixes"}
         </Link>
@@ -162,12 +162,12 @@ export function CodexWeaponRow({
         weapon.isIncarnon || weaponHasRadialAttacks(weapon) ? (
           <div className="flex shrink-0 flex-col items-end gap-0.5">
             {weaponHasRadialAttacks(weapon) && (
-              <Badge variant="outline" className="text-[9px] border-orange-500/30 text-orange-300">
+              <Badge variant="outline" className="text-[9px] border-orange-500/30 text-orange-800 dark:text-orange-300">
                 AoE
               </Badge>
             )}
             {weapon.isIncarnon && (
-              <Badge variant="outline" className="text-[9px] border-amber-500/30 text-amber-300">
+              <Badge variant="outline" className="text-[9px] border-amber-500/30 text-amber-800 dark:text-amber-300">
                 Incarnon
               </Badge>
             )}
@@ -253,7 +253,7 @@ export function CodexArchwingRow({
       onSelect={onSelect}
       accent="sky"
       image={
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-sky-500/10 text-[10px] font-bold text-sky-300">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-sky-500/10 text-[10px] font-bold text-sky-800 dark:text-sky-300">
           AW
         </div>
       }
@@ -278,7 +278,7 @@ export function CodexNecramechRow({
       onSelect={onSelect}
       accent="slate"
       image={
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-slate-500/10 text-[10px] font-bold text-slate-300">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-slate-500/10 text-[10px] font-bold text-slate-700 dark:text-slate-300">
           NM
         </div>
       }
@@ -329,17 +329,17 @@ export function WeaponDetailPanel({ weapon, compact, returnTo }: { weapon: Weapo
               {formatWeaponCategory(weapon.category)}
             </Badge>
             {weapon.isIncarnon && (
-              <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-300">
+              <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-800 dark:text-amber-300">
                 Incarnon
               </Badge>
             )}
             {weapon.isExalted && (
-              <Badge variant="outline" className="text-[10px] border-purple-500/30 text-purple-300">
+              <Badge variant="outline" className="text-[10px] border-purple-500/30 text-purple-800 dark:text-purple-300">
                 Exalted
               </Badge>
             )}
             {radialAttacks.length > 0 && (
-              <Badge variant="outline" className="text-[10px] border-orange-500/30 text-orange-300">
+              <Badge variant="outline" className="text-[10px] border-orange-500/30 text-orange-800 dark:text-orange-300">
                 AoE ×{radialAttacks.length}
               </Badge>
             )}
@@ -361,7 +361,7 @@ export function WeaponDetailPanel({ weapon, compact, returnTo }: { weapon: Weapo
                 ? appendReturnTo(`/codex?section=warframes&id=${encodeURIComponent(weapon.warframeId)}`, returnTo)
                 : `/codex?section=warframes&id=${encodeURIComponent(weapon.warframeId)}`
             }
-            className="inline-flex items-center gap-1.5 rounded border border-cyan-500/30 px-2 py-1 text-[10px] text-cyan-300 hover:bg-cyan-500/5"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded border border-cyan-500/30 px-2.5 py-2 text-xs text-cyan-800 hover:bg-cyan-500/5 dark:text-cyan-300 sm:min-h-0 sm:px-2 sm:py-1 sm:text-[10px]"
           >
             <Crosshair className="h-2.5 w-2.5" />
             View warframe in codex
