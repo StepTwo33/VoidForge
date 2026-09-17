@@ -359,7 +359,7 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
           >
             {isProcessing ? (
               <div className="flex flex-col items-center gap-2">
-                <Loader2 className="h-8 w-8 text-blue-400 animate-spin" />
+                <Loader2 className="h-8 w-8 text-blue-700 dark:text-blue-400 animate-spin" />
                 <p className="text-sm text-muted-foreground">Processing screenshot...</p>
                 <p className="text-[10px] text-muted-foreground">This may take a few seconds on first use</p>
               </div>

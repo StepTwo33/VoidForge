@@ -324,7 +324,7 @@ function CodexPageContent() {
     >
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
-          <div className="rounded-lg bg-amber-500/10 p-2 text-amber-400">
+          <div className="rounded-lg bg-amber-500/10 p-2 text-amber-800 dark:text-amber-400">
             <Library className="h-5 w-5" />
           </div>
           <div>

@@ -2142,7 +2142,7 @@ function AdaptationSurvivability({ stats }: { stats: WarframeCalculatedStats }) 
 
   return (
     <div className="py-1 space-y-1 border-t border-violet-500/20 mt-1">
-      <div className="text-[10px] font-medium text-violet-400/90">Adaptation (typed DR)</div>
+      <div className="text-[10px] font-medium text-violet-700/90 dark:text-violet-400/90">Adaptation (typed DR)</div>
       <SimSlider
         label="Stacks"
         value={stacks}

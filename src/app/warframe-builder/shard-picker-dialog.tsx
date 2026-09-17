@@ -47,7 +47,7 @@ export function ShardPickerDialog({
                 className="w-full text-left p-3 rounded-lg border border-border hover:border-purple-500/50 hover:bg-purple-500/5 transition-all"
               >
                 <span className="text-sm font-medium">{SHARD_BONUS_LABELS[key] || key}</span>
-                <span className="text-sm text-purple-400 ml-2">
+                <span className="text-sm text-purple-700 dark:text-purple-400 ml-2">
                   {formatShardBonusValue(key, value)}
                 </span>
               </button>

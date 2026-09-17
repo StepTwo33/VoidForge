@@ -877,7 +877,7 @@ export default function WarframeBuilderPage() {
                     className={cn(
                       "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       isMR30
-                        ? "bg-amber-500/10 text-amber-400"
+                        ? "bg-amber-500/10 text-amber-800 dark:text-amber-400"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
                     )}
                   >
@@ -1075,7 +1075,7 @@ export default function WarframeBuilderPage() {
                 {/* Warframe Arcanes (2 slots) */}
                 <div>
                   <h2 className="text-sm font-semibold tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-                    <Gem className="h-4 w-4 text-purple-400" />
+                    <Gem className="h-4 w-4 text-purple-700 dark:text-purple-400" />
                     ARCANES
                   </h2>
                   <div className="grid grid-cols-2 gap-2">

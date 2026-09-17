@@ -361,13 +361,13 @@ type SlotType =
   | "companion";
 
 const SLOT_META: Record<SlotType, { label: string; icon: React.ReactNode; color: string }> = {
-  warframe:  { label: "Warframe",  icon: <Shield className="h-4 w-4" />,    color: "text-purple-400" },
-  primary:   { label: "Primary",   icon: <Crosshair className="h-4 w-4" />, color: "text-blue-400" },
-  secondary: { label: "Secondary", icon: <Crosshair className="h-4 w-4" />, color: "text-cyan-400" },
-  melee:     { label: "Melee",     icon: <Swords className="h-4 w-4" />,    color: "text-orange-400" },
-  exalted:   { label: "Exalted",   icon: <Sparkles className="h-4 w-4" />,  color: "text-violet-400" },
-  exaltedMelee: { label: "Exalted Melee", icon: <Sparkles className="h-4 w-4" />, color: "text-fuchsia-400" },
-  companion: { label: "Companion", icon: <Dog className="h-4 w-4" />,       color: "text-green-400" },
+  warframe:  { label: "Warframe",  icon: <Shield className="h-4 w-4" />,    color: "text-purple-700 dark:text-purple-400" },
+  primary:   { label: "Primary",   icon: <Crosshair className="h-4 w-4" />, color: "text-blue-700 dark:text-blue-400" },
+  secondary: { label: "Secondary", icon: <Crosshair className="h-4 w-4" />, color: "text-cyan-700 dark:text-cyan-400" },
+  melee:     { label: "Melee",     icon: <Swords className="h-4 w-4" />,    color: "text-orange-700 dark:text-orange-400" },
+  exalted:   { label: "Exalted",   icon: <Sparkles className="h-4 w-4" />,  color: "text-violet-700 dark:text-violet-400" },
+  exaltedMelee: { label: "Exalted Melee", icon: <Sparkles className="h-4 w-4" />, color: "text-fuchsia-700 dark:text-fuchsia-400" },
+  companion: { label: "Companion", icon: <Dog className="h-4 w-4" />,       color: "text-green-700 dark:text-green-400" },
 };
 
 function sustainedDps(entry: LoadoutStatsResult["primary"]): number {

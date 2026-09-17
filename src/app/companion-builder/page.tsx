@@ -128,7 +128,7 @@ function StatRow({ label, value, highlighted, color }: { label: string; value: s
   return (
     <div className="flex justify-between items-center py-1">
       <span className={cn("text-sm", color || "text-muted-foreground")}>{label}</span>
-      <span className={highlighted ? "text-sm font-bold text-cyan-400" : `text-sm font-mono ${color || ""}`}>
+      <span className={highlighted ? "text-sm font-bold text-cyan-700 dark:text-cyan-400" : `text-sm font-mono ${color || ""}`}>
         {value}
       </span>
     </div>
@@ -590,7 +590,7 @@ export default function CompanionBuilderPage() {
                 }
                 title={
                   <span className="inline-flex items-center gap-1.5">
-                    <span className="text-cyan-400">{getCompanionIcon(comp.type)}</span>
+                    <span className="text-cyan-700 dark:text-cyan-400">{getCompanionIcon(comp.type)}</span>
                     {comp.name}
                   </span>
                 }
@@ -1032,7 +1032,7 @@ export default function CompanionBuilderPage() {
                                   <StatRow
                                     label="Hunter vs Slash"
                                     value={`×${weaponStats.hunterSetVsSlashDamageMultiplier.toFixed(2)}`}
-                                    color="text-amber-400"
+                                    color="text-amber-800 dark:text-amber-400"
                                   />
                                 )}
                               </>

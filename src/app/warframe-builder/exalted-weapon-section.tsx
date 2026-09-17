@@ -84,7 +84,7 @@ export function ExaltedWeaponSection({
             <span
               className={cn(
                 "font-mono font-medium",
-                exaltedCapacity > 60 ? "text-red-400" : "text-foreground",
+                exaltedCapacity > 60 ? "text-red-700 dark:text-red-400" : "text-foreground",
               )}
             >
               {exaltedCapacity} / 60

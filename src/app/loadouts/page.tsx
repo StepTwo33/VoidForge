@@ -685,7 +685,7 @@ export default function LoadoutsPage() {
                         title="Copy share link"
                       >
                         {shareCopiedId === loadout.id ? (
-                          <Check className="h-4 w-4 text-green-400" />
+                          <Check className="h-4 w-4 text-green-700 dark:text-green-400" />
                         ) : (
                           <Share2 className="h-4 w-4" />
                         )}
@@ -750,7 +750,7 @@ export default function LoadoutsPage() {
                           <div className="flex items-start gap-2.5">
                             {isModularSlot ? (
                               <span className="w-10 h-10 rounded-md flex items-center justify-center bg-amber-500/15 border border-amber-500/30 shrink-0">
-                                <Wrench className="h-5 w-5 text-amber-400/90" aria-hidden />
+                                <Wrench className="h-5 w-5 text-amber-800/90 dark:text-amber-400/90" aria-hidden />
                               </span>
                             ) : (
                             <GameAssetImage
@@ -859,7 +859,7 @@ export default function LoadoutsPage() {
                   <Wrench className="h-3.5 w-3.5" />
                   <span className="truncate">Modular</span>
                   {modularCount > 0 && (
-                    <span className="ml-0.5 rounded-full bg-amber-500/15 text-amber-400 px-1.5 py-0 text-[10px] tabular-nums">
+                    <span className="ml-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-400 px-1.5 py-0 text-[10px] tabular-nums">
                       {modularCount}
                     </span>
                   )}

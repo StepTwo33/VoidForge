@@ -61,12 +61,12 @@ const typeIcons: Record<string, typeof Crosshair> = {
 };
 
 const typeColors: Record<string, string> = {
-  weapon: "text-blue-400 border-blue-500/30",
-  warframe: "text-purple-400 border-purple-500/30",
-  companion: "text-cyan-400 border-cyan-500/30",
-  modular: "text-orange-400 border-orange-500/30",
-  archwing: "text-teal-400 border-teal-500/30",
-  railjack: "text-rose-400 border-rose-500/30",
+  weapon: "text-blue-700 dark:text-blue-400 border-blue-500/30",
+  warframe: "text-purple-700 dark:text-purple-400 border-purple-500/30",
+  companion: "text-cyan-700 dark:text-cyan-400 border-cyan-500/30",
+  modular: "text-orange-700 dark:text-orange-400 border-orange-500/30",
+  archwing: "text-teal-700 dark:text-teal-400 border-teal-500/30",
+  railjack: "text-rose-700 dark:text-rose-400 border-rose-500/30",
   loadout: "text-green-700 dark:text-green-400 border-green-500/30",
 };
 

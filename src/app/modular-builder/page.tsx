@@ -412,7 +412,7 @@ export default function ModularBuilderPage() {
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           kitgunChamber?.id === c.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -436,7 +436,7 @@ export default function ModularBuilderPage() {
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           kitgunGrip?.id === g.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -463,7 +463,7 @@ export default function ModularBuilderPage() {
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           kitgunLoader?.id === l.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -496,7 +496,7 @@ export default function ModularBuilderPage() {
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           zawStrike?.id === s.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -520,7 +520,7 @@ export default function ModularBuilderPage() {
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           zawGripSel?.id === g.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -545,7 +545,7 @@ export default function ModularBuilderPage() {
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           zawLinkSel?.id === l.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -578,7 +578,7 @@ export default function ModularBuilderPage() {
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           ampPrism?.id === p.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -602,7 +602,7 @@ export default function ModularBuilderPage() {
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           ampScaffold?.id === s.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -626,7 +626,7 @@ export default function ModularBuilderPage() {
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           ampBrace?.id === b.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -649,7 +649,7 @@ export default function ModularBuilderPage() {
                   {recommendedBuilds.filter(b => b.type === modularType).map((b, i) => (
                     <div key={i} className="p-3 rounded-lg border border-border hover:border-cyan-500/30 transition-all">
                       <div className="font-medium text-sm">{b.name}</div>
-                      <div className="text-[10px] text-cyan-400 font-mono mt-0.5">{b.parts.join(" + ")}</div>
+                      <div className="text-[10px] text-cyan-700 dark:text-cyan-400 font-mono mt-0.5">{b.parts.join(" + ")}</div>
                       <div className="text-[10px] text-muted-foreground mt-1">{b.description}</div>
                       <div className="flex gap-1 mt-1.5 flex-wrap">
                         {b.tags.map(t => <span key={t} className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{t}</span>)}
@@ -747,7 +747,7 @@ export default function ModularBuilderPage() {
                 {arcaneConfig.slots > 0 && (
                   <div className="mt-6">
                     <h3 className="text-sm font-semibold tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-                      <Gem className="h-4 w-4 text-purple-400" />
+                      <Gem className="h-4 w-4 text-purple-700 dark:text-purple-400" />
                       ARCANES
                     </h3>
                     <div className={cn("grid gap-2", arcaneConfig.slots === 2 ? "grid-cols-2" : "grid-cols-1")}>
@@ -788,19 +788,19 @@ export default function ModularBuilderPage() {
                   {modularType === "kitgun" && (
                     <>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", kitgunChamber ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", kitgunChamber ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={kitgunChamber ? "text-foreground" : ""}>
                           {kitgunChamber ? kitgunChamber.name : "Select Chamber"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", kitgunGrip ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", kitgunGrip ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={kitgunGrip ? "text-foreground" : ""}>
                           {kitgunGrip ? kitgunGrip.name : "Select Grip"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", kitgunLoader ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", kitgunLoader ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={kitgunLoader ? "text-foreground" : ""}>
                           {kitgunLoader ? kitgunLoader.name : "Select Loader"}
                         </span>
@@ -810,19 +810,19 @@ export default function ModularBuilderPage() {
                   {modularType === "zaw" && (
                     <>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", zawStrike ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", zawStrike ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={zawStrike ? "text-foreground" : ""}>
                           {zawStrike ? zawStrike.name : "Select Strike"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", zawGripSel ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", zawGripSel ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={zawGripSel ? "text-foreground" : ""}>
                           {zawGripSel ? zawGripSel.name : "Select Grip"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", zawLinkSel ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", zawLinkSel ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={zawLinkSel ? "text-foreground" : ""}>
                           {zawLinkSel ? zawLinkSel.name : "Select Link"}
                         </span>
@@ -832,19 +832,19 @@ export default function ModularBuilderPage() {
                   {modularType === "amp" && (
                     <>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", ampPrism ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", ampPrism ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={ampPrism ? "text-foreground" : ""}>
                           {ampPrism ? ampPrism.name : "Select Prism"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", ampScaffold ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", ampScaffold ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={ampScaffold ? "text-foreground" : ""}>
                           {ampScaffold ? ampScaffold.name : "Select Scaffold"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", ampBrace ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", ampBrace ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={ampBrace ? "text-foreground" : ""}>
                           {ampBrace ? ampBrace.name : "Select Brace"}
                         </span>

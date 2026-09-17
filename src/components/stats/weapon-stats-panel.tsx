@@ -894,7 +894,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                     )}
                   </div>
                   <div className="shrink-0 text-right">
-                    <div className="text-xs font-mono text-blue-400">{formatMarginalPct(row.burstMarginalPct)}</div>
+                    <div className="text-xs font-mono text-blue-700 dark:text-blue-400">{formatMarginalPct(row.burstMarginalPct)}</div>
                     {showSustainedColumn && (
                       <div className="text-[9px] font-mono text-muted-foreground">
                         sus {formatMarginalPct(row.sustainedMarginalPct)}
