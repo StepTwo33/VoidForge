@@ -336,7 +336,8 @@ export default function DiscoverPage() {
                   setShowItemSuggestions(false);
                   syncUrl({ itemFilter: null });
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                className="absolute right-1.5 top-1/2 inline-flex min-h-11 min-w-11 -translate-y-1/2 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                aria-label="Clear item filter"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -354,7 +355,7 @@ export default function DiscoverPage() {
                       setShowItemSuggestions(false);
                       syncUrl({ itemFilter: item, typeFilter: item.type, searchQuery: "" });
                     }}
-                    className="flex w-full justify-between px-3 py-2.5 text-left text-sm transition-colors hover:bg-primary/5"
+                    className="flex min-h-11 w-full items-center justify-between px-3 py-2.5 text-left text-sm transition-colors hover:bg-primary/5"
                   >
                     <span>{item.name}</span>
                     <span className="text-xs capitalize text-muted-foreground">{item.type}</span>
@@ -412,7 +413,7 @@ export default function DiscoverPage() {
                   type="button"
                   disabled={loadingMore}
                   onClick={() => fetchBuilds(nextCursor, true)}
-                  className="rounded-lg border border-border/70 bg-card/50 px-5 py-2.5 text-sm font-medium transition-all hover:border-primary/40 hover:bg-primary/5 disabled:opacity-50"
+                  className="inline-flex min-h-11 items-center rounded-lg border border-border/70 bg-card/50 px-5 py-2.5 text-sm font-medium transition-all hover:border-primary/40 hover:bg-primary/5 disabled:opacity-50"
                 >
                   {loadingMore ? <Loader2 className="h-4 w-4 animate-spin" /> : "Load more"}
                 </button>

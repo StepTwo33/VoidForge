@@ -101,7 +101,7 @@ function NavDropdown({ group }: { group: NavGroup }) {
   return (
     <div className="relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
       <button
-        className="flex items-center gap-1.5 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
+        className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
         onClick={() => setOpen(!open)}
       >
         <Icon className="h-3.5 w-3.5" />
@@ -490,7 +490,7 @@ export function Header() {
         <nav className="hidden lg:flex items-center gap-1 shrink-0">
           <Link
             href="/discover"
-            className="flex items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-primary hover:text-primary/90 transition-colors rounded-lg hover:bg-primary/10"
+            className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-primary hover:text-primary/90 transition-colors rounded-lg hover:bg-primary/10"
           >
             <Users className="h-3.5 w-3.5" />
             Discover
@@ -498,7 +498,7 @@ export function Header() {
 
           <Link
             href="/guides/how-to-mod"
-            className="flex items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
+            className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
           >
             <BookOpen className="h-3.5 w-3.5" />
             How to Mod
@@ -519,7 +519,7 @@ export function Header() {
 
             <Link
               href="/support"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium text-rose-800 hover:text-rose-700 transition-colors rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/15 dark:text-rose-400 dark:hover:text-rose-300"
+              className="flex min-h-11 items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium text-rose-800 hover:text-rose-700 transition-colors rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/15 dark:text-rose-400 dark:hover:text-rose-300"
             >
               <Heart className="h-3.5 w-3.5" />
               Support
@@ -527,7 +527,7 @@ export function Header() {
 
             <Link
               href="/report-issue"
-              className="flex items-center gap-1.5 px-2 py-1.5 text-sm text-amber-800/80 hover:text-amber-900 transition-colors rounded-lg hover:bg-amber-500/5 dark:text-amber-400/70 dark:hover:text-amber-400"
+              className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm text-amber-800/80 hover:text-amber-900 transition-colors rounded-lg hover:bg-amber-500/5 dark:text-amber-400/70 dark:hover:text-amber-400"
             >
               <Flag className="h-3.5 w-3.5" />
               Report
@@ -536,7 +536,7 @@ export function Header() {
             {isAdmin && (
               <Link
                 href="/admin/reports"
-                className="relative flex items-center gap-1.5 px-2 py-1.5 text-sm text-red-700/80 hover:text-red-800 transition-colors rounded-lg hover:bg-red-500/5 dark:text-red-400/70 dark:hover:text-red-400"
+                className="relative flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm text-red-700/80 hover:text-red-800 transition-colors rounded-lg hover:bg-red-500/5 dark:text-red-400/70 dark:hover:text-red-400"
               >
                 <Shield className="h-3.5 w-3.5" />
                 Admin
@@ -548,7 +548,7 @@ export function Header() {
               href={VOIDFORGE_GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center p-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
               title="Open source on GitHub"
             >
               <Github className="h-4 w-4" />
@@ -558,7 +558,7 @@ export function Header() {
               href="https://discord.gg/bqQXaYdTjS"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 text-muted-foreground hover:text-[#5865F2] transition-colors rounded-lg hover:bg-secondary/50"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center p-1.5 text-muted-foreground hover:text-[#5865F2] transition-colors rounded-lg hover:bg-secondary/50"
               title="Join Discord"
             >
               {DISCORD_SVG}
