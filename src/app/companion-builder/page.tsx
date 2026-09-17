@@ -630,12 +630,12 @@ export default function CompanionBuilderPage() {
                 <BuilderActionGroup>
                   <button
                     onClick={() => setSaveDialogOpen(true)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-green-500/10 hover:text-green-400 sm:min-h-0 sm:py-1.5"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-green-500/10 hover:text-green-700 dark:hover:text-green-400 sm:min-h-0 sm:py-1.5"
                     title="Save Build"
                   >
                     <Save className="h-3.5 w-3.5" /> <span>Save</span>
                   </button>
-                  <button onClick={() => { setSavedBuilds(getSavedBuilds("companion")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-blue-500/10 hover:text-blue-400 sm:min-h-0 sm:py-1.5" title="Load Build">
+                  <button onClick={() => { setSavedBuilds(getSavedBuilds("companion")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-0 sm:py-1.5" title="Load Build">
                     <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
                   </button>
                 </BuilderActionGroup>
@@ -646,7 +646,7 @@ export default function CompanionBuilderPage() {
                     className={cn(
                       "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       isMR30
-                        ? "bg-amber-500/10 text-amber-400"
+                        ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
                     )}
                   >
@@ -674,7 +674,7 @@ export default function CompanionBuilderPage() {
                     `/report-issue?type=companion&name=${encodeURIComponent(selectedCompanion.name)}&id=${encodeURIComponent(selectedCompanion.id)}`,
                     builderReturnTo,
                   )}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-2 text-xs font-medium text-amber-400/70 transition-colors hover:bg-amber-500/5 hover:text-amber-400 sm:min-h-0 sm:py-1.5"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-2 text-xs font-medium text-amber-800/80 transition-colors hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 sm:min-h-0 sm:py-1.5"
                 >
                   <Flag className="h-3 w-3" /> <span>Report</span>
                 </a>
@@ -767,7 +767,7 @@ export default function CompanionBuilderPage() {
 
             {selectedCompanion.precept && (
               <div className="mb-4 p-3 border border-cyan-500/20 rounded-lg bg-cyan-500/5">
-                <span className="text-[10px] font-semibold text-cyan-400 tracking-wider">PRECEPT</span>
+                <span className="text-[10px] font-semibold text-cyan-700 dark:text-cyan-400 tracking-wider">PRECEPT</span>
                 <p className="text-sm text-muted-foreground mt-1">{selectedCompanion.precept}</p>
               </div>
             )}
@@ -855,7 +855,7 @@ export default function CompanionBuilderPage() {
               {/* COMPANION WEAPON SECTION — full width below mods/stats */}
               <div className="mt-8 border-t border-border pt-6">
                 <div className="mb-4 flex flex-wrap items-center gap-2 sm:gap-3">
-                  <Swords className="h-5 w-5 shrink-0 text-orange-400" />
+                  <Swords className="h-5 w-5 shrink-0 text-orange-700 dark:text-orange-400" />
                   <h2 className="min-w-0 flex-1 truncate text-lg font-bold">Companion Weapon</h2>
                   {selectedWeapon && (
                     <button
@@ -863,7 +863,7 @@ export default function CompanionBuilderPage() {
                       className={cn(
                         "ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
                         hasCatalyst
-                          ? "bg-blue-500/10 border-blue-500/50 text-blue-400"
+                          ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400"
                           : "border-border text-muted-foreground"
                       )}
                     >
@@ -919,7 +919,7 @@ export default function CompanionBuilderPage() {
                 ) : (
                   <>
                     <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-orange-500/30 bg-orange-500/5 p-3 sm:gap-3">
-                      <Crosshair className="h-4 w-4 shrink-0 text-orange-400" />
+                      <Crosshair className="h-4 w-4 shrink-0 text-orange-700 dark:text-orange-400" />
                       <span className="min-w-0 truncate font-medium text-sm">{selectedWeapon.name}</span>
                       <span className="text-[10px] capitalize text-muted-foreground">{selectedWeapon.category.replace('_', ' ')}</span>
                       <button onClick={() => { setSelectedWeapon(null); setWeaponMods([]); setWeaponSlotPolarities({}); }} className="ml-auto inline-flex min-h-11 items-center rounded-md px-3 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground sm:min-h-9">Change</button>

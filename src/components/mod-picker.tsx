@@ -384,7 +384,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                               <button
                                 type="button"
                                 onClick={() => setRivenStats((prev) => { const n = { ...prev }; delete n[key]; return n; })}
-                                className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-red-400 sm:h-9 sm:w-9"
+                                className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-red-700 dark:hover:text-red-400 sm:h-9 sm:w-9"
                                 aria-label="Remove riven stat"
                               >
                                 <X className="h-3.5 w-3.5" />
@@ -668,7 +668,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                         <span className="text-[10px] text-muted-foreground">Already equipped</span>
                       )}
                       {isBlocked && !isEquipped && (
-                        <span className="text-[10px] text-orange-400">Variant equipped</span>
+                        <span className="text-[10px] text-orange-700 dark:text-orange-400">Variant equipped</span>
                       )}
                     </button>
                   );

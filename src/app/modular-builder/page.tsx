@@ -664,7 +664,7 @@ export default function ModularBuilderPage() {
             {assembledWeapon && (
               <div className="border-t border-border pt-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <Wrench className="h-5 w-5 text-cyan-400" />
+                  <Wrench className="h-5 w-5 text-cyan-700 dark:text-cyan-400" />
                   <h2 className="text-lg font-bold">{assembledWeapon.name}</h2>
                   <span className="text-sm text-muted-foreground capitalize">{assembledWeapon.category}</span>
                   <div className="ml-auto flex items-center gap-2">
@@ -673,7 +673,7 @@ export default function ModularBuilderPage() {
                       className={cn(
                         "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
                         isMR30
-                          ? "bg-amber-500/10 border-amber-500/50 text-amber-400"
+                          ? "bg-amber-500/10 border-amber-500/50 text-amber-700 dark:text-amber-400"
                           : "border-border text-muted-foreground hover:text-foreground"
                       )}
                     >
@@ -685,7 +685,7 @@ export default function ModularBuilderPage() {
                       className={cn(
                         "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
                         hasOrokinCatalyst
-                          ? "bg-blue-500/10 border-blue-500/50 text-blue-400"
+                          ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400"
                           : "border-border text-muted-foreground hover:text-foreground"
                       )}
                     >
