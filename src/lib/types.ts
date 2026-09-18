@@ -1261,6 +1261,7 @@ const RIVEN_RANGED_COMMON: RivenStatDef[] = [
   { key: "criticalChance", label: "Critical Chance", isPercent: true },
   { key: "criticalMultiplier", label: "Critical Damage", isPercent: true },
   { key: "statusChance", label: "Status Chance", isPercent: true },
+  { key: "statusDuration", label: "Status Duration", isPercent: true },
   { key: "multishot", label: "Multishot", isPercent: true },
   { key: "fireRate", label: "Fire Rate", isPercent: true },
   { key: "magazine", label: "Magazine Capacity", isPercent: true },
@@ -1273,6 +1274,9 @@ const RIVEN_RANGED_COMMON: RivenStatDef[] = [
   { key: "puncture", label: "Puncture", isPercent: true },
   { key: "slash", label: "Slash", isPercent: true },
   { key: "projectileSpeed", label: "Projectile Speed", isPercent: true },
+  { key: "factionGrineer", label: "Damage to Grineer", isPercent: true },
+  { key: "factionCorpus", label: "Damage to Corpus", isPercent: true },
+  { key: "factionInfested", label: "Damage to Infested", isPercent: true },
 ];
 
 const RIVEN_RIFLE: RivenStatDef[] = [
@@ -1286,6 +1290,8 @@ const RIVEN_RIFLE: RivenStatDef[] = [
 const RIVEN_SHOTGUN: RivenStatDef[] = [
   ...RIVEN_RANGED_COMMON,
   { key: "ammoMax", label: "Ammo Maximum", isPercent: true },
+  { key: "punchThrough", label: "Punch Through", isPercent: false },
+  { key: "recoil", label: "Recoil", isPercent: true },
 ];
 
 const RIVEN_PISTOL: RivenStatDef[] = [
@@ -1293,6 +1299,7 @@ const RIVEN_PISTOL: RivenStatDef[] = [
   { key: "zoom", label: "Zoom", isPercent: true },
   { key: "ammoMax", label: "Ammo Maximum", isPercent: true },
   { key: "recoil", label: "Recoil", isPercent: true },
+  { key: "punchThrough", label: "Punch Through", isPercent: false },
 ];
 
 const RIVEN_MELEE: RivenStatDef[] = [
@@ -1300,6 +1307,7 @@ const RIVEN_MELEE: RivenStatDef[] = [
   { key: "criticalChance", label: "Critical Chance", isPercent: true },
   { key: "criticalMultiplier", label: "Critical Damage", isPercent: true },
   { key: "statusChance", label: "Status Chance", isPercent: true },
+  { key: "statusDuration", label: "Status Duration", isPercent: true },
   { key: "fireRate", label: "Attack Speed", isPercent: true },
   { key: "range", label: "Range", isPercent: true },
   { key: "toxin", label: "Toxin Damage", isPercent: true },
@@ -1312,11 +1320,19 @@ const RIVEN_MELEE: RivenStatDef[] = [
   { key: "slideAttack", label: "Slide Attack", isPercent: true },
   { key: "finisherDamage", label: "Finisher Damage", isPercent: true },
   { key: "comboDuration", label: "Combo Duration", isPercent: false },
+  { key: "initialCombo", label: "Initial Combo", isPercent: false },
+  { key: "heavyAttackEfficiency", label: "Heavy Attack Efficiency", isPercent: true },
+  { key: "factionGrineer", label: "Damage to Grineer", isPercent: true },
+  { key: "factionCorpus", label: "Damage to Corpus", isPercent: true },
+  { key: "factionInfested", label: "Damage to Infested", isPercent: true },
 ];
 
 const RIVEN_ARCHGUN: RivenStatDef[] = [
   ...RIVEN_RANGED_COMMON.filter(s => s.key !== "impact" && s.key !== "puncture" && s.key !== "slash"),
   { key: "ammoMax", label: "Ammo Maximum", isPercent: true },
+  { key: "punchThrough", label: "Punch Through", isPercent: false },
+  { key: "zoom", label: "Zoom", isPercent: true },
+  { key: "recoil", label: "Recoil", isPercent: true },
 ];
 
 // Get riven stats filtered by weapon category

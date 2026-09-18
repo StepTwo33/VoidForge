@@ -374,12 +374,16 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                     <div className="space-y-1">
                       {Object.entries(rivenStats).map(([key, value]) => {
                         const statDef = rivenPool.find((s) => s.key === key);
+                        const asPercent = statDef?.isPercent !== false;
                         return (
                           <div key={key} className="flex items-center justify-between text-xs p-1.5 rounded bg-background">
                             <span className="text-muted-foreground">{statDef?.label || key}</span>
                             <div className="flex items-center gap-2">
                               <span className={value >= 0 ? "cmp-win" : "cmp-lose"}>
-                                {value >= 0 ? "+" : ""}{(value * 100).toFixed(1)}%
+                                {value >= 0 ? "+" : ""}
+                                {asPercent
+                                  ? `${(value * 100).toFixed(1)}%`
+                                  : value.toFixed(1)}
                               </span>
                               <button
                                 type="button"

@@ -191,6 +191,12 @@ function resolveUpgradeEntries(
         rank: riven.rank,
         ...(Object.keys(riven.rivenStats).length > 0 ? { rivenStats: riven.rivenStats } : {}),
       });
+      if (riven.unmappedTags.length > 0) {
+        warnings.push({
+          kind: "mod",
+          label: `Riven unmapped tag(s): ${riven.unmappedTags.join(", ")}`,
+        });
+      }
       continue;
     }
 

@@ -60,9 +60,10 @@ export function factionBonusFromStats(
 /**
  * Direct hit faction mult: (1 + bane%).
  * DoT ticks get this squared in-game.
+ * Negative bonuses (riven faction curses) reduce damage; floor at 0 so DPS never goes negative.
  */
 export function factionHitMultiplier(factionBonus: number): number {
-  return 1 + Math.max(0, factionBonus);
+  return Math.max(0, 1 + factionBonus);
 }
 
 export function factionDotMultiplier(factionBonus: number): number {

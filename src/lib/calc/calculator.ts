@@ -53,6 +53,7 @@ import {
 } from '@/lib/mods/mod-behavior-registry';
 import {
   combatDamageMultiplier,
+  FACTION_STAT_TO_ID,
   factionBonusFromStats,
   factionDotMultiplier,
   factionHitMultiplier,
@@ -1534,6 +1535,15 @@ export function calculateWeaponBuild(
             (stats.instantReloadOnHeadshotChance ?? 0) + value,
           );
           break;
+        default: {
+          // Riven faction rolls (factionGrineer, …) → same map as Bane/Smite mods.
+          const factionId = FACTION_STAT_TO_ID[stat];
+          if (factionId) {
+            if (!stats.factionBonuses) stats.factionBonuses = {};
+            stats.factionBonuses[factionId] = (stats.factionBonuses[factionId] ?? 0) + value;
+          }
+          break;
+        }
       }
     }
     // Recalculate total damage after incarnon/riven changes (keep residual)
