@@ -183,7 +183,7 @@ export default function AdminReportsPage() {
             { label: "Total", value: stats.total, color: "text-foreground", bg: "bg-muted/30", border: "border-border" },
             { label: "Open", value: stats.open, color: "text-amber-800 dark:text-amber-400", bg: "bg-amber-500/5", border: "border-amber-500/20" },
             { label: "Resolved", value: stats.resolved, color: "text-green-700 dark:text-green-400", bg: "bg-green-500/5", border: "border-green-500/20" },
-            { label: "Won't Fix", value: stats.wontFix, color: "text-zinc-600 dark:text-zinc-400", bg: "bg-zinc-500/5", border: "border-zinc-500/20" },
+            { label: "Won't Fix", value: stats.wontfix, color: "text-zinc-600 dark:text-zinc-400", bg: "bg-zinc-500/5", border: "border-zinc-500/20" },
           ].map((s) => (
             <div key={s.label} className={cn("rounded-xl border p-4 text-center", s.bg, s.border)}>
               <div className={cn("text-2xl font-bold", s.color)}>{s.value}</div>
