@@ -22,6 +22,12 @@ describe("warframe arsenal catalog match", () => {
     expect(findModByName("Serration")?.id).toBeTruthy();
   });
 
+  it("resolves Dreamer's Bond aura (import + apostrophe variants)", () => {
+    expect(findModByName("Dreamer's Bond")?.id).toBe("dreamers_bond");
+    expect(findModByName("Dreamers Bond")?.id).toBe("dreamers_bond");
+    expect(findModByName(`Dreamer\u2019s Bond`)?.id).toBe("dreamers_bond");
+  });
+
   it("finds Archon Amar's Hatred warframe set mod", () => {
     expect(findModByName("Amar's Hatred")?.id).toBe("amars_hatred");
     expect(findModByName("Amar's Anguish")?.id).toBe("amars_anguish");

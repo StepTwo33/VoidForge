@@ -245,6 +245,10 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   diamond_skin: mod("diamond_skin", [
     line("radiation", "mod_panel", "multiplicative_percent", "Diamond Skin: radiation \u2014 +82.5% <DT_RADIATION_COLOR>Radiation Resistance"),
   ]),
+  dreamers_bond: mod("dreamers_bond", [
+    line("energyRegen", "mod_panel", "multiplicative_percent", "wiki: Dreamer's Bond — Squad +0.3 Energy Regen/s at max rank"),
+    line("healthRegen", "mod_panel", "multiplicative_percent", "wiki: Dreamer's Bond — Squad +1.5 Health Regen/s at max rank"),
+  ]),
   emp_aura: mod("emp_aura", [
     line("accuracy", "mod_panel", "multiplicative_percent", "EMP Aura: accuracy \u2014 Enemy Corpus lose -15% Accuracy (arsenal display only)"),
   ]),

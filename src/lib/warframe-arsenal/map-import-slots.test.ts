@@ -45,4 +45,15 @@ describe("mapWarframeUpgradeMods slot placement", () => {
     );
     expect(mods.find((m) => m.modId === "power_drift")?.slotIndex).toBe(WARFRAME_IMPORT_EXILUS_SLOT);
   });
+
+  it("places Dreamer's Bond in the aura slot", () => {
+    const warnings: ArsenalImportWarning[] = [];
+    const { mods } = mapWarframeUpgradeMods(
+      [named("Dreamer's Bond", 5), named("Primed Continuity", 10), named("Power Drift")],
+      warnings,
+    );
+    expect(warnings.filter((w) => w.label.includes("Dreamer"))).toEqual([]);
+    expect(mods.find((m) => m.modId === "dreamers_bond")?.slotIndex).toBe(WARFRAME_IMPORT_AURA_SLOT);
+    expect(mods.find((m) => m.modId === "power_drift")?.slotIndex).toBe(WARFRAME_IMPORT_EXILUS_SLOT);
+  });
 });

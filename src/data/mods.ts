@@ -9986,6 +9986,21 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
+    "id": "dreamers_bond",
+    "name": "Dreamer's Bond",
+    "polarity": "universal",
+    "drain": -2,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "healthRegen": 0.25,
+      "energyRegen": 0.05
+    },
+    "description": "Squad receives +0.3 Energy Regen/s and +1.5 Health Regen/s",
+    "rarity": "uncommon"
+  },
+  {
     "id": "electromagnetic_shielding",
     "name": "Electromagnetic Shielding",
     "polarity": "vazarin",

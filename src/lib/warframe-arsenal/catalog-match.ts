@@ -11,6 +11,8 @@ export type NamedCatalogItem = { id: string; name: string };
 const normalizeName = (value: string): string =>
   value
     .toLowerCase()
+    // Strip ASCII + common Unicode apostrophes so arsenal/"smart quote" names match.
+    .replace(/['\u2018\u2019\u201B\u2032`´]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 
