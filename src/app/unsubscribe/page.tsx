@@ -35,7 +35,7 @@ function UnsubscribeInner() {
   }, [token]);
 
   return (
-    <div className="container mx-auto px-4 py-16 max-w-md text-center">
+    <div className="container mx-auto px-4 py-10 sm:py-16 max-w-md text-center">
       {status === "loading" && (
         <>
           <Loader2 className="h-10 w-10 animate-spin text-muted-foreground mx-auto mb-4" />
@@ -44,26 +44,26 @@ function UnsubscribeInner() {
       )}
       {status === "ok" && (
         <>
-          <CheckCircle2 className="h-10 w-10 text-green-400 mx-auto mb-4" />
+          <CheckCircle2 className="h-10 w-10 text-green-700 dark:text-green-400 mx-auto mb-4" />
           <h1 className="text-xl font-bold mb-2">Unsubscribed</h1>
           <p className="text-sm text-muted-foreground mb-6">
             You will no longer receive Voidforge newsletters. Transactional emails (like report
             updates) are unaffected.
           </p>
-          <Link href="/profile" className="text-sm text-primary hover:underline">
+          <Link href="/profile" className="inline-flex min-h-11 items-center text-sm text-primary hover:underline">
             Manage preferences in your profile
           </Link>
         </>
       )}
       {status === "error" && (
         <>
-          <XCircle className="h-10 w-10 text-red-400 mx-auto mb-4" />
+          <XCircle className="h-10 w-10 text-red-700 dark:text-red-400 mx-auto mb-4" />
           <h1 className="text-xl font-bold mb-2">Link invalid</h1>
           <p className="text-sm text-muted-foreground mb-6">
             This unsubscribe link is invalid or expired. You can turn off newsletters anytime in
             profile settings while signed in.
           </p>
-          <Link href="/profile" className="text-sm text-primary hover:underline">
+          <Link href="/profile" className="inline-flex min-h-11 items-center text-sm text-primary hover:underline">
             Go to profile settings
           </Link>
         </>
@@ -77,7 +77,7 @@ export default function UnsubscribePage() {
     <PageShell>
       <Suspense
         fallback={
-          <div className="container mx-auto px-4 py-16 text-center">
+          <div className="container mx-auto px-4 py-10 sm:py-16 text-center">
             <Loader2 className="h-10 w-10 animate-spin text-muted-foreground mx-auto" />
           </div>
         }

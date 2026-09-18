@@ -112,7 +112,7 @@ export default async function SharedBuildPage({ params }: { params: Promise<{ id
 
   return (
     <PageShell>
-      <main className="flex-1 container mx-auto px-4 py-8 sm:py-12 max-w-4xl animate-in fade-in slide-in-from-bottom-8 duration-700">
+      <main className="flex-1 container mx-auto px-4 py-6 sm:py-12 max-w-4xl animate-in fade-in slide-in-from-bottom-8 duration-700">
         <ContentPanel className="p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8">
             <div className="min-w-0">
@@ -124,7 +124,7 @@ export default async function SharedBuildPage({ params }: { params: Promise<{ id
                   Updated {new Date(build.updatedAt).toLocaleDateString()}
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-foreground">{build.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-foreground break-words [overflow-wrap:anywhere]">{build.name}</h1>
               <div className="flex items-center gap-2">
                 {build.author.image ? (
                   <AvatarImage
@@ -143,7 +143,7 @@ export default async function SharedBuildPage({ params }: { params: Promise<{ id
                 {profileSlug ? (
                   <Link
                     href={`/u/${profileSlug}`}
-                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                    className="inline-flex min-h-11 items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
                   >
                     by {build.author.username}
                   </Link>
@@ -188,7 +188,7 @@ export default async function SharedBuildPage({ params }: { params: Promise<{ id
                 <h2 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
                   Author notes
                 </h2>
-                <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                   {build.description}
                 </div>
               </section>

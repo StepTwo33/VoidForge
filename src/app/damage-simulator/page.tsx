@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { PageShell } from "@/components/page-shell";
+import { PageShell, PageMain, PageHero } from "@/components/page-shell";
 import { cn } from "@/lib/utils";
 import { Crosshair, Shield, Heart, Flame, Plus, X, ChevronDown, ChevronRight, Zap, FolderOpen } from "lucide-react";
 import {
@@ -41,18 +41,18 @@ function InputField({ label, value, onChange, step, min, suffix }: {
   step?: number; min?: number; suffix?: string;
 }) {
   return (
-    <div>
-      <label className="text-[10px] text-muted-foreground block mb-0.5">{label}</label>
-      <div className="relative">
+    <div className="min-w-0">
+      <label className="text-[10px] text-muted-foreground block mb-0.5 truncate">{label}</label>
+      <div className="relative min-w-0">
         <input
           type="number"
           step={step ?? 1}
           min={min ?? 0}
           value={value}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-          className="w-full bg-background border border-border rounded px-2 py-1 text-xs font-mono"
+          className="w-full min-h-11 min-w-0 max-w-full sm:min-h-9 bg-background border border-border rounded px-2.5 py-2 text-base font-mono sm:text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
-        {suffix && <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">{suffix}</span>}
+        {suffix && <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground pointer-events-none">{suffix}</span>}
       </div>
     </div>
   );
@@ -74,16 +74,16 @@ function Section({ title, icon, children, defaultOpen }: {
 }) {
   const [open, setOpen] = useState(defaultOpen ?? true);
   return (
-    <div className="border border-border rounded-xl bg-card overflow-hidden">
+    <div className="min-w-0 border border-border rounded-xl bg-card overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
+        className="w-full flex items-center gap-2 min-h-11 px-4 py-2.5 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
       >
         {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
         {icon}
         {title}
       </button>
-      {open && <div className="px-4 pb-4">{children}</div>}
+      {open && <div className="min-w-0 px-4 pb-4">{children}</div>}
     </div>
   );
 }
@@ -223,20 +223,17 @@ export default function DamageSimulatorPage() {
 
   return (
     <PageShell>
-      <main className="flex-1 container mx-auto px-4 py-6">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-lg sm:text-2xl font-bold mb-2 flex items-center gap-2">
-            <Zap className="h-6 w-6 text-primary" />
-            Damage Simulator
-          </h1>
-          <p className="text-xs text-muted-foreground mb-6 max-w-2xl">
-            Enter stats by hand or load a saved weapon build. TTK uses the same discrete engine as the Arsenal
-            (post-U32 enemy armor DR = 0.9×AR/2700, Viral/Corrosive stacking, Elementalist, Bane, optional headshots).
-          </p>
+      <PageMain maxWidth="xl">
+        <PageHero
+          icon={Zap}
+          accent="primary"
+          title="Damage Simulator"
+          description="Enter stats by hand or load a saved weapon build. TTK uses the same discrete engine as the Arsenal (post-U32 enemy armor DR = 0.9×AR/2700, Viral/Corrosive stacking, Elementalist, Bane, optional headshots)."
+        />
 
-          <div className="grid lg:grid-cols-[1fr_420px] gap-6">
+          <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]">
             {/* Left: Inputs */}
-            <div className="space-y-4">
+            <div className="min-w-0 space-y-4">
               <Section title="LOAD FROM BUILD" icon={<FolderOpen className="h-3.5 w-3.5" />} defaultOpen>
                 {savedBuilds.length === 0 ? (
                   <p className="text-xs text-muted-foreground">
@@ -245,7 +242,7 @@ export default function DamageSimulatorPage() {
                 ) : (
                   <div className="space-y-2">
                     <select
-                      className="w-full h-9 rounded-lg border border-border bg-background px-2 text-xs"
+                      className="w-full min-h-11 h-11 sm:h-9 rounded-lg border border-border bg-background px-2 text-base sm:text-xs"
                       defaultValue=""
                       onChange={(e) => {
                         const b = savedBuilds.find((x) => x.id === e.target.value);
@@ -260,7 +257,7 @@ export default function DamageSimulatorPage() {
                       ))}
                     </select>
                     {loadedBuildLabel && (
-                      <p className="text-[11px] text-cyan-400">
+                      <p className="text-[11px] text-cyan-700 dark:text-cyan-400">
                         Loaded: {loadedBuildLabel}
                         {(statusDamageBonus > 0 || Object.keys(factionBonuses).length > 0) && (
                           <span className="text-muted-foreground">
@@ -271,12 +268,12 @@ export default function DamageSimulatorPage() {
                         )}
                       </p>
                     )}
-                    <label className="flex items-center gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                    <label className="flex min-h-11 items-center gap-2 text-xs text-muted-foreground cursor-pointer">
                       <input
                         type="checkbox"
                         checked={applyHeadshots}
                         onChange={(e) => setApplyHeadshots(e.target.checked)}
-                        className="h-3.5 w-3.5 rounded border-border accent-primary"
+                        className="h-4 w-4 rounded border-border accent-primary"
                       />
                       Headshots (2× × Acuity bonuses from build)
                     </label>
@@ -286,7 +283,7 @@ export default function DamageSimulatorPage() {
 
               {/* Weapon Core Stats */}
               <Section title="WEAPON STATS" icon={<Crosshair className="h-3.5 w-3.5" />}>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4">
                   <InputField label="Fire Rate" value={fireRate} onChange={setFireRate} step={0.1} />
                   <InputField label="Crit Chance" value={critChance} onChange={setCritChance} step={0.01} />
                   <InputField label="Crit Multi" value={critMulti} onChange={setCritMulti} step={0.1} suffix="x" />
@@ -294,9 +291,9 @@ export default function DamageSimulatorPage() {
                   <InputField label="Status Chance" value={statusChance} onChange={setStatusChance} step={0.01} />
                   <InputField label="Magazine" value={magazine} onChange={setMagazine} step={1} />
                   <InputField label="Reload (s)" value={reloadTime} onChange={setReloadTime} step={0.1} />
-                  <div>
+                  <div className="min-w-0">
                     <label className="text-[10px] text-muted-foreground block mb-0.5">Total Damage</label>
-                    <div className="bg-muted/30 border border-border rounded px-2 py-1 text-xs font-mono font-bold text-primary">
+                    <div className="flex min-h-11 min-w-0 max-w-full items-center bg-muted/30 border border-border rounded px-2.5 py-2 text-sm font-mono font-bold text-primary sm:min-h-9 sm:text-xs">
                       {totalRaw.toFixed(1)}
                     </div>
                   </div>
@@ -307,33 +304,33 @@ export default function DamageSimulatorPage() {
               <Section title="DAMAGE TYPES" icon={<Flame className="h-3.5 w-3.5" />}>
                 <div className="space-y-1.5">
                   {Object.entries(dmgTypes).map(([type, val]) => (
-                    <div key={type} className="flex items-center gap-2">
+                    <div key={type} className="flex min-w-0 items-center gap-1 sm:gap-2">
                       <span
                         className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: ELEMENT_COLORS[type] || "#888" }}
                       />
-                      <span className="text-xs font-medium w-20 capitalize" style={{ color: ELEMENT_COLORS[type] }}>{type}</span>
+                      <span className="w-14 shrink-0 truncate text-xs font-medium capitalize sm:w-20" style={{ color: ELEMENT_COLORS[type] }}>{type}</span>
                       <input
                         type="number"
                         value={val}
                         onChange={(e) => setDmg(type, parseFloat(e.target.value) || 0)}
-                        className="flex-1 bg-background border border-border rounded px-2 py-1 text-xs font-mono"
+                        className="min-h-11 min-w-0 max-w-full flex-1 bg-background border border-border rounded px-2.5 py-2 text-base font-mono sm:min-h-9 sm:text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
-                      <span className="text-[10px] text-muted-foreground w-10 text-right">
+                      <span className="w-8 shrink-0 text-right text-[10px] text-muted-foreground sm:w-10">
                         {totalRaw > 0 ? `${((val / totalRaw) * 100).toFixed(0)}%` : "0%"}
                       </span>
-                      <button onClick={() => removeDmg(type)} className="text-red-400/60 hover:text-red-400">
+                      <button onClick={() => removeDmg(type)} className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-red-700/70 dark:text-red-400/60 hover:text-red-700 dark:hover:text-red-400">
                         <X className="h-3 w-3" />
                       </button>
                     </div>
                   ))}
                 </div>
                 {unusedTypes.length > 0 && (
-                  <div className="flex items-center gap-2 mt-3">
+                  <div className="mt-3 flex min-w-0 items-center gap-2">
                     <select
                       value={addingType}
                       onChange={(e) => setAddingType(e.target.value)}
-                      className="flex-1 bg-background border border-border rounded px-2 py-1 text-xs"
+                      className="min-h-11 min-w-0 max-w-full flex-1 bg-background border border-border rounded px-2.5 py-2 text-base sm:text-sm"
                     >
                       <option value="">Add element...</option>
                       {unusedTypes.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
@@ -341,7 +338,7 @@ export default function DamageSimulatorPage() {
                     <button
                       onClick={() => { if (addingType) { setDmg(addingType, 100); setAddingType(""); } }}
                       disabled={!addingType}
-                      className="px-2 py-1 text-xs rounded bg-primary text-primary-foreground disabled:opacity-40"
+                      className="min-h-11 min-w-11 inline-flex items-center justify-center text-xs rounded bg-primary text-primary-foreground disabled:opacity-40"
                     >
                       <Plus className="h-3 w-3" />
                     </button>
@@ -357,7 +354,7 @@ export default function DamageSimulatorPage() {
                       key={f}
                       onClick={() => setSelectedFaction(f === "all" ? null : f)}
                       className={cn(
-                        "px-2 py-0.5 text-[10px] rounded border transition-colors capitalize",
+                        "min-h-11 px-3 py-2 text-xs rounded border transition-colors capitalize",
                         (f === "all" && !selectedFaction) || selectedFaction === f
                           ? "border-primary text-primary bg-primary/10"
                           : "border-border text-muted-foreground"
@@ -373,7 +370,7 @@ export default function DamageSimulatorPage() {
                       key={e.id}
                       onClick={() => setSelectedEnemy(e)}
                       className={cn(
-                        "w-full text-left px-2.5 py-1.5 rounded-lg border text-xs transition-all",
+                        "w-full text-left min-h-11 px-3 py-2.5 rounded-lg border text-xs transition-all",
                         selectedEnemy?.id === e.id ? "border-primary/50 bg-primary/5" : "border-border/50 hover:border-primary/30"
                       )}
                     >
@@ -400,18 +397,18 @@ export default function DamageSimulatorPage() {
             </div>
 
             {/* Right: Results */}
-            <div className="space-y-4">
+            <div className="min-w-0 space-y-4 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:self-start lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:overflow-y-auto lg:overscroll-contain">
               {selectedEnemy && sim && (
                 <>
                   {/* Enemy Scaled Stats */}
-                  <Section title={`${selectedEnemy.name} Lv.${enemyLevel}`} icon={<Heart className="h-3.5 w-3.5 text-red-400" />}>
-                    <ResultRow label="Health" value={fmt(sim.hp)} color="text-red-400" />
-                    {sim.shield > 0 && <ResultRow label="Shield" value={fmt(sim.shield)} color="text-cyan-300" />}
+                  <Section title={`${selectedEnemy.name} Lv.${enemyLevel}`} icon={<Heart className="h-3.5 w-3.5 text-red-700 dark:text-red-400" />}>
+                    <ResultRow label="Health" value={fmt(sim.hp)} color="text-red-700 dark:text-red-400" />
+                    {sim.shield > 0 && <ResultRow label="Shield" value={fmt(sim.shield)} color="text-cyan-700 dark:text-cyan-300" />}
                     {sim.baseArmor > 0 && (
                       <ResultRow
                         label="Armor"
                         value={`${fmt(sim.armor)} (${(sim.armorDR * 100).toFixed(1)}% DR)`}
-                        color="text-yellow-400"
+                        color="text-amber-700 dark:text-amber-300"
                         tooltip="Enemy DR = 0.9 × net armor / 2700 (capped 90%). Not the Tenno armor/(armor+300) formula."
                       />
                     )}
@@ -419,7 +416,7 @@ export default function DamageSimulatorPage() {
                       <ResultRow
                         label="Armor before strip"
                         value={fmt(sim.baseArmor)}
-                        color="text-yellow-400/70"
+                        color="text-amber-700/70 dark:text-amber-300/70"
                       />
                     )}
                     <ResultRow label="Effective HP" value={fmt(sim.effectiveHP)} bold color="text-primary" />
@@ -430,23 +427,23 @@ export default function DamageSimulatorPage() {
 
                   {/* Per-Type Damage Breakdown */}
                   <Section title="DAMAGE BREAKDOWN" icon={<Flame className="h-3.5 w-3.5" />} defaultOpen={false}>
-                    <div className="text-[9px] text-muted-foreground mb-2 grid grid-cols-4 gap-1">
-                      <span>Type</span><span className="text-right">Raw</span>
-                      <span className="text-right">vs Shield</span><span className="text-right">vs Health</span>
+                    <div className="mb-2 grid min-w-0 grid-cols-4 gap-1 text-[9px] text-muted-foreground sm:text-[10px]">
+                      <span className="min-w-0 truncate">Type</span><span className="min-w-0 text-right">Raw</span>
+                      <span className="min-w-0 text-right">vs Shield</span><span className="min-w-0 text-right">vs Health</span>
                     </div>
                     {sim.typeBreakdown.map((t) => (
-                      <div key={t.type} className="grid grid-cols-4 gap-1 py-0.5 text-[10px]">
-                        <span className="capitalize font-medium" style={{ color: ELEMENT_COLORS[t.type] }}>{t.type}</span>
-                        <span className="text-right font-mono">{t.raw.toFixed(0)}</span>
-                        <span className="text-right font-mono text-cyan-300">{t.vsShield.toFixed(0)}</span>
-                        <span className="text-right font-mono text-red-300">{t.vsHealth.toFixed(0)}</span>
+                      <div key={t.type} className="grid min-w-0 grid-cols-4 gap-1 py-0.5 text-[10px]">
+                        <span className="min-w-0 truncate capitalize font-medium" style={{ color: ELEMENT_COLORS[t.type] }}>{t.type}</span>
+                        <span className="min-w-0 text-right font-mono tabular-nums">{t.raw.toFixed(0)}</span>
+                        <span className="min-w-0 text-right font-mono tabular-nums text-cyan-700 dark:text-cyan-300">{t.vsShield.toFixed(0)}</span>
+                        <span className="min-w-0 text-right font-mono tabular-nums text-red-700 dark:text-red-300">{t.vsHealth.toFixed(0)}</span>
                       </div>
                     ))}
                     <div className="border-t border-border/50 mt-1 pt-1 grid grid-cols-4 gap-1 text-[10px] font-bold">
                       <span>Total</span>
                       <span className="text-right font-mono">{totalRaw.toFixed(0)}</span>
-                      <span className="text-right font-mono text-cyan-300">{sim.typeBreakdown.reduce((s, t) => s + t.vsShield, 0).toFixed(0)}</span>
-                      <span className="text-right font-mono text-red-300">{sim.typeBreakdown.reduce((s, t) => s + t.vsHealth, 0).toFixed(0)}</span>
+                      <span className="text-right font-mono text-cyan-700 dark:text-cyan-300">{sim.typeBreakdown.reduce((s, t) => s + t.vsShield, 0).toFixed(0)}</span>
+                      <span className="text-right font-mono text-red-700 dark:text-red-300">{sim.typeBreakdown.reduce((s, t) => s + t.vsHealth, 0).toFixed(0)}</span>
                     </div>
                   </Section>
 
@@ -455,47 +452,47 @@ export default function DamageSimulatorPage() {
                     <ResultRow label="Avg Crit Multiplier" value={`${sim.avgCrit.toFixed(2)}x`} />
                     <ResultRow label={`Multishot × ${multishot.toFixed(1)}`} value={`${multishot > 1 ? multishot.toFixed(1) + " pellets" : "1 pellet"}`} />
                     <ResultRow label="Raw / Shot" value={fmt(sim.rawPerShot)} />
-                    {sim.shield > 0 && <ResultRow label="vs Shield / Shot" value={fmt(sim.shieldDmgPerShot)} color="text-cyan-300" />}
-                    <ResultRow label="vs Health / Shot" value={fmt(sim.healthDmgPerShot)} color="text-red-300" bold />
+                    {sim.shield > 0 && <ResultRow label="vs Shield / Shot" value={fmt(sim.shieldDmgPerShot)} color="text-cyan-700 dark:text-cyan-300" />}
+                    <ResultRow label="vs Health / Shot" value={fmt(sim.healthDmgPerShot)} color="text-red-700 dark:text-red-300" bold />
                   </Section>
 
                   {/* Status Effects */}
                   {sim.procsPerSec > 0 && (
                     <Section title="STATUS EFFECTS" icon={<Zap className="h-3.5 w-3.5" />} defaultOpen={false}>
-                      <ResultRow label="Procs / Sec" value={sim.procsPerSec.toFixed(1)} color="text-teal-400" />
+                      <ResultRow label="Procs / Sec" value={sim.procsPerSec.toFixed(1)} color="text-teal-700 dark:text-teal-400" />
                       {sim.viralMult > 1 && (
-                        <ResultRow label="Viral Multiplier" value={`${sim.viralMult.toFixed(2)}x health dmg`} color="text-teal-300"
+                        <ResultRow label="Viral Multiplier" value={`${sim.viralMult.toFixed(2)}x health dmg`} color="text-teal-700 dark:text-teal-300"
                           tooltip="Stack 1: +100% health dmg, stacks 2–10: +25% each (max 4.25×). Uses discrete peak stacks when available." />
                       )}
                       {sim.baseArmor > 0 && sim.corrosiveStrippedArmor < sim.baseArmor - 0.5 && (
-                        <ResultRow label="Corrosive Strip" value={`${fmt(sim.baseArmor)} → ${fmt(sim.corrosiveStrippedArmor)}`} color="text-lime-400"
+                        <ResultRow label="Corrosive Strip" value={`${fmt(sim.baseArmor)} → ${fmt(sim.corrosiveStrippedArmor)}`} color="text-lime-700 dark:text-lime-400"
                           tooltip="Stack 1: −26% armor; stacks 2–10: −6% each of original (max −80% at 10). Heat strip (−50%) applied when Heat procs." />
                       )}
                       <div className="border-t border-border/50 mt-1 pt-1" />
-                      {sim.slashDotDps > 0 && <ResultRow label="Slash DoT DPS" value={fmt(sim.slashDotDps)} color="text-red-300"
+                      {sim.slashDotDps > 0 && <ResultRow label="Slash DoT DPS" value={fmt(sim.slashDotDps)} color="text-red-700 dark:text-red-300"
                         tooltip="35% base/tick, 7 ticks over 6s, bypasses armor" />}
-                      {sim.heatDotDps > 0 && <ResultRow label="Heat DoT DPS" value={fmt(sim.heatDotDps)} color="text-orange-300"
+                      {sim.heatDotDps > 0 && <ResultRow label="Heat DoT DPS" value={fmt(sim.heatDotDps)} color="text-orange-700 dark:text-orange-300"
                         tooltip="50% base/tick, reduced by enemy armor DR (0.9×AR/2700)" />}
-                      {sim.toxinDotDps > 0 && <ResultRow label="Toxin DoT DPS" value={fmt(sim.toxinDotDps)} color="text-green-300"
+                      {sim.toxinDotDps > 0 && <ResultRow label="Toxin DoT DPS" value={fmt(sim.toxinDotDps)} color="text-green-700 dark:text-green-300"
                         tooltip="50% base/tick, bypasses shields; reduced by armor DR on health" />}
-                      {sim.totalDotDps > 0 && <ResultRow label="Total DoT DPS" value={fmt(sim.totalDotDps)} bold color="text-teal-400" />}
+                      {sim.totalDotDps > 0 && <ResultRow label="Total DoT DPS" value={fmt(sim.totalDotDps)} bold color="text-teal-700 dark:text-teal-400" />}
                     </Section>
                   )}
 
                   {/* DPS & TTK */}
                   <Section title="DPS & TIME TO KILL">
-                    <ResultRow label="Burst DPS (vs Health)" value={fmt(sim.burstDps)} bold color="text-amber-300" />
-                    <ResultRow label="Sustained DPS" value={fmt(sim.sustainedDps)} bold color="text-amber-300"
+                    <ResultRow label="Burst DPS (vs Health)" value={fmt(sim.burstDps)} bold color="text-amber-700 dark:text-amber-300" />
+                    <ResultRow label="Sustained DPS" value={fmt(sim.sustainedDps)} bold color="text-amber-700 dark:text-amber-300"
                       tooltip={`Accounts for ${reloadTime}s reload every ${magazine} shots`} />
                     {sim.totalDotDps > 0 && (
-                      <ResultRow label="↳ incl. DoT DPS" value={fmt(sim.totalDotDps)} color="text-teal-400" />
+                      <ResultRow label="↳ incl. DoT DPS" value={fmt(sim.totalDotDps)} color="text-teal-700 dark:text-teal-400" />
                     )}
                     <div className="border-t border-border/50 my-1" />
-                    {sim.shieldTime > 0 && <ResultRow label="Shield Phase" value={`${sim.shieldTime.toFixed(2)}s`} color="text-cyan-300" />}
-                    <ResultRow label="Health Phase" value={sim.healthTime === Infinity ? "∞" : `${sim.healthTime.toFixed(2)}s`} color="text-red-300" />
+                    {sim.shieldTime > 0 && <ResultRow label="Shield Phase" value={`${sim.shieldTime.toFixed(2)}s`} color="text-cyan-700 dark:text-cyan-300" />}
+                    <ResultRow label="Health Phase" value={sim.healthTime === Infinity ? "∞" : `${sim.healthTime.toFixed(2)}s`} color="text-red-700 dark:text-red-300" />
                     <div className="border-t border-border/50 my-1" />
                     <ResultRow label="Time to Kill" value={sim.ttk === Infinity ? "∞" : sim.ttk < 0.01 ? "<0.01s" : `${sim.ttk.toFixed(2)}s`}
-                      bold color={sim.ttk < 1 ? "text-green-400" : sim.ttk < 5 ? "text-yellow-400" : sim.ttk < 15 ? "text-orange-400" : "text-red-400"}
+                      bold color={sim.ttk < 1 ? "text-green-700 dark:text-green-400" : sim.ttk < 5 ? "text-amber-700 dark:text-amber-300" : sim.ttk < 15 ? "text-orange-700 dark:text-orange-400" : "text-red-700 dark:text-red-400"}
                       tooltip="Discrete shot-by-shot sim (same as Arsenal TTK) — not the continuous paper estimate." />
                     <ResultRow label="Shots to Kill" value={sim.shotsToKill === Infinity ? "∞" : sim.shotsToKill.toLocaleString()} bold />
                     {magazine > 0 && (
@@ -511,15 +508,15 @@ export default function DamageSimulatorPage() {
                         const am = selectedEnemy.armorType !== "none" ? getMod(ARMOR_MODIFIERS, selectedEnemy.armorType, type) : 0;
                         const sm = selectedEnemy.shieldType !== "none" ? getMod(SHIELD_MODIFIERS, selectedEnemy.shieldType, type) : 0;
                         return (
-                          <div key={type} className="flex items-center gap-1 text-[10px]">
-                            <span className="w-16 capitalize font-medium" style={{ color: ELEMENT_COLORS[type] }}>{type}</span>
-                            {hm !== 0 && <span className={cn("px-1 rounded", hm > 0 ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400")}>
+                          <div key={type} className="flex min-w-0 flex-wrap items-center gap-1 text-[10px]">
+                            <span className="w-14 shrink-0 truncate capitalize font-medium sm:w-16" style={{ color: ELEMENT_COLORS[type] }}>{type}</span>
+                            {hm !== 0 && <span className={cn("px-1 rounded", hm > 0 ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-red-500/10 text-red-700 dark:text-red-400")}>
                               HP {hm > 0 ? "+" : ""}{(hm * 100).toFixed(0)}%
                             </span>}
-                            {am !== 0 && <span className={cn("px-1 rounded", am > 0 ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400")}>
+                            {am !== 0 && <span className={cn("px-1 rounded", am > 0 ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-red-500/10 text-red-700 dark:text-red-400")}>
                               AR {am > 0 ? "+" : ""}{(am * 100).toFixed(0)}%
                             </span>}
-                            {sm !== 0 && <span className={cn("px-1 rounded", sm > 0 ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400")}>
+                            {sm !== 0 && <span className={cn("px-1 rounded", sm > 0 ? "bg-green-500/10 text-green-700 dark:text-green-400" : "bg-red-500/10 text-red-700 dark:text-red-400")}>
                               SH {sm > 0 ? "+" : ""}{(sm * 100).toFixed(0)}%
                             </span>}
                             {hm === 0 && am === 0 && sm === 0 && <span className="text-muted-foreground/40">neutral</span>}
@@ -534,13 +531,15 @@ export default function DamageSimulatorPage() {
               {!selectedEnemy && (
                 <div className="border border-border rounded-xl p-8 bg-card text-center">
                   <Shield className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">Select an enemy target to run the simulation</p>
+                  <p className="text-sm font-medium text-foreground">No enemy selected</p>
+                  <p className="mt-1.5 text-xs text-muted-foreground max-w-xs mx-auto">
+                    Pick a faction and enemy on the left to see scaled HP, type matchups, DPS, and time-to-kill.
+                  </p>
                 </div>
               )}
             </div>
           </div>
-        </div>
-      </main>
+      </PageMain>
     </PageShell>
   );
 }

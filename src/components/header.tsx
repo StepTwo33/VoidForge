@@ -101,7 +101,7 @@ function NavDropdown({ group }: { group: NavGroup }) {
   return (
     <div className="relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
       <button
-        className="flex items-center gap-1.5 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
+        className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
         onClick={() => setOpen(!open)}
       >
         <Icon className="h-3.5 w-3.5" />
@@ -305,13 +305,13 @@ function HeaderBuildSearch({ className, onNavigate }: { className?: string; onNa
               setOpen(false);
             }
           }}
-          placeholder="Search builds by frame or weapon..."
+          placeholder="Search…"
           aria-label="Search community builds"
           aria-expanded={showSuggestions}
           aria-autocomplete="list"
           aria-controls="header-build-search-listbox"
           role="combobox"
-          className="h-9 border-border/60 bg-background/40 pl-9 pr-3 text-sm backdrop-blur-sm"
+          className="h-11 border-border/60 bg-background/40 pl-9 pr-3 text-sm backdrop-blur-sm sm:h-9"
         />
 
         {showSuggestions && (
@@ -335,7 +335,7 @@ function HeaderBuildSearch({ className, onNavigate }: { className?: string; onNa
                       aria-selected={idx === activeIndex}
                       onMouseEnter={() => setActiveIndex(idx)}
                       onClick={() => selectSuggestion(idx)}
-                      className={`flex w-full items-center justify-between gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors ${
+                      className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2.5 text-left text-sm transition-colors ${
                         idx === activeIndex ? "bg-secondary/80 text-foreground" : "hover:bg-secondary/50"
                       }`}
                     >
@@ -367,7 +367,7 @@ function HeaderBuildSearch({ className, onNavigate }: { className?: string; onNa
                         aria-selected={idx === activeIndex}
                         onMouseEnter={() => setActiveIndex(idx)}
                         onClick={() => selectSuggestion(idx)}
-                        className={`flex w-full flex-col gap-0.5 rounded-lg px-2 py-2 text-left transition-colors ${
+                        className={`flex min-h-11 w-full flex-col justify-center gap-0.5 rounded-lg px-2.5 py-2.5 text-left transition-colors ${
                           idx === activeIndex ? "bg-secondary/80" : "hover:bg-secondary/50"
                         }`}
                       >
@@ -400,7 +400,7 @@ function HeaderBuildSearch({ className, onNavigate }: { className?: string; onNa
                     aria-selected={idx === activeIndex}
                     onMouseEnter={() => setActiveIndex(idx)}
                     onClick={() => selectSuggestion(idx)}
-                    className={`w-full rounded-lg px-2 py-2 text-left text-xs text-muted-foreground transition-colors ${
+                    className={`min-h-11 w-full rounded-lg px-2.5 py-2.5 text-left text-xs text-muted-foreground transition-colors ${
                       idx === activeIndex ? "bg-secondary/80 text-foreground" : "hover:bg-secondary/50"
                     }`}
                   >
@@ -476,12 +476,12 @@ export function Header() {
   }, [isAdmin]);
 
   return (
-    <header className="page-ambient-ignore sticky top-0 z-50 border-b border-border/60 bg-card/70 shadow-sm shadow-[var(--shadow-color)] backdrop-blur-xl transition-colors duration-300">
+    <header className="page-ambient-ignore sticky top-0 z-50 border-b border-border/60 bg-card/70 shadow-sm shadow-[var(--shadow-color)] backdrop-blur-xl transition-colors duration-300 pt-[env(safe-area-inset-top,0px)]">
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-      <div className="flex h-14 w-full items-center gap-2 px-4 sm:px-5 lg:gap-3 lg:px-6">
-        <Link href="/" className="flex shrink-0 items-center gap-2 text-xl font-bold tracking-tight">
-          <BrandMark size={28} className="ring-1 ring-primary/20" />
-          <span>
+      <div className="flex h-14 w-full items-center gap-2 px-3.5 sm:px-5 lg:gap-3 lg:px-6">
+        <Link href="/" className="tap-target inline-flex min-h-11 min-w-0 shrink items-center gap-2 text-xl font-bold tracking-tight">
+          <BrandMark size={28} className="shrink-0 ring-1 ring-primary/20" />
+          <span className="truncate">
             <span className="text-primary">Voidforge</span>
           </span>
         </Link>
@@ -490,7 +490,7 @@ export function Header() {
         <nav className="hidden lg:flex items-center gap-1 shrink-0">
           <Link
             href="/discover"
-            className="flex items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-primary hover:text-primary/90 transition-colors rounded-lg hover:bg-primary/10"
+            className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-primary hover:text-primary/90 transition-colors rounded-lg hover:bg-primary/10"
           >
             <Users className="h-3.5 w-3.5" />
             Discover
@@ -498,7 +498,7 @@ export function Header() {
 
           <Link
             href="/guides/how-to-mod"
-            className="flex items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
+            className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
           >
             <BookOpen className="h-3.5 w-3.5" />
             How to Mod
@@ -513,13 +513,13 @@ export function Header() {
         <HeaderBuildSearch className="hidden md:block min-w-0 flex-1 max-w-md lg:max-w-lg mx-auto" />
 
         {/* Right cluster — pinned to the right edge */}
-        <div className="ml-auto flex items-center gap-1 shrink-0">
+        <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1">
           <nav className="hidden lg:flex items-center gap-1">
             <span className="w-px h-5 bg-border mx-1" />
 
             <Link
               href="/support"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium text-rose-800 hover:text-rose-700 transition-colors rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/15 dark:text-rose-400 dark:hover:text-rose-300"
+              className="flex min-h-11 items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium text-rose-800 hover:text-rose-700 transition-colors rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/15 dark:text-rose-400 dark:hover:text-rose-300"
             >
               <Heart className="h-3.5 w-3.5" />
               Support
@@ -527,7 +527,7 @@ export function Header() {
 
             <Link
               href="/report-issue"
-              className="flex items-center gap-1.5 px-2 py-1.5 text-sm text-amber-800/80 hover:text-amber-900 transition-colors rounded-lg hover:bg-amber-500/5 dark:text-amber-400/70 dark:hover:text-amber-400"
+              className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm text-amber-800/80 hover:text-amber-900 transition-colors rounded-lg hover:bg-amber-500/5 dark:text-amber-400/70 dark:hover:text-amber-400"
             >
               <Flag className="h-3.5 w-3.5" />
               Report
@@ -536,7 +536,7 @@ export function Header() {
             {isAdmin && (
               <Link
                 href="/admin/reports"
-                className="relative flex items-center gap-1.5 px-2 py-1.5 text-sm text-red-700/80 hover:text-red-800 transition-colors rounded-lg hover:bg-red-500/5 dark:text-red-400/70 dark:hover:text-red-400"
+                className="relative flex min-h-11 items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium text-red-700 hover:text-red-800 transition-colors rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/15 dark:text-red-400 dark:hover:text-red-300"
               >
                 <Shield className="h-3.5 w-3.5" />
                 Admin
@@ -548,7 +548,7 @@ export function Header() {
               href={VOIDFORGE_GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center p-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
               title="Open source on GitHub"
             >
               <Github className="h-4 w-4" />
@@ -558,7 +558,7 @@ export function Header() {
               href="https://discord.gg/bqQXaYdTjS"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 text-muted-foreground hover:text-[#5865F2] transition-colors rounded-lg hover:bg-secondary/50"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center p-1.5 text-muted-foreground hover:text-[#5865F2] transition-colors rounded-lg hover:bg-secondary/50"
               title="Join Discord"
             >
               {DISCORD_SVG}
@@ -572,7 +572,7 @@ export function Header() {
           {loading ? (
             <span className="w-7 h-7 rounded-full bg-muted animate-pulse ml-1" />
           ) : user ? (
-            <Link href="/profile" className="flex items-center gap-2 ml-1 hover:opacity-80 transition-opacity">
+            <Link href="/profile" className="ml-1 inline-flex min-h-11 items-center gap-2 rounded-lg px-1 transition-opacity hover:opacity-80 sm:min-h-0">
               {user.image ? (
                 <AvatarImage src={user.image} alt="" size={28} className="w-7 h-7 rounded-full border border-border" />
               ) : (
@@ -585,7 +585,7 @@ export function Header() {
           ) : (
             <a
               href="/signin"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-all ml-1"
+              className="ml-1 inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-primary/50 hover:text-foreground sm:min-h-0 sm:py-1.5"
             >
               <LogIn className="h-3.5 w-3.5" /> Sign in
             </a>
@@ -593,7 +593,7 @@ export function Header() {
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors lg:hidden"
+            className="tap-target inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:hidden"
             aria-label="Toggle menu"
           >
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -603,12 +603,12 @@ export function Header() {
 
       {/* Mobile nav drawer */}
       {mobileOpen && (
-        <nav className="lg:hidden border-t border-border bg-card px-4 py-3 space-y-1 max-h-[70vh] overflow-y-auto">
+        <nav className="max-h-[min(70vh,calc(100dvh-3.5rem-env(safe-area-inset-top,0px)))] space-y-1 overflow-y-auto overscroll-contain border-t border-border bg-card px-3.5 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] lg:hidden">
           <HeaderBuildSearch className="pb-2 md:hidden" onNavigate={() => setMobileOpen(false)} />
           <Link
             href="/discover"
             onClick={() => setMobileOpen(false)}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+            className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
           >
             <Users className="h-4 w-4" />
             Discover
@@ -617,7 +617,7 @@ export function Header() {
           <Link
             href="/guides/how-to-mod"
             onClick={() => setMobileOpen(false)}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           >
             <BookOpen className="h-4 w-4" />
             How to Mod
@@ -630,7 +630,7 @@ export function Header() {
               <div key={group.label}>
                 <button
                   onClick={() => setMobileExpanded(isExpanded ? null : group.label)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                  className="flex min-h-11 w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 >
                   <Icon className="h-4 w-4" />
                   <span className="flex-1 text-left font-medium">{group.label}</span>
@@ -643,7 +643,7 @@ export function Header() {
                         key={link.href}
                         href={link.href}
                         onClick={() => setMobileOpen(false)}
-                        className="block px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                        className="flex min-h-11 items-center rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                       >
                         {link.label}
                       </Link>
@@ -657,7 +657,7 @@ export function Header() {
             <Link
               href="/support"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-rose-800 hover:text-rose-700 hover:bg-rose-500/10 transition-colors dark:text-rose-400 dark:hover:text-rose-300"
+              className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-rose-800 transition-colors hover:bg-rose-500/10 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300"
             >
               <Heart className="h-4 w-4" />
               Support
@@ -665,7 +665,7 @@ export function Header() {
             <Link
               href="/report-issue"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-amber-800/80 hover:text-amber-900 hover:bg-secondary transition-colors dark:text-amber-400/70 dark:hover:text-amber-400"
+              className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-amber-800/80 transition-colors hover:bg-secondary hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400"
             >
               <Flag className="h-4 w-4" />
               Report Issue
@@ -674,10 +674,10 @@ export function Header() {
               <Link
                 href="/admin/reports"
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-red-700/80 hover:text-red-800 hover:bg-secondary transition-colors dark:text-red-400/70 dark:hover:text-red-400"
+                className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-red-700 transition-colors border border-red-500/30 bg-red-500/10 hover:bg-red-500/15 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
               >
                 <Shield className="h-4 w-4" />
-                Admin Reports
+                Admin
                 <AdminOpenReportsBadge count={openReportCount} />
               </Link>
             )}
@@ -686,7 +686,7 @@ export function Header() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             >
               <Github className="h-4 w-4" />
               GitHub (open source)
@@ -696,7 +696,7 @@ export function Header() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-[#5865F2] hover:bg-secondary transition-colors"
+              className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-[#5865F2]"
             >
               {DISCORD_SVG}
               Discord

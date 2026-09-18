@@ -72,10 +72,10 @@ export default function AboutPage() {
               href={VOIDFORGE_GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+              className="inline-flex max-w-full min-h-11 items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
             >
-              <Github className="h-4 w-4" />
-              github.com/StepTwo33/Voidforge
+              <Github className="h-4 w-4 shrink-0" />
+              <span className="truncate">github.com/StepTwo33/Voidforge</span>
             </a>
           </ContentPanel>
 
@@ -83,7 +83,7 @@ export default function AboutPage() {
             <h2 className="mb-3 text-lg font-semibold">Data Sources</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
               All weapon stats, mod values, warframe abilities, arcane effects, and enemy data are sourced from the{" "}
-              <a href="https://wiki.warframe.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+              <a href="https://wiki.warframe.com" target="_blank" rel="noopener noreferrer" className="text-primary underline-offset-2 hover:underline">
                 Official Warframe Wiki
               </a>{" "}
               and verified against in-game values. Voidforge is not affiliated with or endorsed by Digital Extremes.
@@ -94,7 +94,7 @@ export default function AboutPage() {
             <h2 className="mb-3 text-lg font-semibold">Feedback</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
               Found incorrect data or a missing entry? Use the{" "}
-              <Link href="/report-issue" className="text-amber-400 hover:underline">Report Issue</Link>{" "}
+              <Link href="/report-issue" className="text-amber-800 underline-offset-2 hover:underline dark:text-amber-400">Report Issue</Link>{" "}
               page to flag stat discrepancies or missing items. Staff and moderators review reports and can apply
               data corrections through the Codex and Data Fixes tools. Voidforge is built with Next.js, TypeScript, and Tailwind CSS.
             </p>
@@ -115,7 +115,7 @@ export default function AboutPage() {
                     <Link
                       key={c.name}
                       href={c.profileUrl}
-                      className="group flex items-center gap-3 rounded-lg border border-border/50 bg-background/40 p-3 transition-all hover:border-primary/40 hover:bg-primary/5"
+                      className="group flex min-h-11 items-center gap-3 rounded-lg border border-border/50 bg-background/40 p-3 transition-all hover:border-primary/40 hover:bg-primary/5"
                     >
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                         {c.name.charAt(0)}
@@ -132,7 +132,7 @@ export default function AboutPage() {
                       href={c.profileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex items-center gap-3 rounded-lg border border-border/50 bg-background/40 p-3 transition-all hover:border-primary/40 hover:bg-primary/5"
+                      className="group flex min-h-11 items-center gap-3 rounded-lg border border-border/50 bg-background/40 p-3 transition-all hover:border-primary/40 hover:bg-primary/5"
                     >
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                         {c.name.charAt(0)}

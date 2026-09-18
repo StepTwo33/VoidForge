@@ -40,18 +40,18 @@ const ISSUE_FLAGS = [
 ] as const;
 
 const STATUS_CONFIG: Record<string, { color: string; bg: string; border: string; label: string; icon: typeof Clock }> = {
-  open: { color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30", label: "Open", icon: Clock },
-  resolved: { color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/30", label: "Resolved", icon: CheckCircle2 },
-  wontfix: { color: "text-zinc-400", bg: "bg-zinc-500/10", border: "border-zinc-500/30", label: "Won't Fix", icon: Ban },
+  open: { color: "text-amber-800 dark:text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30", label: "Open", icon: Clock },
+  resolved: { color: "text-green-700 dark:text-green-400", bg: "bg-green-500/10", border: "border-green-500/30", label: "Resolved", icon: CheckCircle2 },
+  wontfix: { color: "text-zinc-600 dark:text-zinc-400", bg: "bg-zinc-500/10", border: "border-zinc-500/30", label: "Won't Fix", icon: Ban },
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  weapon: "text-blue-400 bg-blue-500/10",
-  mod: "text-purple-400 bg-purple-500/10",
-  warframe: "text-cyan-400 bg-cyan-500/10",
-  companion: "text-teal-400 bg-teal-500/10",
-  archon_shard: "text-red-400 bg-red-500/10",
-  other: "text-zinc-400 bg-zinc-500/10",
+  weapon: "text-blue-700 dark:text-blue-400 bg-blue-500/10",
+  mod: "text-purple-700 dark:text-purple-400 bg-purple-500/10",
+  warframe: "text-cyan-700 dark:text-cyan-400 bg-cyan-500/10",
+  companion: "text-teal-700 dark:text-teal-400 bg-teal-500/10",
+  archon_shard: "text-red-700 dark:text-red-400 bg-red-500/10",
+  other: "text-zinc-600 dark:text-zinc-400 bg-zinc-500/10",
 };
 
 export default function AdminReportsPage() {
@@ -169,7 +169,7 @@ export default function AdminReportsPage() {
         {/* Page Header */}
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
-            <Flag className="h-5 w-5 text-amber-400" />
+            <Flag className="h-5 w-5 text-amber-800 dark:text-amber-400" />
           </div>
           <div>
             <h1 className="text-xl font-bold">Report Management</h1>
@@ -181,9 +181,9 @@ export default function AdminReportsPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
           {[
             { label: "Total", value: stats.total, color: "text-foreground", bg: "bg-muted/30", border: "border-border" },
-            { label: "Open", value: stats.open, color: "text-amber-400", bg: "bg-amber-500/5", border: "border-amber-500/20" },
-            { label: "Resolved", value: stats.resolved, color: "text-green-400", bg: "bg-green-500/5", border: "border-green-500/20" },
-            { label: "Won't Fix", value: stats.wontfix, color: "text-zinc-400", bg: "bg-zinc-500/5", border: "border-zinc-500/20" },
+            { label: "Open", value: stats.open, color: "text-amber-800 dark:text-amber-400", bg: "bg-amber-500/5", border: "border-amber-500/20" },
+            { label: "Resolved", value: stats.resolved, color: "text-green-700 dark:text-green-400", bg: "bg-green-500/5", border: "border-green-500/20" },
+            { label: "Won't Fix", value: stats.wontFix, color: "text-zinc-600 dark:text-zinc-400", bg: "bg-zinc-500/5", border: "border-zinc-500/20" },
           ].map((s) => (
             <div key={s.label} className={cn("rounded-xl border p-4 text-center", s.bg, s.border)}>
               <div className={cn("text-2xl font-bold", s.color)}>{s.value}</div>
@@ -200,7 +200,7 @@ export default function AdminReportsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search reports..."
-              className="w-full h-8 text-xs pl-8 pr-3 rounded-lg border border-border bg-background focus:outline-none focus:border-primary/50"
+              className="w-full min-h-11 h-11 text-xs pl-8 pr-3 rounded-lg border border-border bg-background focus:outline-none focus:border-primary/50"
             />
           </div>
 
@@ -216,7 +216,7 @@ export default function AdminReportsPage() {
                 key={s.key}
                 onClick={() => setFilterStatus(s.key)}
                 className={cn(
-                  "px-2.5 py-1 text-[11px] rounded-lg border transition-colors",
+                  "inline-flex items-center min-h-11 px-2.5 py-1 text-[11px] rounded-lg border transition-colors",
                   filterStatus === s.key
                     ? s.key === "all" ? "border-primary text-primary bg-primary/10"
                     : `${STATUS_CONFIG[s.key]?.border} ${STATUS_CONFIG[s.key]?.color} ${STATUS_CONFIG[s.key]?.bg}`
@@ -235,7 +235,7 @@ export default function AdminReportsPage() {
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="bg-background border border-border rounded-lg px-2 py-1 text-xs h-8"
+            className="bg-background border border-border rounded-lg px-2 py-1 text-xs min-h-11 h-11"
           >
             <option value="all">All Types</option>
             <option value="weapon">Weapon</option>
@@ -303,7 +303,7 @@ export default function AdminReportsPage() {
                         {report.itemType.replace("_", " ")}
                       </span>
                       {report.itemId && (
-                        <code className="text-[10px] text-muted-foreground/60 hidden sm:inline">{report.itemId}</code>
+                        <code className="text-[10px] text-muted-foreground/60 hidden sm:inline break-all">{report.itemId}</code>
                       )}
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 text-[10px] text-muted-foreground flex-wrap">
@@ -353,7 +353,7 @@ export default function AdminReportsPage() {
                       <div>
                         <div className="text-sm font-medium">{report.user?.name || report.reporterName}</div>
                         <div className="text-[10px] text-muted-foreground">
-                          {report.user?.email && <span>{report.user.email} · </span>}
+                          {report.user?.email && <span className="break-all">{report.user.email} · </span>}
                           {new Date(report.createdAt).toLocaleString()}
                         </div>
                       </div>
@@ -365,7 +365,7 @@ export default function AdminReportsPage() {
                         <div className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase">Flagged Issues</div>
                         <div className="flex gap-1.5 flex-wrap">
                           {activeIssues.map((label) => (
-                            <span key={label} className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                            <span key={label} className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/20">
                               {label}
                             </span>
                           ))}
@@ -377,8 +377,8 @@ export default function AdminReportsPage() {
                     {discrepancies.length > 0 && (
                       <div>
                         <div className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase">Stat Discrepancies</div>
-                        <div className="rounded-lg border border-border overflow-hidden">
-                          <table className="w-full text-xs">
+                        <div className="rounded-lg border border-border overflow-x-auto">
+                          <table className="w-full text-xs min-w-[20rem]">
                             <thead>
                               <tr className="bg-muted/30 text-muted-foreground">
                                 <th className="text-left px-3 py-1.5 font-medium">Stat</th>
@@ -390,8 +390,8 @@ export default function AdminReportsPage() {
                               {discrepancies.map((d, i) => (
                                 <tr key={i} className="border-t border-border">
                                   <td className="px-3 py-1.5 font-medium">{d.stat}</td>
-                                  <td className="px-3 py-1.5 text-red-400">{d.currentValue}</td>
-                                  <td className="px-3 py-1.5 text-green-400">{d.expectedValue}</td>
+                                  <td className="px-3 py-1.5 text-red-700 dark:text-red-400 break-words">{d.currentValue}</td>
+                                  <td className="px-3 py-1.5 text-green-700 dark:text-green-400 break-words">{d.expectedValue}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -469,7 +469,7 @@ export default function AdminReportsPage() {
                       {report.updatedAt !== report.createdAt && (
                         <span className="flex items-center gap-1"><RotateCcw className="h-3 w-3 shrink-0" /> Updated: {new Date(report.updatedAt).toLocaleString()}</span>
                       )}
-                      <code className="opacity-50 truncate">ID: {report.id}</code>
+                      <code className="opacity-50 truncate break-all">ID: {report.id}</code>
                     </div>
 
                     {/* Actions */}
@@ -479,14 +479,14 @@ export default function AdminReportsPage() {
                           <button
                             onClick={() => handleAction(report.id, "resolved")}
                             disabled={isLoading}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 transition-colors disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 min-h-11 px-3 py-1.5 text-xs rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 hover:bg-green-500/20 transition-colors disabled:opacity-50"
                           >
                             <Check className="h-3 w-3" /> Resolve
                           </button>
                           <button
                             onClick={() => handleAction(report.id, "wontfix")}
                             disabled={isLoading}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-zinc-500/10 text-zinc-400 border border-zinc-500/20 hover:bg-zinc-500/20 transition-colors disabled:opacity-50"
+                            className="inline-flex items-center gap-1.5 min-h-11 px-3 py-1.5 text-xs rounded-lg bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border border-zinc-500/20 hover:bg-zinc-500/20 transition-colors disabled:opacity-50"
                           >
                             <X className="h-3 w-3" /> Won&apos;t Fix
                           </button>
@@ -496,7 +496,7 @@ export default function AdminReportsPage() {
                         <button
                           onClick={() => handleAction(report.id, "open")}
                           disabled={isLoading}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 min-h-11 px-3 py-1.5 text-xs rounded-lg bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-colors disabled:opacity-50"
                         >
                           <RotateCcw className="h-3 w-3" /> Reopen
                         </button>
@@ -513,7 +513,7 @@ export default function AdminReportsPage() {
                           if (ok) handleAction(report.id, "delete");
                         }}
                         disabled={isLoading}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 min-h-11 px-3 py-1.5 text-xs rounded-lg bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors disabled:opacity-50"
                       >
                         <Trash2 className="h-3 w-3" /> Delete
                       </button>

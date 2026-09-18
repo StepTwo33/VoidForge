@@ -46,7 +46,7 @@ export function ArchwingStatsPanel({
         <StatRow
           label="Kinetic Diversion"
           value={`${stats.kineticDiversionPercent.toFixed(0)}% dmg → energy`}
-          color="text-cyan-400"
+          color="text-cyan-700 dark:text-cyan-400"
           tooltip="Converts a portion of damage taken on health into energy. Without shields, ally Overguard counts as health."
         />
       )}
@@ -57,22 +57,22 @@ export function ArchwingStatsPanel({
           <StatRow
             label="Strength"
             value={`${(stats.abilityStrength * 100).toFixed(0)}%`}
-            color={stats.abilityStrength > 1 ? "text-orange-400" : undefined}
+            color={stats.abilityStrength > 1 ? "text-orange-700 dark:text-orange-400" : undefined}
           />
           <StatRow
             label="Duration"
             value={`${(stats.abilityDuration * 100).toFixed(0)}%`}
-            color={stats.abilityDuration > 1 ? "text-cyan-400" : undefined}
+            color={stats.abilityDuration > 1 ? "text-cyan-700 dark:text-cyan-400" : undefined}
           />
           <StatRow
             label="Efficiency"
             value={`${(stats.abilityEfficiency * 100).toFixed(0)}%`}
-            color={stats.abilityEfficiency > 1 ? "text-blue-400" : undefined}
+            color={stats.abilityEfficiency > 1 ? "text-blue-700 dark:text-blue-400" : undefined}
           />
           <StatRow
             label="Range"
             value={`${(stats.abilityRange * 100).toFixed(0)}%`}
-            color={stats.abilityRange > 1 ? "text-green-400" : undefined}
+            color={stats.abilityRange > 1 ? "text-green-700 dark:text-green-400" : undefined}
           />
         </>
       )}
@@ -85,7 +85,7 @@ export function ArchwingStatsPanel({
               key={line.key}
               label={line.label}
               value={`${line.value >= 0 ? "+" : ""}${line.value.toFixed(0)}%`}
-              color="text-purple-300"
+              color="text-purple-800 dark:text-purple-300"
             />
           ))}
         </>

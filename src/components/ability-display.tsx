@@ -37,31 +37,31 @@ export type AbilityScaleHint = AbilityScaleAttribute;
 const SLOT_STYLES: Record<number, { border: string; badge: string; glow: string }> = {
   1: {
     border: "border-l-orange-500/70",
-    badge: "bg-orange-500/15 text-orange-400 ring-orange-500/30",
+    badge: "bg-orange-500/15 text-orange-700 dark:text-orange-400 ring-orange-500/30",
     glow: "shadow-[inset_3px_0_12px_-4px_rgba(249,115,22,0.35)]",
   },
   2: {
     border: "border-l-cyan-500/70",
-    badge: "bg-cyan-500/15 text-cyan-400 ring-cyan-500/30",
+    badge: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 ring-cyan-500/30",
     glow: "shadow-[inset_3px_0_12px_-4px_rgba(34,211,238,0.35)]",
   },
   3: {
     border: "border-l-violet-500/70",
-    badge: "bg-violet-500/15 text-violet-400 ring-violet-500/30",
+    badge: "bg-violet-500/15 text-violet-700 dark:text-violet-400 ring-violet-500/30",
     glow: "shadow-[inset_3px_0_12px_-4px_rgba(139,92,246,0.35)]",
   },
   4: {
     border: "border-l-amber-400/80",
-    badge: "bg-amber-500/15 text-amber-300 ring-amber-500/40",
+    badge: "bg-amber-500/15 text-amber-800 dark:text-amber-300 ring-amber-500/40",
     glow: "shadow-[inset_3px_0_12px_-4px_rgba(251,191,36,0.4)]",
   },
 };
 
 const SCALE_BADGE: Record<AbilityScaleHint, { label: string; className: string }> = {
-  strength: { label: "STR", className: "bg-rose-500/15 text-rose-400 ring-rose-500/25" },
-  duration: { label: "DUR", className: "bg-emerald-500/15 text-emerald-400 ring-emerald-500/25" },
-  range: { label: "RNG", className: "bg-sky-500/15 text-sky-400 ring-sky-500/25" },
-  efficiency: { label: "EFF", className: "bg-amber-500/15 text-amber-300 ring-amber-500/25" },
+  strength: { label: "STR", className: "bg-rose-500/15 text-rose-700 dark:text-rose-400 ring-rose-500/25" },
+  duration: { label: "DUR", className: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 ring-emerald-500/25" },
+  range: { label: "RNG", className: "bg-sky-500/15 text-sky-700 dark:text-sky-400 ring-sky-500/25" },
+  efficiency: { label: "EFF", className: "bg-amber-500/15 text-amber-800 dark:text-amber-300 ring-amber-500/25" },
 };
 
 export function getSlotStyle(slot: number) {
@@ -126,13 +126,13 @@ export function AbilityEnergyChip({
       className={cn(
         "inline-flex items-center gap-1 rounded-full px-2 py-0.5 ring-1",
         modified
-          ? "bg-blue-500/10 text-blue-300 ring-blue-500/25"
+          ? "bg-blue-500/10 text-blue-700 dark:text-blue-300 ring-blue-500/25"
           : "bg-muted/60 text-muted-foreground ring-border/50",
         className,
       )}
     >
-      <Zap className={cn("h-3 w-3", modified ? "text-blue-400" : "text-muted-foreground")} />
-      <span className={cn("text-xs font-mono font-semibold", modified && "text-blue-300")}>
+      <Zap className={cn("h-3 w-3", modified ? "text-blue-700 dark:text-blue-400" : "text-muted-foreground")} />
+      <span className={cn("text-xs font-mono font-semibold", modified && "text-blue-700 dark:text-blue-300")}>
         {modified ? effectiveCost.toFixed(0) : baseCost}
       </span>
       {modified && (
@@ -144,7 +144,7 @@ export function AbilityEnergyChip({
 
 export function AbilityDamageTypeChip({ type }: { type: string }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-orange-500/25 bg-orange-500/10 px-2 py-0.5 text-[10px] font-medium text-orange-300">
+    <span className="inline-flex items-center gap-1 rounded-md border border-orange-500/25 bg-orange-500/10 px-2 py-0.5 text-[10px] font-medium text-orange-800 dark:text-orange-300">
       <Sparkles className="h-3 w-3 opacity-70" />
       {type}
     </span>
@@ -233,7 +233,7 @@ export function AbilityStatRow({
           className={cn(
             "rounded-md bg-muted/50 px-1.5 py-0.5 font-mono font-semibold ring-1 ring-border/40",
             compact ? "text-[10px]" : "text-[11px]",
-            isModified && (isPositive ? "text-emerald-400 ring-emerald-500/20 bg-emerald-500/10" : "text-rose-400 ring-rose-500/20 bg-rose-500/10"),
+            isModified && (isPositive ? "text-emerald-700 dark:text-emerald-400 ring-emerald-500/20 bg-emerald-500/10" : "text-rose-700 dark:text-rose-400 ring-rose-500/20 bg-rose-500/10"),
             !isModified && "text-foreground",
           )}
         >
@@ -260,14 +260,14 @@ export function AbilityCardShell({
   return (
     <div
       className={cn(
-        "relative rounded-xl border border-border/60 bg-gradient-to-br from-card via-card to-muted/20",
+        "relative overflow-hidden rounded-xl border border-border/60 bg-gradient-to-br from-card via-card to-muted/20",
         "border-l-[3px] shadow-sm transition-shadow hover:shadow-md",
         variant === "default" ? cn(style.border, style.glow) : "border-l-emerald-500/70 shadow-[inset_3px_0_12px_-4px_rgba(52,211,153,0.25)]",
         variant === "helminth" && "from-emerald-500/5 via-card to-card ring-1 ring-emerald-500/20",
         className,
       )}
     >
-      <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/5 blur-2xl" />
+      <div className="pointer-events-none absolute -right-4 -top-4 h-24 w-24 rounded-full bg-primary/5 blur-2xl" />
       <div className="relative flex h-full flex-col p-4">{children}</div>
     </div>
   );
@@ -279,19 +279,19 @@ export function AbilitiesSectionHeader({
   formLabel?: string;
 }) {
   return (
-    <div className="mb-4 flex items-center gap-3">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
-        <Sparkles className="h-4 w-4 text-primary" />
+    <div className="mb-2.5 flex items-center gap-2.5">
+      <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 ring-1 ring-primary/20">
+        <Sparkles className="h-3.5 w-3.5 text-primary" />
       </div>
-      <div>
+      <div className="min-w-0">
         <h2 className="text-sm font-semibold tracking-wide text-foreground">
           Abilities
           {formLabel && (
             <span className="ml-2 font-normal text-primary">{formLabel}</span>
           )}
         </h2>
-        <p className="text-[10px] text-muted-foreground">
-          Stats update with your current build · one Helminth subsume per loadout
+        <p className="text-[10px] leading-tight text-muted-foreground">
+          Live with your build · one Helminth subsume
         </p>
       </div>
     </div>
@@ -1365,7 +1365,7 @@ export function AbilityStatsBlock({
   }
   if (ability.miscStats?.channeled === true) {
     rows.push(
-      <div key="channeled" className="px-1.5 py-0.5 text-[10px] font-medium text-violet-400">
+      <div key="channeled" className="px-1.5 py-0.5 text-[10px] font-medium text-violet-800 dark:text-violet-400">
         Channeled
       </div>,
     );

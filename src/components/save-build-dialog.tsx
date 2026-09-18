@@ -88,7 +88,7 @@ export function SaveBuildDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
@@ -164,7 +164,7 @@ export function SaveBuildDialog({
                         type="button"
                         onClick={() => toggleTag(t.id)}
                         className={cn(
-                          "rounded-full border px-2.5 py-0.5 text-[11px] transition-colors",
+                          "inline-flex min-h-11 items-center rounded-full border px-3 py-2 text-[11px] transition-colors sm:min-h-0 sm:px-2.5 sm:py-0.5",
                           on
                             ? "border-primary bg-primary/15 text-primary"
                             : "border-border text-muted-foreground hover:border-primary/40",

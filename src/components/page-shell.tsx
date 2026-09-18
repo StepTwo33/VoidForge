@@ -183,7 +183,7 @@ export function PageMain({
   return (
     <main
       className={cn(
-        "relative z-[1] flex-1 container mx-auto w-full px-4 py-6 sm:py-8",
+        "relative z-[1] flex-1 container mx-auto w-full px-3.5 py-5 sm:px-4 sm:py-8",
         MAX_WIDTH[maxWidth],
         animate && "animate-in fade-in slide-in-from-bottom-4 duration-500",
         className,
@@ -223,19 +223,19 @@ export function PageHero({
   return (
     <div
       className={cn(
-        "mb-8",
+        "mb-6 sm:mb-8",
         centered && "text-center",
         className,
       )}
     >
       <div
         className={cn(
-          "flex gap-4",
-          centered ? "flex-col items-center" : "items-start justify-between",
-          actions && !centered && "flex-wrap",
+          "flex gap-3 sm:gap-4",
+          centered ? "flex-col items-center" : "flex-col items-stretch sm:flex-row sm:items-start sm:justify-between",
+          actions && !centered && "sm:flex-wrap",
         )}
       >
-        <div className={cn("flex gap-3.5", centered && "flex-col items-center")}>
+        <div className={cn("flex gap-3 sm:gap-3.5", centered && "flex-col items-center")}>
           {Icon && (
             <div
               className={cn(
@@ -246,8 +246,8 @@ export function PageHero({
               <Icon className="h-5 w-5" />
             </div>
           )}
-          <div className={cn(centered && "max-w-2xl")}>
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          <div className={cn("min-w-0", centered && "max-w-2xl")}>
+            <h1 className="text-xl font-bold tracking-tight sm:text-3xl">
               {title}
               {highlight && (
                 <>
@@ -257,13 +257,17 @@ export function PageHero({
               )}
             </h1>
             {description && (
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground sm:mt-2 sm:text-base">
                 {description}
               </p>
             )}
           </div>
         </div>
-        {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+        {actions && (
+          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+            {actions}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -299,19 +303,19 @@ export function FeatureCard({
   const inner = (
     <div
       className={cn(
-        "group flex h-full flex-col rounded-xl border border-border/60 surface-panel p-6",
-        "transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
+        "group flex min-h-11 h-full flex-col rounded-xl border border-border/60 surface-panel p-4 sm:p-6",
+        "transition-all duration-300 active:scale-[0.99] hover:-translate-y-1 hover:shadow-xl",
         colors.hoverBorder,
         colors.hoverBg,
         colors.shadow,
       )}
     >
-      <div className="mb-3 flex items-start gap-3">
+      <div className="mb-2.5 flex items-start gap-3 sm:mb-3">
         <div className={cn("rounded-lg p-2 ring-1 ring-border/40", colors.icon)}>
           <Icon className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className={cn("text-lg font-semibold transition-colors", colors.hoverText)}>
+          <h2 className={cn("text-base font-semibold transition-colors sm:text-lg", colors.hoverText)}>
             {title}
           </h2>
           {subtitle && (
@@ -321,12 +325,12 @@ export function FeatureCard({
       </div>
       <p className="flex-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
       {badges && badges.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
           {badges.map((badge) => (
             <span
               key={badge}
               className={cn(
-                "rounded-md px-2 py-1 text-xs font-medium ring-1",
+                "rounded-md px-2 py-1 text-[11px] font-medium ring-1 sm:text-xs",
                 colors.badge,
               )}
             >
@@ -340,13 +344,13 @@ export function FeatureCard({
 
   if (external) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className="group block h-full">
+      <a href={href} target="_blank" rel="noopener noreferrer" className="group block h-full min-h-11">
         {inner}
       </a>
     );
   }
   return (
-    <Link href={href} className="group block h-full">
+    <Link href={href} className="group block h-full min-h-11">
       {inner}
     </Link>
   );
@@ -359,20 +363,23 @@ export function FilterChip({
   children,
   className,
   style,
+  title,
 }: {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
+  title?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       style={style}
+      title={title}
       className={cn(
-        "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all",
+        "inline-flex min-h-11 shrink-0 items-center rounded-full border px-3.5 py-2.5 text-xs font-medium transition-all lg:min-h-9 lg:px-3 lg:py-1.5",
         active
           ? "border-primary bg-primary/10 text-primary shadow-sm shadow-primary/10"
           : "border-border/70 text-muted-foreground hover:border-border hover:bg-muted/40 hover:text-foreground",
@@ -398,7 +405,7 @@ export function ContentPanel({
     <div
       className={cn(
         "overflow-hidden rounded-xl border border-border/60 surface-panel shadow-sm ring-1 ring-border/30",
-        padding && "p-4 sm:p-5",
+        padding && "p-3.5 sm:p-5",
         className,
       )}
     >
@@ -418,7 +425,7 @@ export function PanelHeading({
   return (
     <h2
       className={cn(
-        "mb-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground",
+        "mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground",
         className,
       )}
     >
@@ -450,18 +457,18 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "rounded-xl border border-dashed border-border/70 bg-card/30 px-6 py-16 text-center",
+        "rounded-xl border border-dashed border-border/70 bg-card/40 px-5 py-12 text-center surface-panel sm:px-6 sm:py-16",
         className,
       )}
     >
-      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/50 ring-1 ring-border/50">
-        <Icon className="h-7 w-7 text-muted-foreground/50" />
+      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
+        <Icon className="h-7 w-7 text-primary/70" />
       </div>
-      <h2 className="text-lg font-semibold">{title}</h2>
+      <h2 className="text-base font-semibold sm:text-lg">{title}</h2>
       {description && (
-        <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">{description}</p>
+        <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">{description}</p>
       )}
-      {children && <div className="mt-4">{children}</div>}
+      {children && <div className="mt-5 flex flex-wrap items-center justify-center gap-2">{children}</div>}
     </div>
   );
 }

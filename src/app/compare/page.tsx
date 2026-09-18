@@ -37,6 +37,18 @@ function fmtNum(n: number, decimals = 0): string {
   return n.toFixed(decimals);
 }
 
+function CompareSideHeader({ aLabel = "A", bLabel = "B" }: { aLabel?: string; bLabel?: string }) {
+  return (
+    <div className="mb-1 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b border-border/40 pb-2">
+      <span className="min-w-0 truncate text-right text-[10px] font-bold uppercase tracking-wider text-primary">{aLabel}</span>
+      <span className="w-[4.75rem] max-w-[5.75rem] shrink-0 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:w-28 sm:max-w-28">
+        Diff
+      </span>
+      <span className="min-w-0 truncate text-[10px] font-bold uppercase tracking-wider text-primary">{bLabel}</span>
+    </div>
+  );
+}
+
 function CompareRow({ label, a, b, higher = "green", format }: {
   label: string;
   a: number | null;
@@ -48,20 +60,34 @@ function CompareRow({ label, a, b, higher = "green", format }: {
   const diff = (a ?? 0) - (b ?? 0);
   const aWins = higher === "green" ? diff > 0.01 : diff < -0.01;
   const bWins = higher === "green" ? diff < -0.01 : diff > 0.01;
+  const showDelta = a !== null && b !== null && (aWins || bWins);
+  const deltaPct = showDelta && b !== 0 && a !== 0
+    ? ((a! - b!) / Math.abs(b!)) * 100
+    : null;
 
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] gap-2 py-0.5 items-center">
+    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b border-border/20 py-1.5 last:border-b-0">
       <span className={cn(
-        "text-xs font-mono text-right",
-        a === null ? "text-muted-foreground/30" : aWins ? "text-green-400 font-bold" : bWins ? "text-red-400" : ""
+        "min-w-0 text-right font-mono text-xs tabular-nums",
+        a === null ? "text-muted-foreground/50" : aWins ? "cmp-win" : bWins ? "cmp-lose" : ""
       )}>
+        <span className="mr-1 font-sans text-[9px] font-semibold uppercase text-muted-foreground sm:hidden">A</span>
         {a !== null ? fmtFn(a) : "–"}
       </span>
-      <span className="text-[10px] text-muted-foreground text-center w-16 sm:w-28 truncate">{label}</span>
+      <span className="w-[4.75rem] max-w-[5.75rem] shrink-0 break-words text-center text-[11px] font-medium leading-tight text-muted-foreground sm:w-28 sm:max-w-28">
+        <span className="block">{label}</span>
+        {showDelta && (
+          <span className={cn("mt-0.5 block break-words font-mono text-[10px] tabular-nums", aWins ? "cmp-win" : "cmp-lose")}>
+            {aWins ? "A" : "B"} ahead
+            {deltaPct !== null && Number.isFinite(deltaPct) ? ` · ${Math.abs(deltaPct) >= 10 ? Math.round(Math.abs(deltaPct)) : Math.abs(deltaPct).toFixed(1)}%` : ""}
+          </span>
+        )}
+      </span>
       <span className={cn(
-        "text-xs font-mono",
-        b === null ? "text-muted-foreground/30" : bWins ? "text-green-400 font-bold" : aWins ? "text-red-400" : ""
+        "min-w-0 font-mono text-xs tabular-nums",
+        b === null ? "text-muted-foreground/50" : bWins ? "cmp-win" : aWins ? "cmp-lose" : ""
       )}>
+        <span className="mr-1 font-sans text-[9px] font-semibold uppercase text-muted-foreground sm:hidden">B</span>
         {b !== null ? fmtFn(b) : "–"}
       </span>
     </div>
@@ -180,24 +206,29 @@ function BuildCompareTab() {
                       placeholder="Search weapons..."
                       value={weaponSearch}
                       onChange={(e) => setWeaponSearch(e.target.value)}
-                      className="h-8 text-sm"
+                      className="h-11 text-sm md:h-9"
                       autoFocus
                     />
-                    <button onClick={() => setWeaponPickerOpen(null)} className="text-muted-foreground hover:text-foreground">
+                    <button onClick={() => setWeaponPickerOpen(null)} className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground hover:text-foreground sm:h-10 sm:w-10" aria-label="Close weapon picker">
                       <X className="h-4 w-4" />
                     </button>
                   </div>
                   <ScrollArea className="h-64">
                     <div className="space-y-0.5">
+                      {filteredWeapons.length === 0 ? (
+                        <p className="px-3 py-8 text-center text-xs text-muted-foreground">
+                          No weapons match that search.
+                        </p>
+                      ) : null}
                       {filteredWeapons.map((w) => (
                         <button
                           key={w.id}
                           onClick={() => selectWeapon(side, w)}
-                          className="w-full text-left px-3 py-1.5 text-xs rounded hover:bg-accent transition-colors flex items-center gap-2"
+                          className="flex min-h-11 w-full items-center gap-2 rounded px-3 py-2.5 text-left text-xs transition-colors hover:bg-accent"
                         >
                           <GameAssetImage src={getWeaponImage(w.name, { category: w.category })} alt="" width={24} height={24} className="w-6 h-6 rounded object-contain bg-muted/20 shrink-0" hideOnError />
-                          <span className="font-medium">{w.name}</span>
-                          <span className="text-muted-foreground ml-auto text-[10px]">{w.category}</span>
+                          <span className="min-w-0 flex-1 truncate font-medium">{w.name}</span>
+                          <span className="ml-auto shrink-0 text-[10px] text-muted-foreground">{w.category}</span>
                         </button>
                       ))}
                     </div>
@@ -214,17 +245,18 @@ function BuildCompareTab() {
                   )}
                 >
                   {build.weapon ? (
-                    <div className="flex items-center gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
                       <GameAssetImage src={getWeaponImage(build.weapon.name, { category: build.weapon.category })} alt="" width={40} height={40} className="w-10 h-10 rounded object-contain bg-muted/20 shrink-0" hideOnError />
-                      <div>
-                        <div className="text-lg font-bold">{build.weapon.name}</div>
+                      <div className="min-w-0">
+                        <div className="truncate text-lg font-bold">{build.weapon.name}</div>
                         <div className="text-xs text-muted-foreground capitalize">{build.weapon.category} • {build.weapon.triggerType}</div>
                       </div>
                     </div>
                   ) : (
-                    <div className="text-center py-4 text-muted-foreground">
-                      <ChevronDown className="h-5 w-5 mx-auto mb-1" />
-                      <span className="text-sm">Select Build {side + 1}</span>
+                    <div className="py-5 text-center text-muted-foreground">
+                      <ChevronDown className="mx-auto mb-1.5 h-5 w-5 text-primary/70" />
+                      <span className="block text-sm font-medium text-foreground">Select build {side + 1}</span>
+                      <span className="mt-0.5 block text-[11px]">Tap to pick a weapon build</span>
                     </div>
                   )}
                 </button>
@@ -289,6 +321,7 @@ function BuildCompareTab() {
         <ContentPanel className="mt-8">
           <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground">COMPARISON</h2>
           <div className="space-y-1">
+            <CompareSideHeader aLabel="Build A" bLabel="Build B" />
             <CompareRow label="Total Damage" a={builds[0].stats.totalDamage} b={builds[1].stats.totalDamage} format={(v) => v.toFixed(1)} />
             <CompareRow label="Critical Chance" a={builds[0].stats.criticalChance * 100} b={builds[1].stats.criticalChance * 100} format={(v) => `${v.toFixed(1)}%`} />
             <CompareRow label="Critical Multiplier" a={builds[0].stats.criticalMultiplier} b={builds[1].stats.criticalMultiplier} format={(v) => `${v.toFixed(1)}x`} />
@@ -328,13 +361,13 @@ type SlotType =
   | "companion";
 
 const SLOT_META: Record<SlotType, { label: string; icon: React.ReactNode; color: string }> = {
-  warframe:  { label: "Warframe",  icon: <Shield className="h-4 w-4" />,    color: "text-purple-400" },
-  primary:   { label: "Primary",   icon: <Crosshair className="h-4 w-4" />, color: "text-blue-400" },
-  secondary: { label: "Secondary", icon: <Crosshair className="h-4 w-4" />, color: "text-cyan-400" },
-  melee:     { label: "Melee",     icon: <Swords className="h-4 w-4" />,    color: "text-orange-400" },
-  exalted:   { label: "Exalted",   icon: <Sparkles className="h-4 w-4" />,  color: "text-violet-400" },
-  exaltedMelee: { label: "Exalted Melee", icon: <Sparkles className="h-4 w-4" />, color: "text-fuchsia-400" },
-  companion: { label: "Companion", icon: <Dog className="h-4 w-4" />,       color: "text-green-400" },
+  warframe:  { label: "Warframe",  icon: <Shield className="h-4 w-4" />,    color: "text-purple-700 dark:text-purple-400" },
+  primary:   { label: "Primary",   icon: <Crosshair className="h-4 w-4" />, color: "text-blue-700 dark:text-blue-400" },
+  secondary: { label: "Secondary", icon: <Crosshair className="h-4 w-4" />, color: "text-cyan-700 dark:text-cyan-400" },
+  melee:     { label: "Melee",     icon: <Swords className="h-4 w-4" />,    color: "text-orange-700 dark:text-orange-400" },
+  exalted:   { label: "Exalted",   icon: <Sparkles className="h-4 w-4" />,  color: "text-violet-700 dark:text-violet-400" },
+  exaltedMelee: { label: "Exalted Melee", icon: <Sparkles className="h-4 w-4" />, color: "text-fuchsia-700 dark:text-fuchsia-400" },
+  companion: { label: "Companion", icon: <Dog className="h-4 w-4" />,       color: "text-green-700 dark:text-green-400" },
 };
 
 function sustainedDps(entry: LoadoutStatsResult["primary"]): number {
@@ -365,15 +398,17 @@ function SlotSection({ slot, a, b, weapons }: {
     ) => (
       <>
         {subtitle && <p className="text-[10px] text-muted-foreground mb-2 font-medium">{subtitle}</p>}
-        <div className="grid grid-cols-[1fr_auto_1fr] gap-2 mb-2 items-center">
-          <div className="flex items-center gap-2 justify-end">
-            {statsA && <GameAssetImage src={getWarframeImage(labelA)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/30 hidden sm:block" hideOnError />}
-            <span className="text-xs font-medium">{labelA || "–"}</span>
+        <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+          <div className="flex items-center justify-end gap-2">
+            <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">A</span>
+            {statsA && <GameAssetImage src={getWarframeImage(labelA)} alt="" width={32} height={32} className="hidden h-8 w-8 rounded object-contain bg-muted/30 sm:block" hideOnError />}
+            <span className="min-w-0 truncate text-xs font-medium">{labelA || "–"}</span>
           </div>
           <span className="text-[10px] text-muted-foreground">vs</span>
           <div className="flex items-center gap-2">
-            {statsB && <GameAssetImage src={getWarframeImage(labelB)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/30 hidden sm:block" hideOnError />}
-            <span className="text-xs font-medium">{labelB || "–"}</span>
+            <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">B</span>
+            {statsB && <GameAssetImage src={getWarframeImage(labelB)} alt="" width={32} height={32} className="hidden h-8 w-8 rounded object-contain bg-muted/30 sm:block" hideOnError />}
+            <span className="min-w-0 truncate text-xs font-medium">{labelB || "–"}</span>
           </div>
         </div>
         <CompareRow label="Health" a={statsA?.totalHealth ?? null} b={statsB?.totalHealth ?? null} />
@@ -397,7 +432,7 @@ function SlotSection({ slot, a, b, weapons }: {
 
     return (
       <ContentPanel padding={false} className="overflow-hidden">
-        <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground">
+        <button onClick={() => setOpen(!open)} className="flex min-h-11 w-full items-center gap-2 px-4 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground">
           {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
           <span className={meta.color}>{meta.icon}</span>
           {meta.label}
@@ -433,22 +468,24 @@ function SlotSection({ slot, a, b, weapons }: {
     if (!cA && !cB) return null;
     return (
       <ContentPanel padding={false} className="overflow-hidden">
-        <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground">
+        <button onClick={() => setOpen(!open)} className="flex min-h-11 w-full items-center gap-2 px-4 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground">
           {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
           <span className={meta.color}>{meta.icon}</span>
           {meta.label}
         </button>
         {open && (
           <div className="px-4 pb-4">
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-2 mb-2 items-center">
-              <div className="flex items-center gap-2 justify-end">
-                {cA && <GameAssetImage src={getCompanionImage(cA.name)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/30 hidden sm:block" hideOnError />}
-                <span className="text-xs font-medium">{cA?.name || "–"}</span>
+            <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+              <div className="flex items-center justify-end gap-2">
+                <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">A</span>
+                {cA && <GameAssetImage src={getCompanionImage(cA.name)} alt="" width={32} height={32} className="hidden h-8 w-8 rounded object-contain bg-muted/30 sm:block" hideOnError />}
+                <span className="min-w-0 truncate text-xs font-medium">{cA?.name || "–"}</span>
               </div>
               <span className="text-[10px] text-muted-foreground">vs</span>
               <div className="flex items-center gap-2">
-                {cB && <GameAssetImage src={getCompanionImage(cB.name)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/30 hidden sm:block" hideOnError />}
-                <span className="text-xs font-medium">{cB?.name || "–"}</span>
+                <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">B</span>
+                {cB && <GameAssetImage src={getCompanionImage(cB.name)} alt="" width={32} height={32} className="hidden h-8 w-8 rounded object-contain bg-muted/30 sm:block" hideOnError />}
+                <span className="min-w-0 truncate text-xs font-medium">{cB?.name || "–"}</span>
               </div>
             </div>
             <CompareRow label="Health" a={cA?.bodyStats.totalHealth ?? null} b={cB?.bodyStats.totalHealth ?? null} />
@@ -471,22 +508,24 @@ function SlotSection({ slot, a, b, weapons }: {
 
   return (
     <ContentPanel padding={false} className="overflow-hidden">
-      <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground">
+      <button onClick={() => setOpen(!open)} className="flex min-h-11 w-full items-center gap-2 px-4 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground">
         {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
         <span className={meta.color}>{meta.icon}</span>
         {meta.label}
       </button>
       {open && (
         <div className="px-4 pb-4">
-          <div className="grid grid-cols-[1fr_auto_1fr] gap-2 mb-2 items-center">
-            <div className="flex items-center gap-2 justify-end">
-              {wA && <GameAssetImage src={weaponImageForName(wA.name, weapons)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/30 hidden sm:block" hideOnError />}
-              <span className="text-xs font-medium">{wA?.name || "–"}</span>
+          <div className="mb-2 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+            <div className="flex min-w-0 items-center justify-end gap-2">
+              <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">A</span>
+              {wA && <GameAssetImage src={weaponImageForName(wA.name, weapons)} alt="" width={32} height={32} className="hidden h-8 w-8 shrink-0 rounded object-contain bg-muted/30 sm:block" hideOnError />}
+              <span className="min-w-0 truncate text-xs font-medium">{wA?.name || "–"}</span>
             </div>
             <span className="text-[10px] text-muted-foreground">vs</span>
-            <div className="flex items-center gap-2">
-              {wB && <GameAssetImage src={weaponImageForName(wB.name, weapons)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/30 hidden sm:block" hideOnError />}
-              <span className="text-xs font-medium">{wB?.name || "–"}</span>
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="shrink-0 rounded bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary">B</span>
+              {wB && <GameAssetImage src={weaponImageForName(wB.name, weapons)} alt="" width={32} height={32} className="hidden h-8 w-8 shrink-0 rounded object-contain bg-muted/30 sm:block" hideOnError />}
+              <span className="min-w-0 truncate text-xs font-medium">{wB?.name || "–"}</span>
             </div>
           </div>
           <CompareRow label="Total Damage" a={sA?.totalDamage ?? null} b={sB?.totalDamage ?? null} format={(v) => v.toFixed(1)} />
@@ -549,10 +588,10 @@ function LoadoutCompareTab() {
     return (
       <EmptyState
         icon={Trophy}
-        title="Need more loadouts"
-        description="You need at least 2 saved loadouts to compare them side by side."
+        title="Save two loadouts first"
+        description="Loadout compare needs at least two saved kits. Create them in Loadouts, then come back."
       >
-        <a href="/loadouts" className="text-sm font-medium text-primary hover:underline">Go to Loadouts →</a>
+        <a href="/loadouts" className="inline-flex h-11 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90">Open Loadouts</a>
       </EmptyState>
     );
   }
@@ -560,15 +599,15 @@ function LoadoutCompareTab() {
   return (
     <div className="max-w-3xl mx-auto">
       {/* Loadout Selectors */}
-      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-4 items-start mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-3 sm:gap-4 items-start mb-6">
         <div>
-          <label className="text-[10px] text-muted-foreground block mb-1">LOADOUT A</label>
+          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-primary">Loadout A</label>
           <select
             value={selA ?? ""}
             onChange={(e) => setSelA(e.target.value || null)}
-            className="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm"
+            className="min-h-11 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
           >
-            <option value="">Select loadout...</option>
+            <option value="">Select loadout…</option>
             {loadouts.map((l) => (
               <option key={l.id} value={l.id} disabled={l.id === selB}>{l.name}</option>
             ))}
@@ -578,13 +617,13 @@ function LoadoutCompareTab() {
           <ArrowLeftRight className="h-5 w-5 text-muted-foreground" />
         </div>
         <div>
-          <label className="text-[10px] text-muted-foreground block mb-1">LOADOUT B</label>
+          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-primary">Loadout B</label>
           <select
             value={selB ?? ""}
             onChange={(e) => setSelB(e.target.value || null)}
-            className="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm"
+            className="min-h-11 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
           >
-            <option value="">Select loadout...</option>
+            <option value="">Select loadout…</option>
             {loadouts.map((l) => (
               <option key={l.id} value={l.id} disabled={l.id === selA}>{l.name}</option>
             ))}
@@ -598,6 +637,7 @@ function LoadoutCompareTab() {
           <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground">
             <Trophy className="h-3.5 w-3.5 text-primary" /> AGGREGATE
           </h2>
+          <CompareSideHeader aLabel="Loadout A" bLabel="Loadout B" />
           <CompareRow label="Total Sustained DPS" a={aggregate.totalDpsA} b={aggregate.totalDpsB} format={(v) => fmtDamageNum(v)} />
           <CompareRow label="Warframe EHP" a={aggregate.ehpA} b={aggregate.ehpB} />
         </ContentPanel>
@@ -627,7 +667,7 @@ export default function ComparePage() {
           icon={ArrowLeftRight}
           accent="teal"
           title="Compare"
-          description="Pit two weapon builds or full loadouts against each other side by side."
+          description="Compare two weapon builds or two full loadouts side by side."
         />
 
         <div className="mb-6 flex flex-wrap gap-2">

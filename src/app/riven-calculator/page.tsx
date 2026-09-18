@@ -166,6 +166,14 @@ export default function RivenCalculatorPage() {
           ))}
         </div>
 
+          {!selectedWeaponType && (
+            <div className="mb-4 rounded-xl border border-border bg-card p-6 text-center">
+              <Sparkles className="mx-auto mb-2 h-7 w-7 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-foreground">Pick a weapon type to start grading</p>
+              <p className="mt-1 text-xs text-muted-foreground">Rifle, Shotgun, Pistol, Melee, or Archgun — then choose a weapon.</p>
+            </div>
+          )}
+
           {selectedWeaponType && (
             <>
               <div className="relative mb-3">
@@ -174,25 +182,30 @@ export default function RivenCalculatorPage() {
                   placeholder="Search weapons..."
                   value={weaponSearch}
                   onChange={(e) => setWeaponSearch(e.target.value)}
-                  className="pl-9"
+                  className="min-h-11 pl-9"
                 />
               </div>
               {!selectedWeapon ? (
-                <ScrollArea className="h-48 mb-4">
+                <ScrollArea className="h-56 sm:h-48 mb-4">
                   <div className="space-y-1 pr-4">
-                    {filteredWeapons.map((w) => {
+                    {filteredWeapons.length === 0 ? (
+                      <div className="rounded-lg border border-border/60 bg-muted/20 p-4 text-center">
+                        <p className="text-sm text-muted-foreground">No weapons match</p>
+                      </div>
+                    ) : (
+                      filteredWeapons.map((w) => {
                       const info = getDispositionInfo(w.name);
                       const dispColor = !info.known
                         ? "text-muted-foreground"
-                        : info.value >= 1.3 ? "text-green-400"
-                        : info.value >= 1.0 ? "text-blue-400"
-                        : info.value >= 0.8 ? "text-orange-400"
-                        : "text-red-400";
+                        : info.value >= 1.3 ? "text-green-700 dark:text-green-400"
+                        : info.value >= 1.0 ? "text-blue-700 dark:text-blue-400"
+                        : info.value >= 0.8 ? "text-orange-700 dark:text-orange-400"
+                        : "text-red-700 dark:text-red-400";
                       return (
                         <button
                           key={w.id}
                           onClick={() => setSelectedWeapon(w.name)}
-                          className="w-full text-left p-2 rounded-lg border border-border hover:border-purple-500/50 hover:bg-purple-500/5 transition-all flex items-center justify-between"
+                          className="w-full text-left min-h-11 px-3 py-2.5 rounded-lg border border-border hover:border-purple-500/50 hover:bg-purple-500/5 transition-all flex items-center justify-between"
                         >
                           <span className="text-sm font-medium">{w.name}</span>
                           <span className={cn("text-xs font-mono", dispColor)}>
@@ -200,7 +213,8 @@ export default function RivenCalculatorPage() {
                           </span>
                         </button>
                       );
-                    })}
+                    })
+                    )}
                   </div>
                 </ScrollArea>
               ) : (
@@ -208,19 +222,19 @@ export default function RivenCalculatorPage() {
                   <span className="font-medium">{selectedWeapon}</span>
                   <span className={cn(
                     "text-xs font-mono px-2 py-0.5 rounded",
-                    !dispositionInfo.known ? "bg-amber-500/10 text-amber-400" :
-                    disposition >= 1.3 ? "bg-green-500/10 text-green-400" :
-                    disposition >= 1.0 ? "bg-blue-500/10 text-blue-400" :
-                    disposition >= 0.8 ? "bg-orange-500/10 text-orange-400" : "bg-red-500/10 text-red-400"
+                    !dispositionInfo.known ? "bg-amber-500/10 text-amber-900 dark:text-amber-400" :
+                    disposition >= 1.3 ? "bg-green-500/10 text-green-700 dark:text-green-400" :
+                    disposition >= 1.0 ? "bg-blue-500/10 text-blue-700 dark:text-blue-400" :
+                    disposition >= 0.8 ? "bg-orange-500/10 text-orange-700 dark:text-orange-400" : "bg-red-500/10 text-red-700 dark:text-red-400"
                   )}>
                     Disposition: {disposition.toFixed(2)}
                     {!dispositionInfo.known ? " (unknown)" : ""}
                   </span>
-                  <button onClick={() => { setSelectedWeapon(null); }} className="ml-auto text-muted-foreground hover:text-foreground">
+                  <button onClick={() => { setSelectedWeapon(null); }} className="ml-auto min-h-11 min-w-11 inline-flex items-center justify-center text-muted-foreground hover:text-foreground">
                     <X className="h-4 w-4" />
                   </button>
                   {!dispositionInfo.known && (
-                    <p className="w-full text-xs text-amber-400/90">
+                    <p className="w-full text-xs text-amber-900 dark:text-amber-400/90">
                       No disposition on file for this weapon — ranges use 1.00 as a fallback.
                     </p>
                   )}
@@ -231,13 +245,13 @@ export default function RivenCalculatorPage() {
 
           {selectedWeapon && (
             <div className="space-y-4">
-              <div className="border border-border rounded-xl p-4 bg-card">
-                <div className="flex items-center justify-between mb-3">
+              <div className="border border-border rounded-xl p-3.5 bg-card sm:p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                   <h3 className="text-sm font-semibold text-muted-foreground">POSITIVE STATS ({graderPositives.length}/3)</h3>
                   {graderPositives.length < 3 && (
                     <button
                       onClick={() => setGraderPositives([...graderPositives, { name: "", value: 0 }])}
-                      className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                      className="min-h-11 px-2 text-xs text-purple-700 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 flex items-center gap-1"
                     >
                       <Plus className="h-3 w-3" /> Add Stat
                     </button>
@@ -248,7 +262,7 @@ export default function RivenCalculatorPage() {
                   const outOfRange = poolStat && stat.name && stat.value !== 0 && !isValueInStatRange(stat.value, poolStat);
                   return (
                     <div key={i} className="mb-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap">
                         <select
                           value={stat.name}
                           onChange={(e) => {
@@ -260,7 +274,7 @@ export default function RivenCalculatorPage() {
                             };
                             setGraderPositives(newStats);
                           }}
-                          className="flex-1 bg-background border border-border rounded px-2 py-1.5 text-sm"
+                          className="min-h-11 min-w-0 flex-1 bg-background border border-border rounded px-2 py-1.5 text-base sm:text-sm"
                         >
                           <option value="">Select stat...</option>
                           {(stat.name
@@ -278,15 +292,15 @@ export default function RivenCalculatorPage() {
                             newStats[i] = { ...newStats[i], value: parseFloat(e.target.value) || 0 };
                             setGraderPositives(newStats);
                           }}
-                          className={cn("w-24 h-8 text-sm", outOfRange && "border-amber-500/60")}
+                          className={cn("w-24 shrink-0 min-h-11 text-base sm:h-9 sm:text-sm", outOfRange && "border-amber-500/60")}
                           placeholder={poolStat?.type === "percent" ? "%" : poolStat?.type === "seconds" ? "s" : ""}
                         />
-                        <button onClick={() => setGraderPositives(graderPositives.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300">
+                        <button onClick={() => setGraderPositives(graderPositives.filter((_, j) => j !== i))} className="min-h-11 min-w-11 inline-flex items-center justify-center text-red-700 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
                           <X className="h-4 w-4" />
                         </button>
                       </div>
                       {poolStat && (
-                        <p className={cn("text-[10px] mt-0.5 pl-0.5", outOfRange ? "text-amber-400" : "text-muted-foreground")}>
+                        <p className={cn("text-[10px] mt-0.5 pl-0.5", outOfRange ? "text-amber-900 dark:text-amber-400" : "text-muted-foreground")}>
                           Typical range @ disp {disposition.toFixed(2)}: {formatRangeHint(poolStat)}
                           {outOfRange ? " — outside expected band" : ""}
                         </p>
@@ -300,7 +314,7 @@ export default function RivenCalculatorPage() {
                 <h3 className="text-sm font-semibold text-muted-foreground mb-3">NEGATIVE STAT (Optional)</h3>
                 {graderNegative ? (
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap">
                       <select
                         value={graderNegative.name}
                         onChange={(e) => {
@@ -310,7 +324,7 @@ export default function RivenCalculatorPage() {
                             value: picked ? Math.round(Math.abs((picked.minValue + picked.maxValue) / 2) * 10) / 10 : 0,
                           });
                         }}
-                        className="flex-1 bg-background border border-border rounded px-2 py-1.5 text-sm"
+                        className="min-h-11 min-w-0 flex-1 bg-background border border-border rounded px-2 py-1.5 text-base sm:text-sm"
                       >
                         <option value="">Select stat...</option>
                         {scaledNegativePool.map((s) => (
@@ -321,10 +335,10 @@ export default function RivenCalculatorPage() {
                         type="number"
                         value={graderNegative.value || ""}
                         onChange={(e) => setGraderNegative({ ...graderNegative, value: parseFloat(e.target.value) || 0 })}
-                        className="w-24 h-8 text-sm"
+                        className="w-24 shrink-0 min-h-11 text-base sm:h-9 sm:text-sm"
                         placeholder="%"
                       />
-                      <button onClick={() => setGraderNegative(null)} className="text-red-400 hover:text-red-300">
+                      <button onClick={() => setGraderNegative(null)} className="min-h-11 min-w-11 inline-flex items-center justify-center text-red-700 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
                         <X className="h-4 w-4" />
                       </button>
                     </div>
@@ -337,7 +351,7 @@ export default function RivenCalculatorPage() {
                 ) : (
                   <button
                     onClick={() => setGraderNegative({ name: "", value: 0 })}
-                    className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                    className="min-h-11 px-2 text-xs text-purple-700 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 flex items-center gap-1"
                   >
                     <Plus className="h-3 w-3" /> Add Negative
                   </button>
@@ -374,9 +388,9 @@ export default function RivenCalculatorPage() {
 
               <div className="border border-border rounded-xl p-4 bg-card">
                 <h3 className="text-sm font-semibold text-muted-foreground mb-2">REROLL KUVA COST</h3>
-                <div className="grid grid-cols-5 gap-1 text-xs">
+                <div className="grid grid-cols-5 gap-1 text-[10px] sm:text-xs">
                   {Array.from({ length: 10 }, (_, i) => (
-                    <div key={i} className="text-center p-1 bg-background rounded">
+                    <div key={i} className="min-w-0 text-center p-1.5 bg-background rounded">
                       <div className="text-muted-foreground">#{i}</div>
                       <div className="font-mono">{getRerollCost(i)}</div>
                     </div>

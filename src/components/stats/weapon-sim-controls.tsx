@@ -480,7 +480,7 @@ export function WeaponSimControls({
                   />
                   Stance combo mult
                   {(stats.stanceDamageMultiplier ?? 1) !== 1 && (
-                    <span className="text-cyan-400 font-mono">
+                    <span className="text-cyan-700 dark:text-cyan-400 font-mono">
                       ×{(stats.stanceDamageMultiplier ?? 1).toFixed(2)}
                     </span>
                   )}
@@ -541,12 +541,12 @@ export function WeaponSimControls({
             )}
           </div>
           {(stats.statusDamageBonus ?? 0) > 0 && (
-            <div className="text-[10px] text-amber-400">
+            <div className="text-[10px] text-amber-800 dark:text-amber-400">
               Status damage: +{((stats.statusDamageBonus ?? 0) * 100).toFixed(0)}% (Elementalist)
             </div>
           )}
           {simParams.targetFaction && Object.keys(stats.factionBonuses ?? {}).length > 0 && (
-            <div className="text-[10px] text-orange-400">
+            <div className="text-[10px] text-orange-700 dark:text-orange-400">
               Faction mods active vs {simParams.targetFaction}
             </div>
           )}
@@ -556,72 +556,72 @@ export function WeaponSimControls({
           <div className="border-t border-border/50 pt-1 mt-1 space-y-0.5">
             <div className="text-[9px] text-muted-foreground/60 mb-0.5">Active conditional effects:</div>
             {stats.bloodRushStacks > 0 && (
-              <div className="text-[10px] text-red-400">Blood Rush: ×{(1 + stats.bloodRushStacks * Math.max(0, stats.comboMultiplier - 1)).toFixed(2)} crit (coef × (CM−1) = {(stats.bloodRushStacks * Math.max(0, stats.comboMultiplier - 1) * 100).toFixed(0)}%)</div>
+              <div className="text-[10px] text-red-700 dark:text-red-400">Blood Rush: ×{(1 + stats.bloodRushStacks * Math.max(0, stats.comboMultiplier - 1)).toFixed(2)} crit (coef × (CM−1) = {(stats.bloodRushStacks * Math.max(0, stats.comboMultiplier - 1) * 100).toFixed(0)}%)</div>
             )}
             {stats.weepingWoundsBonus > 0 && (
-              <div className="text-[10px] text-teal-400">Weeping Wounds: ×{(1 + stats.weepingWoundsBonus * Math.max(0, stats.comboMultiplier - 1)).toFixed(2)} status (coef × (CM−1) = {(stats.weepingWoundsBonus * Math.max(0, stats.comboMultiplier - 1) * 100).toFixed(0)}%)</div>
+              <div className="text-[10px] text-teal-700 dark:text-teal-400">Weeping Wounds: ×{(1 + stats.weepingWoundsBonus * Math.max(0, stats.comboMultiplier - 1)).toFixed(2)} status (coef × (CM−1) = {(stats.weepingWoundsBonus * Math.max(0, stats.comboMultiplier - 1) * 100).toFixed(0)}%)</div>
             )}
             {stats.conditionOverloadBonus > 0 && (
-              <div className="text-[10px] text-purple-400">Condition Overload: +{(stats.conditionOverloadBonus * stats.simParams.statusTypesOnTarget * 100).toFixed(0)}% DMG ({stats.simParams.statusTypesOnTarget} types)</div>
+              <div className="text-[10px] text-purple-700 dark:text-purple-400">Condition Overload: +{(stats.conditionOverloadBonus * stats.simParams.statusTypesOnTarget * 100).toFixed(0)}% DMG ({stats.simParams.statusTypesOnTarget} types)</div>
             )}
             {stats.galvanizedMultishotOnKill > 0 && (() => {
               const msCap = stats.galvanizedMultishotStackCap ?? 5;
               const msStacks = Math.min(stats.simParams.killStacks, msCap);
               return (
-                <div className="text-[10px] text-blue-400">Galv. Multishot: +{(stats.galvanizedMultishotOnKill * msStacks * 100).toFixed(0)}% MS ({msStacks}/{msCap} stacks)</div>
+                <div className="text-[10px] text-blue-700 dark:text-blue-400">Galv. Multishot: +{(stats.galvanizedMultishotOnKill * msStacks * 100).toFixed(0)}% MS ({msStacks}/{msCap} stacks)</div>
               );
             })()}
             {stats.galvanizedDamagePerStatus > 0 && (() => {
               const cdCap = stats.galvanizedDamagePerStatusStackCap ?? 5;
               const cdStacks = Math.min(stats.simParams.killStacks, cdCap);
               return (
-                <div className="text-[10px] text-blue-400">Galv. Condition: +{(stats.galvanizedDamagePerStatus * cdStacks * stats.simParams.statusTypesOnTarget * 100).toFixed(0)}% DMG ({cdStacks}/{cdCap} stacks × {stats.simParams.statusTypesOnTarget} status)</div>
+                <div className="text-[10px] text-blue-700 dark:text-blue-400">Galv. Condition: +{(stats.galvanizedDamagePerStatus * cdStacks * stats.simParams.statusTypesOnTarget * 100).toFixed(0)}% DMG ({cdStacks}/{cdCap} stacks × {stats.simParams.statusTypesOnTarget} status)</div>
               );
             })()}
             {onKillBuffTotal > 0 && (
-              <div className={stats.simParams.killStacks > 0 ? "text-[10px] text-blue-400" : "text-[10px] text-muted-foreground/70"}>
+              <div className={stats.simParams.killStacks > 0 ? "text-[10px] text-blue-700 dark:text-blue-400" : "text-[10px] text-muted-foreground/70"}>
                 On-kill buffs{stats.simParams.killStacks > 0 ? ": " : " (inactive — needs kill stacks): "}
                 {Object.entries(stats.onKillStatBonuses ?? {}).map(([k, v]) => `+${(v * 100).toFixed(0)}% ${getModStatLabel(k)}`).join(", ")}
               </div>
             )}
             {triggerBuffTotal > 0 && (
-              <div className={stats.simParams.applyTriggerBuffs ? "text-[10px] text-blue-400" : "text-[10px] text-muted-foreground/70"}>
+              <div className={stats.simParams.applyTriggerBuffs ? "text-[10px] text-blue-700 dark:text-blue-400" : "text-[10px] text-muted-foreground/70"}>
                 Trigger buffs{stats.simParams.applyTriggerBuffs ? ": " : " (inactive — enable Trigger buffs): "}
                 {Object.entries(stats.triggerStatBonuses ?? {}).map(([k, v]) => `+${(v * 100).toFixed(0)}% ${getModStatLabel(k)}`).join(", ")}
               </div>
             )}
             {(stats.galvanizedCritOnHeadshot ?? 0) > 0 && (
               stats.simParams.applyHeadshots ? (
-                <div className="text-[10px] text-blue-400">Galv. Crit: +{(((stats.galvanizedCritOnHeadshot ?? 0) + (stats.galvanizedCritOnHeadshotPerStack ?? 0) * Math.min(stats.simParams.killStacks, 5)) * 100).toFixed(0)}% CC while aiming ({Math.min(stats.simParams.killStacks, 5)} headshot-kill stacks)</div>
+                <div className="text-[10px] text-blue-700 dark:text-blue-400">Galv. Crit: +{(((stats.galvanizedCritOnHeadshot ?? 0) + (stats.galvanizedCritOnHeadshotPerStack ?? 0) * Math.min(stats.simParams.killStacks, 5)) * 100).toFixed(0)}% CC while aiming ({Math.min(stats.simParams.killStacks, 5)} headshot-kill stacks)</div>
               ) : (
                 <div className="text-[10px] text-muted-foreground/70">Galv. Crit: inactive — enable Headshots to model on-headshot crit</div>
               )
             )}
             {stats.berserkerFuryBonus > 0 && (
-              <div className="text-[10px] text-yellow-400">Berserker Fury: +{(stats.berserkerFuryBonus * Math.min(stats.simParams.killStacks, 2) * 100).toFixed(0)}% AS ({Math.min(stats.simParams.killStacks, 2)}/2 stacks)</div>
+              <div className="text-[10px] text-yellow-700 dark:text-yellow-400">Berserker Fury: +{(stats.berserkerFuryBonus * Math.min(stats.simParams.killStacks, 2) * 100).toFixed(0)}% AS ({Math.min(stats.simParams.killStacks, 2)}/2 stacks)</div>
             )}
             {stats.vigilanteCritBonus && stats.vigilanteCritBonus > 0 && (
-              <div className="text-[10px] text-orange-400" title="Primary rifles/shotguns/bows/archguns only — does not apply to secondaries or melee. Averaged into DPS as bonus crit chance.">
+              <div className="text-[10px] text-orange-700 dark:text-orange-400" title="Primary rifles/shotguns/bows/archguns only — does not apply to secondaries or melee. Averaged into DPS as bonus crit chance.">
                 Vigilante Set: {(stats.vigilanteCritBonus * 100).toFixed(0)}% crit tier enhance chance (in DPS)
               </div>
             )}
             {(stats.firstShotDamageBonus ?? 0) > 0 && (
-              <div className="text-[10px] text-blue-400">
+              <div className="text-[10px] text-blue-700 dark:text-blue-400">
                 First shot: +{((stats.firstShotDamageBonus ?? 0) * 100).toFixed(0)}% damage on first shot in magazine (averaged into DPS)
               </div>
             )}
             {(stats.slashOnImpactProcChance ?? 0) > 0 && (
-              <div className="text-[10px] text-red-400">
+              <div className="text-[10px] text-red-700 dark:text-red-400">
                 Internal Bleeding: {((stats.slashOnImpactProcChance ?? 0) * 100).toFixed(0)}% Slash on Impact procs{stats.fireRate < 2.5 ? " (x2 — fire rate < 2.5)" : ""}
               </div>
             )}
             {stats.synthSetReloadBonusApplied != null && stats.synthSetReloadBonusApplied > 0 && (
-              <div className="text-[10px] text-cyan-400">
+              <div className="text-[10px] text-cyan-700 dark:text-cyan-400">
                 Synth 4-set: +{(stats.synthSetReloadBonusApplied * 100).toFixed(0)}% reload speed
               </div>
             )}
             {stats.tekSetVsMarkedDamageMultiplier != null && stats.tekSetVsMarkedDamageMultiplier > 1 && (
-              <div className="text-[10px] text-fuchsia-400">
+              <div className="text-[10px] text-fuchsia-700 dark:text-fuchsia-400">
                 Tek 4-set vs marked: ×{stats.tekSetVsMarkedDamageMultiplier.toFixed(2)} damage (optional)
               </div>
             )}

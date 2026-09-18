@@ -36,7 +36,7 @@ export function CopyRssFeedButton({
       onClick={onCopy}
       title={copied ? "Copied feed link" : title}
       className={cn(
-        "inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground hover:underline",
+        "inline-flex min-h-11 min-w-11 items-center justify-center gap-0.5 px-2 text-[10px] font-medium text-muted-foreground hover:underline",
         className,
       )}
     >

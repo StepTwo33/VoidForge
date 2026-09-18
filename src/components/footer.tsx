@@ -19,10 +19,10 @@ export function Footer() {
   return (
     <footer className="relative z-[1] mt-auto border-t border-border/60 bg-card/40 backdrop-blur-md">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-3.5 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:px-4">
         <div className="flex flex-col items-center justify-between gap-3 sm:flex-row sm:items-center">
           <div className="text-center sm:text-left">
-            <Link href="/" className="inline-flex items-center transition-opacity hover:opacity-90">
+            <Link href="/" className="inline-flex min-h-11 items-center transition-opacity hover:opacity-90 sm:min-h-0">
               <span className="text-base font-bold tracking-tight text-primary">
                 Voidforge
               </span>
@@ -30,13 +30,13 @@ export function Footer() {
             <p className="mt-0.5 text-xs text-muted-foreground">
               Fan-made Warframe build planner
               <span className="mx-1.5 text-muted-foreground/35">·</span>
-              <span className="inline-flex items-center gap-0.5 text-muted-foreground/70">
+              <span className="inline-flex items-center gap-0.5 text-muted-foreground/80">
                 Built for the community <Heart className="h-2.5 w-2.5 text-rose-600/80 dark:text-rose-400/80" />
               </span>
             </p>
           </div>
 
-          <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground sm:justify-end">
+          <nav className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 text-xs text-muted-foreground sm:justify-end sm:gap-x-3">
             {FOOTER_LINKS.map((link) =>
               "external" in link ? (
                 <a
@@ -44,7 +44,7 @@ export function Footer() {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 transition-colors hover:text-foreground"
+                  className="inline-flex min-h-11 items-center gap-1 rounded-md px-2.5 transition-colors hover:text-foreground sm:min-h-0 sm:px-1"
                 >
                   <Github className="h-3 w-3" />
                   {link.label}
@@ -53,7 +53,7 @@ export function Footer() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="transition-colors hover:text-foreground"
+                  className="inline-flex min-h-11 items-center rounded-md px-2.5 transition-colors hover:text-foreground sm:min-h-0 sm:px-1"
                 >
                   {link.label}
                 </Link>
@@ -62,7 +62,7 @@ export function Footer() {
           </nav>
         </div>
 
-        <p className="mt-3 border-t border-border/40 pt-2.5 text-center text-[10px] leading-snug text-muted-foreground/60">
+        <p className="mt-3 border-t border-border/40 pt-2.5 text-center text-[10px] leading-snug text-muted-foreground">
           Warframe and the Warframe logo are registered trademarks of Digital Extremes Ltd.
           Voidforge is not affiliated with Digital Extremes.
         </p>

@@ -73,11 +73,11 @@ export function CommunityBuildsPanel({
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-secondary/30 transition-colors"
+        className="flex min-h-11 w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-secondary/30 transition-colors"
       >
         <div className="flex items-center gap-2 min-w-0">
           <Users className="h-4 w-4 text-primary shrink-0" />
-          <span className="text-sm font-medium truncate">
+          <span className="truncate break-words text-sm font-medium">
             Community builds for {itemName}
           </span>
         </div>
@@ -97,7 +97,7 @@ export function CommunityBuildsPanel({
                 type="button"
                 onClick={() => setSort(s)}
                 className={cn(
-                  "px-3 py-1 text-xs rounded-full border transition-colors",
+                  "inline-flex min-h-11 items-center rounded-full border px-3 py-1 text-xs transition-colors",
                   sort === s
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border text-muted-foreground hover:text-foreground"
@@ -113,9 +113,12 @@ export function CommunityBuildsPanel({
               <Loader2 className="h-5 w-5 animate-spin" />
             </div>
           ) : builds.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">
-              No community builds for this item yet. Be the first — save with &quot;List in Community Builds&quot; checked.
-            </p>
+            <div className="rounded-lg border border-dashed border-border/70 px-3 py-6 text-center">
+              <p className="text-sm font-medium text-foreground">No community builds yet</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Be the first — save with &quot;List in Community Builds&quot; checked.
+              </p>
+            </div>
           ) : (
             <div className="space-y-2">
               {builds.map((build) => (

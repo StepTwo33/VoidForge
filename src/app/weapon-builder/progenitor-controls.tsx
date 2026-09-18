@@ -22,7 +22,7 @@ export function ProgenitorControls({
   const selected = normalizeProgenitorElement(progenitorElement);
   return (
     <div className="flex flex-wrap items-center gap-3 p-3 rounded-xl border border-amber-500/25 bg-amber-500/[0.06]">
-      <span className="text-xs font-medium text-amber-400/90 shrink-0">Progenitor bonus</span>
+      <span className="text-xs font-medium text-amber-800/90 dark:text-amber-400/90 shrink-0">Progenitor bonus</span>
       <label className="flex items-center gap-2 text-xs text-muted-foreground">
         <span className="hidden sm:inline">Element</span>
         <select

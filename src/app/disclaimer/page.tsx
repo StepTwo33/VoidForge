@@ -9,9 +9,9 @@ export default function DisclaimerPage() {
       <PageMain maxWidth="md">
         <PageHero icon={AlertTriangle} accent="amber" title="Disclaimer" description="Last updated: July 5, 2026" />
         <ProsePanel>
-          <div className="space-y-6 text-sm leading-relaxed text-muted-foreground">
+          <div className="space-y-7 text-sm leading-relaxed text-muted-foreground">
             <section>
-              <h2 className="text-lg font-semibold text-foreground mb-2">Fan-Made Tool</h2>
+              <h2 className="mb-2.5 text-lg font-semibold text-foreground">Fan-Made Tool</h2>
               <p>
                 Voidforge is an independent, fan-made tool created for the Warframe community.
                 It is not produced, endorsed, supported, or affiliated with Digital Extremes Ltd.
@@ -22,11 +22,11 @@ export default function DisclaimerPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-foreground mb-2">Accuracy of Data</h2>
+              <h2 className="mb-2.5 text-lg font-semibold text-foreground">Accuracy of Data</h2>
               <p>
                 While we strive to keep all game data accurate and up-to-date, Voidforge relies on
                 community-sourced information primarily from the{" "}
-                <a href="https://wiki.warframe.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                <a href="https://wiki.warframe.com" target="_blank" rel="noopener noreferrer" className="text-primary underline-offset-2 hover:underline">
                   Official Warframe Wiki
                 </a>.
                 Game updates, hotfixes, and balance changes may cause data to become temporarily outdated.
@@ -35,7 +35,7 @@ export default function DisclaimerPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-foreground mb-2">Calculation Accuracy</h2>
+              <h2 className="mb-2.5 text-lg font-semibold text-foreground">Calculation Accuracy</h2>
               <p>
                 Damage calculations, DPS estimates, time-to-kill simulations, and status effect breakdowns
                 are approximations based on known game formulas. Actual in-game results may vary due to:
@@ -50,7 +50,7 @@ export default function DisclaimerPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-foreground mb-2">Trademarks</h2>
+              <h2 className="mb-2.5 text-lg font-semibold text-foreground">Trademarks</h2>
               <p>
                 Warframe&reg;, the Warframe logo, and all associated game content are registered trademarks
                 and copyrights of Digital Extremes Ltd. Use of these names and images on Voidforge is for
@@ -59,7 +59,7 @@ export default function DisclaimerPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-foreground mb-2">Community Content</h2>
+              <h2 className="mb-2.5 text-lg font-semibold text-foreground">Community Content</h2>
               <p>
                 User-submitted build names, descriptions, profile bios, usernames, and avatar images are provided
                 by community members. Voidforge does not endorse user-generated content and may remove or restrict
@@ -68,7 +68,7 @@ export default function DisclaimerPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-foreground mb-2">Community Builds</h2>
+              <h2 className="mb-2.5 text-lg font-semibold text-foreground">Community Builds</h2>
               <p>
                 Builds shared through Discover or public profile pages reflect individual players&apos; choices and
                 opinions. They are not recommendations from Voidforge or Digital Extremes. Always verify a build
@@ -77,7 +77,7 @@ export default function DisclaimerPage() {
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-foreground mb-2">No Warranty</h2>
+              <h2 className="mb-2.5 text-lg font-semibold text-foreground">No Warranty</h2>
               <p>
                 Voidforge is provided &quot;as is&quot; without warranty of any kind. The authors and
                 contributors of Voidforge shall not be held liable for any damages arising from

@@ -82,13 +82,13 @@ export function PWAInstallPrompt() {
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={handleInstall}
-            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="inline-flex min-h-11 items-center rounded-lg bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Install
           </button>
           <button
             onClick={handleDismiss}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
             aria-label="Dismiss"
           >
             <X className="h-3.5 w-3.5" />

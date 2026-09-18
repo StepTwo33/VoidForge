@@ -50,7 +50,7 @@ export function StancePickerDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent className="max-w-lg max-h-[80vh] flex flex-col p-0">
+      <DialogContent className="max-w-[calc(100%-2rem)] max-h-[80vh] flex flex-col p-0 sm:max-w-lg">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>Select Stance Mod</DialogTitle>
         </DialogHeader>
@@ -70,7 +70,7 @@ export function StancePickerDialog({
           <div className="space-y-4">
             {groups.map(([type, mods]) => (
               <div key={type}>
-                <h3 className="text-[10px] font-semibold tracking-wider text-amber-400/70 uppercase mb-1">
+                <h3 className="text-[10px] font-semibold tracking-wider text-amber-800/80 dark:text-amber-400/70 uppercase mb-1">
                   {type}
                 </h3>
                 <div className="space-y-1">

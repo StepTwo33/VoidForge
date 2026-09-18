@@ -15,8 +15,8 @@ export function RoleBadge({ role, className, size = "sm" }: RoleBadgeProps) {
       className={cn(
         "inline-flex items-center gap-1 rounded-full font-semibold uppercase ring-1",
         isAdmin
-          ? "bg-red-500/10 text-red-400 ring-red-500/25"
-          : "bg-amber-500/10 text-amber-400 ring-amber-500/25",
+          ? "bg-red-500/10 text-red-700 ring-red-500/25 dark:text-red-400"
+          : "bg-amber-500/10 text-amber-800 ring-amber-500/25 dark:text-amber-400",
         size === "sm" ? "px-2 py-0.5 text-[10px] tracking-wide" : "px-2.5 py-1 text-xs",
         className,
       )}

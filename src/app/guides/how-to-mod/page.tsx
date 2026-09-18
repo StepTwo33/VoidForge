@@ -50,7 +50,7 @@ export default function HowToModOverviewPage() {
               <Link
                 key={section.id}
                 href={section.href}
-                className="rounded-lg border border-border/50 bg-background/40 p-4 transition-colors hover:border-primary/30"
+                className="block min-h-11 rounded-lg border border-border/50 bg-background/40 p-4 transition-colors hover:border-primary/30 active:scale-[0.99]"
               >
                 <div className="mb-2 flex items-center gap-2">
                   <div className="rounded-md bg-primary/10 p-1.5">

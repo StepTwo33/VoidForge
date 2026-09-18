@@ -36,7 +36,7 @@ import { BrandMark } from "@/components/brand-mark";
 export default function Home() {
   return (
     <PageShell>
-      <PageMain maxWidth="full" className="max-w-none overflow-x-hidden py-8 sm:py-12 lg:py-16 xl:px-5 2xl:px-6">
+      <PageMain maxWidth="full" className="max-w-none overflow-x-hidden py-6 sm:py-12 lg:py-16 xl:px-5 2xl:px-6">
         {/* Equal side tracks keep the center grid centered; side panels pin to the outer edges. */}
         <div className={HOME_GRID_CLASS}>
           {/* Left: site updates — outer edge */}
@@ -46,7 +46,7 @@ export default function Home() {
 
           {/* Center: hero + feature grid */}
           <div className={HOME_CENTER_CLASS}>
-            <div className="mx-auto mb-8 max-w-3xl text-center sm:mb-12">
+            <div className="mx-auto mb-6 max-w-3xl text-center sm:mb-12">
               <div className="mb-5 flex justify-center sm:mb-6">
                 <BrandMark
                   size={64}
@@ -54,10 +54,10 @@ export default function Home() {
                   className="ring-2 ring-primary/25 shadow-lg shadow-primary/15 sm:h-20 sm:w-20"
                 />
               </div>
-              <h1 className="mb-4 text-3xl font-bold tracking-tight sm:text-5xl">
+              <h1 className="mb-3 text-[1.75rem] font-bold leading-tight tracking-tight sm:mb-4 sm:text-5xl">
                 Build. Calculate. <span className="text-primary">Dominate.</span>
               </h1>
-              <p className="text-base text-muted-foreground sm:text-lg">
+              <p className="text-sm leading-relaxed text-muted-foreground sm:text-lg">
                 Plan and optimize your Warframe builds with real-time stat calculations, mod stacking, and DPS analysis.
               </p>
             </div>
@@ -68,7 +68,7 @@ export default function Home() {
               <CommunityBuildsSidebar variant="inline" limit={6} />
             </div>
 
-            <div className="grid w-full gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid w-full gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
               <FeatureCard
                 href="/weapon-builder"
                 title="Weapon Builder"
@@ -173,7 +173,7 @@ export default function Home() {
                 href="https://buff0000n.github.io/dojocad/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="inline-flex items-center gap-1 font-medium text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
               >
                 DojoCAD
                 <ExternalLink className="h-3 w-3 opacity-50" aria-hidden />

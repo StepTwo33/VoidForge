@@ -14,7 +14,7 @@ import {
   type WeaponDpsCalcContext,
 } from "@/lib/calc/dps-contributions";
 import { avgCritMultiplier, critTierDamage, critTiersToShow, critTierLabel, critTierColorClass, exceedsWarframeInt32 } from "@/lib/calc/crit-utils";
-import { CollapsibleSection, StatRow } from "./stat-primitives";
+import { CollapsibleSection, StatRow, toLightSafeTextColor } from "./stat-primitives";
 import { TTKSection } from "./ttk-section";
 import { WeaponSimControls } from "./weapon-sim-controls";
 import { useSimStatChangeFlash } from "./use-sim-stat-change-flash";
@@ -48,15 +48,15 @@ const ELEMENT_LABELS: Record<string, string> = {
 };
 
 const CONTRIBUTION_CATEGORY_COLORS: Record<DpsContributionCategory, string> = {
-  damage: "text-orange-400",
-  crit: "text-red-400",
-  rate: "text-yellow-400",
-  multishot: "text-blue-400",
-  elemental: "text-teal-400",
-  conditional: "text-purple-400",
-  arcane: "text-amber-400",
-  external: "text-cyan-400",
-  set: "text-lime-400",
+  damage: "text-orange-700 dark:text-orange-400",
+  crit: "text-red-700 dark:text-red-400",
+  rate: "text-yellow-700 dark:text-yellow-400",
+  multishot: "text-blue-700 dark:text-blue-400",
+  elemental: "text-teal-700 dark:text-teal-400",
+  conditional: "text-purple-700 dark:text-purple-400",
+  arcane: "text-amber-800 dark:text-amber-400",
+  external: "text-cyan-700 dark:text-cyan-400",
+  set: "text-lime-700 dark:text-lime-400",
   other: "text-muted-foreground",
 };
 
@@ -126,7 +126,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <div className="space-y-1 py-1">
             {stats.setBonusSummary.map((row) => (
               <div key={row.setId} className="text-[10px] leading-snug">
-                <span className={row.active ? "text-green-400 font-medium" : "text-muted-foreground"}>
+                <span className={row.active ? "text-green-700 dark:text-green-400 font-medium" : "text-muted-foreground"}>
                   {row.label}: {row.pieces}/{row.required}
                   {row.active ? " ✓" : ""}
                 </span>
@@ -160,13 +160,13 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
               </div>
             )}
             {(dmg.impact > 0 || (baseStats && baseStats.impact > 0)) && (
-              <StatRow label="Impact" value={dmg.impact.toFixed(1)} color="text-slate-400" changed={flash.has("impact")} />
+              <StatRow label="Impact" value={dmg.impact.toFixed(1)} color="text-slate-700 dark:text-slate-300" changed={flash.has("impact")} />
             )}
             {(dmg.puncture > 0 || (baseStats && baseStats.puncture > 0)) && (
-              <StatRow label="Puncture" value={dmg.puncture.toFixed(1)} color="text-stone-400" changed={flash.has("puncture")} />
+              <StatRow label="Puncture" value={dmg.puncture.toFixed(1)} color="text-stone-700 dark:text-stone-300" changed={flash.has("puncture")} />
             )}
             {(dmg.slash > 0 || (baseStats && baseStats.slash > 0)) && (
-              <StatRow label="Slash" value={dmg.slash.toFixed(1)} color="text-red-400" changed={flash.has("slash")} />
+              <StatRow label="Slash" value={dmg.slash.toFixed(1)} color="text-red-700 dark:text-red-400" changed={flash.has("slash")} />
             )}
 
             {/* Elemental Damage */}
@@ -328,7 +328,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Recoil"
             value={`${stats.recoil > 0 ? "+" : ""}${(stats.recoil * 100).toFixed(0)}%`}
-            color={stats.recoil < 0 ? "text-green-400" : undefined}
+            color={stats.recoil < 0 ? "text-green-700 dark:text-green-400" : undefined}
             tooltip="Incarnon / riven recoil (display; negative = less recoil). Not modeled in DPS."
           />
         )}
@@ -336,7 +336,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Zoom"
             value={`${stats.zoom > 0 ? "+" : ""}${(stats.zoom * 100).toFixed(0)}%`}
-            color={stats.zoom < 0 ? "text-green-400" : undefined}
+            color={stats.zoom < 0 ? "text-green-700 dark:text-green-400" : undefined}
             tooltip="Incarnon / riven zoom (display; negative = less zoom). Not modeled in DPS."
           />
         )}
@@ -344,7 +344,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Holster Reload"
             value={`${(stats.holsterReloadPerSec * 100).toFixed(0)}%/s`}
-            color="text-sky-400"
+            color="text-sky-700 dark:text-sky-400"
             tooltip="Magazine fraction reloaded per second while holstered (display; swap-gated — not in same-weapon sustained DPS)."
           />
         )}
@@ -361,7 +361,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Instant Reload (Kill)"
             value={`${(stats.instantReloadOnKillChance * 100).toFixed(0)}%`}
-            color="text-amber-400"
+            color="text-amber-800 dark:text-amber-400"
             tooltip="Chance to instantly reload on kill. Sustained DPS assumes one qualifying opportunity per magazine dump."
           />
         )}
@@ -369,7 +369,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Instant Reload (HS)"
             value={`${(stats.instantReloadOnHeadshotChance * 100).toFixed(0)}%`}
-            color="text-amber-400"
+            color="text-amber-800 dark:text-amber-400"
             tooltip="Chance to instantly reload on headshot / headshot-kill. Sustained DPS assumes one qualifying opportunity per magazine dump."
           />
         )}
@@ -377,7 +377,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Sprint Speed"
             value={`${(stats.sprintSpeedBonus ?? 0) > 0 ? "+" : ""}${((stats.sprintSpeedBonus ?? 0) * 100).toFixed(0)}%`}
-            color="text-cyan-400"
+            color="text-cyan-700 dark:text-cyan-400"
             tooltip="Warframe sprint speed while this weapon is equipped (Amalgam Serration, etc.)."
           />
         )}
@@ -385,7 +385,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Slide Speed"
             value={`${(stats.slideSpeedBonus ?? 0) > 0 ? "+" : ""}${((stats.slideSpeedBonus ?? 0) * 100).toFixed(0)}%`}
-            color="text-cyan-400"
+            color="text-cyan-700 dark:text-cyan-400"
             tooltip="Warframe slide speed while this weapon is equipped."
           />
         )}
@@ -393,7 +393,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Parkour Velocity"
             value={`${(stats.parkourVelocityBonus ?? 0) > 0 ? "+" : ""}${((stats.parkourVelocityBonus ?? 0) * 100).toFixed(0)}%`}
-            color="text-cyan-400"
+            color="text-cyan-700 dark:text-cyan-400"
             tooltip="Warframe parkour velocity while this weapon is equipped (display)."
           />
         )}
@@ -401,7 +401,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Movement Speed"
             value={`${(stats.movementSpeedBonus ?? 0) > 0 ? "+" : ""}${((stats.movementSpeedBonus ?? 0) * 100).toFixed(0)}%`}
-            color="text-cyan-400"
+            color="text-cyan-700 dark:text-cyan-400"
             tooltip="Warframe movement speed while this weapon is equipped (display; aim-gated perks assume uptime)."
           />
         )}
@@ -413,7 +413,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                 ? `${(stats.ammoRestoreChance * 100).toFixed(0)}% → ${(stats.ammoRestoreMagFraction * 100).toFixed(0)}% mag`
                 : `${(stats.ammoRestoreChance * 100).toFixed(0)}% → ${stats.ammoRestoreFlat ?? 0} rnd`
             }
-            color="text-amber-400"
+            color="text-amber-800 dark:text-amber-400"
             tooltip="Chance to restore ammo on perk trigger. Sustained DPS assumes one opportunity per magazine dump (extends effective mag)."
           />
         )}
@@ -421,7 +421,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Linger Field Duration"
             value={`×${stats.lingeringFieldDurationMult}`}
-            color="text-emerald-400"
+            color="text-emerald-700 dark:text-emerald-400"
             tooltip="Lingering damage-field duration mult after empty reload (display)."
           />
         )}
@@ -429,7 +429,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Incarnon Charge (HS)"
             value={`+${(stats.incarnonHeadshotChargeBonus * 100).toFixed(0)}%`}
-            color="text-violet-400"
+            color="text-violet-700 dark:text-violet-400"
             tooltip="Extra Incarnon Transmutation charge from headshots (display)."
           />
         )}
@@ -437,7 +437,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Silent"
             value="Yes"
-            color="text-emerald-400"
+            color="text-emerald-700 dark:text-emerald-400"
             tooltip="Weapon fire does not alert enemies (Silent Running)."
           />
         )}
@@ -445,7 +445,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Holster Combo Pause"
             value="Yes"
-            color="text-sky-400"
+            color="text-sky-700 dark:text-sky-400"
             tooltip="Melee combo timer pauses while this weapon is holstered (Standoff / Abiding Hold)."
           />
         )}
@@ -453,7 +453,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Combo on Ammo Pickup"
             value={`+${stats.comboOnAmmoPickup}`}
-            color="text-orange-400"
+            color="text-orange-700 dark:text-orange-400"
             tooltip="Melee combo counter gained when collecting ammo (display)."
           />
         )}
@@ -461,7 +461,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Extra Jumps"
             value={`+${stats.extraJumps}`}
-            color="text-cyan-400"
+            color="text-cyan-700 dark:text-cyan-400"
             tooltip="Additional mid-air jumps (display)."
           />
         )}
@@ -469,7 +469,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Jump Strength"
             value={`${stats.jumpStrength > 0 ? "+" : ""}${(stats.jumpStrength * 100).toFixed(0)}%`}
-            color="text-cyan-400"
+            color="text-cyan-700 dark:text-cyan-400"
             tooltip="Double-jump / jump strength bonus (display)."
           />
         )}
@@ -477,7 +477,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Heal Regen"
             value={`${stats.healRegenPerSec}/s`}
-            color="text-emerald-400"
+            color="text-emerald-700 dark:text-emerald-400"
             tooltip="Heal regeneration from perk trigger (display; duration not modeled)."
           />
         )}
@@ -485,7 +485,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Status Vuln"
             value={`+${(stats.statusChanceVulnerability * 100).toFixed(0)}%`}
-            color="text-purple-400"
+            color="text-purple-700 dark:text-purple-400"
             tooltip="Target status-chance vulnerability (assumes uptime; multiplies modded SC for paper DPS)."
           />
         )}
@@ -493,7 +493,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Impale Puncture"
             value={`${stats.punctureStatusOnImpale}`}
-            color="text-yellow-400"
+            color="text-yellow-700 dark:text-yellow-400"
             tooltip="Puncture status stacks while impaled (display)."
           />
         )}
@@ -501,7 +501,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow
             label="Finisher Combo Chance"
             value={`+${(stats.finisherComboCountChance * 100).toFixed(0)}%`}
-            color="text-orange-400"
+            color="text-orange-700 dark:text-orange-400"
             tooltip="Combo count chance on finishers (display)."
           />
         )}
@@ -592,7 +592,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Finisher Damage"
               value={`${stats.finisherDamage > 0 ? "+" : ""}${(stats.finisherDamage * 100).toFixed(0)}%`}
-              color="text-orange-400"
+              color="text-orange-700 dark:text-orange-400"
               tooltip="Incarnon finisher damage bonus (display; not modeled in DPS)."
             />
           )}
@@ -600,7 +600,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Slam Radius"
               value={`${stats.slamRadius > 0 ? "+" : ""}${(stats.slamRadius * 100).toFixed(0)}%`}
-              color="text-orange-400"
+              color="text-orange-700 dark:text-orange-400"
               tooltip="Incarnon slam radius bonus (display; not modeled in DPS)."
             />
           )}
@@ -608,7 +608,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Combo on Finisher"
               value={`+${stats.comboOnFinisher}`}
-              color="text-orange-400"
+              color="text-orange-700 dark:text-orange-400"
               tooltip="Flat combo granted on finisher (display)."
             />
           )}
@@ -616,7 +616,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Combo on Slash Status"
               value={`+${stats.comboOnSlashStatus}`}
-              color="text-orange-400"
+              color="text-orange-700 dark:text-orange-400"
               tooltip="Extra combo on Slash-status targets (display)."
             />
           )}
@@ -624,7 +624,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Combo on Toxin Status"
               value={`+${stats.comboOnToxinStatus}`}
-              color="text-orange-400"
+              color="text-orange-700 dark:text-orange-400"
               tooltip="Extra combo on Toxin-status targets (display)."
             />
           )}
@@ -632,7 +632,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Combo on Cold Status"
               value={`+${stats.comboOnColdStatus}`}
-              color="text-orange-400"
+              color="text-orange-700 dark:text-orange-400"
               tooltip="Extra combo on Cold-status targets (display)."
             />
           )}
@@ -640,7 +640,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Combo on Undamaged"
               value={`+${stats.comboOnUndamaged}`}
-              color="text-orange-400"
+              color="text-orange-700 dark:text-orange-400"
               tooltip="Extra combo on undamaged enemies (display)."
             />
           )}
@@ -648,7 +648,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Combo per Slam Hit"
               value={`+${stats.comboPerSlamHit}`}
-              color="text-orange-400"
+              color="text-orange-700 dark:text-orange-400"
               tooltip="Combo per enemy hit by slam radius (display)."
             />
           )}
@@ -656,7 +656,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Combo per Slide Hit"
               value={`+${stats.comboPerSlideHit}`}
-              color="text-orange-400"
+              color="text-orange-700 dark:text-orange-400"
               tooltip="Combo per enemy hit by slide attack (display)."
             />
           )}
@@ -664,7 +664,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Combo per Slide"
               value={`+${stats.comboPerSlideMeters}/${stats.comboSlideMeterInterval ?? 10}m`}
-              color="text-orange-400"
+              color="text-orange-700 dark:text-orange-400"
               tooltip="Combo gained per continuous slide distance (display)."
             />
           )}
@@ -672,7 +672,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Combo on Shard"
               value={`+${stats.comboOnShardDamage}`}
-              color="text-orange-400"
+              color="text-orange-700 dark:text-orange-400"
               tooltip="Combo granted on shard damage (display)."
             />
           )}
@@ -680,7 +680,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Finisher Stun Radius"
               value={`${stats.stunRadiusOnFinisher}m`}
-              color="text-yellow-400"
+              color="text-yellow-700 dark:text-yellow-400"
               tooltip="Stun radius on finisher (display)."
             />
           )}
@@ -688,7 +688,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Finisher KD Radius"
               value={`${stats.knockdownRadiusOnFinisher}m`}
-              color="text-yellow-400"
+              color="text-yellow-700 dark:text-yellow-400"
               tooltip="Knockdown radius on ground finisher (display)."
             />
           )}
@@ -696,7 +696,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Shard Duration"
               value={`${stats.shardDuration}s`}
-              color="text-violet-400"
+              color="text-violet-700 dark:text-violet-400"
               tooltip="Embedded shard duration (display)."
             />
           )}
@@ -704,7 +704,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Shard Weak Spot CC"
               value={`+${(stats.shardWeakSpotCritBonus * 100).toFixed(0)}%`}
-              color="text-violet-400"
+              color="text-violet-700 dark:text-violet-400"
               tooltip="Extra crit chance vs shard weak spots (display)."
             />
           )}
@@ -712,7 +712,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Shard Damage"
               value={`${stats.shardDamageMult > 0 ? "+" : ""}${(stats.shardDamageMult * 100).toFixed(0)}%`}
-              color="text-violet-400"
+              color="text-violet-700 dark:text-violet-400"
               tooltip="Shard damage multiplier (display)."
             />
           )}
@@ -720,7 +720,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Grown Shard Erupt"
               value={`×${stats.shardFullyGrownDamageMult}`}
-              color="text-violet-400"
+              color="text-violet-700 dark:text-violet-400"
               tooltip="Fully grown shard erupt damage mult (display)."
             />
           )}
@@ -728,7 +728,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Blood Rush"
               value={`+${(stats.bloodRushStacks * 100).toFixed(0)}% × (CM−1)`}
-              color="text-red-400"
+              color="text-red-700 dark:text-red-400"
               tooltip="Multiplies modded crit chance by (1 + this × (melee scaling multiplier − 1))"
             />
           )}
@@ -736,7 +736,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             <StatRow
               label="Condition Overload"
               value={`+${(stats.conditionOverloadBonus * 100).toFixed(0)}%/status`}
-              color="text-purple-400"
+              color="text-purple-700 dark:text-purple-400"
               tooltip="Damage bonus per unique status type on target"
             />
           )}
@@ -779,14 +779,14 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                   <StatRow
                     label="Radial Burst DPS"
                     value={radialBurst.toFixed(0)}
-                    color="text-orange-300"
+                    color="text-orange-800 dark:text-orange-300"
                     changed={flash.has("radialBurstDps")}
                     tooltip="Innate explosion / AoE DPS (not slam radials)."
                   />
                   <StatRow
                     label="Radial Sustained DPS"
                     value={radialSustained.toFixed(0)}
-                    color="text-orange-300"
+                    color="text-orange-800 dark:text-orange-300"
                     changed={flash.has("radialSustainedDps")}
                     tooltip="Radial DPS adjusted for magazine and reload cycle."
                   />
@@ -796,7 +796,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                 <StatRow
                   label="Contagion Cloud DPS"
                   value={contagionCloud.toFixed(0)}
-                  color="text-lime-300"
+                  color="text-lime-800 dark:text-lime-300"
                   changed={flash.has("contagionCloudDps")}
                   tooltip="Toxic Lash Contagion Cloud (augment): ability toxin DPS × Strength (×2 melee) × sim enemies. Not in TTK."
                 />
@@ -805,7 +805,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                 <StatRow
                   label="Mecha Spread DPS"
                   value={mechaSpread.toFixed(0)}
-                  color="text-cyan-300"
+                  color="text-cyan-800 dark:text-cyan-300"
                   changed={flash.has("mechaSpreadDps")}
                   tooltip="Mecha mark-kill status spread: transferred DoT ticks × claw elemental × (spread + cascade) enemies / mark cooldown. Cascade is a sim estimate, not AI. Not in TTK."
                 />
@@ -814,7 +814,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                 <StatRow
                   label="Shard Chain DPS"
                   value={shardChain.toFixed(0)}
-                  color="text-violet-300"
+                  color="text-violet-800 dark:text-violet-300"
                   changed={flash.has("shardChainDps")}
                   tooltip="Thalys form embed triggers (+ Explosive Growth ×2 erupts) + Chain Shatter heavy detonations (sim shard hosts). Combo on host only. Not in TTK."
                 />
@@ -858,9 +858,9 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           return (
             <>
               <div className="border-t border-border/50 my-1" />
-              <StatRow label="Procs / Sec" value={procsPerSec.toFixed(1)} color="text-teal-400" changed={flash.has("procsPerSec")} />
+              <StatRow label="Procs / Sec" value={procsPerSec.toFixed(1)} color="text-teal-700 dark:text-teal-400" changed={flash.has("procsPerSec")} />
               {statusDps > 0 && (
-                <StatRow label="Status DPS" value={statusDps.toFixed(0)} color="text-teal-400"
+                <StatRow label="Status DPS" value={statusDps.toFixed(0)} color="text-teal-700 dark:text-teal-400"
                   changed={flash.has("statusDps")}
                   tooltip="Estimated DPS from DoT status effects (Slash, Heat, Toxin, Gas)" />
               )}
@@ -876,7 +876,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           </p>
           <div className="space-y-0.5">
             {dpsContributions.map((row) => {
-              const color = CONTRIBUTION_CATEGORY_COLORS[row.category];
+              const color = toLightSafeTextColor(CONTRIBUTION_CATEGORY_COLORS[row.category]);
               const tooltip = [
                 row.nominal ? `Nominal: ${row.nominal}` : null,
                 row.tooltip,
@@ -894,7 +894,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                     )}
                   </div>
                   <div className="shrink-0 text-right">
-                    <div className="text-xs font-mono text-blue-400">{formatMarginalPct(row.burstMarginalPct)}</div>
+                    <div className="text-xs font-mono text-blue-700 dark:text-blue-400">{formatMarginalPct(row.burstMarginalPct)}</div>
                     {showSustainedColumn && (
                       <div className="text-[9px] font-mono text-muted-foreground">
                         sus {formatMarginalPct(row.sustainedMarginalPct)}
@@ -945,9 +945,9 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             return (
               <div key={tier} className="py-0.5">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-orange-400 font-medium">T{tier}: {evo.name}</span>
+                  <span className="text-[10px] text-orange-700 dark:text-orange-400 font-medium">T{tier}: {evo.name}</span>
                   {hasStats && (
-                    <span className="text-[9px] font-mono text-orange-300/80">
+                    <span className="text-[9px] font-mono text-orange-800/80 dark:text-orange-300/80">
                       {Object.entries(evo.statChanges).map(([s, v]) => {
                         const n = v as number;
                         if (s === "flatBaseDamage") return `baseDamage: +${n}`;

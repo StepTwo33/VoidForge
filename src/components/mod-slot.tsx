@@ -63,20 +63,20 @@ function FormaPolarizeButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-md border transition-all shadow-sm",
-        inline ? "relative h-7" : "absolute bottom-1.5 right-1.5 z-10",
+        "flex shrink-0 items-center justify-center rounded-md border transition-colors",
+        inline ? "relative" : "absolute bottom-1.5 right-1.5 z-10",
         polarized
           ? cn(
-              "p-1 min-w-[28px] min-h-[28px]",
+              "h-11 w-11 p-1.5 sm:h-8 sm:w-8",
               active
-                ? "border-primary/60 bg-primary/15 ring-1 ring-primary/40"
-                : "border-border/80 bg-card/90 hover:border-primary/40 hover:bg-secondary/80"
+                ? "border-primary/50 bg-primary/10 ring-1 ring-primary/30"
+                : "border-border/60 bg-card/80 text-muted-foreground hover:border-primary/35 hover:bg-secondary/70 hover:text-foreground"
             )
           : cn(
-              "h-7 gap-1 px-2 text-[10px] font-semibold leading-none",
+              "h-11 min-w-11 gap-1 px-2 text-[10px] font-medium leading-none text-muted-foreground sm:h-7 sm:min-w-0",
               active
-                ? "border-yellow-600 bg-yellow-500/20 text-yellow-900 ring-1 ring-yellow-500/40 dark:border-yellow-400 dark:bg-yellow-500/25 dark:text-yellow-300 dark:ring-yellow-400/40"
-                : "border-yellow-600/60 bg-yellow-500/10 text-yellow-800 hover:bg-yellow-500/20 hover:border-yellow-600/80 dark:border-yellow-500/50 dark:bg-yellow-500/15 dark:text-yellow-400 dark:hover:bg-yellow-500/25 dark:hover:border-yellow-400/70"
+                ? "border-amber-600/70 bg-amber-500/15 text-amber-950 ring-1 ring-amber-500/30 dark:border-amber-400/60 dark:bg-amber-500/20 dark:text-amber-200"
+                : "border-border/70 bg-muted/30 hover:border-amber-600/40 hover:bg-amber-500/10 hover:text-amber-900 dark:hover:border-amber-500/40 dark:hover:text-amber-300"
             )
       )}
       title={
@@ -90,7 +90,7 @@ function FormaPolarizeButton({
       ) : (
         <>
           <span className="text-[11px] leading-none" aria-hidden>⬡</span>
-          <span>Forma</span>
+          <span className={active ? "inline" : "hidden sm:inline"}>Forma</span>
         </>
       )}
     </button>
@@ -107,7 +107,7 @@ function PolarityPicker({
   onClose: () => void;
 }) {
   return (
-    <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-card border border-yellow-600/30 dark:border-yellow-500/30 rounded-lg p-2 shadow-lg shadow-[var(--shadow-color)]">
+    <div className="absolute left-0 right-0 top-full z-40 mt-1 max-w-full overflow-hidden rounded-lg border border-yellow-600/30 bg-card p-2 shadow-lg shadow-[var(--shadow-color)] dark:border-yellow-500/30">
       <p className="text-[10px] font-medium text-yellow-800/90 dark:text-yellow-400/90 mb-1.5 px-0.5">
         Forma — pick slot polarity
       </p>
@@ -118,7 +118,7 @@ function PolarityPicker({
             type="button"
             onClick={() => { onPolarize(p); onClose(); }}
             className={cn(
-              "flex items-center justify-center p-1.5 rounded border transition-all",
+              "flex min-h-11 min-w-11 items-center justify-center rounded border p-2 transition-all sm:min-h-0 sm:min-w-0 sm:p-1.5",
               slotPolarity === p ? "border-yellow-500/60 bg-yellow-500/15" : "border-border hover:border-yellow-500/40"
             )}
             title={polarityNames[p] || p}
@@ -131,7 +131,7 @@ function PolarityPicker({
         <button
           type="button"
           onClick={() => { onPolarize(null); onClose(); }}
-          className="w-full mt-1.5 text-[10px] text-red-700 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 py-1"
+          className="mt-1.5 inline-flex min-h-11 w-full items-center justify-center rounded-md py-2 text-[10px] text-red-700 hover:bg-destructive/10 hover:text-red-600 sm:min-h-8 dark:text-red-400 dark:hover:text-red-300"
         >
           Remove polarity
         </button>
@@ -148,12 +148,13 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
       <div className="relative flex min-h-24 flex-col">
         <button
           onClick={onAdd}
-          className="flex min-h-24 flex-1 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border text-muted-foreground transition-all hover:border-solid hover:border-primary/40 hover:bg-primary/5 hover:text-primary group"
+          className="group flex min-h-28 flex-1 flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-border/80 bg-card/20 px-2 text-muted-foreground transition-all hover:border-solid hover:border-primary/45 hover:bg-primary/5 hover:text-primary"
         >
-          <div className="flex items-center gap-1">
-            <Plus className="h-3 w-3" />
-            <span className="text-xs">{label || `Slot ${slotIndex + 1}`}</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted/40 ring-1 ring-border/50 transition-colors group-hover:bg-primary/10 group-hover:ring-primary/30">
+            <Plus className="h-4 w-4" />
           </div>
+          <span className="text-xs font-medium">{label || `Slot ${slotIndex + 1}`}</span>
+          <span className="text-[10px] text-muted-foreground/80 group-hover:text-primary/80">Tap to add mod</span>
         </button>
         {onPolarize && (
           <div className="mt-1.5 flex justify-end">
@@ -192,17 +193,18 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
 
   return (
     <div className={cn(
-      "group relative flex w-full flex-col rounded-lg border bg-card transition-all hover:ring-2 hover:ring-primary/20",
-      compact ? "min-h-[6.5rem] p-2.5" : "min-h-[6.75rem] p-3",
+      "group relative flex w-full flex-col rounded-xl border bg-card/90 transition-all hover:ring-2 hover:ring-primary/20",
+      compact ? "min-h-[6.5rem] p-2.5" : "min-h-[7rem] p-3",
       borderColor,
     )}>
       <button
         onClick={onRemove}
-        className="absolute top-1.5 right-1.5 z-10 rounded p-1 text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive"
+        className="absolute top-1 right-1 z-10 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive sm:h-8 sm:w-8"
+        aria-label="Remove mod"
       >
-        <X className="h-3 w-3" />
+        <X className="h-3.5 w-3.5" />
       </button>
-      <div className="flex min-h-0 flex-1 items-start gap-2.5 pr-5">
+      <div className="flex min-h-0 flex-1 items-start gap-2.5 pr-10 sm:pr-8">
         <GameAssetImage
           src={getModImage(mod.name)}
           alt=""
@@ -217,7 +219,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
         <div className="min-w-0 flex-1">
           <div className="mb-0.5 flex items-start gap-1.5">
             <PolarityIcon polarity={mod.polarity} size={14} className="mt-0.5 shrink-0" />
-            <span className={cn("font-semibold leading-snug", compact ? "text-xs line-clamp-2" : "text-[13px] line-clamp-2")}>
+            <span className={cn("break-words font-semibold leading-snug", compact ? "text-xs" : "text-[13px] sm:line-clamp-2")}>
               {mod.name}
             </span>
           </div>
@@ -243,26 +245,26 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
           )}
         </div>
       </div>
-      <div className="mt-2 flex items-center justify-between gap-2 border-t border-border/40 pt-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <span className="whitespace-nowrap text-[11px] font-medium text-muted-foreground">
-            R{rank}/{mod.maxRank}
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <span className="whitespace-nowrap text-[11px] font-medium tabular-nums text-muted-foreground">
+            Rank {rank}/{mod.maxRank}
           </span>
           <span
             className={cn(
               "whitespace-nowrap text-[11px] font-medium",
               polarityEffect === "match"
-                ? "text-green-700 dark:text-green-400"
+                ? "cmp-win"
                 : polarityEffect === "mismatch"
-                  ? "text-red-700 dark:text-red-400"
+                  ? "cmp-lose"
                   : "text-muted-foreground",
             )}
           >
             ⚡{effectiveDrain}
           </span>
           {mod.subCategory === "riven" && onEditRiven && (
-            <button onClick={(e) => { e.stopPropagation(); onEditRiven(); }} className="text-purple-700 transition-colors hover:text-purple-600 dark:text-purple-400 dark:hover:text-purple-300" title="Edit Riven Stats">
-              <Pencil className="h-3 w-3" />
+            <button onClick={(e) => { e.stopPropagation(); onEditRiven(); }} className="inline-flex h-11 w-11 items-center justify-center rounded-md text-purple-700 transition-colors hover:bg-purple-500/10 hover:text-purple-600 dark:text-purple-400 dark:hover:text-purple-300 sm:h-8 sm:w-8" title="Edit Riven Stats" aria-label="Edit riven stats">
+              <Pencil className="h-3.5 w-3.5" />
             </button>
           )}
         </div>

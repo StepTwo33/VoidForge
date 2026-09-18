@@ -38,7 +38,7 @@ export function EnemyLevelControl({
             const v = Number(e.target.value);
             if (!Number.isNaN(v)) onChange(clamp(v));
           }}
-          className="w-14 shrink-0 text-[10px] font-mono text-right bg-background border border-border rounded px-1 py-0.5 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="h-11 w-16 shrink-0 rounded border border-border bg-background px-1.5 py-1 text-right font-mono text-base [appearance:textfield] sm:h-8 sm:w-14 sm:text-[10px] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
       </div>
       <input
@@ -47,7 +47,7 @@ export function EnemyLevelControl({
         max={ENEMY_LEVEL_SLIDER_MAX}
         value={Math.min(value, ENEMY_LEVEL_SLIDER_MAX)}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full min-w-0 h-1 accent-primary cursor-pointer"
+        className="h-2 w-full min-w-0 cursor-pointer accent-primary touch-manipulation sm:h-1.5"
       />
       {value > ENEMY_LEVEL_SLIDER_MAX && (
         <p className="text-[9px] text-muted-foreground/80">

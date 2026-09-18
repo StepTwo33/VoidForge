@@ -52,7 +52,7 @@ export default function HowToModElementsPage() {
           Each secondary is just two primaries. Order of the pair does not change the result;
           order on the grid changes what pairs with what when you have more than two.
         </p>
-        <div className="overflow-x-auto rounded-lg border border-border/50">
+        <div className="-mx-1 overflow-x-auto overscroll-x-contain rounded-lg border border-border/50 px-1 touch-pan-x sm:mx-0 sm:px-0">
           <table className="w-full min-w-[28rem] text-left text-sm">
             <thead>
               <tr className="border-b border-border/50 bg-muted/30 text-xs uppercase tracking-wide text-muted-foreground">

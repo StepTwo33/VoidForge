@@ -193,7 +193,7 @@ export default function AdminUpdatesPage() {
               <button
                 type="button"
                 onClick={startNew}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                className="inline-flex items-center gap-1.5 min-h-11 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
                 <Plus className="h-4 w-4" />
                 New post
@@ -211,7 +211,7 @@ export default function AdminUpdatesPage() {
               <button
                 type="button"
                 onClick={cancelEdit}
-                className="rounded-md p-1.5 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                className="inline-flex items-center justify-center min-h-11 min-w-11 rounded-md p-1.5 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -224,6 +224,7 @@ export default function AdminUpdatesPage() {
                 onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value.slice(0, SITE_UPDATE_TITLE_MAX) }))}
                 placeholder="e.g. Codex arcane editor improvements"
                 maxLength={SITE_UPDATE_TITLE_MAX}
+                className="min-h-11"
               />
               <p className="mt-1 text-[10px] text-muted-foreground text-right">
                 {draft.title.length}/{SITE_UPDATE_TITLE_MAX}
@@ -242,7 +243,7 @@ export default function AdminUpdatesPage() {
               <p
                 className={
                   draft.body.length > SITE_UPDATE_BODY_MAX
-                    ? "mt-1 text-[10px] text-right font-medium text-amber-500"
+                    ? "mt-1 text-[10px] text-right font-medium text-amber-800 dark:text-amber-500"
                     : "mt-1 text-[10px] text-muted-foreground text-right"
                 }
               >
@@ -274,13 +275,13 @@ export default function AdminUpdatesPage() {
               </label>
             </div>
 
-            {error && <p className="text-sm text-red-400">{error}</p>}
+            {error && <p className="text-sm text-red-700 dark:text-red-400">{error}</p>}
 
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 onClick={cancelEdit}
-                className="rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+                className="inline-flex items-center min-h-11 rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
               >
                 Cancel
               </button>
@@ -288,7 +289,7 @@ export default function AdminUpdatesPage() {
                 type="button"
                 disabled={saving}
                 onClick={saveDraft}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 min-h-11 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
               >
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Save
@@ -313,8 +314,8 @@ export default function AdminUpdatesPage() {
                         className={cn(
                           "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium",
                           update.published
-                            ? "bg-green-500/10 text-green-400"
-                            : "bg-zinc-500/10 text-zinc-400",
+                            ? "bg-green-500/10 text-green-700 dark:text-green-400"
+                            : "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400",
                         )}
                       >
                         {update.published ? (
@@ -328,7 +329,7 @@ export default function AdminUpdatesPage() {
                         )}
                       </span>
                       {update.featured && (
-                        <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-400">
+                        <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:text-amber-400">
                           Featured
                         </span>
                       )}
@@ -342,21 +343,21 @@ export default function AdminUpdatesPage() {
                       type="button"
                       onClick={() => togglePublished(update)}
                       title={update.published ? "Unpublish" : "Publish"}
-                      className="rounded-md p-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                      className="inline-flex items-center justify-center min-h-11 min-w-11 rounded-md p-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                     >
                       {update.published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                     <button
                       type="button"
                       onClick={() => startEdit(update)}
-                      className="rounded-md p-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                      className="inline-flex items-center justify-center min-h-11 min-w-11 rounded-md p-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                     >
                       <Pencil className="h-4 w-4" />
                     </button>
                     <button
                       type="button"
                       onClick={() => deleteUpdate(update.id)}
-                      className="rounded-md p-2 text-muted-foreground hover:bg-red-500/10 hover:text-red-400"
+                      className="inline-flex items-center justify-center min-h-11 min-w-11 rounded-md p-2 text-muted-foreground hover:bg-red-500/10 hover:text-red-700 dark:hover:text-red-400"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>

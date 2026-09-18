@@ -63,32 +63,32 @@ export default function SupportPage() {
           </p>
 
           {!loggedIn ? (
-            <div className="mx-auto mt-6 max-w-md rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-200/90">
+            <div className="mx-auto mt-6 max-w-md rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-900 dark:text-amber-200/90">
               <p className="flex items-center justify-center gap-2 font-medium">
                 <LogIn className="h-4 w-4 shrink-0" />
                 Sign in before you donate
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 We link supporter badges to your Voidforge account by matching your donation email.{" "}
-                <Link href="/signin" className="text-primary hover:underline">Sign in</Link> first so we know which profile to credit.
+                <Link href="/signin" className="inline-flex min-h-11 items-center px-1 text-primary underline-offset-2 hover:underline">Sign in</Link> first so we know which profile to credit.
               </p>
             </div>
           ) : account?.email ? (
             <div className="mx-auto mt-6 max-w-md rounded-xl border border-rose-500/30 bg-rose-500/5 px-4 py-3 text-sm">
-              <p className="flex items-center justify-center gap-2 font-medium text-rose-300">
+              <p className="flex items-center justify-center gap-2 font-medium text-rose-800 dark:text-rose-200">
                 <Mail className="h-4 w-4 shrink-0" />
                 Use this email when donating
               </p>
-              <p className="mt-2 font-mono text-sm text-foreground">{account.email}</p>
+              <p className="mt-2 break-all font-mono text-sm text-foreground">{account.email}</p>
               {!account.emailVerified && (
-                <p className="mt-2 text-xs text-amber-400/90">
+                <p className="mt-2 text-xs text-amber-800 dark:text-amber-400/90">
                   Verify your email in account settings before donating so your supporter badge can be applied automatically.
                 </p>
               )}
               {account.username && (
                 <p className="mt-2 text-xs text-muted-foreground">
                   Your badge will appear on{" "}
-                  <Link href={`/u/${account.username}`} className="text-primary hover:underline">
+                  <Link href={`/u/${account.username}`} className="break-all text-primary underline-offset-2 hover:underline">
                     /u/{account.username}
                   </Link>
                 </p>
@@ -109,7 +109,7 @@ export default function SupportPage() {
                 alt="Buy Me a Coffee QR code — scan to tip StepTwo"
                 width={280}
                 height={280}
-                className="mx-auto rounded-xl border border-border bg-white p-3 shadow-sm"
+                className="mx-auto h-auto max-w-full rounded-xl border border-border bg-white p-3 shadow-sm"
                 priority
               />
             </a>
@@ -117,7 +117,7 @@ export default function SupportPage() {
               href={BUY_ME_A_COFFEE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 inline-block text-sm text-primary hover:underline"
+              className="mt-3 inline-flex min-h-11 items-center text-sm text-primary hover:underline"
             >
               buymeacoffee.com/StepTwo
             </a>
@@ -128,10 +128,10 @@ export default function SupportPage() {
             email as your Voidforge account earn a cosmetic <strong className="font-medium text-foreground/80">Supporter</strong> badge
             on your public profile. The badge does not unlock features or special access.
             If you donate with a different email, contact us via{" "}
-            <Link href="/report-issue" className="text-primary hover:underline">Report Issue</Link>{" "}
+            <Link href="/report-issue" className="text-primary underline-offset-2 hover:underline">Report Issue</Link>{" "}
             or ask an admin to grant it manually.
             See our{" "}
-            <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link>.
+            <Link href="/terms" className="text-primary underline-offset-2 hover:underline">Terms of Service</Link>.
           </p>
         </ContentPanel>
       </PageMain>

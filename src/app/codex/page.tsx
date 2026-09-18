@@ -319,12 +319,12 @@ function CodexPageContent() {
     <div
       className={cn(
         "mx-auto flex min-h-[calc(100vh-4rem)] max-w-[1600px] flex-col px-4 py-4 sm:px-6",
-        hasSelection && "pb-[min(75vh,32rem)]",
+        hasSelection && "pb-[min(88dvh,40rem)] sm:pb-[min(75vh,32rem)]",
       )}
     >
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
-          <div className="rounded-lg bg-amber-500/10 p-2 text-amber-400">
+          <div className="rounded-lg bg-amber-500/10 p-2 text-amber-800 dark:text-amber-400">
             <Library className="h-5 w-5" />
           </div>
           <div>
@@ -332,7 +332,7 @@ function CodexPageContent() {
             <p className="text-xs text-muted-foreground">Browse and verify game data across the full database</p>
           </div>
         </div>
-        <div className="relative ml-auto min-w-[200px] flex-1 sm:max-w-sm">
+        <div className="relative ml-auto min-w-0 w-full flex-1 sm:min-w-[200px] sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search codex..."
@@ -345,8 +345,8 @@ function CodexPageContent() {
 
       <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
         {/* Left sidebar — sections + subcategories */}
-        <aside className="flex shrink-0 flex-col gap-3 lg:sticky lg:top-20 lg:w-52 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
-          <ContentPanel className="p-2">
+        <aside className={cn("flex shrink-0 flex-col gap-3 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:w-52 lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pb-4", hasSelection && "hidden lg:flex")}>
+          <ContentPanel className="shrink-0 overflow-visible p-2">
             <PanelHeading>Sections</PanelHeading>
             <nav className="mt-2 space-y-0.5">
               {CODEX_SECTIONS.map((s) => {
@@ -373,16 +373,16 @@ function CodexPageContent() {
           </ContentPanel>
 
           {section === "mods" && (
-            <ContentPanel className="p-2">
+            <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Mod type</PanelHeading>
-              <nav className="mt-2 max-h-[40vh] space-y-0.5 overflow-y-auto">
+              <nav className="mt-2 max-h-[40vh] space-y-0.5 overflow-y-auto overscroll-contain lg:max-h-none lg:overflow-visible">
                 {CODEX_MOD_CATEGORIES.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-1.5 text-left text-xs transition-colors",
+                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
                       modCategory === cat.id
                         ? accentTone.indigo.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -396,16 +396,16 @@ function CodexPageContent() {
           )}
 
           {section === "weapons" && (
-            <ContentPanel className="p-2">
+            <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Weapon type</PanelHeading>
-              <nav className="mt-2 max-h-[40vh] space-y-0.5 overflow-y-auto">
+              <nav className="mt-2 max-h-[40vh] space-y-0.5 overflow-y-auto overscroll-contain lg:max-h-none lg:overflow-visible">
                 {CODEX_WEAPON_CATEGORY_FILTERS.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-1.5 text-left text-xs transition-colors",
+                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
                       weaponCategory === cat.id
                         ? accentTone.blue.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -422,7 +422,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ aoe: null, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-1.5 text-left text-xs transition-colors",
+                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
                       !weaponAoeOnly
                         ? accentTone.blue.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -434,7 +434,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ aoe: "1", id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-1.5 text-left text-xs transition-colors",
+                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
                       weaponAoeOnly
                         ? accentTone.orange.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -448,7 +448,7 @@ function CodexPageContent() {
           )}
 
           {section === "companions" && (
-            <ContentPanel className="p-2">
+            <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Companion type</PanelHeading>
               <nav className="mt-2 space-y-0.5">
                 {CODEX_COMPANION_TYPE_FILTERS.map((cat) => (
@@ -457,7 +457,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-1.5 text-left text-xs transition-colors",
+                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
                       companionType === cat.id
                         ? accentTone.orange.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -471,14 +471,14 @@ function CodexPageContent() {
           )}
 
           {section === "arcanes" && (
-            <ContentPanel className="p-2">
+            <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Slot</PanelHeading>
               <nav className="mt-2 space-y-0.5">
                 <button
                   type="button"
                   onClick={() => setParams({ slot: "all", id: null })}
                   className={cn(
-                    "block w-full rounded-md px-2.5 py-1.5 text-left text-xs transition-colors",
+                    "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
                     arcaneSlot === "all"
                       ? accentTone.purple.chipActive
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -492,7 +492,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ slot: f.id, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-1.5 text-left text-xs transition-colors",
+                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
                       arcaneSlot === f.id
                         ? accentTone.purple.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",

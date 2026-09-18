@@ -541,7 +541,7 @@ export default function WeaponBuilderPage() {
   return (
     <PageShell>
 
-      <main className="flex-1 container mx-auto px-4 py-6">
+      <main className="container mx-auto flex-1 px-3.5 py-5 sm:px-4 sm:py-6">
         {showWeaponList || !selectedWeapon ? (
           <ItemPickerScreen
             icon={Crosshair}
@@ -613,7 +613,7 @@ export default function WeaponBuilderPage() {
                 title={
                   <>
                     {weapon.name}
-                    {incarnonDataMap.has(weapon.id) && <Flame className="ml-1 inline h-3 w-3 text-orange-400" />}
+                    {incarnonDataMap.has(weapon.id) && <Flame className="ml-1 inline h-3 w-3 text-orange-700 dark:text-orange-400" />}
                   </>
                 }
                 badge={
@@ -666,43 +666,43 @@ export default function WeaponBuilderPage() {
                       setSaveDialogDefaultPublic(buildIsPublic);
                       setSaveDialogOpen(true);
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md text-muted-foreground hover:text-green-400 hover:bg-green-500/10 transition-all font-medium"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs sm:min-h-0 sm:py-1.5 text-muted-foreground hover:text-green-700 dark:hover:text-green-400 hover:bg-green-500/10 transition-all font-medium"
                     title="Save Build"
                   >
-                    <Save className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Save</span>
+                    <Save className="h-3.5 w-3.5" /> <span className="inline">Save</span>
                   </button>
                   <button
                     onClick={() => { setSavedBuilds(getSavedBuilds("weapon")); setShowSavedBuilds(true); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md text-muted-foreground hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs sm:min-h-0 sm:py-1.5 text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium"
                     title="Load Build"
                   >
-                    <FolderOpen className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Load</span>
+                    <FolderOpen className="h-3.5 w-3.5" /> <span className="inline">Load</span>
                   </button>
                   <div className="w-px h-4 bg-border mx-1" />
                   <button
                     onClick={() => setShowImporter(!showImporter)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all font-medium",
+                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       showImporter
-                        ? "bg-blue-500/10 text-blue-400"
-                        : "text-muted-foreground hover:text-blue-400 hover:bg-blue-500/10"
+                        ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
+                        : "text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10"
                     )}
                     title="Import Build"
                   >
-                    <Upload className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Import</span>
+                    <Upload className="h-3.5 w-3.5" /> <span className="inline">Import</span>
                   </button>
                   <button
                     onClick={handleShareBuild}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all font-medium",
+                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       shareCopied
-                        ? "bg-green-500/10 text-green-400"
-                        : "text-muted-foreground hover:text-purple-400 hover:bg-purple-500/10"
+                        ? "bg-green-500/10 text-green-700 dark:text-green-400"
+                        : "text-muted-foreground hover:text-purple-700 dark:hover:text-purple-400 hover:bg-purple-500/10"
                     )}
                     title="Copy shareable link"
                   >
                     {shareCopied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
-                    <span className="hidden sm:inline">{shareCopied ? "Copied!" : "Share"}</span>
+                    <span className="inline">{shareCopied ? "Copied!" : "Share"}</span>
                   </button>
                 </BuilderActionGroup>
 
@@ -710,34 +710,34 @@ export default function WeaponBuilderPage() {
                   <button
                     onClick={() => setIsMR30(!isMR30)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all font-medium",
+                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       isMR30
-                        ? "bg-amber-500/10 text-amber-400"
+                        ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
                     )}
                   >
                     <Star className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">MR 30+</span>
+                    <span className="inline">MR 30+</span>
                   </button>
                   <button
                     onClick={() => setHasOrokinCatalyst(!hasOrokinCatalyst)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all font-medium",
+                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       hasOrokinCatalyst
-                        ? "bg-blue-500/10 text-blue-400"
+                        ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
                     )}
                   >
                     <Zap className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Catalyst</span>
+                    <span className="inline">Catalyst</span>
                   </button>
                   {weaponHasGravimagMode(selectedWeapon) && (
                     <button
                       onClick={() => setGravimagMode((v) => !v)}
                       className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all font-medium",
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                         gravimagMode
-                          ? "bg-cyan-500/10 text-cyan-400"
+                          ? "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                           : "text-muted-foreground hover:text-foreground hover:bg-accent"
                       )}
                       title={gravimagMode
@@ -745,7 +745,7 @@ export default function WeaponBuilderPage() {
                         : "Showing Archwing (space) stats. Click to deploy via Gravimag (atmosphere stats)."}
                     >
                       <Orbit className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">Gravimag</span>
+                      <span className="inline">Gravimag</span>
                     </button>
                   )}
                   {weaponHasAlternateMode(selectedWeapon) && (
@@ -761,9 +761,9 @@ export default function WeaponBuilderPage() {
                         });
                       }}
                       className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all font-medium",
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                         alternateMode
-                          ? "bg-amber-500/10 text-amber-400"
+                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
                           : "text-muted-foreground hover:text-foreground hover:bg-accent"
                       )}
                       title={
@@ -773,7 +773,7 @@ export default function WeaponBuilderPage() {
                       }
                     >
                       <Swords className="h-3.5 w-3.5" />
-                      <span className="hidden sm:inline">
+                      <span className="inline">
                         {selectedWeapon.alternateModeStats!.label}
                       </span>
                     </button>
@@ -797,9 +797,9 @@ export default function WeaponBuilderPage() {
                     `/report-issue?type=weapon&name=${encodeURIComponent(selectedWeapon.name)}&id=${encodeURIComponent(selectedWeapon.id)}`,
                     builderReturnTo,
                   )}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-amber-500/30 text-amber-400/70 hover:text-amber-400 hover:bg-amber-500/5 transition-colors"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-2 text-xs font-medium text-amber-800/80 transition-colors hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 sm:min-h-0 sm:py-1.5"
                 >
-                  <Flag className="h-3 w-3" /> <span className="hidden sm:inline">Report</span>
+                  <Flag className="h-3 w-3" /> <span className="inline">Report</span>
                 </a>
               </BuilderActionBar>
             </BuilderItemHeader>
@@ -815,16 +815,17 @@ export default function WeaponBuilderPage() {
 
             <div className="grid lg:grid-cols-[1fr_320px] gap-6">
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-sm font-semibold tracking-wider text-muted-foreground">
+                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                  <h2 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">
                     MOD CONFIGURATION
                   </h2>
                   <span className={cn(
-                    "text-xs font-mono",
+                    "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
                     computeUsedCapacity(equippedMods, modsMap, slotPolarities) >
                       (hasOrokinCatalyst ? 60 : 30) + (isMR30 ? 10 : 0)
-                      ? "text-red-400" : "text-muted-foreground"
+                      ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
                   )}>
+                    <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
                     {computeUsedCapacity(equippedMods, modsMap, slotPolarities)} / {(hasOrokinCatalyst ? 60 : 30) + (isMR30 ? 10 : 0)}
                   </span>
                 </div>
@@ -841,18 +842,23 @@ export default function WeaponBuilderPage() {
                     />
                   </div>
                 )}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {Array.from({ length: totalModSlots }, (_, i) => {
+                {hasWeaponExilusSlot && (
+                  <p className="mb-2 text-[11px] leading-snug text-muted-foreground">
+                    Slot 9 is <span className="font-medium text-foreground/80">Exilus</span>
+                    {selectedWeapon && isTomeWeapon(selectedWeapon.id) ? " (Canticle on tomes)" : ""}
+                    {" "}— only Exilus-eligible mods for this weapon.
+                  </p>
+                )}
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 sm:gap-2.5">
+                  {Array.from({ length: numSlots }, (_, i) => {
                     const equipped = equippedMods.find((m) => m.slotIndex === i);
                     const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
-                    const isExilus = hasWeaponExilusSlot && i === WEAPON_EXILUS_SLOT_INDEX;
                     return (
                       <ModSlotCard
                         key={i}
                         mod={mod}
                         rank={equipped?.rank ?? 0}
                         slotIndex={i}
-                        label={isExilus ? (isTomeWeapon(selectedWeapon.id) ? "Canticle" : "Exilus") : undefined}
                         slotPolarity={slotPolarities[i]}
                         rivenStats={rivenStatsMap[i]}
                         weaponCategory={selectedWeapon.category}
@@ -864,6 +870,35 @@ export default function WeaponBuilderPage() {
                     );
                   })}
                 </div>
+                {hasWeaponExilusSlot && (() => {
+                  const i = WEAPON_EXILUS_SLOT_INDEX;
+                  const equipped = equippedMods.find((m) => m.slotIndex === i);
+                  const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
+                  const exilusLabel = isTomeWeapon(selectedWeapon.id) ? "Canticle" : "Exilus";
+                  return (
+                    <div className="mt-2.5">
+                      <span className="mb-1 block text-[10px] font-semibold tracking-wider text-cyan-700 dark:text-cyan-400">
+                        {exilusLabel.toUpperCase()}
+                      </span>
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 sm:gap-2.5">
+                        <ModSlotCard
+                          key={i}
+                          mod={mod}
+                          rank={equipped?.rank ?? 0}
+                          slotIndex={i}
+                          label={exilusLabel}
+                          slotPolarity={slotPolarities[i]}
+                          rivenStats={rivenStatsMap[i]}
+                          weaponCategory={selectedWeapon.category}
+                          onAdd={() => handleOpenModPicker(i)}
+                          onRemove={() => handleRemoveMod(i)}
+                          onPolarize={(p) => setSlotPolarities((prev) => { const next = { ...prev }; if (p) next[i] = p; else delete next[i]; return next; })}
+                          onEditRiven={() => handleOpenModPicker(i)}
+                        />
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Stance Mod (melee only) */}
                 {selectedWeapon.category === "melee" && (
@@ -872,14 +907,16 @@ export default function WeaponBuilderPage() {
                     {stanceMod ? (
                       <div className="relative border border-amber-500/30 rounded-lg p-3 bg-amber-500/5">
                         <button
+                          type="button"
                           onClick={() => setStanceMod(null)}
-                          className="absolute top-1 right-1 p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors"
+                          className="absolute right-1 top-1 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive sm:h-8 sm:w-8"
+                          aria-label="Remove stance"
                         >
-                          <X className="h-3 w-3" />
+                          <X className="h-3.5 w-3.5" />
                         </button>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium">{stanceMod.name}</span>
-                          <span className="text-[10px] text-amber-400">
+                          <span className="text-[10px] text-amber-700 dark:text-amber-400">
                             +{Math.abs(modCapacityAtRank(stanceMod.drain, stanceMod.maxRank))} capacity
                           </span>
                         </div>
@@ -890,7 +927,7 @@ export default function WeaponBuilderPage() {
                     ) : (
                       <button
                         onClick={() => setStancePickerOpen(true)}
-                        className="w-full h-14 border border-dashed border-amber-500/30 rounded-lg flex items-center justify-center gap-2 text-muted-foreground hover:border-amber-500/50 hover:text-amber-400 hover:bg-amber-500/5 transition-all"
+                        className="w-full h-14 border border-dashed border-amber-500/30 rounded-lg flex items-center justify-center gap-2 text-muted-foreground hover:border-amber-500/50 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-amber-500/5 transition-all"
                       >
                         <Plus className="h-4 w-4" />
                         <span className="text-xs">Add Stance</span>
@@ -906,7 +943,7 @@ export default function WeaponBuilderPage() {
                   return (
                     <div className="mt-6">
                       <h2 className="text-sm font-semibold tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-                        <Gem className="h-4 w-4 text-purple-400" />
+                        <Gem className="h-4 w-4 text-purple-700 dark:text-purple-400" />
                         ARCANES
                       </h2>
                       <div className={cn("grid gap-2", arcaneConfig.slots === 2 ? "grid-cols-2" : "grid-cols-1")}>
@@ -947,7 +984,7 @@ export default function WeaponBuilderPage() {
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:self-start lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:overflow-y-auto lg:overscroll-contain">
                 <WeaponStatsPanel
                   stats={calculatedStats}
                   baseStats={baseStats}

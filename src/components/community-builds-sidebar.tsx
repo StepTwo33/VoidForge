@@ -59,7 +59,7 @@ export function CommunityBuildsSidebar({
       padding={false}
       className={cn(isSidebar && HOME_SIDEBAR_PANEL_CLASS, className)}
     >
-      <div className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-border/60 px-4 py-3">
         <div className="min-w-0">
           <h2 className="flex items-center gap-1.5 text-sm font-semibold">
             <Sparkles className="h-4 w-4 shrink-0 text-primary" />
@@ -69,7 +69,7 @@ export function CommunityBuildsSidebar({
             Shared by other Tenno
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-x-1 gap-y-0.5">
           <CopyRssFeedButton
             feedPath={
               sort === "popular"
@@ -85,7 +85,7 @@ export function CommunityBuildsSidebar({
           />
           <Link
             href="/discover"
-            className="inline-flex items-center gap-0.5 text-[10px] font-medium text-primary hover:underline"
+            className="inline-flex min-h-11 items-center gap-0.5 text-[10px] font-medium text-primary hover:underline"
           >
             View all
             <ChevronRight className="h-3 w-3" />
@@ -103,7 +103,7 @@ export function CommunityBuildsSidebar({
             type="button"
             onClick={() => setSort(id)}
             className={cn(
-              "inline-flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-[10px] font-medium transition-colors",
+              "inline-flex min-h-11 flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-[10px] font-medium transition-colors",
               sort === id
                 ? "bg-primary/10 text-primary"
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -122,12 +122,13 @@ export function CommunityBuildsSidebar({
           </div>
         ) : builds.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border/70 px-3 py-8 text-center">
-            <p className="text-xs text-muted-foreground">
-              No public builds yet. Save a build and check &quot;List in Community Builds&quot; to share it.
+            <p className="text-xs font-medium text-foreground">No public builds yet</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Save a build and check &quot;List in Community Builds&quot; to share it.
             </p>
             <Link
               href="/discover"
-              className="mt-2 inline-block text-xs font-medium text-primary hover:underline"
+              className="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-primary hover:underline"
             >
               Browse Discover
             </Link>

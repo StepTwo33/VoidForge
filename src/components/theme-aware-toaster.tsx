@@ -15,5 +15,19 @@ export function ThemeAwareToaster() {
     return () => observer.disconnect();
   }, []);
 
-  return <Toaster theme={theme} position="bottom-right" richColors closeButton />;
+  return (
+    <Toaster
+      theme={theme}
+      position="bottom-right"
+      richColors
+      closeButton
+      toastOptions={{
+        classNames: {
+          toast: "border shadow-lg",
+          title: "text-sm font-semibold",
+          description: "text-xs opacity-90",
+        },
+      }}
+    />
+  );
 }
