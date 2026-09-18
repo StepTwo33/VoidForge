@@ -1,39 +1,43 @@
 import type { Weapon } from "../types";
 
-/** Element keys supported for Kuva/Tenet/Coda progenitor bonus (matches calculator innate keys). */
+/**
+ * Kuva / Tenet / Coda progenitor damage types (wiki Lich/Sister/Technocyte Coda).
+ * Order matches the in-game / wiki element table.
+ */
 export const PROGENITOR_ELEMENT_IDS = [
+  "impact",
   "heat",
   "cold",
-  "toxin",
   "electricity",
-  "impact",
-  "puncture",
-  "slash",
-  "radiation",
-  "viral",
-  "corrosive",
+  "toxin",
   "magnetic",
-  "gas",
-  "blast",
+  "radiation",
 ] as const;
 
 export type ProgenitorElementId = (typeof PROGENITOR_ELEMENT_IDS)[number];
 
-export const PROGENITOR_ELEMENT_LABELS: Record<string, string> = {
+export const PROGENITOR_ELEMENT_LABELS: Record<ProgenitorElementId, string> = {
+  impact: "Impact",
   heat: "Heat",
   cold: "Cold",
-  toxin: "Toxin",
   electricity: "Electricity",
-  impact: "Impact",
-  puncture: "Puncture",
-  slash: "Slash",
-  radiation: "Radiation",
-  viral: "Viral",
-  corrosive: "Corrosive",
+  toxin: "Toxin",
   magnetic: "Magnetic",
-  gas: "Gas",
-  blast: "Blast",
+  radiation: "Radiation",
 };
+
+export function isProgenitorElementId(value: string): value is ProgenitorElementId {
+  return (PROGENITOR_ELEMENT_IDS as readonly string[]).includes(value);
+}
+
+/** Fall back to Heat when an old share/build used a non-progenitor type. */
+export function normalizeProgenitorElement(
+  value: string | undefined | null,
+  fallback: ProgenitorElementId = "heat",
+): ProgenitorElementId {
+  if (value && isProgenitorElementId(value)) return value;
+  return fallback;
+}
 
 export function weaponSupportsProgenitor(weapon: Weapon): boolean {
   const id = weapon.id;

@@ -24,6 +24,7 @@ import {
   zawStrikes,
 } from "@/data/modular-weapons";
 import type { ModularBuildData } from "@/lib/types";
+import { isProgenitorElementId } from "@/lib/weapons/weapon-progenitor";
 import {
   findCompanionByName,
   findWarframeByName,
@@ -277,6 +278,7 @@ export function parseProgenitorFromRawWeapon(raw?: {
       const tag = buff.tag ?? "";
       const element = ELEMENT_DAMAGE_TAGS[tag];
       if (element && typeof buff.val === "number") {
+        if (!isProgenitorElementId(element)) continue;
         return {
           progenitorElement: element,
           progenitorBonusPercent: Math.round(buff.val * 100),

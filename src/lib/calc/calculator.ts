@@ -10,6 +10,7 @@ import {
 import { enrichWeapon } from '../weapons/weapon-enrich';
 import { resolveExaltedStrengthForCalc } from '../weapons/exalted-weapons';
 import { sentientIncisionElementForFaction } from './sentient-incision';
+import { isProgenitorElementId } from '../weapons/weapon-progenitor';
 
 export { avgCritMultiplier, quantizeBaseCritMultiplier } from './crit-utils';
 import {
@@ -1182,10 +1183,10 @@ export function calculateWeaponBuild(
     const pct = calcOptions.progenitorBonusPercent / 100;
     const bonus = baseWeapon.damage * pct * dmgMult;
     const pe = calcOptions.progenitorElement;
-    if (pe === "impact") stats.impact += bonus;
-    else if (pe === "puncture") stats.puncture += bonus;
-    else if (pe === "slash") stats.slash += bonus;
-    else innateElements.push({ type: pe, value: bonus });
+    if (isProgenitorElementId(pe)) {
+      if (pe === "impact") stats.impact += bonus;
+      else innateElements.push({ type: pe, value: bonus });
+    }
   }
   elementalMods.push(...innateElements);
 

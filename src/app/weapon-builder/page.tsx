@@ -26,6 +26,7 @@ import { applyArbucepAttackMode } from "@/lib/weapons/weapon-arbucep-mode";
 import {
   weaponSupportsProgenitor,
   PROGENITOR_BONUS_DEFAULT,
+  normalizeProgenitorElement,
 } from "@/lib/weapons/weapon-progenitor";
 import { Zap, Flag, Flame, Plus, X, Gem, Star, Save, FolderOpen, Share2, Check, Upload, Crosshair, Orbit, Swords } from "lucide-react";
 import { isPrimaryWeaponCategory } from "@/lib/mods/mod-weapon-eligibility";
@@ -178,7 +179,9 @@ export default function WeaponBuilderPage() {
         setCurrentBuildId(null);
         setBuildName(`${weapon.name} Build`);
         setBuildDescription("");
-        if (shared.progenitorElement) setProgenitorElement(shared.progenitorElement);
+        if (shared.progenitorElement) {
+          setProgenitorElement(normalizeProgenitorElement(shared.progenitorElement));
+        }
         if (shared.progenitorBonusPercent != null) setProgenitorBonusPercent(shared.progenitorBonusPercent);
         if (shared.hasOrokinCatalyst != null) setHasOrokinCatalyst(shared.hasOrokinCatalyst);
         if (shared.isMR30 != null) setIsMR30(shared.isMR30);
@@ -248,7 +251,7 @@ export default function WeaponBuilderPage() {
     setIsMR30(d.isMR30);
     setSlotPolarities(d.slotPolarities || {});
     if (weaponSupportsProgenitor(weapon)) {
-      setProgenitorElement(d.progenitorElement ?? "heat");
+      setProgenitorElement(normalizeProgenitorElement(d.progenitorElement));
       setProgenitorBonusPercent(d.progenitorBonusPercent ?? PROGENITOR_BONUS_DEFAULT);
     } else {
       setProgenitorElement("heat");

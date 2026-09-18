@@ -5,6 +5,7 @@ import {
   PROGENITOR_ELEMENT_LABELS,
   PROGENITOR_BONUS_MIN,
   PROGENITOR_BONUS_MAX,
+  normalizeProgenitorElement,
 } from "@/lib/weapons/weapon-progenitor";
 
 export function ProgenitorControls({
@@ -18,19 +19,20 @@ export function ProgenitorControls({
   onElementChange: (element: string) => void;
   onBonusChange: (percent: number) => void;
 }) {
+  const selected = normalizeProgenitorElement(progenitorElement);
   return (
     <div className="flex flex-wrap items-center gap-3 p-3 rounded-xl border border-amber-500/25 bg-amber-500/[0.06]">
       <span className="text-xs font-medium text-amber-400/90 shrink-0">Progenitor bonus</span>
       <label className="flex items-center gap-2 text-xs text-muted-foreground">
         <span className="hidden sm:inline">Element</span>
         <select
-          value={progenitorElement}
-          onChange={(e) => onElementChange(e.target.value)}
+          value={selected}
+          onChange={(e) => onElementChange(normalizeProgenitorElement(e.target.value))}
           className="bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground max-w-[140px]"
         >
           {PROGENITOR_ELEMENT_IDS.map((id) => (
             <option key={id} value={id}>
-              {PROGENITOR_ELEMENT_LABELS[id] ?? id}
+              {PROGENITOR_ELEMENT_LABELS[id]}
             </option>
           ))}
         </select>

@@ -37,6 +37,7 @@ import { computeCrewBoardingDps } from "@/lib/calc/railjack-crew-boarding";
 import { getModCategory } from "@/lib/weapons/weapon-categories";
 import {
   PROGENITOR_BONUS_DEFAULT,
+  normalizeProgenitorElement,
   weaponSupportsProgenitor,
 } from "@/lib/weapons/weapon-progenitor";
 import type { EquippedMod, Mod, Weapon } from "@/lib/types";
@@ -506,7 +507,7 @@ export function CrewSlotEditor({
                 working.weaponLoadout?.progenitorBonusPercent,
               )}
               onElementChange={(element) =>
-                updateLoadout({ progenitorElement: element })
+                updateLoadout({ progenitorElement: normalizeProgenitorElement(element) })
               }
               onBonusChange={(percent) =>
                 updateLoadout({ progenitorBonusPercent: clampProgenitorBonusPercent(percent) })
