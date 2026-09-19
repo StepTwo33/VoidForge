@@ -3194,7 +3194,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "augment_mesa_mess_waltz",
     "name": "Mesa's Waltz",
-    "polarity": "exilus",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",

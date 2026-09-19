@@ -202,7 +202,8 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
 
     if (category === "warframe") {
       if (slotType === "regular") {
-        categoryMods = categoryMods.filter((m) => !isAuraMod(m) && !isWarframeExilusMod(m));
+        // Aura is slot-exclusive. Exilus mods may also occupy regular slots (wiki / in-game).
+        categoryMods = categoryMods.filter((m) => !isAuraMod(m));
       } else if (slotType === "aura") {
         categoryMods = categoryMods.filter(isAuraMod);
       } else if (slotType === "exilus") {

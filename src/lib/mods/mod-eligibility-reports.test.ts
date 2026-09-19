@@ -52,6 +52,16 @@ describe("Primed Sure Footed", () => {
   });
 });
 
+describe("Mesa's Waltz", () => {
+  it("is Zenurik polarity and still Exilus-eligible", () => {
+    const mod = modsById.get("augment_mesa_mess_waltz")!;
+    expect(mod.polarity).toBe("zenurik");
+    expect(isWarframeExilusMod(mod)).toBe(true);
+    expect(warframeAugmentEligibleInBuilder(mod, "warframe", "mesa")).toBe(true);
+    expect(warframeAugmentEligibleInBuilder(mod, "warframe", "mesa_prime")).toBe(true);
+  });
+});
+
 describe("Fused Reservoir Exilus", () => {
   it("is Exilus and eligible for Wisp / Wisp Prime", () => {
     const mod = modsById.get("augment_wisp_fused_reservoir")!;

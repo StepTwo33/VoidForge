@@ -46,6 +46,20 @@ describe("mapWarframeUpgradeMods slot placement", () => {
     expect(mods.find((m) => m.modId === "power_drift")?.slotIndex).toBe(WARFRAME_IMPORT_EXILUS_SLOT);
   });
 
+  it("places a second Exilus (Primed Sure Footed) in a regular slot", () => {
+    const warnings: ArsenalImportWarning[] = [];
+    const { mods } = mapWarframeUpgradeMods(
+      [named("Power Drift"), named("Primed Sure Footed", 10), named("Primed Continuity", 10)],
+      warnings,
+    );
+    const byId = new Map(mods.map((m) => [m.modId, m.slotIndex]));
+    expect(byId.get("power_drift")).toBe(WARFRAME_IMPORT_EXILUS_SLOT);
+    expect(byId.get("primed_sure_footed")).not.toBe(WARFRAME_IMPORT_EXILUS_SLOT);
+    expect(byId.get("primed_sure_footed")).not.toBe(WARFRAME_IMPORT_AURA_SLOT);
+    expect(byId.get("primed_sure_footed")).toBeGreaterThanOrEqual(1);
+    expect(byId.get("primed_sure_footed")).toBeLessThanOrEqual(8);
+  });
+
   it("places Dreamer's Bond in the aura slot", () => {
     const warnings: ArsenalImportWarning[] = [];
     const { mods } = mapWarframeUpgradeMods(
