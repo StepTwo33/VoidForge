@@ -4738,7 +4738,7 @@ export const allWarframes: Warframe[] = [
       },
       {
         "name": "Hakchum",
-        "description": "Tap to leap into the air, then tap again to land at the target. The landing applies Cold damage vulnerability and Cold status in a large radius. Gain Ice for each enemy hit. This is Narin's Railjack ability.",
+        "description": "Tap to leap into the air, then tap again to land at the target. The landing applies Cold damage vulnerability and Cold status in a large radius. Gain Ice for each enemy hit.",
         "damageType": "Cold"
       },
       {
