@@ -43,7 +43,7 @@ const RAW_MODS: Mod[] = [
       "criticalChanceOnHeadshot": 22.5,
       "duration": 1.5
     },
-    "description": "On Headshot:\\n+135% Critical Chance when Aiming for 9s",
+    "description": "On Weak Point:\\n+135% Critical Chance when Aiming for 9s",
     "rarity": "rare"
   },
   {
@@ -59,7 +59,7 @@ const RAW_MODS: Mod[] = [
       "criticalChanceOnHeadshotKill": 3.636364,
       "duration": 1.090909
     },
-    "description": "On Headshot:\\n+120% Critical Chance when Aiming for 12s\\nOn Headshot Kill:\\n+40% Critical Chance when Aiming for 12s. Stacks up to 5x.",
+    "description": "On Weak Point:\\n+120% Critical Chance when Aiming for 12s\\nOn Weak Point Kill:\\n+40% Critical Chance when Aiming for 12s. Stacks up to 5x.",
     "rarity": "rare"
   },
   {
@@ -390,7 +390,7 @@ const RAW_MODS: Mod[] = [
       "criticalChanceOnHeadshot": 22.5,
       "duration": 1.5
     },
-    "description": "On Headshot:\\n+135% Critical Chance when Aiming for 9s",
+    "description": "On Weak Point:\\n+135% Critical Chance when Aiming for 9s",
     "rarity": "common"
   },
   {
@@ -406,7 +406,7 @@ const RAW_MODS: Mod[] = [
       "criticalChanceOnHeadshotKill": 3.636364,
       "duration": 1.090909
     },
-    "description": "On Headshot:\\n+120% Critical Chance when Aiming for 12s\\nOn Headshot Kill:\\n+40% Critical Chance when Aiming for 12s. Stacks up to 5x.",
+    "description": "On Weak Point:\\n+120% Critical Chance when Aiming for 12s\\nOn Weak Point Kill:\\n+40% Critical Chance when Aiming for 12s. Stacks up to 5x.",
     "rarity": "rare"
   },
   {
@@ -3687,16 +3687,17 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "augment_banshee_sonic_fracture",
-    "name": "Sonic Fracture",
+    "name": "Sonic Siphon",
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "armorReduction": 15
+      "armorDuration": 20,
+      "armorCap": 1500
     },
-    "description": "Sonic Boom Augment: Enemy Armor is reduced by 70%.",
+    "description": "Sonic Boom Augment: If an enemy is hit, Banshee gains Armor for 20s, up to 1500 Armor. Recasting refreshes the duration when an enemy is struck.",
     "rarity": "rare",
     "warframeId": "banshee"
   },
@@ -3732,18 +3733,78 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "augment_banshee_resonating_quake",
-    "name": "Resonating Quake",
+    "name": "Gaseous Quake",
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "quakeDamage": 75
+      "channeled": 1
     },
-    "description": "Sound Quake Augment: Forgoes channeling to create a shockwave that deals 20x Damage at the epicenter, gradually weakening as it expands out.",
+    "description": "Sound Quake Augment: Channel to root Banshee in place. The quake deals additional Gas damage and status. Damage and energy drain increase every second. The area lingers briefly after channeling ends.",
     "rarity": "rare",
     "warframeId": "banshee"
+  },
+  {
+    "id": "augment_oraxia_broods_oversurge",
+    "name": "Brood's Oversurge",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "electricityDamage": 2000
+    },
+    "description": "Widow's Brood Augment: Scuttlers are galvanized with Electricity. Hold to direct all active Scuttlers at the aimed target, inflicting 2000 Electricity damage and status in a radius.",
+    "rarity": "rare",
+    "warframeId": "oraxia"
+  },
+  {
+    "id": "augment_uriel_infernum",
+    "name": "Infernum",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "heatDamage": 1500
+    },
+    "description": "Infernalis Augment: Release fireballs for 1500 Heat damage, with larger volleys when grabbing Vythelas' Runes during flight. Hits from fireballs slowly charge Brimstone.",
+    "rarity": "rare",
+    "warframeId": "uriel"
+  },
+  {
+    "id": "augment_frost_cold_front",
+    "name": "Cold Front",
+    "polarity": "exilus",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "globeHealthPerKill": 4
+    },
+    "description": "Snow Globe Augment: Snow Globe attaches to Frost with a smaller radius and increased mobility. Kills on frozen enemies increase Globe health by 4% per kill. Can be equipped in the Exilus slot.",
+    "rarity": "rare",
+    "warframeId": "frost"
+  },
+  {
+    "id": "augment_grendel_gastroparesis",
+    "name": "Gastroparesis",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "gasDamagePerEnemy": 15
+    },
+    "description": "Passive Augment: Each enemy consumed adds 15% Gas damage to Primary and Secondary weapons.",
+    "rarity": "rare",
+    "warframeId": "grendel"
   },
   {
     "id": "augment_vauban_tesla_link",
@@ -7283,7 +7344,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "energyOnKill": 1.363636
     },
-    "description": "On Headshot Kill:\\n+15 Energy",
+    "description": "On Weak Point Kill:\\n+15 Energy",
     "rarity": "rare"
   },
   {
@@ -12682,7 +12743,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "duration": 0.75
     },
-    "description": "Covenant Augment: Headshot kills increase Critical Chance bonus duration by 3s.",
+    "description": "Covenant Augment: Weak Point kills increase Critical Chance bonus duration by 3s.",
     "rarity": "rare",
     "warframeId": "harrow"
   },
@@ -15278,11 +15339,11 @@ const RAW_MODS: Mod[] = [
   {
     "id": "martyr_symbiosis",
     "name": "Martyr Symbiosis",
-    "polarity": "penjaga",
+    "polarity": "madurai",
     "drain": 0,
     "maxRank": 3,
     "category": "companion",
-    "subCategory": "",
+    "subCategory": "beast",
     "stats": {
       "health": 10.0,
       "range": 6.25

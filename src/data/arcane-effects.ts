@@ -8,6 +8,7 @@ export type ArcaneTrigger =
   | "stacks"
   | "onKill"
   | "onHeadshot"
+  | "onWeakPoint"
   | "onDamaged"
   | "onReload"
   | "onAbilityCast"
@@ -757,7 +758,7 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
   },
   "arcane_precision": {
     "name": "Arcane Precision",
-    "trigger": "onHeadshot",
+    "trigger": "onWeakPoint",
     "maxRank": 5,
     "effects": [
       {
@@ -1497,7 +1498,7 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
   },
   "longbow_sharpshot": {
     "name": "Longbow Sharpshot",
-    "trigger": "onHeadshot",
+    "trigger": "onWeakPoint",
     "maxRank": 5,
     "effects": [
       {

@@ -354,7 +354,7 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("damage", "weapon_dps", "multiplicative_percent", "Serration: damage \u2014 +165% Damage"),
   ]),
   sharpshooter: mod("sharpshooter", [
-    line("energyOnKill", "mod_panel", "multiplicative_percent", "Sharpshooter: energyOnKill \u2014 On Headshot Kill:\\\\n+15 Energy"),
+    line("energyOnKill", "mod_panel", "multiplicative_percent", "Sharpshooter: energyOnKill \u2014 On Weak Point Kill:\\\\n+15 Energy"),
   ]),
   shivering_contagion: mod("shivering_contagion", [
     line("range", "mod_panel", "multiplicative_percent", "Shivering Contagion: range \u2014 On <DT_FREEZE_COLOR>Cold Status Effect: 100% chance to spread that status to oth\u2026 (arsenal display only)"),

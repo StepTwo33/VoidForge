@@ -54,7 +54,6 @@ export const COMPANION_PRECEPT_COMPANION_IDS: Readonly<Record<string, readonly s
   "infectious_bite": ["medjay_predasite", "pharaoh_predasite", "vizier_predasite"],
   "investigator": ["helios", "helios_prime"],
   "looter": ["carrier", "carrier_prime", "dethcube", "dethcube_prime", "diriga", "djinn", "helios", "helios_prime", "nautilus", "nautilus_prime", "oxylus", "prisma_shade", "shade", "shade_prime", "taxon", "wyrm", "wyrm_prime"],
-  "martyr_symbiosis": ["carrier", "carrier_prime", "dethcube", "dethcube_prime", "diriga", "djinn", "helios", "helios_prime", "nautilus", "nautilus_prime", "oxylus", "prisma_shade", "shade", "shade_prime", "taxon", "wyrm", "wyrm_prime"],
   "medi_ray": ["carrier", "carrier_prime", "dethcube", "dethcube_prime", "diriga", "djinn", "helios", "helios_prime", "nautilus", "nautilus_prime", "oxylus", "prisma_shade", "shade", "shade_prime", "taxon", "wyrm", "wyrm_prime"],
   "melee_prowess_sentinel": ["carrier", "carrier_prime", "dethcube", "dethcube_prime", "diriga", "djinn", "helios", "helios_prime", "nautilus", "nautilus_prime", "oxylus", "prisma_shade", "shade", "shade_prime", "taxon", "wyrm", "wyrm_prime"],
   "mischief": ["adarza", "smeeta", "vasca"],

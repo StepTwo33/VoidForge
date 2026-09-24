@@ -285,55 +285,62 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 175,
     "sprintSpeed": 1.1,
-    "description": "Banshee emits a sonic shockwave that pushes targets in range with enough force to incapacitate or kill attackers.",
-    "passive": "Weapon noises are hushed so that enemies cannot hear them.",
+    "description": "Banshee emits a sonic shockwave that pushes and stuns targets in range, dealing Impact damage and reducing Armor.",
+    "passive": "Weapon noises are hushed so that enemies cannot hear them. Casting abilities applies maximum Puncture status on foes within 10m.",
     "abilities": [
       {
         "name": "Sonic Boom",
         "energyCost": 25,
-        "description": "Banshee emits a sonic shockwave that pushes targets in range with enough force to incapacitate or kill attackers.",
-        "damage": 50,
+        "description": "Banshee emits a one-handed sonic shockwave that pushes and stuns targets in range. The wave deals Impact damage, applies a guaranteed Impact status, and reduces Armor.",
+        "damage": 250,
         "range": 15,
         "castTime": 0.5,
         "damageType": "Impact",
         "miscStats": {
-          "coneAngle": 180
+          "coneAngle": 180,
+          "armorStrip": 0.7,
+          "armorStripCap": 1,
+          "impactStatus": true
         }
       },
       {
         "name": "Sonar",
         "energyCost": 50,
-        "description": "Using acoustic location, Banshee's Sonar power finds and tracks enemies, and exposes critical weak spots to everyone in your squad.",
+        "description": "Using acoustic location, Banshee's Sonar finds and tracks enemies and exposes weak spots. Those spots count as Weak Points for mods, arcanes, and other Weak Point effects, and Sonar prefers unmarked body parts.",
         "range": 35,
         "duration": 30,
         "castTime": 0.6,
         "miscStats": {
           "damageMultiplier": 5,
-          "propagationSpeed": 20
+          "propagationSpeed": 20,
+          "weakPoint": true
         }
       },
       {
         "name": "Silence",
         "energyCost": 75,
-        "description": "Using Silence surrounds Banshee in an aura that stuns enemies and will limit their perceptions and tactical response to gunfire and Warframe attacks.",
+        "description": "Using Silence surrounds Banshee in an aura that stuns enemies and limits their perceptions and tactical response to gunfire and Warframe attacks. Recasting refreshes the duration and reapplies the stun.",
         "range": 20,
         "duration": 30,
         "castTime": 0.5,
         "miscStats": {
-          "stunDuration": 2
+          "stunDuration": 2,
+          "recastRefresh": true
         }
       },
       {
         "name": "Sound Quake",
         "energyCost": 25,
-        "description": "Channeling all of her acoustic energy into the environment, Banshee uses ultrasonic reverberations to violently shake the ground.",
+        "description": "Banshee slams the ground and leaves an area that violently shakes enemies. Foes in the area take guaranteed Blast status, which is weaker farther from the center. Banshee is briefly invulnerable while casting.",
         "damage": 200,
         "range": 20,
+        "duration": 25,
         "castTime": 1,
         "damageType": "Blast",
         "miscStats": {
-          "energyDrain": 12,
-          "channeled": true
+          "blastStatus": true,
+          "statusFalloff": true,
+          "castInvulnerable": true
         }
       }
     ]
@@ -346,55 +353,62 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 215,
     "sprintSpeed": 1.15,
-    "description": "Banshee emits a sonic shockwave that pushes targets in range with enough force to incapacitate or kill attackers.",
-    "passive": "Weapon noises are hushed so that enemies cannot hear them.",
+    "description": "Banshee emits a sonic shockwave that pushes and stuns targets in range, dealing Impact damage and reducing Armor.",
+    "passive": "Weapon noises are hushed so that enemies cannot hear them. Casting abilities applies maximum Puncture status on foes within 10m.",
     "abilities": [
       {
         "name": "Sonic Boom",
         "energyCost": 25,
-        "description": "Banshee emits a sonic shockwave that pushes targets in range with enough force to incapacitate or kill attackers.",
-        "damage": 50,
+        "description": "Banshee emits a one-handed sonic shockwave that pushes and stuns targets in range. The wave deals Impact damage, applies a guaranteed Impact status, and reduces Armor.",
+        "damage": 250,
         "range": 15,
         "castTime": 0.5,
         "damageType": "Impact",
         "miscStats": {
-          "coneAngle": 180
+          "coneAngle": 180,
+          "armorStrip": 0.7,
+          "armorStripCap": 1,
+          "impactStatus": true
         }
       },
       {
         "name": "Sonar",
         "energyCost": 50,
-        "description": "Using acoustic location, Banshee's Sonar power finds and tracks enemies, and exposes critical weak spots to everyone in your squad.",
+        "description": "Using acoustic location, Banshee's Sonar finds and tracks enemies and exposes weak spots. Those spots count as Weak Points for mods, arcanes, and other Weak Point effects, and Sonar prefers unmarked body parts.",
         "range": 35,
         "duration": 30,
         "castTime": 0.6,
         "miscStats": {
           "damageMultiplier": 5,
-          "propagationSpeed": 20
+          "propagationSpeed": 20,
+          "weakPoint": true
         }
       },
       {
         "name": "Silence",
         "energyCost": 75,
-        "description": "Using Silence surrounds Banshee in an aura that stuns enemies and will limit their perceptions and tactical response to gunfire and Warframe attacks.",
+        "description": "Using Silence surrounds Banshee in an aura that stuns enemies and limits their perceptions and tactical response to gunfire and Warframe attacks. Recasting refreshes the duration and reapplies the stun.",
         "range": 20,
         "duration": 30,
         "castTime": 0.5,
         "miscStats": {
-          "stunDuration": 2
+          "stunDuration": 2,
+          "recastRefresh": true
         }
       },
       {
         "name": "Sound Quake",
         "energyCost": 25,
-        "description": "Channeling all of her acoustic energy into the environment, Banshee uses ultrasonic reverberations to violently shake the ground.",
+        "description": "Banshee slams the ground and leaves an area that violently shakes enemies. Foes in the area take guaranteed Blast status, which is weaker farther from the center. Banshee is briefly invulnerable while casting.",
         "damage": 200,
         "range": 20,
+        "duration": 25,
         "castTime": 1,
         "damageType": "Blast",
         "miscStats": {
-          "energyDrain": 12,
-          "channeled": true
+          "blastStatus": true,
+          "statusFalloff": true,
+          "castInvulnerable": true
         }
       }
     ]
@@ -986,6 +1000,78 @@ export const allWarframes: Warframe[] = [
     "energy": 130,
     "sprintSpeed": 1,
     "description": "Slash and stagger enemies with a crystal blast that inflicts <DT_SLASH_COLOR>Slash Status. Enemies afflicted with this Status Effect have an increased chance of dropping Health Orbs.",
+    "passive": "Citrine grants nearby allies within Affinity Range 5 health regeneration per second. Pick up a Health Orb to increase regeneration by 0.1, up to a maximum of 25.",
+    "abilities": [
+      {
+        "name": "Fractured Blast",
+        "energyCost": 25,
+        "description": "Slash and stagger enemies with a crystal blast that inflicts Slash Status. Enemies afflicted with this Status Effect have an increased chance of dropping Health and Energy Orbs.",
+        "damage": 500,
+        "range": 14,
+        "damageType": "Slash",
+        "miscStats": {
+          "healthOrbChance": 0.5,
+          "energyOrbChance": 0.2
+        }
+      },
+      {
+        "name": "Preserving Shell",
+        "energyCost": 50,
+        "description": "Citrine guards herself and nearby allies with a crystalline shell that gradually decays. Kills and assists increase the defensive power of the shell.",
+        "damageReduction": 0.4,
+        "duration": 25,
+        "miscStats": {
+          "drCap": 0.9,
+          "minDamageReduction": 0.25,
+          "drPerKill": 0.03,
+          "drPerAssist": 0.01,
+          "staggerRadius": 8,
+          "initialDecayDelay": 1,
+          "killAssistDecayDelay": 2
+        }
+      },
+      {
+        "name": "Prismatic Gem",
+        "energyCost": 75,
+        "description": "Deploy a gem that shoots prismatic beams. The gem targets enemies that are taking weapon damage from Citrine and her allies. Its beams inflict Heat, Cold, Toxin, and Electricity Status Effects. Status Chance and Status Duration increase for nearby allies.",
+        "damage": 1000,
+        "duration": 30,
+        "range": 15,
+        "miscStats": {
+          "placementDistance": 5,
+          "statusChanceBonus": 1,
+          "statusDurationBonus": 1,
+          "beamsPerAlly": 1,
+          "retargetDelay": 0.4,
+          "statusTypes": 4,
+          "gemLimit": 1
+        }
+      },
+      {
+        "name": "Crystallize",
+        "energyCost": 100,
+        "description": "Citrine summons crystal fractals. The fractals rush forward, seeking enemies. Enemies touched by the fractals are paralyzed by crystalline growths. Hit the growths to deal Critical Damage.",
+        "damage": 500,
+        "range": 30,
+        "duration": 8,
+        "damageType": "Impact",
+        "miscStats": {
+          "coneAngle": 190,
+          "growthsPerEnemy": 1,
+          "absoluteCritChance": 3
+        }
+      }
+    ]
+  },
+  {
+    "id": "citrine_prime",
+    "name": "Citrine Prime",
+    "health": 400,
+    "shield": 270,
+    "armor": 325,
+    "energy": 150,
+    "sprintSpeed": 1,
+    "description": "The crystalline citadel ascends. Citrine Prime captivates with refined radiance, her brilliant gems set within the finest gold filigree.",
     "passive": "Citrine grants nearby allies within Affinity Range 5 health regeneration per second. Pick up a Health Orb to increase regeneration by 0.1, up to a maximum of 25.",
     "abilities": [
       {
@@ -2471,7 +2557,7 @@ export const allWarframes: Warframe[] = [
       {
         "name": "Regurgitate",
         "energyCost": 0,
-        "description": "Violently puke out a bile soaked enemy from Grendel's gut, turning the consumed into a toxic projectile. Nearby enemies are slowed and have their armor dissolved by the bile.",
+        "description": "Violently puke out a bile soaked enemy from Grendel's gut, turning the consumed into a toxic projectile. Nearby enemies are slowed and have their armor dissolved by the bile. Bonus damage uses the swallowed enemy's maximum health.",
         "damage": 2000,
         "range": 6,
         "castTime": 0.3,
@@ -2549,7 +2635,7 @@ export const allWarframes: Warframe[] = [
       {
         "name": "Regurgitate",
         "energyCost": 0,
-        "description": "Violently puke out a bile soaked enemy from Grendel's gut, turning the consumed into a toxic projectile. Nearby enemies are slowed and have their armor dissolved by the bile.",
+        "description": "Violently puke out a bile soaked enemy from Grendel's gut, turning the consumed into a toxic projectile. Nearby enemies are slowed and have their armor dissolved by the bile. Bonus damage uses the swallowed enemy's maximum health.",
         "damage": 2000,
         "range": 6,
         "castTime": 0.3,
@@ -2755,7 +2841,7 @@ export const allWarframes: Warframe[] = [
       {
         "name": "Thurible",
         "energyCost": 25,
-        "description": "Channel Harrow's energy into the Thurible to generate a buff. Once finished, kill enemies to bestow nearby allies with bursts of energy. The more energy channeled the greater the reward. Headshots produce extra energy.",
+        "description": "Channel Harrow's energy into the Thurible to generate a buff. Once finished, kill enemies to bestow nearby allies with bursts of energy. The more energy channeled the greater the reward. Weak Point hits produce extra energy.",
         "range": 20,
         "duration": 35,
         "castTime": 1,
@@ -2767,7 +2853,7 @@ export const allWarframes: Warframe[] = [
       {
         "name": "Covenant",
         "energyCost": 100,
-        "description": "Protect nearby allies with an energy force that absorbs all damage and converts it to a Critical Chance bonus for all those under the Covenant. Headshots are amplified even further.",
+        "description": "Protect nearby allies with an energy force that absorbs all damage and converts it to a Critical Chance bonus for all those under the Covenant. Weak Point hits are amplified even further.",
         "duration": 6,
         "castTime": 0.8,
         "miscStats": {
@@ -2822,7 +2908,7 @@ export const allWarframes: Warframe[] = [
       {
         "name": "Thurible",
         "energyCost": 25,
-        "description": "Channel Harrow's energy into the Thurible to generate a buff. Once finished, kill enemies to bestow nearby allies with bursts of energy. The more energy channeled the greater the reward. Headshots produce extra energy.",
+        "description": "Channel Harrow's energy into the Thurible to generate a buff. Once finished, kill enemies to bestow nearby allies with bursts of energy. The more energy channeled the greater the reward. Weak Point hits produce extra energy.",
         "range": 20,
         "duration": 35,
         "castTime": 1,
@@ -2834,7 +2920,7 @@ export const allWarframes: Warframe[] = [
       {
         "name": "Covenant",
         "energyCost": 100,
-        "description": "Protect nearby allies with an energy force that absorbs all damage and converts it to a Critical Chance bonus for all those under the Covenant. Headshots are amplified even further.",
+        "description": "Protect nearby allies with an energy force that absorbs all damage and converts it to a Critical Chance bonus for all those under the Covenant. Weak Point hits are amplified even further.",
         "duration": 6,
         "castTime": 0.8,
         "miscStats": {
@@ -3031,8 +3117,8 @@ export const allWarframes: Warframe[] = [
     "id": "hydroid",
     "name": "Hydroid",
     "health": 270,
-    "shield": 365,
-    "armor": 240,
+    "shield": 140,
+    "armor": 365,
     "energy": 140,
     "sprintSpeed": 1.05,
     "description": "Summon a tempest to rain down upon a target area.",
@@ -3103,8 +3189,8 @@ export const allWarframes: Warframe[] = [
     "id": "hydroid_prime",
     "name": "Hydroid Prime",
     "health": 270,
-    "shield": 550,
-    "armor": 290,
+    "shield": 190,
+    "armor": 650,
     "energy": 175,
     "sprintSpeed": 1.05,
     "description": "Summon a tempest to rain down upon a target area.",
@@ -4626,6 +4712,39 @@ export const allWarframes: Warframe[] = [
           "damageBonusPerHit": 0.25,
           "blindDuration": 15
         }
+      }
+    ]
+  },
+  {
+    "id": "narin",
+    "name": "Narin",
+    "health": 270,
+    "shield": 550,
+    "armor": 165,
+    "energy": 200,
+    "sprintSpeed": 1.1,
+    "description": "Narin descends in swirling eddies, her blade keen and deadly as an icy wind. She wields ice to defend as deftly as her swift rapier strikes.",
+    "passive": "Each stack of Cold status on enemies increases the chance they drop a Sangodae pickup by 1%. The pickup grants Cold damage on Primary and Secondary weapons for 10s. Narin also gains Cold damage for her abilities.",
+    "abilities": [
+      {
+        "name": "Neote",
+        "description": "Lunge with Narin's ice rapier Neote, inflicting Cold damage and Cold and Puncture status on foes directly ahead. Gain Ice for each enemy hit. This is Narin's Helminth ability.",
+        "damageType": "Cold"
+      },
+      {
+        "name": "Naraemagi",
+        "description": "Recover Shields by absorbing Cold status from nearby enemies. Gain Overguard if Shields are already full. Gain Ice for each enemy hit.",
+        "damageType": "Cold"
+      },
+      {
+        "name": "Hakchum",
+        "description": "Tap to leap into the air, then tap again to land at the target. The landing applies Cold damage vulnerability and Cold status in a large radius. Gain Ice for each enemy hit. This is Narin's Railjack ability.",
+        "damageType": "Cold"
+      },
+      {
+        "name": "Nurinarim",
+        "description": "Requires full Ice to cast. An ancestral spirit descends and Narin sword-dances for continuous nearby damage. Press Attack on marked targets to launch icy slashes that deplete Armor and Shields. Hitting Frozen enemies makes them explode for radial Cold damage.",
+        "damageType": "Cold"
       }
     ]
   },

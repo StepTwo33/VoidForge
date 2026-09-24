@@ -13,7 +13,8 @@ export interface HelminthAbility {
   id: string;
   name: string;
   description: string;
-  energyCost: number;
+  /** Omitted when the live cost has not been published yet. */
+  energyCost?: number;
   source: string; // "helminth" for unique, or warframe id for subsumed
   sourceWarframe?: string; // Display name of source warframe
   abilitySlot?: number; // Which slot (1-4) this comes from on the source warframe
@@ -158,6 +159,7 @@ const subsumedAbilities: HelminthAbility[] = [
   { id: "subsume_mag", name: "Pull", description: "Stun enemies in a magnetic vortex and pull them in front of you along with Polarize Shards.", energyCost: 25, source: "mag", sourceWarframe: "Mag", abilitySlot: 1, damage: 300, range: 25, miscStats: { radialPull: 6, pullAngle: 90 } },
   { id: "subsume_mesa", name: "Shooting Gallery", description: "Buff yourself and an ally with +25% damage; jams nearby enemy guns.", energyCost: 50, source: "mesa", sourceWarframe: "Mesa", abilitySlot: 2, damageBuff: 0.25, duration: 30, range: 16, miscStats: { stunTargets: 3, stunInterval: 1.5 } },
   { id: "subsume_mirage", name: "Eclipse", description: "(TAP) Lunar Eclipse: Reduce incoming damage by 75% (cap 75%). (HOLD) Solar Eclipse: +30% weapon damage.", energyCost: 50, source: "mirage", sourceWarframe: "Mirage", abilitySlot: 3, damageBuff: 0.3, damageReduction: 0.75, duration: 25, miscStats: { drCap: 0.75 } },
+  { id: "subsume_narin", name: "Neote", description: "Lunge with an ice rapier, inflicting Cold damage and Cold and Puncture status on foes directly ahead.", source: "narin", sourceWarframe: "Narin", abilitySlot: 1, damageType: "Cold" },
   { id: "subsume_nekros", name: "Terrify", description: "Cast fear into nearby enemies, causing them to flee while stripping armor.", energyCost: 75, source: "nekros", sourceWarframe: "Nekros", abilitySlot: 2, range: 15, duration: 25, miscStats: { armorStrip: 0.6, affectedEnemies: 20 } },
   { id: "subsume_nezha", name: "Fire Walker", description: "Blaze a trail of flames that damages enemies, cleanses status, and boosts movement speed. Teleport blast deals Heat explosion damage.", energyCost: 25, source: "nezha", sourceWarframe: "Nezha", abilitySlot: 1, damage: 200, duration: 30, radius: 6, miscStats: { explosionDamage: 1250, flameDuration: 10, speedBuff: 0.25, statusChance: 0.75, damageInterval: 0.5 } },
   { id: "subsume_nidus", name: "Larva", description: "Spawn an infested pod that pulls enemies toward it. Recasting removes the previous pod.", energyCost: 50, source: "nidus", sourceWarframe: "Nidus", abilitySlot: 2, duration: 7, range: 8, miscStats: { mutationStackChance: 0.5 } },

@@ -96,13 +96,26 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("markDuration", "mod_panel", "multiplicative_percent", "Resonance: markDuration \u2014 Sonar Augment: Killing an enemy by shooting their weak spot will trigger another\u2026"),
   ]),
   augment_banshee_resonating_quake: mod("augment_banshee_resonating_quake", [
-    line("quakeDamage", "mod_panel", "multiplicative_percent", "Resonating Quake: quakeDamage \u2014 Sound Quake Augment: Forgoes channeling to create a shockwave that deals 20x Dam\u2026"),
+    line("channeled", "mod_panel", "multiplicative_percent", "Gaseous Quake: channeled \u2014 Sound Quake Augment: Channel for Gas damage and status. Damage and energy drain rise each second, then the area lingers."),
   ]),
   augment_banshee_silence_savage: mod("augment_banshee_silence_savage", [
     line("finisherDamage", "mod_panel", "multiplicative_percent", "Savage Silence: finisherDamage \u2014 Silence Augment: Silence staggers enemies and Finisher damage is increased by 30\u2026"),
   ]),
   augment_banshee_sonic_fracture: mod("augment_banshee_sonic_fracture", [
-    line("armorReduction", "mod_panel", "multiplicative_percent", "Sonic Fracture: armorReduction \u2014 Sonic Boom Augment: Enemy Armor is reduced by 70%."),
+    line("armorDuration", "mod_panel", "multiplicative_percent", "Sonic Siphon: armorDuration \u2014 Sonic Boom Augment: Hitting an enemy grants Armor for 20s, up to 1500."),
+    line("armorCap", "mod_panel", "multiplicative_percent", "Sonic Siphon: armorCap \u2014 Sonic Boom Augment: Hitting an enemy grants Armor for 20s, up to 1500."),
+  ]),
+  augment_frost_cold_front: mod("augment_frost_cold_front", [
+    line("globeHealthPerKill", "mod_panel", "multiplicative_percent", "Cold Front: globeHealthPerKill \u2014 Snow Globe Augment: Globe attaches to Frost. Frozen kills add 4% Globe health."),
+  ]),
+  augment_grendel_gastroparesis: mod("augment_grendel_gastroparesis", [
+    line("gasDamagePerEnemy", "mod_panel", "multiplicative_percent", "Gastroparesis: gasDamagePerEnemy \u2014 Passive Augment: Each consumed enemy adds 15% Gas damage to Primary and Secondary weapons."),
+  ]),
+  augment_oraxia_broods_oversurge: mod("augment_oraxia_broods_oversurge", [
+    line("electricityDamage", "mod_panel", "multiplicative_percent", "Brood's Oversurge: electricityDamage \u2014 Widow's Brood Augment: Hold to send Scuttlers for 2000 Electricity damage and status."),
+  ]),
+  augment_uriel_infernum: mod("augment_uriel_infernum", [
+    line("heatDamage", "mod_panel", "multiplicative_percent", "Infernum: heatDamage \u2014 Infernalis Augment: Fireballs deal 1500 Heat damage and slowly charge Brimstone."),
   ]),
   augment_baruuk_elusive_retribution: mod("augment_baruuk_elusive_retribution", [
     line("duration", "mod_panel", "multiplicative_percent", "Elusive Retribution: duration \u2014 Elude Augment: Every attack Baruuk Eludes increases his Melee Attack Speed and M\u2026"),
@@ -764,7 +777,7 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Larva Burst: range \u2014 Larva Augment: Reactivate Larva to detonate and deal 600 Toxin Damage in a 8m ra\u2026"),
   ]),
   lasting_covenant: mod("lasting_covenant", [
-    line("duration", "mod_panel", "multiplicative_percent", "Lasting Covenant: duration \u2014 Covenant Augment: Headshot kills increase Critical Chance bonus duration by 3s."),
+    line("duration", "mod_panel", "multiplicative_percent", "Lasting Covenant: duration \u2014 Covenant Augment: Weak Point kills increase Critical Chance bonus duration by 3s."),
   ]),
   lasting_purity: mod("lasting_purity", [
     line("damage", "weapon_dps", "conditional_stat_on_trigger", "wiki: Lasting Purity — +60% Damage when Aiming"),

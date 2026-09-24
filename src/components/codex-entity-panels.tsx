@@ -633,7 +633,9 @@ export function WarframeDetailPanel({
             {warframe.abilities.map((ab) => (
               <li key={ab.name} className="rounded border border-border/60 p-2">
                 <p className="text-sm font-medium">{ab.name}</p>
-                <p className="text-[10px] text-muted-foreground">{ab.energyCost} energy</p>
+                {ab.energyCost != null && (
+                  <p className="text-[10px] text-muted-foreground">{ab.energyCost} energy</p>
+                )}
                 <p className={cn("mt-0.5 text-muted-foreground", compact ? "text-[10px] leading-snug" : "text-xs")}>
                   {ab.description}
                 </p>

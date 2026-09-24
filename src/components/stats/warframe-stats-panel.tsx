@@ -1500,6 +1500,12 @@ function BansheeSilencePassivePanel() {
         color="text-violet-800 dark:text-violet-300"
         tooltip="Banshee: all equipped weapons (incl. Gunblades and Sentinel weapons) are treated as silent so enemies cannot hear them."
       />
+      <StatRow
+        label="Ability Cast"
+        value="Max Puncture · 10m"
+        color="text-violet-800 dark:text-violet-300"
+        tooltip="Casting an ability applies maximum Puncture status to enemies within 10m."
+      />
     </div>
   );
 }
@@ -2301,7 +2307,7 @@ export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equ
           {(warframe.id === "nyx" || warframe.id === "nyx_prime") && <NyxPsychicPassivePanel />}
           {(warframe.id === "harrow" || warframe.id === "harrow_prime") && <HarrowPassivePanel />}
           {(warframe.id === "gyre" || warframe.id === "gyre_prime") && <GyreAbilityCritPassivePanel />}
-          {warframe.id === "citrine" && <CitrineGeoluminesencePassivePanel />}
+          {(warframe.id === "citrine" || warframe.id === "citrine_prime") && <CitrineGeoluminesencePassivePanel />}
           {(warframe.id === "chroma" || warframe.id === "chroma_prime") && <ChromaPassivePanel />}
           {(warframe.id === "titania" || warframe.id === "titania_prime") && <TitaniaUpsurgePassivePanel />}
           {(warframe.id === "hildryn" || warframe.id === "hildryn_prime") && <HildrynShieldGatePassivePanel />}

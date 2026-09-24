@@ -66,6 +66,7 @@ const KUVA_TENET_CODA: Record<string, string> = {
 
 /** Wiki passives (auto-synced + hand-tuned overrides). */
 const WIKI_PASSIVES: Record<string, string> = {
+  aksondol: "Reloading creates a cloud of freezing mist that inflicts Cold status. The mist's range grows with each round reloaded.",
   acceltra: "Reloads 25% faster while sprinting.",
   acceltra_prime: "Sprint reload: Reloads 25% faster while sprinting (50% faster if wielded by Gauss / Gauss Prime). Rockets have a 7m minimum arming distance and explode in a 4m (Base) or 5m (Prime) radius (penetrates walls). Direct impacts have a guaranteed Impact proc.",
   "ack_&_brunt": "Blocking elemental damage stores stacks (up to 4); each stack adds ~17.5% elemental damage.",
@@ -231,6 +232,7 @@ const WIKI_PASSIVES: Record<string, string> = {
   noctua: "Deals pure Slash damage. Shots split into 4 fragments on impact that seek enemies within 20m. Innate infinite body punch through and 1.4m punch through against surfaces. Alt-fire: Deals primarily Radiation damage. Hurls a wide projectile requiring a full meter (recharges over 60 seconds; primary fire hits reduce recharge by 1 second). On kill: Passively scans enemies. Grants +50% additive Status Chance against fully scanned enemies.",
   nukor: "Consumes 0.5 ammo per tick. Inflicts the unique Microwave status, visually enlarging the body part struck. Kuva beam chains up to 2 nearby enemies within 9m, dealing 50% of the main beam's damage.",
   obex: "[Held] Grants 5% Movement Speed bonus when held.",
+  nunchasa: "Alt-fire releases a charged blizzard arrow that freezes enemies it touches and leaves a chilling path. Charged shots have 1.4m punch through; the blizzard arrow has 2m punch through.",
   ocucor: "On kill: Kills release an energy tendril (max 4) that locks onto enemies within 40° of the reticle. Tendrils disappear upon reloading or emptying the magazine.",
   ogris: "Rockets explode in a 7.1m radius upon impact (7.9m on Kuva) and penetrate walls. Enemies can destroy rockets with gunfire or area explosions. Can be fired while sprinting. Kuva direct hits have a guaranteed Impact proc.",
   okina: "[Held] Grants 5% Movement Speed bonus when held.",

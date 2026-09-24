@@ -35,9 +35,9 @@ export const MOD_BEHAVIORS_PISTOL: Record<string, VerifiedModBehavior> = {
     line("statusChance", "weapon_dps", "conditional_stat_on_trigger", "wiki: Embedded Catalyzer \u2014 On Ability Cast: +90% Status Chance when Aiming for 9s"),
   ]),
   galvanized_crosshairs: mod("galvanized_crosshairs", [
-    line("criticalChanceOnHeadshot", "weapon_dps", "conditional_crit_on_headshot", "wiki: Galvanized Crosshairs \u2014 +120% Critical Chance when Aiming for 12s on Headshot"),
-    line("criticalChanceOnHeadshotKill", "weapon_dps", "conditional_crit_on_headshot", "wiki: Galvanized Crosshairs \u2014 +40% Critical Chance per Headshot Kill stack (5x)"),
-    line("duration", "mod_panel", "multiplicative_percent", "Galvanized Crosshairs: duration \u2014 On Headshot:\\\\n+120% Critical Chance when Aiming for 12s\\\\nOn Headshot Kill:\\\\n+\u2026"),
+    line("criticalChanceOnHeadshot", "weapon_dps", "conditional_crit_on_headshot", "wiki: Galvanized Crosshairs \u2014 +120% Critical Chance when Aiming for 12s on Weak Point"),
+    line("criticalChanceOnHeadshotKill", "weapon_dps", "conditional_crit_on_headshot", "wiki: Galvanized Crosshairs \u2014 +40% Critical Chance per Weak Point Kill stack (5x)"),
+    line("duration", "mod_panel", "multiplicative_percent", "Galvanized Crosshairs: duration \u2014 On Weak Point:\\\\n+120% Critical Chance when Aiming for 12s\\\\nOn Weak Point Kill:\\\\n+\u2026"),
   ]),
   galvanized_shot: mod("galvanized_shot", [
     line("damagePerStatus", "weapon_dps", "conditional_damage_per_status_on_kill", "wiki: Galvanized Shot — on-kill damage per status stack"),
@@ -45,8 +45,8 @@ export const MOD_BEHAVIORS_PISTOL: Record<string, VerifiedModBehavior> = {
     line("statusChance", "weapon_dps", "multiplicative_percent", "wiki: Galvanized Shot — +80% Status Chance (always-on paper)"),
   ]),
   hydraulic_crosshairs: mod("hydraulic_crosshairs", [
-    line("criticalChanceOnHeadshot", "weapon_dps", "conditional_crit_on_headshot", "wiki: Hydraulic Crosshairs \u2014 On Headshot: +135% Critical Chance when Aiming for 9s"),
-    line("duration", "mod_panel", "multiplicative_percent", "Hydraulic Crosshairs: duration \u2014 On Headshot:\\\\n+135% Critical Chance when Aiming for 9s"),
+    line("criticalChanceOnHeadshot", "weapon_dps", "conditional_crit_on_headshot", "wiki: Hydraulic Crosshairs \u2014 On Weak Point: +135% Critical Chance when Aiming for 9s"),
+    line("duration", "mod_panel", "multiplicative_percent", "Hydraulic Crosshairs: duration \u2014 On Weak Point:\\\\n+135% Critical Chance when Aiming for 9s"),
   ]),
 
   lethal_torrent: mod("lethal_torrent", [

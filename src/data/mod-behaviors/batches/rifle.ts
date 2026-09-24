@@ -20,8 +20,8 @@ export const MOD_BEHAVIORS_RIFLE: Record<string, VerifiedModBehavior> = {
     line("sprintSpeed", "warframe_totals", "multiplicative_percent", "Amalgam Serration: sprintSpeed — +5% Sprint Speed per rank (max +55%)"),
   ]),
   argon_scope: mod("argon_scope", [
-    line("criticalChanceOnHeadshot", "weapon_dps", "conditional_crit_on_headshot", "wiki: Argon Scope \u2014 On Headshot: +135% Critical Chance when Aiming for 9s"),
-    line("duration", "mod_panel", "multiplicative_percent", "Argon Scope: duration \u2014 On Headshot:\\\\n+135% Critical Chance when Aiming for 9s"),
+    line("criticalChanceOnHeadshot", "weapon_dps", "conditional_crit_on_headshot", "wiki: Argon Scope \u2014 On Weak Point: +135% Critical Chance when Aiming for 9s"),
+    line("duration", "mod_panel", "multiplicative_percent", "Argon Scope: duration \u2014 On Weak Point:\\\\n+135% Critical Chance when Aiming for 9s"),
   ]),
   bladed_rounds: mod("bladed_rounds", [
     line("criticalMultiplier", "weapon_dps", "conditional_stat_on_kill", "wiki: Bladed Rounds \u2014 On Kill: +120% Critical Damage when Aiming for 9s"),
@@ -55,9 +55,9 @@ export const MOD_BEHAVIORS_RIFLE: Record<string, VerifiedModBehavior> = {
     line("statusChance", "weapon_dps", "multiplicative_percent", "wiki: Galvanized Savvy — +80% Status Chance (always-on paper)"),
   ]),
   galvanized_scope: mod("galvanized_scope", [
-    line("criticalChanceOnHeadshot", "weapon_dps", "conditional_crit_on_headshot", "wiki: Galvanized Scope \u2014 +120% Critical Chance when Aiming for 12s on Headshot"),
-    line("criticalChanceOnHeadshotKill", "weapon_dps", "conditional_crit_on_headshot", "wiki: Galvanized Scope \u2014 +40% Critical Chance per Headshot Kill stack (5x)"),
-    line("duration", "mod_panel", "multiplicative_percent", "Galvanized Scope: duration \u2014 On Headshot:\\\\n+120% Critical Chance when Aiming for 12s\\\\nOn Headshot Kill:\\\\n+\u2026"),
+    line("criticalChanceOnHeadshot", "weapon_dps", "conditional_crit_on_headshot", "wiki: Galvanized Scope \u2014 +120% Critical Chance when Aiming for 12s on Weak Point"),
+    line("criticalChanceOnHeadshotKill", "weapon_dps", "conditional_crit_on_headshot", "wiki: Galvanized Scope \u2014 +40% Critical Chance per Weak Point Kill stack (5x)"),
+    line("duration", "mod_panel", "multiplicative_percent", "Galvanized Scope: duration \u2014 On Weak Point:\\\\n+120% Critical Chance when Aiming for 12s\\\\nOn Weak Point Kill:\\\\n+\u2026"),
   ]),
   hammer_shot: mod("hammer_shot", [
     line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "Hammer Shot: criticalMultiplier \u2014 +60% Critical Damage\\\\n+80% Status Chance"),

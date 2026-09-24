@@ -141,7 +141,7 @@ export function getAbilityFieldDef(key: string): AbilityFieldDef | undefined {
 
 export interface AbilityDraft {
   name: string;
-  energyCost: number;
+  energyCost?: number;
   description: string;
   /** Optional fields the moderator chose to show/edit for this ability. */
   visibleFields: string[];

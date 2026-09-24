@@ -59,7 +59,8 @@ export function AbilityCard({
 }) {
   const eff = stats?.abilityEfficiency ?? 1;
   const display = { warframeId, abilityName: ability.name };
-  const effectiveCost = scaledAbilityEnergyCost(ability.energyCost, eff);
+  const effectiveCost =
+    typeof ability.energyCost === "number" ? scaledAbilityEnergyCost(ability.energyCost, eff) : null;
   const slotNum = gameSlot ?? index + 1;
   const augurPct = stats?.augurEnergyToShieldsPercent ?? 0;
 
@@ -76,8 +77,10 @@ export function AbilityCard({
           </div>
         </div>
         <div className="shrink-0">
-          <AbilityEnergyChip baseCost={ability.energyCost} effectiveCost={effectiveCost} />
-          {augurPct > 0 && (
+          {effectiveCost != null && ability.energyCost != null && (
+            <AbilityEnergyChip baseCost={ability.energyCost} effectiveCost={effectiveCost} />
+          )}
+          {augurPct > 0 && effectiveCost != null && (
             <AugurShieldsOnCast energySpent={effectiveCost} convertPercent={augurPct} />
           )}
         </div>
@@ -160,7 +163,8 @@ export function HelminthAbilityCard({
   onRemove: () => void;
 }) {
   const eff = stats?.abilityEfficiency ?? 1;
-  const effectiveCost = scaledAbilityEnergyCost(ability.energyCost, eff);
+  const effectiveCost =
+    typeof ability.energyCost === "number" ? scaledAbilityEnergyCost(ability.energyCost, eff) : null;
   const display = { warframeId: undefined, abilityName: ability.name, helminth: true as const };
   const augurPct = stats?.augurEnergyToShieldsPercent ?? 0;
 
@@ -179,8 +183,10 @@ export function HelminthAbilityCard({
           </div>
         </div>
         <div className="shrink-0">
-          <AbilityEnergyChip baseCost={ability.energyCost} effectiveCost={effectiveCost} />
-          {augurPct > 0 && (
+          {effectiveCost != null && ability.energyCost != null && (
+            <AbilityEnergyChip baseCost={ability.energyCost} effectiveCost={effectiveCost} />
+          )}
+          {augurPct > 0 && effectiveCost != null && (
             <AugurShieldsOnCast energySpent={effectiveCost} convertPercent={augurPct} />
           )}
         </div>

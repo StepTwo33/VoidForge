@@ -60,6 +60,7 @@ export const SELECT_FIELD_OPTIONS: Record<string, { value: string; label: string
     { value: "stacks", label: "Stacks (Merciless, Deadhead, etc.)" },
     { value: "onKill", label: "On kill" },
     { value: "onHeadshot", label: "On headshot" },
+    { value: "onWeakPoint", label: "On weak point" },
     { value: "onDamaged", label: "When damaged" },
     { value: "onReload", label: "On reload" },
     { value: "onAbilityCast", label: "On ability cast" },

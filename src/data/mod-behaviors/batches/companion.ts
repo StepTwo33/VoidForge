@@ -138,7 +138,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Crowd Dispersion: range \u2014 Unleashes a 10.0m radial knockdown when multiple enemies are nearby, dealing 10.\u2026 (arsenal display only)"),
   ]),
   detect_vulnerability: mod("detect_vulnerability", [
-    line("weakspotDamage", "mod_panel", "multiplicative_percent", "wiki: Detect Vulnerability — precept weakspot reveal (AI)"),
+    line("weakspotDamage", "mod_panel", "multiplicative_percent", "wiki: Detect Vulnerability — precept reveals Weak Points (AI)"),
   ]),
   dig: mod("dig", [
     line("digCooldown", "mod_panel", "multiplicative_percent", "Dig: digCooldown \u2014 The kubrow sniffs out buried objects and digs them up.\\\\n+270% Success Chance"),

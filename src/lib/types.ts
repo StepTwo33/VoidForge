@@ -203,7 +203,8 @@ export interface Warframe {
 
 export interface Ability {
   name: string;
-  energyCost: number;
+  /** Omitted when the live cost has not been published yet. */
+  energyCost?: number;
   description: string;
   subAbilities?: string[];
   damage?: number;

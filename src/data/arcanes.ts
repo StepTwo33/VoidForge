@@ -718,7 +718,7 @@ export const allArcanes: Mod[] = [
     category: "arcane",
     subCategory: "primary",
     stats: {"damage": 120.0},
-    description: "On Headshot Kill:\n+120% Damage for 24s. Stacks up to 3x.\n+30% to Headshot Multiplier\n-50% Weapon Recoil",
+    description: "On Weak Point Kill:\n+120% Damage for 24s. Stacks up to 3x.\n+30% to Headshot Multiplier\n-50% Weapon Recoil",
     rarity: "rare",
   },
 {
@@ -826,7 +826,7 @@ export const allArcanes: Mod[] = [
     category: "arcane",
     subCategory: "secondary",
     stats: {"damage": 120.0},
-    description: "On Headshot Kill: +120% Damage for 24s. Stacks up to 3x.\n+30% to Headshot Multiplier\n-50% Weapon Recoil",
+    description: "On Weak Point Kill: +120% Damage for 24s. Stacks up to 3x.\n+30% to Headshot Multiplier\n-50% Weapon Recoil",
     rarity: "rare",
   },
 {
@@ -1402,7 +1402,7 @@ export const allArcanes: Mod[] = [
     category: "arcane",
     subCategory: "warframe",
     stats: {},
-    description: "On Pistol Headshot Kill:\ 60% chance for +102% Ammo Efficiency for 12s\ +1 Arcane Revive +1 Arcane Revive",
+    description: "On Pistol Weak Point Kill:\ 60% chance for +102% Ammo Efficiency for 12s\ +1 Arcane Revive +1 Arcane Revive",
     rarity: "rare",
   },
 {
@@ -1426,7 +1426,7 @@ export const allArcanes: Mod[] = [
     category: "arcane",
     subCategory: "warframe",
     stats: {"headshotDamage": 300},
-    description: "On Headshot: +300% Damage for 18s. +50% per rank. +1 Arcane Revive",
+    description: "On Weak Point: +300% Damage for 18s. +50% per rank. +1 Arcane Revive",
     rarity: "rare",
   },
 {
@@ -1776,7 +1776,7 @@ export const allArcanes: Mod[] = [
     category: "arcane",
     subCategory: "warframe",
     stats: {},
-    description: "On Headshot: Gain +300% damage on your next shot.",
+    description: "On Weak Point: Gain +300% damage on your next shot.",
     rarity: "legendary",
   },
 {

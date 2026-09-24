@@ -13,6 +13,7 @@ export const WARFRAME_ENERGY_RANK30: Record<string, number> = {
   "chroma": 225,
   "chroma_prime": 300,
   "citrine": 180,
+  "citrine_prime": 200,
   "cyte_09": 230,
   "dagath": 225,
   "dante": 270,

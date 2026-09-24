@@ -293,6 +293,8 @@ function triggerNote(trigger: ArcaneTrigger, stackCap?: number | null): string |
       return "On kill";
     case "onHeadshot":
       return "On headshot";
+    case "onWeakPoint":
+      return "On weak point";
     case "onDamaged":
       return "When damaged";
     case "onReload":

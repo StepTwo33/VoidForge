@@ -109,7 +109,9 @@ export function HelminthPickerDialog({
                   <p className="mt-0.5 line-clamp-2 text-[10px] leading-relaxed text-muted-foreground">
                     {ability.description}
                   </p>
-                  <span className="mt-1 inline-block text-[9px] text-muted-foreground">⚡ {ability.energyCost} energy</span>
+                  {ability.energyCost != null && (
+                    <span className="mt-1 inline-block text-[9px] text-muted-foreground">⚡ {ability.energyCost} energy</span>
+                  )}
                 </button>
               ))
             )}

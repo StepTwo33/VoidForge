@@ -4320,15 +4320,28 @@ describe("Phase 8 — ability scaling registry + sets", () => {
     });
   });
 
-  it("Banshee Sonar mult × STR; Silence stun Misc-fixed", () => {
+  it("Banshee Sonar mult × STR; Sonic Boom strip × STR; Silence stun Misc-fixed; Sound Quake unchanneled", () => {
     expect(getVerifiedMiscScaling("banshee", "Sonar", "damageMultiplier")).toEqual({
       scale: "strength",
     });
+    expect(getVerifiedMiscScaling("banshee", "Sonic Boom", "armorStrip")).toEqual({
+      scale: "strength",
+      cap: 1,
+    });
     expect(getVerifiedMiscScaling("banshee", "Sonar", "propagationSpeed")).toBeNull();
     expect(getVerifiedMiscScaling("banshee", "Silence", "stunDuration")).toBeNull();
+    expect(getVerifiedMiscScaling("banshee", "Sound Quake", "energyDrain")).toBeNull();
     expect(getVerifiedMiscScaling("banshee_prime", "Sonar", "damageMultiplier")).toEqual({
       scale: "strength",
     });
+    const banshee = allWarframes.find((w) => w.id === "banshee")!;
+    const boom = banshee.abilities.find((a) => a.name === "Sonic Boom")!;
+    expect(boom.damage).toBe(250);
+    expect(boom.miscStats).toMatchObject({ armorStrip: 0.7, armorStripCap: 1 });
+    const quake = banshee.abilities.find((a) => a.name === "Sound Quake")!;
+    expect(quake.duration).toBe(25);
+    expect(quake.miscStats?.channeled).toBeUndefined();
+    expect(quake.miscStats?.energyDrain).toBeUndefined();
   });
 
   it("Revenant Mesmer / Reave / Danse / Enthrall scaling", () => {

@@ -1382,17 +1382,18 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     speedMultiplier: { scale: "range", cap: 1.5 },
   },
 
-  // wiki: Sonic Boom — Impact via damage; 180° cone Misc-fixed
-  // wiki: Sonar — weak-spot mult × STR; propagation Misc-fixed
+  // wiki Update 44: Sonic Boom — Impact via damage; 70% armor strip × STR, cap 100%; cone Misc-fixed
+  "banshee::Sonic Boom": {
+    armorStrip: { scale: "strength", cap: 1 },
+  },
+
+  // wiki: Sonar — weak-spot mult × STR; spots count as Weak Points; propagation Misc-fixed
   "banshee::Sonar": {
     damageMultiplier: { scale: "strength" },
   },
 
-  // wiki: Silence — stun Misc-fixed; aura via ability.range/duration
-  // wiki: Sound Quake — Blast DPS via damage; channeled energyDrain × max((2−EFF)÷DUR, 0.25)
-  "banshee::Sound Quake": {
-    energyDrain: { scale: "efficiency", formula: "channeled_drain" },
-  },
+  // wiki: Silence — stun Misc-fixed; recast refreshes duration; aura via ability.range/duration
+  // wiki Update 44: Sound Quake — unchanneled 25s zone; Blast damage via ability.damage
 
   // wiki: Enthrall — pillar DPS via damage; projectile / pillar radius × STR/RNG; thrall duration via ability.duration
   "revenant::Enthrall": {
