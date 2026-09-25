@@ -4718,8 +4718,8 @@ export const allWarframes: Warframe[] = [
   {
     "id": "narin",
     "name": "Narin",
-    "health": 270,
-    "shield": 550,
+    "health": 370,
+    "shield": 650,
     "armor": 165,
     "energy": 200,
     "sprintSpeed": 1.1,
