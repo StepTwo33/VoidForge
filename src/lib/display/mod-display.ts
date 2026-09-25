@@ -29,6 +29,7 @@ const FLAT_STAT_KEYS = new Set([
   "ampStatusDamage",
   "ampSchoolDamage",
   "ampEnergyRegen",
+  "killsRequired",
 ]);
 
 const PERCENT_LIKE_KEYS = new Set([

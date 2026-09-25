@@ -117,6 +117,21 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
   augment_uriel_infernum: mod("augment_uriel_infernum", [
     line("heatDamage", "mod_panel", "multiplicative_percent", "Infernum: heatDamage \u2014 Infernalis Augment: Fireballs deal 1500 Heat damage and slowly charge Brimstone."),
   ]),
+  augment_dante_noctua_swarm: mod("augment_dante_noctua_swarm", [
+    line("range", "mod_panel", "flat", "Noctua Swarm: range \u2014 Noctua Augment: Paragrimms swarm 8m for 15s and deal 500 Slash per second."),
+    line("duration", "mod_panel", "flat", "Noctua Swarm: duration \u2014 Noctua Augment: Paragrimms swarm 8m for 15s and deal 500 Slash per second."),
+    line("allyRadius", "mod_panel", "flat", "Noctua Swarm: allyRadius \u2014 Each living enemy restores 2 Energy per second to allies within 25m, up to 20."),
+  ]),
+  augment_temple_rhythm_guard: mod("augment_temple_rhythm_guard", [
+    line("overguardPerCast", "mod_panel", "flat", "Rhythm Guard: overguardPerCast \u2014 Passive Augment: 100 Overguard on a Backbeat, doubling up to 1600."),
+    line("overguardAtMaxStacks", "mod_panel", "flat", "Rhythm Guard: overguardAtMaxStacks \u2014 Passive Augment: 100 Overguard on a Backbeat, doubling up to 1600."),
+  ]),
+  augment_nokko_reroot_rampage: mod("augment_nokko_reroot_rampage", [
+    line("range", "mod_panel", "flat", "Reroot Rampage: range \u2014 Reroot Augment: Sprodlings deal 250 Toxin in an 8m radius."),
+  ]),
+  augment_koumei_kumihimo_loading: mod("augment_koumei_kumihimo_loading", [
+    line("killsRequired", "mod_panel", "flat", "Kumihimo Loading: killsRequired \u2014 Kumihimo Augment: 6 passive-weapon kills grant a loaded die that always rolls 6."),
+  ]),
   augment_baruuk_elusive_retribution: mod("augment_baruuk_elusive_retribution", [
     line("duration", "mod_panel", "multiplicative_percent", "Elusive Retribution: duration \u2014 Elude Augment: Every attack Baruuk Eludes increases his Melee Attack Speed and M\u2026"),
     line("evasionToDamage", "mod_panel", "multiplicative_percent", "Elusive Retribution: evasionToDamage \u2014 Elude Augment: Every attack Baruuk Eludes increases his Melee Attack Speed and M\u2026"),

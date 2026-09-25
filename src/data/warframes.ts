@@ -4728,23 +4728,46 @@ export const allWarframes: Warframe[] = [
     "abilities": [
       {
         "name": "Neote",
+        "energyCost": 25,
         "description": "Lunge with Narin's ice rapier Neote, inflicting Cold damage and Cold and Puncture status on foes directly ahead. Gain Ice for each enemy hit. This is Narin's Helminth ability.",
-        "damageType": "Cold"
+        "damage": 400,
+        "range": 12,
+        "damageType": "Cold",
+        "miscStats": { "totalDamage": 2000 }
       },
       {
         "name": "Naraemagi",
+        "energyCost": 50,
         "description": "Recover Shields by absorbing Cold status from nearby enemies. Gain Overguard if Shields are already full. Gain Ice for each enemy hit.",
-        "damageType": "Cold"
+        "radius": 14,
+        "damageType": "Cold",
+        "miscStats": { "shieldPerColdStatus": 75, "overguardCap": 15000 }
       },
       {
         "name": "Hakchum",
+        "energyCost": 75,
         "description": "Tap to leap into the air, then tap again to land at the target. The landing applies Cold damage vulnerability and Cold status in a large radius. Gain Ice for each enemy hit.",
-        "damageType": "Cold"
+        "damage": 1000,
+        "damagePerSecond": 100,
+        "radius": 10,
+        "duration": 15,
+        "damageType": "Cold",
+        "miscStats": { "damageVulnerability": 1.5 }
       },
       {
         "name": "Nurinarim",
+        "energyCost": 25,
         "description": "Requires full Ice to cast. An ancestral spirit descends and Narin sword-dances for continuous nearby damage. Press Attack on marked targets to launch icy slashes that deplete Armor and Shields. Hitting Frozen enemies makes them explode for radial Cold damage.",
-        "damageType": "Cold"
+        "damage": 40000,
+        "aoeDamage": 500,
+        "radius": 8,
+        "duration": 15,
+        "damageType": "Cold",
+        "miscStats": {
+          "defenseReduction": 0.05,
+          "explosionDamage": 20000,
+          "explosionRange": 10
+        }
       }
     ]
   },

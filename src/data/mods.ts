@@ -3807,6 +3807,69 @@ const RAW_MODS: Mod[] = [
     "warframeId": "grendel"
   },
   {
+    "id": "augment_dante_noctua_swarm",
+    "name": "Noctua Swarm",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "range": 8,
+      "duration": 15,
+      "allyRadius": 25
+    },
+    "description": "Noctua Augment: Alternate Fire releases Paragrimms that swarm 8m around the point of aim for 15s, silencing enemies and dealing 500 Slash per second. Each living enemy restores 2 Energy per second to allies within 25m, up to 20.",
+    "rarity": "rare",
+    "warframeId": "dante"
+  },
+  {
+    "id": "augment_temple_rhythm_guard",
+    "name": "Rhythm Guard",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "overguardPerCast": 25,
+      "overguardAtMaxStacks": 400
+    },
+    "description": "Passive Augment: Gain 100 Overguard when using an Ability on the Backbeat. Amount doubles up to 1600 per Beat, but resets if the Beat is missed.",
+    "rarity": "rare",
+    "warframeId": "temple"
+  },
+  {
+    "id": "augment_nokko_reroot_rampage",
+    "name": "Reroot Rampage",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "range": 8
+    },
+    "description": "Reroot Augment: Collecting Reroot orbs summons additional Sprodlings inflicting 250 Toxin Damage in an 8m radius, with 20% more Critical Chance each bounce.",
+    "rarity": "rare",
+    "warframeId": "nokko"
+  },
+  {
+    "id": "augment_koumei_kumihimo_loading",
+    "name": "Kumihimo Loading",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "killsRequired": 6
+    },
+    "description": "Kumihimo Augment: 6 kills with weapons affected by Koumei's Passive give a loaded die that always rolls 6. Hold to cast empowered Kumihimo and consume all dice.",
+    "rarity": "rare",
+    "warframeId": "koumei"
+  },
+  {
     "id": "augment_vauban_tesla_link",
     "name": "Tesla Link",
     "polarity": "naramon",
