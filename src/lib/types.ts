@@ -1184,6 +1184,8 @@ export interface Loadout {
     /** Kuva/Tenet/Coda — same as saved weapon build. */
     progenitorElement?: string;
     progenitorBonusPercent?: number;
+    /** Formas past rank 30 (0–5). Capacity follows the resulting rank. */
+    adversaryFormas?: number;
     incarnonEvolutions?: Record<number, number>;
   };
   secondaryBuild?: {
@@ -1196,6 +1198,7 @@ export interface Loadout {
     slotPolarities?: Record<number, string>;
     progenitorElement?: string;
     progenitorBonusPercent?: number;
+    adversaryFormas?: number;
     incarnonEvolutions?: Record<number, number>;
   };
   meleeBuild?: {
@@ -1208,6 +1211,7 @@ export interface Loadout {
     slotPolarities?: Record<number, string>;
     progenitorElement?: string;
     progenitorBonusPercent?: number;
+    adversaryFormas?: number;
     incarnonEvolutions?: Record<number, number>;
   };
   companionBuild?: {

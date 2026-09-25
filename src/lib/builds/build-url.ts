@@ -13,6 +13,8 @@ export interface ShareableBuild {
   parts?: Record<string, string>;
   hasOrokinCatalyst?: boolean;
   isMR30?: boolean;
+  /** Kuva/Tenet/Coda Formas past rank 30 (0–5). Each adds 2 rank, up to 40. */
+  adversaryFormas?: number;
   slotPolarities?: Record<string, string>;
   // Warframe-specific
   shards?: { id: string; bonus: string }[];
@@ -104,7 +106,7 @@ type PackedMod = [string, number] | [string, number, number];
 /**
  * Dense array form:
  * [1, typeCode, itemId, mods, extras?]
- * extras only present when needed: { a, s, pe, pb, mt, p, oc, mr, sp, ie }
+ * extras only present when needed: { a, s, pe, pb, mt, p, oc, mr, af, sp, ie }
  */
 export function packShareableBuild(build: ShareableBuild): unknown[] {
   const mods: PackedMod[] = build.mods.map((m) =>
@@ -122,6 +124,7 @@ export function packShareableBuild(build: ShareableBuild): unknown[] {
   if (build.parts && Object.keys(build.parts).length > 0) extras.p = build.parts;
   if (build.hasOrokinCatalyst) extras.oc = 1;
   if (build.isMR30) extras.mr = 1;
+  if (build.adversaryFormas != null && build.adversaryFormas > 0) extras.af = build.adversaryFormas;
   if (build.slotPolarities && Object.keys(build.slotPolarities).length > 0) {
     extras.sp = build.slotPolarities;
   }
@@ -177,6 +180,7 @@ export function unpackShareableBuild(raw: unknown): ShareableBuild | null {
     }
     if (e.oc) build.hasOrokinCatalyst = true;
     if (e.mr) build.isMR30 = true;
+    if (typeof e.af === "number") build.adversaryFormas = e.af;
     if (e.sp && typeof e.sp === "object" && !Array.isArray(e.sp)) {
       build.slotPolarities = e.sp as Record<string, string>;
     }

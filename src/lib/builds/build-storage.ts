@@ -159,6 +159,8 @@ export interface WeaponBuildData {
   /** Kuva/Tenet/Coda progenitor bonus (optional). */
   progenitorElement?: string;
   progenitorBonusPercent?: number;
+  /** Formas that raised a Kuva/Tenet/Coda weapon past rank 30 (0–5). */
+  adversaryFormas?: number;
   /** Incarnon evolution picks: tier → slot index. */
   incarnonEvolutions?: Record<number, number>;
 }

@@ -12,7 +12,7 @@ import { Weapon, Mod, EquippedMod, SimulationParams, DEFAULT_SIM_PARAMS, Modular
 import { getWeaponArcanes } from "@/lib/weapons/weapon-arcane-config";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import type { SlotType } from "@/components/mod-picker";
-import { Zap, Star, Wrench, ChevronRight, Save, FolderOpen, Gem } from "lucide-react";
+import { Zap, Wrench, ChevronRight, Save, FolderOpen, Gem } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, persistSavedBuild } from "@/lib/builds/build-storage";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { toast } from "sonner";
@@ -78,7 +78,6 @@ export default function ModularBuilderPage() {
   const [arcanePickerOpen, setArcanePickerOpen] = useState(false);
   const [activeArcaneSlot, setActiveArcaneSlot] = useState(0);
   const [hasOrokinCatalyst, setHasOrokinCatalyst] = useState(false);
-  const [isMR30, setIsMR30] = useState(false);
   const [simParams, setSimParams] = useState<SimulationParams>(() => ({ ...DEFAULT_SIM_PARAMS }));
 
   // Build the assembled weapon
@@ -137,7 +136,7 @@ export default function ModularBuilderPage() {
   const arcaneConfig = assembledWeapon ? getWeaponArcanes(assembledWeapon) : { slots: 0, arcanes: [], label: "" };
 
   const [slotPolarities, setSlotPolarities] = useState<Record<number, string>>({});
-  const capacity = (hasOrokinCatalyst ? 60 : 30) + (isMR30 ? 10 : 0);
+  const capacity = hasOrokinCatalyst ? 60 : 30;
   const capacityUsed = useMemo(() => {
     return equippedMods.reduce((sum, m) => {
       const mod = modsMap.get(m.modId);
@@ -192,7 +191,6 @@ export default function ModularBuilderPage() {
           })
         );
         setHasOrokinCatalyst(shared.hasOrokinCatalyst ?? false);
-        setIsMR30(shared.isMR30 ?? false);
         if (shared.arcanes?.length) {
           setEquippedArcanes(shared.arcanes.map((id) => (id ? resolveArcaneById(id) : null)));
         } else {
@@ -235,7 +233,7 @@ export default function ModularBuilderPage() {
       mods: equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
       arcaneIds: equippedArcanes.map((a) => a?.id ?? null),
       hasOrokinCatalyst,
-      isMR30,
+      isMR30: false,
       slotPolarities,
     };
   };
@@ -284,7 +282,6 @@ export default function ModularBuilderPage() {
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
     }));
     setHasOrokinCatalyst(d.hasOrokinCatalyst);
-    setIsMR30(d.isMR30 ?? false);
     setSlotPolarities(d.slotPolarities || {});
     const aid = d.arcaneIds ?? [];
     setEquippedArcanes([
@@ -668,18 +665,6 @@ export default function ModularBuilderPage() {
                   <h2 className="text-lg font-bold">{assembledWeapon.name}</h2>
                   <span className="text-sm text-muted-foreground capitalize">{assembledWeapon.category}</span>
                   <div className="ml-auto flex items-center gap-2">
-                    <button
-                      onClick={() => setIsMR30(!isMR30)}
-                      className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
-                        isMR30
-                          ? "bg-amber-500/10 border-amber-500/50 text-amber-700 dark:text-amber-400"
-                          : "border-border text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <Star className="h-3.5 w-3.5" />
-                      MR 30+
-                    </button>
                     <button
                       onClick={() => setHasOrokinCatalyst(!hasOrokinCatalyst)}
                       className={cn(

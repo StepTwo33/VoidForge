@@ -17,7 +17,7 @@ import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity"
 import { WeaponStatsPanel, ArchwingStatsPanel } from "@/components/stats-panel";
 import { Weapon, EquippedMod, CalculatedStats, ArchwingCalculatedStats } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Star, Zap, Save, FolderOpen } from "lucide-react";
+import { Zap, Save, FolderOpen } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, ArchwingBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
 import { toast } from "sonner";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
@@ -57,7 +57,6 @@ export default function ArchwingBuilderPage() {
   // Shared
   const [hasReactor, setHasReactor] = useState(false);
   const [hasCatalyst, setHasCatalyst] = useState(false);
-  const [isMR30, setIsMR30] = useState(false);
   const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>([]);
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
@@ -76,7 +75,7 @@ export default function ArchwingBuilderPage() {
       weaponMods: weaponMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
       hasReactor,
       hasCatalyst,
-      isMR30,
+      isMR30: false,
       framePolarities: mode === "archwing" ? archwingPolarities : necramechPolarities,
       weaponPolarities,
     };
@@ -130,7 +129,6 @@ export default function ArchwingBuilderPage() {
     }
     setHasReactor(d.hasReactor);
     setHasCatalyst(d.hasCatalyst);
-    setIsMR30(d.isMR30);
     setWeaponPolarities(d.weaponPolarities || {});
     setCurrentBuildId(build.id);
     setBuildName(build.name);
@@ -180,8 +178,8 @@ export default function ArchwingBuilderPage() {
     return null;
   }, [mode, selectedArchwing, selectedNecramech, archwingMods, necramechMods]);
 
-  const frameCapacity = (hasReactor ? 60 : 30) + (isMR30 ? 10 : 0);
-  const weaponCapacity = (hasCatalyst ? 60 : 30) + (isMR30 ? 10 : 0);
+  const frameCapacity = hasReactor ? 60 : 30;
+  const weaponCapacity = hasCatalyst ? 60 : 30;
 
   const frameModsUsed = useMemo(() => {
     const mods = mode === "archwing" ? archwingMods : necramechMods;
@@ -332,15 +330,6 @@ export default function ArchwingBuilderPage() {
                     {mode === "archwing" ? "ARCHWING MODS" : "NECRAMECH MODS"}
                   </h2>
                   <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      onClick={() => setIsMR30(!isMR30)}
-                      className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
-                        isMR30 ? "bg-amber-500/10 border-amber-500/50 text-amber-700 dark:text-amber-400" : "border-border text-muted-foreground"
-                      )}
-                    >
-                      <Star className="h-3.5 w-3.5" /> MR 30+
-                    </button>
                     <button
                       onClick={() => setHasReactor(!hasReactor)}
                       className={cn(

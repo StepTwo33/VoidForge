@@ -1,4 +1,6 @@
-import type { Companion, Weapon } from "../types";
+import type { Companion, Mod, Weapon } from "../types";
+import { modEligibleForWeaponSlot } from "@/lib/mods/mod-weapon-eligibility";
+import { getWeaponModProfile } from "@/lib/mods/weapon-mod-tags";
 
 /** Weapon categories that belong in Companion Builder only (not Weapon Builder). */
 export const COMPANION_WEAPON_CATEGORIES = [
@@ -11,6 +13,57 @@ export type CompanionWeaponCategory = (typeof COMPANION_WEAPON_CATEGORIES)[numbe
 
 export function isCompanionWeaponCategory(category: string): boolean {
   return (COMPANION_WEAPON_CATEGORIES as readonly string[]).includes(category);
+}
+
+/** Wiki: these robotic guns take shotgun mods. Everything else listed as a rifle gun takes rifle mods. */
+const SHOTGUN_SENTINEL_WEAPON_IDS = new Set(["sweeper", "sweeper_prime"]);
+/** Wiki: Burst Laser family takes pistol mods. */
+const PISTOL_SENTINEL_WEAPON_IDS = new Set([
+  "burst_laser",
+  "burst_laser_prime",
+  "prisma_burst_laser",
+]);
+/** Glaives. Hound weapons are melee too. */
+const MELEE_SENTINEL_WEAPON_IDS = new Set(["deconstructor", "deconstructor_prime"]);
+
+export type CompanionWeaponModClass = "rifle" | "shotgun" | "pistol" | "melee" | "beast_claw";
+
+/** Which ground-weapon mod class this companion weapon accepts. */
+export function companionWeaponModClass(weapon: { id: string; category: string }): CompanionWeaponModClass {
+  if (weapon.category === "beast_claw") return "beast_claw";
+  if (weapon.category === "hound_weapon" || MELEE_SENTINEL_WEAPON_IDS.has(weapon.id)) return "melee";
+  if (SHOTGUN_SENTINEL_WEAPON_IDS.has(weapon.id)) return "shotgun";
+  if (PISTOL_SENTINEL_WEAPON_IDS.has(weapon.id)) return "pistol";
+  return "rifle";
+}
+
+/** True when this mod belongs on the companion's weapon, not the companion itself. */
+export function modFitsCompanionWeapon(
+  mod: Pick<Mod, "id" | "category" | "subCategory" | "name" | "description" | "polarity">,
+  weapon: Pick<Weapon, "id" | "category" | "triggerType" | "name">,
+): boolean {
+  const modClass = companionWeaponModClass(weapon);
+  if (modClass === "beast_claw") {
+    return (
+      mod.category === "companion_weapon" &&
+      (mod.subCategory === "beast_weapon" || mod.subCategory === "riven")
+    );
+  }
+  if (mod.category === "companion" || mod.category === "companion_weapon") {
+    return weapon.category === "sentinel_weapon" && mod.id === "fired_up";
+  }
+  if (mod.subCategory === "riven") {
+    const rivenId =
+      modClass === "shotgun" ? "riven_shotgun"
+      : modClass === "pistol" ? "riven_pistol"
+      : modClass === "melee" ? "riven_melee"
+      : "riven_rifle";
+    return mod.id === rivenId;
+  }
+  const builderCategory = modClass === "pistol" ? "secondary" : modClass === "melee" ? "melee" : "primary";
+  const weaponCategory = modClass === "pistol" ? "pistol" : modClass;
+  const profile = { ...getWeaponModProfile(weapon), category: weaponCategory };
+  return modEligibleForWeaponSlot(mod as Mod, builderCategory, weaponCategory, "regular", profile);
 }
 
 /** Breed-specific claw weapon per companion id (not interchangeable within a family). */

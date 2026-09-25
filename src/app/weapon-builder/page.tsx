@@ -25,10 +25,13 @@ import { applyAlternateMode, weaponHasAlternateMode } from "@/lib/weapons/weapon
 import { applyArbucepAttackMode } from "@/lib/weapons/weapon-arbucep-mode";
 import {
   weaponSupportsProgenitor,
+  weaponModCapacity,
+  clampAdversaryFormas,
+  adversaryRankFromFormas,
   PROGENITOR_BONUS_DEFAULT,
   normalizeProgenitorElement,
 } from "@/lib/weapons/weapon-progenitor";
-import { Zap, Flag, Flame, Plus, X, Gem, Star, Save, FolderOpen, Share2, Check, Upload, Crosshair, Orbit, Swords } from "lucide-react";
+import { Zap, Flag, Flame, Plus, X, Gem, Save, FolderOpen, Share2, Check, Upload, Crosshair, Orbit, Swords } from "lucide-react";
 import { isPrimaryWeaponCategory } from "@/lib/mods/mod-weapon-eligibility";
 import { isTomeWeapon } from "@/lib/weapons/tome-weapons";
 import { getWeaponArcanes } from "@/lib/weapons/weapon-arcane-config";
@@ -78,7 +81,7 @@ export default function WeaponBuilderPage() {
   const [weaponCategory, setWeaponCategory] = useState("all");
   const [showWeaponList, setShowWeaponList] = useState(true);
   const [hasOrokinCatalyst, setHasOrokinCatalyst] = useState(false);
-  const [isMR30, setIsMR30] = useState(false);
+  const [adversaryFormas, setAdversaryFormas] = useState(0);
   const [selectedEvolutions, setSelectedEvolutions] = useState<Record<number, number>>({}); // tier -> slot
   const [rivenStatsMap, setRivenStatsMap] = useState<Record<number, Record<string, number>>>({});
   const [equippedArcanes, setEquippedArcanes] = useState<(Mod | null)[]>([null, null]);
@@ -184,7 +187,9 @@ export default function WeaponBuilderPage() {
         }
         if (shared.progenitorBonusPercent != null) setProgenitorBonusPercent(shared.progenitorBonusPercent);
         if (shared.hasOrokinCatalyst != null) setHasOrokinCatalyst(shared.hasOrokinCatalyst);
-        if (shared.isMR30 != null) setIsMR30(shared.isMR30);
+        setAdversaryFormas(
+          weaponSupportsProgenitor(weapon) ? clampAdversaryFormas(shared.adversaryFormas) : 0,
+        );
         if (shared.slotPolarities) setSlotPolarities(shared.slotPolarities);
         const sharedIncarnon = (shared as ShareableBuild & { incarnonEvolutions?: Record<number, number> }).incarnonEvolutions;
         if (sharedIncarnon) setSelectedEvolutions(sharedIncarnon);
@@ -207,7 +212,10 @@ export default function WeaponBuilderPage() {
       stanceModId: stanceMod?.id,
       arcaneIds: equippedArcanes.map((a) => a?.id ?? null),
       hasOrokinCatalyst,
-      isMR30,
+      isMR30: false,
+      ...(weaponSupportsProgenitor(selectedWeapon) && adversaryFormas > 0
+        ? { adversaryFormas }
+        : {}),
       slotPolarities,
       ...(weaponCalcOptions?.progenitorElement != null
         ? {
@@ -217,7 +225,7 @@ export default function WeaponBuilderPage() {
         : {}),
       ...(Object.keys(selectedEvolutions).length > 0 ? { incarnonEvolutions: selectedEvolutions } : {}),
     };
-  }, [selectedWeapon, equippedMods, stanceMod, equippedArcanes, hasOrokinCatalyst, isMR30, slotPolarities, weaponCalcOptions, selectedEvolutions]);
+  }, [selectedWeapon, equippedMods, stanceMod, equippedArcanes, hasOrokinCatalyst, adversaryFormas, slotPolarities, weaponCalcOptions, selectedEvolutions]);
 
   const applyLoadedBuild = useCallback((build: SavedBuild, options?: { silent?: boolean }) => {
     const d = build.data as WeaponBuildData;
@@ -248,7 +256,9 @@ export default function WeaponBuilderPage() {
     }
     setEquippedArcanes(resolveSavedArcaneSlots(d.arcaneIds, 2));
     setHasOrokinCatalyst(d.hasOrokinCatalyst);
-    setIsMR30(d.isMR30);
+    setAdversaryFormas(
+      weaponSupportsProgenitor(weapon) ? clampAdversaryFormas(d.adversaryFormas) : 0,
+    );
     setSlotPolarities(d.slotPolarities || {});
     if (weaponSupportsProgenitor(weapon)) {
       setProgenitorElement(normalizeProgenitorElement(d.progenitorElement));
@@ -344,7 +354,10 @@ export default function WeaponBuilderPage() {
         mods: equippedMods.map((m) => ({ id: m.modId, rank: m.rank })),
         arcanes: equippedArcanes.map((a) => a?.id ?? ""),
         hasOrokinCatalyst,
-        isMR30,
+        isMR30: false,
+        ...(weaponSupportsProgenitor(selectedWeapon) && adversaryFormas > 0
+          ? { adversaryFormas }
+          : {}),
         slotPolarities: slotPolarities as Record<string, string>,
         ...(weaponCalcOptions?.progenitorElement != null
           ? {
@@ -367,7 +380,7 @@ export default function WeaponBuilderPage() {
     equippedMods,
     equippedArcanes,
     hasOrokinCatalyst,
-    isMR30,
+    adversaryFormas,
     slotPolarities,
     weaponCalcOptions,
     selectedEvolutions,
@@ -457,6 +470,7 @@ export default function WeaponBuilderPage() {
     setAlternateMode(false);
     setEquippedMods([]);
     setHasOrokinCatalyst(false);
+    setAdversaryFormas(0);
     setSelectedEvolutions({});
     setRivenStatsMap({});
     setEquippedArcanes([null, null]);
@@ -537,6 +551,8 @@ export default function WeaponBuilderPage() {
   const isMeleeWeapon = selectedWeapon?.category === "melee";
   const hasWeaponExilusSlot = isPrimaryWeapon || isSecondaryWeapon || isMeleeWeapon;
   const totalModSlots = hasWeaponExilusSlot ? numSlots + 1 : numSlots;
+  const modCapacity = weaponModCapacity(selectedWeapon, adversaryFormas, hasOrokinCatalyst);
+  const showAdversaryRank = selectedWeapon != null && weaponSupportsProgenitor(selectedWeapon);
 
   return (
     <PageShell>
@@ -707,18 +723,20 @@ export default function WeaponBuilderPage() {
                 </BuilderActionGroup>
 
                 <BuilderActionGroup>
-                  <button
-                    onClick={() => setIsMR30(!isMR30)}
-                    className={cn(
-                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
-                      isMR30
-                        ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
-                  >
-                    <Star className="h-3.5 w-3.5" />
-                    <span className="inline">MR 30+</span>
-                  </button>
+                  {showAdversaryRank && (
+                    <button
+                      onClick={() => setAdversaryFormas((n) => (n >= 5 ? 0 : n + 1))}
+                      className={cn(
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
+                        adversaryFormas > 0
+                          ? "bg-amber-500/10 text-amber-800 dark:text-amber-400"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      )}
+                      title="Each Forma raises max rank by 2, up to 40. Mod capacity matches that rank."
+                    >
+                      <span className="inline">Rank {adversaryRankFromFormas(adversaryFormas)}</span>
+                    </button>
+                  )}
                   <button
                     onClick={() => setHasOrokinCatalyst(!hasOrokinCatalyst)}
                     className={cn(
@@ -821,12 +839,11 @@ export default function WeaponBuilderPage() {
                   </h2>
                   <span className={cn(
                     "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
-                    computeUsedCapacity(equippedMods, modsMap, slotPolarities) >
-                      (hasOrokinCatalyst ? 60 : 30) + (isMR30 ? 10 : 0)
+                    computeUsedCapacity(equippedMods, modsMap, slotPolarities) > modCapacity
                       ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
                   )}>
                     <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
-                    {computeUsedCapacity(equippedMods, modsMap, slotPolarities)} / {(hasOrokinCatalyst ? 60 : 30) + (isMR30 ? 10 : 0)}
+                    {computeUsedCapacity(equippedMods, modsMap, slotPolarities)} / {modCapacity}
                   </span>
                 </div>
                 {showImporter && (

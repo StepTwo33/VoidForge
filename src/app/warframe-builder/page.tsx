@@ -33,7 +33,7 @@ import {
   ArchonShard,
   WeaponCalculationOptions,
 } from "@/lib/types";
-import { Zap, Flag, Gem, Star, Save, FolderOpen, Share2, Check, Upload, Shield } from "lucide-react";
+import { Zap, Flag, Gem, Save, FolderOpen, Share2, Check, Upload, Shield } from "lucide-react";
 import { warframeArcanes } from "@/data/arcanes";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import { ArchonShardSlot } from "@/components/archon-shard-slot";
@@ -110,7 +110,6 @@ export default function WarframeBuilderPage() {
   const [shardPickerOpen, setShardPickerOpen] = useState(false);
   const [activeShardSlot, setActiveShardSlot] = useState(0);
   const [hasOrokinReactor, setHasOrokinReactor] = useState(false);
-  const [isMR30, setIsMR30] = useState(false);
   const [helminthSlot, setHelminthSlot] = useState<number | null>(null); // which ability slot (0-3) is replaced
   const [helminthAbility, setHelminthAbility] = useState<HelminthAbility | null>(null);
   const [helminthPickerOpen, setHelminthPickerOpen] = useState(false);
@@ -266,7 +265,7 @@ export default function WarframeBuilderPage() {
       warframeId: selectedWarframe.id,
       ...payload,
       hasOrokinReactor: hasOrokinReactor,
-      isMR30,
+      isMR30: false,
       helminthSlot,
       helminthAbilityId: helminthAbility?.id ?? null,
       exaltedMods: exaltedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
@@ -280,7 +279,6 @@ export default function WarframeBuilderPage() {
     selectedWarframe,
     buildWarframePayload,
     hasOrokinReactor,
-    isMR30,
     helminthSlot,
     helminthAbility,
     exaltedMods,
@@ -320,7 +318,6 @@ export default function WarframeBuilderPage() {
     setEquippedShards(d.shards?.length === 5 ? d.shards : [...EMPTY_SHARDS]);
     setSelectedWarframe(wf);
     setHasOrokinReactor(d.hasOrokinReactor);
-    setIsMR30(d.isMR30);
     setExaltedMods((d.exaltedMods || []).map((m) => {
       const mod = modsMap.get(m.modId);
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
@@ -600,7 +597,7 @@ export default function WarframeBuilderPage() {
     return buildAbilityDisplayEntries(selectedWarframe, !!dualFormConfig, activeDualFormId);
   }, [selectedWarframe, dualFormConfig, activeDualFormId]);
 
-  const baseCapacity = warframeBaseCapacity(hasOrokinReactor, isMR30);
+  const baseCapacity = warframeBaseCapacity(hasOrokinReactor);
   const auraBonus = useMemo(
     () => computeWarframeAuraBonus(equippedMods, modsMap, slotPolarities, AURA_SLOT),
     [equippedMods, modsMap, slotPolarities],
@@ -872,18 +869,6 @@ export default function WarframeBuilderPage() {
                 </BuilderActionGroup>
 
                 <BuilderActionGroup>
-                  <button
-                    onClick={() => setIsMR30(!isMR30)}
-                    className={cn(
-                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
-                      isMR30
-                        ? "bg-amber-500/10 text-amber-800 dark:text-amber-400"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
-                  >
-                    <Star className="h-3.5 w-3.5" />
-                    <span className="inline">MR 30+</span>
-                  </button>
                   <button
                     onClick={() => setHasOrokinReactor(!hasOrokinReactor)}
                     className={cn(

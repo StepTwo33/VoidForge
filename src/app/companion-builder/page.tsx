@@ -33,7 +33,7 @@ import {
 } from "@/lib/mods/companion-precept-eligibility";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Zap, Dog, Bot, Bug, Swords, Crosshair, Flag, Star, Save, FolderOpen } from "lucide-react";
+import { Search, Zap, Dog, Bot, Bug, Swords, Crosshair, Flag, Save, FolderOpen } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, CompanionBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { cn } from "@/lib/utils";
@@ -74,7 +74,7 @@ function getCompanionModSubCategory(companionType: string): string[] {
   }
 }
 
-import { getCompanionWeapons, resolveDefaultCompanionWeapon, resolveHoundWeaponId } from "@/lib/weapons/companion-weapons";
+import { getCompanionWeapons, resolveDefaultCompanionWeapon, resolveHoundWeaponId, modFitsCompanionWeapon } from "@/lib/weapons/companion-weapons";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
@@ -154,7 +154,6 @@ export default function CompanionBuilderPage() {
   const [companionType, setCompanionType] = useState("all");
   const [showCompanionList, setShowCompanionList] = useState(true);
   const [hasReactor, setHasReactor] = useState(false);
-  const [isMR30, setIsMR30] = useState(false);
   const [slotPolarities, setSlotPolarities] = useState<Record<number, string>>({});
   const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>(() => getSavedBuilds("companion"));
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
@@ -187,7 +186,7 @@ export default function CompanionBuilderPage() {
       arcaneIds: [],
       hasReactor,
       hasCatalyst,
-      isMR30,
+      isMR30: false,
       slotPolarities,
       ...(companionParts ? { parts: companionParts } : {}),
     };
@@ -213,7 +212,7 @@ export default function CompanionBuilderPage() {
     } else {
       toast.success("Build saved locally", { description: "Log in to sync builds to your account" });
     }
-  }, [selectedCompanion, equippedMods, selectedWeapon, weaponMods, weaponSlotPolarities, hasReactor, hasCatalyst, isMR30, slotPolarities, companionParts, currentBuildId]);
+  }, [selectedCompanion, equippedMods, selectedWeapon, weaponMods, weaponSlotPolarities, hasReactor, hasCatalyst, slotPolarities, companionParts, currentBuildId]);
 
   const handleLoadBuild = useCallback((build: SavedBuild) => {
     const d = build.data as CompanionBuildData;
@@ -244,7 +243,6 @@ export default function CompanionBuilderPage() {
     }));
     setHasReactor(d.hasReactor);
     setHasCatalyst(d.hasCatalyst ?? false);
-    setIsMR30(d.isMR30);
     const resolved = loadedParts ? resolveCompanionParts(loadedParts) : null;
     setSlotPolarities(
       Object.keys(d.slotPolarities || {}).length > 0
@@ -289,7 +287,7 @@ export default function CompanionBuilderPage() {
     return calculateCompanionBuild(selectedCompanion, equippedMods, modsMap, companionParts);
   }, [selectedCompanion, equippedMods, modsMap, companionParts]);
 
-  const baseCapacity = (hasReactor ? 60 : 30) + (isMR30 ? 10 : 0);
+  const baseCapacity = hasReactor ? 60 : 30;
   const capacityUsed = useMemo(() => {
     return equippedMods.reduce((sum, m) => {
       const mod = modsMap.get(m.modId);
@@ -381,30 +379,8 @@ export default function CompanionBuilderPage() {
 
   const weaponModPool = useMemo(() => {
     if (!selectedWeapon) return [];
-    const cat = selectedWeapon.category;
-    if (cat === "sentinel_weapon") {
-      // Sentinel weapons use robotic weapon mods only
-      return allMods.filter((m) =>
-        m.category === "companion_weapon" ||
-        (m.category === "companion" && (m.subCategory === "robotic" || m.subCategory === "universal"))
-      );
-    }
-    if (cat === "beast_claw") {
-      // Beast claws use companion weapon mods only (Bite, Maul, etc.) — NOT regular melee mods like Blood Rush
-      return allMods.filter((m) =>
-        m.category === "companion_weapon" ||
-        (m.category === "companion" && (m.subCategory === "beast" || m.subCategory === "universal"))
-      );
-    }
-    if (cat === "hound_weapon") {
-      // Hound weapons use robotic weapon mods
-      return allMods.filter((m) =>
-        m.category === "companion_weapon" ||
-        (m.category === "companion" && (m.subCategory === "robotic" || m.subCategory === "universal"))
-      );
-    }
-    return allMods.filter((m) => m.category === "companion_weapon");
-  }, [selectedWeapon]);
+    return allMods.filter((m) => modFitsCompanionWeapon(m, selectedWeapon));
+  }, [allMods, selectedWeapon]);
 
   const handleSelectCompanion = useCallback((companion: Companion) => {
     setSelectedCompanion(companion);
@@ -641,18 +617,6 @@ export default function CompanionBuilderPage() {
                 </BuilderActionGroup>
 
                 <BuilderActionGroup>
-                  <button
-                    onClick={() => setIsMR30(!isMR30)}
-                    className={cn(
-                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
-                      isMR30
-                        ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
-                  >
-                    <Star className="h-3.5 w-3.5" />
-                    <span>MR 30+</span>
-                  </button>
                   <button
                     onClick={() => setHasReactor(!hasReactor)}
                     className={cn(

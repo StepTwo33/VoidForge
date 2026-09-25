@@ -44,6 +44,7 @@ export const TOME_CANTICLE_MOD_IDS = new Set([
 export const WARFRAME_EXILUS_MOD_IDS = new Set([
   "augment_wisp_fused_reservoir",
   "augment_mesa_mess_waltz",
+  "hysterical_assault",
   "rush_r3",
   "maglev",
   "master_thief",
