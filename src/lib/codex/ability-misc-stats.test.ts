@@ -1096,6 +1096,15 @@ describe("scaleAbilityMiscStats", () => {
     expect(lines.find((l) => l.label === "Damage Vulnerability")!.scaled).toBe("381%");
   });
 
+  it("scales Nurinarim defense reduction with strength", () => {
+    const lines = scaleAbilityMiscStats(
+      { defenseReduction: 0.05 },
+      { strength: 2.54, duration: 1, range: 1, efficiency: 1 },
+      { warframeId: "narin", abilityName: "Nurinarim" },
+    );
+    expect(lines.find((l) => l.label === "Defense Reduction")!.scaled).toBe("13%");
+  });
+
   it("keeps Iron Skin armorMultiplier Misc-fixed (outer STR on pool)", () => {
     const lines = scaleAbilityMiscStats(
       { armorMultiplier: 2.5, invulnerabilityDuration: 3 },

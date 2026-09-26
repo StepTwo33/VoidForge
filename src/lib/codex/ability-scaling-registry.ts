@@ -1386,6 +1386,10 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
   "narin::Hakchum": {
     damageVulnerability: { scale: "strength" },
   },
+  // Arsenal card: Nurinarim defense reduction is 5% at 100% STR and scales with Strength.
+  "narin::Nurinarim": {
+    defenseReduction: { scale: "strength" },
+  },
 
   // wiki Update 44: Sonic Boom — Impact via damage; 70% armor strip × STR, cap 100%; cone Misc-fixed
   "banshee::Sonic Boom": {
