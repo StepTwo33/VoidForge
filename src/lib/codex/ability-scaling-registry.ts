@@ -1382,6 +1382,11 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     speedMultiplier: { scale: "range", cap: 1.5 },
   },
 
+  // Arsenal card: Hakchum Cold vulnerability is 150% at 100% STR and keeps scaling (381% at 254% STR).
+  "narin::Hakchum": {
+    damageVulnerability: { scale: "strength" },
+  },
+
   // wiki Update 44: Sonic Boom — Impact via damage; 70% armor strip × STR, cap 100%; cone Misc-fixed
   "banshee::Sonic Boom": {
     armorStrip: { scale: "strength", cap: 1 },
