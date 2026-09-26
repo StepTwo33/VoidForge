@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findModByName, parseCustomItemName } from "@/lib/warframe-arsenal/catalog-match";
+import { findModByName, findWarframeByName, findWeaponByName, parseCustomItemName } from "@/lib/warframe-arsenal/catalog-match";
 import {
   findWeaponByLotusPath,
   findCompanionByLotusPath,
@@ -26,6 +26,12 @@ describe("warframe arsenal catalog match", () => {
     expect(findModByName("Dreamer's Bond")?.id).toBe("dreamers_bond");
     expect(findModByName("Dreamers Bond")?.id).toBe("dreamers_bond");
     expect(findModByName(`Dreamer\u2019s Bond`)?.id).toBe("dreamers_bond");
+  });
+
+  it("maps Update 44 arsenal export names onto catalog items", () => {
+    expect(findWarframeByName("Duelist")?.id).toBe("narin");
+    expect(findWeaponByName("Prime Steflos Shotgun")?.id).toBe("steflos_prime");
+    expect(findWeaponByName("Prime Corufell Scythe Weapon")?.id).toBe("corufell_prime");
   });
 
   it("finds Archon Amar's Hatred warframe set mod", () => {
