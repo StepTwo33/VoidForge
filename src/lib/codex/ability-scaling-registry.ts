@@ -1382,6 +1382,16 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     speedMultiplier: { scale: "range", cap: 1.5 },
   },
 
+  // Arsenal card at 254% STR / 145% RNG: Neote total damage × STR; range is ability.range.
+  "narin::Neote": {
+    totalDamage: { scale: "strength" },
+  },
+  // Arsenal card: shield per Cold status and Overguard cap × STR; radius is ability.radius.
+  "narin::Naraemagi": {
+    shieldPerColdStatus: { scale: "strength" },
+    overguardCap: { scale: "strength" },
+  },
+
   // Arsenal card: Hakchum Cold vulnerability is 150% at 100% STR and keeps scaling (381% at 254% STR).
   "narin::Hakchum": {
     damageVulnerability: { scale: "strength" },

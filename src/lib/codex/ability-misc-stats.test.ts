@@ -1087,6 +1087,23 @@ describe("Uriel Legion passive", () => {
 });
 
 describe("scaleAbilityMiscStats", () => {
+  it("scales Neote total damage and Naraemagi shield and Overguard with strength", () => {
+    const neote = scaleAbilityMiscStats(
+      { totalDamage: 2000 },
+      { strength: 2.54, duration: 1, range: 1.45, efficiency: 1 },
+      { warframeId: "narin", abilityName: "Neote" },
+    );
+    expect(neote.find((l) => l.label === "Total Damage")!.scaled).toBe("5080");
+
+    const nara = scaleAbilityMiscStats(
+      { shieldPerColdStatus: 75, overguardCap: 15000 },
+      { strength: 2.54, duration: 1, range: 1.45, efficiency: 1 },
+      { warframeId: "narin", abilityName: "Naraemagi" },
+    );
+    expect(nara.find((l) => l.label === "Shield Per Cold Status")!.scaled).toBe("190.5");
+    expect(nara.find((l) => l.label === "Overguard Cap")!.scaled).toBe("38100");
+  });
+
   it("scales Hakchum Cold vulnerability with strength and does not cap at 150%", () => {
     const lines = scaleAbilityMiscStats(
       { damageVulnerability: 1.5 },
