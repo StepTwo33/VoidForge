@@ -1774,7 +1774,7 @@ export const allArcanes: Mod[] = [
     drain: 0,
     maxRank: 5,
     category: "arcane",
-    subCategory: "warframe",
+    subCategory: "primary",
     stats: {},
     description: "On Weak Point: Gain +300% damage on your next shot.",
     rarity: "legendary",

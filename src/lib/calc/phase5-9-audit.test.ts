@@ -10,6 +10,7 @@ import { allMods } from "@/data/mods";
 import { STANCE_WEAPON_TYPE } from "@/data/stances";
 import { allWarframes } from "@/data/warframes";
 import { allWeapons } from "@/data/weapons";
+import { getWeaponArcanes } from "@/lib/weapons/weapon-arcane-config";
 import {
   DEFAULT_STANCE_AVG_MULTIPLIER,
   STANCE_AVG_DAMAGE_MULTIPLIER,
@@ -1159,6 +1160,8 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
       { ...DEFAULT_SIM_PARAMS, arcaneStacks: 1 },
     );
     expect(full.totalDamage).toBeCloseTo(bare.totalDamage * 4, 4);
+    const artemis = allWeapons.find((w) => w.id === "artemis_bow_prime")!;
+    expect(getWeaponArcanes(artemis).arcanes.some((a) => a.id === "longbow_sharpshot")).toBe(true);
   });
 
   it("Theorem Demulcent: 0 stacks = no buff; 15 stacks R5 → +180% damage", () => {

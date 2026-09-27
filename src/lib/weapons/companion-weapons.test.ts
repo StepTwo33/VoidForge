@@ -79,6 +79,15 @@ describe("companion weapon mod pool", () => {
     const claws = beastClaws[0];
     expect(modFitsCompanionWeapon(byId.get("enhanced_vitality")!, claws)).toBe(false);
     expect(modFitsCompanionWeapon(byId.get("claw_bite")!, claws)).toBe(true);
+    expect(modFitsCompanionWeapon(byId.get("bell_ringer")!, claws)).toBe(true);
+    expect(modFitsCompanionWeapon(byId.get("shock_collar")!, claws)).toBe(true);
+    expect(modFitsCompanionWeapon(byId.get("shocking_claws")!, claws)).toBe(true);
+    expect(modFitsCompanionWeapon(byId.get("burning_claws")!, claws)).toBe(true);
+    expect(modFitsCompanionWeapon(byId.get("chilling_claws")!, claws)).toBe(true);
+    expect(modFitsCompanionWeapon(byId.get("sepsis_claws")!, claws)).toBe(true);
+    expect(modFitsCompanionWeapon(byId.get("flame_gland")!, claws)).toBe(true);
+    expect(modFitsCompanionWeapon(byId.get("frost_jaw")!, claws)).toBe(true);
+    expect(modFitsCompanionWeapon(byId.get("venom_teeth")!, claws)).toBe(true);
   });
 });
 

@@ -14906,8 +14906,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "impactStatusStacks": 1.0
     },
@@ -14967,8 +14967,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "statusChance": 30,
       "heat": 30.0
@@ -14996,8 +14996,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "cold": 30,
       "statusChance": 30
@@ -15219,8 +15219,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "statusChance": 15,
       "heat": 15.0
@@ -15248,8 +15248,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "cold": 15,
       "statusChance": 15
@@ -15611,8 +15611,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "toxin": 30,
       "statusChance": 30
@@ -15654,8 +15654,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "electricity": 15,
       "statusChance": 15
@@ -15669,8 +15669,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "electricity": 30,
       "statusChance": 30
@@ -15828,8 +15828,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "toxin": 15,
       "statusChance": 15
