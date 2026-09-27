@@ -33,7 +33,7 @@ import {
   ArchonShard,
   WeaponCalculationOptions,
 } from "@/lib/types";
-import { Zap, Flag, Gem, Save, FolderOpen, Share2, Check, Upload, Shield } from "lucide-react";
+import { Zap, Flag, Gem, Save, FolderOpen, Share2, Check, Upload, Shield, ArrowLeftRight } from "lucide-react";
 import { warframeArcanes } from "@/data/arcanes";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import { ArchonShardSlot } from "@/components/archon-shard-slot";
@@ -57,6 +57,8 @@ import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-b
 import { CommunityBuildsPanel } from "@/components/community-builds-panel";
 import { DualFormTabs } from "@/components/dual-form-tabs";
 import { useCloudBuildFromUrl, fetchCloudBuild, setCloudBuildInUrl, clearCloudBuildInUrl, markCloudBuildLoaded } from "@/lib/builds/use-cloud-build-from-url";
+import { snapshotFromBuild } from "@/lib/builds/compare-build";
+import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
 import { getWeaponArcanes } from "@/lib/weapons/weapon-arcane-config";
@@ -705,6 +707,12 @@ export default function WarframeBuilderPage() {
   }, []);
 
   const [shareCopied, setShareCopied] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const liveCompare = useMemo(() => {
+    const data = buildWarframeData();
+    if (!data || !selectedWarframe) return null;
+    return snapshotFromBuild("warframe", buildName || selectedWarframe.name, data);
+  }, [buildWarframeData, selectedWarframe, buildName]);
   const handleShareBuild = useCallback(async () => {
     if (!selectedWarframe) return;
 
@@ -865,6 +873,14 @@ export default function WarframeBuilderPage() {
                   >
                     {shareCopied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
                     <span className="inline">{shareCopied ? "Copied!" : "Share"}</span>
+                  </button>
+                  <button
+                    onClick={() => setCompareOpen(true)}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-400 sm:min-h-0 sm:py-1.5"
+                    title="Compare this build to a saved or posted build"
+                  >
+                    <ArrowLeftRight className="h-3.5 w-3.5" />
+                    <span className="inline">Compare</span>
                   </button>
                 </BuilderActionGroup>
 
@@ -1399,6 +1415,16 @@ export default function WarframeBuilderPage() {
         onLoad={handleLoadBuild}
         onDelete={handleDeleteBuild}
       />
+
+      {selectedWarframe && (
+        <BuildCompareDialog
+          open={compareOpen}
+          onOpenChange={setCompareOpen}
+          type="warframe"
+          itemId={selectedWarframe.id}
+          live={liveCompare}
+        />
+      )}
 
       <SaveBuildDialog
         open={saveDialogOpen}

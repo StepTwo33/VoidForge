@@ -33,7 +33,7 @@ import {
 } from "@/lib/mods/companion-precept-eligibility";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Zap, Dog, Bot, Bug, Swords, Crosshair, Flag, Save, FolderOpen } from "lucide-react";
+import { Search, Zap, Dog, Bot, Bug, Swords, Crosshair, Flag, Save, FolderOpen, ArrowLeftRight } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, CompanionBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { cn } from "@/lib/utils";
@@ -42,6 +42,8 @@ import { toast } from "sonner";
 import { getCompanionImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
 import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
+import { snapshotFromBuild } from "@/lib/builds/compare-build";
+import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 
 const companionTypeLabels: Record<string, string> = {
   all: "All",
@@ -175,9 +177,11 @@ export default function CompanionBuilderPage() {
   const [applyHunterVsSlash, setApplyHunterVsSlash] = useState(false);
   const [companionParts, setCompanionParts] = useState<ModularCompanionParts | null>(null);
 
-  const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags }: SaveBuildDialogValues) => {
-    if (!selectedCompanion) return;
-    const data: CompanionBuildData = {
+  const [compareOpen, setCompareOpen] = useState(false);
+
+  const buildCompanionData = useCallback((): CompanionBuildData | null => {
+    if (!selectedCompanion) return null;
+    return {
       companionId: selectedCompanion.id,
       mods: equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
       weaponId: selectedWeapon?.id,
@@ -190,6 +194,17 @@ export default function CompanionBuilderPage() {
       slotPolarities,
       ...(companionParts ? { parts: companionParts } : {}),
     };
+  }, [selectedCompanion, equippedMods, selectedWeapon, weaponMods, weaponSlotPolarities, hasReactor, hasCatalyst, slotPolarities, companionParts]);
+
+  const liveCompare = useMemo(() => {
+    const data = buildCompanionData();
+    if (!data || !selectedCompanion) return null;
+    return snapshotFromBuild("companion", buildName || selectedCompanion.name, data);
+  }, [buildCompanionData, selectedCompanion, buildName]);
+
+  const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags }: SaveBuildDialogValues) => {
+    const data = buildCompanionData();
+    if (!data || !selectedCompanion) return;
     const build: SavedBuild = {
       id: currentBuildId || generateBuildId(),
       name,
@@ -212,7 +227,7 @@ export default function CompanionBuilderPage() {
     } else {
       toast.success("Build saved locally", { description: "Log in to sync builds to your account" });
     }
-  }, [selectedCompanion, equippedMods, selectedWeapon, weaponMods, weaponSlotPolarities, hasReactor, hasCatalyst, slotPolarities, companionParts, currentBuildId]);
+  }, [buildCompanionData, selectedCompanion, currentBuildId]);
 
   const handleLoadBuild = useCallback((build: SavedBuild) => {
     const d = build.data as CompanionBuildData;
@@ -613,6 +628,13 @@ export default function CompanionBuilderPage() {
                   </button>
                   <button onClick={() => { setSavedBuilds(getSavedBuilds("companion")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-0 sm:py-1.5" title="Load Build">
                     <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
+                  </button>
+                  <button
+                    onClick={() => setCompareOpen(true)}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-400 sm:min-h-0 sm:py-1.5"
+                    title="Compare this build to a saved or posted build"
+                  >
+                    <ArrowLeftRight className="h-3.5 w-3.5" /> <span>Compare</span>
                   </button>
                 </BuilderActionGroup>
 
@@ -1042,6 +1064,16 @@ export default function CompanionBuilderPage() {
         onLoad={handleLoadBuild}
         onDelete={handleDeleteBuild}
       />
+
+      {selectedCompanion && (
+        <BuildCompareDialog
+          open={compareOpen}
+          onOpenChange={setCompareOpen}
+          type="companion"
+          itemId={selectedCompanion.id}
+          live={liveCompare}
+        />
+      )}
 
       <SaveBuildDialog
         open={saveDialogOpen}

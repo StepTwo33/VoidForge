@@ -12,7 +12,7 @@ import { Weapon, Mod, EquippedMod, SimulationParams, DEFAULT_SIM_PARAMS, Modular
 import { getWeaponArcanes } from "@/lib/weapons/weapon-arcane-config";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import type { SlotType } from "@/components/mod-picker";
-import { Zap, Wrench, ChevronRight, Save, FolderOpen, Gem } from "lucide-react";
+import { Zap, Wrench, ChevronRight, Save, FolderOpen, Gem, ArrowLeftRight } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, persistSavedBuild } from "@/lib/builds/build-storage";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { toast } from "sonner";
@@ -29,6 +29,9 @@ import { resolveArcaneById } from "@/lib/builds/build-storage";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
+import { snapshotFromBuild } from "@/lib/builds/compare-build";
+import { extractBuildItemId } from "@/lib/builds/build-types";
+import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 
 type ModularType = "kitgun" | "zaw" | "amp";
 
@@ -153,6 +156,7 @@ export default function ModularBuilderPage() {
   const [buildName, setBuildName] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
 
   // Load build from ?build= share link (e.g. from /build/[id] page)
   useEffect(() => {
@@ -237,6 +241,28 @@ export default function ModularBuilderPage() {
       slotPolarities,
     };
   };
+
+  const liveCompare = useMemo(() => {
+    if (!assembledWeapon) return null;
+    return snapshotFromBuild("modular", buildName || assembledWeapon.name, buildModularData());
+  }, [
+    assembledWeapon,
+    buildName,
+    modularType,
+    kitgunChamber,
+    kitgunGrip,
+    kitgunLoader,
+    zawStrike,
+    zawGripSel,
+    zawLinkSel,
+    ampPrism,
+    ampScaffold,
+    ampBrace,
+    equippedMods,
+    equippedArcanes,
+    hasOrokinCatalyst,
+    slotPolarities,
+  ]);
 
   const handleSaveBuildConfirm = async ({ name, isPublic }: SaveBuildDialogValues) => {
     const data = buildModularData();
@@ -331,6 +357,14 @@ export default function ModularBuilderPage() {
             </button>
             <button onClick={() => { setSavedBuilds(getSavedBuilds("modular")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-9 sm:py-1.5" title="Load Build">
               <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
+            </button>
+            <button
+              onClick={() => setCompareOpen(true)}
+              disabled={!assembledWeapon}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-teal-500/50 hover:text-teal-700 disabled:pointer-events-none disabled:opacity-40 dark:hover:text-teal-400 sm:min-h-9 sm:py-1.5"
+              title={assembledWeapon ? "Compare this build to a saved or posted build" : "Finish the parts before comparing"}
+            >
+              <ArrowLeftRight className="h-3.5 w-3.5" /> <span>Compare</span>
             </button>
           </div>
         </div>
@@ -908,6 +942,16 @@ export default function ModularBuilderPage() {
         onLoad={handleLoadBuild}
         onDelete={handleDeleteBuild}
       />
+
+      {assembledWeapon && (
+        <BuildCompareDialog
+          open={compareOpen}
+          onOpenChange={setCompareOpen}
+          type="modular"
+          itemId={extractBuildItemId("modular", buildModularData())}
+          live={liveCompare}
+        />
+      )}
 
       <SaveBuildDialog
         open={saveDialogOpen}

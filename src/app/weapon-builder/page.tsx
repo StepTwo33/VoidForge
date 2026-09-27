@@ -31,7 +31,7 @@ import {
   PROGENITOR_BONUS_DEFAULT,
   normalizeProgenitorElement,
 } from "@/lib/weapons/weapon-progenitor";
-import { Zap, Flag, Flame, Plus, X, Gem, Save, FolderOpen, Share2, Check, Upload, Crosshair, Orbit, Swords } from "lucide-react";
+import { Zap, Flag, Flame, Plus, X, Gem, Save, FolderOpen, Share2, Check, Upload, Crosshair, Orbit, Swords, ArrowLeftRight } from "lucide-react";
 import { isPrimaryWeaponCategory } from "@/lib/mods/mod-weapon-eligibility";
 import { isTomeWeapon } from "@/lib/weapons/tome-weapons";
 import { getWeaponArcanes } from "@/lib/weapons/weapon-arcane-config";
@@ -47,6 +47,8 @@ import { getWeaponImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
 import { BuildImporter } from "@/components/build-importer";
 import { useCloudBuildFromUrl, fetchCloudBuild, setCloudBuildInUrl, clearCloudBuildInUrl, markCloudBuildLoaded } from "@/lib/builds/use-cloud-build-from-url";
+import { snapshotFromBuild } from "@/lib/builds/compare-build";
+import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
@@ -342,6 +344,12 @@ export default function WeaponBuilderPage() {
   }, [currentBuildId]);
 
   const [shareCopied, setShareCopied] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const liveCompare = useMemo(() => {
+    const data = buildWeaponData();
+    if (!data || !selectedWeapon) return null;
+    return snapshotFromBuild("weapon", buildName || selectedWeapon.name, data);
+  }, [buildWeaponData, selectedWeapon, buildName]);
   const handleShareBuild = useCallback(async () => {
     if (!selectedWeapon) return;
 
@@ -720,6 +728,14 @@ export default function WeaponBuilderPage() {
                     {shareCopied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
                     <span className="inline">{shareCopied ? "Copied!" : "Share"}</span>
                   </button>
+                  <button
+                    onClick={() => setCompareOpen(true)}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-400 sm:min-h-0 sm:py-1.5"
+                    title="Compare this build to a saved or posted build"
+                  >
+                    <ArrowLeftRight className="h-3.5 w-3.5" />
+                    <span className="inline">Compare</span>
+                  </button>
                 </BuilderActionGroup>
 
                 <BuilderActionGroup>
@@ -1077,6 +1093,16 @@ export default function WeaponBuilderPage() {
         onLoad={handleLoadBuild}
         onDelete={handleDeleteBuild}
       />
+
+      {selectedWeapon && (
+        <BuildCompareDialog
+          open={compareOpen}
+          onOpenChange={setCompareOpen}
+          type="weapon"
+          itemId={selectedWeapon.id}
+          live={liveCompare}
+        />
+      )}
 
       <SaveBuildDialog
         open={saveDialogOpen}

@@ -17,12 +17,14 @@ import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity"
 import { WeaponStatsPanel, ArchwingStatsPanel } from "@/components/stats-panel";
 import { Weapon, EquippedMod, CalculatedStats, ArchwingCalculatedStats } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Zap, Save, FolderOpen } from "lucide-react";
+import { Zap, Save, FolderOpen, ArrowLeftRight } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, ArchwingBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
 import { toast } from "sonner";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
+import { snapshotFromBuild } from "@/lib/builds/compare-build";
+import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 
 type BuilderMode = "archwing" | "necramech";
 
@@ -63,6 +65,7 @@ export default function ArchwingBuilderPage() {
   const [buildName, setBuildName] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
 
   useEffect(() => { setSavedBuilds(getSavedBuilds("archwing")); }, []);
 
@@ -168,6 +171,38 @@ export default function ArchwingBuilderPage() {
     });
   }, [selectedWeapon, weaponMods, modsMap]);
 
+  const selectedFrame = mode === "archwing" ? selectedArchwing : selectedNecramech;
+
+  const liveCompare = useMemo(() => {
+    if (!selectedFrame) return null;
+    const data: ArchwingBuildData = {
+      mode,
+      frameId: selectedFrame.name,
+      frameMods: (mode === "archwing" ? archwingMods : necramechMods).map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      weaponId: selectedWeapon?.id,
+      weaponMods: weaponMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      hasReactor,
+      hasCatalyst,
+      isMR30: false,
+      framePolarities: mode === "archwing" ? archwingPolarities : necramechPolarities,
+      weaponPolarities,
+    };
+    return snapshotFromBuild("archwing", buildName || selectedFrame.name, data);
+  }, [
+    selectedFrame,
+    mode,
+    archwingMods,
+    necramechMods,
+    selectedWeapon,
+    weaponMods,
+    hasReactor,
+    hasCatalyst,
+    archwingPolarities,
+    necramechPolarities,
+    weaponPolarities,
+    buildName,
+  ]);
+
   const frameStats = useMemo<ArchwingCalculatedStats | null>(() => {
     if (mode === "archwing" && selectedArchwing) {
       return calculateArchwingBuild(selectedArchwing, archwingMods);
@@ -236,6 +271,14 @@ export default function ArchwingBuilderPage() {
             </button>
             <button onClick={() => { setSavedBuilds(getSavedBuilds("archwing")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-9 sm:py-1.5" title="Load Build">
               <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
+            </button>
+            <button
+              onClick={() => setCompareOpen(true)}
+              disabled={!selectedFrame}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-teal-500/50 hover:text-teal-700 disabled:pointer-events-none disabled:opacity-40 dark:hover:text-teal-400 sm:min-h-9 sm:py-1.5"
+              title={selectedFrame ? "Compare this build to a saved or posted build" : "Select an archwing or necramech first"}
+            >
+              <ArrowLeftRight className="h-3.5 w-3.5" /> <span>Compare</span>
             </button>
           </div>
         </div>
@@ -545,6 +588,16 @@ export default function ArchwingBuilderPage() {
         onLoad={handleLoadBuild}
         onDelete={handleDeleteBuild}
       />
+
+      {selectedFrame && (
+        <BuildCompareDialog
+          open={compareOpen}
+          onOpenChange={setCompareOpen}
+          type="archwing"
+          itemId={selectedFrame.name}
+          live={liveCompare}
+        />
+      )}
 
       <SaveBuildDialog
         open={saveDialogOpen}

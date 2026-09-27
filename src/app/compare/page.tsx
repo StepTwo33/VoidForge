@@ -23,75 +23,15 @@ import { isPrimaryWeaponCategory } from "@/lib/mods/mod-weapon-eligibility";
 import { isCompanionWeaponCategory } from "@/lib/weapons/companion-weapons";
 import { getModCategory } from "@/lib/weapons/weapon-categories";
 import { toast } from "sonner";
-
-/* ─── Shared helpers ─── */
+import { CompareRow, CompareSideHeader } from "@/components/compare/stat-diff";
+import { SnapshotCompare, WeaponCompareRows } from "@/components/compare/build-stat-rows";
+import { BuildSourcePicker } from "@/components/compare/build-source-picker";
+import { snapshotFromBuild, type CompareKind, type CompareSnapshot } from "@/lib/builds/compare-build";
+import type { SavedBuild } from "@/lib/builds/build-storage";
 
 function weaponImageForName(name: string, weapons: Weapon[]): string {
   const w = weapons.find((x) => x.name === name);
   return getWeaponImage(name, w ? { category: w.category } : undefined);
-}
-
-function fmtNum(n: number, decimals = 0): string {
-  if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M`;
-  if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
-  return n.toFixed(decimals);
-}
-
-function CompareSideHeader({ aLabel = "A", bLabel = "B" }: { aLabel?: string; bLabel?: string }) {
-  return (
-    <div className="mb-1 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b border-border/40 pb-2">
-      <span className="min-w-0 truncate text-right text-[10px] font-bold uppercase tracking-wider text-primary">{aLabel}</span>
-      <span className="w-[4.75rem] max-w-[5.75rem] shrink-0 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:w-28 sm:max-w-28">
-        Diff
-      </span>
-      <span className="min-w-0 truncate text-[10px] font-bold uppercase tracking-wider text-primary">{bLabel}</span>
-    </div>
-  );
-}
-
-function CompareRow({ label, a, b, higher = "green", format }: {
-  label: string;
-  a: number | null;
-  b: number | null;
-  higher?: "green" | "red";
-  format?: (v: number) => string;
-}) {
-  const fmtFn = format || ((v: number) => fmtNum(v));
-  const diff = (a ?? 0) - (b ?? 0);
-  const aWins = higher === "green" ? diff > 0.01 : diff < -0.01;
-  const bWins = higher === "green" ? diff < -0.01 : diff > 0.01;
-  const showDelta = a !== null && b !== null && (aWins || bWins);
-  const deltaPct = showDelta && b !== 0 && a !== 0
-    ? ((a! - b!) / Math.abs(b!)) * 100
-    : null;
-
-  return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b border-border/20 py-1.5 last:border-b-0">
-      <span className={cn(
-        "min-w-0 text-right font-mono text-xs tabular-nums",
-        a === null ? "text-muted-foreground/50" : aWins ? "cmp-win" : bWins ? "cmp-lose" : ""
-      )}>
-        <span className="mr-1 font-sans text-[9px] font-semibold uppercase text-muted-foreground sm:hidden">A</span>
-        {a !== null ? fmtFn(a) : "–"}
-      </span>
-      <span className="w-[4.75rem] max-w-[5.75rem] shrink-0 break-words text-center text-[11px] font-medium leading-tight text-muted-foreground sm:w-28 sm:max-w-28">
-        <span className="block">{label}</span>
-        {showDelta && (
-          <span className={cn("mt-0.5 block break-words font-mono text-[10px] tabular-nums", aWins ? "cmp-win" : "cmp-lose")}>
-            {aWins ? "A" : "B"} ahead
-            {deltaPct !== null && Number.isFinite(deltaPct) ? ` · ${Math.abs(deltaPct) >= 10 ? Math.round(Math.abs(deltaPct)) : Math.abs(deltaPct).toFixed(1)}%` : ""}
-          </span>
-        )}
-      </span>
-      <span className={cn(
-        "min-w-0 font-mono text-xs tabular-nums",
-        b === null ? "text-muted-foreground/50" : bWins ? "cmp-win" : aWins ? "cmp-lose" : ""
-      )}>
-        <span className="mr-1 font-sans text-[9px] font-semibold uppercase text-muted-foreground sm:hidden">B</span>
-        {b !== null ? fmtFn(b) : "–"}
-      </span>
-    </div>
-  );
 }
 
 /* ─── Tab type ─── */
@@ -121,6 +61,37 @@ function BuildCompareTab() {
   const [modPickerSlotType, setModPickerSlotType] = useState<ModPickerSlotType>("regular");
   const [weaponPickerOpen, setWeaponPickerOpen] = useState<0 | 1 | null>(null);
   const [weaponSearch, setWeaponSearch] = useState("");
+  const [kind, setKind] = useState<CompareKind>("weapon");
+  const [loaded, setLoaded] = useState<[CompareSnapshot | null, CompareSnapshot | null]>([null, null]);
+  const [sourceOpen, setSourceOpen] = useState<0 | 1 | null>(null);
+
+  const setCompareKind = (next: CompareKind) => {
+    setKind(next);
+    setLoaded([null, null]);
+    setSourceOpen(null);
+  };
+
+  const loadSavedOrPosted = (side: 0 | 1, build: SavedBuild) => {
+    const snap = snapshotFromBuild(kind, build.name, build.data);
+    if (!snap) {
+      toast.error("That build could not be compared");
+      return;
+    }
+    setLoaded((prev) => {
+      const next = [...prev] as [CompareSnapshot | null, CompareSnapshot | null];
+      next[side] = snap;
+      return next;
+    });
+    setSourceOpen(null);
+  };
+
+  const clearLoaded = (side: 0 | 1) => {
+    setLoaded((prev) => {
+      const next = [...prev] as [CompareSnapshot | null, CompareSnapshot | null];
+      next[side] = null;
+      return next;
+    });
+  };
 
   const filteredWeapons = useMemo(() => {
     const hiddenCategories = [
@@ -190,13 +161,85 @@ function BuildCompareTab() {
     });
   };
 
+  const weaponStats = (side: 0 | 1): CalculatedStats | null => {
+    const snap = loaded[side];
+    if (snap?.kind === "weapon") return snap.stats;
+    return builds[side].stats;
+  };
+  const weaponLabel = (side: 0 | 1, fallback: string) => {
+    const snap = loaded[side];
+    if (snap?.kind === "weapon") return snap.label;
+    return builds[side].weapon?.name || fallback;
+  };
+
   return (
     <>
+      <div className="mb-4 flex flex-wrap gap-2">
+        <FilterChip active={kind === "weapon"} onClick={() => setCompareKind("weapon")}>
+          Weapon
+        </FilterChip>
+        <FilterChip active={kind === "warframe"} onClick={() => setCompareKind("warframe")}>
+          Warframe
+        </FilterChip>
+        <FilterChip active={kind === "companion"} onClick={() => setCompareKind("companion")}>
+          Companion
+        </FilterChip>
+        <FilterChip active={kind === "modular"} onClick={() => setCompareKind("modular")}>
+          Modular
+        </FilterChip>
+        <FilterChip active={kind === "archwing"} onClick={() => setCompareKind("archwing")}>
+          Archwing
+        </FilterChip>
+      </div>
       <div className="grid md:grid-cols-2 gap-6">
         {([0, 1] as const).map((side) => {
           const build = builds[side];
+          const loadedBuild = loaded[side];
           return (
             <div key={side} className="space-y-4">
+              <ContentPanel>
+                {loadedBuild ? (
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Loaded build</p>
+                      <p className="truncate text-sm font-medium">{loadedBuild.label}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => clearLoaded(side)}
+                      className="inline-flex h-9 items-center rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                ) : sourceOpen === side ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-medium">Load a saved or posted build</p>
+                      <button
+                        type="button"
+                        onClick={() => setSourceOpen(null)}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+                        aria-label="Close build picker"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <BuildSourcePicker type={kind} onSelect={(build) => loadSavedOrPosted(side, build)} />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setSourceOpen(side)}
+                    className="w-full text-left text-sm font-medium text-primary hover:underline"
+                  >
+                    Load a saved or posted build
+                  </button>
+                )}
+              </ContentPanel>
+
+              {kind === "weapon" && (
+              <>
               {/* Weapon Selector */}
               {weaponPickerOpen === side ? (
                 <ContentPanel>
@@ -311,26 +354,28 @@ function BuildCompareTab() {
                 weapon={build.weapon}
                 isMelee={build.weapon?.category === "melee" || build.weapon?.triggerType === "Melee"}
               />
+              </>
+              )}
             </div>
           );
         })}
       </div>
 
-      {/* Side-by-side comparison table */}
-      {builds[0].stats && builds[1].stats && (
+      {kind === "weapon" && weaponStats(0) && weaponStats(1) && (
         <ContentPanel className="mt-8">
           <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground">COMPARISON</h2>
-          <div className="space-y-1">
-            <CompareSideHeader aLabel="Build A" bLabel="Build B" />
-            <CompareRow label="Total Damage" a={builds[0].stats.totalDamage} b={builds[1].stats.totalDamage} format={(v) => v.toFixed(1)} />
-            <CompareRow label="Critical Chance" a={builds[0].stats.criticalChance * 100} b={builds[1].stats.criticalChance * 100} format={(v) => `${v.toFixed(1)}%`} />
-            <CompareRow label="Critical Multiplier" a={builds[0].stats.criticalMultiplier} b={builds[1].stats.criticalMultiplier} format={(v) => `${v.toFixed(1)}x`} />
-            <CompareRow label="Status Chance" a={builds[0].stats.statusChance * 100} b={builds[1].stats.statusChance * 100} format={(v) => `${v.toFixed(1)}%`} />
-            <CompareRow label="Fire Rate" a={builds[0].stats.fireRate} b={builds[1].stats.fireRate} format={(v) => v.toFixed(2)} />
-            <CompareRow label="Multishot" a={builds[0].stats.multishot} b={builds[1].stats.multishot} format={(v) => v.toFixed(2)} />
-            <CompareRow label="Burst DPS" a={builds[0].stats.burstDps} b={builds[1].stats.burstDps} />
-            <CompareRow label="Sustained DPS" a={builds[0].stats.sustainedDps} b={builds[1].stats.sustainedDps} />
-          </div>
+          <WeaponCompareRows
+            a={weaponStats(0)}
+            b={weaponStats(1)}
+            aLabel={weaponLabel(0, "Build A")}
+            bLabel={weaponLabel(1, "Build B")}
+          />
+        </ContentPanel>
+      )}
+      {kind !== "weapon" && loaded[0]?.kind === kind && loaded[1]?.kind === kind && (
+        <ContentPanel className="mt-8">
+          <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground">COMPARISON</h2>
+          <SnapshotCompare a={loaded[0]} b={loaded[1]} />
         </ContentPanel>
       )}
 
@@ -667,7 +712,7 @@ export default function ComparePage() {
           icon={ArrowLeftRight}
           accent="teal"
           title="Compare"
-          description="Compare two weapon builds or two full loadouts side by side."
+          description="Compare weapon, warframe, companion, modular, or archwing builds, or two full loadouts side by side."
         />
 
         <div className="mb-6 flex flex-wrap gap-2">
