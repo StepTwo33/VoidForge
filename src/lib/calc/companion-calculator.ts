@@ -1,5 +1,7 @@
 import { getEffectiveModsMap } from "@/lib/weapons/effective-data";
 import type { Companion, CompanionCalculatedStats, Mod, ModSlot } from "@/lib/types";
+import type { ModularCompanionParts } from "@/data/companion-parts";
+import { companionWithPartStats } from "@/lib/companions/companion-parts-resolve";
 import {
   applyVerifiedModStatToCompanion,
   getVerifiedModStatLine,
@@ -116,7 +118,9 @@ export function calculateCompanionBuild(
   companion: Companion,
   equippedMods: EquippedCompanionMod[],
   allMods: Map<string, Mod> = getEffectiveModsMap(),
+  parts?: ModularCompanionParts | null,
 ): CompanionCalculatedStats {
+  const body = companionWithPartStats(companion, parts);
   const acc = emptyAccumulators();
   const panel: { modBonuses?: Record<string, number> } = {};
 
@@ -141,15 +145,15 @@ export function calculateCompanionBuild(
     }
   }
 
-  const totalHealth = companion.health * (1 + acc.healthBonus);
-  const totalShield = companion.shield * (1 + acc.shieldBonus);
-  const totalArmor = companion.armor * (1 + acc.armorBonus);
+  const totalHealth = body.health * (1 + acc.healthBonus);
+  const totalShield = body.shield * (1 + acc.shieldBonus);
+  const totalArmor = body.armor * (1 + acc.armorBonus);
   const armorDR = totalArmor > 0 ? totalArmor / (totalArmor + 300) : 0;
 
   return {
-    baseHealth: companion.health,
-    baseShield: companion.shield,
-    baseArmor: companion.armor,
+    baseHealth: body.health,
+    baseShield: body.shield,
+    baseArmor: body.armor,
     totalHealth,
     totalShield,
     totalArmor,

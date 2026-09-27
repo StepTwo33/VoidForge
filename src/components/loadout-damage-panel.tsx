@@ -52,7 +52,7 @@ function ContributionsList({ contributions }: { contributions?: DpsContribution[
               )}
             </div>
             <div className="shrink-0 text-right">
-              <div className="text-[10px] font-mono text-blue-400">{formatMarginalPct(row.burstMarginalPct ?? 0)}</div>
+              <div className="text-[10px] font-mono text-blue-700 dark:text-blue-400">{formatMarginalPct(row.burstMarginalPct ?? 0)}</div>
               {showSustained && (
                 <div className="text-[9px] font-mono text-muted-foreground">
                   sus {formatMarginalPct(row.sustainedMarginalPct ?? 0)}
@@ -93,13 +93,13 @@ function WeaponRow({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-muted/30 transition-colors"
+        className="w-full flex min-h-11 items-center gap-2 px-3 py-2 text-left hover:bg-muted/30 transition-colors"
       >
         {open ? <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
         <span className={color}>{icon}</span>
-        <span className="text-xs font-medium truncate flex-1">{label}</span>
+        <span className="min-w-0 flex-1 truncate text-xs font-medium">{label}</span>
         <span className="text-[10px] text-muted-foreground truncate max-w-[40%] hidden sm:inline">{entry.name}</span>
-        <span className="text-xs font-mono text-amber-400 tabular-nums shrink-0">{fmtDamageNum(sustained)}</span>
+        <span className="text-xs font-mono text-amber-800 dark:text-amber-400 tabular-nums shrink-0">{fmtDamageNum(sustained)}</span>
       </button>
       {open && (
         <div className="px-3 pb-3 pt-0 space-y-1 border-t border-border/40">
@@ -215,10 +215,10 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
   }
 
   return (
-    <div className="mt-4 border border-amber-500/20 rounded-xl bg-amber-500/[0.04] overflow-hidden">
+    <div className="mt-4 min-w-0 overflow-hidden rounded-xl border border-amber-500/20 bg-amber-500/[0.04]">
       <div className="px-4 py-3 border-b border-amber-500/15 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Zap className="h-4 w-4 text-amber-400" />
+          <Zap className="h-4 w-4 text-amber-700 dark:text-amber-400" />
           <span className="text-sm font-semibold">Damage estimate</span>
         </div>
         <div className="flex flex-wrap gap-1">
@@ -228,9 +228,9 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
               type="button"
               onClick={() => setScenario(key)}
               className={cn(
-                "px-2.5 py-1 text-[10px] rounded-md border transition-colors",
+                "inline-flex min-h-11 items-center px-2.5 py-1.5 text-[10px] rounded-md border transition-colors",
                 scenario === key
-                  ? "border-amber-500/50 bg-amber-500/15 text-amber-200"
+                  ? "border-amber-500/50 bg-amber-500/15 text-amber-900 dark:text-amber-200"
                   : "border-border/60 text-muted-foreground hover:text-foreground hover:border-border",
               )}
             >
@@ -247,7 +247,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
             <select
               value={enemyId}
               onChange={(e) => setEnemyId(e.target.value)}
-              className="w-full bg-background border border-border rounded-md px-2 py-1 text-xs"
+              className="w-full min-h-11 bg-background border border-border rounded-md px-2 py-1.5 text-xs"
             >
               {ENEMY_TYPES.map((e) => (
                 <option key={e.id} value={e.id}>
@@ -278,9 +278,9 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
                     )
                   }
                   className={cn(
-                    "px-2 py-0.5 text-[10px] rounded-md border transition-colors",
+                    "inline-flex min-h-11 items-center px-2.5 py-1.5 text-[10px] rounded-md border transition-colors",
                     active
-                      ? "border-purple-500/50 bg-purple-500/15 text-purple-200"
+                      ? "border-purple-500/50 bg-purple-500/15 text-purple-900 dark:text-purple-200"
                       : "border-border/60 text-muted-foreground hover:text-foreground",
                   )}
                   title={ability.description}
@@ -297,13 +297,15 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
       )}
 
       {best && (
-        <div className="px-4 py-2 text-xs text-muted-foreground border-b border-border/30 flex items-center gap-1.5">
-          <Target className="h-3.5 w-3.5 text-amber-400/80" />
-          Best sustained: <span className="text-foreground font-medium">{best.slot}</span> ({best.name}) —{" "}
-          <span className="font-mono text-amber-800 dark:text-amber-300">{fmtDamageNum(best.sustainedDps)}</span>
-          {showTtk && scenario === "vsEnemy" && (
-            <span className="text-[10px] ml-1">vs {enemy.name} L{enemyLevel}</span>
-          )}
+        <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 border-b border-border/30 px-4 py-2 text-xs text-muted-foreground">
+          <Target className="h-3.5 w-3.5 shrink-0 text-amber-700/80 dark:text-amber-400/80" />
+          <span className="min-w-0">
+            Best sustained: <span className="font-medium text-foreground">{best.slot}</span> ({best.name}) —{" "}
+            <span className="font-mono text-amber-800 dark:text-amber-300">{fmtDamageNum(best.sustainedDps)}</span>
+            {showTtk && scenario === "vsEnemy" && (
+              <span className="ml-1 text-[10px]">vs {enemy.name} L{enemyLevel}</span>
+            )}
+          </span>
         </div>
       )}
 
@@ -311,7 +313,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
         {stats.warframe && (
           <div className="border border-purple-500/25 rounded-lg px-3 py-2 bg-purple-500/[0.06]">
             <div className="flex items-center gap-2 mb-1.5">
-              <Shield className="h-3.5 w-3.5 text-purple-400" />
+              <Shield className="h-3.5 w-3.5 text-purple-700 dark:text-purple-400" />
               <span className="text-xs font-medium">{stats.warframe.name}</span>
             </div>
             {stats.warframe.forms ? (
@@ -339,14 +341,14 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
           </div>
         )}
 
-        <WeaponRow label="Primary" icon={<Crosshair className="h-3.5 w-3.5" />} color="text-blue-400" entry={stats.primary} showTtk={showTtk} />
-        <WeaponRow label="Secondary" icon={<Crosshair className="h-3.5 w-3.5" />} color="text-cyan-400" entry={stats.secondary} showTtk={showTtk} />
-        <WeaponRow label="Melee" icon={<Swords className="h-3.5 w-3.5" />} color="text-orange-400" entry={stats.melee} showTtk={showTtk} />
-        <WeaponRow label="Exalted" icon={<Sparkles className="h-3.5 w-3.5" />} color="text-violet-400" entry={stats.exalted} showTtk={showTtk} />
+        <WeaponRow label="Primary" icon={<Crosshair className="h-3.5 w-3.5" />} color="text-blue-700 dark:text-blue-400" entry={stats.primary} showTtk={showTtk} />
+        <WeaponRow label="Secondary" icon={<Crosshair className="h-3.5 w-3.5" />} color="text-cyan-700 dark:text-cyan-400" entry={stats.secondary} showTtk={showTtk} />
+        <WeaponRow label="Melee" icon={<Swords className="h-3.5 w-3.5" />} color="text-orange-700 dark:text-orange-400" entry={stats.melee} showTtk={showTtk} />
+        <WeaponRow label="Exalted" icon={<Sparkles className="h-3.5 w-3.5" />} color="text-violet-700 dark:text-violet-400" entry={stats.exalted} showTtk={showTtk} />
         <WeaponRow
           label="Exalted Melee"
           icon={<Sparkles className="h-3.5 w-3.5" />}
-          color="text-fuchsia-400"
+          color="text-fuchsia-700 dark:text-fuchsia-400"
           entry={stats.exaltedMelee}
           showTtk={showTtk}
         />
@@ -354,7 +356,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
         {stats.companion && (
           <div className="border border-green-500/25 rounded-lg overflow-hidden bg-green-500/[0.04]">
             <div className="px-3 py-2 flex items-center gap-2">
-              <Dog className="h-3.5 w-3.5 text-green-400" />
+              <Dog className="h-3.5 w-3.5 text-green-700 dark:text-green-400" />
               <span className="text-xs font-medium">{stats.companion.name}</span>
             </div>
             <div className="px-3 pb-2 grid grid-cols-3 gap-2">

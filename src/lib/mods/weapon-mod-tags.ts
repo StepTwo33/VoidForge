@@ -18,6 +18,9 @@ export interface WeaponModProfile {
   tags: ReadonlySet<WeaponModProfileTag>;
 }
 
+/** Sniper-class ids whose fire mode is not semi-auto (Charge / Auto). */
+const NON_SEMI_SNIPER_IDS = new Set(["lanka", "buzlok"]);
+
 /** Infer wiki-style weapon tags from arsenal data. */
 export function getWeaponModProfile(
   weapon: Pick<Weapon, "category" | "triggerType" | "id" | "name">,
@@ -39,6 +42,10 @@ export function getWeaponModProfile(
   if (category === "bow" || category === "launcher") {
     tags.add("SINGLESHOT");
   } else if (trigger === "semi" || trigger === "charge") {
+    tags.add("SINGLESHOT");
+  } else if (trigger === "sniper" && !NON_SEMI_SNIPER_IDS.has(weapon.id)) {
+    // Sniper class uses triggerType "Sniper" in arsenal data; most are semi-auto
+    // (Rubico, Vectis, …) and need SINGLESHOT for Semi-Rifle Cannonade etc.
     tags.add("SINGLESHOT");
   }
 

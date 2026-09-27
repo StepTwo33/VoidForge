@@ -109,41 +109,10 @@ export default function HowToModWarframesPage() {
           If you keep dying, swap one luxury damage mod for a defensive layer before you
           blame the weapon.
         </GuideTip>
-        <div className="mt-4">
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-4">
           <GuideCtaLink href="/warframe-builder">Warframe Builder</GuideCtaLink>
-        </div>
-      </ContentPanel>
-
-      <ContentPanel>
-        <h2 className="mb-3 text-lg font-semibold">Companions</h2>
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          Companions are a second loadout: precepts for what they do, mods to keep them
-          alive and linked, and a real build on their weapon. Treat them like that, not like
-          cosmetic fluff.
-        </p>
-        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
-          <li>
-            Give the companion <span className="font-medium text-foreground">one clear job</span>{" "}
-            (loot, priming, damage support). Six random precepts usually fight each other.
-          </li>
-          <li>
-            Many precepts are companion-specific. Equip the ones that match that pet&apos;s
-            role.
-          </li>
-          <li>
-            Mod the companion weapon the same way you would a player weapon. Primers want
-            status. Damage pets follow crit / status / hybrid from base stats.
-          </li>
-          <li>
-            Keep the companion alive if you rely on its precepts. A dead pet does nothing.
-          </li>
-        </ul>
-        <GuideMistake>
-          Leaving the companion weapon empty. That is free priming or free damage you already
-          brought into the mission.
-        </GuideMistake>
-        <div className="mt-4">
-          <GuideCtaLink href="/companion-builder">Companion Builder</GuideCtaLink>
+          <GuideCtaLink href="/guides/how-to-mod/arcanes">Arcanes</GuideCtaLink>
+          <GuideCtaLink href="/guides/how-to-mod/companions">Companions</GuideCtaLink>
         </div>
       </ContentPanel>
     </>

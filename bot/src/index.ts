@@ -1,5 +1,5 @@
 /**
- * FrameHub Discord bot — standalone process.
+ * Voidforge Discord bot — standalone process.
  *
  * Env: DISCORD_BOT_TOKEN, DISCORD_CLIENT_ID, DATABASE_URL (shared with Next app)
  *
@@ -286,7 +286,7 @@ const commands = [
   new SlashCommandBuilder().setName("bounties").setDescription("Open-world syndicate bounty boards"),
   new SlashCommandBuilder().setName("simaris").setDescription("Cephalon Simaris synthesis target"),
   new SlashCommandBuilder().setName("cycles").setDescription("Open-world cycle timers"),
-  new SlashCommandBuilder().setName("ping").setDescription("Check that FrameHub Bot is online"),
+  new SlashCommandBuilder().setName("ping").setDescription("Check that Voidforge Bot is online"),
 ].map((c) => c.toJSON());
 
 async function registerCommands() {
@@ -374,7 +374,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         await handleCycles(interaction);
         break;
       case "ping":
-        await interaction.reply({ content: "FrameHub Bot online.", ephemeral: true });
+        await interaction.reply({ content: "Voidforge Bot online.", ephemeral: true });
         break;
       default:
         break;

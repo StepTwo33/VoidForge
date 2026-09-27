@@ -116,6 +116,7 @@ const STAT_KEY_FILTERS: Record<string, ModStatFilterId[]> = {
   statusChancePerCombo: ["status"],
   damagePerStatus: ["status"],
   slashOnCrit: ["status", "crit"],
+  extraElectricProcChance: ["status"],
   slashOnImpactProc: ["status"],
   damageFirstShot: ["damage"],
   multishot: ["multishot"],

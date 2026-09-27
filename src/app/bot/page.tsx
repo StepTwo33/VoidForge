@@ -10,7 +10,7 @@ export default function BotLandingPage() {
     <PageShell>
       <PageMain maxWidth="lg" className="py-10 sm:py-14">
         <PageHero
-          title="FrameHub Bot"
+          title="Voidforge Bot"
           description="World-state alerts, vendor pings, and open-world cycles — configured from the web, posted to Discord."
         />
 

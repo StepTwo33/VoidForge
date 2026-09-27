@@ -4,7 +4,7 @@
 
 Please report security issues privately rather than opening a public GitHub issue:
 
-- Email: [support@frame-hub.com](mailto:support@frame-hub.com)
+- Email: [support@void-forge.org](mailto:support@void-forge.org)
 - Discord: link in the app header
 
 ## Secret scanning

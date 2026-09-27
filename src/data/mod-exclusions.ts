@@ -19,6 +19,12 @@ export const MOD_EXCLUSION_GROUPS: string[][] = [
   ["streamline_r3", "primed_streamline"],
   // Vigor / Primed
   ["vigor_r5", "primed_vigor"],
+  // Archon set warframe Hatred (mutually exclusive)
+  ["amars_hatred", "boreals_hatred", "niras_hatred"],
+  // Archon set Exilus Anguish (mutually exclusive)
+  ["amars_anguish", "boreals_anguish", "niras_anguish"],
+  // Sure Footed / Primed
+  ["sure_footed_r5", "primed_sure_footed"],
 
   // === PRIMARY (RIFLE) MODS ===
   // Serration / Amalgam Serration

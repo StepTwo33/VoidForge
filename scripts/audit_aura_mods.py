@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parent.parent
 MODS_TS = ROOT / "src/data/mods.ts"
 AURA_TS = ROOT / "src/lib/aura-mods.ts"
 WIKI = "https://wiki.warframe.com/api.php"
-UA = {"User-Agent": "FrameHub/1.0 (https://frame-hub.com)"}
+UA = {"User-Agent": "Voidforge/1.0 (https://void-forge.org)"}
 
 
 def load_aura_ids() -> set[str]:

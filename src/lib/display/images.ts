@@ -26,6 +26,8 @@ const WARFRAME_IMAGE_STEM_BY_NAME: Record<string, string> = {
 
 /** Mod display name → PNG stem when it differs from the default rule. */
 const MOD_IMAGE_STEM_BY_NAME: Record<string, string> = {
+  "Sonic Siphon": "Sonic_Fracture",
+  "Gaseous Quake": "Resonating_Quake",
   "Endless Lull": "Endless_Lullaby",
   "Flame Claws": "Heated_Charge",
   "Frost Claws": "Chilling_Claws",
@@ -40,7 +42,7 @@ const MOD_IMAGE_STEM_BY_NAME: Record<string, string> = {
   "Saxum Set Bonus": "Femursetmod",
   // Legacy catalog names → correct on-disk / wiki stems
   "Sprint Speed": "Sprint_Boost",
-  "Scan Organic Lifeforms": "Scan_Aquatic_Lifeforms",
+  "Scan Aquatic Lifeforms": "Scan_Aquatic_Lifeforms",
 };
 
 const MOD_STEM_SMALL_WORDS = new Set(["of", "the", "and"]);

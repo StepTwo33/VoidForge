@@ -42,7 +42,7 @@ export function BuildPageVote({ buildId, initialUpvoteCount, isPublic, builderUr
         />
       )}
       {builderUrl && builderUrl !== "#" && (
-        <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white shadow hover:shadow-lg hover:-translate-y-0.5 transition-all">
+        <Button asChild className="min-h-11 bg-blue-600 hover:bg-blue-700 text-white shadow hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <Link href={builderUrl}>{openLabel}</Link>
         </Button>
       )}

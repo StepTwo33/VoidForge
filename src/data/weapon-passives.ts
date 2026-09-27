@@ -66,6 +66,7 @@ const KUVA_TENET_CODA: Record<string, string> = {
 
 /** Wiki passives (auto-synced + hand-tuned overrides). */
 const WIKI_PASSIVES: Record<string, string> = {
+  aksondol: "Reloading creates a cloud of freezing mist that inflicts Cold status. The mist's range grows with each round reloaded.",
   acceltra: "Reloads 25% faster while sprinting.",
   acceltra_prime: "Sprint reload: Reloads 25% faster while sprinting (50% faster if wielded by Gauss / Gauss Prime). Rockets have a 7m minimum arming distance and explode in a 4m (Base) or 5m (Prime) radius (penetrates walls). Direct impacts have a guaranteed Impact proc.",
   "ack_&_brunt": "Blocking elemental damage stores stacks (up to 4); each stack adds ~17.5% elemental damage.",
@@ -136,6 +137,7 @@ const WIKI_PASSIVES: Record<string, string> = {
   corinth: "Primary fire shoots wide-spread, close-ranged buckshot with innate multishot of 6 pellets. Alt-fire: Launches a grenade. Base requires 20m minimum arming distance before exploding in a 9.4m radius; Prime is remotely detonated and explodes in a 9.8m radius. Physical contact has a guaranteed Impact proc (penetrates walls). Reload: Reloads one shell at a time and can be interrupted at any point. Base reloads at 0.22 seconds per shell; Prime consumes 4 ammunition per alt-fire shot.",
   corinth_prime: "Primary fire shoots wide-spread, close-ranged buckshot with innate multishot of 6 pellets. Alt-fire: Launches a grenade. Base requires 20m minimum arming distance before exploding in a 9.4m radius; Prime is remotely detonated and explodes in a 9.8m radius. Physical contact has a guaranteed Impact proc (penetrates walls). Reload: Reloads one shell at a time and can be interrupted at any point. Base reloads at 0.22 seconds per shell; Prime consumes 4 ammunition per alt-fire shot.",
   corufell: "[Heavy Attack] Transforms into a Gunblade to fire up to two consecutive energy projectiles.",
+  corufell_prime: "Range 2.6m. Follow through 40%. Combo duration 5s. Slam 450, slide 450. Heavy attack damage 225, heavy slam 675, wind up 1.33s. Heavy projectile deals 650 Heat at 0.833 fire rate, with damage falloff from 15m to 30m.",
   cyanex: "Primary fire homes in on enemies within 15°, ricochets once, and explodes in a 0.7m radius (penetrates walls). Alt-fire: Unleashes all remaining rounds in a single fully automatic burst with increased fire rate. Innate 0.5m punch through and infinite body punch through.",
   cycron: "Consumes 0.5 ammo per tick. Does not use ammo pickups; regenerates 40 ammo per second after a 1-second (Base) or 0.5-second (Tenet) delay. Tenet beam chains up to 2 nearby enemies within 7m, dealing 60% of the main beam's damage.",
   daikyu: "Charged shots have innate 3m punch through. On kill: Ragdolls targets; bodies follow the projectile, damaging enemies in their path and pinning corpses to walls.",
@@ -169,7 +171,7 @@ const WIKI_PASSIVES: Record<string, string> = {
   fragor_prime: "Innate 30 starting combo (2.0× heavy attack multiplier).",
   fulmin: "Silent semi-auto; full-auto emits a close-range shockwave.",
   fulmin_prime: "Does not use ammo pickups; regenerates ammo over time. Semi-auto mode is silent, has innate 3m punch through against bodies, and guarantees an Impact proc up to 9m. Alternate Fire mode-switching animation is halved to 0.5 seconds when wielded by Wisp / Wisp Prime.",
-  furia_wraith: "Innate 20 starting combo (2.0× heavy attack multiplier).",
+  furax_wraith: "Innate 20 starting combo (2.0× heavy attack multiplier).",
   fusilai: "Silent. Alt-fire: Throws 3 knives in a fan shape with a wide spread. Consumes 3 ammo. Changes noise level to Alarming.",
   gammacor: "Consumes 0.5 ammo per tick. Synoid Specific: Innate Entropy effect.",
   gazal_machete: "[Djinn Synergy] Gains bonus Corrosive damage after consecutive casts of Djinn's {{M|Fatal Attraction}}.",
@@ -231,6 +233,7 @@ const WIKI_PASSIVES: Record<string, string> = {
   noctua: "Deals pure Slash damage. Shots split into 4 fragments on impact that seek enemies within 20m. Innate infinite body punch through and 1.4m punch through against surfaces. Alt-fire: Deals primarily Radiation damage. Hurls a wide projectile requiring a full meter (recharges over 60 seconds; primary fire hits reduce recharge by 1 second). On kill: Passively scans enemies. Grants +50% additive Status Chance against fully scanned enemies.",
   nukor: "Consumes 0.5 ammo per tick. Inflicts the unique Microwave status, visually enlarging the body part struck. Kuva beam chains up to 2 nearby enemies within 9m, dealing 50% of the main beam's damage.",
   obex: "[Held] Grants 5% Movement Speed bonus when held.",
+  nunchasa: "Alt-fire releases a charged blizzard arrow that freezes enemies it touches and leaves a chilling path. Charged shots have 1.4m punch through; the blizzard arrow has 2m punch through.",
   ocucor: "On kill: Kills release an energy tendril (max 4) that locks onto enemies within 40° of the reticle. Tendrils disappear upon reloading or emptying the magazine.",
   ogris: "Rockets explode in a 7.1m radius upon impact (7.9m on Kuva) and penetrate walls. Enemies can destroy rockets with gunfire or area explosions. Can be fired while sprinting. Kuva direct hits have a guaranteed Impact proc.",
   okina: "[Held] Grants 5% Movement Speed bonus when held.",
@@ -316,6 +319,7 @@ const WIKI_PASSIVES: Record<string, string> = {
   stahlta: "Primary fire has an independent extra chance to proc Radiation (separate from normal status chance).",
   staticor: "Uncharged shots explode in a 2.4m radius (penetrates walls). Charged shots: Charges for 5 ammo to increase explosion radius to 9.6m and damage by 20%. Direct enemy contact while charging discharges the shot and applies a knockdown, preventing further charging while in contact.",
   steflos: "Deals primarily Heat damage. Projectiles have a lifespan of 0.6 seconds and a base thickness of ~2 meters. Innate Infinite Body Punch Through. Each enemy hit increases projectile lifespan by 50%, up to a maximum of 10 seconds. Projectiles grow in size as they hit enemies.",
+  steflos_prime: "Very High accuracy. Linear damage falloff from 8m to 24m. Citrine Prime's signature shotgun.",
   stradavar: "Alt-fire: Toggles between semi-automatic and fully-automatic firing modes.",
   stradavar_prime: "Alt-fire: Toggles between semi-automatic and fully-automatic firing modes.",
   strun: "Innate multishot of 10 (Mk1/Wraith), 12 (Strun), or deals primarily Impact and Slash (Prime) pellets. Prime has innate 0.8m punch through. Wraith Specific: Shots have a forced enemy stagger. Reload: Reloads one shell at a time and can be interrupted at any point. Mk1/Strun reload at 0.5 seconds per shell with 0.5 second start delay and 0.25 second end delay. Wraith reloads at 0.45 seconds per shell with 0.25 second start delay. Prime reloads at 0.4 seconds per shell with 0.6 second total start/end delay.",

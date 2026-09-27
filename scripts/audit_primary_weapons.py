@@ -139,7 +139,7 @@ def load_wiki_primary_aoe_ids() -> set[str]:
             "format": "json",
         }
         url = "https://wiki.warframe.com/api.php?" + urllib.parse.urlencode(params)
-        req = urllib.request.Request(url, headers={"User-Agent": "FrameHub/1.0 (primary audit)"})
+        req = urllib.request.Request(url, headers={"User-Agent": "Voidforge/1.0 (primary audit)"})
         with urllib.request.urlopen(req, timeout=120) as resp:
             data = json.loads(resp.read())
         text = data["parse"]["wikitext"]["*"]

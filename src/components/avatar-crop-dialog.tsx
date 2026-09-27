@@ -144,7 +144,7 @@ export function AvatarCropDialog({
 
   return (
     <Dialog open={open} onOpenChange={(next) => !busy && onOpenChange(next)}>
-      <DialogContent className="sm:max-w-md" showCloseButton={!busy}>
+      <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-md" showCloseButton={!busy}>
         <DialogHeader>
           <DialogTitle>Adjust profile picture</DialogTitle>
           <DialogDescription>
@@ -154,7 +154,7 @@ export function AvatarCropDialog({
 
         <div
           className={cn(
-            "relative mx-auto overflow-hidden rounded-xl border border-border bg-muted/30 touch-none select-none",
+            "relative mx-auto max-w-full overflow-hidden rounded-xl border border-border bg-muted/30 touch-none select-none",
             !image && "animate-pulse",
           )}
           style={{ width: AVATAR_CROP_VIEWPORT, height: AVATAR_CROP_VIEWPORT }}
@@ -192,7 +192,7 @@ export function AvatarCropDialog({
           </div>
         </div>
 
-        <label className="flex items-center gap-3 text-sm text-muted-foreground">
+        <label className="flex min-h-11 items-center gap-3 text-sm text-muted-foreground">
           <ZoomIn className="h-4 w-4 shrink-0" />
           <span className="sr-only">Zoom</span>
           <input
@@ -203,15 +203,15 @@ export function AvatarCropDialog({
             value={transform.zoom}
             disabled={!image || busy}
             onChange={(e) => applyTransform({ ...transform, zoom: Number(e.target.value) })}
-            className="w-full accent-primary"
+            className="h-11 w-full min-w-0 cursor-pointer accent-primary touch-manipulation"
           />
         </label>
 
         <DialogFooter>
-          <Button type="button" variant="outline" disabled={busy} onClick={() => onOpenChange(false)}>
+          <Button type="button" variant="outline" className="min-h-11 w-full sm:w-auto" disabled={busy} onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button type="button" disabled={!image || busy} onClick={() => void handleConfirm()}>
+          <Button type="button" className="min-h-11 w-full sm:w-auto" disabled={!image || busy} onClick={() => void handleConfirm()}>
             {busy ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />

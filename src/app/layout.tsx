@@ -25,7 +25,7 @@ const geistMono = Geist_Mono({
 const siteUrl = getSiteUrl();
 const defaultTitle = `${SITE_NAME} - ${SITE_TAGLINE}`;
 /** Bump when replacing the social preview image so Discord/Twitter re-scrape. */
-const OG_IMAGE_VERSION = "4";
+const OG_IMAGE_VERSION = "7";
 const ogImageUrl = `/og-embed.png?v=${OG_IMAGE_VERSION}`;
 
 export const metadata: Metadata = {
@@ -72,7 +72,16 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Frame Hub",
+    title: "Voidforge",
+  },
+  alternates: {
+    types: {
+      "application/rss+xml": [
+        { url: "/feeds/updates.xml", title: `${SITE_NAME} What's New` },
+        { url: "/feeds/builds-recent.xml", title: `${SITE_NAME} Latest Builds` },
+        { url: "/feeds/builds.xml", title: `${SITE_NAME} Top Builds` },
+      ],
+    },
   },
   icons: {
     icon: [
@@ -107,7 +116,7 @@ export default async function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased overflow-x-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col overflow-x-hidden scroll-smooth antialiased [scroll-padding-top:4.5rem]`}
         suppressHydrationWarning
       >
         <TooltipProvider>

@@ -1,13 +1,16 @@
 #!/bin/bash
-# start.sh - Builds and starts Frame Hub in production with optional Cloudflare tunnel
+# Maintainer deploy helper for void-forge.org — not public self-host documentation.
+# start.sh - Builds and starts Voidforge in production with optional Cloudflare tunnel
 # Usage: ./start.sh [--dev]
 #   --dev   Skip build and run Next.js dev server instead
 #
-# Environment (all optional):
+# Environment:
+#   FRAMEHUB_MAINTAINER / VOIDFORGE_MAINTAINER  Either must be 1 to run the Next app
 #   PORT                 Default 3000
 #   DATABASE_URL         SQLite URL for Prisma; default file:./dev.db
-#   PUBLIC_DOMAIN        Shown in banner; default https://frame-hub.com
-#   CLOUDFLARED_CONFIG   Tunnel config file; default ~/.cloudflared/config-framehub.yml
+#   PUBLIC_DOMAIN        Shown in banner; default https://void-forge.org
+#   CLOUDFLARED_CONFIG   Tunnel config file; default ~/.cloudflared/config-voidforge.yml
+#   CLOUDFLARED_TUNNEL   Named tunnel to run; default frame-hub
 #   SKIP_TUNNEL          Set to 1 to skip Cloudflare (local or no creds)
 #   OVERFRAME_SYNC_DATA  Set to 1 to run scripts/convert_data_v2.py before build (needs Dart data path)
 
@@ -16,9 +19,6 @@ set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$DIR"
 
-PORT="${PORT:-3000}"
-DOMAIN="${PUBLIC_DOMAIN:-https://frame-hub.com}"
-TUNNEL_CONFIG="${CLOUDFLARED_CONFIG:-$HOME/.cloudflared/config-framehub.yml}"
 DEV_MODE=false
 TUNNEL_PID=""
 
@@ -34,7 +34,26 @@ cleanup() {
 }
 trap cleanup SIGINT SIGTERM
 
-# --- Load env + apply Prisma migrations (same DB file the app uses) ---
+# --- Load env before reading PORT / tunnel settings (must be before defaults below) ---
+load_env_files() {
+  for env_file in .env .env.local .env.production; do
+    if [ -f "$DIR/$env_file" ]; then
+      set -a
+      # shellcheck disable=SC1090
+      source "$DIR/$env_file"
+      set +a
+    fi
+  done
+}
+
+load_env_files
+
+PORT="${PORT:-3000}"
+DOMAIN="${PUBLIC_DOMAIN:-https://void-forge.org}"
+TUNNEL_CONFIG="${CLOUDFLARED_CONFIG:-$HOME/.cloudflared/config-voidforge.yml}"
+TUNNEL_NAME="${CLOUDFLARED_TUNNEL:-frame-hub}"
+
+# --- Apply Prisma migrations (same DB file the app uses) ---
 resolve_db_path() {
   local url="${DATABASE_URL:-file:./dev.db}"
   local db_path="${url#file:}"
@@ -50,15 +69,6 @@ repair_database_schema() {
 }
 
 prepare_database() {
-  for env_file in .env .env.local .env.production; do
-    if [ -f "$DIR/$env_file" ]; then
-      set -a
-      # shellcheck disable=SC1090
-      source "$DIR/$env_file"
-      set +a
-    fi
-  done
-
   export DATABASE_URL="${DATABASE_URL:-file:./dev.db}"
 
   local db_path
@@ -84,6 +94,14 @@ prepare_database() {
 }
 
 prepare_database
+
+if [ "${FRAMEHUB_MAINTAINER:-}" != "1" ] && [ "${VOIDFORGE_MAINTAINER:-}" != "1" ]; then
+  echo "Voidforge is not intended for self-hosting."
+  echo "Use the planner at https://void-forge.org"
+  echo "To verify calculations and item catalogs: npm test"
+  echo "Maintainers: set FRAMEHUB_MAINTAINER=1 or VOIDFORGE_MAINTAINER=1 in .env to run the Next app."
+  exit 1
+fi
 
 # --- Optional: Dart → TypeScript data sync (host must have OVERFRAME_DART_DIR or sibling overframe-app) ---
 if [ "${OVERFRAME_SYNC_DATA:-}" = "1" ] && [ -f "$DIR/scripts/convert_data_v2.py" ]; then
@@ -116,8 +134,8 @@ elif [ ! -f "$TUNNEL_CONFIG" ]; then
   echo "Tunnel config not found: $TUNNEL_CONFIG"
   echo "  Set CLOUDFLARED_CONFIG or SKIP_TUNNEL=1. Continuing without tunnel."
 else
-  echo "Starting Cloudflare tunnel (frame-hub)..."
-  cloudflared tunnel --config "$TUNNEL_CONFIG" run frame-hub &
+  echo "Starting Cloudflare tunnel ($TUNNEL_NAME)..."
+  cloudflared tunnel --config "$TUNNEL_CONFIG" run "$TUNNEL_NAME" &
   TUNNEL_PID=$!
   sleep 2
   if ! kill -0 "$TUNNEL_PID" 2>/dev/null; then

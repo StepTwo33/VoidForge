@@ -556,57 +556,50 @@ export default function LoadoutsPage() {
           title="Loadouts"
           description="Group a warframe, weapons (including kitguns, zaws, and amps from the Modular tab), and a companion into one kit."
           actions={
-            <button
-              type="button"
-              onClick={handleCreate}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              <Plus className="h-4 w-4" />
-              New loadout
-            </button>
+            loadouts.length > 0 ? (
+              <button
+                type="button"
+                onClick={handleCreate}
+                className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm text-primary-foreground transition-colors hover:bg-primary/90"
+              >
+                <Plus className="h-4 w-4" />
+                New loadout
+              </button>
+            ) : undefined
           }
         />
 
-        <ContentPanel className="mb-6">
-          <div className="flex gap-2 text-xs leading-relaxed text-muted-foreground">
-            <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary/80" />
-            <div className="space-y-1.5">
-              <p>
-                <span className="font-medium text-foreground">1.</span> Save builds in Warframe / Weapon / Companion
-                builders (Load button lists them here).
-              </p>
-              <p>
-                <span className="font-medium text-foreground">2.</span> Weapon slots also have a <strong>Modular</strong>{" "}
-                tab for saved kitgun / zaw / amp builds.
-              </p>
-              <p>
-                <span className="font-medium text-foreground">3.</span> Save to your account to sync across devices. Enable{" "}
-                <strong>List in Community Builds</strong> to share publicly on Discover.
-              </p>
-              <p>
-                <span className="font-medium text-foreground">Tip:</span>{" "}
-                <Link href="/player-sync" className="text-primary hover:underline">
-                  Player Sync
-                </Link>{" "}
-                can import your in-game loadout from your Warframe account (Twitch extension data).
-              </p>
+        {loadouts.length > 0 && (
+          <ContentPanel className="mb-6 py-3">
+            <div className="flex gap-2 text-xs leading-relaxed text-muted-foreground">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary/80" />
+              <div className="space-y-1">
+                <p>
+                  <span className="font-medium text-foreground/80" title="Kitguns, Zaws, and Amps saved in Modular Builder">Modular</span>
+                  {" "}— attach kitgun / zaw / amp presets from the Modular tab when filling a weapon slot.
+                </p>
+                <p>
+                  <Link href="/player-sync" className="font-medium text-primary hover:underline" title="Import equipped gear from your Warframe account via the Arsenal Twitch extension">Player Sync</Link>
+                  {" "}— pull your in-game loadout into Frame Hub.
+                </p>
+              </div>
             </div>
-          </div>
-        </ContentPanel>
+          </ContentPanel>
+        )}
 
         {loadouts.length === 0 ? (
           <EmptyState
             icon={Sparkles}
             title="No loadouts yet"
-            description="Create one, then attach saved builds from your builders for a full kit in one place."
+            description="Create a kit, then attach saved builds from the Warframe, Weapon, and Companion builders."
           >
             <button
               type="button"
               onClick={handleCreate}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm text-primary-foreground transition-colors hover:bg-primary/90"
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm text-primary-foreground transition-colors hover:bg-primary/90"
             >
               <Plus className="h-4 w-4" />
-              Create first loadout
+              New loadout
             </button>
           </EmptyState>
         ) : (
@@ -635,13 +628,13 @@ export default function LoadoutsPage() {
                             if (e.key === "Enter") handleSaveEdit(loadout.id);
                             if (e.key === "Escape") handleCancelEdit();
                           }}
-                          className="max-w-xs h-9 text-sm"
+                          className="w-full max-w-xs text-sm sm:h-9"
                           autoFocus
                         />
                         <button
                           type="button"
                           onClick={() => handleSaveEdit(loadout.id)}
-                          className="p-2 rounded-lg hover:bg-green-500/10 text-green-400"
+                          className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-green-700 hover:bg-green-500/10 dark:text-green-400 sm:h-10 sm:w-10"
                           aria-label="Save name"
                         >
                           <Check className="h-4 w-4" />
@@ -649,7 +642,7 @@ export default function LoadoutsPage() {
                         <button
                           type="button"
                           onClick={handleCancelEdit}
-                          className="p-2 rounded-lg hover:bg-red-500/10 text-red-400"
+                          className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-red-700 hover:bg-red-500/10 dark:text-red-400 sm:h-10 sm:w-10"
                           aria-label="Cancel"
                         >
                           <X className="h-4 w-4" />
@@ -666,21 +659,21 @@ export default function LoadoutsPage() {
                         <button
                           type="button"
                           onClick={() => handleStartEdit(loadout)}
-                          className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground shrink-0"
+                          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted sm:h-9 sm:w-9"
                           aria-label="Rename loadout"
                         >
                           <Edit2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     )}
-                    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                    <div className="flex shrink-0 flex-wrap items-center gap-1 sm:gap-2">
                       <span className="text-[10px] text-muted-foreground tabular-nums mr-2">
                         Updated {new Date(loadout.updatedAt).toLocaleDateString()}
                       </span>
                       <button
                         type="button"
                         onClick={() => handleOpenSaveDialog(loadout.id)}
-                        className="p-2 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary sm:h-10 sm:w-10"
                         title="Save to account"
                       >
                         <Save className="h-4 w-4" />
@@ -688,11 +681,11 @@ export default function LoadoutsPage() {
                       <button
                         type="button"
                         onClick={() => handleShareLoadout(loadout)}
-                        className="p-2 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary sm:h-10 sm:w-10"
                         title="Copy share link"
                       >
                         {shareCopiedId === loadout.id ? (
-                          <Check className="h-4 w-4 text-green-400" />
+                          <Check className="h-4 w-4 text-green-700 dark:text-green-400" />
                         ) : (
                           <Share2 className="h-4 w-4" />
                         )}
@@ -700,7 +693,7 @@ export default function LoadoutsPage() {
                       {loadout.cloudId && (
                         <a
                           href={`/build/${loadout.cloudId}`}
-                          className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                          className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:h-10 sm:w-10"
                           title="View build page"
                         >
                           <Globe className="h-4 w-4" />
@@ -709,7 +702,7 @@ export default function LoadoutsPage() {
                       <button
                         type="button"
                         onClick={() => handleDuplicate(loadout)}
-                        className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:h-10 sm:w-10"
                         title="Duplicate loadout"
                       >
                         <Copy className="h-4 w-4" />
@@ -717,7 +710,7 @@ export default function LoadoutsPage() {
                       <button
                         type="button"
                         onClick={() => handleDelete(loadout.id)}
-                        className="p-2 rounded-lg hover:bg-destructive/15 text-muted-foreground hover:text-destructive transition-colors"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/15 hover:text-destructive sm:h-10 sm:w-10"
                         title="Delete loadout"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -739,14 +732,14 @@ export default function LoadoutsPage() {
                             key={slot}
                             type="button"
                             onClick={() => handleOpenPicker(loadout.id, slot)}
-                            className="flex items-center gap-3 p-4 rounded-xl border border-dashed border-border/80 hover:border-primary/45 hover:bg-primary/5 transition-all text-left group min-h-[100px]"
+                            className="group flex min-h-[100px] items-center gap-3 rounded-xl border border-dashed border-border/80 p-4 text-left transition-all hover:border-primary/45 hover:bg-primary/5"
                           >
                             <span className="text-muted-foreground/60 group-hover:text-primary">{SLOT_ICONS[slot]}</span>
                             <div>
-                              <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground block">
+                              <span className="block text-xs font-medium text-muted-foreground group-hover:text-foreground">
                                 {cfg.label}
                               </span>
-                              <span className="text-[11px] text-muted-foreground/50">Add frame, weapon, or companion</span>
+                              <span className="text-[11px] text-muted-foreground/70">Tap to add</span>
                             </div>
                           </button>
                         );
@@ -757,7 +750,7 @@ export default function LoadoutsPage() {
                           <div className="flex items-start gap-2.5">
                             {isModularSlot ? (
                               <span className="w-10 h-10 rounded-md flex items-center justify-center bg-amber-500/15 border border-amber-500/30 shrink-0">
-                                <Wrench className="h-5 w-5 text-amber-400/90" aria-hidden />
+                                <Wrench className="h-5 w-5 text-amber-800/90 dark:text-amber-400/90" aria-hidden />
                               </span>
                             ) : (
                             <GameAssetImage
@@ -783,7 +776,7 @@ export default function LoadoutsPage() {
                           <div className="flex flex-col gap-1.5 mt-auto pt-1">
                             <a
                               href={`${isModularSlot ? "/modular-builder" : cfg.builderPath}?loadout=${encodeURIComponent(loadout.id)}&slot=${slot}`}
-                              className="inline-flex items-center justify-center gap-1.5 text-xs font-medium py-2 rounded-lg bg-background/60 border border-border/60 hover:border-primary/35 hover:text-primary transition-colors"
+                              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-background/60 text-xs font-medium transition-colors hover:border-primary/35 hover:text-primary"
                             >
                               Open builder <ExternalLink className="h-3 w-3 opacity-70" />
                             </a>
@@ -791,14 +784,14 @@ export default function LoadoutsPage() {
                               <button
                                 type="button"
                                 onClick={() => handleOpenPicker(loadout.id, slot)}
-                                className="text-xs py-1.5 rounded-lg border border-border/60 hover:bg-background/80 transition-colors"
+                                className="min-h-11 rounded-lg border border-border/60 text-xs transition-colors hover:bg-background/80"
                               >
                                 Change
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleClearSlot(loadout.id, slot)}
-                                className="text-xs py-1.5 rounded-lg border border-border/60 text-muted-foreground hover:text-destructive hover:border-destructive/30 hover:bg-destructive/5 transition-colors"
+                                className="min-h-11 rounded-lg border border-border/60 text-xs text-muted-foreground transition-colors hover:border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
                               >
                                 Clear
                               </button>
@@ -826,7 +819,7 @@ export default function LoadoutsPage() {
           if (!open) setPickerLoadoutId(null);
         }}
       >
-        <DialogContent className="max-w-lg max-h-[85vh] flex flex-col p-0 gap-0 sm:max-w-lg">
+        <DialogContent className="flex max-h-[85vh] w-full max-w-[calc(100%-2rem)] flex-col gap-0 p-0 sm:max-w-lg">
           <DialogHeader className="p-5 pb-0 shrink-0">
             <DialogTitle className="text-left">Fill {SLOT_CONFIG[pickerSlot]?.label} slot</DialogTitle>
             <p className="text-xs text-muted-foreground text-left font-normal pt-1">
@@ -841,7 +834,7 @@ export default function LoadoutsPage() {
                 placeholder="Search…"
                 value={pickerSearch}
                 onChange={(e) => setPickerSearch(e.target.value)}
-                className="pl-9 h-9"
+                className="h-11 pl-9 sm:h-9"
               />
             </div>
           </div>
@@ -851,7 +844,7 @@ export default function LoadoutsPage() {
             onValueChange={(v) => setPickerTab(v as "saved" | "catalog" | "modular")}
             className="flex flex-col flex-1 min-h-0 px-5 pb-5 pt-3"
           >
-            <TabsList className={cn("w-full mb-3 shrink-0 h-9 grid", showModularTab ? "grid-cols-3" : "grid-cols-2")}>
+            <TabsList className={cn("mb-3 grid h-auto min-h-11 w-full shrink-0 sm:h-9", showModularTab ? "grid-cols-3" : "grid-cols-2")}>
               <TabsTrigger value="saved" className="gap-1.5 text-xs sm:text-sm">
                 <Library className="h-3.5 w-3.5" />
                 <span className="truncate">Saved</span>
@@ -866,7 +859,7 @@ export default function LoadoutsPage() {
                   <Wrench className="h-3.5 w-3.5" />
                   <span className="truncate">Modular</span>
                   {modularCount > 0 && (
-                    <span className="ml-0.5 rounded-full bg-amber-500/15 text-amber-400 px-1.5 py-0 text-[10px] tabular-nums">
+                    <span className="ml-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-400 px-1.5 py-0 text-[10px] tabular-nums">
                       {modularCount}
                     </span>
                   )}

@@ -9,6 +9,7 @@ import { Search, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getArcaneImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
+import { getArcaneDisplayInfo } from "@/lib/display/arcane-display";
 
 import { RARITY_BADGE_COLORS } from "@/lib/display/rarity-badge-colors";
 interface ArcaneSlotProps {
@@ -19,32 +20,67 @@ interface ArcaneSlotProps {
   onRemove: () => void;
 }
 
+function ArcaneEffectSummary({ arcane, rank }: { arcane: Mod; rank: number }) {
+  const info = useMemo(() => getArcaneDisplayInfo(arcane, rank), [arcane, rank]);
+  const lines = [...info.applied, ...info.conditional].slice(0, 3);
+
+  if (lines.length === 0) {
+    const desc = info.description;
+    if (!desc) return null;
+    return (
+      <p className="text-[10px] leading-snug text-purple-800/80 line-clamp-2 pr-4 dark:text-purple-300/80">
+        {desc}
+      </p>
+    );
+  }
+
+  return (
+    <ul className="space-y-0.5 pr-4">
+      {lines.map((line, i) => (
+        <li key={`${line.label}-${i}`} className="text-[10px] leading-snug text-purple-800/90 dark:text-purple-300/90">
+          <span className="text-muted-foreground">{line.label}</span>
+          {" "}
+          <span className="font-mono">{line.value}</span>
+          {line.note ? (
+            <span className="text-muted-foreground/80"> · {line.note}</span>
+          ) : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function ArcaneSlotCard({ arcane, rank, label, onAdd, onRemove }: ArcaneSlotProps) {
   if (!arcane) {
     return (
       <button
         onClick={onAdd}
-        className="w-full h-16 border border-dashed border-purple-500/30 rounded-lg flex items-center justify-center gap-2 text-muted-foreground hover:border-purple-500/50 hover:text-purple-400 hover:bg-purple-500/5 transition-all"
+        className="flex w-full min-h-16 items-center justify-center gap-2 rounded-lg border border-dashed border-purple-500/30 text-muted-foreground transition-all hover:border-purple-500/50 hover:bg-purple-500/5 hover:text-purple-700 dark:hover:text-purple-400"
       >
         <Plus className="h-4 w-4" />
-        <span className="text-xs">{label}</span>
+        <span className="text-xs">Add {label}</span>
       </button>
     );
   }
 
   return (
-    <div className="relative w-full h-16 border border-purple-500/30 rounded-lg p-3 bg-purple-500/5">
+    <div className="relative w-full min-h-16 border border-purple-500/30 rounded-lg p-3 bg-purple-500/5">
       <button
+        type="button"
         onClick={onRemove}
-        className="absolute top-1 right-1 p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors"
+        className="absolute top-1 right-1 inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive"
+        aria-label="Remove arcane"
       >
-        <X className="h-3 w-3" />
+        <X className="h-3.5 w-3.5" />
       </button>
-      <div className="flex items-center gap-2 h-full">
-        <GameAssetImage src={getArcaneImage(arcane.name)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/20 shrink-0" hideOnError />
-        <div className="flex-1 min-w-0">
-          <span className="text-sm font-medium truncate block">{arcane.name}</span>
-          <span className="text-[10px] text-muted-foreground">Rank {rank}/{arcane.maxRank}</span>
+      <div className="flex items-start gap-2">
+        <GameAssetImage src={getArcaneImage(arcane.name)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/20 shrink-0 mt-0.5" hideOnError />
+        <div className="flex-1 min-w-0 space-y-1">
+          <div>
+            <span className="text-sm font-medium truncate block">{arcane.name}</span>
+            <span className="text-[10px] text-muted-foreground">Rank {rank}/{arcane.maxRank}</span>
+          </div>
+          <ArcaneEffectSummary arcane={arcane} rank={rank} />
         </div>
       </div>
     </div>
@@ -71,7 +107,7 @@ export function ArcanePicker({ open, onOpenChange, arcanes, equippedArcaneIds, o
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[80vh] flex flex-col p-0">
+      <DialogContent className="max-w-[calc(100%-2rem)] max-h-[80vh] flex flex-col p-0 sm:max-w-lg">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -82,23 +118,30 @@ export function ArcanePicker({ open, onOpenChange, arcanes, equippedArcaneIds, o
               placeholder="Search arcanes..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="min-h-11 pl-9 sm:min-h-9"
               autoFocus
             />
           </div>
           <p className="text-xs text-muted-foreground mt-2">{filtered.length} arcanes</p>
         </div>
         <div className="flex-1 overflow-y-auto px-6 pb-6 min-h-0">
+          {filtered.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-border/70 px-3 py-8 text-center">
+              <p className="text-sm font-medium text-foreground">No arcanes match</p>
+              <p className="mt-1 text-xs text-muted-foreground">Try a different search term.</p>
+            </div>
+          ) : (
           <div className="space-y-1">
             {filtered.map((arcane) => {
               const isEquipped = equippedArcaneIds.includes(arcane.id);
               return (
                 <button
                   key={arcane.id}
+                  type="button"
                   onClick={() => !isEquipped && onSelect(arcane)}
                   disabled={isEquipped}
                   className={cn(
-                    "w-full text-left p-3 rounded-lg border transition-all",
+                    "w-full min-h-11 text-left p-3 rounded-lg border transition-all",
                     isEquipped
                       ? "border-border opacity-40 cursor-not-allowed"
                       : "border-border hover:border-purple-500/50 hover:bg-purple-500/5 cursor-pointer"
@@ -120,6 +163,7 @@ export function ArcanePicker({ open, onOpenChange, arcanes, equippedArcaneIds, o
               );
             })}
           </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

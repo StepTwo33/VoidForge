@@ -42,6 +42,9 @@ export const TOME_CANTICLE_MOD_IDS = new Set([
 
 /** Warframe Exilus slot mods (utility / drift / mobility). */
 export const WARFRAME_EXILUS_MOD_IDS = new Set([
+  "augment_wisp_fused_reservoir",
+  "augment_mesa_mess_waltz",
+  "hysterical_assault",
   "rush_r3",
   "maglev",
   "master_thief",
@@ -61,6 +64,11 @@ export const WARFRAME_EXILUS_MOD_IDS = new Set([
   "battering_maneuver",
   "handspring_r10",
   "sure_footed_r5",
+  "primed_sure_footed",
+  "peculiar_audience",
+  "peculiar_bloom",
+  "peculiar_growth",
+  "peculiar_end",
   "aviator",
   "agility_drift",
   "mobilize_r3",
@@ -72,6 +80,9 @@ export const WARFRAME_EXILUS_MOD_IDS = new Set([
   "shock_absorbers",
   "warm_coat",
   "mecha_pulse_r3",
+  "amars_anguish",
+  "boreals_anguish",
+  "niras_anguish",
 ]);
 
 /** Primary weapon Exilus slot (utility — ammo mutation, terminal velocity, etc.). */
@@ -116,17 +127,19 @@ export const PRIMARY_WEAPON_EXILUS_MOD_IDS = new Set([
   "tactical_reload_r3",
   "twitch",
   "hush_r3",
+  "vigilante_supplies",
   "vile_precision",
+  "double_barrel_drift",
+  "fatal_acceleration",
+  "galvanized_acceleration",
 ]);
 
 /** Secondary weapon Exilus slot (utility; excludes Tome mods). */
 export const SECONDARY_WEAPON_EXILUS_MOD_IDS = new Set([
   "agile_aim",
   "air_recon",
-  "double_barrel_drift",
   "eject_magazine",
   "energizing_shot",
-  "fatal_acceleration",
   "hawk_eye",
   "hush_r3",
   "lethal_momentum",
@@ -141,7 +154,6 @@ export const SECONDARY_WEAPON_EXILUS_MOD_IDS = new Set([
   "suppress_r3",
   "targeting_subsystem",
   "trick_mag_r3",
-  "vigilante_supplies",
   "vile_precision",
 ]);
 

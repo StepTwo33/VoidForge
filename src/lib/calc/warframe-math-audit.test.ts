@@ -110,6 +110,70 @@ describe("elemental combo order (wiki: mods first, innate last)", () => {
     expect(types).not.toContain("heat");
   });
 
+  it("Alternox: Heat alone combines with innate Electricity → Radiation", () => {
+    const weapon = allWeapons.find((w) => w.id === "alternox");
+    const hellfire = allMods.find((m) => m.id === "hellfire_r3" || m.id === "hellfire");
+    if (!weapon || !hellfire) return;
+    expect(weapon.electricity).toBe(62);
+
+    const stats = calculateWeaponBuild(
+      weapon,
+      [{ modId: hellfire.id, rank: hellfire.maxRank, slotIndex: 0 }],
+      modsMap(),
+    );
+    const types = stats.elements.map((e) => e.type);
+    expect(types).toEqual(["radiation"]);
+  });
+
+  it("Alternox: Elec+Toxin then Heat → Corrosive+Heat (innate merges into Elec mod)", () => {
+    const weapon = allWeapons.find((w) => w.id === "alternox");
+    const storm = allMods.find((m) => m.id === "stormbringer_r3" || m.id === "stormbringer");
+    const toxin = allMods.find((m) => m.id === "infected_clip_r3" || m.id === "infected_clip");
+    const hellfire = allMods.find((m) => m.id === "hellfire_r3" || m.id === "hellfire");
+    if (!weapon || !storm || !toxin || !hellfire) return;
+
+    const stats = calculateWeaponBuild(
+      weapon,
+      [
+        { modId: storm.id, rank: storm.maxRank, slotIndex: 0 },
+        { modId: toxin.id, rank: toxin.maxRank, slotIndex: 1 },
+        { modId: hellfire.id, rank: hellfire.maxRank, slotIndex: 2 },
+      ],
+      modsMap(),
+    );
+    const types = stats.elements.map((e) => e.type).sort();
+    expect(types).toEqual(["corrosive", "heat"]);
+    expect(types).not.toContain("radiation");
+    expect(types).not.toContain("electricity");
+  });
+
+  it("duplicate Heat mods coalesce before combine (Hellfire+Cryo+Thermite → Blast+Elec)", () => {
+    const weapon = allWeapons.find((w) => w.id === "alternox");
+    const hellfire = allMods.find((m) => m.id === "hellfire_r3" || m.id === "hellfire");
+    const cryo = allMods.find((m) => m.id === "cryo_rounds_r3" || m.id === "cryo_rounds");
+    const thermite = allMods.find(
+      (m) => m.id === "thermite_rounds_nightmare" || m.id === "wildfire" || m.name === "Thermite Rounds",
+    );
+    expect(weapon).toBeDefined();
+    expect(hellfire).toBeDefined();
+    expect(cryo).toBeDefined();
+    expect(thermite).toBeDefined();
+    if (!weapon || !hellfire || !cryo || !thermite) return;
+
+    const stats = calculateWeaponBuild(
+      weapon,
+      [
+        { modId: hellfire.id, rank: hellfire.maxRank, slotIndex: 0 },
+        { modId: cryo.id, rank: cryo.maxRank, slotIndex: 1 },
+        { modId: thermite.id, rank: thermite.maxRank, slotIndex: 2 },
+      ],
+      modsMap(),
+    );
+    const types = stats.elements.map((e) => e.type).sort();
+    expect(types).toEqual(["blast", "electricity"]);
+    expect(types).not.toContain("radiation");
+  });
+
   it("merges duplicate combined types from separate mod pairs (Viral+Viral → one Viral)", () => {
     const lesion = allWeapons.find((w) => w.id === "lesion");
     const fever = allMods.find((m) => m.id === "fever_strike_r3" || m.id === "fever_strike");

@@ -11,6 +11,8 @@ export type NamedCatalogItem = { id: string; name: string };
 const normalizeName = (value: string): string =>
   value
     .toLowerCase()
+    // Strip ASCII + common Unicode apostrophes so arsenal/"smart quote" names match.
+    .replace(/['\u2018\u2019\u201B\u2032`´]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -20,6 +22,17 @@ function buildNameIndex<T extends NamedCatalogItem>(items: T[]): Map<string, T> 
     map.set(normalizeName(item.name), item);
   }
   return map;
+}
+
+/** Arsenal export names that do not match the catalog display name. */
+const ARSENAL_NAME_ALIASES: Record<string, string> = {
+  duelist: "Narin",
+  "prime steflos shotgun": "Steflos Prime",
+  "prime corufell scythe weapon": "Corufell Prime",
+};
+
+function resolveArsenalName(name: string): string {
+  return ARSENAL_NAME_ALIASES[normalizeName(name)] ?? name;
 }
 
 const modsByName = buildNameIndex(allMods);
@@ -61,11 +74,11 @@ export function findArcaneByName(name: string): Mod | undefined {
 }
 
 export function findWarframeByName(name: string): Warframe | undefined {
-  return warframesByName.get(normalizeName(name));
+  return warframesByName.get(normalizeName(resolveArsenalName(name)));
 }
 
 export function findWeaponByName(name: string): Weapon | undefined {
-  return weaponsByName.get(normalizeName(name));
+  return weaponsByName.get(normalizeName(resolveArsenalName(name)));
 }
 
 export function findCompanionByName(name: string): Companion | undefined {

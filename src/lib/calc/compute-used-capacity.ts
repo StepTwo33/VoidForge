@@ -16,8 +16,8 @@ export function computeUsedCapacity(
 }
 
 /** Warframe base mod capacity before aura bonus. */
-export function warframeBaseCapacity(hasOrokinReactor: boolean, isMR30: boolean): number {
-  return (hasOrokinReactor ? 60 : 30) + (isMR30 ? 10 : 0);
+export function warframeBaseCapacity(hasOrokinReactor: boolean): number {
+  return hasOrokinReactor ? 60 : 30;
 }
 
 /**

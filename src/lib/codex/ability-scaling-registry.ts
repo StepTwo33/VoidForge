@@ -1382,17 +1382,40 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     speedMultiplier: { scale: "range", cap: 1.5 },
   },
 
-  // wiki: Sonic Boom — Impact via damage; 180° cone Misc-fixed
-  // wiki: Sonar — weak-spot mult × STR; propagation Misc-fixed
+  // Arsenal card at 254% STR / 145% RNG: Neote total damage × STR; range is ability.range.
+  "narin::Neote": {
+    totalDamage: { scale: "strength" },
+  },
+  // Arsenal card: shield per Cold status and Overguard cap × STR; radius is ability.radius.
+  "narin::Naraemagi": {
+    shieldPerColdStatus: { scale: "strength" },
+    overguardCap: { scale: "strength" },
+  },
+
+  // Arsenal card: Hakchum Cold vulnerability is 150% at 100% STR and keeps scaling (381% at 254% STR).
+  "narin::Hakchum": {
+    damageVulnerability: { scale: "strength" },
+  },
+  // Arsenal card at 254% STR / 145% RNG: defense reduction 12.7%, explosion damage × STR,
+  // explosion range × RNG. Radius is ability.radius (already × RNG).
+  "narin::Nurinarim": {
+    defenseReduction: { scale: "strength" },
+    explosionDamage: { scale: "strength" },
+    explosionRange: { scale: "range" },
+  },
+
+  // wiki Update 44: Sonic Boom — Impact via damage; 70% armor strip × STR, cap 100%; cone Misc-fixed
+  "banshee::Sonic Boom": {
+    armorStrip: { scale: "strength", cap: 1 },
+  },
+
+  // wiki: Sonar — weak-spot mult × STR; spots count as Weak Points; propagation Misc-fixed
   "banshee::Sonar": {
     damageMultiplier: { scale: "strength" },
   },
 
-  // wiki: Silence — stun Misc-fixed; aura via ability.range/duration
-  // wiki: Sound Quake — Blast DPS via damage; channeled energyDrain × max((2−EFF)÷DUR, 0.25)
-  "banshee::Sound Quake": {
-    energyDrain: { scale: "efficiency", formula: "channeled_drain" },
-  },
+  // wiki: Silence — stun Misc-fixed; recast refreshes duration; aura via ability.range/duration
+  // wiki Update 44: Sound Quake — unchanneled 25s zone; Blast damage via ability.damage
 
   // wiki: Enthrall — pillar DPS via damage; projectile / pillar radius × STR/RNG; thrall duration via ability.duration
   "revenant::Enthrall": {

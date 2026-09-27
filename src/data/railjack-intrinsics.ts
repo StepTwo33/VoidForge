@@ -111,7 +111,7 @@ export const RAILJACK_INTRINSIC_RANK_NAMES: Record<RailjackIntrinsicTree, string
 };
 
 export interface RailjackIntrinsicPaperEffects {
-  /** Gunnery ≥1: +50% damage on Dorsal + Ventral turrets only. */
+  /** Gunnery ≥1: +50% damage on swivel (Dorsal/Ventral) turrets only. */
   dorsalVentralTurretDamageBonus: number;
   /** Tactical ≥6: multiply Battle Mod energy costs. */
   battleEnergyCostMult: number;
@@ -123,6 +123,10 @@ export interface RailjackIntrinsicPaperEffects {
   ordnanceForge: boolean;
   /** Command ≥10: elite crew recruit unlocked. */
   eliteCrewUnlocked: boolean;
+  /** Command ≥8: Lich / Sister / Coda crew. */
+  unusualCrewUnlocked: boolean;
+  /** Mission crew slots unlocked (0–3) at Command 1/3/5. */
+  crewSlotsUnlocked: number;
   /** Panel notes for QoL / heat ranks that are not paper DPS. */
   panelNotes: string[];
 }
@@ -156,6 +160,11 @@ export function intrinsicPaperEffects(
   if (i.engineering >= 5) panelNotes.push("Engineering 5–7: Forge yield / speed");
   if (i.tactical >= 1 && i.tactical < 6) panelNotes.push("Tactical 1–5: Menu / warp / Necramech deploy");
 
+  let crewSlotsUnlocked = 0;
+  if (i.command >= 1) crewSlotsUnlocked = 1;
+  if (i.command >= 3) crewSlotsUnlocked = 2;
+  if (i.command >= 5) crewSlotsUnlocked = 3;
+
   return {
     dorsalVentralTurretDamageBonus: i.gunnery >= 1 ? 0.5 : 0,
     battleEnergyCostMult: i.tactical >= 6 ? 0.75 : 1,
@@ -163,6 +172,8 @@ export function intrinsicPaperEffects(
     domeChargeForge: i.engineering >= 4,
     ordnanceForge: i.engineering >= 3,
     eliteCrewUnlocked: i.command >= 10,
+    unusualCrewUnlocked: i.command >= 8,
+    crewSlotsUnlocked,
     panelNotes,
   };
 }

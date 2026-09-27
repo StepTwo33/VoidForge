@@ -33,7 +33,7 @@ import {
 } from "@/lib/mods/companion-precept-eligibility";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Zap, Dog, Bot, Bug, Swords, Crosshair, Flag, Star, Save, FolderOpen } from "lucide-react";
+import { Search, Zap, Dog, Bot, Bug, Swords, Crosshair, Flag, Save, FolderOpen, ArrowLeftRight } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, CompanionBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { cn } from "@/lib/utils";
@@ -42,6 +42,8 @@ import { toast } from "sonner";
 import { getCompanionImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
 import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
+import { snapshotFromBuild } from "@/lib/builds/compare-build";
+import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 
 const companionTypeLabels: Record<string, string> = {
   all: "All",
@@ -74,17 +76,61 @@ function getCompanionModSubCategory(companionType: string): string[] {
   }
 }
 
-import { getCompanionWeapons, resolveDefaultCompanionWeapon } from "@/lib/weapons/companion-weapons";
+import { getCompanionWeapons, resolveDefaultCompanionWeapon, resolveHoundWeaponId, modFitsCompanionWeapon } from "@/lib/weapons/companion-weapons";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
+import {
+  houndBrackets,
+  houndCores,
+  houndModels,
+  houndStabilizers,
+  moaBrackets,
+  moaCores,
+  moaGyros,
+  moaModels,
+  type ModularCompanionParts,
+} from "@/data/companion-parts";
+import {
+  defaultPartsForCompanion,
+  resolveCompanionParts,
+} from "@/lib/companions/companion-parts-resolve";
+
+function PartSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: Array<{ id: string; name: string }>;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <label className="flex flex-col gap-1 text-xs">
+      <span className="text-muted-foreground tracking-wider font-semibold">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-md border border-border bg-card px-2 py-1.5 text-sm text-foreground"
+      >
+        {options.map((o) => (
+          <option key={o.id} value={o.id}>
+            {o.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
 
 function StatRow({ label, value, highlighted, color }: { label: string; value: string; highlighted?: boolean; color?: string }) {
   return (
     <div className="flex justify-between items-center py-1">
       <span className={cn("text-sm", color || "text-muted-foreground")}>{label}</span>
-      <span className={highlighted ? "text-sm font-bold text-cyan-400" : `text-sm font-mono ${color || ""}`}>
+      <span className={highlighted ? "text-sm font-bold text-cyan-700 dark:text-cyan-400" : `text-sm font-mono ${color || ""}`}>
         {value}
       </span>
     </div>
@@ -110,7 +156,6 @@ export default function CompanionBuilderPage() {
   const [companionType, setCompanionType] = useState("all");
   const [showCompanionList, setShowCompanionList] = useState(true);
   const [hasReactor, setHasReactor] = useState(false);
-  const [isMR30, setIsMR30] = useState(false);
   const [slotPolarities, setSlotPolarities] = useState<Record<number, string>>({});
   const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>(() => getSavedBuilds("companion"));
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
@@ -122,6 +167,7 @@ export default function CompanionBuilderPage() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   // Weapon state
   const [selectedWeapon, setSelectedWeapon] = useState<Weapon | null>(null);
+  const [weaponSearch, setWeaponSearch] = useState("");
   const [weaponMods, setWeaponMods] = useState<EquippedMod[]>([]);
   const [activeWeaponSlotIndex, setActiveWeaponSlotIndex] = useState(0);
   const [hasCatalyst, setHasCatalyst] = useState(false);
@@ -129,10 +175,13 @@ export default function CompanionBuilderPage() {
   const [modPickerTarget, setModPickerTarget] = useState<"companion" | "weapon">("companion");
   const [weaponRivenStatsMap, setWeaponRivenStatsMap] = useState<Record<number, Record<string, number>>>();
   const [applyHunterVsSlash, setApplyHunterVsSlash] = useState(false);
+  const [companionParts, setCompanionParts] = useState<ModularCompanionParts | null>(null);
 
-  const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags }: SaveBuildDialogValues) => {
-    if (!selectedCompanion) return;
-    const data: CompanionBuildData = {
+  const [compareOpen, setCompareOpen] = useState(false);
+
+  const buildCompanionData = useCallback((): CompanionBuildData | null => {
+    if (!selectedCompanion) return null;
+    return {
       companionId: selectedCompanion.id,
       mods: equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
       weaponId: selectedWeapon?.id,
@@ -141,9 +190,21 @@ export default function CompanionBuilderPage() {
       arcaneIds: [],
       hasReactor,
       hasCatalyst,
-      isMR30,
+      isMR30: false,
       slotPolarities,
+      ...(companionParts ? { parts: companionParts } : {}),
     };
+  }, [selectedCompanion, equippedMods, selectedWeapon, weaponMods, weaponSlotPolarities, hasReactor, hasCatalyst, slotPolarities, companionParts]);
+
+  const liveCompare = useMemo(() => {
+    const data = buildCompanionData();
+    if (!data || !selectedCompanion) return null;
+    return snapshotFromBuild("companion", buildName || selectedCompanion.name, data);
+  }, [buildCompanionData, selectedCompanion, buildName]);
+
+  const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags }: SaveBuildDialogValues) => {
+    const data = buildCompanionData();
+    if (!data || !selectedCompanion) return;
     const build: SavedBuild = {
       id: currentBuildId || generateBuildId(),
       name,
@@ -166,20 +227,26 @@ export default function CompanionBuilderPage() {
     } else {
       toast.success("Build saved locally", { description: "Log in to sync builds to your account" });
     }
-  }, [selectedCompanion, equippedMods, selectedWeapon, weaponMods, weaponSlotPolarities, hasReactor, hasCatalyst, isMR30, slotPolarities, currentBuildId]);
+  }, [buildCompanionData, selectedCompanion, currentBuildId]);
 
   const handleLoadBuild = useCallback((build: SavedBuild) => {
     const d = build.data as CompanionBuildData;
     const comp = allCompanions.find((c) => c.id === d.companionId);
     if (!comp) { toast.error("Companion not found"); return; }
     setSelectedCompanion(comp);
+    const loadedParts = d.parts ?? defaultPartsForCompanion(comp) ?? null;
+    setCompanionParts(loadedParts);
     setEquippedMods(d.mods.map((m) => {
       const mod = modsMap.get(m.modId);
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
     }));
     const weaponCandidates = getCompanionWeapons(comp, allWeapons);
-    if (d.weaponId) {
-      setSelectedWeapon(weaponCandidates.find((w) => w.id === d.weaponId) ?? null);
+    const resolvedWeaponId =
+      d.weaponId ??
+      (loadedParts ? resolveCompanionParts(loadedParts)?.weaponId : undefined) ??
+      resolveHoundWeaponId(comp);
+    if (resolvedWeaponId) {
+      setSelectedWeapon(weaponCandidates.find((w) => w.id === resolvedWeaponId) ?? null);
     } else if ((d.weaponMods || []).length > 0) {
       setSelectedWeapon(resolveDefaultCompanionWeapon(comp, allWeapons));
     } else {
@@ -191,8 +258,12 @@ export default function CompanionBuilderPage() {
     }));
     setHasReactor(d.hasReactor);
     setHasCatalyst(d.hasCatalyst ?? false);
-    setIsMR30(d.isMR30);
-    setSlotPolarities(d.slotPolarities || {});
+    const resolved = loadedParts ? resolveCompanionParts(loadedParts) : null;
+    setSlotPolarities(
+      Object.keys(d.slotPolarities || {}).length > 0
+        ? d.slotPolarities
+        : (resolved?.defaultSlotPolarities ?? {}),
+    );
     setWeaponSlotPolarities(d.weaponSlotPolarities || {});
     setCurrentBuildId(build.id);
     setBuildName(build.name);
@@ -228,10 +299,10 @@ export default function CompanionBuilderPage() {
 
   const calculatedStats = useMemo<CompanionCalculatedStats | null>(() => {
     if (!selectedCompanion) return null;
-    return calculateCompanionBuild(selectedCompanion, equippedMods);
-  }, [selectedCompanion, equippedMods]);
+    return calculateCompanionBuild(selectedCompanion, equippedMods, modsMap, companionParts);
+  }, [selectedCompanion, equippedMods, modsMap, companionParts]);
 
-  const baseCapacity = (hasReactor ? 60 : 30) + (isMR30 ? 10 : 0);
+  const baseCapacity = hasReactor ? 60 : 30;
   const capacityUsed = useMemo(() => {
     return equippedMods.reduce((sum, m) => {
       const mod = modsMap.get(m.modId);
@@ -276,9 +347,18 @@ export default function CompanionBuilderPage() {
     return getCompanionWeapons(selectedCompanion, allWeapons);
   }, [selectedCompanion, allWeapons]);
 
+  const filteredAvailableWeapons = useMemo(() => {
+    const q = weaponSearch.trim().toLowerCase();
+    if (!q) return availableWeapons;
+    return availableWeapons.filter(
+      (w) => w.name.toLowerCase().includes(q) || w.category.toLowerCase().includes(q),
+    );
+  }, [availableWeapons, weaponSearch]);
+
   const weaponStats = useMemo(() => {
     if (!selectedWeapon) return null;
     const rivenStatChanges = mergeRivenStatChanges(weaponRivenStatsMap, weaponMods);
+
     const linkage = {
       companionMods: equippedMods.map((m) => ({
         modId: m.modId,
@@ -314,46 +394,51 @@ export default function CompanionBuilderPage() {
 
   const weaponModPool = useMemo(() => {
     if (!selectedWeapon) return [];
-    const cat = selectedWeapon.category;
-    if (cat === "sentinel_weapon") {
-      // Sentinel weapons use robotic weapon mods only
-      return allMods.filter((m) =>
-        m.category === "companion_weapon" ||
-        (m.category === "companion" && (m.subCategory === "robotic" || m.subCategory === "universal"))
-      );
-    }
-    if (cat === "beast_claw") {
-      // Beast claws use companion weapon mods only (Bite, Maul, etc.) — NOT regular melee mods like Blood Rush
-      return allMods.filter((m) =>
-        m.category === "companion_weapon" ||
-        (m.category === "companion" && (m.subCategory === "beast" || m.subCategory === "universal"))
-      );
-    }
-    if (cat === "hound_weapon") {
-      // Hound weapons use robotic weapon mods
-      return allMods.filter((m) =>
-        m.category === "companion_weapon" ||
-        (m.category === "companion" && (m.subCategory === "robotic" || m.subCategory === "universal"))
-      );
-    }
-    return allMods.filter((m) => m.category === "companion_weapon");
-  }, [selectedWeapon]);
+    return allMods.filter((m) => modFitsCompanionWeapon(m, selectedWeapon));
+  }, [allMods, selectedWeapon]);
 
   const handleSelectCompanion = useCallback((companion: Companion) => {
     setSelectedCompanion(companion);
     setEquippedMods([]);
     setHasReactor(false);
-    setSelectedWeapon(null);
+    const parts = defaultPartsForCompanion(companion) ?? null;
+    setCompanionParts(parts);
+    const resolved = parts ? resolveCompanionParts(parts) : null;
+    const weaponId = resolved?.weaponId ?? resolveHoundWeaponId(companion);
+    const weaponCandidates = getCompanionWeapons(companion, allWeapons);
+    setSelectedWeapon(weaponId ? weaponCandidates.find((w) => w.id === weaponId) ?? null : null);
     setWeaponMods([]);
     setHasCatalyst(false);
     setWeaponSlotPolarities({});
     setWeaponRivenStatsMap(undefined);
-    setSlotPolarities({});
+    setSlotPolarities(resolved?.defaultSlotPolarities ?? {});
     setCurrentBuildId(null);
     setBuildName(`${companion.name} Build`);
     setBuildDescription("");
     setShowCompanionList(false);
-  }, []);
+  }, [allWeapons]);
+
+  const updateCompanionParts = useCallback((patch: Partial<ModularCompanionParts>) => {
+    setCompanionParts((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...patch };
+      const resolved = resolveCompanionParts(next);
+      if (resolved) {
+        setSlotPolarities((slots) =>
+          Object.keys(slots).length === 0 ? resolved.defaultSlotPolarities : slots,
+        );
+        if (resolved.weaponId) {
+          const weapon = allWeapons.find((w) => w.id === resolved.weaponId);
+          if (weapon) setSelectedWeapon(weapon);
+        }
+        if (resolved.companionId && selectedCompanion?.id !== resolved.companionId) {
+          const nextComp = allCompanions.find((c) => c.id === resolved.companionId);
+          if (nextComp) setSelectedCompanion(nextComp);
+        }
+      }
+      return next;
+    });
+  }, [allCompanions, allWeapons, selectedCompanion?.id]);
 
   const handleOpenModPicker = useCallback((slotIndex: number) => {
     setActiveSlotIndex(slotIndex);
@@ -496,7 +581,7 @@ export default function CompanionBuilderPage() {
                 }
                 title={
                   <span className="inline-flex items-center gap-1.5">
-                    <span className="text-cyan-400">{getCompanionIcon(comp.type)}</span>
+                    <span className="text-cyan-700 dark:text-cyan-400">{getCompanionIcon(comp.type)}</span>
                     {comp.name}
                   </span>
                 }
@@ -536,40 +621,35 @@ export default function CompanionBuilderPage() {
                 <BuilderActionGroup>
                   <button
                     onClick={() => setSaveDialogOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md text-muted-foreground hover:text-green-400 hover:bg-green-500/10 transition-all font-medium"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-green-500/10 hover:text-green-700 dark:hover:text-green-400 sm:min-h-0 sm:py-1.5"
                     title="Save Build"
                   >
-                    <Save className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Save</span>
+                    <Save className="h-3.5 w-3.5" /> <span>Save</span>
                   </button>
-                  <button onClick={() => { setSavedBuilds(getSavedBuilds("companion")); setShowSavedBuilds(true); }} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md text-muted-foreground hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium" title="Load Build">
-                    <FolderOpen className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Load</span>
+                  <button onClick={() => { setSavedBuilds(getSavedBuilds("companion")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-0 sm:py-1.5" title="Load Build">
+                    <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
+                  </button>
+                  <button
+                    onClick={() => setCompareOpen(true)}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-400 sm:min-h-0 sm:py-1.5"
+                    title="Compare this build to a saved or posted build"
+                  >
+                    <ArrowLeftRight className="h-3.5 w-3.5" /> <span>Compare</span>
                   </button>
                 </BuilderActionGroup>
 
                 <BuilderActionGroup>
                   <button
-                    onClick={() => setIsMR30(!isMR30)}
-                    className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all font-medium",
-                      isMR30
-                        ? "bg-amber-500/10 text-amber-400"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
-                  >
-                    <Star className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">MR 30+</span>
-                  </button>
-                  <button
                     onClick={() => setHasReactor(!hasReactor)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all font-medium",
+                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       hasReactor
                         ? "bg-yellow-500/10 text-yellow-400"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
                     )}
                   >
                     <Zap className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Reactor</span>
+                    <span>Reactor</span>
                   </button>
                 </BuilderActionGroup>
 
@@ -580,9 +660,9 @@ export default function CompanionBuilderPage() {
                     `/report-issue?type=companion&name=${encodeURIComponent(selectedCompanion.name)}&id=${encodeURIComponent(selectedCompanion.id)}`,
                     builderReturnTo,
                   )}
-                  className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-1.5 text-xs font-medium text-amber-400/70 transition-colors hover:bg-amber-500/5 hover:text-amber-400"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-2 text-xs font-medium text-amber-800/80 transition-colors hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 sm:min-h-0 sm:py-1.5"
                 >
-                  <Flag className="h-3 w-3" /> <span className="hidden sm:inline">Report</span>
+                  <Flag className="h-3 w-3" /> <span>Report</span>
                 </a>
               </BuilderActionBar>
             </BuilderItemHeader>
@@ -596,31 +676,108 @@ export default function CompanionBuilderPage() {
               />
             </div>
 
+            {companionParts && (selectedCompanion.type === "moa" || selectedCompanion.type === "hound") && (
+              <div className="mb-4 p-3 border border-border rounded-lg bg-card">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">
+                    {companionParts.kind === "moa" ? "MOA PARTS" : "HOUND PARTS"}
+                  </span>
+                  <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <input
+                      type="checkbox"
+                      checked={companionParts.isGilded !== false}
+                      onChange={(e) => updateCompanionParts({ isGilded: e.target.checked })}
+                    />
+                    Gilded
+                  </label>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {companionParts.kind === "moa" ? (
+                    <>
+                      <PartSelect
+                        label="Model"
+                        value={companionParts.model}
+                        options={moaModels}
+                        onChange={(id) => updateCompanionParts({ model: id })}
+                      />
+                      <PartSelect
+                        label="Core"
+                        value={companionParts.core}
+                        options={moaCores}
+                        onChange={(id) => updateCompanionParts({ core: id })}
+                      />
+                      <PartSelect
+                        label="Gyro"
+                        value={companionParts.gyro ?? moaGyros[0].id}
+                        options={moaGyros}
+                        onChange={(id) => updateCompanionParts({ gyro: id })}
+                      />
+                      <PartSelect
+                        label="Bracket"
+                        value={companionParts.bracket}
+                        options={moaBrackets}
+                        onChange={(id) => updateCompanionParts({ bracket: id })}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <PartSelect
+                        label="Model"
+                        value={companionParts.model}
+                        options={houndModels}
+                        onChange={(id) => updateCompanionParts({ model: id })}
+                      />
+                      <PartSelect
+                        label="Core"
+                        value={companionParts.core}
+                        options={houndCores}
+                        onChange={(id) => updateCompanionParts({ core: id })}
+                      />
+                      <PartSelect
+                        label="Bracket"
+                        value={companionParts.bracket}
+                        options={houndBrackets}
+                        onChange={(id) => updateCompanionParts({ bracket: id })}
+                      />
+                      <PartSelect
+                        label="Stabilizer"
+                        value={companionParts.stabilizer ?? houndStabilizers[0].id}
+                        options={houndStabilizers}
+                        onChange={(id) => updateCompanionParts({ stabilizer: id })}
+                      />
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
             {selectedCompanion.precept && (
               <div className="mb-4 p-3 border border-cyan-500/20 rounded-lg bg-cyan-500/5">
-                <span className="text-[10px] font-semibold text-cyan-400 tracking-wider">PRECEPT</span>
+                <span className="text-[10px] font-semibold text-cyan-700 dark:text-cyan-400 tracking-wider">PRECEPT</span>
                 <p className="text-sm text-muted-foreground mt-1">{selectedCompanion.precept}</p>
               </div>
             )}
 
             <div className="grid lg:grid-cols-[1fr_320px] gap-6">
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-sm font-semibold tracking-wider text-muted-foreground">
+                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                  <h2 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">
                     MOD CONFIGURATION
                   </h2>
-                  <div className="flex items-center gap-3 text-xs font-mono">
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
                     <span className="text-muted-foreground">
                       {equippedPreceptCount}/{COMPANION_MAX_PRECEPTS} precepts
                     </span>
                     <span className={cn(
-                      capacityUsed > baseCapacity ? "text-red-400" : "text-muted-foreground"
+                      "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
+                      capacityUsed > baseCapacity ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
                     )}>
+                      <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
                       {capacityUsed} / {baseCapacity}
                     </span>
                   </div>
                 </div>
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
                   {Array.from({ length: COMPANION_MOD_SLOT_COUNT }, (_, i) => {
                     const equipped = equippedMods.find((m) => m.slotIndex === i);
                     const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
@@ -675,79 +832,98 @@ export default function CompanionBuilderPage() {
                       <StatRow label="Dmg Reduction" value={`${calculatedStats.damageReduction.toFixed(1)}%`} highlighted />
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">Select a companion to see stats</p>
+                    <p className="text-sm text-muted-foreground">Pick a companion above to see body stats and precepts.</p>
                   )}
                 </div>
               </div>
+            </div>
 
-              {/* COMPANION WEAPON SECTION */}
+              {/* COMPANION WEAPON SECTION — full width below mods/stats */}
               <div className="mt-8 border-t border-border pt-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Swords className="h-5 w-5 text-orange-400" />
-                  <h2 className="text-lg font-bold">Companion Weapon</h2>
+                <div className="mb-4 flex flex-wrap items-center gap-2 sm:gap-3">
+                  <Swords className="h-5 w-5 shrink-0 text-orange-700 dark:text-orange-400" />
+                  <h2 className="min-w-0 flex-1 truncate text-lg font-bold">Companion Weapon</h2>
                   {selectedWeapon && (
                     <button
                       onClick={() => setHasCatalyst(!hasCatalyst)}
                       className={cn(
-                        "ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-all",
+                        "ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
                         hasCatalyst
-                          ? "bg-blue-500/10 border-blue-500/50 text-blue-400"
+                          ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400"
                           : "border-border text-muted-foreground"
                       )}
                     >
                       <Zap className="h-3.5 w-3.5" />
-                      {hasCatalyst ? "Catalyst Installed" : "Orokin Catalyst"}
+                      {hasCatalyst ? (<><span className="sm:hidden">Catalyst</span><span className="hidden sm:inline">Catalyst Installed</span></>) : "Orokin Catalyst"}
                     </button>
                   )}
                 </div>
 
                 {/* Weapon Selector */}
                 {!selectedWeapon ? (
-                  <div className="space-y-1 max-h-48 overflow-y-auto">
-                    {availableWeapons.length === 0 ? (
-                      <p className="text-sm text-muted-foreground py-4 text-center">No weapons available for this companion type</p>
-                    ) : (
-                      availableWeapons.map((w) => (
-                        <button
-                          key={w.id}
-                          onClick={() => { setSelectedWeapon(w); setWeaponMods([]); setHasCatalyst(false); setWeaponSlotPolarities({}); }}
-                          className="w-full text-left p-2.5 rounded-lg border border-border hover:border-orange-500/50 hover:bg-orange-500/5 transition-all"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-sm">{w.name}</span>
-                            <span className="text-[10px] text-muted-foreground capitalize">{w.category.replace('_', ' ')}</span>
-                          </div>
-                          <div className="flex gap-3 text-[10px] text-muted-foreground mt-0.5">
-                            <span>DMG {w.damage}</span>
-                            <span>CC {(w.criticalChance * 100).toFixed(0)}%</span>
-                            <span>CD {w.criticalMultiplier.toFixed(1)}x</span>
-                            <span>SC {(w.statusChance * 100).toFixed(0)}%</span>
-                          </div>
-                        </button>
-                      ))
+                  <div className="space-y-2">
+                    {availableWeapons.length > 0 && (
+                      <div className="relative">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <input
+                          type="search"
+                          value={weaponSearch}
+                          onChange={(e) => setWeaponSearch(e.target.value)}
+                          placeholder="Search companion weapons…"
+                          className="h-11 w-full rounded-lg border border-border bg-background pl-9 pr-3 text-sm"
+                          aria-label="Search companion weapons"
+                        />
+                      </div>
                     )}
+                    <div className="max-h-[min(50dvh,20rem)] space-y-1 overflow-y-auto overscroll-contain rounded-lg border border-border/60 p-1.5 sm:max-h-[min(60vh,24rem)]">
+                      {availableWeapons.length === 0 ? (
+                        <p className="py-6 text-center text-sm text-muted-foreground">No weapons available for this companion type</p>
+                      ) : filteredAvailableWeapons.length === 0 ? (
+                        <p className="py-6 text-center text-sm text-muted-foreground">No weapons match “{weaponSearch.trim()}”.</p>
+                      ) : (
+                        filteredAvailableWeapons.map((w) => (
+                          <button
+                            key={w.id}
+                            onClick={() => { setSelectedWeapon(w); setWeaponMods([]); setHasCatalyst(false); setWeaponSlotPolarities({}); setWeaponSearch(""); }}
+                            className="min-h-11 w-full rounded-lg border border-transparent p-2.5 text-left transition-all hover:border-orange-500/50 hover:bg-orange-500/5"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="min-w-0 truncate font-medium text-sm">{w.name}</span>
+                              <span className="shrink-0 text-[10px] capitalize text-muted-foreground">{w.category.replace('_', ' ')}</span>
+                            </div>
+                            <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-muted-foreground">
+                              <span>DMG {w.damage}</span>
+                              <span>CC {(w.criticalChance * 100).toFixed(0)}%</span>
+                              <span>CD {w.criticalMultiplier.toFixed(1)}x</span>
+                              <span>SC {(w.statusChance * 100).toFixed(0)}%</span>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <>
-                    <div className="flex items-center gap-3 mb-4 p-3 border border-orange-500/30 bg-orange-500/5 rounded-lg">
-                      <Crosshair className="h-4 w-4 text-orange-400" />
-                      <span className="font-medium text-sm">{selectedWeapon.name}</span>
-                      <span className="text-[10px] text-muted-foreground capitalize">{selectedWeapon.category.replace('_', ' ')}</span>
-                      <button onClick={() => { setSelectedWeapon(null); setWeaponMods([]); setWeaponSlotPolarities({}); }} className="ml-auto text-xs text-muted-foreground hover:text-foreground">Change</button>
+                    <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-orange-500/30 bg-orange-500/5 p-3 sm:gap-3">
+                      <Crosshair className="h-4 w-4 shrink-0 text-orange-700 dark:text-orange-400" />
+                      <span className="min-w-0 truncate font-medium text-sm">{selectedWeapon.name}</span>
+                      <span className="text-[10px] capitalize text-muted-foreground">{selectedWeapon.category.replace('_', ' ')}</span>
+                      <button onClick={() => { setSelectedWeapon(null); setWeaponMods([]); setWeaponSlotPolarities({}); }} className="ml-auto inline-flex min-h-11 items-center rounded-md px-3 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground sm:min-h-9">Change</button>
                     </div>
 
                     <div className="space-y-6">
                       <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <h3 className="text-sm font-semibold tracking-wider text-muted-foreground">WEAPON MODS</h3>
+                        <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                          <h3 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">WEAPON MODS</h3>
                           <span className={cn(
-                            "text-xs font-mono",
-                            weaponCapacityUsed > weaponCapacity ? "text-red-400" : "text-muted-foreground"
+                            "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
+                            weaponCapacityUsed > weaponCapacity ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
                           )}>
+                            <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
                             {weaponCapacityUsed} / {weaponCapacity}
                           </span>
                         </div>
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                           {Array.from({ length: 8 }, (_, i) => {
                             const equipped = weaponMods.find((m) => m.slotIndex === i);
                             const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
@@ -808,7 +984,7 @@ export default function CompanionBuilderPage() {
                                     Orange/red+ are tier hit values; Avg hit only blends tiers your CC can roll.
                                   </p>                                  {showOverflow && (
                                     <p className="text-[9px] text-amber-500/90 mt-1.5 leading-snug">
-                                      Note: values above ~2.147B can wrap to large negatives in-game (signed 32-bit). FrameHub shows uncapped math.
+                                      Note: values above ~2.147B can wrap to large negatives in-game (signed 32-bit). Voidforge shows uncapped math.
                                     </p>
                                   )}
                                 </>
@@ -842,7 +1018,7 @@ export default function CompanionBuilderPage() {
                                   <StatRow
                                     label="Hunter vs Slash"
                                     value={`×${weaponStats.hunterSetVsSlashDamageMultiplier.toFixed(2)}`}
-                                    color="text-amber-400"
+                                    color="text-amber-800 dark:text-amber-400"
                                   />
                                 )}
                               </>
@@ -851,14 +1027,13 @@ export default function CompanionBuilderPage() {
                             <StatRow label="Sustained DPS" value={weaponStats.sustainedDps.toFixed(0)} highlighted />
                           </div>
                         ) : (
-                          <p className="text-sm text-muted-foreground">Select a weapon to see stats</p>
+                          <p className="text-sm text-muted-foreground">Attach a companion weapon to see DPS and mod capacity.</p>
                         )}
                       </div>
                     </div>
                   </>
                 )}
               </div>
-            </div>
           </div>
         )}
       </main>
@@ -889,6 +1064,16 @@ export default function CompanionBuilderPage() {
         onLoad={handleLoadBuild}
         onDelete={handleDeleteBuild}
       />
+
+      {selectedCompanion && (
+        <BuildCompareDialog
+          open={compareOpen}
+          onOpenChange={setCompareOpen}
+          type="companion"
+          itemId={selectedCompanion.id}
+          live={liveCompare}
+        />
+      )}
 
       <SaveBuildDialog
         open={saveDialogOpen}

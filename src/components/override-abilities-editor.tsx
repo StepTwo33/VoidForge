@@ -151,7 +151,7 @@ export function AbilitiesEditor({
                 <span className="text-muted-foreground">Energy cost</span>
                 <input
                   type="number"
-                  value={ability.energyCost}
+                  value={ability.energyCost ?? ""}
                   onChange={(e) => update(index, { energyCost: Number(e.target.value) })}
                   className="mt-0.5 h-8 w-full rounded border border-border bg-background px-2 text-sm"
                 />

@@ -40,6 +40,9 @@ export function normalizeFactionName(faction: string | undefined | null): string
   if (f.includes("infest")) return "infested";
   if (f.includes("sentient")) return "sentient";
   if (f.includes("narmer")) return "narmer";
+  if (f.includes("scaldra")) return "grineer";
+  if (f.includes("techrot")) return "corpus";
+  if (f.includes("anarch")) return "anarchs";
   return f;
 }
 
@@ -57,9 +60,10 @@ export function factionBonusFromStats(
 /**
  * Direct hit faction mult: (1 + bane%).
  * DoT ticks get this squared in-game.
+ * Negative bonuses (riven faction curses) reduce damage; floor at 0 so DPS never goes negative.
  */
 export function factionHitMultiplier(factionBonus: number): number {
-  return 1 + Math.max(0, factionBonus);
+  return Math.max(0, 1 + factionBonus);
 }
 
 export function factionDotMultiplier(factionBonus: number): number {

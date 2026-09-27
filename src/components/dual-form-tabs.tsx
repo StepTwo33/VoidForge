@@ -22,7 +22,7 @@ export function DualFormTabs({
           type="button"
           onClick={() => onChange(form.id)}
           className={cn(
-            "flex-1 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors",
+            "flex-1 min-h-11 px-3 py-2 text-xs font-semibold rounded-md transition-colors sm:min-h-0 sm:py-1.5",
             activeFormId === form.id
               ? "bg-background text-foreground shadow-sm border border-border/60"
               : "text-muted-foreground hover:text-foreground hover:bg-background/40",

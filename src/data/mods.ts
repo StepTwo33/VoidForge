@@ -43,7 +43,7 @@ const RAW_MODS: Mod[] = [
       "criticalChanceOnHeadshot": 22.5,
       "duration": 1.5
     },
-    "description": "On Headshot:\\n+135% Critical Chance when Aiming for 9s",
+    "description": "On Weak Point:\\n+135% Critical Chance when Aiming for 9s",
     "rarity": "rare"
   },
   {
@@ -59,7 +59,7 @@ const RAW_MODS: Mod[] = [
       "criticalChanceOnHeadshotKill": 3.636364,
       "duration": 1.090909
     },
-    "description": "On Headshot:\\n+120% Critical Chance when Aiming for 12s\\nOn Headshot Kill:\\n+40% Critical Chance when Aiming for 12s. Stacks up to 5x.",
+    "description": "On Weak Point:\\n+120% Critical Chance when Aiming for 12s\\nOn Weak Point Kill:\\n+40% Critical Chance when Aiming for 12s. Stacks up to 5x.",
     "rarity": "rare"
   },
   {
@@ -170,7 +170,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 5,
-    "category": "rifle",
+    "category": "primary",
     "subCategory": "",
     "stats": {
       "ammoPickup": 15,
@@ -198,7 +198,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "galvanized_aptitude",
     "name": "Galvanized Aptitude",
-    "polarity": "madurai",
+    "polarity": "vazarin",
     "drain": 2,
     "maxRank": 10,
     "category": "rifle",
@@ -217,7 +217,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 2,
     "maxRank": 10,
-    "category": "rifle",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "statusChance": 7.272727,
@@ -390,7 +390,7 @@ const RAW_MODS: Mod[] = [
       "criticalChanceOnHeadshot": 22.5,
       "duration": 1.5
     },
-    "description": "On Headshot:\\n+135% Critical Chance when Aiming for 9s",
+    "description": "On Weak Point:\\n+135% Critical Chance when Aiming for 9s",
     "rarity": "common"
   },
   {
@@ -406,7 +406,7 @@ const RAW_MODS: Mod[] = [
       "criticalChanceOnHeadshotKill": 3.636364,
       "duration": 1.090909
     },
-    "description": "On Headshot:\\n+120% Critical Chance when Aiming for 12s\\nOn Headshot Kill:\\n+40% Critical Chance when Aiming for 12s. Stacks up to 5x.",
+    "description": "On Weak Point:\\n+120% Critical Chance when Aiming for 12s\\nOn Weak Point Kill:\\n+40% Critical Chance when Aiming for 12s. Stacks up to 5x.",
     "rarity": "rare"
   },
   {
@@ -2453,7 +2453,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "cats_eye",
     "name": "Cat's Eye",
-    "polarity": "madurai",
+    "polarity": "penjaga",
     "drain": 0,
     "maxRank": 3,
     "category": "companion",
@@ -2476,8 +2476,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "beast",
     "stats": {
-      "buffChance": 27,
-      "duration": 6.75
+      "buffChance": 10,
+      "cooldown": 6.75
     },
     "description": "Smeeta Kavat has a 40% chance every 27s to bestow its owner with good fortune.",
     "rarity": "rare"
@@ -3194,7 +3194,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "augment_mesa_mess_waltz",
     "name": "Mesa's Waltz",
-    "polarity": "exilus",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
@@ -3687,16 +3687,17 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "augment_banshee_sonic_fracture",
-    "name": "Sonic Fracture",
+    "name": "Sonic Siphon",
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "armorReduction": 15
+      "armorDuration": 20,
+      "armorCap": 1500
     },
-    "description": "Sonic Boom Augment: Enemy Armor is reduced by 70%.",
+    "description": "Sonic Boom Augment: If an enemy is hit, Banshee gains Armor for 20s, up to 1500 Armor. Recasting refreshes the duration when an enemy is struck.",
     "rarity": "rare",
     "warframeId": "banshee"
   },
@@ -3732,18 +3733,141 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "augment_banshee_resonating_quake",
-    "name": "Resonating Quake",
+    "name": "Gaseous Quake",
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "quakeDamage": 75
+      "channeled": 1
     },
-    "description": "Sound Quake Augment: Forgoes channeling to create a shockwave that deals 20x Damage at the epicenter, gradually weakening as it expands out.",
+    "description": "Sound Quake Augment: Channel to root Banshee in place. The quake deals additional Gas damage and status. Damage and energy drain increase every second. The area lingers briefly after channeling ends.",
     "rarity": "rare",
     "warframeId": "banshee"
+  },
+  {
+    "id": "augment_oraxia_broods_oversurge",
+    "name": "Brood's Oversurge",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "electricityDamage": 2000
+    },
+    "description": "Widow's Brood Augment: Scuttlers are galvanized with Electricity. Hold to direct all active Scuttlers at the aimed target, inflicting 2000 Electricity damage and status in a radius.",
+    "rarity": "rare",
+    "warframeId": "oraxia"
+  },
+  {
+    "id": "augment_uriel_infernum",
+    "name": "Infernum",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "heatDamage": 1500
+    },
+    "description": "Infernalis Augment: Release fireballs for 1500 Heat damage, with larger volleys when grabbing Vythelas' Runes during flight. Hits from fireballs slowly charge Brimstone.",
+    "rarity": "rare",
+    "warframeId": "uriel"
+  },
+  {
+    "id": "augment_frost_cold_front",
+    "name": "Cold Front",
+    "polarity": "exilus",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "globeHealthPerKill": 4
+    },
+    "description": "Snow Globe Augment: Snow Globe attaches to Frost with a smaller radius and increased mobility. Kills on frozen enemies increase Globe health by 4% per kill. Can be equipped in the Exilus slot.",
+    "rarity": "rare",
+    "warframeId": "frost"
+  },
+  {
+    "id": "augment_grendel_gastroparesis",
+    "name": "Gastroparesis",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "gasDamagePerEnemy": 15
+    },
+    "description": "Passive Augment: Each enemy consumed adds 15% Gas damage to Primary and Secondary weapons.",
+    "rarity": "rare",
+    "warframeId": "grendel"
+  },
+  {
+    "id": "augment_dante_noctua_swarm",
+    "name": "Noctua Swarm",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "range": 8,
+      "duration": 15,
+      "allyRadius": 25
+    },
+    "description": "Noctua Augment: Alternate Fire releases Paragrimms that swarm 8m around the point of aim for 15s, silencing enemies and dealing 500 Slash per second. Each living enemy restores 2 Energy per second to allies within 25m, up to 20.",
+    "rarity": "rare",
+    "warframeId": "dante"
+  },
+  {
+    "id": "augment_temple_rhythm_guard",
+    "name": "Rhythm Guard",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "overguardPerCast": 25,
+      "overguardAtMaxStacks": 400
+    },
+    "description": "Passive Augment: Gain 100 Overguard when using an Ability on the Backbeat. Amount doubles up to 1600 per Beat, but resets if the Beat is missed.",
+    "rarity": "rare",
+    "warframeId": "temple"
+  },
+  {
+    "id": "augment_nokko_reroot_rampage",
+    "name": "Reroot Rampage",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "range": 8
+    },
+    "description": "Reroot Augment: Collecting Reroot orbs summons additional Sprodlings inflicting 250 Toxin Damage in an 8m radius, with 20% more Critical Chance each bounce.",
+    "rarity": "rare",
+    "warframeId": "nokko"
+  },
+  {
+    "id": "augment_koumei_kumihimo_loading",
+    "name": "Kumihimo Loading",
+    "polarity": "zenurik",
+    "drain": 6,
+    "maxRank": 3,
+    "category": "augment",
+    "subCategory": "",
+    "stats": {
+      "killsRequired": 6
+    },
+    "description": "Kumihimo Augment: 6 kills with weapons affected by Koumei's Passive give a loaded die that always rolls 6. Hold to cast empowered Kumihimo and consume all dice.",
+    "rarity": "rare",
+    "warframeId": "koumei"
   },
   {
     "id": "augment_vauban_tesla_link",
@@ -4988,21 +5112,22 @@ const RAW_MODS: Mod[] = [
 
 
   {
-    "id": "scan_organic",
-    "name": "Scan Organic Lifeforms",
+    "id": "scan_aquatic",
+    "name": "Scan Aquatic Lifeforms",
     "polarity": "penjaga",
-    "drain": 4,
-    "maxRank": 5,
+    "drain": 0,
+    "maxRank": 3,
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "scanChance": 10
+      "hotspotRange": 25.0,
+      "luminousDyeRange": 10.0
     },
-    "description": "+10% Scan Chance per rank",
-    "rarity": "uncommon"
+    "description": "Displays Fishing Hotspots within 100m and applies Luminous Dye to fish within 40m.",
+    "rarity": "common"
   },
   {
-    "id": "hard_engag",
+    "id": "hard_engage",
     "name": "Hard Engage",
     "polarity": "penjaga",
     "drain": 2,
@@ -5010,7 +5135,7 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "spinDamage": 20,
+      "spinDamage": 15,
       "range": 1.666667
     },
     "description": "Engages enemies within 10m with melee attacks, dealing 90 Impact Damage. Melee attacks are enhanced by Mods equipped in the Moa's weapon.",
@@ -6796,6 +6921,20 @@ const RAW_MODS: Mod[] = [
     "rarity": "uncommon"
   },
   {
+    "id": "overpressured_rounds",
+    "name": "Overpressured Rounds",
+    "polarity": "madurai",
+    "drain": 2,
+    "maxRank": 5,
+    "category": "primary",
+    "subCategory": "weapon",
+    "stats": {
+      "falloffDistance": 20
+    },
+    "description": "Rifle kills add 120% Falloff Distance and decrease Spread for next attack with Buckshot. Buckshot kills restore 50% of the current Magazine.",
+    "rarity": "rare"
+  },
+  {
     "id": "photon_overcharge",
     "name": "Photon Overcharge",
     "polarity": "vazarin",
@@ -7268,7 +7407,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "energyOnKill": 1.363636
     },
-    "description": "On Headshot Kill:\\n+15 Energy",
+    "description": "On Weak Point Kill:\\n+15 Energy",
     "rarity": "rare"
   },
   {
@@ -7603,6 +7742,20 @@ const RAW_MODS: Mod[] = [
       "health": -6.25
     },
     "description": "On Kill:\\n-100% Shield Recharge Delay for 10s, -25% from Health Orbs",
+    "rarity": "rare"
+  },
+  {
+    "id": "velox_conclusion",
+    "name": "Velox Conclusion",
+    "polarity": "madurai",
+    "drain": 2,
+    "maxRank": 5,
+    "category": "secondary",
+    "subCategory": "weapon",
+    "stats": {
+      "abilityStrength": 0.1
+    },
+    "description": "On hit, gain +0.6% Ability Strength up to 60% maximum. Consumed on your next Ability cast.",
     "rarity": "rare"
   },
   {
@@ -8794,6 +8947,21 @@ const RAW_MODS: Mod[] = [
     "rarity": "legendary"
   },
   {
+    "id": "prototype_shock_coils",
+    "name": "Prototype Shock Coils",
+    "polarity": "madurai",
+    "drain": 2,
+    "maxRank": 5,
+    "category": "secondary",
+    "subCategory": "weapon",
+    "stats": {
+      "electricity": 15,
+      "extraElectricProcChance": 20
+    },
+    "description": "Adds +90% <DT_ELECTRICITY_COLOR>Electric damage, and shots have a 20% base chance to apply extra Electric status independent of modded damage types",
+    "rarity": "rare"
+  },
+  {
     "id": "pummel",
     "name": "Pummel",
     "polarity": "naramon",
@@ -9621,6 +9789,21 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
+    "id": "amars_anguish",
+    "name": "Amar's Anguish",
+    "polarity": "vazarin",
+    "drain": 4,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "parkourVelocity": 2.5,
+      "sprintSpeed": 2.5
+    },
+    "description": "+15% to Parkour Velocity\\n+15% Sprint Speed",
+    "rarity": "common"
+  },
+  {
     "id": "amars_contempt",
     "name": "Amar's Contempt",
     "polarity": "madurai",
@@ -9634,6 +9817,21 @@ const RAW_MODS: Mod[] = [
     },
     "description": "+90% Melee Damage\\n+30% Slash",
     "rarity": "rare"
+  },
+  {
+    "id": "amars_hatred",
+    "name": "Amar's Hatred",
+    "polarity": "vazarin",
+    "drain": 4,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "armor": 4.1667,
+      "abilityStrength": 2.5
+    },
+    "description": "+25% Armor\\n+15% Ability Strength",
+    "rarity": "uncommon"
   },
   {
     "id": "auger_strike",
@@ -9695,6 +9893,21 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
+    "id": "boreals_anguish",
+    "name": "Boreal's Anguish",
+    "polarity": "vazarin",
+    "drain": 4,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "gravityReduction": 12.5,
+      "aimGlide": 10.0
+    },
+    "description": "-75% Gravity while Aim Gliding\\n+60% Aim Glide/Wall Latch Duration",
+    "rarity": "common"
+  },
+  {
     "id": "boreals_contempt",
     "name": "Boreal's Contempt",
     "polarity": "madurai",
@@ -9708,6 +9921,21 @@ const RAW_MODS: Mod[] = [
     },
     "description": "+90% Melee Damage\\n+60% Status Damage",
     "rarity": "rare"
+  },
+  {
+    "id": "boreals_hatred",
+    "name": "Boreal's Hatred",
+    "polarity": "vazarin",
+    "drain": 4,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "shield": 10.8333,
+      "abilityEfficiency": 2.5
+    },
+    "description": "+65% Shield Capacity\\n+15% Ability Efficiency",
+    "rarity": "uncommon"
   },
   {
     "id": "bright_purity",
@@ -9882,6 +10110,21 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
+    "id": "dreamers_bond",
+    "name": "Dreamer's Bond",
+    "polarity": "universal",
+    "drain": -2,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "healthRegen": 0.25,
+      "energyRegen": 0.05
+    },
+    "description": "Squad receives +0.3 Energy Regen/s and +1.5 Health Regen/s",
+    "rarity": "uncommon"
+  },
+  {
     "id": "electromagnetic_shielding",
     "name": "Electromagnetic Shielding",
     "polarity": "vazarin",
@@ -10001,7 +10244,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "galvanized_elementalist",
     "name": "Galvanized Elementalist",
-    "polarity": "madurai",
+    "polarity": "vazarin",
     "drain": 2,
     "maxRank": 10,
     "category": "melee",
@@ -10333,6 +10576,21 @@ const RAW_MODS: Mod[] = [
     "rarity": "uncommon"
   },
   {
+    "id": "niras_anguish",
+    "name": "Nira's Anguish",
+    "polarity": "vazarin",
+    "drain": 4,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "parkourVelocity": 2.5,
+      "aimGlide": 2.5
+    },
+    "description": "+15% to Parkour Velocity\\n+15% Aim Glide/Wall Latch Duration",
+    "rarity": "common"
+  },
+  {
     "id": "niras_contempt",
     "name": "Nira's Contempt",
     "polarity": "madurai",
@@ -10346,6 +10604,21 @@ const RAW_MODS: Mod[] = [
     },
     "description": "+90% Melee Damage\\n+60% Status Chance",
     "rarity": "rare"
+  },
+  {
+    "id": "niras_hatred",
+    "name": "Nira's Hatred",
+    "polarity": "vazarin",
+    "drain": 4,
+    "maxRank": 5,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "health": 5.8333,
+      "abilityDuration": 2.5
+    },
+    "description": "+35% Health\\n+15% Ability Duration",
+    "rarity": "uncommon"
   },
   {
     "id": "opportunitys_reach",
@@ -10592,6 +10865,20 @@ const RAW_MODS: Mod[] = [
     },
     "description": "+200% Slam Attack Damage",
     "rarity": "uncommon"
+  },
+  {
+    "id": "sentient_incision",
+    "name": "Sentient Incision",
+    "polarity": "naramon",
+    "drain": 2,
+    "maxRank": 5,
+    "category": "melee",
+    "subCategory": "weapon",
+    "stats": {
+      "damage": 20
+    },
+    "description": "+120% additional damage matching the target's weakness. Does not combine with other damage types.",
+    "rarity": "rare"
   },
   {
     "id": "serrated_edges",
@@ -11467,7 +11754,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "archon_stretch",
     "name": "Archon Stretch",
-    "polarity": "madurai",
+    "polarity": "naramon",
     "drain": 6,
     "maxRank": 10,
     "category": "warframe",
@@ -12519,7 +12806,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "duration": 0.75
     },
-    "description": "Covenant Augment: Headshot kills increase Critical Chance bonus duration by 3s.",
+    "description": "Covenant Augment: Weak Point kills increase Critical Chance bonus duration by 3s.",
     "rarity": "rare",
     "warframeId": "harrow"
   },
@@ -14438,6 +14725,20 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
+    "id": "primed_sure_footed",
+    "name": "Primed Sure Footed",
+    "polarity": "vazarin",
+    "drain": 6,
+    "maxRank": 10,
+    "category": "warframe",
+    "subCategory": "",
+    "stats": {
+      "knockdownResistance": 9.0909
+    },
+    "description": "+100% Chance to Resist Knockdown",
+    "rarity": "legendary"
+  },
+  {
     "id": "swift_bite_r3",
     "name": "Swift Bite",
     "polarity": "zenurik",
@@ -14605,8 +14906,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "impactStatusStacks": 1.0
     },
@@ -14622,7 +14923,11 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "range": 1.666667
+      "overshields": 500,
+      "range": 1.666667,
+      "damage": 5,
+      "knockdownRadius": 0.833333,
+      "cooldown": 2.5
     },
     "description": "Overshields increased by +3000. Leap at an enemy within 10m dealing 30 <DT_IMPACT_COLOR>Impact Damage and knocking down other enemies within 5m and resets Overshields.",
     "rarity": "common"
@@ -14662,8 +14967,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "statusChance": 30,
       "heat": 30.0
@@ -14691,8 +14996,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "cold": 30,
       "statusChance": 30
@@ -14841,6 +15146,7 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
+      "damage": 50,
       "range": 2.5
     },
     "description": "Unleashes a series of shockwaves that knockdown enemies within 15m and deal 300 damage.",
@@ -14855,7 +15161,7 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "heat": 12.5,
+      "dodgeChance": 12.5,
       "duration": 1.333333
     },
     "description": "Teleports a safe distance away and engages a displacement field gaining 75% chance to dodge enemy fire for 8s.",
@@ -14913,8 +15219,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "statusChance": 15,
       "heat": 15.0
@@ -14942,8 +15248,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "cold": 15,
       "statusChance": 15
@@ -15096,11 +15402,11 @@ const RAW_MODS: Mod[] = [
   {
     "id": "martyr_symbiosis",
     "name": "Martyr Symbiosis",
-    "polarity": "penjaga",
+    "polarity": "madurai",
     "drain": 0,
     "maxRank": 3,
     "category": "companion",
-    "subCategory": "",
+    "subCategory": "beast",
     "stats": {
       "health": 10.0,
       "range": 6.25
@@ -15264,9 +15570,10 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
+      "damage": 50,
       "range": 5.0
     },
-    "description": "Emits a magnetic pulse that disarms enemies within 30m.",
+    "description": "Emits a magnetic pulse dealing 50 <DT_MAGNETIC_COLOR>Magnetic Damage that permanently disarms enemies within 30m.",
     "rarity": "rare"
   },
   {
@@ -15304,8 +15611,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "toxin": 30,
       "statusChance": 30
@@ -15347,8 +15654,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "electricity": 15,
       "statusChance": 15
@@ -15362,8 +15669,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "electricity": 30,
       "statusChance": 30
@@ -15521,8 +15828,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "toxin": 15,
       "statusChance": 15
@@ -15903,7 +16210,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "melee",
     "subCategory": "",
     "stats": {},
     "description": "Kills from Melee Attacks grant 45% more Melee Affinity.",
@@ -15927,7 +16234,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "weapon",
     "stats": {
       "fireRate": 14.1667
@@ -15941,7 +16248,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -15979,7 +16286,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "antivirus",
     "subCategory": "",
     "stats": {},
     "description": "Digital extremists stand no chance when you have Anti-V on your side",
@@ -16019,7 +16326,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": -2,
     "maxRank": 3,
-    "category": "general",
+    "category": "conclave",
     "subCategory": "",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -16031,7 +16338,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "Forward Artillery has a +90% chance to not consume Dome Charges",
@@ -16043,7 +16350,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -16055,7 +16362,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "penjaga",
     "drain": -2,
     "maxRank": 3,
-    "category": "general",
+    "category": "companion",
     "subCategory": "",
     "stats": {
       "damage": 75.0
@@ -16121,7 +16428,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "magazine": 10,
@@ -16136,7 +16443,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -16148,7 +16455,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {},
     "description": "+30% chance to auto complete Hacking",
@@ -16174,7 +16481,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "penjaga",
     "drain": -2,
     "maxRank": 3,
-    "category": "general",
+    "category": "companion",
     "subCategory": "",
     "stats": {
       "range": 0.5
@@ -16226,7 +16533,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "cooldown": 80.0
@@ -16240,7 +16547,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "duration": 4.333333,
@@ -16267,7 +16574,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 10,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "Electro-Magnetic Pulse that damages enemies and disables them temporarily.",
@@ -16331,7 +16638,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {},
     "description": "Mercy Kill refills Primary and Secondary Magazine by 100%",
@@ -16343,7 +16650,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {
       "energy": 50.0
@@ -16357,7 +16664,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {
       "health": 100.0
@@ -16385,7 +16692,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -16397,7 +16704,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -16409,7 +16716,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Ability strength, duration, and cast speed granted by spectral pages increased by 40%.",
@@ -16421,7 +16728,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 1.0
@@ -16435,7 +16742,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "puncture": 20
@@ -16449,7 +16756,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "duration": 7.5,
@@ -16464,7 +16771,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Spectral pages also fire off beams that blind enemies within 16m.",
@@ -16476,7 +16783,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "primary",
     "subCategory": "",
     "stats": {
       "zoom": -10
@@ -16514,7 +16821,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "antivirus",
     "subCategory": "",
     "stats": {},
     "description": "Keeps your bytes tight and your bits fit",
@@ -16526,7 +16833,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Second Ability launches an energy bomb that explodes with a 8m radius, stripping 100% of enemy armor. Tap <ACTIVATE_ABILITY_1> again to detonate in-flight.",
@@ -16577,7 +16884,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "cold": 15,
@@ -16592,7 +16899,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "factionOrokin": 5
@@ -16606,7 +16913,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "factionMurmur": 5
@@ -16620,7 +16927,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "tektolyst",
     "subCategory": "",
     "stats": {},
     "description": "Summon forth Cogron from the Void and brandish the mighty hammer, slamming it into the ground to create a cataclysmic shockwave that ripples 4 times.",
@@ -16674,8 +16981,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "riven",
     "stats": {},
     "description": "You will need to prove yourself before I reveal the beauty within this work.",
     "rarity": "rare"
@@ -16686,7 +16993,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "antivirus",
     "subCategory": "",
     "stats": {},
     "description": "Stopping cyber-crime in its tracks",
@@ -16698,7 +17005,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "melee",
     "subCategory": "",
     "stats": {
       "electricity": 20
@@ -16712,7 +17019,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "engineSpeed": 4.25
@@ -16768,7 +17075,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 3,
-    "category": "general",
+    "category": "primary",
     "subCategory": "",
     "stats": {
       "recoil": -15
@@ -16782,7 +17089,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "Flares that distract enemy guided projectiles.",
@@ -16794,7 +17101,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damage": 5.0
@@ -16832,7 +17139,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 10,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "damage": 2.5,
@@ -16874,7 +17181,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "criticalChance": 15,
@@ -16889,7 +17196,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 10,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "engineSpeed": 9.09,
@@ -16916,7 +17223,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "cold": 15,
@@ -16984,7 +17291,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "cooldown": 50.0,
@@ -16999,7 +17306,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Vortex heals allies for 250 health/s. Downed players inside the vortex will be instantly revived, and dead players will be resummoned.",
@@ -17011,7 +17318,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "shield": 1.5,
@@ -17038,7 +17345,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Slinging through enemies has a 50% chance to disarm them.",
@@ -17062,7 +17369,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "impact": 15
@@ -17076,7 +17383,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Killing an enemy affected by Contamination Wave makes all affected enemies 50% more vulnerable, while also making the effect last 10s longer. Maximum 2 stacks.",
@@ -17100,7 +17407,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 3,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "accuracy": 5,
@@ -17115,7 +17422,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Rain of Arrows will also target 4 additional enemies within 10m.",
@@ -17127,7 +17434,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "antivirus",
     "subCategory": "",
     "stats": {},
     "description": "Your digital virus buster",
@@ -17193,7 +17500,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "penjaga",
     "drain": -2,
     "maxRank": 3,
-    "category": "general",
+    "category": "companion",
     "subCategory": "",
     "stats": {},
     "description": "The companion will avoid attacking. +50% Evasion",
@@ -17217,7 +17524,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Energy pickups grant 50% additional Energy over 5s.",
@@ -17229,7 +17536,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Vortex applies 100% status vulnerability to all enemies within it.",
@@ -17291,7 +17598,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {},
     "description": "+50% to retry on Hacking failure",
@@ -17315,7 +17622,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "requiem",
     "subCategory": "",
     "stats": {},
     "description": "Roiling, moaning, this realm of ours  In madness lost shall die",
@@ -17327,7 +17634,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "projectileSpeed": 10
@@ -17353,7 +17660,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -17377,7 +17684,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "cooldown": 38.333333
@@ -17391,7 +17698,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {},
     "description": "Reduces damage by 75% while hacking",
@@ -17404,7 +17711,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damage": 5.0
@@ -17430,7 +17737,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "puncture": 15
@@ -17444,7 +17751,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 10,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "duration": 1.181818,
@@ -17459,7 +17766,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "melee",
     "subCategory": "",
     "stats": {},
     "description": "Increase the range of spectral melee attacks to 26m.",
@@ -17486,7 +17793,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "cooldown": 40.0
@@ -17500,7 +17807,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "shield": 0.5
@@ -17514,7 +17821,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 10,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "artilleryDamage": 9.09,
@@ -17553,7 +17860,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "penjaga",
     "drain": -2,
     "maxRank": 3,
-    "category": "general",
+    "category": "companion",
     "subCategory": "",
     "stats": {
       "statusDuration": 20.0
@@ -17567,7 +17874,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "impact": 20
@@ -17619,7 +17926,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 10,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "projectileSpeed": 2.7273,
@@ -17661,7 +17968,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -17685,7 +17992,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "x1.27 Turret Damage vs Corpus",
@@ -17697,7 +18004,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Increase shockwave radius by +40%.",
@@ -17721,7 +18028,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "When the Guardian Shell breaks, Warframe Shield Regeneration rate is increased by 150% and Regeneration Delay is reduced by 80%, for 12s.",
@@ -17745,7 +18052,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {
       "duration": 15.0
@@ -17759,7 +18066,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Use your first Ability inside a Wellspring to increase its size, boost its duration by 20s, and grant 20% Ability Strength to those inside.",
@@ -17771,7 +18078,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": -2,
     "maxRank": 3,
-    "category": "general",
+    "category": "stance",
     "subCategory": "",
     "stats": {},
     "description": "Relentless jabs and powerful sweeping lunges.",
@@ -17783,7 +18090,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -17795,7 +18102,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {
       "parkourVelocity": 60.0,
@@ -17824,7 +18131,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Spectral weapons have a 100% chance to attack the same enemy a second time.",
@@ -17836,7 +18143,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -17848,7 +18155,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 3,
-    "category": "general",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "magazine": -2.5,
@@ -17863,7 +18170,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "turretDamage": 12.5,
@@ -17893,7 +18200,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "potency",
     "subCategory": "",
     "stats": {},
     "description": "Gain 15% Disinfection and gain 5000 Affinity",
@@ -17905,7 +18212,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": -2,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "shield": 2.5,
@@ -17959,7 +18266,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Allows Abilities to be cast without using Energy or Shields but requires 60s to recharge.",
@@ -17971,7 +18278,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "potency",
     "subCategory": "",
     "stats": {},
     "description": "Gain 15% Disinfection and gain 10,000 H\u00f6llars",
@@ -17983,7 +18290,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "duration": 5.833333,
@@ -17998,7 +18305,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "boostSpeed": 7.5
@@ -18027,7 +18334,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": -2,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "armor": 3.75,
@@ -18042,7 +18349,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "requiem",
     "subCategory": "",
     "stats": {},
     "description": "Corporeal laws are unwrit  As suns and love retreat",
@@ -18066,7 +18373,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "antivirus",
     "subCategory": "",
     "stats": {},
     "description": "There's no Clean like Keep-Clean",
@@ -18078,7 +18385,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "requiem",
     "subCategory": "",
     "stats": {},
     "description": "To cosmic forms from tangent planes  We end as we began",
@@ -18090,7 +18397,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "general",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "reloadSpeed": 12.5,
@@ -18105,7 +18412,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -18132,7 +18439,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "criticalChance": 20,
@@ -18195,7 +18502,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "statusDuration": 15
@@ -18209,7 +18516,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {
       "range": 20.0
@@ -18223,7 +18530,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "magazine": 5,
@@ -18238,7 +18545,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 3,
-    "category": "general",
+    "category": "primary",
     "subCategory": "",
     "stats": {
       "holsterRate": 5
@@ -18252,7 +18559,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "requiem",
     "subCategory": "",
     "stats": {},
     "description": "From brooding gulfs are we beheld  By that which bears no name",
@@ -18264,7 +18571,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "reloadSpeed": 5,
@@ -18279,7 +18586,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "tektolyst",
     "subCategory": "",
     "stats": {},
     "description": "Summon forth Lorak from the Void and conjure its ruinous spells, calling forth a beam of energy from within. Enemies pierced by the beam have a 100% chance to drop Energy Orbs if killed within 10s.",
@@ -18303,7 +18610,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "utility",
     "subCategory": "",
     "stats": {},
     "description": "Ensures transmuted mod is of Madurai polarity and eliminates credit cost.",
@@ -18392,7 +18699,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Use your first Ability to create a 8m radius field that lasts for 30s and disables the shields of any enemy that enters it.",
@@ -18404,7 +18711,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "magnetic": 15,
@@ -18419,7 +18726,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "fireRate": 5.833333
@@ -18433,7 +18740,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "magnetic": 15,
@@ -18463,7 +18770,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {
       "range": 15.0,
@@ -18504,7 +18811,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {
       "range": 20.0
@@ -18518,7 +18825,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -18530,8 +18837,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
-    "subCategory": "",
+    "category": "melee",
+    "subCategory": "riven",
     "stats": {},
     "description": "You will need to prove yourself before I reveal the beauty within this work.",
     "rarity": "rare"
@@ -18542,7 +18849,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "The first 4 revives are instantaneous. Additional revives are 100% faster.",
@@ -18554,7 +18861,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Increases Affinity Radius by 25m.",
@@ -18630,7 +18937,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 10,
     "maxRank": 3,
-    "category": "general",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 2.5,
@@ -18657,7 +18964,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "Vortex that absorbs incoming fire and detonates, releasing damage.",
@@ -18669,7 +18976,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "statusChance": 15,
@@ -18684,7 +18991,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "utility",
     "subCategory": "",
     "stats": {},
     "description": "Ensures transmuted mod is of Naramon polarity and eliminates credit cost.",
@@ -18696,7 +19003,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "accuracy": 5,
@@ -19107,7 +19414,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "requiem",
     "subCategory": "",
     "stats": {},
     "description": "Carrion hordes trill their profane  Accord with eldritch plans",
@@ -19119,7 +19426,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "tektolyst",
     "subCategory": "",
     "stats": {},
     "description": "Summon forth Nidri from the Void and plant the noble staff into the ground, creating a titanic splash of water that becomes a lingering vortex for 20s. 50% of damage dealt to enemies caught in the vortex is also inflicted upon all other enemies within it.",
@@ -19131,7 +19438,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -19179,7 +19486,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": -2,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "damage": 3.333333
@@ -19205,7 +19512,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "Ordnance weapons have a +90% chance to not consume Munitions",
@@ -19217,7 +19524,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "ordnanceSpeed": 10
@@ -19231,7 +19538,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": -2,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "heat": 3.0
@@ -19245,7 +19552,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "requiem",
     "subCategory": "",
     "stats": {},
     "description": "Through endless faces, countless forms, a multitude unfolds.  (Mimics any Requiem Mod)",
@@ -19257,7 +19564,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {
       "range": 18.0
@@ -19271,7 +19578,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "magazine": 21.75
@@ -19285,7 +19592,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "tektolyst",
     "subCategory": "",
     "stats": {
       "abilityStrength": 1.25
@@ -19313,7 +19620,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 10,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "Railjack Ram that deals damage to anything it touches when moving forward.",
@@ -19325,7 +19632,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "warframe",
     "subCategory": "",
     "stats": {
       "cooldown": 3.333333
@@ -19339,7 +19646,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "warframe",
     "subCategory": "",
     "stats": {},
     "description": "Critical hits cause flowers to grow from the wounds.",
@@ -19351,7 +19658,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "warframe",
     "subCategory": "",
     "stats": {},
     "description": "Finisher kills have a 100% chance to dissolve enemies in dread.",
@@ -19363,7 +19670,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "warframe",
     "subCategory": "",
     "stats": {
       "duration": 1.0
@@ -19389,7 +19696,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "penjaga",
     "drain": -2,
     "maxRank": 3,
-    "category": "general",
+    "category": "companion",
     "subCategory": "",
     "stats": {
       "damage": 10.0
@@ -19403,7 +19710,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 10,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "Wreathes the Railjack in fire, increasing Turret Damage and Speed.",
@@ -19415,7 +19722,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Elemental Damage increased by |PERCENT|%.",
@@ -19451,8 +19758,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
-    "subCategory": "",
+    "category": "secondary",
+    "subCategory": "riven",
     "stats": {},
     "description": "You will need to prove yourself before I reveal the beauty within this work.",
     "rarity": "rare"
@@ -19527,7 +19834,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {
       "abilityStrength": 50
@@ -19541,7 +19848,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "melee",
     "subCategory": "",
     "stats": {},
     "description": "Melee Combo Counter now decays while out of combat by 5 every few seconds, instead of depleting completely.",
@@ -19565,7 +19872,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "turretCritChance": 8.333,
@@ -19594,7 +19901,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 10,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "magazine": 10
@@ -19608,7 +19915,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 10,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "criticalChance": 15
@@ -19622,7 +19929,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "factionCorpus": 5
@@ -19636,7 +19943,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "factionGrineer": 5
@@ -19650,7 +19957,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "factionInfested": 5
@@ -19664,7 +19971,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "factionOrokin": 5
@@ -19678,7 +19985,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "factionMurmur": 5
@@ -19706,7 +20013,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 10,
-    "category": "general",
+    "category": "primary",
     "subCategory": "",
     "stats": {
       "recoil": -7.7273
@@ -19763,7 +20070,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 0,
     "maxRank": 10,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "ammoConversion": 8.363636
@@ -19803,7 +20110,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "tektolyst",
     "subCategory": "",
     "stats": {},
     "description": "Enemies struck by the Tauron Strike fire off smaller beams at other enemies within 20m.",
@@ -19815,7 +20122,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 10,
     "maxRank": 3,
-    "category": "general",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "shield": -25,
@@ -19831,7 +20138,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "damage": 5.0
@@ -19857,7 +20164,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "penjaga",
     "drain": -2,
     "maxRank": 3,
-    "category": "general",
+    "category": "companion",
     "subCategory": "",
     "stats": {
       "range": 3.75
@@ -19897,7 +20204,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "potency",
     "subCategory": "",
     "stats": {},
     "description": "Gain 10% Disinfection and 10% chance to drop a Live Heartcell ",
@@ -19937,7 +20244,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "-112.5% Ordnance Lock-On Time",
@@ -19949,7 +20256,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": -2,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "damage": 7.5,
@@ -19976,7 +20283,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "On dealing damage, fire an arrow at an enemy with 0.35s cooldown between arrows. 30s duration.",
@@ -19988,7 +20295,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -20048,7 +20355,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "fireRate": 17.5,
@@ -20077,7 +20384,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "-60.8% Omni Revolite Consumption",
@@ -20089,8 +20396,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
-    "subCategory": "",
+    "category": "primary",
+    "subCategory": "riven",
     "stats": {},
     "description": "You will need to prove yourself before I reveal the beauty within this work.",
     "rarity": "rare"
@@ -20101,7 +20408,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Vortex strips enemy Overguard 25% per second.",
@@ -20113,7 +20420,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "reloadSpeed": -7.0
@@ -20127,7 +20434,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "requiem",
     "subCategory": "",
     "stats": {},
     "description": "In luminous space blackened stars  They gaze, accuse, deny",
@@ -20177,7 +20484,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {
       "sprintSpeed": 75,
@@ -20207,7 +20514,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -20232,7 +20539,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "shield": 8.5
@@ -20261,7 +20568,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "turretCritDamage": 8.333,
@@ -20276,7 +20583,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 10,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "Fires a volley of homing missiles.",
@@ -20288,7 +20595,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "tektolyst",
     "subCategory": "",
     "stats": {},
     "description": "Cogron Tauron Strikes enable their shockwave effect for the next 4 aerial Melee slam attacks.",
@@ -20300,7 +20607,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "punchThrough": 0.25,
@@ -20315,7 +20622,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "x1.41 Turret Damage vs Sentients",
@@ -20339,7 +20646,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "Delivers a barrage of explosions across a large area.",
@@ -20363,7 +20670,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "ammoMaximum": 15
@@ -20391,7 +20698,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "fireRate": 15
@@ -20405,7 +20712,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "statusDamage": 15,
@@ -20420,8 +20727,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
-    "subCategory": "",
+    "category": "shotgun",
+    "subCategory": "riven",
     "stats": {},
     "description": "You will need to prove yourself before I reveal the beauty within this work.",
     "rarity": "rare"
@@ -20432,7 +20739,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "statusChance": 15
@@ -20446,7 +20753,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "criticalMultiplier": 16.5,
@@ -20461,7 +20768,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damage": 5.0
@@ -20475,7 +20782,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "slash": 15
@@ -20489,7 +20796,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "primary",
     "subCategory": "",
     "stats": {
       "noiseReduction": 25.0
@@ -20529,7 +20836,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Switching to Warframe after a Chained Sling adds 40% Ability Strength for 20s.",
@@ -20553,7 +20860,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "primary",
     "subCategory": "",
     "stats": {
       "sprintSpeed": 5
@@ -20567,7 +20874,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "primary",
     "subCategory": "",
     "stats": {
       "accuracy": -10.0,
@@ -20582,7 +20889,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "antivirus",
     "subCategory": "",
     "stats": {},
     "description": "Keeping software safe by ALWAYS WATCHING",
@@ -20633,7 +20940,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "melee",
     "subCategory": "",
     "stats": {},
     "description": "Summon 4 spectral swords that are copies of equipped melee weapon. Melee attacks will simultaneously trigger spectral attacks on any enemies within 10m for 30s. Spectral sword hits increase Combo Count and grant extra Tauron Strike Charge. Spectral swords are granted to all players in Affinity Range.",
@@ -20645,7 +20952,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Create 4 spectral pages granting an additional 10% Cast Speed, Ability Strength, Duration, and 100 bonus Energy per page.",
@@ -20657,7 +20964,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -20669,7 +20976,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "When Void Regen reaches its maximum, it is applied to squad members within Affinity Range for 60s.",
@@ -20681,7 +20988,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "cooldown": 50.0
@@ -20731,7 +21038,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -20757,7 +21064,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "tektolyst",
     "subCategory": "",
     "stats": {},
     "description": "Shockwaves generate 5 pickups, in the form of Universal Orbs or Ammo.",
@@ -20781,7 +21088,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Increase Rain of Arrows radius to 5m.",
@@ -20793,7 +21100,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "slash": 20
@@ -20807,7 +21114,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Increase vortex duration to 40s.",
@@ -20819,7 +21126,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {},
     "description": "Speed of Mercy Kills increased by 50%",
@@ -20831,7 +21138,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -20855,7 +21162,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -20867,7 +21174,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "tektolyst",
     "subCategory": "",
     "stats": {},
     "description": "Shockwaves create 5 Armor Motes that grant +450 temporary Armor. Max 5.",
@@ -20893,7 +21200,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Second Ability emits a radial burst slowing any enemy it touches by 80% for 10s.",
@@ -20905,7 +21212,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "tektolyst",
     "subCategory": "",
     "stats": {},
     "description": "Precision head shot damage increased by 100% on enemies afflicted with Temporal Drag.",
@@ -20917,7 +21224,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "Ensnares enemies, increasing vulnerability to Railjack weaponry.",
@@ -20929,7 +21236,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "tektolyst",
     "subCategory": "",
     "stats": {},
     "description": "Summon forth Thara from the Void and fire the great bow into the air, blanketing the area with a rain of explosive arrows for 7s.",
@@ -20956,7 +21263,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "potency",
     "subCategory": "",
     "stats": {},
     "description": "Gain 10% Disinfection and 25% chance to drop a Potency mod",
@@ -20993,7 +21300,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "antivirus",
     "subCategory": "",
     "stats": {},
     "description": "Eliminating sneaky viruses since 1989",
@@ -21005,7 +21312,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "potency",
     "subCategory": "",
     "stats": {},
     "description": "Gain 10% Disinfection and 25% chance to drop an Antivirus mod",
@@ -21017,7 +21324,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 10,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "turretRange": 2.3,
@@ -21033,7 +21340,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -21058,7 +21365,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "parazon",
     "subCategory": "",
     "stats": {
       "duration": 15.0
@@ -21084,7 +21391,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "utility",
     "subCategory": "",
     "stats": {},
     "description": "Ensures transmuted mod is of Vazarin polarity and eliminates credit cost.",
@@ -21134,7 +21441,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "tektolyst",
     "subCategory": "",
     "stats": {},
     "description": "Summon forth Vexoric from the Void and swing the colossal sword, unleashing a wave of devastating energy. Gain +8 Melee Combo from each enemy hit.",
@@ -21158,7 +21465,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "general",
+    "category": "set",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -21194,7 +21501,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "duration": 5.833333,
@@ -21233,7 +21540,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 10,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "A black hole that draws in enemies, dealing damage.",
@@ -21257,7 +21564,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "First Ability creates a 6m wide shockwave lasting 4s, that inflicts Lift Status on all enemies it touches.",
@@ -21341,7 +21648,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "100% Damage taken is returned to the attacker.",
@@ -21377,7 +21684,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "First Ability consumes all energy to increase damage for 8s. Deal 10% additional damage for every percentage of energy consumed. 40s cooldown.",
@@ -21401,7 +21708,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "requiem",
     "subCategory": "",
     "stats": {},
     "description": "To cosmic madness laws submit  Though stalwart minds entreat",
@@ -21425,7 +21732,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 10,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "ordnanceDamage": 9.09,
@@ -21440,7 +21747,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {
       "shield": 8.5
@@ -21454,7 +21761,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "First Ability creates a well of energy for 8s. Allies passing through the well gain 5 Energy/s for 30s.",
@@ -21466,7 +21773,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "antivirus",
     "subCategory": "",
     "stats": {},
     "description": "Get rid of malware, spyware, wetware and worms",
@@ -21478,7 +21785,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "railjack",
     "subCategory": "",
     "stats": {},
     "description": "x1.27 Turret Damage vs Grineer",
@@ -21490,7 +21797,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "general",
+    "category": "requiem",
     "subCategory": "",
     "stats": {},
     "description": "Its heralds are the stars it fells  The sky and Earth aflame",
@@ -21502,7 +21809,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 0,
-    "category": "general",
+    "category": "melee",
     "subCategory": "",
     "stats": {},
     "description": "You will need to prove yourself before I reveal the beauty within this work.",
@@ -21528,7 +21835,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 3,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "fireRate": 15,
@@ -21543,7 +21850,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "magazine": 10
@@ -21557,7 +21864,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "criticalChance": 15
@@ -21571,7 +21878,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "electricity": 15
@@ -21585,7 +21892,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "cold": 15
@@ -21599,7 +21906,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "factionCorpus": 5
@@ -21613,7 +21920,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "factionGrineer": 5
@@ -21627,7 +21934,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "factionInfested": 5
@@ -21641,7 +21948,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "toxin": 15
@@ -21655,7 +21962,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "cold": 15,
@@ -21670,7 +21977,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "heat": 15
@@ -21684,7 +21991,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "damage": 15
@@ -21698,7 +22005,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "criticalMultiplier": 10
@@ -21712,7 +22019,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "statusChance": 15,
@@ -21727,7 +22034,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "punchThrough": 0.35
@@ -21741,7 +22048,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "electricity": 15,
@@ -21756,7 +22063,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "reloadSpeed": 10
@@ -21770,7 +22077,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 10,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "accuracy": 7,
@@ -21785,7 +22092,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "general",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "toxin": 15,
@@ -22232,6 +22539,8 @@ export const modsMap = new Map<string, Mod>(allMods.map(m => [m.id, m]));
 const MOD_ID_ALIASES: Record<string, string> = {
   augment_styanax_intrepid_stand: "intrepid_stand",
   augment_styanax_axios_javelin_aug: "axios_javelineers",
+  hard_engag: "hard_engage",
+  scan_organic: "scan_aquatic",
 };
 for (const [alias, canonical] of Object.entries(MOD_ID_ALIASES)) {
   const mod = modsMap.get(canonical);

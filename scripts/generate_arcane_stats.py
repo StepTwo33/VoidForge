@@ -16,7 +16,7 @@ REPO = Path(__file__).resolve().parents[1]
 OUT = REPO / "src" / "data" / "arcane-effects.ts"
 MANUAL = REPO / "src" / "data" / "arcane-manual-overrides.json"
 ARCANES_TS = REPO / "src" / "data" / "arcanes.ts"
-HEADERS = {"User-Agent": "FrameHub/1.0 (arcane stats generator)"}
+HEADERS = {"User-Agent": "Voidforge/1.0 (arcane stats generator)"}
 
 
 def slugify(name: str) -> str:
@@ -298,7 +298,7 @@ def parse_effects(desc: str, arcane_type: str) -> tuple[str, list[dict], int | N
         for m in re.finditer(r"Converts (\d+(?:\.\d+)?)\s*%\s*Void", clean, re.I):
             add_effect(effects, "voidConversion", float(m.group(1)))
 
-    # --- FrameHub / aggressive patterns (merged from build_arcane_manual_overrides) ---
+    # --- Voidforge / aggressive patterns (merged from build_arcane_manual_overrides) ---
     for m in re.finditer(r"x([\d.]+)\s*Melee Damage", clean, re.I):
         add_effect(effects, "meleeDamageBonus", (float(m.group(1)) - 1) * 100)
 

@@ -132,13 +132,13 @@ export default function AdminUsersPage() {
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && refresh(search)}
               placeholder="Search by email, username, or name…"
-              className="w-full rounded-lg border border-border bg-background/60 py-2 pl-9 pr-3 text-sm"
+              className="w-full min-h-11 rounded-lg border border-border bg-background/60 py-2 pl-9 pr-3 text-sm"
             />
           </div>
           <button
             type="button"
             onClick={() => refresh(search)}
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-secondary/60"
+            className="inline-flex items-center min-h-11 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-secondary/60"
           >
             Search
           </button>
@@ -173,12 +173,12 @@ export default function AdminUsersPage() {
                           {user.role}
                         </span>
                         {banned && (
-                          <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-400">
+                          <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-700 dark:text-red-400">
                             Banned
                           </span>
                         )}
                         {isSupporter && (
-                          <span className="rounded-full bg-rose-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-400">
+                          <span className="rounded-full bg-rose-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-400">
                             Supporter
                           </span>
                         )}
@@ -186,19 +186,19 @@ export default function AdminUsersPage() {
                           className={cn(
                             "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
                             newsletterOn
-                              ? "bg-emerald-500/15 text-emerald-400"
+                              ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
                               : "bg-muted text-muted-foreground",
                           )}
                         >
                           {newsletterOn ? "Newsletter" : "Unsubscribed"}
                         </span>
                       </div>
-                      <p className="mt-1 truncate text-xs text-muted-foreground">{user.email ?? "No email"}</p>
+                      <p className="mt-1 break-all text-xs text-muted-foreground">{user.email ?? "No email"}</p>
                       <p className="mt-1 text-[10px] text-muted-foreground/80">
                         {user._count.builds} builds · joined {new Date(user.createdAt).toLocaleDateString()}
                       </p>
                       {user.banReason && (
-                        <p className="mt-2 text-xs text-red-300/90">Reason: {user.banReason}</p>
+                        <p className="mt-2 text-xs text-red-700/90 dark:text-red-300/90 break-words">Reason: {user.banReason}</p>
                       )}
                     </div>
 
@@ -208,7 +208,7 @@ export default function AdminUsersPage() {
                           type="button"
                           disabled={actionLoading === user.id}
                           onClick={() => runAction(user.id, "unban")}
-                          className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary/60"
+                          className="inline-flex items-center gap-1 min-h-11 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary/60"
                         >
                           <RotateCcw className="h-3.5 w-3.5" />
                           Unban
@@ -218,7 +218,7 @@ export default function AdminUsersPage() {
                           type="button"
                           disabled={actionLoading === user.id}
                           onClick={() => handleBan(user)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/20"
+                          className="inline-flex items-center gap-1 min-h-11 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-700 dark:text-red-400 hover:bg-red-500/20"
                         >
                           <Ban className="h-3.5 w-3.5" />
                           Ban
@@ -229,7 +229,7 @@ export default function AdminUsersPage() {
                           type="button"
                           disabled={actionLoading === user.id}
                           onClick={() => runAction(user.id, "unsubscribeNewsletter")}
-                          className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary/60"
+                          className="inline-flex items-center gap-1 min-h-11 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary/60"
                         >
                           <MailX className="h-3.5 w-3.5" />
                           Unsubscribe
@@ -239,7 +239,7 @@ export default function AdminUsersPage() {
                           type="button"
                           disabled={actionLoading === user.id}
                           onClick={() => runAction(user.id, "subscribeNewsletter")}
-                          className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-400 hover:bg-emerald-500/20"
+                          className="inline-flex items-center gap-1 min-h-11 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20"
                         >
                           <Mail className="h-3.5 w-3.5" />
                           Resubscribe
@@ -252,7 +252,7 @@ export default function AdminUsersPage() {
                               type="button"
                               disabled={actionLoading === user.id}
                               onClick={() => runAction(user.id, "revokeSupporter")}
-                              className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary/60"
+                              className="inline-flex items-center gap-1 min-h-11 rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-secondary/60"
                             >
                               <Heart className="h-3.5 w-3.5" />
                               Revoke Supporter
@@ -262,7 +262,7 @@ export default function AdminUsersPage() {
                               type="button"
                               disabled={actionLoading === user.id}
                               onClick={() => runAction(user.id, "grantSupporter")}
-                              className="inline-flex items-center gap-1 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-medium text-rose-400 hover:bg-rose-500/20"
+                              className="inline-flex items-center gap-1 min-h-11 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-1.5 text-xs font-medium text-rose-700 dark:text-rose-400 hover:bg-rose-500/20"
                             >
                               <Heart className="h-3.5 w-3.5" />
                               Grant Supporter
@@ -272,7 +272,7 @@ export default function AdminUsersPage() {
                             value={user.role}
                             disabled={actionLoading === user.id}
                             onChange={(e) => runAction(user.id, "setRole", { role: e.target.value })}
-                            className="rounded-lg border border-border bg-background px-2 py-1.5 text-xs"
+                            className="min-h-11 rounded-lg border border-border bg-background px-2 py-1.5 text-xs"
                           >
                             <option value="user">user</option>
                             <option value="moderator">moderator</option>

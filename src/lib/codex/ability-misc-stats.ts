@@ -1882,6 +1882,15 @@ function scaleVerifiedValue(
     };
   }
 
+  if (num != null && key === "shieldPerColdStatus") {
+    const scaled = Math.round(applyBounds(num * mult, cap, floor) * 10) / 10;
+    return {
+      scaled: String(scaled),
+      modified: Math.abs(scaled - num) > 0.001,
+      positive,
+    };
+  }
+
   if (num != null && isFractionPercentKey(key)) {
     const scaled = applyBounds(num * mult, cap, floor);
     return {

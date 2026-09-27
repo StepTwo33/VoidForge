@@ -1,8 +1,8 @@
 # Contributing
 
-Thanks for helping with FrameHub.
+Thanks for helping with Voidforge.
 
-Use the planner at [frame-hub.com](https://frame-hub.com). This repo is for verifying and fixing calculations and item catalogs.
+Use the planner at [void-forge.org](https://void-forge.org). This repo is for verifying and fixing calculations and item catalogs.
 
 ## Quick start
 

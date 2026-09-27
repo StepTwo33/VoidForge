@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getSession } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
 import { isUserBanned } from "@/lib/auth/admin";
-import { Flag, Users, Megaphone, Wrench, Mail } from "lucide-react";
+import { AdminSubnav } from "@/components/admin-subnav";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -24,49 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div>
-      <div className="border-b border-border/60 bg-card/40">
-        <div className="container mx-auto flex gap-1 px-4 py-2">
-          <Link
-            href="/admin/reports"
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
-          >
-            <Flag className="h-3.5 w-3.5" />
-            Reports
-          </Link>
-          <Link
-            href="/admin/data-fixes"
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
-          >
-            <Wrench className="h-3.5 w-3.5" />
-            Data Fixes
-          </Link>
-          <Link
-            href="/admin/users"
-            className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
-          >
-            <Users className="h-3.5 w-3.5" />
-            Users
-          </Link>
-          {isFullAdmin && (
-            <>
-              <Link
-                href="/admin/updates"
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
-              >
-                <Megaphone className="h-3.5 w-3.5" />
-                Site Updates
-              </Link>
-              <Link
-                href="/admin/newsletter"
-                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
-              >
-                <Mail className="h-3.5 w-3.5" />
-                Newsletter
-              </Link>
-            </>
-          )}
-        </div>
-      </div>
+      <AdminSubnav isFullAdmin={isFullAdmin} />
       {children}
     </div>
   );

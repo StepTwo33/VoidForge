@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MODS_TS = ROOT / "src/data/mods.ts"
 SLOT_TS = ROOT / "src/lib/mod-slot-categories.ts"
 BEHAVIOR_DIR = ROOT / "src/data/mod-behaviors"
-UA = {"User-Agent": "FrameHub/1.0 (weapon mod audit)"}
+UA = {"User-Agent": "Voidforge/1.0 (weapon mod audit)"}
 
 PRIMARY_CATS = {"primary", "rifle", "shotgun", "bow", "launcher"}
 SECONDARY_CATS = {"secondary", "pistol", "dual_pistols"}

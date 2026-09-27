@@ -1,4 +1,4 @@
-// Core data types for FrameHub
+// Core data types for Voidforge
 
 export interface Mod {
   id: string;
@@ -203,7 +203,8 @@ export interface Warframe {
 
 export interface Ability {
   name: string;
-  energyCost: number;
+  /** Omitted when the live cost has not been published yet. */
+  energyCost?: number;
   description: string;
   subAbilities?: string[];
   damage?: number;
@@ -767,6 +768,13 @@ export interface CalculatedStats {
   triggerStatBonuses?: Record<string, number>;
   /** Chance to force a Slash proc on critical hits (Hunter Munitions). */
   slashOnCritChance?: number;
+  /** Chance to force an extra Electric proc on hit (Prototype Shock Coils). */
+  extraElectricProcChance?: number;
+  /**
+   * Next-cast Ability Strength bonus from Velox Conclusion (and similar).
+   * Fraction (0.6 = +60%). Sim-gated by applyTriggerBuffs (assumes max stacks).
+   */
+  abilityStrengthNextCastBonus?: number;
   /** Chance for Impact procs to add a Slash proc (Internal Bleeding / Hemorrhage). */
   slashOnImpactProcChance?: number;
   /** Bonus damage on first shot of each magazine (Charged/Primed Chamber), averaged into DPS. */
@@ -1074,12 +1082,23 @@ export interface RailjackCalculatedStats {
   abilityStrengthBonus?: number;
   abilityRangeBonus?: number;
   abilityDurationBonus?: number;
-  /** Passive bonuses from elite crew competency. */
+  /** Wiki-faithful crew paper bonuses + panel notes. */
   crewBonuses?: {
-    turretDamageBonus: number;
+    /** Pilot role → ship speed (piloting competency table). */
     speedBonus: number;
-    hullBonus: number;
-    repairSpeedBonus: number;
+    /** Elite piloting trait applied to equipped engine (0 if house mismatch). */
+    houseEngineSpeedBonus: number;
+    /** Max elite gunnery trait across houses (display); per-turret applied in armament stats. */
+    houseTurretDamageBonus: number;
+    houseEngineSpeedByHouse?: Partial<Record<"lavan" | "vidar" | "zetki", number>>;
+    houseTurretDamageByHouse?: Partial<Record<"lavan" | "vidar" | "zetki", number>>;
+    panelNotes: string[];
+    /** @deprecated Always 0 — kept for older UI bindings. */
+    turretDamageBonus?: number;
+    /** @deprecated Always 0. */
+    hullBonus?: number;
+    /** @deprecated Always 0. */
+    repairSpeedBonus?: number;
   };
   /** Equipped battle/tactical abilities with scaled costs/cooldowns. */
   battleAbilities?: RailjackAbilityComputed[];
@@ -1106,6 +1125,8 @@ export interface RailjackCalculatedStats {
     domeChargeForge: boolean;
     ordnanceForge: boolean;
     eliteCrewUnlocked: boolean;
+    unusualCrewUnlocked?: boolean;
+    crewSlotsUnlocked?: number;
     panelNotes: string[];
   };
 }
@@ -1163,6 +1184,8 @@ export interface Loadout {
     /** Kuva/Tenet/Coda — same as saved weapon build. */
     progenitorElement?: string;
     progenitorBonusPercent?: number;
+    /** Formas past rank 30 (0–5). Capacity follows the resulting rank. */
+    adversaryFormas?: number;
     incarnonEvolutions?: Record<number, number>;
   };
   secondaryBuild?: {
@@ -1175,6 +1198,7 @@ export interface Loadout {
     slotPolarities?: Record<number, string>;
     progenitorElement?: string;
     progenitorBonusPercent?: number;
+    adversaryFormas?: number;
     incarnonEvolutions?: Record<number, number>;
   };
   meleeBuild?: {
@@ -1187,6 +1211,7 @@ export interface Loadout {
     slotPolarities?: Record<number, string>;
     progenitorElement?: string;
     progenitorBonusPercent?: number;
+    adversaryFormas?: number;
     incarnonEvolutions?: Record<number, number>;
   };
   companionBuild?: {
@@ -1202,6 +1227,16 @@ export interface Loadout {
     hasCatalyst: boolean;
     isMR30?: boolean;
     slotPolarities?: Record<number, string>;
+    /** MOA / Hound modular part selection. */
+    parts?: {
+      kind: "moa" | "hound";
+      model: string;
+      core: string;
+      bracket: string;
+      gyro?: string;
+      stabilizer?: string;
+      isGilded?: boolean;
+    };
   };
   /** Modular preset occupying one weapon slot (mutually exclusive with that slot's normal weapon build). */
   modularBuild?: ModularBuildData & {
@@ -1231,6 +1266,7 @@ const RIVEN_RANGED_COMMON: RivenStatDef[] = [
   { key: "criticalChance", label: "Critical Chance", isPercent: true },
   { key: "criticalMultiplier", label: "Critical Damage", isPercent: true },
   { key: "statusChance", label: "Status Chance", isPercent: true },
+  { key: "statusDuration", label: "Status Duration", isPercent: true },
   { key: "multishot", label: "Multishot", isPercent: true },
   { key: "fireRate", label: "Fire Rate", isPercent: true },
   { key: "magazine", label: "Magazine Capacity", isPercent: true },
@@ -1243,6 +1279,9 @@ const RIVEN_RANGED_COMMON: RivenStatDef[] = [
   { key: "puncture", label: "Puncture", isPercent: true },
   { key: "slash", label: "Slash", isPercent: true },
   { key: "projectileSpeed", label: "Projectile Speed", isPercent: true },
+  { key: "factionGrineer", label: "Damage to Grineer", isPercent: true },
+  { key: "factionCorpus", label: "Damage to Corpus", isPercent: true },
+  { key: "factionInfested", label: "Damage to Infested", isPercent: true },
 ];
 
 const RIVEN_RIFLE: RivenStatDef[] = [
@@ -1256,6 +1295,8 @@ const RIVEN_RIFLE: RivenStatDef[] = [
 const RIVEN_SHOTGUN: RivenStatDef[] = [
   ...RIVEN_RANGED_COMMON,
   { key: "ammoMax", label: "Ammo Maximum", isPercent: true },
+  { key: "punchThrough", label: "Punch Through", isPercent: false },
+  { key: "recoil", label: "Recoil", isPercent: true },
 ];
 
 const RIVEN_PISTOL: RivenStatDef[] = [
@@ -1263,6 +1304,7 @@ const RIVEN_PISTOL: RivenStatDef[] = [
   { key: "zoom", label: "Zoom", isPercent: true },
   { key: "ammoMax", label: "Ammo Maximum", isPercent: true },
   { key: "recoil", label: "Recoil", isPercent: true },
+  { key: "punchThrough", label: "Punch Through", isPercent: false },
 ];
 
 const RIVEN_MELEE: RivenStatDef[] = [
@@ -1270,6 +1312,7 @@ const RIVEN_MELEE: RivenStatDef[] = [
   { key: "criticalChance", label: "Critical Chance", isPercent: true },
   { key: "criticalMultiplier", label: "Critical Damage", isPercent: true },
   { key: "statusChance", label: "Status Chance", isPercent: true },
+  { key: "statusDuration", label: "Status Duration", isPercent: true },
   { key: "fireRate", label: "Attack Speed", isPercent: true },
   { key: "range", label: "Range", isPercent: true },
   { key: "toxin", label: "Toxin Damage", isPercent: true },
@@ -1282,11 +1325,19 @@ const RIVEN_MELEE: RivenStatDef[] = [
   { key: "slideAttack", label: "Slide Attack", isPercent: true },
   { key: "finisherDamage", label: "Finisher Damage", isPercent: true },
   { key: "comboDuration", label: "Combo Duration", isPercent: false },
+  { key: "initialCombo", label: "Initial Combo", isPercent: false },
+  { key: "heavyAttackEfficiency", label: "Heavy Attack Efficiency", isPercent: true },
+  { key: "factionGrineer", label: "Damage to Grineer", isPercent: true },
+  { key: "factionCorpus", label: "Damage to Corpus", isPercent: true },
+  { key: "factionInfested", label: "Damage to Infested", isPercent: true },
 ];
 
 const RIVEN_ARCHGUN: RivenStatDef[] = [
   ...RIVEN_RANGED_COMMON.filter(s => s.key !== "impact" && s.key !== "puncture" && s.key !== "slash"),
   { key: "ammoMax", label: "Ammo Maximum", isPercent: true },
+  { key: "punchThrough", label: "Punch Through", isPercent: false },
+  { key: "zoom", label: "Zoom", isPercent: true },
+  { key: "recoil", label: "Recoil", isPercent: true },
 ];
 
 // Get riven stats filtered by weapon category

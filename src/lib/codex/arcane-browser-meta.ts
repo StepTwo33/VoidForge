@@ -142,6 +142,7 @@ export const ARCANE_TRIGGER_FILTERS: { id: ArcaneTrigger | "all"; label: string 
   { id: "stacks", label: "Stacks" },
   { id: "onKill", label: "On kill" },
   { id: "onHeadshot", label: "On headshot" },
+  { id: "onWeakPoint", label: "On weak point" },
   { id: "onDamaged", label: "When damaged" },
   { id: "onReload", label: "On reload" },
   { id: "onAbilityCast", label: "On ability cast" },

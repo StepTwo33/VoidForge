@@ -9,6 +9,8 @@ import {
 } from './melee-combo';
 import { enrichWeapon } from '../weapons/weapon-enrich';
 import { resolveExaltedStrengthForCalc } from '../weapons/exalted-weapons';
+import { sentientIncisionElementForFaction } from './sentient-incision';
+import { isProgenitorElementId } from '../weapons/weapon-progenitor';
 
 export { avgCritMultiplier, quantizeBaseCritMultiplier } from './crit-utils';
 import {
@@ -51,6 +53,7 @@ import {
 } from '@/lib/mods/mod-behavior-registry';
 import {
   combatDamageMultiplier,
+  FACTION_STAT_TO_ID,
   factionBonusFromStats,
   factionDotMultiplier,
   factionHitMultiplier,
@@ -83,11 +86,19 @@ const DIRECT_ELEMENT_MOD_STATS = [
 ] as const;
 
 function resolveElementalCombos(rawElements: { type: string; value: number }[]): ElementalDamage[] {
-  // Work with a mutable list of pending elements in mod order
-  const pending: { type: string; value: number }[] = rawElements.map(e => ({ ...e }));
+  // Wiki Damage / Calculating Bonuses: same primary type collapses to its first
+  // occurrence (mod slot or earlier innate). Later Heat/Elec/etc. mods and a matching
+  // innate (e.g. Alternox Electricity after Stormbringer) add damage there instead of
+  // forming a second combine site.
+  const pending: { type: string; value: number }[] = [];
+  for (const e of rawElements) {
+    const existing = pending.find((p) => p.type === e.type);
+    if (existing) existing.value += e.value;
+    else pending.push({ ...e });
+  }
   const result: ElementalDamage[] = [];
 
-  // Try to combine from left to right
+  // Combine left→right (mod order; innate already appended / coalesced above).
   let i = 0;
   while (i < pending.length) {
     let combined = false;
@@ -292,6 +303,24 @@ function calculateStatusProcs(
       ticks,
       totalDamage: dpt * ticks,
       description: "Guaranteed status (Valence Formation)",
+    });
+  }
+
+  // Prototype Shock Coils: extra Electric proc on hit, independent of modded damage types.
+  const extraElec = stats.extraElectricProcChance ?? 0;
+  if (extraElec > 0) {
+    const duration = STATUS_INFO.electricity.duration * durMult;
+    const ticks = Math.floor(duration) + 1;
+    const typeMult = 1 + elementalTypeBonus(stats, "electricity", moddedBaseDamage);
+    const dpt = DOT_TICK_FRACTION.electricity * dotBase * typeMult;
+    procs.push({
+      type: "electricity",
+      chance: Math.min(extraElec, 1),
+      damagePerTick: dpt,
+      duration,
+      ticks,
+      totalDamage: dpt * ticks,
+      description: "Extra Electric on hit (Prototype Shock Coils)",
     });
   }
 
@@ -574,6 +603,47 @@ function applyParallelExternalElementals(
   }
 }
 
+/**
+ * Nightwave weapon augments that need sim/faction context beyond verified stat modes:
+ * - Sentient Incision → parallel weakness elemental
+ * - Velox Conclusion → next-cast Ability Strength (max stacks when trigger buffs on)
+ */
+function applyNightwaveWeaponAugmentEffects(
+  equippedMods: ModSlot[],
+  allMods: Map<string, Mod>,
+  sim: SimulationParams,
+  parallelElementals: { type: string; bonusFraction: number }[],
+  stats: CalculatedStats,
+): void {
+  for (const slot of equippedMods) {
+    const mod = allMods.get(slot.modId);
+    if (!mod) continue;
+    const rank = Math.min(Math.max(slot.rank ?? 0, 0), mod.maxRank);
+    const mult = rank + 1;
+
+    if (slot.modId === "sentient_incision") {
+      const perRank = mod.stats.damage ?? 0;
+      const bonusFraction = (perRank * mult) / 100;
+      const elem = sentientIncisionElementForFaction(sim.targetFaction);
+      if (elem && bonusFraction > 0) {
+        parallelElementals.push({ type: elem, bonusFraction });
+      }
+      continue;
+    }
+
+    if (slot.modId === "velox_conclusion") {
+      // Catalog abilityStrength is % per hit per rank (0.1 → R5 = 0.6% / hit).
+      // Cap is always 100 hits × per-hit → R5 = +60% next cast.
+      const perHitFraction = ((mod.stats.abilityStrength ?? 0) * mult) / 100;
+      const maxBonus = perHitFraction * 100;
+      if (sim.applyTriggerBuffs && maxBonus > 0) {
+        stats.abilityStrengthNextCastBonus =
+          (stats.abilityStrengthNextCastBonus ?? 0) + maxBonus;
+      }
+    }
+  }
+}
+
 // ── Main Weapon Calculator ──────────────────────────────────────────────
 export function calculateWeaponBuild(
   rawWeapon: Weapon,
@@ -722,6 +792,7 @@ export function calculateWeaponBuild(
     heavyAttackWindUpBonus: 0,
     triggerStatBonuses: {},
     slashOnCritChance: 0,
+    extraElectricProcChance: 0,
     slashOnImpactProcChance: 0,
     firstShotDamageBonus: 0,
   };
@@ -750,6 +821,10 @@ export function calculateWeaponBuild(
       let modValue = absoluteRankUnits
         ? value * multiplier * setMult
         : (value * multiplier * setMult) / 100.0;
+      // wiki Prototype Shock Coils: extra Electric proc chance is 20% at every rank.
+      if (line?.mode === "electric_on_hit") {
+        modValue = (value * setMult) / 100.0;
+      }
       if (statName === "fireRate") modValue *= bowFireRateMult;
       applyVerifiedModStatToWeapon(stats, {
         modId: modSlot.modId,
@@ -786,6 +861,13 @@ export function calculateWeaponBuild(
     externalDamageMult,
     externalExtraHit,
     parallelElementals,
+  );
+  applyNightwaveWeaponAugmentEffects(
+    orderedMods,
+    allMods,
+    sim,
+    parallelElementals,
+    stats,
   );
   // Toxin mod % (pre-combine) for Toxic Lash tick type mult.
   let toxinModBonus = 0;
@@ -961,6 +1043,8 @@ export function calculateWeaponBuild(
 
   // Hunter Munitions-style forced Slash procs on crits (adds to status proc DPS below).
   stats.slashOnCritChance = weaponModAcc.slashOnCritChance;
+  // Prototype Shock Coils: extra Electric proc on hit, independent of damage types.
+  stats.extraElectricProcChance = weaponModAcc.extraElectricProcChance;
   // Internal Bleeding / Hemorrhage: Impact procs can add a Slash proc.
   stats.slashOnImpactProcChance = weaponModAcc.slashOnImpactProcChance;
   // Charged/Primed Chamber: first-shot damage, averaged over the magazine for DPS.
@@ -1100,10 +1184,10 @@ export function calculateWeaponBuild(
     const pct = calcOptions.progenitorBonusPercent / 100;
     const bonus = baseWeapon.damage * pct * dmgMult;
     const pe = calcOptions.progenitorElement;
-    if (pe === "impact") stats.impact += bonus;
-    else if (pe === "puncture") stats.puncture += bonus;
-    else if (pe === "slash") stats.slash += bonus;
-    else innateElements.push({ type: pe, value: bonus });
+    if (isProgenitorElementId(pe)) {
+      if (pe === "impact") stats.impact += bonus;
+      else innateElements.push({ type: pe, value: bonus });
+    }
   }
   elementalMods.push(...innateElements);
 
@@ -1451,6 +1535,15 @@ export function calculateWeaponBuild(
             (stats.instantReloadOnHeadshotChance ?? 0) + value,
           );
           break;
+        default: {
+          // Riven faction rolls (factionGrineer, …) → same map as Bane/Smite mods.
+          const factionId = FACTION_STAT_TO_ID[stat];
+          if (factionId) {
+            if (!stats.factionBonuses) stats.factionBonuses = {};
+            stats.factionBonuses[factionId] = (stats.factionBonuses[factionId] ?? 0) + value;
+          }
+          break;
+        }
       }
     }
     // Recalculate total damage after incarnon/riven changes (keep residual)

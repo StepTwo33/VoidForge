@@ -1,13 +1,11 @@
 import { notFound } from "next/navigation";
 import { AvatarImage } from "@/components/game-asset-image";
-import Link from "next/link";
 import { PageShell, PageMain, ContentPanel } from "@/components/page-shell";
 import { prisma } from "@/lib/prisma";
-import { buildOpenUrl } from "@/lib/builds/build-url";
-import { ThumbsUp, ChevronRight } from "lucide-react";
 import { SupporterBadge } from "@/components/supporter-badge";
 import { RoleBadge } from "@/components/role-badge";
 import { isSupporter } from "@/lib/auth/supporter";
+import { PublicProfileBuilds } from "@/components/public-profile-builds";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +58,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
     <PageShell>
       <PageMain maxWidth="md">
         <ContentPanel className="p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
+          <div className="flex w-full min-w-0 flex-col sm:flex-row items-center sm:items-start gap-5">
             {user.image ? (
               <AvatarImage src={user.image} alt="" size={80} className="w-20 h-20 rounded-full border-2 border-border object-cover" />
             ) : (
@@ -71,16 +69,16 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
               </div>
             )}
 
-            <div className="flex-1 text-center sm:text-left">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <h1 className="text-2xl font-bold">{user.name ?? user.username ?? "Tenno"}</h1>
+            <div className="w-full min-w-0 flex-1 text-center sm:text-left">
+              <div className="flex min-w-0 flex-wrap items-center justify-center sm:justify-start gap-2">
+                <h1 className="max-w-full text-2xl font-bold break-words [overflow-wrap:anywhere]">{user.name ?? user.username ?? "Tenno"}</h1>
                 {user.role === "admin" && <RoleBadge role="admin" />}
                 {user.role === "moderator" && <RoleBadge role="moderator" />}
                 {isSupporter(user) && <SupporterBadge />}
               </div>
-              {user.username && <p className="text-primary text-sm mt-1">@{user.username}</p>}
+              {user.username && <p className="text-primary text-sm mt-1 max-w-full break-words [overflow-wrap:anywhere]">@{user.username}</p>}
               {user.bio ? (
-                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{user.bio}</p>
+                <p className="text-sm text-muted-foreground mt-3 leading-relaxed max-w-full break-words [overflow-wrap:anywhere]">{user.bio}</p>
               ) : (
                 <p className="text-sm text-muted-foreground/80 mt-3">No bio yet.</p>
               )}
@@ -101,42 +99,16 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
           <h2 className="text-sm font-semibold tracking-wider text-muted-foreground mb-4">
             COMMUNITY BUILDS
           </h2>
-          {publicBuilds.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-12 rounded-xl border border-dashed border-border">
-              No public builds yet.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {publicBuilds.map((build) => (
-                <Link
-                  key={build.id}
-                  href={buildOpenUrl(build.type, build.id)}
-                  className="flex items-center gap-3 p-4 rounded-lg border border-border bg-card hover:border-primary/35 transition-colors group"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm truncate group-hover:text-primary transition-colors">
-                      {build.name}
-                    </div>
-                    <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-2">
-                      <span className="capitalize">{build.type}</span>
-                      <span>•</span>
-                      <span>{new Date(build.updatedAt).toLocaleDateString()}</span>
-                      {build.upvoteCount > 0 && (
-                        <>
-                          <span>•</span>
-                          <span className="inline-flex items-center gap-0.5">
-                            <ThumbsUp className="h-3 w-3" />
-                            {build.upvoteCount}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0" />
-                </Link>
-              ))}
-            </div>
-          )}
+          <PublicProfileBuilds
+            builds={publicBuilds.map((b) => ({
+              id: b.id,
+              name: b.name,
+              description: b.description,
+              type: b.type,
+              upvoteCount: b.upvoteCount,
+              updatedAt: b.updatedAt.toISOString(),
+            }))}
+          />
         </div>
       </PageMain>
     </PageShell>

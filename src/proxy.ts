@@ -50,8 +50,20 @@ function buildCsp(nonce: string, isProd: boolean): string {
   return directives.join("; ");
 }
 
-/** Next.js 16+ convention (replaces `middleware`). Early 404 for common exploit probes + CSP. */
+const LEGACY_HOSTS = new Set(["frame-hub.com", "www.frame-hub.com"]);
+const CANONICAL_ORIGIN = "https://void-forge.org";
+
+/** Next.js 16+ convention (replaces `middleware`). Host redirect + exploit 404s + CSP. */
 export function proxy(request: NextRequest) {
+  const host = (request.headers.get("host") || "").split(":")[0]?.toLowerCase() ?? "";
+  if (LEGACY_HOSTS.has(host)) {
+    const url = new URL(request.url);
+    return NextResponse.redirect(
+      `${CANONICAL_ORIGIN}${url.pathname}${url.search}`,
+      301,
+    );
+  }
+
   if (isDeniedPath(request.nextUrl.pathname)) {
     return new NextResponse(null, { status: 404 });
   }

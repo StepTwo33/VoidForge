@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare FrameHub arcanes against wiki Category:Arcane Enhancements."""
+"""Compare Voidforge arcanes against wiki Category:Arcane Enhancements."""
 
 import json
 import re
@@ -9,7 +9,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 ARCANES_TS = REPO / "src" / "data" / "arcanes.ts"
-HEADERS = {"User-Agent": "FrameHub/1.0 (arcane audit)"}
+HEADERS = {"User-Agent": "Voidforge/1.0 (arcane audit)"}
 
 
 def slugify(name: str) -> str:
@@ -52,7 +52,7 @@ def fetch_category_members() -> list[str]:
 
 def main() -> None:
     ours = load_ours()
-    print(f"FrameHub arcanes: {len(ours)}")
+    print(f"Voidforge arcanes: {len(ours)}")
 
     wiki_titles = fetch_category_members()
     # Drop category subpages / non-arcane entries
@@ -77,11 +77,11 @@ def main() -> None:
         if i not in wiki_slugs
     )
 
-    print(f"\nLikely missing from FrameHub ({len(missing)}):")
+    print(f"\nLikely missing from Voidforge ({len(missing)}):")
     for name, slug in missing:
         print(f"  - {name}  (expected id: {slug})")
 
-    print(f"\nIn FrameHub but not in wiki category ({len(extra)}):")
+    print(f"\nIn Voidforge but not in wiki category ({len(extra)}):")
     for name, id_ in extra:
         print(f"  + {name}  ({id_})")
 

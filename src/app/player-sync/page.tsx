@@ -15,7 +15,7 @@ export default function PlayerSyncPage() {
           icon={RefreshCw}
           accent="primary"
           title="Player Sync"
-          description="Import your active Warframe loadout from your account — the same data source used by the official Arsenal Twitch extension."
+          description="Import your active Warframe loadout from PC, Xbox, PlayStation, or Switch — the same data source used by the official Arsenal Twitch extension."
         />
         <WarframePlayerSync
           onImported={() => {

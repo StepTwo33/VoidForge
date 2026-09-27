@@ -305,7 +305,7 @@ export const VERIFIED_ARCANE_BEHAVIORS: Record<string, VerifiedArcaneBehavior> =
     arcaneId: "arcane_pistoleer",
     customHandler: "arcane_pistoleer",
     effects: [
-      {"statKey": "headshotProcChance", "target": "arcane_panel", "mode": "custom", "source": "wiki: Arcane Pistoleer — 60% chance on pistol HS kill"},
+      {"statKey": "headshotProcChance", "target": "arcane_panel", "mode": "custom", "source": "wiki: Arcane Pistoleer — 60% chance on pistol Weak Point kill"},
       {"statKey": "ammoEfficiency", "target": "weapon_dps", "mode": "custom", "source": "wiki: Arcane Pistoleer — +102% Ammo Efficiency for 12s (paper: stacks>0 = buff up)"},
       {"statKey": "buffDuration", "target": "arcane_panel", "mode": "custom", "source": "wiki: Arcane Pistoleer — 12s buff duration"},
     ],
@@ -320,7 +320,7 @@ export const VERIFIED_ARCANE_BEHAVIORS: Record<string, VerifiedArcaneBehavior> =
     arcaneId: "arcane_precision",
     customHandler: "arcane_precision",
     effects: [
-      {"statKey": "headshotDamage", "target": "weapon_dps", "mode": "custom", "source": "wiki: Arcane Precision — +300% secondary damage for 18s on headshot (paper: stacks>0 = buff up)"},
+      {"statKey": "headshotDamage", "target": "weapon_dps", "mode": "custom", "source": "wiki: Arcane Precision — +300% secondary damage for 18s on Weak Point (paper: stacks>0 = buff up)"},
     ],
   },
   "arcane_primary_charger": {
@@ -336,7 +336,7 @@ export const VERIFIED_ARCANE_BEHAVIORS: Record<string, VerifiedArcaneBehavior> =
     arcaneId: "arcane_primary_deadhead",
     customHandler: "arcane_primary_deadhead",
     effects: [
-      {"statKey": "damage", "target": "weapon_dps", "mode": "custom", "source": "wiki: Primary Deadhead — +120% damage / HS-kill stack at R5 (cap 3 → +360%; applies at sim stack count)"},
+      {"statKey": "damage", "target": "weapon_dps", "mode": "custom", "source": "wiki: Primary Deadhead — +120% damage / Weak Point kill stack at R5 (cap 3 → +360%; applies at sim stack count)"},
       {"statKey": "headshotMultiplier", "target": "weapon_dps", "mode": "custom", "source": "wiki: Primary Deadhead — +30% headshot multiplier passive at R5"},
       {"statKey": "recoilReduction", "target": "arcane_panel", "mode": "custom", "source": "wiki: Primary Deadhead — −50% recoil passive at R5 (panel)"},
     ],
@@ -410,7 +410,7 @@ export const VERIFIED_ARCANE_BEHAVIORS: Record<string, VerifiedArcaneBehavior> =
     arcaneId: "arcane_secondary_deadhead",
     customHandler: "arcane_secondary_deadhead",
     effects: [
-      {"statKey": "damage", "target": "weapon_dps", "mode": "custom", "source": "wiki: Secondary Deadhead — +120% damage / HS-kill stack at R5 (cap 3 → +360%; applies at sim stack count)"},
+      {"statKey": "damage", "target": "weapon_dps", "mode": "custom", "source": "wiki: Secondary Deadhead — +120% damage / Weak Point kill stack at R5 (cap 3 → +360%; applies at sim stack count)"},
       {"statKey": "headshotMultiplier", "target": "weapon_dps", "mode": "custom", "source": "wiki: Secondary Deadhead — +30% headshot multiplier passive at R5"},
       {"statKey": "recoilReduction", "target": "arcane_panel", "mode": "custom", "source": "wiki: Secondary Deadhead — −50% recoil passive at R5 (panel)"},
     ],
@@ -677,7 +677,7 @@ export const VERIFIED_ARCANE_BEHAVIORS: Record<string, VerifiedArcaneBehavior> =
     arcaneId: "longbow_sharpshot",
     customHandler: "longbow_sharpshot",
     effects: [
-      {"statKey": "damage", "target": "weapon_dps", "mode": "custom", "source": "wiki: Longbow Sharpshot — +300% next-shot damage after HS, multiplicative to Serration (paper: stacks>0 = buff up)"},
+      {"statKey": "damage", "target": "weapon_dps", "mode": "custom", "source": "wiki: Longbow Sharpshot — +300% next-shot damage after Weak Point hit, multiplicative to Serration (paper: stacks>0 = buff up)"},
     ],
   },
   "magus_accelerant": {

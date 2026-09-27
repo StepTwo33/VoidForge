@@ -4,16 +4,30 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { PageShell } from "@/components/page-shell";
 import { ModSlotCard } from "@/components/mod-slot";
 import { ModPicker } from "@/components/mod-picker";
-import { useMods } from "@/lib/weapons/use-data";
+import { useMods, useWeapons } from "@/lib/weapons/use-data";
+import { computeCrewBoardingDps } from "@/lib/calc/railjack-crew-boarding";
 import {
   allReactors, allShieldArrays, allEngines, allPlating,
   allTurrets, allOrdnance,
-  isRailjackMod,
   RailjackComponent, RailjackArmament,
-  railjackPresets, uranusProximaMissions, railjackEliteCrew,
+  railjackPresets, uranusProximaMissions,
   findRailjackComponent, findRailjackArmament,
   getRailjackComponentTraits,
 } from "@/data/railjack";
+import {
+  CREW_ROLE_LABELS,
+  CREW_SLOT_LABELS,
+  DEFAULT_CREW_ROLES,
+  findAdversaryCrew,
+  findEliteTrait,
+  findNamedEliteCrew,
+  findTickerTemplate,
+  normalizeCrewSlots,
+  resolveCrewCompetency,
+  resolveSlotEliteTraitId,
+  crewSlotUnlocked,
+  type RailjackCrewSlot,
+} from "@/data/railjack-crew";
 import {
   DEFAULT_RAILJACK_INTRINSICS,
   MAX_INTRINSIC_RANK,
@@ -28,25 +42,37 @@ import { calculateRailjackBuild, railjackBuildNeedsSimulation, resolveHouseTrait
 function defaultTraitId(componentId: string): string | undefined {
   return resolveHouseTrait(getRailjackComponentTraits(componentId))?.id;
 }
-import { filterRailjackModsForTab } from "@/lib/mods/railjack-plexus-mods";
+import {
+  filterRailjackModsForSlot,
+  INTEGRATED_AURA_SLOT,
+  migratePlexusModsToSlots,
+  PLEXUS_ABILITY_SLOT_CATEGORIES,
+  PLEXUS_ABILITY_SLOT_LABELS,
+  type PlexusModTab,
+} from "@/lib/mods/railjack-plexus-mods";
 import { cn } from "@/lib/utils";
 import { Save, FolderOpen, Crosshair, Shield, Zap, Gauge, ChevronRight, Users } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, RailjackBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
 import { toast } from "sonner";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
+import { CrewSlotEditor } from "@/components/railjack-crew-slot-editor";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
-import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
+import {
+  computeWarframeAuraBonus,
+  computeWarframeCapacityUsed,
+} from "@/lib/calc/compute-used-capacity";
 
-type PlexusTab = "integrated" | "battle" | "tactical";
+type PlexusTab = PlexusModTab;
 
 const INTEGRATED_SLOTS = 9;
 const BATTLE_SLOTS = 3;
 const TACTICAL_SLOTS = 3;
-const TURRET_SLOT_LABELS = ["Nose", "Dorsal", "Ventral"] as const;
+const TURRET_SLOT_LABELS = ["Nose", "Swivel"] as const;
 
 export default function RailjackBuilderPage() {
   const { mods: allMods, modsMap } = useMods();
+  const weapons = useWeapons();
   // Component state
   const [selectedReactor, setSelectedReactor] = useState<RailjackComponent | null>(null);
   const [selectedShield, setSelectedShield] = useState<RailjackComponent | null>(null);
@@ -56,9 +82,9 @@ export default function RailjackBuilderPage() {
   const [shieldTraitId, setShieldTraitId] = useState<string | undefined>();
   const [engineTraitId, setEngineTraitId] = useState<string | undefined>();
 
-  // Armament state — Nose / Dorsal / Ventral turrets + munitions launcher
-  const [selectedTurrets, setSelectedTurrets] = useState<[RailjackArmament | null, RailjackArmament | null, RailjackArmament | null]>([null, null, null]);
-  const [activeTurretSlot, setActiveTurretSlot] = useState<0 | 1 | 2>(0);
+  // Armament state — Nose + Swivel + Ordnance
+  const [selectedTurrets, setSelectedTurrets] = useState<[RailjackArmament | null, RailjackArmament | null]>([null, null]);
+  const [activeTurretSlot, setActiveTurretSlot] = useState<0 | 1>(0);
   const [showTurretPicker, setShowTurretPicker] = useState(false);
   const [selectedOrdnance, setSelectedOrdnance] = useState<RailjackArmament | null>(null);
   const [showOrdnancePicker, setShowOrdnancePicker] = useState(false);
@@ -79,8 +105,9 @@ export default function RailjackBuilderPage() {
   // Intrinsics (Dirac/grid removed U29.10 — Plexus uses Endo + Forma)
   const [intrinsics, setIntrinsics] = useState<RailjackIntrinsics>({ ...DEFAULT_RAILJACK_INTRINSICS });
 
-  // Elite crew & simulation
-  const [selectedEliteCrewId, setSelectedEliteCrewId] = useState<string | null>(null);
+  // Crew (A/B/C) & simulation
+  const [crewSlots, setCrewSlots] = useState<(RailjackCrewSlot | null)[]>([null, null, null]);
+  const [activeCrewEditor, setActiveCrewEditor] = useState<0 | 1 | 2 | null>(null);
   const [crimsonFugueStacks, setCrimsonFugueStacks] = useState(5);
   const [cruisingSpeedActive, setCruisingSpeedActive] = useState(false);
   const [protectiveShotsActive, setProtectiveShotsActive] = useState(true);
@@ -106,32 +133,26 @@ export default function RailjackBuilderPage() {
   const setCurrentMods = plexusTab === "integrated" ? setIntegratedMods : plexusTab === "battle" ? setBattleMods : setTacticalMods;
   const currentPolarities = plexusTab === "integrated" ? integratedPolarities : plexusTab === "battle" ? battlePolarities : tacticalPolarities;
   const setCurrentPolarities = plexusTab === "integrated" ? setIntegratedPolarities : plexusTab === "battle" ? setBattlePolarities : setTacticalPolarities;
-  const currentSlotCount = plexusTab === "integrated" ? INTEGRATED_SLOTS : plexusTab === "battle" ? BATTLE_SLOTS : TACTICAL_SLOTS;
 
-  // Railjack mods from the "general" category
+  // Railjack plexus mods (recategorized from general)
   const railjackMods = useMemo(() => {
-    return allMods.filter((m) => m.category === "general" && isRailjackMod(m));
-  }, []);
+    return allMods.filter((m) => m.category === "railjack");
+  }, [allMods]);
 
-  // Capacity
-  const capacityUsed = useMemo(() => {
-    return currentMods.reduce((sum, m) => {
-      const mod = modsMap.get(m.modId);
-      if (!mod) return sum;
-      const baseDrain = modCapacityAtRank(mod.drain, m.rank);
-      const slotPol = currentPolarities[m.slotIndex];
-      return sum + modSlotCapacityCost(baseDrain, slotPol, mod.polarity);
-    }, 0);
-  }, [currentMods, currentPolarities]);
+  // Capacity — Integrated only (Battle/Tactical do not use capacity)
+  const auraBonus = useMemo(
+    () => computeWarframeAuraBonus(integratedMods, modsMap, integratedPolarities, INTEGRATED_AURA_SLOT),
+    [integratedMods, modsMap, integratedPolarities],
+  );
+  const capacityUsed = useMemo(
+    () => computeWarframeCapacityUsed(integratedMods, modsMap, integratedPolarities, INTEGRATED_AURA_SLOT),
+    [integratedMods, modsMap, integratedPolarities],
+  );
+  const maxCapacity = Math.max(20, selectedReactor?.stats.avionicsCapacity ?? 60) + auraBonus;
 
-  const maxCapacity =
-    plexusTab === "integrated"
-      ? Math.max(20, selectedReactor?.stats.avionicsCapacity ?? 60)
-      : 15;
-
-  const tabRailjackMods = useMemo(
-    () => filterRailjackModsForTab(railjackMods, plexusTab),
-    [railjackMods, plexusTab],
+  const slotRailjackMods = useMemo(
+    () => filterRailjackModsForSlot(railjackMods, plexusTab, activeSlotIndex),
+    [railjackMods, plexusTab, activeSlotIndex],
   );
 
   const buildInput = useMemo(
@@ -148,7 +169,7 @@ export default function RailjackBuilderPage() {
       integratedMods: integratedMods.map(({ modId, rank, slotIndex }) => ({ modId, rank, slotIndex })),
       battleMods: battleMods.map(({ modId, rank, slotIndex }) => ({ modId, rank, slotIndex })),
       tacticalMods: tacticalMods.map(({ modId, rank, slotIndex }) => ({ modId, rank, slotIndex })),
-      eliteCrewId: selectedEliteCrewId ?? undefined,
+      crewSlots,
       intrinsics,
       simulation: {
         crimsonFugueStacks,
@@ -172,7 +193,7 @@ export default function RailjackBuilderPage() {
       integratedMods,
       battleMods,
       tacticalMods,
-      selectedEliteCrewId,
+      crewSlots,
       intrinsics,
       crimsonFugueStacks,
       cruisingSpeedActive,
@@ -209,7 +230,7 @@ export default function RailjackBuilderPage() {
       integratedPolarities,
       battlePolarities,
       tacticalPolarities,
-      eliteCrewId: selectedEliteCrewId ?? undefined,
+      crewSlots,
       intrinsics,
       simulation: {
         crimsonFugueStacks,
@@ -239,12 +260,18 @@ export default function RailjackBuilderPage() {
     } else {
       toast.success("Build saved locally", { description: "Log in to sync builds to your account" });
     }
-  }, [selectedReactor, selectedShield, selectedEngine, selectedPlating, reactorTraitId, shieldTraitId, engineTraitId, selectedTurrets, selectedOrdnance, integratedMods, battleMods, tacticalMods, integratedPolarities, battlePolarities, tacticalPolarities, selectedEliteCrewId, intrinsics, crimsonFugueStacks, cruisingSpeedActive, protectiveShotsActive, shieldsDepleted, activeBattleAbilityId, activeTacticalAbilityId, currentBuildId]);
+  }, [selectedReactor, selectedShield, selectedEngine, selectedPlating, reactorTraitId, shieldTraitId, engineTraitId, selectedTurrets, selectedOrdnance, integratedMods, battleMods, tacticalMods, integratedPolarities, battlePolarities, tacticalPolarities, crewSlots, intrinsics, crimsonFugueStacks, cruisingSpeedActive, protectiveShotsActive, shieldsDepleted, activeBattleAbilityId, activeTacticalAbilityId, currentBuildId]);
 
   const handleLoadBuild = useCallback((build: SavedBuild) => {
     const d = build.data as RailjackBuildData;
-    const restoreMods = (slots: { modId: string; rank: number; slotIndex: number }[]) =>
-      slots.map((m) => { const mod = modsMap.get(m.modId); return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain }; });
+    const restoreMods = (
+      slots: { modId: string; rank: number; slotIndex: number }[],
+      tab: PlexusTab,
+    ) =>
+      migratePlexusModsToSlots(slots, tab).map((m) => {
+        const mod = modsMap.get(m.modId);
+        return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
+      });
 
     setSelectedReactor(findRailjackComponent(d.reactorId ?? "") ?? null);
     setSelectedShield(findRailjackComponent(d.shieldId ?? "") ?? null);
@@ -268,16 +295,15 @@ export default function RailjackBuilderPage() {
     setSelectedTurrets([
       findRailjackArmament(turretIds[0] ?? "") ?? null,
       findRailjackArmament(turretIds[1] ?? "") ?? null,
-      findRailjackArmament(turretIds[2] ?? "") ?? null,
     ]);
     setSelectedOrdnance(findRailjackArmament(d.ordnanceId ?? "") ?? null);
-    setIntegratedMods(restoreMods(d.integratedMods));
-    setBattleMods(restoreMods(d.battleMods));
-    setTacticalMods(restoreMods(d.tacticalMods));
+    setIntegratedMods(restoreMods(d.integratedMods, "integrated"));
+    setBattleMods(restoreMods(d.battleMods, "battle"));
+    setTacticalMods(restoreMods(d.tacticalMods, "tactical"));
     setIntegratedPolarities(d.integratedPolarities || {});
     setBattlePolarities(d.battlePolarities || {});
     setTacticalPolarities(d.tacticalPolarities || {});
-    setSelectedEliteCrewId(d.eliteCrewId ?? null);
+    setCrewSlots(normalizeCrewSlots(d.crewSlots, d.eliteCrewId));
     setCrimsonFugueStacks(d.simulation?.crimsonFugueStacks ?? 5);
     setCruisingSpeedActive(d.simulation?.cruisingSpeedActive ?? false);
     setProtectiveShotsActive(d.simulation?.protectiveShotsActive ?? true);
@@ -289,7 +315,7 @@ export default function RailjackBuilderPage() {
     setBuildIsPublic(build.isPublic ?? false);
     setShowSavedBuilds(false);
     toast.info("Build loaded", { description: build.name });
-  }, []);
+  }, [modsMap]);
 
   useCloudBuildFromUrl("railjack", handleLoadBuild);
 
@@ -317,29 +343,32 @@ export default function RailjackBuilderPage() {
     setSelectedTurrets([
       findRailjackArmament(preset.turretIds[0]) ?? null,
       findRailjackArmament(preset.turretIds[1]) ?? null,
-      findRailjackArmament(preset.turretIds[2]) ?? null,
     ]);
     setSelectedOrdnance(findRailjackArmament(preset.ordnanceId) ?? null);
 
-    const toEquipped = (modIds: string[], slotCap: number): EquippedMod[] => {
-      const out: EquippedMod[] = [];
-      for (let i = 0; i < modIds.length && out.length < slotCap; i++) {
-        const mod = modsMap.get(modIds[i]!);
-        if (!mod) continue;
-        out.push({
+    const toEquipped = (modIds: string[], tab: PlexusTab): EquippedMod[] => {
+      const staged = modIds
+        .map((id, i) => {
+          const mod = modsMap.get(id);
+          if (!mod) return null;
+          return { modId: mod.id, rank: mod.maxRank, slotIndex: i };
+        })
+        .filter((m): m is { modId: string; rank: number; slotIndex: number } => !!m);
+      return migratePlexusModsToSlots(staged, tab).map((m) => {
+        const mod = modsMap.get(m.modId)!;
+        return {
           modId: mod.id,
-          rank: mod.maxRank,
-          slotIndex: out.length,
+          rank: m.rank,
+          slotIndex: m.slotIndex,
           modName: mod.name,
           polarity: mod.polarity,
           drain: mod.drain,
-        });
-      }
-      return out;
+        };
+      });
     };
-    setIntegratedMods(toEquipped(preset.integratedMods, INTEGRATED_SLOTS));
-    setBattleMods(toEquipped(preset.battleMods, BATTLE_SLOTS));
-    setTacticalMods(toEquipped(preset.tacticalMods, TACTICAL_SLOTS));
+    setIntegratedMods(toEquipped(preset.integratedMods, "integrated"));
+    setBattleMods(toEquipped(preset.battleMods, "battle"));
+    setTacticalMods(toEquipped(preset.tacticalMods, "tactical"));
     setIntegratedPolarities({});
     setBattlePolarities({});
     setTacticalPolarities({});
@@ -351,21 +380,21 @@ export default function RailjackBuilderPage() {
     <PageShell>
       <main className="container mx-auto px-4 py-8">
         {/* Title bar */}
-        <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-          <h1 className="text-xl sm:text-3xl font-bold">Railjack Builder</h1>
-          <div className="flex items-center gap-2">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h1 className="min-w-0 text-xl font-bold sm:text-3xl">Railjack Builder</h1>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             <input
               type="text"
               value={buildName}
               onChange={(e) => setBuildName(e.target.value)}
               placeholder="Build name..."
-              className="px-3 py-1.5 text-xs rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground w-40"
+              className="h-11 w-full max-w-[12rem] rounded-lg border border-border bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground sm:h-9 sm:w-40"
             />
-            <button onClick={() => setSaveDialogOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-green-400 hover:border-green-500/50 transition-all" title="Save Build">
-              <Save className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Save</span>
+            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 sm:min-h-9 sm:min-w-0 sm:py-1.5" title="Save Build">
+              <Save className="h-3.5 w-3.5" /> <span>Save</span>
             </button>
-            <button onClick={() => { setSavedBuilds(getSavedBuilds("railjack")); setShowSavedBuilds(true); }} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-blue-400 hover:border-blue-500/50 transition-all" title="Load Build">
-              <FolderOpen className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Load</span>
+            <button onClick={() => { setSavedBuilds(getSavedBuilds("railjack")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-9 sm:min-w-0 sm:py-1.5" title="Load Build">
+              <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
             </button>
           </div>
         </div>
@@ -389,14 +418,14 @@ export default function RailjackBuilderPage() {
               <button
                 key={p.id}
                 onClick={() => applyRailjackPreset(p.id)}
-                className="px-3 py-1.5 text-xs rounded-lg border border-rose-500/30 text-rose-800 hover:bg-rose-500/10 transition-colors dark:text-rose-300"
+                className="inline-flex min-h-11 items-center rounded-lg border border-rose-500/30 px-3 py-2 text-xs text-rose-800 transition-colors hover:bg-rose-500/10 sm:min-h-9 sm:py-1.5 dark:text-rose-300"
               >
                 Load {p.name} ({p.owner})
               </button>
             ))}
           </div>
           <p className="text-[10px] text-muted-foreground/80 mt-2">
-            Presets apply ship components, Nose/Dorsal/Ventral turrets, munitions, and max-rank Plexus mods.
+            Presets apply ship components, Nose/Swivel turrets, ordnance, and max-rank Plexus mods.
           </p>
         </div>
 
@@ -415,7 +444,7 @@ export default function RailjackBuilderPage() {
                   <div className="flex justify-between"><span className="text-muted-foreground">Recharge Delay −</span><span className="font-mono">{computedStats.shieldRechargeDelayReduction}s</span></div>
                 )}
                 <div className="flex justify-between"><span className="text-muted-foreground">Speed</span><span className="font-mono">{computedStats.speed} m/s</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Boost Speed</span><span className="font-mono">{computedStats.boostSpeed} m/s</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Boost Speed</span><span className="font-mono">{Number(computedStats.boostSpeed).toFixed(1)} m/s</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Boost Mult</span><span className="font-mono">{(computedStats.boostMultiplier ?? 0).toFixed(2)}×</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Boost Cost</span><span className="font-mono">{computedStats.boostCost}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Flux Capacity</span><span className="font-mono">{computedStats.fluxCapacity}</span></div>
@@ -431,44 +460,45 @@ export default function RailjackBuilderPage() {
                   </ul>
                 </div>
               )}
-              {(computedStats.turretDamageBonus > 0 || computedStats.turretCritBonus > 0 || computedStats.turretCritDmgBonus > 0 || computedStats.ordnanceDamageBonus > 0 || computedStats.artilleryDamageBonus > 0 || computedStats.munitionsCapacityBonus > 0 || (computedStats.abilityTurretDamageBonus ?? 0) > 0 || (computedStats.crewBonuses?.turretDamageBonus ?? 0) > 0 || (computedStats.crewBonuses?.repairSpeedBonus ?? 0) > 0 || (computedStats.crewBonuses?.hullBonus ?? 0) > 0 || (computedStats.crewBonuses?.speedBonus ?? 0) > 0) && (
+              {(computedStats.turretDamageBonus > 0 || computedStats.turretCritBonus > 0 || computedStats.turretCritDmgBonus > 0 || computedStats.ordnanceDamageBonus > 0 || computedStats.artilleryDamageBonus > 0 || computedStats.munitionsCapacityBonus > 0 || (computedStats.abilityTurretDamageBonus ?? 0) > 0 || (computedStats.crewBonuses?.speedBonus ?? 0) > 0 || (computedStats.crewBonuses?.houseTurretDamageBonus ?? 0) > 0) && (
                 <div className="mt-3 pt-3 border-t border-border/50">
                   <h3 className="text-[10px] font-semibold tracking-wider text-muted-foreground mb-1.5">PLEXUS / CREW BONUSES</h3>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
                     {computedStats.turretDamageBonus > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Turret Damage</span><span className="font-mono text-cyan-400">+{(computedStats.turretDamageBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Turret Damage</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{(computedStats.turretDamageBonus * 100).toFixed(0)}%</span></div>
                     )}
                     {computedStats.turretCritBonus > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Turret Crit</span><span className="font-mono text-cyan-400">+{(computedStats.turretCritBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Turret Crit</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{(computedStats.turretCritBonus * 100).toFixed(0)}%</span></div>
                     )}
                     {computedStats.turretCritDmgBonus > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Turret Crit DMG</span><span className="font-mono text-cyan-400">+{(computedStats.turretCritDmgBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Turret Crit DMG</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{(computedStats.turretCritDmgBonus * 100).toFixed(0)}%</span></div>
                     )}
                     {computedStats.ordnanceDamageBonus > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Ordnance Damage</span><span className="font-mono text-cyan-400">+{(computedStats.ordnanceDamageBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Ordnance Damage</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{(computedStats.ordnanceDamageBonus * 100).toFixed(0)}%</span></div>
                     )}
                     {computedStats.artilleryDamageBonus > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Artillery Damage</span><span className="font-mono text-cyan-400">+{(computedStats.artilleryDamageBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Artillery Damage</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{(computedStats.artilleryDamageBonus * 100).toFixed(0)}%</span></div>
                     )}
                     {computedStats.munitionsCapacityBonus > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Munitions Capacity</span><span className="font-mono text-cyan-400">+{(computedStats.munitionsCapacityBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Munitions Capacity</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{(computedStats.munitionsCapacityBonus * 100).toFixed(0)}%</span></div>
                     )}
                     {(computedStats.abilityTurretDamageBonus ?? 0) > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Ability Turret DMG</span><span className="font-mono text-cyan-400">+{((computedStats.abilityTurretDamageBonus ?? 0) * 100).toFixed(0)}%</span></div>
-                    )}
-                    {(computedStats.crewBonuses?.turretDamageBonus ?? 0) > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Crew Gunnery</span><span className="font-mono text-cyan-400">+{((computedStats.crewBonuses!.turretDamageBonus) * 100).toFixed(0)}%</span></div>
-                    )}
-                    {(computedStats.crewBonuses?.repairSpeedBonus ?? 0) > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Crew Repair</span><span className="font-mono text-cyan-400">+{((computedStats.crewBonuses!.repairSpeedBonus) * 100).toFixed(0)}%</span></div>
-                    )}
-                    {(computedStats.crewBonuses?.hullBonus ?? 0) > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Crew Hull</span><span className="font-mono text-cyan-400">+{((computedStats.crewBonuses!.hullBonus) * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Ability Turret DMG</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{((computedStats.abilityTurretDamageBonus ?? 0) * 100).toFixed(0)}%</span></div>
                     )}
                     {(computedStats.crewBonuses?.speedBonus ?? 0) > 0 && (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Crew Speed</span><span className="font-mono text-cyan-400">+{((computedStats.crewBonuses!.speedBonus) * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Crew Pilot Speed</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{((computedStats.crewBonuses!.speedBonus) * 100).toFixed(0)}%</span></div>
+                    )}
+                    {(computedStats.crewBonuses?.houseTurretDamageBonus ?? 0) > 0 && (
+                      <div className="flex justify-between"><span className="text-muted-foreground">Elite House Turrets</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{((computedStats.crewBonuses!.houseTurretDamageBonus) * 100).toFixed(0)}%</span></div>
                     )}
                   </div>
+                  {(computedStats.crewBonuses?.panelNotes?.length ?? 0) > 0 && (
+                    <ul className="mt-2 space-y-0.5 text-[10px] text-muted-foreground">
+                      {computedStats.crewBonuses!.panelNotes.map((note, i) => (
+                        <li key={i}>• {note}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
               {(computedStats.abilityStrengthBonus || computedStats.abilityRangeBonus || computedStats.abilityDurationBonus) && (
@@ -476,13 +506,13 @@ export default function RailjackBuilderPage() {
                   <h3 className="text-[10px] font-semibold tracking-wider text-muted-foreground mb-1.5">REACTOR BATTLE SCALING</h3>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
                     {computedStats.abilityStrengthBonus ? (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Strength</span><span className="font-mono text-orange-400">+{(computedStats.abilityStrengthBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Strength</span><span className="font-mono text-orange-700 dark:text-orange-400">+{(computedStats.abilityStrengthBonus * 100).toFixed(0)}%</span></div>
                     ) : null}
                     {computedStats.abilityRangeBonus ? (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Range</span><span className="font-mono text-orange-400">+{(computedStats.abilityRangeBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Range</span><span className="font-mono text-orange-700 dark:text-orange-400">+{(computedStats.abilityRangeBonus * 100).toFixed(0)}%</span></div>
                     ) : null}
                     {computedStats.abilityDurationBonus ? (
-                      <div className="flex justify-between"><span className="text-muted-foreground">Duration</span><span className="font-mono text-orange-400">+{(computedStats.abilityDurationBonus * 100).toFixed(0)}%</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Duration</span><span className="font-mono text-orange-700 dark:text-orange-400">+{(computedStats.abilityDurationBonus * 100).toFixed(0)}%</span></div>
                     ) : null}
                   </div>
                 </div>
@@ -502,7 +532,7 @@ export default function RailjackBuilderPage() {
                   )}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <Zap className="h-3.5 w-3.5 text-orange-400" />
+                    <Zap className="h-3.5 w-3.5 text-orange-700 dark:text-orange-400" />
                     <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">REACTOR</span>
                   </div>
                   <span className="text-sm font-medium">{selectedReactor?.name ?? "None"}</span>
@@ -525,7 +555,7 @@ export default function RailjackBuilderPage() {
                   )}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <Shield className="h-3.5 w-3.5 text-cyan-400" />
+                    <Shield className="h-3.5 w-3.5 text-cyan-700 dark:text-cyan-400" />
                     <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">SHIELD ARRAY</span>
                   </div>
                   <span className="text-sm font-medium">{selectedShield?.name ?? "None"}</span>
@@ -547,7 +577,7 @@ export default function RailjackBuilderPage() {
                   )}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <Gauge className="h-3.5 w-3.5 text-green-400" />
+                    <Gauge className="h-3.5 w-3.5 text-green-700 dark:text-green-400" />
                     <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">ENGINES</span>
                   </div>
                   <span className="text-sm font-medium">{selectedEngine?.name ?? "None"}</span>
@@ -569,7 +599,7 @@ export default function RailjackBuilderPage() {
                   )}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <Shield className="h-3.5 w-3.5 text-amber-400" />
+                    <Shield className="h-3.5 w-3.5 text-amber-700 dark:text-amber-400" />
                     <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">HULL (PLATING)</span>
                   </div>
                   <span className="text-sm font-medium">{selectedPlating?.name ?? "None"}</span>
@@ -672,7 +702,7 @@ export default function RailjackBuilderPage() {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    className="text-[10px] text-muted-foreground hover:text-foreground"
+                    className="inline-flex min-h-11 items-center rounded-md px-2.5 text-[10px] text-muted-foreground hover:bg-secondary hover:text-foreground"
                     onClick={() => {
                       beginNewRailjackDraft();
                       setIntrinsics({ ...DEFAULT_RAILJACK_INTRINSICS });
@@ -682,7 +712,7 @@ export default function RailjackBuilderPage() {
                   </button>
                   <button
                     type="button"
-                    className="text-[10px] text-muted-foreground hover:text-foreground"
+                    className="inline-flex min-h-11 items-center rounded-md px-2.5 text-[10px] text-muted-foreground hover:bg-secondary hover:text-foreground"
                     onClick={() => {
                       beginNewRailjackDraft();
                       setIntrinsics({
@@ -732,7 +762,7 @@ export default function RailjackBuilderPage() {
                 })}
                 {(computedStats.intrinsicEffects?.dorsalVentralTurretDamageBonus ?? 0) > 0 && (
                   <p className="text-[10px] text-cyan-600 dark:text-cyan-400 pt-1 border-t border-border/50">
-                    Paper: +50% Dorsal/Ventral turret damage (Gunnery 1)
+                    Paper: +50% Swivel turret damage (Gunnery 1)
                   </p>
                 )}
                 {(computedStats.intrinsicEffects?.battleEnergyCostMult ?? 1) < 1 && (
@@ -745,63 +775,124 @@ export default function RailjackBuilderPage() {
                     Paper: −{Math.round((computedStats.intrinsicEffects!.tacticalCooldownReduction ?? 0) * 100)}% Tactical cooldown
                   </p>
                 )}
-                {selectedEliteCrewId && !(computedStats.intrinsicEffects?.eliteCrewUnlocked) && (
-                  <p className="text-[10px] text-amber-700 dark:text-amber-300">
-                    Elite crew requires Command 10 (still applied for planning).
-                  </p>
-                )}
               </div>
             </div>
 
-            {/* Elite Crew */}
+            {/* Crew A/B/C */}
             <div>
-              <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">ELITE CREW</h2>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => { beginNewRailjackDraft(); setSelectedEliteCrewId(null); }}
-                  className={cn(
-                    "p-2.5 rounded-lg border text-left text-xs transition-all",
-                    !selectedEliteCrewId ? "border-primary/50 bg-primary/5" : "border-border hover:border-primary/30",
-                  )}
-                >
-                  <span className="font-medium">None</span>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Default crew bonuses</p>
-                </button>
-                {railjackEliteCrew.map((crew) => (
-                  <button
-                    key={crew.id}
-                    type="button"
-                    onClick={() => { beginNewRailjackDraft(); setSelectedEliteCrewId(crew.id); }}
-                    className={cn(
-                      "p-2.5 rounded-lg border text-left text-xs transition-all",
-                      selectedEliteCrewId === crew.id ? "border-violet-500/50 bg-violet-500/10" : "border-border hover:border-violet-500/30",
-                    )}
-                  >
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <Users className="h-3 w-3 text-violet-400" />
-                      <span className="font-medium">{crew.name}</span>
+              <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-1">CREW</h2>
+              <p className="text-[10px] text-muted-foreground mb-3">
+                Slots unlock at Command 1 / 3 / 5. Adversaries need Command 8; elites need Command 10. Hired from Ticker (Fortuna).
+              </p>
+              <div className="space-y-2">
+                {([0, 1, 2] as const).map((slotIdx) => {
+                  const unlocked = crewSlotUnlocked(slotIdx, intrinsics.command);
+                  const slot = crewSlots[slotIdx];
+                  const label = CREW_SLOT_LABELS[slotIdx];
+                  const roleDefault = DEFAULT_CREW_ROLES[slotIdx] ?? "defender";
+                  let profileName = "Empty";
+                  if (slot?.source === "ticker") profileName = findTickerTemplate(slot.profileId)?.name ?? slot.profileId;
+                  if (slot?.source === "elite") profileName = findNamedEliteCrew(slot.profileId)?.name ?? slot.profileId;
+                  if (slot?.source === "adversary") profileName = findAdversaryCrew(slot.profileId)?.name ?? slot.profileId;
+                  const competency = slot ? resolveCrewCompetency(slot) : undefined;
+                  const editing = activeCrewEditor === slotIdx;
+                  const traitId = slot ? resolveSlotEliteTraitId(slot) : undefined;
+                  const weapon = slot?.weaponLoadout?.weaponId
+                    ? weapons.find((w) => w.id === slot.weaponLoadout!.weaponId)
+                    : undefined;
+                  const boarding =
+                    slot && weapon ? computeCrewBoardingDps(slot, weapon, modsMap) : null;
+                  return (
+                    <div key={slotIdx} className={cn("rounded-lg border p-2.5", unlocked ? "border-border bg-card" : "border-border/40 opacity-60")}>
+                      <div className="flex items-start justify-between gap-2">
+                        <button
+                          type="button"
+                          disabled={!unlocked}
+                          onClick={() => setActiveCrewEditor(editing ? null : slotIdx)}
+                          className="min-h-11 flex-1 min-w-0 py-1 text-left"
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <Users className="h-3 w-3 shrink-0 text-violet-800 dark:text-violet-400" />
+                            <span className="text-xs font-medium">Slot {label}</span>
+                            {!unlocked && (
+                              <span className="text-[10px] text-amber-600 dark:text-amber-300">
+                                Command {slotIdx === 0 ? 1 : slotIdx === 1 ? 3 : 5}+
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                            {slot
+                              ? `${CREW_ROLE_LABELS[slot.role]} · ${profileName}`
+                              : unlocked
+                                ? "Click to assign crew"
+                                : "Locked"}
+                          </p>
+                          {competency && (
+                            <p className="text-[10px] text-muted-foreground/80 mt-0.5">
+                              P{competency.piloting} G{competency.gunnery} R{competency.repair} C{competency.combat} E{competency.endurance}
+                              {traitId ? ` · ${findEliteTrait(traitId)?.competency ?? "trait"}` : ""}
+                            </p>
+                          )}
+                          {boarding && (
+                            <p className="text-[10px] text-orange-600 dark:text-orange-400 mt-0.5">
+                              {weapon!.name} · Boarding DPS {Math.round(boarding.boardingDps).toLocaleString()}
+                            </p>
+                          )}
+                        </button>
+                        {slot && unlocked && (
+                          <button
+                            type="button"
+                            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-[10px] text-muted-foreground hover:bg-destructive/10 hover:text-red-700 dark:hover:text-red-400"
+                            onClick={() => {
+                              beginNewRailjackDraft();
+                              setCrewSlots((prev) => {
+                                const next = [...prev] as (RailjackCrewSlot | null)[];
+                                next[slotIdx] = null;
+                                return next;
+                              });
+                            }}
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                      {editing && unlocked && (
+                        <CrewSlotEditor
+                          slot={slot}
+                          slotIndex={slotIdx}
+                          allSlots={crewSlots}
+                          commandRank={intrinsics.command}
+                          defaultRole={roleDefault}
+                          weapons={weapons}
+                          mods={allMods}
+                          modsMap={modsMap}
+                          onChange={(next) => {
+                            beginNewRailjackDraft();
+                            setCrewSlots((prev) => {
+                              const out = [...prev] as (RailjackCrewSlot | null)[];
+                              out[slotIdx] = next;
+                              return out;
+                            });
+                          }}
+                        />
+                      )}
                     </div>
-                    <p className="text-[10px] text-muted-foreground line-clamp-2">{crew.description}</p>
-                    <p className="text-[10px] text-muted-foreground/80 mt-1">
-                      G{crew.competency.gunnery} C{crew.competency.combat} P{crew.competency.piloting} R{crew.competency.repair} E{crew.competency.endurance}
-                    </p>
-                  </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
-            {/* Armaments — Nose / Dorsal / Ventral + munitions launcher */}
+            {/* Armaments — Nose + Swivel + Ordnance */}
             <div>
               <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">ARMAMENTS</h2>
               <div className="space-y-3">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <Crosshair className="h-3.5 w-3.5 text-red-400" />
-                    <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">TURRETS (×3)</span>
+                    <Crosshair className="h-3.5 w-3.5 text-red-700 dark:text-red-400" />
+                    <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">NOSE + SWIVEL</span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {([0, 1, 2] as const).map((slot) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {([0, 1] as const).map((slot) => (
                       <button
                         key={slot}
                         type="button"
@@ -840,7 +931,7 @@ export default function RailjackBuilderPage() {
                             onClick={() => {
                               beginNewRailjackDraft();
                               setSelectedTurrets((prev) => {
-                                const next: [RailjackArmament | null, RailjackArmament | null, RailjackArmament | null] = [...prev];
+                                const next: [RailjackArmament | null, RailjackArmament | null] = [...prev];
                                 next[activeTurretSlot] = t;
                                 return next;
                               });
@@ -849,7 +940,7 @@ export default function RailjackBuilderPage() {
                             className={cn(
                               "p-2 rounded-lg border text-left transition-all text-xs",
                               selectedTurrets[activeTurretSlot]?.id === t.id
-                                ? "border-red-500/50 bg-red-500/10 text-red-400"
+                                ? "border-red-500/50 bg-red-500/10 text-red-700 dark:text-red-400"
                                 : "border-border hover:border-red-500/30",
                             )}
                           >
@@ -866,8 +957,8 @@ export default function RailjackBuilderPage() {
 
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <Crosshair className="h-3.5 w-3.5 text-purple-400" />
-                    <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">MUNITIONS LAUNCHER</span>
+                    <Crosshair className="h-3.5 w-3.5 text-purple-700 dark:text-purple-400" />
+                    <span className="text-[10px] font-semibold text-muted-foreground tracking-wider">ORDNANCE</span>
                   </div>
                   <button
                     type="button"
@@ -882,10 +973,10 @@ export default function RailjackBuilderPage() {
                         : "border-dashed border-border hover:border-purple-500/30",
                     )}
                   >
-                    <span className="text-sm font-medium">{selectedOrdnance?.name ?? "Select munitions launcher"}</span>
+                    <span className="text-sm font-medium">{selectedOrdnance?.name ?? "Select ordnance (Milati / Tycho / Galvarc)"}</span>
                     {selectedOrdnance && (
                       <p className="text-[10px] text-muted-foreground mt-0.5">
-                        DMG {selectedOrdnance.damage} • CC {(selectedOrdnance.critChance * 100).toFixed(0)}% • FR {selectedOrdnance.fireRate}
+                        DMG {selectedOrdnance.damage} • CC {(selectedOrdnance.critChance * 100).toFixed(0)}% • FR {Number(selectedOrdnance.fireRate).toFixed(2)}
                       </p>
                     )}
                   </button>
@@ -902,15 +993,15 @@ export default function RailjackBuilderPage() {
                               setShowOrdnancePicker(false);
                             }}
                             className={cn(
-                              "p-2 rounded-lg border text-left transition-all text-xs",
+                              "min-h-11 rounded-lg border p-2.5 text-left text-xs transition-all",
                               selectedOrdnance?.id === o.id
-                                ? "border-purple-500/50 bg-purple-500/10 text-purple-400"
+                                ? "border-purple-500/50 bg-purple-500/10 text-purple-700 dark:text-purple-400"
                                 : "border-border hover:border-purple-500/30",
                             )}
                           >
                             <span className="font-medium">{o.name}</span>
                             <div className="text-[10px] text-muted-foreground mt-0.5">
-                              DMG {o.damage} • CC {(o.critChance * 100).toFixed(0)}% • FR {o.fireRate}
+                              DMG {o.damage} • CC {(o.critChance * 100).toFixed(0)}% • FR {Number(o.fireRate).toFixed(2)}
                             </div>
                           </button>
                         ))}
@@ -928,7 +1019,7 @@ export default function RailjackBuilderPage() {
               <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">PLEXUS MODS</h2>
 
               {/* Tab selector */}
-              <div className="flex gap-2 mb-4">
+              <div className="mb-4 flex flex-wrap gap-2">
                 {(["integrated", "battle", "tactical"] as PlexusTab[]).map((tab) => {
                   const count = tab === "integrated" ? integratedMods.length : tab === "battle" ? battleMods.length : tacticalMods.length;
                   const max = tab === "integrated" ? INTEGRATED_SLOTS : tab === "battle" ? BATTLE_SLOTS : TACTICAL_SLOTS;
@@ -937,9 +1028,9 @@ export default function RailjackBuilderPage() {
                       key={tab}
                       onClick={() => setPlexusTab(tab)}
                       className={cn(
-                        "px-4 py-2 rounded-lg text-sm font-medium border transition-all capitalize",
+                        "inline-flex min-h-11 items-center rounded-lg border px-3 py-2 text-sm font-medium capitalize transition-all sm:min-h-9 sm:px-4",
                         plexusTab === tab
-                          ? "bg-rose-500/10 border-rose-500/50 text-rose-400"
+                          ? "bg-rose-500/10 border-rose-500/50 text-rose-700 dark:text-rose-400"
                           : "border-border text-muted-foreground hover:text-foreground"
                       )}
                     >
@@ -950,42 +1041,110 @@ export default function RailjackBuilderPage() {
                 })}
               </div>
 
-              {/* Capacity bar */}
-              <div className="flex items-center justify-end gap-2 mb-3">
-                <span className={cn(
-                  "text-xs font-mono",
-                  capacityUsed > maxCapacity ? "text-red-400" : "text-muted-foreground"
-                )}>
-                  {capacityUsed} / {maxCapacity}
-                </span>
-              </div>
+              {/* Capacity — Integrated only */}
+              {plexusTab === "integrated" && (
+                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                  <h3 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">INTEGRATED</h3>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {auraBonus > 0 && (
+                      <span className="text-[10px] text-green-700/80 dark:text-green-400/70">+{auraBonus} aura</span>
+                    )}
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
+                      capacityUsed > maxCapacity ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
+                    )}>
+                      <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
+                      {capacityUsed} / {maxCapacity}
+                    </span>
+                  </div>
+                </div>
+              )}
+              {plexusTab !== "integrated" && (
+                <p className="text-[10px] text-muted-foreground mb-3 text-right">
+                  Battle / Tactical mods do not use capacity (one Defensive / Offensive / Super each).
+                </p>
+              )}
 
               {/* Mod slots */}
-              <div className={cn(
-                "grid gap-2",
-                plexusTab === "integrated" ? "grid-cols-3 sm:grid-cols-3" : "grid-cols-3"
-              )}>
-                {Array.from({ length: currentSlotCount }, (_, i) => {
-                  const equipped = currentMods.find((m) => m.slotIndex === i);
-                  const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
-                  return (
-                    <ModSlotCard
-                      key={`${plexusTab}-${i}`}
-                      mod={mod}
-                      rank={equipped?.rank ?? 0}
-                      slotIndex={i}
-                      slotPolarity={currentPolarities[i]}
-                      onAdd={() => { setActiveSlotIndex(i); setModPickerOpen(true); }}
-                      onRemove={() => setCurrentMods((prev) => prev.filter((m) => m.slotIndex !== i))}
-                      onPolarize={(p) => setCurrentPolarities((prev) => {
-                        const next = { ...prev };
-                        if (p) next[i] = p; else delete next[i];
-                        return next;
-                      })}
-                    />
-                  );
-                })}
-              </div>
+              {plexusTab === "integrated" ? (
+                <div className="space-y-2">
+                  <div>
+                    <span className="text-[10px] font-semibold text-purple-700 dark:text-purple-400 tracking-wider mb-1 block">AURA</span>
+                    {(() => {
+                      const equipped = integratedMods.find((m) => m.slotIndex === INTEGRATED_AURA_SLOT);
+                      const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
+                      return (
+                        <ModSlotCard
+                          key="integrated-aura"
+                          mod={mod}
+                          rank={equipped?.rank ?? 0}
+                          slotIndex={INTEGRATED_AURA_SLOT}
+                          label="Aura"
+                          slotPolarity={integratedPolarities[INTEGRATED_AURA_SLOT]}
+                          onAdd={() => { setActiveSlotIndex(INTEGRATED_AURA_SLOT); setModPickerOpen(true); }}
+                          onRemove={() => setIntegratedMods((prev) => prev.filter((m) => m.slotIndex !== INTEGRATED_AURA_SLOT))}
+                          onPolarize={(p) => setIntegratedPolarities((prev) => {
+                            const next = { ...prev };
+                            if (p) next[INTEGRATED_AURA_SLOT] = p; else delete next[INTEGRATED_AURA_SLOT];
+                            return next;
+                          })}
+                        />
+                      );
+                    })()}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {Array.from({ length: 8 }, (_, idx) => {
+                      const i = idx + 1;
+                      const equipped = integratedMods.find((m) => m.slotIndex === i);
+                      const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
+                      return (
+                        <ModSlotCard
+                          key={`integrated-${i}`}
+                          mod={mod}
+                          rank={equipped?.rank ?? 0}
+                          slotIndex={i}
+                          slotPolarity={integratedPolarities[i]}
+                          onAdd={() => { setActiveSlotIndex(i); setModPickerOpen(true); }}
+                          onRemove={() => setIntegratedMods((prev) => prev.filter((m) => m.slotIndex !== i))}
+                          onPolarize={(p) => setIntegratedPolarities((prev) => {
+                            const next = { ...prev };
+                            if (p) next[i] = p; else delete next[i];
+                            return next;
+                          })}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {PLEXUS_ABILITY_SLOT_CATEGORIES.map((category, i) => {
+                    const equipped = currentMods.find((m) => m.slotIndex === i);
+                    const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
+                    return (
+                      <div key={`${plexusTab}-${category}`}>
+                        <span className="text-[10px] font-semibold text-rose-700/80 dark:text-rose-400/80 tracking-wider mb-1 block">
+                          {PLEXUS_ABILITY_SLOT_LABELS[category]}
+                        </span>
+                        <ModSlotCard
+                          mod={mod}
+                          rank={equipped?.rank ?? 0}
+                          slotIndex={i}
+                          label={PLEXUS_ABILITY_SLOT_LABELS[category]}
+                          slotPolarity={currentPolarities[i]}
+                          onAdd={() => { setActiveSlotIndex(i); setModPickerOpen(true); }}
+                          onRemove={() => setCurrentMods((prev) => prev.filter((m) => m.slotIndex !== i))}
+                          onPolarize={(p) => setCurrentPolarities((prev) => {
+                            const next = { ...prev };
+                            if (p) next[i] = p; else delete next[i];
+                            return next;
+                          })}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Simulation toggles for conditional mods & active abilities */}
@@ -1100,7 +1259,7 @@ export default function RailjackBuilderPage() {
                         <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{ability.category}</span>
                       </div>
                       <p className="text-[10px] text-muted-foreground mt-1">{ability.description}</p>
-                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-[10px] font-mono text-cyan-400">
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-[10px] font-mono text-cyan-700 dark:text-cyan-400">
                         {ability.energyCost !== undefined && <span>Energy {ability.energyCost}</span>}
                         {ability.cooldownSec !== undefined && <span>CD {ability.cooldownSec}s</span>}
                         {ability.turretDamageWhileActive !== undefined && (
@@ -1118,41 +1277,41 @@ export default function RailjackBuilderPage() {
               <h3 className="text-xs font-semibold text-muted-foreground mb-3">ARMAMENT STATS (WITH PLEXUS)</h3>
               {computedStats.artillery && (
                 <div>
-                  <div className="text-xs font-medium text-orange-400 mb-1.5">Forward Artillery — {computedStats.artillery.name}</div>
+                  <div className="text-xs font-medium text-orange-700 dark:text-orange-400 mb-1.5">Forward Artillery — {computedStats.artillery.name}</div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                     <div className="flex justify-between"><span className="text-muted-foreground">Damage</span><span className="font-mono">{computedStats.artillery.damage}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Avg Shot</span><span className="font-mono text-cyan-400">{computedStats.artillery.avgShotDamage}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Avg Shot</span><span className="font-mono text-cyan-700 dark:text-cyan-400">{Number(computedStats.artillery.avgShotDamage).toLocaleString(undefined, { maximumFractionDigits: 1 })}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Chance</span><span className="font-mono">{(computedStats.artillery.critChance * 100).toFixed(0)}%</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Multi</span><span className="font-mono">{computedStats.artillery.critMultiplier.toFixed(1)}x</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Charge</span><span className="font-mono">{computedStats.artillery.chargeTime}s</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Est. DPS</span><span className="font-mono text-cyan-400">{computedStats.artillery.estimatedDps}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Est. DPS</span><span className="font-mono text-cyan-700 dark:text-cyan-400">{computedStats.artillery.estimatedDps}</span></div>
                   </div>
                   <p className="text-[10px] text-muted-foreground mt-1.5">Paper only — Dome Charge economy not modeled.</p>
                 </div>
               )}
               {computedStats.turrets.map((turret, index) => (
                 <div key={turret.id} className={cn((index > 0 || computedStats.artillery) && "mt-3 pt-3 border-t border-border/50")}>
-                  <div className="text-xs font-medium text-red-400 mb-1.5">Turret {index + 1} — {turret.name}</div>
+                  <div className="text-xs font-medium text-red-700 dark:text-red-400 mb-1.5">Turret {index + 1} — {turret.name}</div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                     <div className="flex justify-between"><span className="text-muted-foreground">Damage</span><span className="font-mono">{turret.damage}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Est. DPS</span><span className="font-mono text-cyan-400">{turret.estimatedDps}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Est. DPS</span><span className="font-mono text-cyan-700 dark:text-cyan-400">{turret.estimatedDps}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Chance</span><span className="font-mono">{(turret.critChance * 100).toFixed(1)}%</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Multi</span><span className="font-mono">{turret.critMultiplier.toFixed(1)}x</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="font-mono">{(turret.statusChance * 100).toFixed(1)}%</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Fire Rate</span><span className="font-mono">{turret.fireRate}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Fire Rate</span><span className="font-mono">{Number(turret.fireRate).toFixed(2)}</span></div>
                   </div>
                 </div>
               ))}
               {computedStats.ordnance && (
                 <div className={cn((computedStats.turrets.length > 0 || computedStats.artillery) && "mt-3 pt-3 border-t border-border/50")}>
-                  <div className="text-xs font-medium text-purple-400 mb-1.5">Munitions — {computedStats.ordnance.name}</div>
+                  <div className="text-xs font-medium text-purple-700 dark:text-purple-400 mb-1.5">Ordnance — {computedStats.ordnance.name}</div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                     <div className="flex justify-between"><span className="text-muted-foreground">Damage</span><span className="font-mono">{computedStats.ordnance.damage}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Est. DPS</span><span className="font-mono text-cyan-400">{computedStats.ordnance.estimatedDps}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Est. DPS</span><span className="font-mono text-cyan-700 dark:text-cyan-400">{computedStats.ordnance.estimatedDps}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Chance</span><span className="font-mono">{(computedStats.ordnance.critChance * 100).toFixed(1)}%</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Crit Multi</span><span className="font-mono">{computedStats.ordnance.critMultiplier.toFixed(1)}x</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Status</span><span className="font-mono">{(computedStats.ordnance.statusChance * 100).toFixed(1)}%</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Fire Rate</span><span className="font-mono">{computedStats.ordnance.fireRate}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Fire Rate</span><span className="font-mono">{Number(computedStats.ordnance.fireRate).toFixed(2)}</span></div>
                   </div>
                 </div>
               )}
@@ -1161,14 +1320,15 @@ export default function RailjackBuilderPage() {
         </div>
       </main>
 
-      {/* Plexus Mod Picker */}
+      {/* Plexus Mod Picker — filtered by tab + aura / D-O-S slot */}
       <ModPicker
         open={modPickerOpen}
         onClose={() => setModPickerOpen(false)}
-        mods={tabRailjackMods}
+        mods={slotRailjackMods}
         category="_prefiltered"
         equippedModIds={currentMods.map((m) => m.modId)}
         onSelect={(mod, rank) => {
+          beginNewRailjackDraft();
           setCurrentMods((prev) => {
             const filtered = prev.filter((m) => m.slotIndex !== activeSlotIndex);
             return [...filtered, { modId: mod.id, modName: mod.name, rank, slotIndex: activeSlotIndex, polarity: mod.polarity, drain: mod.drain }];

@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyFullAdmin } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
 import {
-  SITE_UPDATE_BODY_MAX,
-  SITE_UPDATE_TITLE_MAX,
+  parseSiteUpdatePayload,
   type SiteUpdateSummary,
 } from "@/lib/site/site-updates";
 
@@ -13,6 +12,7 @@ function toSummary(
     title: string;
     body: string;
     published: boolean;
+    featured: boolean;
     createdAt: Date;
     updatedAt: Date;
     author: { username: string | null; name: string | null };
@@ -23,10 +23,11 @@ function toSummary(
     title: row.title,
     body: row.body,
     published: row.published,
+    featured: row.featured,
     createdAt: row.createdAt.getTime(),
     updatedAt: row.updatedAt.getTime(),
     author: {
-      username: row.author.username || row.author.name || "Frame Hub",
+      username: row.author.username || row.author.name || "Voidforge",
       profileSlug: row.author.username,
     },
   };
@@ -37,21 +38,11 @@ const selectFields = {
   title: true,
   body: true,
   published: true,
+  featured: true,
   createdAt: true,
   updatedAt: true,
   author: { select: { username: true, name: true } },
 } as const;
-
-function parsePayload(body: unknown): { title: string; body: string; published: boolean } | null {
-  if (!body || typeof body !== "object") return null;
-  const b = body as Record<string, unknown>;
-  const title = typeof b.title === "string" ? b.title.trim() : "";
-  const text = typeof b.body === "string" ? b.body.trim() : "";
-  const published = b.published !== false;
-  if (!title || !text) return null;
-  if (title.length > SITE_UPDATE_TITLE_MAX || text.length > SITE_UPDATE_BODY_MAX) return null;
-  return { title, body: text, published };
-}
 
 // GET /api/admin/site-updates — all posts (admin only)
 export async function GET() {
@@ -61,7 +52,7 @@ export async function GET() {
   }
 
   const rows = await prisma.siteUpdate.findMany({
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     select: selectFields,
   });
 
@@ -82,16 +73,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const payload = parsePayload(json);
-  if (!payload) {
-    return NextResponse.json({ error: "Title and body are required" }, { status: 400 });
+  const parsed = parseSiteUpdatePayload(json);
+  if (!parsed.ok) {
+    return NextResponse.json({ error: parsed.error }, { status: 400 });
   }
 
   const row = await prisma.siteUpdate.create({
     data: {
-      title: payload.title,
-      body: payload.body,
-      published: payload.published,
+      title: parsed.data.title,
+      body: parsed.data.body,
+      published: parsed.data.published,
+      featured: parsed.data.featured,
       authorId: userId,
     },
     select: selectFields,

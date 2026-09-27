@@ -226,7 +226,7 @@ export function summarizeEquippedAbilities(
   return summaries;
 }
 
-/** Elite crew competency → passive Railjack bonuses (approximate in-game impact). */
+/** @deprecated Use computeCrewPaperBonuses from @/data/railjack-crew */
 export interface RailjackCrewBonuses {
   turretDamageBonus: number;
   speedBonus: number;
@@ -234,7 +234,11 @@ export interface RailjackCrewBonuses {
   repairSpeedBonus: number;
 }
 
-export function crewBonusesFromCompetency(competency: {
+/**
+ * @deprecated Invented scaling — use computeCrewPaperBonuses (wiki-faithful).
+ * Kept only for any external imports; returns zeros.
+ */
+export function crewBonusesFromCompetency(_competency: {
   piloting: number;
   gunnery: number;
   repair: number;
@@ -242,9 +246,9 @@ export function crewBonusesFromCompetency(competency: {
   endurance: number;
 }): RailjackCrewBonuses {
   return {
-    turretDamageBonus: competency.gunnery * 0.04 + competency.combat * 0.02,
-    speedBonus: competency.piloting * 0.03,
-    hullBonus: competency.endurance * 0.03,
-    repairSpeedBonus: competency.repair * 0.05,
+    turretDamageBonus: 0,
+    speedBonus: 0,
+    hullBonus: 0,
+    repairSpeedBonus: 0,
   };
 }

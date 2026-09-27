@@ -1,5 +1,5 @@
 /**
- * FrameHub bot alert event types (worldstate / vendors / cycles).
+ * Voidforge bot alert event types (worldstate / vendors / cycles).
  * Used by dashboard, API, and bot poller.
  */
 

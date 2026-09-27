@@ -29,6 +29,7 @@ const FLAT_STAT_KEYS = new Set([
   "ampStatusDamage",
   "ampSchoolDamage",
   "ampEnergyRegen",
+  "killsRequired",
 ]);
 
 const PERCENT_LIKE_KEYS = new Set([
@@ -43,6 +44,8 @@ const PERCENT_LIKE_KEYS = new Set([
   "multishotOnKill",
   "slashOnCrit",
   "slashOnImpactProc",
+  "extraElectricProcChance",
+  "falloffDistance",
   "damageFirstShot",
   "statusChance",
   "abilityStrength",
@@ -62,7 +65,13 @@ const PERCENT_LIKE_KEYS = new Set([
   "damageResistancePerStack",
 ]);
 
+/** Percent stats stored as the live value (not per-rank × (rank+1)). */
+const RANK_INDEPENDENT_PERCENT_KEYS = new Set([
+  "extraElectricProcChance",
+]);
+
 function usesPercentDisplay(statKey: string): boolean {
+  if (RANK_INDEPENDENT_PERCENT_KEYS.has(statKey)) return true;
   if (FLAT_STAT_KEYS.has(statKey)) return false;
   if (PERCENT_LIKE_KEYS.has(statKey)) return true;
   if (statKey.endsWith("Chance") || statKey.endsWith("Percent") || statKey.endsWith("Bonus")) return true;
@@ -135,11 +144,11 @@ export interface ModStatDisplayLine {
 export function getModStatDisplayLines(mod: Mod, rank: number): ModStatDisplayLine[] {
   const stats = mod.stats ?? {};
   return Object.entries(stats).map(([statKey, perRank]) => {
-    const flat = FLAT_STAT_KEYS.has(statKey);
-    const atRank = flat
+    const unscaled = FLAT_STAT_KEYS.has(statKey) || RANK_INDEPENDENT_PERCENT_KEYS.has(statKey);
+    const atRank = unscaled
       ? formatModStatValue(statKey, perRank, 0)
       : formatModStatValue(statKey, perRank, rank);
-    const atMax = flat
+    const atMax = unscaled
       ? atRank
       : formatModStatValue(statKey, perRank, mod.maxRank);
     return {

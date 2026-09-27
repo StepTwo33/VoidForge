@@ -4,18 +4,18 @@ import { railjackPresets } from "@/data/railjack";
 import { allMods } from "@/data/mods";
 
 describe("calculateRailjackBuild", () => {
-  it("applies Gunnery 1 +50% to Dorsal/Ventral only (not Nose)", () => {
+  it("applies Gunnery 1 +50% to Swivel only (not Nose)", () => {
     const bare = calculateRailjackBuild({
-      turretIds: ["sigma_apoc", "sigma_apoc", "sigma_apoc"],
+      turretIds: ["sigma_apoc", "sigma_apoc"],
       intrinsics: { gunnery: 0 },
     });
     const gunned = calculateRailjackBuild({
-      turretIds: ["sigma_apoc", "sigma_apoc", "sigma_apoc"],
+      turretIds: ["sigma_apoc", "sigma_apoc"],
       intrinsics: { gunnery: 1 },
     });
     expect(gunned.turrets[0]!.damage).toBe(bare.turrets[0]!.damage);
     expect(gunned.turrets[1]!.damage).toBe(Math.round((bare.turrets[1]!.damage) * 1.5));
-    expect(gunned.turrets[2]!.damage).toBe(Math.round((bare.turrets[2]!.damage) * 1.5));
+    expect(gunned.turrets).toHaveLength(2);
   });
 
   it("applies Tactical 6/7/9 battle energy and tactical cooldown paper", () => {
@@ -165,7 +165,7 @@ describe("calculateRailjackBuild", () => {
     });
     expect(stats.artilleryDamageBonus).toBeGreaterThan(0);
     expect(stats.turretDamageBonus).toBeGreaterThan(0);
-    expect(stats.turrets).toHaveLength(3);
+    expect(stats.turrets).toHaveLength(2);
   });
 
   it("applies ironclad matrix hull, armor, shield, and recharge bonuses", () => {
@@ -180,17 +180,26 @@ describe("calculateRailjackBuild", () => {
     expect(stats.armor).toBe(Math.round(baseArmor * (1 + 0.225)));
   });
 
-  it("supports three turret hardpoints (Nose/Dorsal/Ventral) and applies turret damage mods", () => {
+  it("supports Nose + Swivel hardpoints and applies turret damage mods", () => {
     const stats = calculateRailjackBuild({
-      turretIds: ["zetki_apoc", "vidar_pulsar", "lavan_cryophon"],
-      integratedMods: [{ modId: "hyperstrike", rank: 5, slotIndex: 0 }],
+      turretIds: ["zetki_apoc", "vidar_pulsar"],
+      integratedMods: [{ modId: "hyperstrike", rank: 5, slotIndex: 1 }],
     });
 
-    expect(stats.turrets).toHaveLength(3);
+    expect(stats.turrets).toHaveLength(2);
     expect(stats.turretDamageBonus).toBeGreaterThan(0);
     expect(stats.turrets[0]!.damage).toBeGreaterThan(748);
     expect(stats.turrets[1]!.estimatedDps).toBeGreaterThan(0);
-    expect(stats.turrets[2]!.id).toBe("lavan_cryophon");
+    expect(stats.turrets[1]!.id).toBe("vidar_pulsar");
+  });
+
+  it("ignores a third legacy turret id and keeps Nose + Swivel", () => {
+    const stats = calculateRailjackBuild({
+      turretIds: ["zetki_apoc", "vidar_pulsar", "lavan_cryophon"],
+    });
+    expect(stats.turrets).toHaveLength(2);
+    expect(stats.turrets[0]!.id).toBe("zetki_apoc");
+    expect(stats.turrets[1]!.id).toBe("vidar_pulsar");
   });
 
   it("migrates legacy single turretId saves", () => {
@@ -250,15 +259,17 @@ describe("calculateRailjackBuild", () => {
     expect(stats.turrets[0]!.damage).toBeGreaterThan(748);
   });
 
-  it("applies elite crew gunnery bonus and battle abilities", () => {
+  it("migrates legacy eliteCrewId and applies battle abilities", () => {
     const stats = calculateRailjackBuild({
       eliteCrewId: "vena",
       reactorId: "zetki_reactor_mk3",
-      battleMods: [{ modId: "phoenix_blaze", rank: 0, slotIndex: 0 }],
+      battleMods: [{ modId: "phoenix_blaze", rank: 0, slotIndex: 2 }],
       simulation: { activeBattleAbilityId: "phoenix_blaze" },
     });
 
-    expect(stats.crewBonuses?.turretDamageBonus).toBeGreaterThan(0);
+    // Legacy elite → slot A; Vena default trait is combat (panel), not house turret damage
+    expect(stats.crewBonuses?.panelNotes.some((n) => n.includes("Elite trait") || n.startsWith("Defender:") || n.startsWith("Gunner:"))).toBe(true);
+    expect(stats.crewBonuses?.turretDamageBonus ?? 0).toBe(0);
     expect(stats.battleAbilities).toHaveLength(1);
     expect(stats.battleAbilities![0]!.name).toBe("Phoenix Blaze");
     expect(stats.abilityTurretDamageBonus).toBeGreaterThan(0.5);

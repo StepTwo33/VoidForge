@@ -26,7 +26,7 @@ export default function AdminNewsletterPage() {
   const [testing, setTesting] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [origin, setOrigin] = useState("https://frame-hub.com");
+  const [origin, setOrigin] = useState("https://void-forge.org");
 
   const refreshCount = useCallback(() => {
     fetch("/api/admin/newsletter")
@@ -76,7 +76,7 @@ export default function AdminNewsletterPage() {
     const previewSubject = subject.trim() || "Newsletter subject";
     const previewBody =
       body.trim() ||
-      "Your message will appear here.\n\nUse **bold**, *italic*, [links](https://frame-hub.com), and blank lines for paragraphs.";
+      "Your message will appear here.\n\nUse **bold**, *italic*, [links](https://void-forge.org), and blank lines for paragraphs.";
     return buildNewsletterPreviewDocument(
       {
         subject: previewSubject,
@@ -135,7 +135,7 @@ export default function AdminNewsletterPage() {
     const ok = await confirm({
       title: `Send newsletter to ${subscribers} subscriber${subscribers === 1 ? "" : "s"}?`,
       description:
-        "This emails every opted-in user from news@frame-hub.com. Transactional support mail is not used.",
+        "This emails every opted-in user from news@void-forge.org. Transactional support mail is not used.",
       confirmLabel: "Send newsletter",
     });
     if (!ok) return;
@@ -190,7 +190,7 @@ export default function AdminNewsletterPage() {
   }
 
   const fieldClass =
-    "w-full h-9 px-3 text-sm rounded-lg border border-border bg-background focus:outline-none focus:border-primary/50";
+    "w-full min-h-11 h-11 px-3 text-sm rounded-lg border border-border bg-background focus:outline-none focus:border-primary/50";
   const labelClass = "text-[10px] font-semibold text-muted-foreground uppercase mb-1.5 block";
 
   return (
@@ -198,12 +198,12 @@ export default function AdminNewsletterPage() {
       <div className="container mx-auto px-4 py-6 max-w-6xl">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 rounded-lg bg-sky-500/10 border border-sky-500/20">
-            <Mail className="h-5 w-5 text-sky-400" />
+            <Mail className="h-5 w-5 text-sky-700 dark:text-sky-400" />
           </div>
           <div>
             <h1 className="text-xl font-bold">Newsletter</h1>
             <p className="text-xs text-muted-foreground">
-              Send from news@frame-hub.com · {subscribers} opted-in subscriber
+              Send from news@void-forge.org · {subscribers} opted-in subscriber
               {subscribers === 1 ? "" : "s"}
             </p>
           </div>
@@ -217,7 +217,7 @@ export default function AdminNewsletterPage() {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 maxLength={120}
-                placeholder="What's new on FrameHub"
+                placeholder="What's new on Voidforge"
                 className={fieldClass}
               />
             </div>
@@ -276,7 +276,7 @@ export default function AdminNewsletterPage() {
                   value={ctaUrl}
                   onChange={(e) => setCtaUrl(e.target.value)}
                   maxLength={500}
-                  placeholder="https://frame-hub.com/…"
+                  placeholder="https://void-forge.org/…"
                   className={fieldClass}
                 />
               </div>
@@ -285,8 +285,8 @@ export default function AdminNewsletterPage() {
               </p>
             </div>
 
-            {error && <p className="text-xs text-red-400">{error}</p>}
-            {result && <p className="text-xs text-green-400">{result}</p>}
+            {error && <p className="text-xs text-red-700 dark:text-red-400">{error}</p>}
+            {result && <p className="text-xs text-green-700 dark:text-green-400">{result}</p>}
 
             <div className="rounded-lg border border-border bg-background/40 p-3 space-y-2">
               <label className="text-[10px] font-semibold text-muted-foreground uppercase block">
@@ -305,8 +305,8 @@ export default function AdminNewsletterPage() {
                   onClick={handleSendTest}
                   disabled={testing || sending}
                   className={cn(
-                    "inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium rounded-lg shrink-0",
-                    "bg-amber-500/10 text-amber-300 border border-amber-500/25 hover:bg-amber-500/20",
+                    "inline-flex items-center justify-center gap-2 min-h-11 px-3 py-2 text-xs font-medium rounded-lg shrink-0",
+                    "bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/25 hover:bg-amber-500/20",
                     "disabled:opacity-50 transition-colors",
                   )}
                 >
@@ -328,8 +328,8 @@ export default function AdminNewsletterPage() {
               onClick={handleSend}
               disabled={sending || testing || subscribers === 0}
               className={cn(
-                "inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg",
-                "bg-sky-500/15 text-sky-300 border border-sky-500/30 hover:bg-sky-500/25",
+                "inline-flex items-center gap-2 min-h-11 px-4 py-2 text-sm font-medium rounded-lg",
+                "bg-sky-500/15 text-sky-800 dark:text-sky-300 border border-sky-500/30 hover:bg-sky-500/25",
                 "disabled:opacity-50 transition-colors",
               )}
             >

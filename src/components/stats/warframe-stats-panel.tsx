@@ -102,12 +102,11 @@ import {
   computeVorunaUlfrunCooldownRemaining,
   computeUrielLegionPassive,
   computeUrielDemonResurrectRemaining,
-  scaledAbilityEnergyCost,
   type MesaSidearmStyle,
   type NovaSpeedState,
   type ChromaElement,
 } from "@/lib/codex/ability-misc-stats";
-import { augurShieldsFromEnergySpent, computeMechaSetMarkStats } from "@/lib/calc/set-bonuses";
+import { computeMechaSetMarkStats } from "@/lib/calc/set-bonuses";
 import { CollapsibleSection, SimSlider, StatRow } from "./stat-primitives";
 
 function GaussPassiveBattery() {
@@ -129,13 +128,13 @@ function GaussPassiveBattery() {
       <StatRow
         label="Shield Recharge"
         value={`+${(recharge * 100).toFixed(0)}%`}
-        color="text-sky-400"
+        color="text-sky-700 dark:text-sky-400"
         tooltip="Max +120% at full battery (not affected by Ability Strength)."
       />
       <StatRow
         label="Recharge Delay"
         value={`−${(delay * 100).toFixed(0)}%`}
-        color="text-sky-400"
+        color="text-sky-700 dark:text-sky-400"
         tooltip="Max −80% delay at full battery (not affected by Ability Strength)."
       />
     </div>
@@ -159,7 +158,7 @@ function BaruukRestraintPassive() {
       <StatRow
         label="Restraint DR"
         value={`${(dr * 100).toFixed(0)}%`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Max 50% at fully eroded meter (not affected by Ability Strength)."
       />
     </div>
@@ -184,13 +183,13 @@ function ValkyrRagePassive() {
       <StatRow
         label="Melee Damage"
         value={`+${(meleeBonus * 100).toFixed(0)}%`}
-        color="text-red-400"
+        color="text-red-700 dark:text-red-400"
         tooltip="Flat additive melee damage bonus from Rage (not × Ability Strength)."
       />
       <StatRow
         label="Death Prevention"
         value={deathPrev ? "Ready (≥150%)" : "Inactive"}
-        color={deathPrev ? "text-green-400" : "text-muted-foreground"}
+        color={deathPrev ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
         tooltip="Fatal hit consumes Rage, grants 5s invuln and full heal (wiki)."
       />
     </div>
@@ -214,7 +213,7 @@ function EmberHeatPassive() {
       <StatRow
         label="Passive Strength"
         value={`+${(bonusStr * 100).toFixed(0)}%`}
-        color="text-orange-400"
+        color="text-orange-700 dark:text-orange-400"
         tooltip="Additive Ability Strength from Heat-status enemies (not multiplied by Ability Strength)."
       />
     </div>
@@ -238,7 +237,7 @@ function GarudaDeathsGatePassive() {
       <StatRow
         label="Damage Bonus"
         value={`+${(dmgBonus * 100).toFixed(0)}%`}
-        color="text-red-400"
+        color="text-red-700 dark:text-red-400"
         tooltip="Multiplicative universal weapon bonus (panel-only; not wired into weapon DPS)."
       />
     </div>
@@ -262,13 +261,13 @@ function FrostFortifyingFreezePassive({ moddedArmor }: { moddedArmor: number }) 
       <StatRow
         label="Bonus Armor"
         value={`+${bonusArmor}`}
-        color="text-sky-400"
+        color="text-sky-700 dark:text-sky-400"
         tooltip="Flat armor after mods (not × Ability Strength). Ability Cold status also lasts +100%."
       />
       <StatRow
         label="Armor w/ Passive"
         value={(moddedArmor + bonusArmor).toFixed(0)}
-        color="text-sky-400"
+        color="text-sky-700 dark:text-sky-400"
         tooltip="Modded armor + Fortifying Freeze bonus."
       />
     </div>
@@ -292,7 +291,7 @@ function Cyte09PracticedAimPassive() {
       <StatRow
         label="WP Crit Chance"
         value={`+${(wpCc * 100).toFixed(0)}%`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Additive to weapon crit chance vs weak points (not × Ability Strength)."
       />
     </div>
@@ -316,13 +315,13 @@ function GrendelBellyArmorPassive({ moddedArmor }: { moddedArmor: number }) {
       <StatRow
         label="Bonus Armor"
         value={`+${bonusArmor}`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Flat armor after mods (not × Ability Strength)."
       />
       <StatRow
         label="Armor w/ Passive"
         value={(moddedArmor + bonusArmor).toFixed(0)}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Modded armor + belly armor. Max +1,250 at 5 enemies (base; Catgut can raise per-enemy)."
       />
     </div>
@@ -356,19 +355,19 @@ function CalibanAdaptiveArmorPassive({
       <StatRow
         label="Typed Resist"
         value={`${(typedDr * 100).toFixed(0)}%`}
-        color="text-violet-300"
+        color="text-violet-800 dark:text-violet-300"
         tooltip="Per damage type; does not stack with Adaptation (higher of the two)."
       />
       <StatRow
         label="Combined DR"
         value={`${combinedDrPct.toFixed(1)}%`}
-        color="text-violet-400"
+        color="text-violet-700 dark:text-violet-400"
         tooltip="Armor DR × Adaptive Armor vs that type."
       />
       <StatRow
         label="Adapted EHP"
         value={adaptedEhp.toFixed(0)}
-        color="text-violet-400"
+        color="text-violet-700 dark:text-violet-400"
         tooltip="Effective health vs fully adapted single-type damage (typed resist only on EHP row)."
       />
     </div>
@@ -393,13 +392,13 @@ function ProteaPowerRecorderPassive({ abilityStrength }: { abilityStrength: numb
       <StatRow
         label="Next Cast STR"
         value={bonus > 0 ? `+${(bonus * 100).toFixed(0)}% Ready` : "Charging"}
-        color={bonus > 0 ? "text-green-400" : "text-muted-foreground"}
+        color={bonus > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
         tooltip="Additive +100% Ability Strength on the empowered cast only."
       />
       <StatRow
         label="Effective STR"
         value={`${(nextStr * 100).toFixed(0)}%`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Current Ability Strength + passive bonus if power recorder is full."
       />
     </div>
@@ -407,31 +406,28 @@ function ProteaPowerRecorderPassive({ abilityStrength }: { abilityStrength: numb
 }
 
 function StyanaxHoplitePassive({ moddedShield }: { moddedShield: number }) {
-  const maxShields = Math.max(2000, Math.ceil(moddedShield + 1200));
-  const [currentShields, setCurrentShields] = useState(Math.round(moddedShield));
-  const cc = computeStyanaxHopliteCritChance(currentShields);
-  const speargunCc = computeStyanaxHopliteCritChance(currentShields, { speargun: true });
+  const shields = Math.max(0, Math.round(moddedShield));
+  const cc = computeStyanaxHopliteCritChance(shields);
+  const speargunCc = computeStyanaxHopliteCritChance(shields, { speargun: true });
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Current Shields"
-        value={currentShields}
-        min={0}
-        max={maxShields}
-        onChange={setCurrentShields}
-        tooltip="Styanax Hoplite: +1% weapon Critical Chance per 40 shields (includes Overshields)."
+      <StatRow
+        label="At Full Shields"
+        value={shields.toFixed(0)}
+        color="text-muted-foreground"
+        tooltip="Uses this build’s modded Shield capacity. Overshields are not included here."
       />
       <StatRow
         label="Hoplite CC"
         value={`+${(cc * 100).toFixed(0)}%`}
-        color="text-sky-400"
-        tooltip="Additive weapon crit chance (primary/secondary/melee)."
+        color="text-sky-700 dark:text-sky-400"
+        tooltip="Styanax Hoplite: +1% weapon Critical Chance per 40 shields (additive; primary/secondary/melee)."
       />
       <StatRow
         label="w/ Speargun"
         value={`+${(speargunCc * 100).toFixed(0)}%`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Doubled while a Speargun primary is equipped (Afentis, Scytax, etc.)."
       />
     </div>
@@ -455,7 +451,7 @@ function YareliCriticalFlowPassive() {
       <StatRow
         label="Secondary CC"
         value={cc > 0 ? `+${(cc * 100).toFixed(0)}%` : "Inactive"}
-        color={cc > 0 ? "text-sky-400" : "text-muted-foreground"}
+        color={cc > 0 ? "text-sky-700 dark:text-sky-400" : "text-muted-foreground"}
         tooltip="Additive to secondary weapon base crit chance mods (panel-only)."
       />
     </div>
@@ -479,7 +475,7 @@ function ZephyrAirbornePassive() {
       <StatRow
         label="Weapon CC"
         value={cc > 0 ? `+${(cc * 100).toFixed(0)}%` : "Inactive"}
-        color={cc > 0 ? "text-sky-400" : "text-muted-foreground"}
+        color={cc > 0 ? "text-sky-700 dark:text-sky-400" : "text-muted-foreground"}
         tooltip="Additive to all equipped weapons' crit chance while airborne (panel-only)."
       />
     </div>
@@ -503,13 +499,13 @@ function XakuEvasionPassive() {
       <StatRow
         label="Dodge Chance"
         value={`${(dodgeChance * 100).toFixed(0)}%`}
-        color="text-violet-300"
+        color="text-violet-800 dark:text-violet-300"
         tooltip="Chance to phase through enemy weapon attacks (separate from Evasion)."
       />
       <StatRow
         label="AoE DR"
         value={`${(aoeDamageReduction * 100).toFixed(0)}%`}
-        color="text-violet-400"
+        color="text-violet-700 dark:text-violet-400"
         tooltip="Damage reduction vs area-of-effect damage (explosions are not dodged)."
       />
     </div>
@@ -533,7 +529,7 @@ function VoltStaticDischargePassive() {
       <StatRow
         label="Bonus Damage"
         value={`+${bonusDmg.toFixed(0)}`}
-        color="text-yellow-400"
+        color="text-yellow-700 dark:text-yellow-400"
         tooltip="Separate Electricity hit on next weapon attack or ability; not × Ability Strength."
       />
     </div>
@@ -548,7 +544,7 @@ function TrinityLifegiverPassive({ maxEnergy }: { maxEnergy: number }) {
       <StatRow
         label="Ally Bonus Health"
         value={`+${bonusHealth.toFixed(0)}`}
-        color="text-green-400"
+        color="text-green-700 dark:text-green-400"
         tooltip="Lifegiver: allies in Affinity Range gain Health equal to 50% of Trinity's max Energy (scales with Flow/shards)."
       />
       <StatRow
@@ -593,19 +589,19 @@ function MesaPassiveBonusesPanel({ moddedHealth }: { moddedHealth: number }) {
       <StatRow
         label="Fire Rate"
         value={bonuses.fireRateBonus > 0 ? `+${(bonuses.fireRateBonus * 100).toFixed(0)}%` : "—"}
-        color={bonuses.fireRateBonus > 0 ? "text-amber-400" : "text-muted-foreground"}
+        color={bonuses.fireRateBonus > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
         tooltip="Dual-wielded sidearms only."
       />
       <StatRow
         label="Reload Speed"
         value={bonuses.reloadSpeedBonus > 0 ? `+${(bonuses.reloadSpeedBonus * 100).toFixed(0)}%` : "—"}
-        color={bonuses.reloadSpeedBonus > 0 ? "text-amber-400" : "text-muted-foreground"}
+        color={bonuses.reloadSpeedBonus > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
         tooltip="One-handed sidearms only."
       />
       <StatRow
         label="Health w/ Passive"
         value={(moddedHealth + bonuses.bonusHealth).toFixed(0)}
-        color="text-green-400"
+        color="text-green-700 dark:text-green-400"
         tooltip={bonuses.bonusHealth > 0 ? "+50 flat Health (no melee)." : "Melee equipped — no Health bonus."}
       />
     </div>
@@ -620,7 +616,7 @@ function QorvexCoreExposurePassive() {
       <StatRow
         label="Punch Through"
         value={`+${pt}`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Core Exposure: +3 Punch Through on primary, secondary, and melee (panel-only; not wired into weapon DPS)."
       />
     </div>
@@ -644,13 +640,13 @@ function ExcaliburSwordsmanshipPassive() {
       <StatRow
         label="Melee Damage"
         value={damageBonus > 0 ? `+${(damageBonus * 100).toFixed(0)}%` : "Inactive"}
-        color={damageBonus > 0 ? "text-amber-400" : "text-muted-foreground"}
+        color={damageBonus > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
         tooltip="Additive melee damage bonus (panel-only)."
       />
       <StatRow
         label="Attack Speed"
         value={attackSpeedBonus > 0 ? `+${(attackSpeedBonus * 100).toFixed(0)}%` : "Inactive"}
-        color={attackSpeedBonus > 0 ? "text-amber-400" : "text-muted-foreground"}
+        color={attackSpeedBonus > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
         tooltip="Additive attack speed (panel-only). Umbra also keeps sentience outside Transference."
       />
     </div>
@@ -667,7 +663,7 @@ function SarynStatusDurationPassive() {
       <StatRow
         label="Status Duration"
         value={`+${((mult - 1) * 100).toFixed(0)}%`}
-        color="text-green-400"
+        color="text-green-700 dark:text-green-400"
         tooltip="Saryn passive: status effects from weapons and abilities last 25% longer (additive with duration mods)."
       />
       <StatRow
@@ -688,13 +684,13 @@ function KullervoMeleePassive() {
       <StatRow
         label="Heavy Efficiency"
         value={`+${(heavyAttackEfficiency * 100).toFixed(0)}%`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Kullervo passive on all melee. HAE hard-caps at 90% with other sources."
       />
       <StatRow
         label="Heavy Wind Up"
         value={`+${(heavyAttackWindUpSpeed * 100).toFixed(0)}%`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="+100% Heavy Attack Wind Up Speed on all melee weapons (panel-only)."
       />
     </div>
@@ -719,7 +715,7 @@ function VaubanIncapacitatedPassive() {
       <StatRow
         label="Damage Bonus"
         value={bonus > 0 ? `+${(bonus * 100).toFixed(0)}%` : "Inactive"}
-        color={bonus > 0 ? "text-amber-400" : "text-muted-foreground"}
+        color={bonus > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
         tooltip="Multiplicative to total damage (and again on status DoTs applied while incapacitated)."
       />
       <StatRow
@@ -742,13 +738,13 @@ function AshSlashPassive() {
       <StatRow
         label="Slash Status Dmg"
         value={`+${(statusDamageBonus * 100).toFixed(0)}%`}
-        color="text-red-400"
+        color="text-red-700 dark:text-red-400"
         tooltip="Ash passive: Slash (Bleed) status damage +25%, additive with other Status Damage bonuses."
       />
       <StatRow
         label="Slash Status Dur"
         value={`+${(statusDurationBonus * 100).toFixed(0)}%`}
-        color="text-red-400"
+        color="text-red-700 dark:text-red-400"
         tooltip="Slash status lasts 50% longer (6s → 9s before other duration mods)."
       />
       <StatRow
@@ -778,13 +774,13 @@ function HydroidCorrosivePassive() {
       <StatRow
         label="1st Stack Strip"
         value={`${(strip.firstStackStrip * 100).toFixed(0)}%`}
-        color="text-lime-400"
+        color="text-lime-700 dark:text-lime-400"
         tooltip="Normal Corrosive first stack is 26%; Hydroid-marked enemies take 50%."
       />
       <StatRow
         label="Full Stack Strip"
         value={`${(strip.fullStackStrip * 100).toFixed(0)}%`}
-        color="text-lime-400"
+        color="text-lime-700 dark:text-lime-400"
         tooltip="Normal Corrosive caps at 80% armor strip; Hydroid-marked can reach 100%."
       />
     </div>
@@ -817,7 +813,7 @@ function DanteChroniclersMarkPassive() {
       <StatRow
         label="Status Chance"
         value={`${(scaled * 100).toFixed(0)}%`}
-        color={scanned > 0 ? "text-amber-400" : "text-muted-foreground"}
+        color={scanned > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
         tooltip="Wiki example: 40% × 1.5 = 60% vs fully researched enemies."
       />
     </div>
@@ -853,13 +849,13 @@ function DagathAbundantAbyssPassive() {
       <StatRow
         label="Proc Chance"
         value={`${(result.procChance * 100).toFixed(0)}%`}
-        color="text-violet-300"
+        color="text-violet-800 dark:text-violet-300"
         tooltip="Rolled separately for Health and Energy on Universal Orbs."
       />
       <StatRow
         label="Orb Yield"
         value={result.effectiveValue.toFixed(1)}
-        color="text-violet-400"
+        color="text-violet-700 dark:text-violet-400"
         tooltip={
           forceProc === 2
             ? `Expected value at ${((result.expectedYieldMultiplier - 1) * 100).toFixed(0)}% average uplift (×${result.expectedYieldMultiplier.toFixed(2)}).`
@@ -899,13 +895,13 @@ function EquinoxOrbConversionPassive() {
       <StatRow
         label={kind === "health" ? "Health" : "Energy"}
         value={`+${result.primaryAmount.toFixed(0)}`}
-        color="text-sky-400"
+        color="text-sky-700 dark:text-sky-400"
         tooltip="Full orb value applied to its primary resource."
       />
       <StatRow
         label={result.convertedResource === "energy" ? "→ Energy" : "→ Health"}
         value={`+${result.convertedAmount.toFixed(1)}`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="10% of the orb value converted to the other resource (stacks additively with Equilibrium)."
       />
     </div>
@@ -930,7 +926,7 @@ function RevenantShieldPulsePassive() {
       <StatRow
         label="Pulse Damage"
         value={dmg.toFixed(0)}
-        color="text-violet-400"
+        color="text-violet-700 dark:text-violet-400"
         tooltip="Not affected by Ability Strength. Knocks down enemies in range."
       />
       <StatRow
@@ -961,13 +957,13 @@ function OctaviaInspirationPassivePanel() {
       <StatRow
         label="Energy/s"
         value={`${insp.energyPerSecond}/s`}
-        color="text-sky-400"
+        color="text-sky-700 dark:text-sky-400"
         tooltip={`Within ${insp.radiusM}m. Not affected by Ability Strength/Duration.`}
       />
       <StatRow
         label="Remaining Energy"
         value={`+${remaining.toFixed(0)}`}
-        color="text-sky-400"
+        color="text-sky-700 dark:text-sky-400"
         tooltip={`Full buff restores ${insp.totalEnergy} energy over ${insp.durationSec}s.`}
       />
     </div>
@@ -992,13 +988,13 @@ function NekrosDeathHealPassivePanel() {
       <StatRow
         label="Heal / Death"
         value={`+${heal.healthPerDeath}`}
-        color="text-green-400"
+        color="text-green-700 dark:text-green-400"
         tooltip="Flat heal, not × Ability Strength."
       />
       <StatRow
         label="Total Heal"
         value={`+${total}`}
-        color="text-green-400"
+        color="text-green-700 dark:text-green-400"
         tooltip={`${deaths} deaths × ${heal.healthPerDeath} Health.`}
       />
     </div>
@@ -1035,13 +1031,13 @@ function NovaOrbDropPassive() {
       <StatRow
         label="Health Orb Chance"
         value={chances.healthOrbChance > 0 ? `${(chances.healthOrbChance * 100).toFixed(0)}%` : "—"}
-        color={chances.healthOrbChance > 0 ? "text-green-400" : "text-muted-foreground"}
+        color={chances.healthOrbChance > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
         tooltip="Only while the enemy is slowed at death."
       />
       <StatRow
         label="Energy Orb Chance"
         value={chances.energyOrbChance > 0 ? `${(chances.energyOrbChance * 100).toFixed(0)}%` : "—"}
-        color={chances.energyOrbChance > 0 ? "text-sky-400" : "text-muted-foreground"}
+        color={chances.energyOrbChance > 0 ? "text-sky-700 dark:text-sky-400" : "text-muted-foreground"}
         tooltip="Only while the enemy is sped up at death."
       />
       <StatRow
@@ -1053,7 +1049,7 @@ function NovaOrbDropPassive() {
               ? `${expected.expectedEnergyOrbs.toFixed(1)} Energy`
               : "0"
         }
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Average orbs from the selected kill count and speed state."
       />
     </div>
@@ -1077,7 +1073,7 @@ function IvaraRadarPassive() {
       <StatRow
         label="Enemy Radar"
         value={`${range}m`}
-        color="text-emerald-400"
+        color="text-emerald-700 dark:text-emerald-400"
         tooltip={`Ivara base 50m + extras. Default Warframes sense ${DEFAULT_ENEMY_RADAR_M}m.`}
       />
       <StatRow
@@ -1098,13 +1094,13 @@ function NezhaSlidePassive() {
       <StatRow
         label="Slide Speed"
         value={`+${(slideSpeedBonus * 100).toFixed(0)}%`}
-        color="text-orange-400"
+        color="text-orange-700 dark:text-orange-400"
         tooltip="Nezha passive: +60% slide speed (additive with Maglev / Cunning Drift). Can be disabled by Controlled Slide."
       />
       <StatRow
         label="Slide Distance"
         value={`+${(slideDistanceBonus * 100).toFixed(0)}%`}
-        color="text-orange-400"
+        color="text-orange-700 dark:text-orange-400"
         tooltip="+35% slide distance (additive with other slide distance sources)."
       />
     </div>
@@ -1119,13 +1115,13 @@ function MirageParkourPassive() {
       <StatRow
         label="Slide Duration"
         value={`+${(slideDurationBonus * 100).toFixed(0)}%`}
-        color="text-pink-400"
+        color="text-pink-700 dark:text-pink-400"
         tooltip="Mirage passive: sliding lasts 85% longer."
       />
       <StatRow
         label="Maneuver Speed"
         value={`+${(maneuverSpeedBonus * 100).toFixed(0)}%`}
-        color="text-pink-400"
+        color="text-pink-700 dark:text-pink-400"
         tooltip="+50% faster acrobatic maneuvers (parkour velocity)."
       />
     </div>
@@ -1140,7 +1136,7 @@ function LokiWallLatchPassive() {
       <StatRow
         label="Wall Latch"
         value={`${latch.durationSec}s`}
-        color="text-emerald-400"
+        color="text-emerald-700 dark:text-emerald-400"
         tooltip={`Loki: hang from walls ${latch.multiplier}× longer than normal (${DEFAULT_WALL_LATCH_SEC}s → ${latch.durationSec}s).`}
       />
       <StatRow
@@ -1171,7 +1167,7 @@ function LavosValenceBlockPassivePanel() {
       <StatRow
         label="Status Immunity"
         value={remaining > 0 ? `${remaining.toFixed(0)}s left` : "Inactive"}
-        color={remaining > 0 ? "text-cyan-400" : "text-muted-foreground"}
+        color={remaining > 0 ? "text-cyan-700 dark:text-cyan-400" : "text-muted-foreground"}
         tooltip="Cleanses and blocks negative status effects while active. Renewed to full on a new orb pickup."
       />
       <StatRow
@@ -1201,7 +1197,7 @@ function KhoraVenariPassivePanel() {
       <StatRow
         label="Move Speed"
         value={venari.moveSpeedBonus > 0 ? `+${(venari.moveSpeedBonus * 100).toFixed(0)}%` : "Inactive"}
-        color={venari.moveSpeedBonus > 0 ? "text-amber-400" : "text-muted-foreground"}
+        color={venari.moveSpeedBonus > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
         tooltip="Tied to Venari's presence (modifiable via Venari ability mods)."
       />
       <StatRow
@@ -1234,13 +1230,13 @@ function OberonRighteousNegationPassivePanel() {
       <StatRow
         label="Stacks"
         value={`${clamped} / ${negation.maxStacks}`}
-        color={clamped > 0 ? "text-green-400" : "text-muted-foreground"}
+        color={clamped > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
         tooltip="Granted to Oberon and allies in Affinity Range; each ally consumes their own stacks."
       />
       <StatRow
         label="Next Hit Invuln"
         value={clamped > 0 ? `${nextInvuln}s` : "—"}
-        color={clamped > 0 ? "text-green-400" : "text-muted-foreground"}
+        color={clamped > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
         tooltip={`0.25s on a normal consume; 0.5s when consuming the final charge.`}
       />
     </div>
@@ -1276,13 +1272,13 @@ function JadeJudgmentPassivePanel() {
       <StatRow
         label="Vulnerability"
         value={active ? `+${(judgment.damageVulnerability * 100).toFixed(0)}%` : "Inactive"}
-        color={active ? "text-rose-400" : "text-muted-foreground"}
+        color={active ? "text-rose-700 dark:text-rose-400" : "text-muted-foreground"}
         tooltip={`Enemy takes ×${dmgMult.toFixed(1)} damage while Judged (${remaining.toFixed(0)}s left).`}
       />
       <StatRow
         label="Aura Slots"
         value={`${judgment.auraSlots}`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Jade uniquely has two Aura polarity slots."
       />
     </div>
@@ -1307,13 +1303,13 @@ function TempleBackbeatPassivePanel({ abilityEfficiency }: { abilityEfficiency: 
       <StatRow
         label="Backbeat EFF"
         value={bonus > 0 ? `+${(bonus * 100).toFixed(0)}%` : "Missed"}
-        color={bonus > 0 ? "text-fuchsia-400" : "text-muted-foreground"}
+        color={bonus > 0 ? "text-fuchsia-700 dark:text-fuchsia-400" : "text-muted-foreground"}
         tooltip="Additive Ability Efficiency on timed casts (also fuels Exalted and per-ability bonuses)."
       />
       <StatRow
         label="Effective EFF"
         value={`${(effectiveEff * 100).toFixed(0)}%`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Current Ability Efficiency + Backbeat bonus when on beat."
       />
     </div>
@@ -1338,7 +1334,7 @@ function OraxiaPredatorsLurkPassivePanel() {
       <StatRow
         label="Invisibility"
         value={remaining > 0 ? `${remaining.toFixed(0)}s left` : "Inactive"}
-        color={remaining > 0 ? "text-violet-400" : "text-muted-foreground"}
+        color={remaining > 0 ? "text-violet-700 dark:text-violet-400" : "text-muted-foreground"}
         tooltip="Also applies to Oraxia's companion. Silken Thread wall latch triggers the same duration."
       />
     </div>
@@ -1363,7 +1359,7 @@ function RhinoHardLandingPassivePanel() {
       <StatRow
         label="Pulse Damage"
         value={dmg.toFixed(0)}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Not affected by Ability Strength. Knocks down enemies in range."
       />
       <StatRow
@@ -1394,7 +1390,7 @@ function GaraPassiveBlindPanel() {
       <StatRow
         label="Blind Chance"
         value={`${(chance * 100).toFixed(0)}%`}
-        color="text-cyan-400"
+        color="text-cyan-700 dark:text-cyan-400"
         tooltip={`Base ${(blind.baseChance * 100).toFixed(0)}% + ${(blind.chanceIncreasePerMiss * 100).toFixed(0)}% × misses (cap 100%).`}
       />
       <StatRow
@@ -1434,7 +1430,7 @@ function LimboRiftPassivePanel() {
       <StatRow
         label="Energy Gained"
         value={`+${energy.toFixed(0)}`}
-        color="text-sky-400"
+        color="text-sky-700 dark:text-sky-400"
         tooltip={`Kills × ${rift.energyPerKill} + time × ${rift.energyPerSecondInRift}/s.`}
       />
       <StatRow
@@ -1455,7 +1451,7 @@ function MagVacuumPassivePanel() {
       <StatRow
         label="Vacuum Radius"
         value={`${vacuum.radiusM}m`}
-        color="text-sky-400"
+        color="text-sky-700 dark:text-sky-400"
         tooltip="Mag: pickups within 8m gravitate to her. Overridden by larger vacuum sources (e.g. Fetch / Vacuum)."
       />
     </div>
@@ -1480,7 +1476,7 @@ function KoumeiFatePassivePanel() {
       <StatRow
         label="Fate Status"
         value={remaining > 0 ? `${remaining.toFixed(0)}s left` : "Waiting"}
-        color={remaining > 0 ? "text-rose-400" : "text-muted-foreground"}
+        color={remaining > 0 ? "text-rose-700 dark:text-rose-400" : "text-muted-foreground"}
         tooltip={`Interval ${fate.intervalSec}s · Duration ${fate.durationSec}s. Can select unequipped weapon types.`}
       />
       <StatRow
@@ -1501,8 +1497,14 @@ function BansheeSilencePassivePanel() {
       <StatRow
         label="Weapon Noise"
         value={silence.weaponsSilent ? "Silent" : "Normal"}
-        color="text-violet-300"
+        color="text-violet-800 dark:text-violet-300"
         tooltip="Banshee: all equipped weapons (incl. Gunblades and Sentinel weapons) are treated as silent so enemies cannot hear them."
+      />
+      <StatRow
+        label="Ability Cast"
+        value="Max Puncture · 10m"
+        color="text-violet-800 dark:text-violet-300"
+        tooltip="Casting an ability applies maximum Puncture status to enemies within 10m."
       />
     </div>
   );
@@ -1525,7 +1527,7 @@ function AtlasKnockdownPassivePanel() {
       <StatRow
         label="Knockdown"
         value={kd.knockdownImmuneWhileGrounded ? "Immune" : "Vulnerable"}
-        color={kd.knockdownImmuneWhileGrounded ? "text-amber-400" : "text-muted-foreground"}
+        color={kd.knockdownImmuneWhileGrounded ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
         tooltip="Rubble armor from petrified enemies is a separate Atlas passive mechanic."
       />
     </div>
@@ -1549,7 +1551,7 @@ function NyxPsychicPassivePanel() {
       <StatRow
         label="Gun Crit Chance"
         value={`+${(cc * 100).toFixed(0)}%`}
-        color="text-violet-300"
+        color="text-violet-800 dark:text-violet-300"
         tooltip="Additive to Primary/Secondary crit chance mods. Cap at 5 Confused enemies."
       />
     </div>
@@ -1564,13 +1566,13 @@ function HarrowPassivePanel() {
       <StatRow
         label="Overshield Cap"
         value={`${harrow.overshieldCap}`}
-        color="text-sky-400"
+        color="text-sky-700 dark:text-sky-400"
         tooltip={`Harrow: overshield capacity doubled (${harrow.baseOvershieldCap} → ${harrow.overshieldCap}).`}
       />
       <StatRow
         label="Mission Start"
         value={harrow.startAtMaxEnergy ? "Max Energy" : "Normal"}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Starts missions at maximum Energy."
       />
     </div>
@@ -1594,7 +1596,7 @@ function GyreAbilityCritPassivePanel() {
       <StatRow
         label="Ability Crit"
         value={`+${(crit.critChance * 100).toFixed(0)}%`}
-        color="text-yellow-300"
+        color="text-yellow-800 dark:text-yellow-300"
         tooltip="Flat ability Critical Chance vs that enemy. Helminth/Railjack abilities do not benefit."
       />
       <StatRow
@@ -1606,11 +1608,11 @@ function GyreAbilityCritPassivePanel() {
         }
         color={
           crit.tier === "red"
-            ? "text-red-400"
+            ? "text-red-700 dark:text-red-400"
             : crit.tier === "orange"
-              ? "text-orange-400"
+              ? "text-orange-700 dark:text-orange-400"
               : crit.tier === "yellow"
-                ? "text-yellow-300"
+                ? "text-yellow-800 dark:text-yellow-300"
                 : "text-muted-foreground"
         }
         tooltip="Orange from 11 stacks (110%); red from 21 stacks (210%)."
@@ -1636,7 +1638,7 @@ function CitrineGeoluminesencePassivePanel() {
       <StatRow
         label="Heal / s"
         value={`${geo.healPerSec.toFixed(1)}`}
-        color="text-green-400"
+        color="text-green-700 dark:text-green-400"
         tooltip={`Base ${geo.baseHealPerSec}/s + ${geo.healPerOrb}/s per orb. Allies in ${geo.radiusM}m gain the buff.`}
       />
       <StatRow
@@ -1662,7 +1664,7 @@ function ChromaPassivePanel() {
       <StatRow
         label="Dragon's Flight"
         value={flight.extraAirJump ? "Extra Jump" : "—"}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Chroma: additional midair jump and bullet jump (wings match energy color)."
       />
       <SimSlider
@@ -1676,7 +1678,7 @@ function ChromaPassivePanel() {
       <StatRow
         label="Active Element"
         value={cycle.label}
-        color="text-violet-300"
+        color="text-violet-800 dark:text-violet-300"
         tooltip="Secondary emission / energy colors do not change the element."
       />
     </div>
@@ -1693,7 +1695,7 @@ function TitaniaUpsurgePassivePanel() {
       <StatRow
         label="Parkour Dist."
         value={`+${(upsurge.parkourDistanceBonus * 100).toFixed(0)}%`}
-        color="text-pink-300"
+        color="text-pink-800 dark:text-pink-300"
         tooltip="Titania: +25% Bullet Jump and Rolling distance."
       />
       <SimSlider
@@ -1707,7 +1709,7 @@ function TitaniaUpsurgePassivePanel() {
       <StatRow
         label="Upsurge Heal"
         value={remaining > 0 ? `${upsurge.healPerSec}/s · ${remaining.toFixed(0)}s` : "Inactive"}
-        color={remaining > 0 ? "text-green-400" : "text-muted-foreground"}
+        color={remaining > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
         tooltip={`${upsurge.healRadiusM}m radius · ${upsurge.durationSec}s duration.`}
       />
     </div>
@@ -1722,13 +1724,13 @@ function HildrynShieldGatePassivePanel() {
       <StatRow
         label="Full Shield Gate"
         value={`${gate.fullGateSec}s`}
-        color="text-sky-400"
+        color="text-sky-700 dark:text-sky-400"
         tooltip="Hildryn: 3.5s invulnerability when Shields break from a full charge (longer than the default gate)."
       />
       <StatRow
         label="Energy Orb → Shield"
         value={`+${gate.energyOrbShieldRestore}`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Energy Orbs restore 25 Shields and reset recharge delay; cannot create Overshields."
       />
       <StatRow
@@ -1758,13 +1760,13 @@ function NidusUndyingPassivePanel() {
       <StatRow
         label="Undying"
         value={undying.undyingReady ? "Ready" : "Need 15"}
-        color={undying.undyingReady ? "text-green-400" : "text-muted-foreground"}
+        color={undying.undyingReady ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
         tooltip={`${undying.invulnSec}s invulnerability · restore ${(undying.healFraction * 100).toFixed(0)}% Health. Cap ${undying.stackCap} stacks.`}
       />
       <StatRow
         label="After Proc"
         value={`${undying.stacksAfterUndying} stacks`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip={
           undying.undyingReady
             ? `Consumes ${undying.stacksRequired} stacks (${stacks} → ${undying.stacksAfterUndying}).`
@@ -1793,13 +1795,13 @@ function SiriusOrionPassivePanel() {
       <StatRow
         label="Efficiency Buff"
         value={remaining > 0 ? `+${(passive.efficiencyBonus * 100).toFixed(0)}% × ${remaining}` : "Expired"}
-        color={remaining > 0 ? "text-sky-400" : "text-muted-foreground"}
+        color={remaining > 0 ? "text-sky-700 dark:text-sky-400" : "text-muted-foreground"}
         tooltip={`${passive.casts} casts after each form swap.`}
       />
       <StatRow
         label="Energy Steal"
         value={`<${passive.energyStealThreshold} Energy`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="When either form is below 50 Energy, they steal energy from each other."
       />
     </div>
@@ -1823,7 +1825,7 @@ function WispAirborneInvisPassivePanel() {
       <StatRow
         label="Visibility"
         value={invis.invisibleWhileAirborne ? "Invisible" : "Visible"}
-        color={invis.invisibleWhileAirborne ? "text-violet-300" : "text-muted-foreground"}
+        color={invis.invisibleWhileAirborne ? "text-violet-800 dark:text-violet-300" : "text-muted-foreground"}
         tooltip="Landing ends the dimensional cloak until airborne again."
       />
     </div>
@@ -1840,7 +1842,7 @@ function FollieInkblotPassivePanel() {
       <StatRow
         label="Inkblot Slow"
         value={`${(ink.slowFraction * 100).toFixed(0)}% · ${ink.durationSec}s`}
-        color="text-violet-300"
+        color="text-violet-800 dark:text-violet-300"
         tooltip="Follie: abilities apply Inkblot (50% slow for 10s). Not dismissed by Nullifiers."
       />
       <SimSlider
@@ -1854,7 +1856,7 @@ function FollieInkblotPassivePanel() {
       <StatRow
         label="Expected Balloons"
         value={expected.expectedBalloons.toFixed(1)}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip={`${(ink.balloonChance * 100).toFixed(0)}% × ${kills} kills → ~${expected.expectedOrbs.toFixed(1)} orbs.`}
       />
     </div>
@@ -1879,7 +1881,7 @@ function SevagothTombstonePassivePanel() {
       <StatRow
         label="Souls Left"
         value={remaining > 0 ? `${remaining}` : "Revived"}
-        color={remaining > 0 ? "text-violet-300" : "text-green-400"}
+        color={remaining > 0 ? "text-violet-800 dark:text-violet-300" : "text-green-700 dark:text-green-400"}
         tooltip={`Track range ${tomb.soulTrackRangeM}m. Consume (passive) costs 0 Energy and instantly kills non-bosses.`}
       />
       <StatRow
@@ -1901,13 +1903,13 @@ function InarosPassivePanel({ maxHealth }: { maxHealth: number }) {
       <StatRow
         label="Sarcophagus"
         value={passive.sarcophagusOnFatal ? "On Fatal" : "—"}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Inaros: fatal damage entombs him; sand form melee-siphons to revive (allies can also interact)."
       />
       <StatRow
         label="Finisher Heal"
         value={`+${(passive.finisherHealFraction * 100).toFixed(0)}% (${heal.toFixed(0)})`}
-        color="text-green-400"
+        color="text-green-700 dark:text-green-400"
         tooltip={`Melee Finisher / Mercy kills restore 20% of max Health (~${heal.toFixed(0)} at current max HP).`}
       />
     </div>
@@ -1947,7 +1949,7 @@ function NokkoVitalDecayPassivePanel() {
               ? `${remaining.toFixed(0)}s left`
               : "Expired"
         }
-        color={hasMushroom > 0 && remaining > 0 ? "text-green-400" : "text-muted-foreground"}
+        color={hasMushroom > 0 && remaining > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
         tooltip="Fungal Spores grant move speed but not healing. Does not work in Arbitrations."
       />
     </div>
@@ -1966,7 +1968,7 @@ function WukongFiveTechniquesPassivePanel() {
       <StatRow
         label="Per Mission"
         value={`${five.techniquesPerMission} of ${five.techniques.length}`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip={`On fatal damage: ${five.deathGateInvulnSec}s invuln + ${(five.deathGateHealFraction * 100).toFixed(0)}% Health, then a random remaining technique buff.`}
       />
       <SimSlider
@@ -1980,7 +1982,7 @@ function WukongFiveTechniquesPassivePanel() {
       <StatRow
         label={tech.name}
         value={`${tech.summary} · ${tech.durationSec}s`}
-        color="text-violet-300"
+        color="text-violet-800 dark:text-violet-300"
         tooltip="Buffs cannot be dispelled by Nullifiers or ability disable."
       />
     </div>
@@ -2009,7 +2011,7 @@ function VorunaWolvesPassivePanel() {
       <StatRow
         label={`${wolf.name} (Hold ${wolf.abilitySlot})`}
         value={wolf.summary}
-        color="text-rose-300"
+        color="text-rose-800 dark:text-rose-300"
         tooltip={
           wolf.id === "lycath"
             ? `HAE hard-caps at ${(pack.heavyAttackEfficiencyCap * 100).toFixed(0)}%; +100% only helps with negative HAE Rivens.`
@@ -2031,49 +2033,11 @@ function VorunaWolvesPassivePanel() {
           <StatRow
             label="Ulfrun Ready"
             value={ulfrunCd > 0 ? `${ulfrunCd.toFixed(0)}s CD` : "Ready"}
-            color={ulfrunCd > 0 ? "text-muted-foreground" : "text-green-400"}
+            color={ulfrunCd > 0 ? "text-muted-foreground" : "text-green-700 dark:text-green-400"}
             tooltip="Death prevention only while Ulfrun's passive is active and off cooldown."
           />
         </>
       )}
-    </div>
-  );
-}
-
-function AugurCastShieldsPanel({
-  convertPercent,
-  abilityEfficiency,
-}: {
-  convertPercent: number;
-  abilityEfficiency: number;
-}) {
-  const pieces = Math.round(convertPercent / 40);
-  const [baseCost, setBaseCost] = useState(25);
-  const spent = scaledAbilityEnergyCost(baseCost, abilityEfficiency);
-  const shields = augurShieldsFromEnergySpent(spent, pieces);
-
-  return (
-    <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Base Cast Cost"
-        value={baseCost}
-        min={0}
-        max={100}
-        onChange={setBaseCost}
-        tooltip="Augur converts Energy actually spent (after Ability Efficiency) into Shields. Cap 175% EFF / floor 25% cost."
-      />
-      <StatRow
-        label="Energy Spent"
-        value={spent.toFixed(1)}
-        color="text-muted-foreground"
-        tooltip={`At ${(abilityEfficiency * 100).toFixed(0)}% Ability Efficiency.`}
-      />
-      <StatRow
-        label="Shields / Cast"
-        value={`+${shields.toFixed(1)}`}
-        color="text-sky-400"
-        tooltip={`${pieces} Augur piece${pieces === 1 ? "" : "s"} × ${convertPercent}% of ${spent.toFixed(1)} Energy. Can create Overshields.`}
-      />
     </div>
   );
 }
@@ -2087,19 +2051,19 @@ function MechaMarkTimingPanel({ pieces }: { pieces: number }) {
       <StatRow
         label="Mark Cooldown"
         value={`${mark.cooldownSec}s`}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Mecha Set: companion marks a target on this interval (Kubrow/Predasite required)."
       />
       <StatRow
         label="Mark Duration"
         value={`${mark.markDurationSec}s`}
-        color="text-sky-400"
+        color="text-sky-700 dark:text-sky-400"
         tooltip="How long the mark lasts. Killing the marked target spreads statuses to nearby enemies."
       />
       <StatRow
         label="Spread Range"
         value={`${mark.spreadRangeM}m`}
-        color="text-violet-300"
+        color="text-violet-800 dark:text-violet-300"
         tooltip="Status types (not stacks) transfer with remaining duration. DoT spread damage is not modeled in paper DPS."
       />
       <StatRow
@@ -2146,13 +2110,13 @@ function UrielLegionPassivePanel() {
       <StatRow
         label={`${demon.name} (${demon.unlockAbility})`}
         value={demon.summary}
-        color="text-orange-400"
+        color="text-orange-700 dark:text-orange-400"
         tooltip={detail}
       />
       <StatRow
         label="Key Stats"
         value={detail}
-        color="text-amber-400"
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Base (unmodded) values from wiki; Ability Strength scales some fields when the unlock ability is equipped."
       />
       <SimSlider
@@ -2166,7 +2130,7 @@ function UrielLegionPassivePanel() {
       <StatRow
         label="Resurrect"
         value={resurrectLeft > 0 ? `${resurrectLeft.toFixed(0)}s` : "Alive"}
-        color={resurrectLeft > 0 ? "text-muted-foreground" : "text-green-400"}
+        color={resurrectLeft > 0 ? "text-muted-foreground" : "text-green-700 dark:text-green-400"}
         tooltip="Brimstone gauge builds from chained/latched kills, rune pickups, and Demonium split-soul hits."
       />
     </div>
@@ -2184,7 +2148,7 @@ function AdaptationSurvivability({ stats }: { stats: WarframeCalculatedStats }) 
 
   return (
     <div className="py-1 space-y-1 border-t border-violet-500/20 mt-1">
-      <div className="text-[10px] font-medium text-violet-400/90">Adaptation (typed DR)</div>
+      <div className="text-[10px] font-medium text-violet-700/90 dark:text-violet-400/90">Adaptation (typed DR)</div>
       <SimSlider
         label="Stacks"
         value={stacks}
@@ -2196,19 +2160,19 @@ function AdaptationSurvivability({ stats }: { stats: WarframeCalculatedStats }) 
       <StatRow
         label="Typed resist"
         value={`${typedDRPercent.toFixed(0)}%`}
-        color="text-violet-300"
+        color="text-violet-800 dark:text-violet-300"
         tooltip="Resistance to the adapted damage type only"
       />
       <StatRow
         label="Combined DR"
         value={`${combinedDRPercent.toFixed(1)}%`}
-        color="text-violet-400"
+        color="text-violet-700 dark:text-violet-400"
         tooltip="Armor DR and Adaptation stack multiplicatively vs that type"
       />
       <StatRow
         label="Adapted EHP"
         value={adaptedEHP.toFixed(0)}
-        color="text-violet-400"
+        color="text-violet-700 dark:text-violet-400"
         tooltip="Effective health vs fully adapted single-type damage"
       />
       <p className="text-[9px] text-muted-foreground/80 leading-snug">
@@ -2343,7 +2307,7 @@ export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equ
           {(warframe.id === "nyx" || warframe.id === "nyx_prime") && <NyxPsychicPassivePanel />}
           {(warframe.id === "harrow" || warframe.id === "harrow_prime") && <HarrowPassivePanel />}
           {(warframe.id === "gyre" || warframe.id === "gyre_prime") && <GyreAbilityCritPassivePanel />}
-          {warframe.id === "citrine" && <CitrineGeoluminesencePassivePanel />}
+          {(warframe.id === "citrine" || warframe.id === "citrine_prime") && <CitrineGeoluminesencePassivePanel />}
           {(warframe.id === "chroma" || warframe.id === "chroma_prime") && <ChromaPassivePanel />}
           {(warframe.id === "titania" || warframe.id === "titania_prime") && <TitaniaUpsurgePassivePanel />}
           {(warframe.id === "hildryn" || warframe.id === "hildryn_prime") && <HildrynShieldGatePassivePanel />}
@@ -2376,22 +2340,22 @@ export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equ
           <StatRow
             label="Slide Speed"
             value={`${stats.slideSpeedBonus > 0 ? "+" : ""}${(stats.slideSpeedBonus * 100).toFixed(0)}%`}
-            color={stats.slideSpeedBonus > 0 ? "text-cyan-400" : "text-red-400"}
+            color={stats.slideSpeedBonus > 0 ? "text-cyan-700 dark:text-cyan-400" : "text-red-700 dark:text-red-400"}
             tooltip="From Maglev / Cunning Drift / Streamlined Form, etc."
           />
         )}
         {stats.parkourVelocityBonus > 0 && (
-          <StatRow label="Parkour Velocity" value={`+${(stats.parkourVelocityBonus * 100).toFixed(0)}%`} color="text-cyan-400" />
+          <StatRow label="Parkour Velocity" value={`+${(stats.parkourVelocityBonus * 100).toFixed(0)}%`} color="text-cyan-700 dark:text-cyan-400" />
         )}
         {stats.healthRegenPerSec > 0 && (
-          <StatRow label="Health Regen" value={`${stats.healthRegenPerSec.toFixed(1)}/s`} color="text-green-400" />
+          <StatRow label="Health Regen" value={`${stats.healthRegenPerSec.toFixed(1)}/s`} color="text-green-700 dark:text-green-400" />
         )}
         {stats.elementalResistance > 0 && (
-          <StatRow label="Elemental Resist" value={`${stats.elementalResistance.toFixed(0)}%`} color="text-cyan-400" />
+          <StatRow label="Elemental Resist" value={`${stats.elementalResistance.toFixed(0)}%`} color="text-cyan-700 dark:text-cyan-400" />
         )}
         {stats.persistenceDamageCapPerSecond != null && (
           <p
-            className={`text-[10px] leading-snug pt-0.5 ${stats.persistenceActive ? "text-amber-400/90" : "text-muted-foreground"}`}
+            className={`text-[10px] leading-snug pt-0.5 ${stats.persistenceActive ? "text-amber-800/90 dark:text-amber-400/90" : "text-muted-foreground"}`}
             title="Shields removed while equipped. Magnetic and nullify disable the damage cap."
           >
             Arcane Persistence: shields removed
@@ -2405,13 +2369,13 @@ export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equ
 
       <CollapsibleSection title="ABILITY MODS" defaultOpen>
         <StatRow label="Strength" value={`${(stats.abilityStrength * 100).toFixed(0)}%`}
-          color={stats.abilityStrength > 1 ? "text-orange-400" : stats.abilityStrength < 1 ? "text-red-400" : undefined} />
+          color={stats.abilityStrength > 1 ? "text-orange-700 dark:text-orange-400" : stats.abilityStrength < 1 ? "text-red-700 dark:text-red-400" : undefined} />
         <StatRow label="Duration" value={`${(stats.abilityDuration * 100).toFixed(0)}%`}
-          color={stats.abilityDuration > 1 ? "text-cyan-400" : stats.abilityDuration < 1 ? "text-red-400" : undefined} />
+          color={stats.abilityDuration > 1 ? "text-cyan-700 dark:text-cyan-400" : stats.abilityDuration < 1 ? "text-red-700 dark:text-red-400" : undefined} />
         <StatRow label="Efficiency" value={`${(stats.abilityEfficiency * 100).toFixed(0)}%`}
-          color={stats.abilityEfficiency > 1 ? "text-blue-400" : stats.abilityEfficiency < 1 ? "text-red-400" : undefined} />
+          color={stats.abilityEfficiency > 1 ? "text-blue-400" : stats.abilityEfficiency < 1 ? "text-red-700 dark:text-red-400" : undefined} />
         <StatRow label="Range" value={`${(stats.abilityRange * 100).toFixed(0)}%`}
-          color={stats.abilityRange > 1 ? "text-green-400" : stats.abilityRange < 1 ? "text-red-400" : undefined} />
+          color={stats.abilityRange > 1 ? "text-green-700 dark:text-green-400" : stats.abilityRange < 1 ? "text-red-700 dark:text-red-400" : undefined} />
       </CollapsibleSection>
 
       <CollapsibleSection title="EFFECTIVE HEALTH" defaultOpen>
@@ -2427,7 +2391,7 @@ export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equ
           <div className="space-y-1 py-1">
             {stats.setBonusSummary.map((row) => (
               <div key={row.setId} className="text-[10px] leading-snug">
-                <span className={row.active ? "text-green-400 font-medium" : "text-muted-foreground"}>
+                <span className={row.active ? "text-green-700 dark:text-green-400 font-medium" : "text-muted-foreground"}>
                   {row.label}: {row.pieces}/{row.required}
                   {row.active ? " ✓" : ""}
                 </span>
@@ -2435,23 +2399,18 @@ export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equ
               </div>
             ))}
             {(stats.augurEnergyToShieldsPercent ?? 0) > 0 && (
-              <>
-                <StatRow
-                  label="Augur (shields)"
-                  value={`${stats.augurEnergyToShieldsPercent}% of energy → shields`}
-                  color="text-sky-400"
-                />
-                <AugurCastShieldsPanel
-                  convertPercent={stats.augurEnergyToShieldsPercent ?? 0}
-                  abilityEfficiency={stats.abilityEfficiency}
-                />
-              </>
+              <StatRow
+                label="Augur (shields)"
+                value={`${stats.augurEnergyToShieldsPercent}% of energy → shields`}
+                color="text-sky-700 dark:text-sky-400"
+                tooltip="Shields gained per cast are shown on each ability card from that ability’s energy cost."
+              />
             )}
             {(stats.hunterCompanionVsStatusDamagePercent ?? 0) > 0 && (
               <StatRow
                 label="Hunter (companion)"
                 value={`+${stats.hunterCompanionVsStatusDamagePercent}% dmg vs Slash (${(1 + (stats.hunterCompanionVsStatusDamagePercent ?? 0) / 100).toFixed(2)}×)`}
-                color="text-amber-400"
+                color="text-amber-800 dark:text-amber-400"
                 tooltip="Applies to beast claws / sentinel weapons when the Hunter vs Slash DPS toggle is on (companion builder / loadout sim)."
               />
             )}
@@ -2460,7 +2419,7 @@ export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equ
                 <StatRow
                   label="Mecha (mark)"
                   value={`${stats.mechaSetPieces}/4 pieces`}
-                  color="text-orange-400"
+                  color="text-orange-700 dark:text-orange-400"
                   tooltip="Companion mark + status spread on kill. Requires Kubrow or Predasite."
                 />
                 <MechaMarkTimingPanel pieces={stats.mechaSetPieces ?? 0} />
@@ -2478,7 +2437,7 @@ export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equ
               <StatRow
                 label={line.label}
                 value={line.value}
-                color={line.conditional ? "text-muted-foreground" : "text-purple-400"}
+                color={line.conditional ? "text-muted-foreground" : "text-purple-700 dark:text-purple-400"}
                 tooltip={line.conditional ? `${line.shardName} — conditional` : line.shardName}
               />
             </div>
@@ -2496,19 +2455,23 @@ export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equ
                 <span className="text-[10px] text-muted-foreground font-mono">R{info.rank}/{info.maxRank}</span>
               </div>
               {info.applied.map((line, i) => (
-                <StatRow
-                  key={`a-${i}`}
-                  label={line.label}
-                  value={line.value}
-                  color={line.active === false ? "text-muted-foreground" : "text-purple-400"}
-                />
+                <div key={`a-${i}`} className="py-0.5">
+                  <StatRow
+                    label={line.label}
+                    value={line.value}
+                    color={line.active === false ? "text-muted-foreground" : "text-purple-700 dark:text-purple-400"}
+                  />
+                  {line.note && (
+                    <p className="text-[9px] text-muted-foreground/80 pl-0.5">{line.note}</p>
+                  )}
+                </div>
               ))}
               {info.conditional.map((line, i) => (
                 <div key={`c-${i}-${line.label}`} className="py-0.5">
                   <StatRow
                     label={line.label}
                     value={line.value}
-                    color={line.active ? "text-green-400" : "text-muted-foreground"}
+                    color={line.active ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
                   />
                   {line.note && (
                     <p className="text-[9px] text-muted-foreground/80 pl-0.5">{line.note}</p>

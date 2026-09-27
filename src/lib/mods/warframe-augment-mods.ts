@@ -3,6 +3,14 @@ import { isArchwingAugment } from "@/lib/mods/archwing-augment-mods";
 import { isWeaponExclusiveMod } from "@/lib/mods/weapon-mod-tags";
 import type { Mod } from "@/lib/types";
 
+/** Optional Helminth injection used to unlock the subsumed ability's augment. */
+export type HelminthAugmentContext = {
+  /** Source warframe id from helminth.ts (`source`), e.g. "volt". */
+  sourceWarframeId: string;
+  /** Ability display name, e.g. "Shock" — matches "{Name} Augment:" in mod descriptions. */
+  abilityName: string;
+};
+
 /** Strip variant suffix so loki_prime matches augments tagged for loki. */
 export function normalizeWarframeId(warframeId: string): string {
   return warframeId.replace(/_prime$/i, "").replace(/_umbra$/i, "");
@@ -39,11 +47,28 @@ export function augmentMatchesWarframe(
   return candidates.has(mid) || candidates.has(normalizeWarframeId(mid));
 }
 
+/** True when this augment is for the Helminth-injected ability (wiki "{Ability} Augment:"). */
+export function augmentMatchesHelminthAbility(
+  mod: Pick<Mod, "warframeId" | "category" | "subCategory" | "id" | "description">,
+  helminth: HelminthAugmentContext,
+): boolean {
+  if (!isWarframeAugment(mod)) return false;
+  const mid = mod.warframeId;
+  if (!mid || mid === "universal") return false;
+  const source = normalizeWarframeId(helminth.sourceWarframeId);
+  if (normalizeWarframeId(mid) !== source && mid !== helminth.sourceWarframeId) {
+    return false;
+  }
+  const prefix = `${helminth.abilityName.trim()} Augment`.toLowerCase();
+  return (mod.description || "").trim().toLowerCase().startsWith(prefix);
+}
+
 /** Warframe ability augments only appear in the warframe builder for a matching frame (+ universal). */
 export function warframeAugmentEligibleInBuilder(
   mod: Mod,
   builderCategory: string,
   selectedWarframeId?: string,
+  helminth?: HelminthAugmentContext | null,
 ): boolean {
   // Weapon-exclusive / weapon-slot amalgam augments must never appear on warframes.
   if (isWeaponExclusiveMod(mod.id) || (mod.category === "augment" && mod.subCategory === "weapon")) {
@@ -53,7 +78,9 @@ export function warframeAugmentEligibleInBuilder(
   if (builderCategory !== "warframe") return false;
   if (mod.warframeId === "universal") return true;
   if (!selectedWarframeId) return false;
-  return augmentMatchesWarframe(mod, selectedWarframeId);
+  if (augmentMatchesWarframe(mod, selectedWarframeId)) return true;
+  if (helminth && augmentMatchesHelminthAbility(mod, helminth)) return true;
+  return false;
 }
 
 function buildWarframeToAugmentsIndex(): Map<string, string[]> {

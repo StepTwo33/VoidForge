@@ -114,6 +114,9 @@ export default function HowToModWeaponsPage() {
           <li>
             <span className="font-medium text-foreground">Melee</span> adds combo and heavy
             attacks, but the same crit / status / hybrid read still starts from base stats.
+            A matching-polarity{" "}
+            <span className="font-medium text-foreground">Stance</span> also adds capacity,
+            like an Aura on a frame.
           </li>
         </ul>
         <GuideTip>
@@ -123,6 +126,9 @@ export default function HowToModWeaponsPage() {
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-4">
           <GuideCtaLink href="/weapon-builder">Weapon Builder</GuideCtaLink>
           <GuideCtaLink href="/damage-simulator">Damage Simulator</GuideCtaLink>
+          <GuideCtaLink href="/guides/how-to-mod/modular">Modular</GuideCtaLink>
+          <GuideCtaLink href="/guides/how-to-mod/rivens">Rivens</GuideCtaLink>
+          <GuideCtaLink href="/guides/how-to-mod/arcanes">Arcanes</GuideCtaLink>
         </div>
       </ContentPanel>
     </>

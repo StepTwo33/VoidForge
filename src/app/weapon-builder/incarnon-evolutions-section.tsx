@@ -16,7 +16,7 @@ export function IncarnonEvolutionsSection({
   return (
     <div className="mt-6">
       <h2 className="text-sm font-semibold tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-        <Flame className="h-4 w-4 text-orange-400" />
+        <Flame className="h-4 w-4 text-orange-700 dark:text-orange-400" />
         INCARNON EVOLUTIONS
       </h2>
       {incarnonData ? (
@@ -27,7 +27,7 @@ export function IncarnonEvolutionsSection({
             const selected = selectedEvolutions[tier];
             return (
               <div key={tier} className="border border-border rounded-lg p-3">
-                <span className="text-[10px] font-semibold text-orange-400 tracking-wider">
+                <span className="text-[10px] font-semibold text-orange-700 dark:text-orange-400 tracking-wider">
                   EVOLUTION {tier}
                 </span>
                 <div className="flex gap-2 mt-1.5">

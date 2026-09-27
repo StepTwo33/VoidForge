@@ -16,9 +16,9 @@ export function HowToModSectionNav() {
   const active = resolveHowToModSection(pathname);
 
   return (
-    <ContentPanel className="mb-6 p-2" padding={false}>
+    <ContentPanel className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-6 min-w-0 p-2 backdrop-blur-md supports-[backdrop-filter]:bg-card/90" padding={false}>
       <nav
-        className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5 sm:flex-wrap sm:overflow-visible"
+        className="-mx-1 flex min-w-0 snap-x snap-mandatory gap-1 overflow-x-auto overscroll-x-contain px-1 pb-0.5 touch-pan-x [scrollbar-width:thin] [mask-image:linear-gradient(to_right,transparent,black_0.75rem,black_calc(100%-1.75rem),transparent)] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:snap-none sm:px-0 sm:pb-0 sm:[mask-image:none] sm:[scrollbar-width:auto]"
         aria-label="How to Mod sections"
       >
         {HOW_TO_MOD_SECTIONS.map((section) => {
@@ -29,14 +29,14 @@ export function HowToModSectionNav() {
               key={section.id}
               href={section.href}
               className={cn(
-                "flex shrink-0 items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors",
+                "inline-flex shrink-0 snap-start items-center gap-1.5 min-h-11 rounded-md px-2.5 py-2 text-xs sm:gap-2 sm:px-3 sm:py-2.5 sm:text-sm transition-colors",
                 isActive
                   ? accentTone.amber.chipActive
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
               )}
               aria-current={isActive ? "page" : undefined}
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              <Icon className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
               {section.label}
             </Link>
           );
@@ -80,7 +80,7 @@ export function GuideCtaLink({
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+      className="inline-flex min-h-11 items-center gap-1.5 py-2 text-sm font-medium text-primary transition-colors hover:text-primary/80"
     >
       {children}
       <span aria-hidden="true">→</span>

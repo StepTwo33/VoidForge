@@ -239,6 +239,9 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
   overview: mod("overview", [
     line("zoom", "mod_panel", "multiplicative_percent", "Overview: zoom \u2014 -60% Zoom while Aim Gliding (arsenal display only)"),
   ]),
+  overpressured_rounds: mod("overpressured_rounds", [
+    line("falloffDistance", "mod_panel", "multiplicative_percent", "wiki: Overpressured Rounds — Rifle kill: +120% Buckshot falloff distance and reduced spread for next Buckshot (not always-on paper)"),
+  ]),
   piercing_hit: mod("piercing_hit", [
     line("puncture", "weapon_dps", "multiplicative_percent", "Piercing Hit: puncture \u2014 +90% <DT_PUNCTURE_COLOR>Puncture"),
   ]),
@@ -351,7 +354,7 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("damage", "weapon_dps", "multiplicative_percent", "Serration: damage \u2014 +165% Damage"),
   ]),
   sharpshooter: mod("sharpshooter", [
-    line("energyOnKill", "mod_panel", "multiplicative_percent", "Sharpshooter: energyOnKill \u2014 On Headshot Kill:\\\\n+15 Energy"),
+    line("energyOnKill", "mod_panel", "multiplicative_percent", "Sharpshooter: energyOnKill \u2014 On Weak Point Kill:\\\\n+15 Energy"),
   ]),
   shivering_contagion: mod("shivering_contagion", [
     line("range", "mod_panel", "multiplicative_percent", "Shivering Contagion: range \u2014 On <DT_FREEZE_COLOR>Cold Status Effect: 100% chance to spread that status to oth\u2026 (arsenal display only)"),

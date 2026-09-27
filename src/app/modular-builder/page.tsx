@@ -12,7 +12,7 @@ import { Weapon, Mod, EquippedMod, SimulationParams, DEFAULT_SIM_PARAMS, Modular
 import { getWeaponArcanes } from "@/lib/weapons/weapon-arcane-config";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import type { SlotType } from "@/components/mod-picker";
-import { Zap, Star, Wrench, ChevronRight, Save, FolderOpen, Gem } from "lucide-react";
+import { Zap, Wrench, ChevronRight, Save, FolderOpen, Gem, ArrowLeftRight } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, persistSavedBuild } from "@/lib/builds/build-storage";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { toast } from "sonner";
@@ -24,11 +24,14 @@ import {
   KitgunChamber, KitgunGrip, KitgunLoader, ZawStrike, ZawGrip, ZawLink, AmpScaffold, AmpBrace,
 } from "@/data/modular-weapons";
 import { cn } from "@/lib/utils";
-import { extractBuildFromUrl } from "@/lib/builds/build-url";
+import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
 import { resolveArcaneById } from "@/lib/builds/build-storage";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
+import { snapshotFromBuild } from "@/lib/builds/compare-build";
+import { extractBuildItemId } from "@/lib/builds/build-types";
+import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 
 type ModularType = "kitgun" | "zaw" | "amp";
 
@@ -41,7 +44,7 @@ const typeLabels: Record<ModularType, string> = {
 };
 
 function StatDelta({ label, value, suffix = "" }: { label: string; value: number; suffix?: string }) {
-  const color = value > 0 ? "text-green-400" : value < 0 ? "text-red-400" : "text-muted-foreground";
+  const color = value > 0 ? "cmp-win" : value < 0 ? "cmp-lose" : "text-muted-foreground";
   return (
     <div className="flex justify-between text-xs py-0.5">
       <span className="text-muted-foreground">{label}</span>
@@ -78,7 +81,6 @@ export default function ModularBuilderPage() {
   const [arcanePickerOpen, setArcanePickerOpen] = useState(false);
   const [activeArcaneSlot, setActiveArcaneSlot] = useState(0);
   const [hasOrokinCatalyst, setHasOrokinCatalyst] = useState(false);
-  const [isMR30, setIsMR30] = useState(false);
   const [simParams, setSimParams] = useState<SimulationParams>(() => ({ ...DEFAULT_SIM_PARAMS }));
 
   // Build the assembled weapon
@@ -137,7 +139,7 @@ export default function ModularBuilderPage() {
   const arcaneConfig = assembledWeapon ? getWeaponArcanes(assembledWeapon) : { slots: 0, arcanes: [], label: "" };
 
   const [slotPolarities, setSlotPolarities] = useState<Record<number, string>>({});
-  const capacity = (hasOrokinCatalyst ? 60 : 30) + (isMR30 ? 10 : 0);
+  const capacity = hasOrokinCatalyst ? 60 : 30;
   const capacityUsed = useMemo(() => {
     return equippedMods.reduce((sum, m) => {
       const mod = modsMap.get(m.modId);
@@ -154,58 +156,64 @@ export default function ModularBuilderPage() {
   const [buildName, setBuildName] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
 
   // Load build from ?build= share link (e.g. from /build/[id] page)
   useEffect(() => {
+    let cancelled = false;
     queueMicrotask(() => {
-      const params = new URLSearchParams(window.location.search);
-      const shared = extractBuildFromUrl(params);
-      if (!shared || shared.type !== "modular" || !shared.modularType || !shared.parts) return;
-      const mt = shared.modularType as ModularType;
-      setModularType(mt);
-      if (mt === "kitgun") {
-        setKitgunChamber(kitgunChambers.find((c) => c.id === shared.parts!.chamber) ?? null);
-        setKitgunGrip(kitgunGrips.find((g) => g.id === shared.parts!.grip) ?? null);
-        setKitgunLoader(kitgunLoaders.find((l) => l.id === shared.parts!.loader) ?? null);
-      } else if (mt === "zaw") {
-        setZawStrike(zawStrikes.find((s) => s.id === shared.parts!.strike) ?? null);
-        setZawGripSel(zawGrips.find((g) => g.id === shared.parts!.grip) ?? null);
-        setZawLinkSel(zawLinks.find((l) => l.id === shared.parts!.link) ?? null);
-      } else {
-        setAmpPrism(ampPrisms.find((p) => p.id === shared.parts!.prism) ?? null);
-        setAmpScaffold(ampScaffolds.find((s) => s.id === shared.parts!.scaffold) ?? null);
-        setAmpBrace(ampBraces.find((b) => b.id === shared.parts!.brace) ?? null);
-      }
-      setEquippedMods(
-        shared.mods.map((m, idx) => {
-          const mod = modsMap.get(m.id);
-          return {
-            modId: m.id,
-            modName: mod?.name ?? "",
-            rank: m.rank,
-            slotIndex: m.slotIndex ?? idx,
-            polarity: mod?.polarity,
-            drain: mod?.drain,
-          };
-        })
-      );
-      setHasOrokinCatalyst(shared.hasOrokinCatalyst ?? false);
-      setIsMR30(shared.isMR30 ?? false);
-      if (shared.arcanes?.length) {
-        setEquippedArcanes(shared.arcanes.map((id) => (id ? resolveArcaneById(id) : null)));
-      } else {
-        setEquippedArcanes([null, null]);
-      }
-      const pol: Record<number, string> = {};
-      if (shared.slotPolarities) {
-        for (const [k, v] of Object.entries(shared.slotPolarities)) {
-          pol[Number(k)] = v;
+      void (async () => {
+        const params = new URLSearchParams(window.location.search);
+        const shared = await extractBuildFromUrlAsync(params);
+        if (cancelled || !shared || shared.type !== "modular" || !shared.modularType || !shared.parts) return;
+        const mt = shared.modularType as ModularType;
+        setModularType(mt);
+        if (mt === "kitgun") {
+          setKitgunChamber(kitgunChambers.find((c) => c.id === shared.parts!.chamber) ?? null);
+          setKitgunGrip(kitgunGrips.find((g) => g.id === shared.parts!.grip) ?? null);
+          setKitgunLoader(kitgunLoaders.find((l) => l.id === shared.parts!.loader) ?? null);
+        } else if (mt === "zaw") {
+          setZawStrike(zawStrikes.find((s) => s.id === shared.parts!.strike) ?? null);
+          setZawGripSel(zawGrips.find((g) => g.id === shared.parts!.grip) ?? null);
+          setZawLinkSel(zawLinks.find((l) => l.id === shared.parts!.link) ?? null);
+        } else {
+          setAmpPrism(ampPrisms.find((p) => p.id === shared.parts!.prism) ?? null);
+          setAmpScaffold(ampScaffolds.find((s) => s.id === shared.parts!.scaffold) ?? null);
+          setAmpBrace(ampBraces.find((b) => b.id === shared.parts!.brace) ?? null);
         }
-      }
-      setSlotPolarities(pol);
-      window.history.replaceState({}, "", window.location.pathname);
-      toast.info("Build loaded from link", { description: "Modular configuration applied" });
+        setEquippedMods(
+          shared.mods.map((m, idx) => {
+            const mod = modsMap.get(m.id);
+            return {
+              modId: m.id,
+              modName: mod?.name ?? "",
+              rank: m.rank,
+              slotIndex: m.slotIndex ?? idx,
+              polarity: mod?.polarity,
+              drain: mod?.drain,
+            };
+          })
+        );
+        setHasOrokinCatalyst(shared.hasOrokinCatalyst ?? false);
+        if (shared.arcanes?.length) {
+          setEquippedArcanes(shared.arcanes.map((id) => (id ? resolveArcaneById(id) : null)));
+        } else {
+          setEquippedArcanes([null, null]);
+        }
+        const pol: Record<number, string> = {};
+        if (shared.slotPolarities) {
+          for (const [k, v] of Object.entries(shared.slotPolarities)) {
+            pol[Number(k)] = v;
+          }
+        }
+        setSlotPolarities(pol);
+        window.history.replaceState({}, "", window.location.pathname);
+        toast.info("Build loaded from link", { description: "Modular configuration applied" });
+      })();
     });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const buildModularData = (): ModularBuildData => {
@@ -229,10 +237,32 @@ export default function ModularBuilderPage() {
       mods: equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
       arcaneIds: equippedArcanes.map((a) => a?.id ?? null),
       hasOrokinCatalyst,
-      isMR30,
+      isMR30: false,
       slotPolarities,
     };
   };
+
+  const liveCompare = useMemo(() => {
+    if (!assembledWeapon) return null;
+    return snapshotFromBuild("modular", buildName || assembledWeapon.name, buildModularData());
+  }, [
+    assembledWeapon,
+    buildName,
+    modularType,
+    kitgunChamber,
+    kitgunGrip,
+    kitgunLoader,
+    zawStrike,
+    zawGripSel,
+    zawLinkSel,
+    ampPrism,
+    ampScaffold,
+    ampBrace,
+    equippedMods,
+    equippedArcanes,
+    hasOrokinCatalyst,
+    slotPolarities,
+  ]);
 
   const handleSaveBuildConfirm = async ({ name, isPublic }: SaveBuildDialogValues) => {
     const data = buildModularData();
@@ -278,7 +308,6 @@ export default function ModularBuilderPage() {
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
     }));
     setHasOrokinCatalyst(d.hasOrokinCatalyst);
-    setIsMR30(d.isMR30 ?? false);
     setSlotPolarities(d.slotPolarities || {});
     const aid = d.arcaneIds ?? [];
     setEquippedArcanes([
@@ -311,17 +340,31 @@ export default function ModularBuilderPage() {
     setBuildName("");
   };
 
+  const hasKitSummary = modularType === "kitgun"
+    ? Boolean(kitgunChamber || kitgunGrip || kitgunLoader)
+    : modularType === "zaw"
+      ? Boolean(zawStrike || zawGripSel || zawLinkSel)
+      : Boolean(ampPrism || ampScaffold || ampBrace);
+
   return (
     <PageShell>
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <h1 className="text-xl sm:text-3xl font-bold">Modular Builder</h1>
           <div className="flex items-center gap-2">
-            <button onClick={() => setSaveDialogOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-green-400 hover:border-green-500/50 transition-all" title="Save Build">
-              <Save className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Save</span>
+            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 sm:min-h-9 sm:py-1.5" title="Save Build">
+              <Save className="h-3.5 w-3.5" /> <span>Save</span>
             </button>
-            <button onClick={() => { setSavedBuilds(getSavedBuilds("modular")); setShowSavedBuilds(true); }} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-blue-400 hover:border-blue-500/50 transition-all" title="Load Build">
-              <FolderOpen className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Load</span>
+            <button onClick={() => { setSavedBuilds(getSavedBuilds("modular")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-9 sm:py-1.5" title="Load Build">
+              <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
+            </button>
+            <button
+              onClick={() => setCompareOpen(true)}
+              disabled={!assembledWeapon}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-teal-500/50 hover:text-teal-700 disabled:pointer-events-none disabled:opacity-40 dark:hover:text-teal-400 sm:min-h-9 sm:py-1.5"
+              title={assembledWeapon ? "Compare this build to a saved or posted build" : "Finish the parts before comparing"}
+            >
+              <ArrowLeftRight className="h-3.5 w-3.5" /> <span>Compare</span>
             </button>
           </div>
         </div>
@@ -337,9 +380,9 @@ export default function ModularBuilderPage() {
                 resetMods();
               }}
               className={cn(
-                "px-4 py-2 rounded-lg text-sm font-medium border transition-all",
+                "inline-flex min-h-11 items-center px-4 py-2.5 rounded-lg text-sm font-medium border transition-all sm:min-h-9 sm:py-2",
                 modularType === t
-                  ? "bg-cyan-500/10 border-cyan-500/50 text-cyan-400"
+                  ? "bg-cyan-500/10 border-cyan-500/50 text-cyan-700 dark:text-cyan-400"
                   : "border-border text-muted-foreground hover:text-foreground"
               )}
             >
@@ -348,6 +391,38 @@ export default function ModularBuilderPage() {
             </button>
           ))}
         </div>
+
+        {/* Sticky current-kit summary — sits under header safe-area; z above mod toolbars */}
+        {hasKitSummary && (
+          <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-30 mb-4 rounded-lg border border-cyan-500/30 bg-card/95 px-3 py-2 text-xs shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/90">
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Current {typeLabels[modularType]}
+            </p>
+            <div className="flex gap-x-3 gap-y-1 overflow-x-auto overscroll-x-contain whitespace-nowrap text-muted-foreground [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:overflow-visible sm:whitespace-normal">
+              {modularType === "kitgun" && (
+                <>
+                  <span><span className="text-foreground/70">Chamber</span> {kitgunChamber?.name ?? "—"}</span>
+                  <span><span className="text-foreground/70">Grip</span> {kitgunGrip?.name ?? "—"}</span>
+                  <span><span className="text-foreground/70">Loader</span> {kitgunLoader?.name ?? "—"}</span>
+                </>
+              )}
+              {modularType === "zaw" && (
+                <>
+                  <span><span className="text-foreground/70">Strike</span> {zawStrike?.name ?? "—"}</span>
+                  <span><span className="text-foreground/70">Grip</span> {zawGripSel?.name ?? "—"}</span>
+                  <span><span className="text-foreground/70">Link</span> {zawLinkSel?.name ?? "—"}</span>
+                </>
+              )}
+              {modularType === "amp" && (
+                <>
+                  <span><span className="text-foreground/70">Prism</span> {ampPrism?.name ?? "—"}</span>
+                  <span><span className="text-foreground/70">Scaffold</span> {ampScaffold?.name ?? "—"}</span>
+                  <span><span className="text-foreground/70">Brace</span> {ampBrace?.name ?? "—"}</span>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-[1fr_320px] gap-6">
           {/* Left: Part selection + Mod slots */}
@@ -366,9 +441,9 @@ export default function ModularBuilderPage() {
                         key={c.id}
                         onClick={() => { setKitgunChamber(c); resetMods(); }}
                         className={cn(
-                          "p-2.5 rounded-lg border text-left transition-all text-sm",
+                          "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           kitgunChamber?.id === c.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -390,14 +465,14 @@ export default function ModularBuilderPage() {
                         key={g.id}
                         onClick={() => { setKitgunGrip(g); resetMods(); }}
                         className={cn(
-                          "p-2.5 rounded-lg border text-left transition-all text-sm",
+                          "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           kitgunGrip?.id === g.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
                         <span className="font-medium">{g.name}</span>
-                        <span className={cn("ml-1.5 text-[10px]", g.type === "primary" ? "text-blue-400" : "text-green-400")}>
+                        <span className={cn("ml-1.5 text-[10px]", g.type === "primary" ? "text-blue-700 dark:text-blue-400" : "text-green-700 dark:text-green-400")}>
                           {g.type}
                         </span>
                         <div className="text-[10px] text-muted-foreground mt-0.5">
@@ -417,9 +492,9 @@ export default function ModularBuilderPage() {
                         key={l.id}
                         onClick={() => { setKitgunLoader(l); resetMods(); }}
                         className={cn(
-                          "p-2.5 rounded-lg border text-left transition-all text-sm",
+                          "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           kitgunLoader?.id === l.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -450,9 +525,9 @@ export default function ModularBuilderPage() {
                         key={s.id}
                         onClick={() => { setZawStrike(s); resetMods(); }}
                         className={cn(
-                          "p-2.5 rounded-lg border text-left transition-all text-sm",
+                          "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           zawStrike?.id === s.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -474,14 +549,14 @@ export default function ModularBuilderPage() {
                         key={g.id}
                         onClick={() => { setZawGripSel(g); resetMods(); }}
                         className={cn(
-                          "p-2.5 rounded-lg border text-left transition-all text-sm",
+                          "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           zawGripSel?.id === g.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
                         <span className="font-medium">{g.name}</span>
-                        <span className={cn("ml-1.5 text-[10px]", g.type === "1h" ? "text-green-400" : "text-amber-400")}>{g.type}</span>
+                        <span className={cn("ml-1.5 text-[10px]", g.type === "1h" ? "text-green-700 dark:text-green-400" : "text-amber-800 dark:text-amber-400")}>{g.type}</span>
                         <div className="text-[10px] text-muted-foreground mt-0.5">
                           {g.description}
                         </div>
@@ -499,9 +574,9 @@ export default function ModularBuilderPage() {
                         key={l.id}
                         onClick={() => { setZawLinkSel(l); resetMods(); }}
                         className={cn(
-                          "p-2.5 rounded-lg border text-left transition-all text-sm",
+                          "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           zawLinkSel?.id === l.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -532,9 +607,9 @@ export default function ModularBuilderPage() {
                         key={p.id}
                         onClick={() => { setAmpPrism(p); resetMods(); }}
                         className={cn(
-                          "p-2.5 rounded-lg border text-left transition-all text-sm",
+                          "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           ampPrism?.id === p.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -556,9 +631,9 @@ export default function ModularBuilderPage() {
                         key={s.id}
                         onClick={() => setAmpScaffold(s)}
                         className={cn(
-                          "p-2.5 rounded-lg border text-left transition-all text-sm",
+                          "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           ampScaffold?.id === s.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -580,9 +655,9 @@ export default function ModularBuilderPage() {
                         key={b.id}
                         onClick={() => setAmpBrace(b)}
                         className={cn(
-                          "p-2.5 rounded-lg border text-left transition-all text-sm",
+                          "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           ampBrace?.id === b.id
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                             : "border-border hover:border-cyan-500/30 hover:bg-cyan-500/5"
                         )}
                       >
@@ -605,7 +680,7 @@ export default function ModularBuilderPage() {
                   {recommendedBuilds.filter(b => b.type === modularType).map((b, i) => (
                     <div key={i} className="p-3 rounded-lg border border-border hover:border-cyan-500/30 transition-all">
                       <div className="font-medium text-sm">{b.name}</div>
-                      <div className="text-[10px] text-cyan-400 font-mono mt-0.5">{b.parts.join(" + ")}</div>
+                      <div className="text-[10px] text-cyan-700 dark:text-cyan-400 font-mono mt-0.5">{b.parts.join(" + ")}</div>
                       <div className="text-[10px] text-muted-foreground mt-1">{b.description}</div>
                       <div className="flex gap-1 mt-1.5 flex-wrap">
                         {b.tags.map(t => <span key={t} className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{t}</span>)}
@@ -620,28 +695,16 @@ export default function ModularBuilderPage() {
             {assembledWeapon && (
               <div className="border-t border-border pt-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <Wrench className="h-5 w-5 text-cyan-400" />
+                  <Wrench className="h-5 w-5 text-cyan-700 dark:text-cyan-400" />
                   <h2 className="text-lg font-bold">{assembledWeapon.name}</h2>
                   <span className="text-sm text-muted-foreground capitalize">{assembledWeapon.category}</span>
                   <div className="ml-auto flex items-center gap-2">
                     <button
-                      onClick={() => setIsMR30(!isMR30)}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-all",
-                        isMR30
-                          ? "bg-amber-500/10 border-amber-500/50 text-amber-400"
-                          : "border-border text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <Star className="h-3.5 w-3.5" />
-                      MR 30+
-                    </button>
-                    <button
                       onClick={() => setHasOrokinCatalyst(!hasOrokinCatalyst)}
                       className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-all",
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
                         hasOrokinCatalyst
-                          ? "bg-blue-500/10 border-blue-500/50 text-blue-400"
+                          ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400"
                           : "border-border text-muted-foreground hover:text-foreground"
                       )}
                     >
@@ -653,15 +716,26 @@ export default function ModularBuilderPage() {
 
                 {totalModSlots > 0 && (
                   <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-semibold tracking-wider text-muted-foreground">MOD CONFIGURATION</h3>
+                    <div className={cn(
+                      "sticky z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none",
+                      hasKitSummary
+                        ? "top-[calc(3.5rem+env(safe-area-inset-top,0px)+4.25rem)]"
+                        : "top-[calc(3.5rem+env(safe-area-inset-top,0px))]",
+                    )}>
+                      <h3 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">MOD CONFIGURATION</h3>
                       <span className={cn(
-                        "text-xs font-mono",
-                        capacityUsed > capacity ? "text-red-400" : "text-muted-foreground"
+                        "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
+                        capacityUsed > capacity ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
                       )}>
+                        <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
                         {capacityUsed} / {capacity}
                       </span>
                     </div>
+                    {isSecondaryKitgun && (
+                      <p className="mb-2 text-[11px] leading-snug text-muted-foreground">
+                        Last slot is <span className="font-medium text-foreground/80">Exilus</span> for secondary kitguns.
+                      </p>
+                    )}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       {Array.from({ length: totalModSlots }, (_, i) => {
                         const equipped = equippedMods.find((m) => m.slotIndex === i);
@@ -692,7 +766,7 @@ export default function ModularBuilderPage() {
                 {arcaneConfig.slots > 0 && (
                   <div className="mt-6">
                     <h3 className="text-sm font-semibold tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-                      <Gem className="h-4 w-4 text-purple-400" />
+                      <Gem className="h-4 w-4 text-purple-700 dark:text-purple-400" />
                       ARCANES
                     </h3>
                     <div className={cn("grid gap-2", arcaneConfig.slots === 2 ? "grid-cols-2" : "grid-cols-1")}>
@@ -715,7 +789,7 @@ export default function ModularBuilderPage() {
 
           {/* Right: Stats panel */}
           <div>
-            <div className="border border-border rounded-xl p-6 bg-card sticky top-6">
+            <div className="border border-border rounded-xl bg-card p-4 sm:p-6 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:self-start lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:overflow-y-auto lg:overscroll-contain">
               <h3 className="text-sm font-semibold tracking-wider text-muted-foreground mb-4">
                 {assembledWeapon ? "WEAPON STATS" : "SELECT ALL PARTS"}
               </h3>
@@ -733,19 +807,19 @@ export default function ModularBuilderPage() {
                   {modularType === "kitgun" && (
                     <>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", kitgunChamber ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", kitgunChamber ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={kitgunChamber ? "text-foreground" : ""}>
                           {kitgunChamber ? kitgunChamber.name : "Select Chamber"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", kitgunGrip ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", kitgunGrip ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={kitgunGrip ? "text-foreground" : ""}>
                           {kitgunGrip ? kitgunGrip.name : "Select Grip"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", kitgunLoader ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", kitgunLoader ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={kitgunLoader ? "text-foreground" : ""}>
                           {kitgunLoader ? kitgunLoader.name : "Select Loader"}
                         </span>
@@ -755,19 +829,19 @@ export default function ModularBuilderPage() {
                   {modularType === "zaw" && (
                     <>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", zawStrike ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", zawStrike ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={zawStrike ? "text-foreground" : ""}>
                           {zawStrike ? zawStrike.name : "Select Strike"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", zawGripSel ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", zawGripSel ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={zawGripSel ? "text-foreground" : ""}>
                           {zawGripSel ? zawGripSel.name : "Select Grip"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", zawLinkSel ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", zawLinkSel ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={zawLinkSel ? "text-foreground" : ""}>
                           {zawLinkSel ? zawLinkSel.name : "Select Link"}
                         </span>
@@ -777,19 +851,19 @@ export default function ModularBuilderPage() {
                   {modularType === "amp" && (
                     <>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", ampPrism ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", ampPrism ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={ampPrism ? "text-foreground" : ""}>
                           {ampPrism ? ampPrism.name : "Select Prism"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", ampScaffold ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", ampScaffold ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={ampScaffold ? "text-foreground" : ""}>
                           {ampScaffold ? ampScaffold.name : "Select Scaffold"}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <ChevronRight className={cn("h-3.5 w-3.5", ampBrace ? "text-green-400" : "")} />
+                        <ChevronRight className={cn("h-3.5 w-3.5", ampBrace ? "text-green-700 dark:text-green-400" : "")} />
                         <span className={ampBrace ? "text-foreground" : ""}>
                           {ampBrace ? ampBrace.name : "Select Brace"}
                         </span>
@@ -868,6 +942,16 @@ export default function ModularBuilderPage() {
         onLoad={handleLoadBuild}
         onDelete={handleDeleteBuild}
       />
+
+      {assembledWeapon && (
+        <BuildCompareDialog
+          open={compareOpen}
+          onOpenChange={setCompareOpen}
+          type="modular"
+          itemId={extractBuildItemId("modular", buildModularData())}
+          live={liveCompare}
+        />
+      )}
 
       <SaveBuildDialog
         open={saveDialogOpen}

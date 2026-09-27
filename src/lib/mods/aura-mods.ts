@@ -25,6 +25,7 @@ export const AURA_MOD_IDS = new Set([
   "brief_respite",
   "combat_discipline",
   "dead_eye",
+  "dreamers_bond",
   "emp_aura",
   "empowered_blades",
   "growing_power",

@@ -37,7 +37,7 @@ export interface MeleeComboModContext {
 /** Innate starting combo counter from weapon passives (rank-3 / max). */
 export const WEAPON_INNATE_INITIAL_COMBO: Record<string, number> = {
   fragor_prime: 30,
-  furia_wraith: 20,
+  furax_wraith: 20,
   synoid_heliocor: 20,
 };
 

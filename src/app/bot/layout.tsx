@@ -21,7 +21,7 @@ export default async function BotLayout({ children }: { children: React.ReactNod
           </div>
           <h1 className="mt-5 text-2xl font-semibold tracking-tight">You shouldn&apos;t be here</h1>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            The Discord bot pages are only available to FrameHub staff right now while we finish building
+            The Discord bot pages are only available to Voidforge staff right now while we finish building
             and testing them. If you followed an old link, head back home — nothing to configure here yet.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

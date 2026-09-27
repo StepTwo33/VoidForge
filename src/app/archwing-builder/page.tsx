@@ -17,12 +17,14 @@ import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity"
 import { WeaponStatsPanel, ArchwingStatsPanel } from "@/components/stats-panel";
 import { Weapon, EquippedMod, CalculatedStats, ArchwingCalculatedStats } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { Star, Zap, Save, FolderOpen } from "lucide-react";
+import { Zap, Save, FolderOpen, ArrowLeftRight } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, ArchwingBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
 import { toast } from "sonner";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
+import { snapshotFromBuild } from "@/lib/builds/compare-build";
+import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 
 type BuilderMode = "archwing" | "necramech";
 
@@ -57,13 +59,13 @@ export default function ArchwingBuilderPage() {
   // Shared
   const [hasReactor, setHasReactor] = useState(false);
   const [hasCatalyst, setHasCatalyst] = useState(false);
-  const [isMR30, setIsMR30] = useState(false);
   const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>([]);
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
   const [buildName, setBuildName] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
 
   useEffect(() => { setSavedBuilds(getSavedBuilds("archwing")); }, []);
 
@@ -76,7 +78,7 @@ export default function ArchwingBuilderPage() {
       weaponMods: weaponMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
       hasReactor,
       hasCatalyst,
-      isMR30,
+      isMR30: false,
       framePolarities: mode === "archwing" ? archwingPolarities : necramechPolarities,
       weaponPolarities,
     };
@@ -130,7 +132,6 @@ export default function ArchwingBuilderPage() {
     }
     setHasReactor(d.hasReactor);
     setHasCatalyst(d.hasCatalyst);
-    setIsMR30(d.isMR30);
     setWeaponPolarities(d.weaponPolarities || {});
     setCurrentBuildId(build.id);
     setBuildName(build.name);
@@ -170,6 +171,38 @@ export default function ArchwingBuilderPage() {
     });
   }, [selectedWeapon, weaponMods, modsMap]);
 
+  const selectedFrame = mode === "archwing" ? selectedArchwing : selectedNecramech;
+
+  const liveCompare = useMemo(() => {
+    if (!selectedFrame) return null;
+    const data: ArchwingBuildData = {
+      mode,
+      frameId: selectedFrame.name,
+      frameMods: (mode === "archwing" ? archwingMods : necramechMods).map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      weaponId: selectedWeapon?.id,
+      weaponMods: weaponMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      hasReactor,
+      hasCatalyst,
+      isMR30: false,
+      framePolarities: mode === "archwing" ? archwingPolarities : necramechPolarities,
+      weaponPolarities,
+    };
+    return snapshotFromBuild("archwing", buildName || selectedFrame.name, data);
+  }, [
+    selectedFrame,
+    mode,
+    archwingMods,
+    necramechMods,
+    selectedWeapon,
+    weaponMods,
+    hasReactor,
+    hasCatalyst,
+    archwingPolarities,
+    necramechPolarities,
+    weaponPolarities,
+    buildName,
+  ]);
+
   const frameStats = useMemo<ArchwingCalculatedStats | null>(() => {
     if (mode === "archwing" && selectedArchwing) {
       return calculateArchwingBuild(selectedArchwing, archwingMods);
@@ -180,8 +213,8 @@ export default function ArchwingBuilderPage() {
     return null;
   }, [mode, selectedArchwing, selectedNecramech, archwingMods, necramechMods]);
 
-  const frameCapacity = (hasReactor ? 60 : 30) + (isMR30 ? 10 : 0);
-  const weaponCapacity = (hasCatalyst ? 60 : 30) + (isMR30 ? 10 : 0);
+  const frameCapacity = hasReactor ? 60 : 30;
+  const weaponCapacity = hasCatalyst ? 60 : 30;
 
   const frameModsUsed = useMemo(() => {
     const mods = mode === "archwing" ? archwingMods : necramechMods;
@@ -233,18 +266,26 @@ export default function ArchwingBuilderPage() {
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <h1 className="text-xl sm:text-3xl font-bold">Archwing & Necramech Builder</h1>
           <div className="flex items-center gap-2">
-            <button onClick={() => setSaveDialogOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-green-400 hover:border-green-500/50 transition-all" title="Save Build">
-              <Save className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Save</span>
+            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 sm:min-h-9 sm:py-1.5" title="Save Build">
+              <Save className="h-3.5 w-3.5" /> <span>Save</span>
             </button>
-            <button onClick={() => { setSavedBuilds(getSavedBuilds("archwing")); setShowSavedBuilds(true); }} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:text-blue-400 hover:border-blue-500/50 transition-all" title="Load Build">
-              <FolderOpen className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Load</span>
+            <button onClick={() => { setSavedBuilds(getSavedBuilds("archwing")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-9 sm:py-1.5" title="Load Build">
+              <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
+            </button>
+            <button
+              onClick={() => setCompareOpen(true)}
+              disabled={!selectedFrame}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-teal-500/50 hover:text-teal-700 disabled:pointer-events-none disabled:opacity-40 dark:hover:text-teal-400 sm:min-h-9 sm:py-1.5"
+              title={selectedFrame ? "Compare this build to a saved or posted build" : "Select an archwing or necramech first"}
+            >
+              <ArrowLeftRight className="h-3.5 w-3.5" /> <span>Compare</span>
             </button>
           </div>
         </div>
         <p className="text-muted-foreground mb-6">Build Archwings, Necramechs, and their weapons</p>
 
         {/* Mode selector */}
-        <div className="flex gap-2 mb-6">
+        <div className="mb-6 flex flex-wrap gap-2">
           {(["archwing", "necramech"] as BuilderMode[]).map((m) => (
             <button
               key={m}
@@ -256,9 +297,9 @@ export default function ArchwingBuilderPage() {
                 setBuildName("");
               }}
               className={cn(
-                "px-4 py-2 rounded-lg text-sm font-medium border transition-all capitalize",
+                "inline-flex min-h-11 items-center rounded-lg border px-4 py-2.5 text-sm font-medium capitalize transition-all sm:min-h-9 sm:py-2",
                 mode === m
-                  ? "bg-cyan-500/10 border-cyan-500/50 text-cyan-400"
+                  ? "bg-cyan-500/10 border-cyan-500/50 text-cyan-700 dark:text-cyan-400"
                   : "border-border text-muted-foreground hover:text-foreground"
               )}
             >
@@ -287,9 +328,9 @@ export default function ArchwingBuilderPage() {
                       setBuildName(`${aw.name} Build`);
                     }}
                     className={cn(
-                      "p-3 rounded-lg border text-left transition-all",
+                      "min-h-11 rounded-lg border p-3 text-left transition-all",
                       selectedArchwing?.id === aw.id
-                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                         : "border-border hover:border-cyan-500/30"
                     )}
                   >
@@ -309,9 +350,9 @@ export default function ArchwingBuilderPage() {
                       setBuildName(`${nm.name} Build`);
                     }}
                     className={cn(
-                      "p-3 rounded-lg border text-left transition-all",
+                      "min-h-11 rounded-lg border p-3 text-left transition-all",
                       selectedNecramech?.id === nm.id
-                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                         : "border-border hover:border-cyan-500/30"
                     )}
                   >
@@ -327,33 +368,25 @@ export default function ArchwingBuilderPage() {
             {/* Frame mod slots */}
             {((mode === "archwing" && selectedArchwing) || (mode === "necramech" && selectedNecramech)) && (
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-sm font-semibold tracking-wider text-muted-foreground">
+                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                  <h2 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">
                     {mode === "archwing" ? "ARCHWING MODS" : "NECRAMECH MODS"}
                   </h2>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setIsMR30(!isMR30)}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-all",
-                        isMR30 ? "bg-amber-500/10 border-amber-500/50 text-amber-400" : "border-border text-muted-foreground"
-                      )}
-                    >
-                      <Star className="h-3.5 w-3.5" /> MR 30+
-                    </button>
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => setHasReactor(!hasReactor)}
                       className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-all",
-                        hasReactor ? "bg-blue-500/10 border-blue-500/50 text-blue-400" : "border-border text-muted-foreground"
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
+                        hasReactor ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400" : "border-border text-muted-foreground"
                       )}
                     >
                       <Zap className="h-3.5 w-3.5" /> Reactor
                     </button>
                     <span className={cn(
-                      "text-xs font-mono",
-                      frameModsUsed > frameCapacity ? "text-red-400" : "text-muted-foreground"
+                      "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
+                      frameModsUsed > frameCapacity ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
                     )}>
+                      <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
                       {frameModsUsed} / {frameCapacity}
                     </span>
                   </div>
@@ -419,14 +452,14 @@ export default function ArchwingBuilderPage() {
                       setBuildName(`${w.name} Build`);
                     }}
                     className={cn(
-                      "p-2.5 rounded-lg border text-left transition-all text-sm",
+                      "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                       selectedWeapon?.id === w.id
-                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                         : "border-border hover:border-cyan-500/30"
                     )}
                   >
                     <span className="font-medium">{w.name}</span>
-                    <span className={cn("ml-1.5 text-[10px]", w.category === "archgun" ? "text-blue-400" : "text-green-400")}>
+                    <span className={cn("ml-1.5 text-[10px]", w.category === "archgun" ? "text-blue-700 dark:text-blue-400" : "text-green-700 dark:text-green-400")}>
                       {w.category}
                     </span>
                     <div className="text-[10px] text-muted-foreground mt-0.5">
@@ -439,22 +472,23 @@ export default function ArchwingBuilderPage() {
 
             {selectedWeapon && (
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-sm font-semibold tracking-wider text-muted-foreground">WEAPON MODS</h2>
-                  <div className="flex items-center gap-2">
+                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                  <h2 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">WEAPON MODS</h2>
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => setHasCatalyst(!hasCatalyst)}
                       className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-all",
-                        hasCatalyst ? "bg-blue-500/10 border-blue-500/50 text-blue-400" : "border-border text-muted-foreground"
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
+                        hasCatalyst ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400" : "border-border text-muted-foreground"
                       )}
                     >
                       <Zap className="h-3.5 w-3.5" /> Catalyst
                     </button>
                     <span className={cn(
-                      "text-xs font-mono",
-                      weaponModsUsed > weaponCapacity ? "text-red-400" : "text-muted-foreground"
+                      "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
+                      weaponModsUsed > weaponCapacity ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
                     )}>
+                      <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
                       {weaponModsUsed} / {weaponCapacity}
                     </span>
                   </div>
@@ -554,6 +588,16 @@ export default function ArchwingBuilderPage() {
         onLoad={handleLoadBuild}
         onDelete={handleDeleteBuild}
       />
+
+      {selectedFrame && (
+        <BuildCompareDialog
+          open={compareOpen}
+          onOpenChange={setCompareOpen}
+          type="archwing"
+          itemId={selectedFrame.name}
+          live={liveCompare}
+        />
+      )}
 
       <SaveBuildDialog
         open={saveDialogOpen}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Swords, Shield, Bug, Wrench, BarChart3, Users, User, Github, Info, BookOpen, FolderOpen, Plane, Rocket } from "lucide-react";
-import { FRAME_HUB_GITHUB_URL } from "@/lib/site/site-links";
+import { VOIDFORGE_GITHUB_URL } from "@/lib/site/site-links";
 import { PageShell, PageMain, PageHero, ContentPanel } from "@/components/page-shell";
 
 export default function AboutPage() {
@@ -13,15 +13,15 @@ export default function AboutPage() {
           icon={Info}
           accent="primary"
           title="About"
-          highlight="Frame Hub"
+          highlight="Voidforge"
           description="A Warframe build planner and theorycrafting toolkit."
         />
 
         <div className="space-y-6">
           <ContentPanel>
-            <h2 className="mb-3 text-lg font-semibold">What is Frame Hub?</h2>
+            <h2 className="mb-3 text-lg font-semibold">What is Voidforge?</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Frame Hub is a free build planner for Digital Extremes&apos; Warframe.
+              Voidforge is a free build planner for Digital Extremes&apos; Warframe.
               It lets you theorycraft weapon, warframe, companion, archwing, railjack, and modular weapon builds
               with real-time stat calculations, elemental combo resolution, damage simulation, and
               time-to-kill estimates against every enemy faction. Browse the Codex to verify mod, arcane, and
@@ -66,16 +66,16 @@ export default function AboutPage() {
               Open Source
             </h2>
             <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
-              Frame Hub is open source under the MIT license. You can browse the code, file issues, suggest features, or contribute pull requests on GitHub.
+              Voidforge is open source under the MIT license. You can browse the code, file issues, suggest features, or contribute pull requests on GitHub.
             </p>
             <a
-              href={FRAME_HUB_GITHUB_URL}
+              href={VOIDFORGE_GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+              className="inline-flex max-w-full min-h-11 items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
             >
-              <Github className="h-4 w-4" />
-              github.com/StepTwo33/FrameHub
+              <Github className="h-4 w-4 shrink-0" />
+              <span className="truncate">github.com/StepTwo33/Voidforge</span>
             </a>
           </ContentPanel>
 
@@ -83,10 +83,10 @@ export default function AboutPage() {
             <h2 className="mb-3 text-lg font-semibold">Data Sources</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
               All weapon stats, mod values, warframe abilities, arcane effects, and enemy data are sourced from the{" "}
-              <a href="https://wiki.warframe.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+              <a href="https://wiki.warframe.com" target="_blank" rel="noopener noreferrer" className="text-primary underline-offset-2 hover:underline">
                 Official Warframe Wiki
               </a>{" "}
-              and verified against in-game values. Frame Hub is not affiliated with or endorsed by Digital Extremes.
+              and verified against in-game values. Voidforge is not affiliated with or endorsed by Digital Extremes.
             </p>
           </ContentPanel>
 
@@ -94,9 +94,9 @@ export default function AboutPage() {
             <h2 className="mb-3 text-lg font-semibold">Feedback</h2>
             <p className="text-sm leading-relaxed text-muted-foreground">
               Found incorrect data or a missing entry? Use the{" "}
-              <Link href="/report-issue" className="text-amber-400 hover:underline">Report Issue</Link>{" "}
+              <Link href="/report-issue" className="text-amber-800 underline-offset-2 hover:underline dark:text-amber-400">Report Issue</Link>{" "}
               page to flag stat discrepancies or missing items. Staff and moderators review reports and can apply
-              data corrections through the Codex and Data Fixes tools. Frame Hub is built with Next.js, TypeScript, and Tailwind CSS.
+              data corrections through the Codex and Data Fixes tools. Voidforge is built with Next.js, TypeScript, and Tailwind CSS.
             </p>
           </ContentPanel>
 
@@ -115,7 +115,7 @@ export default function AboutPage() {
                     <Link
                       key={c.name}
                       href={c.profileUrl}
-                      className="group flex items-center gap-3 rounded-lg border border-border/50 bg-background/40 p-3 transition-all hover:border-primary/40 hover:bg-primary/5"
+                      className="group flex min-h-11 items-center gap-3 rounded-lg border border-border/50 bg-background/40 p-3 transition-all hover:border-primary/40 hover:bg-primary/5"
                     >
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                         {c.name.charAt(0)}
@@ -132,7 +132,7 @@ export default function AboutPage() {
                       href={c.profileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group flex items-center gap-3 rounded-lg border border-border/50 bg-background/40 p-3 transition-all hover:border-primary/40 hover:bg-primary/5"
+                      className="group flex min-h-11 items-center gap-3 rounded-lg border border-border/50 bg-background/40 p-3 transition-all hover:border-primary/40 hover:bg-primary/5"
                     >
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                         {c.name.charAt(0)}
@@ -164,7 +164,7 @@ export default function AboutPage() {
 
           <p className="text-center text-xs text-muted-foreground/70">
             Warframe and the Warframe logo are registered trademarks of Digital Extremes Ltd.
-            Frame Hub is a fan-made tool and is not affiliated with, endorsed, or sponsored by Digital Extremes.
+            Voidforge is a fan-made tool and is not affiliated with, endorsed, or sponsored by Digital Extremes.
           </p>
         </div>
       </PageMain>

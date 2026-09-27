@@ -1,5 +1,5 @@
 /**
- * Discord OAuth helpers for linking FrameHub accounts and bot invite URLs.
+ * Discord OAuth helpers for linking Voidforge accounts and bot invite URLs.
  */
 
 import { getPublicOrigin } from "@/lib/site/public-origin";

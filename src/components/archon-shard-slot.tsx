@@ -73,11 +73,11 @@ export function ArchonShardSlot({ shard, slotIndex, onEquip, onRemove }: ArchonS
       <button
         type="button"
         onClick={onEquip}
-        className="flex h-[4.75rem] w-16 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border/80 bg-card/30 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+        className="flex h-[4.75rem] min-h-11 w-16 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border/80 bg-card/30 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
         title={`Empty shard slot ${slotIndex + 1}`}
       >
         <Plus className="h-4 w-4" />
-        <span className="text-[9px] font-medium text-muted-foreground/80">{slotIndex + 1}</span>
+        <span className="text-[9px] font-medium text-muted-foreground/80">Add {slotIndex + 1}</span>
       </button>
     );
   }
@@ -103,7 +103,7 @@ export function ArchonShardSlot({ shard, slotIndex, onEquip, onRemove }: ArchonS
           {colorName}
         </span>
         {isTau && (
-          <span className="rounded bg-amber-500/15 px-1 py-px text-[8px] font-bold uppercase tracking-wide text-amber-400 ring-1 ring-amber-500/25">
+          <span className="rounded bg-amber-500/15 px-1 py-px text-[8px] font-bold uppercase tracking-wide text-amber-800 ring-1 ring-amber-500/25 dark:text-amber-400">
             Tau
           </span>
         )}

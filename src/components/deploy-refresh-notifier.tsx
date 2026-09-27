@@ -2,8 +2,10 @@
 
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { promptDeployRefresh } from "@/lib/site/deploy-refresh";
 
 const BUILD_STORAGE_KEY = "framehub_build_id";
+const CHECK_INTERVAL_MS = 60_000;
 
 function isStaleClientError(message: string): boolean {
   const m = message.toLowerCase();
@@ -15,24 +17,18 @@ function isStaleClientError(message: string): boolean {
   );
 }
 
-function promptRefresh(reason: string) {
-  toast.info(reason, {
-    duration: 12000,
-    action: {
-      label: "Refresh",
-      onClick: () => window.location.reload(),
-    },
-  });
-}
-
+/**
+ * Detects a new production build and prompts to refresh.
+ * Does not auto-reload — that would wipe in-progress builder state.
+ */
 export function DeployRefreshNotifier() {
-  const warned = useRef(false);
+  const prompted = useRef(false);
 
   useEffect(() => {
-    const warnOnce = (reason: string) => {
-      if (warned.current) return;
-      warned.current = true;
-      promptRefresh(reason);
+    const offerRefresh = (message: string) => {
+      if (prompted.current) return;
+      prompted.current = true;
+      promptDeployRefresh(message);
     };
 
     const checkBuild = async () => {
@@ -43,21 +39,29 @@ export function DeployRefreshNotifier() {
         if (!buildId) return;
 
         const prev = sessionStorage.getItem(BUILD_STORAGE_KEY);
-        if (prev && prev !== buildId) {
-          warnOnce("Frame Hub was updated. Refresh for the latest version.");
-        }
         sessionStorage.setItem(BUILD_STORAGE_KEY, buildId);
+        if (prev && prev !== buildId) {
+          offerRefresh("Voidforge was updated");
+        }
       } catch {
         // ignore network errors during deploy
       }
     };
 
     checkBuild();
-    const interval = setInterval(checkBuild, 3 * 60 * 1000);
+    const interval = setInterval(checkBuild, CHECK_INTERVAL_MS);
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void checkBuild();
+    };
+    document.addEventListener("visibilitychange", onVisible);
 
     const onError = (event: ErrorEvent) => {
       if (isStaleClientError(event.message || "")) {
-        warnOnce("This page is from an older version. Please refresh.");
+        offerRefresh("This tab is on an older version");
+        toast.warning("Something failed because of an old page version. Refresh when you can.", {
+          duration: 8000,
+        });
       }
     };
 
@@ -67,7 +71,7 @@ export function DeployRefreshNotifier() {
           ? event.reason.message
           : String(event.reason ?? "");
       if (isStaleClientError(msg)) {
-        warnOnce("This page is from an older version. Please refresh.");
+        offerRefresh("This tab is on an older version");
       }
     };
 
@@ -76,6 +80,7 @@ export function DeployRefreshNotifier() {
 
     return () => {
       clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onRejection);
     };

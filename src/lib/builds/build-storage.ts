@@ -159,6 +159,8 @@ export interface WeaponBuildData {
   /** Kuva/Tenet/Coda progenitor bonus (optional). */
   progenitorElement?: string;
   progenitorBonusPercent?: number;
+  /** Formas that raised a Kuva/Tenet/Coda weapon past rank 30 (0–5). */
+  adversaryFormas?: number;
   /** Incarnon evolution picks: tier → slot index. */
   incarnonEvolutions?: Record<number, number>;
 }
@@ -203,6 +205,18 @@ export interface CompanionBuildData {
   hasCatalyst?: boolean;
   isMR30: boolean;
   slotPolarities: Record<number, string>;
+  /** Custom pet display name (arsenal import). */
+  customName?: string;
+  /** MOA / Hound modular part selection. */
+  parts?: {
+    kind: "moa" | "hound";
+    model: string;
+    core: string;
+    bracket: string;
+    gyro?: string;
+    stabilizer?: string;
+    isGilded?: boolean;
+  };
 }
 
 export type { ModularBuildData };
@@ -213,7 +227,7 @@ export interface RailjackBuildData {
   shieldId?: string;
   engineId?: string;
   platingId?: string;
-  /** Nose / Dorsal / Ventral turret hardpoints. */
+  /** Nose + Swivel turret hardpoints. */
   turretIds?: (string | undefined)[];
   /** @deprecated Use turretIds[0] — kept for older saves. */
   turretId?: string;
@@ -224,7 +238,29 @@ export interface RailjackBuildData {
   integratedPolarities: Record<number, string>;
   battlePolarities: Record<number, string>;
   tacticalPolarities: Record<number, string>;
-  /** Elite crew member (Update 43 protoframes). */
+  /** Mission crew slots A/B/C (Command 1/3/5). */
+  crewSlots?: ({
+    role: "pilot" | "gunner" | "engineer" | "defender";
+    source: "ticker" | "elite" | "adversary";
+    profileId: string;
+    competency?: {
+      piloting: number;
+      gunnery: number;
+      repair: number;
+      combat: number;
+      endurance: number;
+    };
+    eliteTraitId?: string;
+    weaponLoadout?: {
+      weaponId: string;
+      mods: ModSlot[];
+      slotPolarities?: Record<number, string>;
+      hasOrokinCatalyst?: boolean;
+      progenitorElement?: string;
+      progenitorBonusPercent?: number;
+    };
+  } | null)[];
+  /** @deprecated Use crewSlots — single elite pick from older saves. */
   eliteCrewId?: string;
   /** Selected Mk III house unique trait rolls. */
   reactorTraitId?: string;

@@ -1,12 +1,12 @@
-# Frame Hub
+# Voidforge
 
-Open-source verification source for [frame-hub.com](https://frame-hub.com) — Warframe build planner calculations and item catalogs (mods, weapons, warframes, arcanes, and more).
+Open-source verification source for [void-forge.org](https://void-forge.org) — Warframe build planner calculations and item catalogs (mods, weapons, warframes, arcanes, and more).
 
-**Use the planner at:** [frame-hub.com](https://frame-hub.com)
+**Use the planner at:** [void-forge.org](https://void-forge.org)
 
 This repository is **not intended for self-hosting**. Clone it to inspect or correct damage math and catalog data, or to contribute fixes. Run the product on the live site.
 
-> **Fan project disclaimer:** Frame Hub is not affiliated with, endorsed by, or sponsored by Digital Extremes. *Warframe* and related logos are trademarks of Digital Extremes Ltd. All game data is used for informational purposes under community fan-site conventions.
+> **Fan project disclaimer:** Voidforge is not affiliated with, endorsed by, or sponsored by Digital Extremes. *Warframe* and related logos are trademarks of Digital Extremes Ltd. All game data is used for informational purposes under community fan-site conventions.
 
 ## What lives here
 
@@ -22,8 +22,8 @@ This repository is **not intended for self-hosting**. Clone it to inspect or cor
 Node.js 20+ and npm:
 
 ```bash
-git clone https://github.com/StepTwo33/FrameHub.git
-cd FrameHub
+git clone https://github.com/StepTwo33/Voidforge.git
+cd Voidforge
 npm install
 npm test
 ```

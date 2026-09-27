@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import {
   buildShareUrl,
-  encodeBuild,
+  encodeBuildAsync,
   isLocalBuildId,
   type ShareableBuild,
 } from "@/lib/builds/build-url";
@@ -15,7 +15,7 @@ export type ShareBuildOutcome =
 /**
  * Copy a shareable link for the current builder state.
  * - Public cloud builds → `/build/{id}` (community page)
- * - Otherwise → compact `/{builder}?build=` URL (no save required)
+ * - Otherwise → compact compressed `/{builder}?build=` URL (no save required)
  */
 export async function shareBuilderBuild(opts: {
   isPublic: boolean;
@@ -31,14 +31,14 @@ export async function shareBuilderBuild(opts: {
   if (canUseCommunityUrl) {
     url = `${window.location.origin}/build/${opts.buildId}`;
   } else {
-    const encoded = encodeBuild(opts.fallback);
+    const encoded = await encodeBuildAsync(opts.fallback);
     if (!encoded) {
       toast.error("Could not create share link", {
         description: "Build data could not be encoded. Try renaming if it has unusual characters.",
       });
       return { kind: "encode_failed" };
     }
-    url = window.location.origin + buildShareUrl(opts.fallback);
+    url = window.location.origin + buildShareUrl(opts.fallback, encoded);
   }
 
   const ok = await copyTextToClipboard(url);

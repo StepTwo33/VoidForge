@@ -15,7 +15,7 @@ import urllib.parse
 import urllib.request
 
 API = "https://wiki.warframe.com/api.php"
-HEADERS = {"User-Agent": "FrameHub/1.0 (https://frame-hub.com)"}
+HEADERS = {"User-Agent": "Voidforge/1.0 (https://void-forge.org)"}
 
 PAGES = [
     "Gravitic Slash", "Astral Shell", "Light's Sanctuary", "Event Horizon",

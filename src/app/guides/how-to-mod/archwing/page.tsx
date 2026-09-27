@@ -30,8 +30,9 @@ export default function HowToModArchwingPage() {
             vs Range, then fund enough Efficiency to cast.
           </li>
           <li>
-            Archwing guns and melee have their own grids. Use the Weapons guide: crit,
-            status, or hybrid still starts from base stats.
+            Archwing guns and melee have their own grids and use a{" "}
+            <span className="font-medium text-foreground">Catalyst</span>, not a Reactor.
+            Use the Weapons guide: crit, status, or hybrid still starts from base stats.
           </li>
           <li>
             Survivability and mobility matter in open space. A glass DPS wing that dies to
@@ -56,8 +57,10 @@ export default function HowToModArchwingPage() {
             Treat it like a frame you intend to main in the landscape.
           </li>
           <li>
-            Mech weapons are their own builds. Do not leave a strong archgun or mech weapon
-            on empty defaults if the mech is your damage source.
+            Mech weapons are their own builds and take a{" "}
+            <span className="font-medium text-foreground">Catalyst</span>. Do not leave a
+            strong archgun or mech weapon on empty defaults if the mech is your damage
+            source.
           </li>
           <li>
             Energy and survivability matter as much as raw Strength. Mechs are big targets.
@@ -72,7 +75,10 @@ export default function HowToModArchwingPage() {
       <ContentPanel>
         <h2 className="mb-3 text-lg font-semibold">Quick checklist</h2>
         <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
-          <li>Reactor → match polarities → Forma the heavy slots</li>
+          <li>
+            Reactor on the wing/mech, Catalyst on its weapons → match polarities → Forma
+            the heavy slots
+          </li>
           <li>Do not stack past 175% Efficiency</li>
           <li>One clear role per build</li>
           <li>Weapons follow the Weapons section</li>

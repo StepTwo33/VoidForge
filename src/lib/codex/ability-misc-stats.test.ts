@@ -1087,6 +1087,43 @@ describe("Uriel Legion passive", () => {
 });
 
 describe("scaleAbilityMiscStats", () => {
+  it("scales Neote total damage and Naraemagi shield and Overguard with strength", () => {
+    const neote = scaleAbilityMiscStats(
+      { totalDamage: 2000 },
+      { strength: 2.54, duration: 1, range: 1.45, efficiency: 1 },
+      { warframeId: "narin", abilityName: "Neote" },
+    );
+    expect(neote.find((l) => l.label === "Total Damage")!.scaled).toBe("5080");
+
+    const nara = scaleAbilityMiscStats(
+      { shieldPerColdStatus: 75, overguardCap: 15000 },
+      { strength: 2.54, duration: 1, range: 1.45, efficiency: 1 },
+      { warframeId: "narin", abilityName: "Naraemagi" },
+    );
+    expect(nara.find((l) => l.label === "Shield Per Cold Status")!.scaled).toBe("190.5");
+    expect(nara.find((l) => l.label === "Overguard Cap")!.scaled).toBe("38100");
+  });
+
+  it("scales Hakchum Cold vulnerability with strength and does not cap at 150%", () => {
+    const lines = scaleAbilityMiscStats(
+      { damageVulnerability: 1.5 },
+      { strength: 2.54, duration: 1, range: 1, efficiency: 1 },
+      { warframeId: "narin", abilityName: "Hakchum" },
+    );
+    expect(lines.find((l) => l.label === "Damage Vulnerability")!.scaled).toBe("381%");
+  });
+
+  it("scales Nurinarim defense reduction with strength and explosion range with range", () => {
+    const lines = scaleAbilityMiscStats(
+      { defenseReduction: 0.05, explosionDamage: 20000, explosionRange: 10 },
+      { strength: 2.54, duration: 1.5333, range: 1.45, efficiency: 1 },
+      { warframeId: "narin", abilityName: "Nurinarim" },
+    );
+    expect(lines.find((l) => l.label === "Defense Reduction")!.scaled).toBe("13%");
+    expect(lines.find((l) => l.label === "Explosion Damage")!.scaled).toBe("50800");
+    expect(lines.find((l) => l.label === "Explosion Range")!.scaled).toBe("14.5m");
+  });
+
   it("keeps Iron Skin armorMultiplier Misc-fixed (outer STR on pool)", () => {
     const lines = scaleAbilityMiscStats(
       { armorMultiplier: 2.5, invulnerabilityDuration: 3 },
