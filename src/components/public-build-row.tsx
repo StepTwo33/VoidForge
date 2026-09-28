@@ -18,7 +18,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { buildOpenUrl } from "@/lib/builds/build-url";
 import type { PublicBuildSummary } from "@/lib/builds/build-types";
 import { resolveBuildItemDisplay } from "@/lib/builds/build-item-display";
 import { AvatarImage, GameAssetImage } from "@/components/game-asset-image";
@@ -190,7 +189,7 @@ export function PublicBuildRow({
       )}
     >
       <Link
-        href={buildOpenUrl(build.type, build.id)}
+        href={`/build/${build.id}`}
         className="flex min-h-11 flex-1 items-center gap-3 p-3 sm:p-4 min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-inset"
       >
         {showThumbnails && (

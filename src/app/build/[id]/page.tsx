@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { PageShell, ContentPanel } from "@/components/page-shell";
 import { BuildPreviewSummary } from "@/components/build-preview-summary";
+import { LoadoutBuildPreview } from "@/components/loadout-build-preview";
 import { BuildPreviewStats } from "@/components/build-preview-stats";
 import { buildOpenUrl } from "@/lib/builds/build-url";
 import { summarizeBuildPreview } from "@/lib/builds/build-preview";
@@ -166,7 +167,11 @@ export default async function SharedBuildPage({ params }: { params: Promise<{ id
 
           <div className="w-full h-px bg-border mb-8" />
 
-          <BuildPreviewSummary preview={preview} />
+          {build.type === "loadout" ? (
+            <LoadoutBuildPreview data={build.data} summary={preview} />
+          ) : (
+            <BuildPreviewSummary preview={preview} />
+          )}
 
           <BuildPreviewStats type={build.type} data={build.data} />
 

@@ -27,6 +27,17 @@ export interface BuildPreviewData {
   modSummary: string;
 }
 
+/** One filled kit slot for loadout display pages. */
+export interface LoadoutSlotPreview {
+  id: string;
+  label: string;
+  itemName: string;
+  itemImage: string | null;
+  modChips: BuildPreviewChip[];
+  arcaneChips: BuildPreviewChip[];
+  extraLines: string[];
+}
+
 function modChipsFromSlots(mods: ModSlot[] | undefined, modsMap = getEffectiveModsMap()): BuildPreviewChip[] {
   const chips: BuildPreviewChip[] = [];
   for (const m of mods ?? []) {
@@ -58,6 +69,177 @@ function shardSummary(shards: (EquippedArchonShard | null)[] | undefined): strin
   });
   return `Archon shards: ${parts.join(", ")}`;
 }
+
+type WeaponSlotBuild = {
+  weaponId: string;
+  mods?: ModSlot[];
+  stanceModId?: string;
+  arcaneIds?: (string | null)[];
+};
+
+function weaponSlotPreview(
+  id: string,
+  label: string,
+  build: WeaponSlotBuild | undefined,
+  weaponsMap: ReturnType<typeof getEffectiveWeaponsMap>,
+  modsMap: ReturnType<typeof getEffectiveModsMap>,
+): LoadoutSlotPreview | null {
+  if (!build?.weaponId) return null;
+  const w = weaponsMap.get(build.weaponId);
+  const modChips = modChipsFromSlots(build.mods, modsMap);
+  if (build.stanceModId) {
+    const stance = modsMap.get(build.stanceModId);
+    if (stance) modChips.unshift({ label: stance.name, sublabel: "Stance" });
+  }
+  return {
+    id,
+    label,
+    itemName: w?.name ?? build.weaponId,
+    itemImage: w ? getWeaponImage(w.name, { category: w.category }) : null,
+    modChips,
+    arcaneChips: arcaneChipsFromIds(build.arcaneIds),
+    extraLines: [],
+  };
+}
+
+/** Per-slot cards for a public loadout build display. */
+export function summarizeLoadoutSlots(data: unknown): LoadoutSlotPreview[] {
+  if (!data || typeof data !== "object") return [];
+  const ld = data as Record<string, unknown>;
+  const modsMap = getEffectiveModsMap();
+  const weaponsMap = getEffectiveWeaponsMap();
+  const warframesMap = getEffectiveWarframesMap();
+  const companionsMap = getEffectiveCompanionsMap();
+  const slots: LoadoutSlotPreview[] = [];
+
+  const wfBuild = ld.warframeBuild as WarframeBuildData | undefined;
+  if (wfBuild?.warframeId) {
+    const wf = warframesMap.get(wfBuild.warframeId);
+    const extraLines: string[] = [];
+    const shards = shardSummary(wfBuild.shards);
+    if (shards) extraLines.push(shards);
+    if (wfBuild.helminthAbilityId) {
+      const helminth = allHelminthAbilities.find((a) => a.id === wfBuild.helminthAbilityId);
+      extraLines.push(`Helminth: ${helminth?.name ?? wfBuild.helminthAbilityId}`);
+    }
+    if (wfBuild.dualFormBuilds && Object.keys(wfBuild.dualFormBuilds).length > 0) {
+      extraLines.push(dualFormModCountSummary(wfBuild));
+    }
+    slots.push({
+      id: "warframe",
+      label: "Warframe",
+      itemName: wf?.name ?? wfBuild.warframeId,
+      itemImage: wf ? getWarframeImage(wf.name) : null,
+      modChips: modChipsFromSlots(wfBuild.mods, modsMap),
+      arcaneChips: arcaneChipsFromIds(wfBuild.arcaneIds),
+      extraLines,
+    });
+  }
+
+  const primary = weaponSlotPreview(
+    "primary",
+    "Primary",
+    ld.primaryBuild as WeaponSlotBuild | undefined,
+    weaponsMap,
+    modsMap,
+  );
+  if (primary) slots.push(primary);
+
+  const secondary = weaponSlotPreview(
+    "secondary",
+    "Secondary",
+    ld.secondaryBuild as WeaponSlotBuild | undefined,
+    weaponsMap,
+    modsMap,
+  );
+  if (secondary) slots.push(secondary);
+
+  const melee = weaponSlotPreview(
+    "melee",
+    "Melee",
+    ld.meleeBuild as WeaponSlotBuild | undefined,
+    weaponsMap,
+    modsMap,
+  );
+  if (melee) slots.push(melee);
+
+  const modular = ld.modularBuild as
+    | {
+        modularType?: string;
+        parts?: Record<string, string>;
+        mods?: ModSlot[];
+        arcaneIds?: (string | null)[];
+        slot?: string;
+        customName?: string;
+      }
+    | undefined;
+  if (modular?.modularType) {
+    const parts = modular.parts ?? {};
+    const primaryPartId =
+      parts.chamber ?? parts.strike ?? parts.prism ?? Object.values(parts)[0];
+    const partWeapon = primaryPartId ? weaponsMap.get(primaryPartId) : undefined;
+    const partLines = Object.entries(parts).map(
+      ([slot, id]) => `${slot}: ${weaponsMap.get(id)?.name ?? id}`,
+    );
+    const slotLabel =
+      modular.slot === "primary"
+        ? "Modular (Primary)"
+        : modular.slot === "secondary"
+          ? "Modular (Secondary)"
+          : modular.slot === "melee"
+            ? "Modular (Melee)"
+            : "Modular";
+    slots.push({
+      id: "modular",
+      label: slotLabel,
+      itemName:
+        modular.customName ||
+        partWeapon?.name ||
+        String(modular.modularType).replace(/_/g, " "),
+      itemImage: partWeapon
+        ? getWeaponImage(partWeapon.name, { category: partWeapon.category })
+        : null,
+      modChips: modChipsFromSlots(modular.mods, modsMap),
+      arcaneChips: arcaneChipsFromIds(modular.arcaneIds),
+      extraLines: partLines,
+    });
+  }
+
+  const comp = ld.companionBuild as
+    | {
+        companionId?: string;
+        customName?: string;
+        mods?: ModSlot[];
+        weaponId?: string;
+        weaponMods?: ModSlot[];
+        arcaneIds?: (string | null)[];
+      }
+    | undefined;
+  if (comp?.companionId) {
+    const c = companionsMap.get(comp.companionId);
+    const extraLines: string[] = [];
+    if (comp.weaponId) {
+      const cw = weaponsMap.get(comp.weaponId);
+      const weaponModCount = comp.weaponMods?.length ?? 0;
+      extraLines.push(
+        `Weapon: ${cw?.name ?? comp.weaponId}` +
+          (weaponModCount > 0 ? ` (${weaponModCount} mod${weaponModCount === 1 ? "" : "s"})` : ""),
+      );
+    }
+    slots.push({
+      id: "companion",
+      label: "Companion",
+      itemName: comp.customName || c?.name || comp.companionId,
+      itemImage: c ? getCompanionImage(c.name) : null,
+      modChips: modChipsFromSlots(comp.mods, modsMap),
+      arcaneChips: arcaneChipsFromIds(comp.arcaneIds),
+      extraLines,
+    });
+  }
+
+  return slots;
+}
+
 
 export function summarizeBuildPreview(type: string, data: unknown): BuildPreviewData {
   const modsMap = getEffectiveModsMap();
@@ -205,30 +387,14 @@ export function summarizeBuildPreview(type: string, data: unknown): BuildPreview
       const ld = data as Record<string, unknown>;
       const wfBuild = ld.warframeBuild as WarframeBuildData | undefined;
       const wf = wfBuild ? warframesMap.get(wfBuild.warframeId) : undefined;
-      const slots: string[] = [];
-      if (wfBuild) {
-        const wfMods = wfBuild.mods?.length ?? 0;
-        slots.push(`Warframe: ${wf?.name ?? wfBuild.warframeId} (${wfMods} mods)`);
-      }
-      const countWeaponMods = (b: { mods?: ModSlot[] } | undefined) => b?.mods?.length ?? 0;
-      if (ld.primaryBuild) slots.push(`Primary: ${countWeaponMods(ld.primaryBuild as { mods?: ModSlot[] })} mods`);
-      if (ld.secondaryBuild) slots.push(`Secondary: ${countWeaponMods(ld.secondaryBuild as { mods?: ModSlot[] })} mods`);
-      if (ld.meleeBuild) slots.push(`Melee: ${countWeaponMods(ld.meleeBuild as { mods?: ModSlot[] })} mods`);
-      if (ld.modularBuild) slots.push(`Modular (${(ld.modularBuild as { slot?: string }).slot ?? "weapon"}): ${countWeaponMods(ld.modularBuild as { mods?: ModSlot[] })} mods`);
-      const comp = ld.companionBuild as { companionId?: string; mods?: ModSlot[] } | undefined;
-      if (comp?.companionId) {
-        const c = companionsMap.get(comp.companionId);
-        slots.push(`Companion: ${c?.name ?? comp.companionId} (${comp.mods?.length ?? 0} mods)`);
-      }
-      extraLines.push(...slots);
-      const filledSlots = slots.length;
+      const filledSlots = summarizeLoadoutSlots(data).length;
       return {
         itemName: wf?.name ?? (filledSlots > 0 ? "Full loadout" : "Loadout"),
         itemImage: wf ? getWarframeImage(wf.name) : null,
         typeLabel: "Loadout",
-        modChips: wfBuild ? modChipsFromSlots(wfBuild.mods) : [],
-        arcaneChips: wfBuild ? arcaneChipsFromIds(wfBuild.arcaneIds) : [],
-        extraLines,
+        modChips: [],
+        arcaneChips: [],
+        extraLines: [],
         modSummary:
           filledSlots === 0
             ? "No slots filled"

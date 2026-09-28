@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ChevronRight, ThumbsUp, Trash2 } from "lucide-react";
-import { buildOpenUrl } from "@/lib/builds/build-url";
 import { useStaffRole } from "@/lib/auth/use-staff";
 import { useConfirmDialog } from "@/components/confirm-dialog-provider";
 
@@ -79,7 +78,7 @@ export function PublicProfileBuilds({ builds }: { builds: PublicProfileBuild[] }
           className="flex items-stretch rounded-lg border border-border bg-card overflow-hidden group"
         >
           <Link
-            href={buildOpenUrl(build.type, build.id)}
+            href={`/build/${build.id}`}
             className="flex min-h-11 flex-1 items-center gap-3 p-4 min-w-0 hover:bg-muted/30 transition-colors"
           >
             <div className="flex-1 min-w-0">
