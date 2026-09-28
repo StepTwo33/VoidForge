@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { PageShell, PageMain, PageHero, FilterChip, ContentPanel, EmptyState } from "@/components/page-shell";
 import { WeaponStatsPanel } from "@/components/stats-panel";
 import { useWeapons, useMods } from "@/lib/weapons/use-data";
@@ -17,7 +17,10 @@ import {
 import { cn } from "@/lib/utils";
 import { getWeaponImage, getWarframeImage, getCompanionImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
-import { getLoadouts } from "@/lib/builds/loadouts";
+import { BuildSourcePicker } from "@/components/compare/build-source-picker";
+import { snapshotFromBuild, equipmentFromLoadoutSlot, type CompareKind, type CompareSnapshot } from "@/lib/builds/compare-build";
+import type { SavedBuild } from "@/lib/builds/build-storage";
+import { savedBuildToLoadout, ownershipBadge } from "@/lib/builds/yours-builds";
 import { calcLoadoutStats, fmtDamageNum, scenarioSimParams, type LoadoutStatsResult } from "@/lib/builds/loadout-stats";
 import { isPrimaryWeaponCategory } from "@/lib/mods/mod-weapon-eligibility";
 import { isCompanionWeaponCategory } from "@/lib/weapons/companion-weapons";
@@ -25,9 +28,6 @@ import { getModCategory } from "@/lib/weapons/weapon-categories";
 import { toast } from "sonner";
 import { CompareRow, CompareSideHeader } from "@/components/compare/stat-diff";
 import { SnapshotCompare, WeaponCompareRows } from "@/components/compare/build-stat-rows";
-import { BuildSourcePicker } from "@/components/compare/build-source-picker";
-import { snapshotFromBuild, equipmentFromLoadoutSlot, type CompareKind, type CompareSnapshot } from "@/lib/builds/compare-build";
-import type { SavedBuild } from "@/lib/builds/build-storage";
 import { EquipmentDiff } from "@/components/compare/equipment-diff";
 
 function weaponImageForName(name: string, weapons: Weapon[]): string {
@@ -72,7 +72,7 @@ function BuildCompareTab() {
     setSourceOpen(null);
   };
 
-  const loadSavedOrPosted = (side: 0 | 1, build: SavedBuild) => {
+  const loadSavedOrCommunity = (side: 0 | 1, build: SavedBuild) => {
     const snap = snapshotFromBuild(kind, build.name, build.data);
     if (!snap) {
       toast.error("That build could not be compared");
@@ -216,7 +216,7 @@ function BuildCompareTab() {
                 ) : sourceOpen === side ? (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium">Load a saved or posted build</p>
+                      <p className="text-xs font-medium">Load from Yours or Community</p>
                       <button
                         type="button"
                         onClick={() => setSourceOpen(null)}
@@ -226,7 +226,7 @@ function BuildCompareTab() {
                         <X className="h-4 w-4" />
                       </button>
                     </div>
-                    <BuildSourcePicker type={kind} onSelect={(build) => loadSavedOrPosted(side, build)} />
+                    <BuildSourcePicker type={kind} onSelect={(build) => loadSavedOrCommunity(side, build)} />
                   </div>
                 ) : (
                   <button
@@ -234,7 +234,7 @@ function BuildCompareTab() {
                     onClick={() => setSourceOpen(side)}
                     className="w-full text-left text-sm font-medium text-primary hover:underline"
                   >
-                    Load a saved or posted build
+                    Load from Yours or Community
                   </button>
                 )}
               </ContentPanel>
@@ -608,16 +608,40 @@ function SlotSection({ slot, a, b, weapons, loadoutA, loadoutB }: {
 
 function LoadoutCompareTab() {
   const allWeapons = useWeapons();
-  const [loadouts, setLoadouts] = useState<Loadout[]>([]);
-  const [selA, setSelA] = useState<string | null>(null);
-  const [selB, setSelB] = useState<string | null>(null);
+  const [sides, setSides] = useState<[Loadout | null, Loadout | null]>([null, null]);
+  const [sourceMeta, setSourceMeta] = useState<[string | null, string | null]>([null, null]);
+  const [pickerOpen, setPickerOpen] = useState<0 | 1 | null>(null);
 
-  useEffect(() => {
-    queueMicrotask(() => setLoadouts(getLoadouts()));
-  }, []);
+  const pickLoadout = (side: 0 | 1, build: SavedBuild, origin: "yours" | "community") => {
+    const loadout = savedBuildToLoadout(build);
+    setSides((prev) => {
+      const next = [...prev] as [Loadout | null, Loadout | null];
+      next[side] = loadout;
+      return next;
+    });
+    setSourceMeta((prev) => {
+      const next = [...prev] as [string | null, string | null];
+      next[side] = origin === "community" ? "Community" : ownershipBadge(build.id);
+      return next;
+    });
+    setPickerOpen(null);
+  };
 
-  const loadoutA = useMemo(() => loadouts.find((l) => l.id === selA) ?? null, [loadouts, selA]);
-  const loadoutB = useMemo(() => loadouts.find((l) => l.id === selB) ?? null, [loadouts, selB]);
+  const clearSide = (side: 0 | 1) => {
+    setSides((prev) => {
+      const next = [...prev] as [Loadout | null, Loadout | null];
+      next[side] = null;
+      return next;
+    });
+    setSourceMeta((prev) => {
+      const next = [...prev] as [string | null, string | null];
+      next[side] = null;
+      return next;
+    });
+  };
+
+  const loadoutA = sides[0];
+  const loadoutB = sides[1];
 
   const simParams = useMemo(() => scenarioSimParams("midFight"), []);
 
@@ -645,67 +669,95 @@ function LoadoutCompareTab() {
     return { totalDpsA, totalDpsB, ehpA, ehpB };
   }, [statsA, statsB]);
 
-  if (loadouts.length < 2) {
+  const labelA = loadoutA?.name ?? "Loadout A";
+  const labelB = loadoutB?.name ?? "Loadout B";
+
+  const renderSide = (side: 0 | 1) => {
+    const loadout = sides[side];
+    const meta = sourceMeta[side];
     return (
-      <EmptyState
-        icon={Trophy}
-        title="Save two loadouts first"
-        description="Loadout compare needs at least two saved kits. Create them in Loadouts, then come back."
-      >
-        <a href="/loadouts" className="inline-flex h-11 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90">Open Loadouts</a>
-      </EmptyState>
+      <div className="space-y-2">
+        <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-primary">
+          {side === 0 ? "Side A" : "Side B"}
+        </label>
+        {loadout ? (
+          <ContentPanel className="!p-3">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">{loadout.name}</p>
+                {meta && <p className="text-[10px] text-muted-foreground">{meta}</p>}
+              </div>
+              <button
+                type="button"
+                onClick={() => clearSide(side)}
+                className="inline-flex h-8 items-center rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                Clear
+              </button>
+            </div>
+          </ContentPanel>
+        ) : pickerOpen === side ? (
+          <ContentPanel className="!p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium">Yours or Community</p>
+              <button
+                type="button"
+                onClick={() => setPickerOpen(null)}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+                aria-label="Close loadout picker"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <BuildSourcePicker type="loadout" onSelect={(build, origin) => pickLoadout(side, build, origin)} />
+          </ContentPanel>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setPickerOpen(side)}
+            className="min-h-11 w-full rounded-lg border border-dashed border-border bg-card px-3 py-2 text-left text-sm font-medium text-primary hover:border-primary/40"
+          >
+            Pick a loadout…
+          </button>
+        )}
+      </div>
     );
-  }
+  };
 
   return (
     <div className="max-w-3xl mx-auto">
-      {/* Loadout Selectors */}
       <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-3 sm:gap-4 items-start mb-6">
-        <div>
-          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-primary">Loadout A</label>
-          <select
-            value={selA ?? ""}
-            onChange={(e) => setSelA(e.target.value || null)}
-            className="min-h-11 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
-          >
-            <option value="">Select loadout…</option>
-            {loadouts.map((l) => (
-              <option key={l.id} value={l.id} disabled={l.id === selB}>{l.name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="pt-5 hidden sm:block">
+        {renderSide(0)}
+        <div className="pt-5 hidden sm:flex sm:items-center sm:justify-center">
           <ArrowLeftRight className="h-5 w-5 text-muted-foreground" />
         </div>
-        <div>
-          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-primary">Loadout B</label>
-          <select
-            value={selB ?? ""}
-            onChange={(e) => setSelB(e.target.value || null)}
-            className="min-h-11 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm"
-          >
-            <option value="">Select loadout…</option>
-            {loadouts.map((l) => (
-              <option key={l.id} value={l.id} disabled={l.id === selA}>{l.name}</option>
-            ))}
-          </select>
-        </div>
+        {renderSide(1)}
       </div>
 
-      {/* Aggregate Summary */}
+      {!loadoutA && !loadoutB && (
+        <EmptyState
+          icon={Trophy}
+          title="Pick two loadouts to compare"
+          description="Choose from Yours (this device + account) or Community posted kits — no need to import first."
+        >
+          <a href="/loadouts" className="inline-flex h-11 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+            Open Loadouts
+          </a>
+        </EmptyState>
+      )}
+
       {aggregate && (
         <ContentPanel className="mb-6 border-primary/30 bg-primary/5">
           <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground">
             <Trophy className="h-3.5 w-3.5 text-primary" /> AGGREGATE
           </h2>
-          <CompareSideHeader aLabel="Loadout A" bLabel="Loadout B" />
+          <CompareSideHeader aLabel={labelA} bLabel={labelB} />
           <CompareRow label="Total Sustained DPS" a={aggregate.totalDpsA} b={aggregate.totalDpsB} format={(v) => fmtDamageNum(v)} />
           <CompareRow label="Warframe EHP" a={aggregate.ehpA} b={aggregate.ehpB} />
         </ContentPanel>
       )}
 
-      {/* Per-Slot Comparisons */}
-      {statsA && statsB && (
+      {statsA && statsB && loadoutA && loadoutB && (
         <div className="space-y-4">
           {(["warframe", "primary", "secondary", "melee", "exalted", "exaltedMelee", "companion"] as SlotType[]).map((slot) => (
             <SlotSection

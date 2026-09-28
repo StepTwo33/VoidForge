@@ -116,7 +116,7 @@ export function CommunityBuildsPanel({
             <div className="rounded-lg border border-dashed border-border/70 px-3 py-6 text-center">
               <p className="text-sm font-medium text-foreground">No community builds yet</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Be the first — save with &quot;List in Community Builds&quot; checked.
+                Be the first — save with &quot;List in Community&quot; checked.
               </p>
             </div>
           ) : (

@@ -511,7 +511,7 @@ export default function DiscoverPage() {
                   <EmptyState
                     icon={Users}
                     title={`No builds for ${itemFilter?.name ?? "this item"} yet`}
-                    description={`Be the first to share a ${itemFilter?.name ?? ""} build — save in the builder and enable “List in Community Builds”.`}
+                    description={`Be the first to share a ${itemFilter?.name ?? ""} build — save in the builder and enable “List in Community”.`}
                   />
                 ) : (
                   <>

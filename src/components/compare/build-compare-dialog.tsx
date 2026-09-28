@@ -47,7 +47,7 @@ export function BuildCompareDialog({
           <DialogTitle>Compare builds</DialogTitle>
         </DialogHeader>
         <p className="text-xs text-muted-foreground">
-          This build stays on the left. Pick one of yours or a posted build for the same item.
+          This build stays on the left. Pick one from Yours or Community for the same item.
           Stats and gear (mods, arcanes, shards) both show below.
         </p>
         <BuildSourcePicker type={type} itemId={itemId} onSelect={pick} />

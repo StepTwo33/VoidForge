@@ -131,7 +131,7 @@ export default function Home() {
                 description="Save and manage complete loadouts with warframe, weapons, and companion builds."
                 icon={FolderOpen}
                 accent="green"
-                badges={["Local Storage", "Import/Export"]}
+                badges={["This device", "Account sync"]}
               />
               <FeatureCard
                 href="/discover"

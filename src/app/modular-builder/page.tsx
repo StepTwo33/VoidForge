@@ -340,6 +340,26 @@ export default function ModularBuilderPage() {
     setBuildName("");
   };
 
+  const applyRecommended = useCallback((parts: string[]) => {
+    const [a, b, c] = parts;
+    resetMods();
+    if (modularType === "kitgun") {
+      setKitgunChamber(kitgunChambers.find((p) => p.name === a) ?? null);
+      setKitgunGrip(kitgunGrips.find((p) => p.name === b) ?? null);
+      setKitgunLoader(kitgunLoaders.find((p) => p.name === c) ?? null);
+      return;
+    }
+    if (modularType === "zaw") {
+      setZawStrike(zawStrikes.find((p) => p.name === a) ?? null);
+      setZawGripSel(zawGrips.find((p) => p.name === b) ?? null);
+      setZawLinkSel(zawLinks.find((p) => p.name === c) ?? null);
+      return;
+    }
+    setAmpPrism(ampPrisms.find((p) => p.name === a) ?? null);
+    setAmpScaffold(ampScaffolds.find((p) => p.name === b) ?? null);
+    setAmpBrace(ampBraces.find((p) => p.name === c) ?? null);
+  }, [modularType]);
+
   const hasKitSummary = modularType === "kitgun"
     ? Boolean(kitgunChamber || kitgunGrip || kitgunLoader)
     : modularType === "zaw"
@@ -677,15 +697,22 @@ export default function ModularBuilderPage() {
               <div className="space-y-3">
                 <h2 className="text-sm font-semibold tracking-wider text-muted-foreground">RECOMMENDED BUILDS</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {recommendedBuilds.filter(b => b.type === modularType).map((b, i) => (
-                    <div key={i} className="p-3 rounded-lg border border-border hover:border-cyan-500/30 transition-all">
+                  {recommendedBuilds.filter((b) => b.type === modularType).map((b, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => applyRecommended(b.parts)}
+                      className="p-3 rounded-lg border border-border hover:border-cyan-500/30 transition-all text-left"
+                    >
                       <div className="font-medium text-sm">{b.name}</div>
                       <div className="text-[10px] text-cyan-700 dark:text-cyan-400 font-mono mt-0.5">{b.parts.join(" + ")}</div>
                       <div className="text-[10px] text-muted-foreground mt-1">{b.description}</div>
                       <div className="flex gap-1 mt-1.5 flex-wrap">
-                        {b.tags.map(t => <span key={t} className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{t}</span>)}
+                        {b.tags.map((t) => (
+                          <span key={t} className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{t}</span>
+                        ))}
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>

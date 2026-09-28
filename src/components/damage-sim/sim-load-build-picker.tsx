@@ -4,14 +4,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { getSavedBuilds, getCloudBuilds, type SavedBuild } from "@/lib/builds/build-storage";
+import type { SavedBuild } from "@/lib/builds/build-storage";
+import { mergeYoursBuilds, ownershipBadge } from "@/lib/builds/yours-builds";
 import {
   applyWeaponBuildToSim,
   type AppliedSimBuild,
   type SimWeaponBuildData,
 } from "@/lib/calc/damage-sim-load";
 
-type Tab = "mine" | "community";
+type Tab = "yours" | "community";
 
 interface CommunityHit {
   id: string;
@@ -36,12 +37,12 @@ export function SimLoadBuildPicker({
   applyHeadshots: boolean;
   onApplyHeadshotsChange: (v: boolean) => void;
 }) {
-  const [tab, setTab] = useState<Tab>("mine");
+  const [tab, setTab] = useState<Tab>("yours");
   const [query, setQuery] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
-  const [myBuilds, setMyBuilds] = useState<SavedBuild[]>([]);
+  const [yoursBuilds, setYoursBuilds] = useState<SavedBuild[]>([]);
   const [community, setCommunity] = useState<CommunityHit[]>([]);
-  const [loadingMine, setLoadingMine] = useState(true);
+  const [loadingYours, setLoadingYours] = useState(true);
   const [loadingCommunity, setLoadingCommunity] = useState(false);
   const [loadingPick, setLoadingPick] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -55,21 +56,11 @@ export function SimLoadBuildPicker({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      setLoadingMine(true);
-      const local = getSavedBuilds("weapon");
-      let cloud: SavedBuild[] = [];
-      try {
-        cloud = await getCloudBuilds("weapon");
-      } catch {
-        /* offline / signed out */
-      }
+      setLoadingYours(true);
+      const merged = await mergeYoursBuilds("weapon");
       if (cancelled) return;
-      const byId = new Map<string, SavedBuild>();
-      for (const b of [...local, ...cloud]) byId.set(b.id, b);
-      setMyBuilds(
-        Array.from(byId.values()).sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 80),
-      );
-      setLoadingMine(false);
+      setYoursBuilds(merged);
+      setLoadingYours(false);
     })();
     return () => {
       cancelled = true;
@@ -85,7 +76,7 @@ export function SimLoadBuildPicker({
     setError(null);
     const params = new URLSearchParams({
       type: "weapon",
-      sort: "popular",
+      sort: "recent",
       limit: "20",
     });
     if (debouncedQ) params.set("q", debouncedQ);
@@ -104,13 +95,13 @@ export function SimLoadBuildPicker({
     return () => ac.abort();
   }, [tab, debouncedQ]);
 
-  const filteredMine = useMemo(() => {
-    if (!debouncedQ) return myBuilds;
+  const filteredYours = useMemo(() => {
+    if (!debouncedQ) return yoursBuilds;
     const q = debouncedQ.toLowerCase();
-    return myBuilds.filter((b) => b.name.toLowerCase().includes(q));
-  }, [myBuilds, debouncedQ]);
+    return yoursBuilds.filter((b) => b.name.toLowerCase().includes(q));
+  }, [yoursBuilds, debouncedQ]);
 
-  const pickMine = useCallback(
+  const pickYours = useCallback(
     (build: SavedBuild) => {
       setError(null);
       const applied = applyWeaponBuildToSim(build.name, build.data as SimWeaponBuildData);
@@ -151,7 +142,7 @@ export function SimLoadBuildPicker({
       <div className="flex gap-1 rounded-lg border border-border/60 bg-muted/20 p-1">
         {(
           [
-            { id: "mine" as const, label: "My builds" },
+            { id: "yours" as const, label: "Yours" },
             { id: "community" as const, label: "Community" },
           ] as const
         ).map((t) => (
@@ -174,7 +165,7 @@ export function SimLoadBuildPicker({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder={tab === "mine" ? "Search your builds…" : "Search community weapon builds…"}
+          placeholder={tab === "yours" ? "Search yours…" : "Search community weapon builds…"}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="min-h-11 pl-9"
@@ -182,30 +173,30 @@ export function SimLoadBuildPicker({
       </div>
 
       <div className="max-h-[min(40vh,14rem)] overflow-y-auto rounded-lg border border-border/60 bg-background/40">
-        {tab === "mine" && (
+        {tab === "yours" && (
           <>
-            {loadingMine ? (
+            {loadingYours ? (
               <div className="flex items-center justify-center gap-2 p-6 text-xs text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading…
               </div>
-            ) : filteredMine.length === 0 ? (
+            ) : filteredYours.length === 0 ? (
               <p className="p-4 text-center text-xs text-muted-foreground">
-                {myBuilds.length === 0
-                  ? "No saved weapon builds. Save one in the Weapon Builder, or try Community."
+                {yoursBuilds.length === 0
+                  ? "No weapon builds in Yours. Save one in the Weapon Builder, or try Community."
                   : "No builds match your search."}
               </p>
             ) : (
               <ul className="divide-y divide-border/40 p-1">
-                {filteredMine.map((b) => (
+                {filteredYours.map((b) => (
                   <li key={b.id}>
                     <button
                       type="button"
-                      onClick={() => pickMine(b)}
+                      onClick={() => pickYours(b)}
                       className="flex w-full min-h-11 items-center justify-between gap-2 rounded-md px-3 py-2 text-left text-xs transition-colors hover:bg-amber-500/5"
                     >
                       <span className="min-w-0 truncate font-medium">{b.name}</span>
                       <span className="shrink-0 text-[10px] text-muted-foreground">
-                        {/^\d{10,}_/.test(b.id) ? "Local" : "Cloud"}
+                        {ownershipBadge(b.id)}
                       </span>
                     </button>
                   </li>
@@ -223,7 +214,7 @@ export function SimLoadBuildPicker({
               </div>
             ) : community.length === 0 ? (
               <p className="p-4 text-center text-xs text-muted-foreground">
-                {debouncedQ ? "No public weapon builds match." : "No popular weapon builds yet."}
+                {debouncedQ ? "No community weapon builds match." : "No community weapon builds yet."}
               </p>
             ) : (
               <ul className="divide-y divide-border/40 p-1">
@@ -238,7 +229,7 @@ export function SimLoadBuildPicker({
                       <span className="min-w-0">
                         <span className="block truncate font-medium">{b.name}</span>
                         <span className="text-[10px] text-muted-foreground">
-                          by {b.author.username}
+                          @{b.author.username}
                           {b.upvoteCount > 0 ? ` · ${b.upvoteCount}↑` : ""}
                         </span>
                       </span>

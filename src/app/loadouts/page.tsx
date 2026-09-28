@@ -188,7 +188,7 @@ export default function LoadoutsPage() {
         markCloudBuildLoaded(cloudResult.id);
         startTransition(() => refresh());
         toast.success("Loadout saved", {
-          description: isPublic ? "Listed in Community Builds." : "Saved to your account.",
+          description: isPublic ? "Listed in Community." : "Saved to your account.",
         });
       } catch (err) {
         console.error("Failed to save loadout", err);
@@ -653,7 +653,7 @@ export default function LoadoutsPage() {
                         <h2 className="text-lg font-semibold truncate">{loadout.name}</h2>
                         {loadout.isPublic && (
                           <span className="text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
-                            Public
+                            Community
                           </span>
                         )}
                         <button

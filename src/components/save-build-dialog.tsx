@@ -93,7 +93,7 @@ export function SaveBuildDialog({
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>
-              Save to your account. Optionally list it in Community Builds so others can find and upvote it.
+              Save to your account. Optionally list it in Community so others can find and upvote it.
             </DialogDescription>
           </DialogHeader>
 
@@ -142,7 +142,7 @@ export function SaveBuildDialog({
                 className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
               />
               <div>
-                <div className="text-sm font-medium">List in Community Builds</div>
+                <div className="text-sm font-medium">List in Community</div>
                 <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                   Public builds can be searched and upvoted by anyone. You can change this later in Profile.
                 </p>

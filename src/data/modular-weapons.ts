@@ -461,7 +461,7 @@ export const ampBraces: AmpBrace[] = [
 // ── RECOMMENDED BUILDS ──────────────────────────────────────────────────
 export interface RecommendedBuild {
   name: string;
-  type: "kitgun" | "zaw";
+  type: "kitgun" | "zaw" | "amp";
   parts: string[];
   description: string;
   tags: string[];
@@ -486,4 +486,13 @@ export const recommendedBuilds: RecommendedBuild[] = [
   { name: "Sepfahn Nikana", type: "zaw", parts: ["Sepfahn", "Peye", "Vargeet II Jai"], description: "Fast nikana with highest base crit (34%) among zaws. Slash-focused for bleed procs.", tags: ["1H", "Crit", "Slash"] },
   { name: "Balla Dagger Speed", type: "zaw", parts: ["Balla", "Peye", "Vargeet II Jai"], description: "Fastest attack speed dagger. Great for Covert Lethality and finisher-focused builds.", tags: ["1H", "Speed", "Dagger"] },
   { name: "Plague Keewar Status", type: "zaw", parts: ["Plague Keewar", "Seekalla", "Ekwana II Jai"], description: "High status staff with innate Viral. 36% status chance makes status builds trivial.", tags: ["2H", "Status", "Viral"] },
+  // Amp recommendations (prism / scaffold / brace)
+  { name: "177 Certus", type: "amp", parts: ["Raplak", "Pencha", "Certus"], description: "Classic sniper amp. Raplak prism + Pencha charged beam with Certus crit. Excellent Eidolon limb DPS.", tags: ["Crit", "Eidolon", "Beam"] },
+  { name: "773 Certus", type: "amp", parts: ["Cantic", "Shraksun", "Certus"], description: "Burst prism with Shraksun explosive scaffold and Certus. Strong all-round Void DPS with splash.", tags: ["Crit", "AoE", "Burst"] },
+  { name: "Propa Certus", type: "amp", parts: ["Raplak", "Propa", "Certus"], description: "Deployable Propa mines with Raplak primary fire and Certus. High burst for big Void targets.", tags: ["Crit", "Mine", "Burst"] },
+  { name: "Xatti Exard", type: "amp", parts: ["Cantic", "Exard", "Certus"], description: "Full-auto Exard scaffold with Cantic bursts and Certus. Sustained explosive Void DPS.", tags: ["Crit", "AoE", "Auto"] },
+  { name: "Klamora Beam Crit", type: "amp", parts: ["Klamora", "Pencha", "Certus"], description: "Held Klamora prism with Pencha alt-fire and Certus. High crit beam for operator combat.", tags: ["Crit", "Beam", "Held"] },
+  { name: "Lega Status", type: "amp", parts: ["Lega", "Dissic", "Lohrin"], description: "Status-oriented Lega prism with Dissic fragmenting explosives and Lohrin hybrid brace.", tags: ["Status", "AoE", "Hybrid"] },
+  { name: "Phahd Crit", type: "amp", parts: ["Raplak", "Phahd", "Certus"], description: "Bouncing Phahd glaive scaffold with Raplak and Certus. Great for groups of Void-weak enemies.", tags: ["Crit", "Glaive", "AoE"] },
+  { name: "Rahn Rapid", type: "amp", parts: ["Rahn", "Klebrik", "Certus"], description: "Auto Rahn prism with Klebrik homing beam scaffold. Mobile operator DPS with Certus crit.", tags: ["Crit", "Homing", "Auto"] },
 ];

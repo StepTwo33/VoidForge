@@ -124,7 +124,7 @@ export function CommunityBuildsSidebar({
           <div className="rounded-lg border border-dashed border-border/70 px-3 py-8 text-center">
             <p className="text-xs font-medium text-foreground">No public builds yet</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Save a build and check &quot;List in Community Builds&quot; to share it.
+              Save a build and check &quot;List in Community&quot; to share it.
             </p>
             <Link
               href="/discover"

@@ -1021,7 +1021,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={() => handleTogglePublic(build)}
-                      title={build.isPublic ? "Remove from community listing" : "List in Community Builds"}
+                      title={build.isPublic ? "Remove from community listing" : "List in Community"}
                       className="flex min-w-14 shrink-0 items-center justify-center border-l border-border px-3 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                     >
                       {build.isPublic ? "Unlist" : "List"}
