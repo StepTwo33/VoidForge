@@ -560,6 +560,7 @@ function TrinityLifegiverPassive({ maxEnergy }: { maxEnergy: number }) {
   );
 }
 
+function MesaPassiveBonusesPanel({ moddedHealth }: { moddedHealth: number }) {
   const dual = computeMesaPassiveBonuses({ sidearmStyle: "dual", meleeEquipped: false });
   const single = computeMesaPassiveBonuses({ sidearmStyle: "single", meleeEquipped: false });
   const withMelee = computeMesaPassiveBonuses({ sidearmStyle: "none", meleeEquipped: true });
