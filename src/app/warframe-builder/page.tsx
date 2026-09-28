@@ -38,6 +38,7 @@ import { warframeArcanes } from "@/data/arcanes";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import { ArchonShardSlot } from "@/components/archon-shard-slot";
 import { allHelminthAbilities, HelminthAbility } from "@/data/helminth";
+import { computeFrostPassiveArmor } from "@/lib/codex/ability-misc-stats";
 import { cn } from "@/lib/utils";
 import { appendReturnTo } from "@/lib/site/nav-return";
 import {
@@ -116,6 +117,8 @@ export default function WarframeBuilderPage() {
   const [helminthAbility, setHelminthAbility] = useState<HelminthAbility | null>(null);
   const [helminthPickerOpen, setHelminthPickerOpen] = useState(false);
   const [helminthPickerSlot, setHelminthPickerSlot] = useState(0);
+  /** Fortifying Freeze sim — shared with Snow Globe Initial Health. */
+  const [frostColdEnemies, setFrostColdEnemies] = useState(5);
   const [modPickerMode, setModPickerMode] = useState<"mods" | "arcanes">("mods");
   const [equippedArcanes, setEquippedArcanes] = useState<(Mod | null)[]>([null, null]);
   const [equippedArcaneRanks, setEquippedArcaneRanks] = useState<number[]>([5, 5]);
@@ -152,6 +155,12 @@ export default function WarframeBuilderPage() {
     () => (selectedWarframe ? getDualFormConfig(selectedWarframe.id) : null),
     [selectedWarframe],
   );
+
+  const frostExtraFlatArmor = useMemo(() => {
+    const id = selectedWarframe?.id ?? "";
+    if (id !== "frost" && id !== "frost_prime") return 0;
+    return computeFrostPassiveArmor(frostColdEnemies);
+  }, [selectedWarframe?.id, frostColdEnemies]);
 
   const modSlotsToEquipped = useCallback((mods: { modId: string; rank: number; slotIndex: number }[]): EquippedMod[] => {
     return mods.map((m) => {
@@ -1134,6 +1143,7 @@ export default function WarframeBuilderPage() {
                                 formLabel={entry.formLabel}
                                 stats={calculatedStats}
                                 warframeId={selectedWarframe.id}
+                                extraFlatArmor={frostExtraFlatArmor}
                                 exaltedWeapon={getExaltedWeaponForAbility(
                                   selectedWarframe.id,
                                   entry.ability.name,
@@ -1263,6 +1273,8 @@ export default function WarframeBuilderPage() {
                   allMods={modsMap}
                   equippedArcanes={equippedArcanes}
                   arcaneRanks={equippedArcaneRanks}
+                  frostColdEnemies={frostColdEnemies}
+                  onFrostColdEnemiesChange={setFrostColdEnemies}
                 />
               </div>
             </div>

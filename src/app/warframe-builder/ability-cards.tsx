@@ -46,6 +46,7 @@ export function AbilityCard({
   gameSlot,
   formLabel,
   warframeId,
+  extraFlatArmor,
   footer,
   exaltedWeapon,
 }: {
@@ -55,11 +56,13 @@ export function AbilityCard({
   gameSlot?: number;
   formLabel?: string;
   warframeId?: string;
+  /** e.g. Frost Fortifying Freeze from the stats-panel Cold Enemies sim. */
+  extraFlatArmor?: number;
   footer?: ReactNode;
   exaltedWeapon?: Weapon | null;
 }) {
   const eff = stats?.abilityEfficiency ?? 1;
-  const display = { warframeId, abilityName: ability.name };
+  const display = { warframeId, abilityName: ability.name, extraFlatArmor };
   const effectiveCost =
     typeof ability.energyCost === "number" ? scaledAbilityEnergyCost(ability.energyCost, eff) : null;
   const slotNum = gameSlot ?? index + 1;

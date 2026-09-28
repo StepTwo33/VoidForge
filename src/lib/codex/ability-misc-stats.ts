@@ -18,6 +18,11 @@ export interface AbilityDisplayContext {
   warframeId?: string;
   abilityName: string;
   helminth?: boolean;
+  /**
+   * Extra flat armor folded into armor-scaled ability pools (e.g. Frost Fortifying Freeze).
+   * Comes from the warframe stats-panel sim, not a second ability-card slider.
+   */
+  extraFlatArmor?: number;
 }
 
 export interface ScaledMiscStatLine {

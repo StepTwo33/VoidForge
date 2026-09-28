@@ -27,7 +27,6 @@ import {
   computeVirulenceDamage,
   lerpBatteryValue,
   lerpBatteryMaxStat,
-  computeFrostPassiveArmor,
   type AbilityDisplayContext,
 } from "@/lib/codex/ability-misc-stats";
 import { SimSlider } from "@/components/stats/stat-primitives";
@@ -351,14 +350,11 @@ export function AbilityStatsBlock({
         absorptionMultiplier: poolAbsorb.absorptionMultiplier,
       }
     : undefined;
-  /** wiki Fortifying Freeze: +50 armor/enemy with Cold in Affinity Range — fortifies Snow Globe. */
+  /** wiki Fortifying Freeze: +50 armor/enemy — from stats-panel Cold Enemies sim via display.extraFlatArmor. */
   const frostFamily = (display.warframeId ?? "").replace(/_prime$/, "");
   const usesFrostGlobeArmor =
     display.abilityName === "Snow Globe" && frostFamily === "frost";
-  const [frostColdEnemies, setFrostColdEnemies] = useState(0);
-  const frostPassiveArmor = usesFrostGlobeArmor
-    ? computeFrostPassiveArmor(frostColdEnemies)
-    : 0;
+  const frostPassiveArmor = usesFrostGlobeArmor ? Math.max(0, display.extraFlatArmor ?? 0) : 0;
   const armorForPools = (stats?.totalArmor ?? 0) + frostPassiveArmor;
   const hasMassVitrifyAbsorb = display.abilityName === "Mass Vitrify";
   const [vitrifyEnemies, setVitrifyEnemies] = useState(0);
@@ -1411,16 +1407,6 @@ export function AbilityStatsBlock({
               ? "Damage taken during cast invulnerability. Wiki: (base + armor×mult + absorb×absorbMult) × STR. Halo absorbMult Misc-fixed; Storm Shroud absorbMult also × STR (same form)."
               : "Damage taken during cast invulnerability. Wiki: (base + armor×mult) × STR + absorbed."
           }
-        />
-      )}
-      {usesFrostGlobeArmor && (
-        <SimSlider
-          label="Cold Enemies"
-          value={frostColdEnemies}
-          min={0}
-          max={40}
-          onChange={setFrostColdEnemies}
-          tooltip="Fortifying Freeze: +50 Armor per enemy with Cold status in Affinity Range. Added into Snow Globe health as Additional Armor."
         />
       )}
       {hasMassVitrifyAbsorb && (

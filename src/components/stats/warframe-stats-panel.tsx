@@ -243,8 +243,15 @@ function GarudaDeathsGatePassive() {
   );
 }
 
-function FrostFortifyingFreezePassive({ moddedArmor }: { moddedArmor: number }) {
-  const [coldEnemies, setColdEnemies] = useState(5);
+function FrostFortifyingFreezePassive({
+  moddedArmor,
+  coldEnemies,
+  onColdEnemiesChange,
+}: {
+  moddedArmor: number;
+  coldEnemies: number;
+  onColdEnemiesChange: (n: number) => void;
+}) {
   const bonusArmor = computeFrostPassiveArmor(coldEnemies);
 
   return (
@@ -254,8 +261,8 @@ function FrostFortifyingFreezePassive({ moddedArmor }: { moddedArmor: number }) 
         value={coldEnemies}
         min={0}
         max={40}
-        onChange={setColdEnemies}
-        tooltip="Frost Fortifying Freeze: +50 Armor per enemy with Cold status in Affinity Range."
+        onChange={onColdEnemiesChange}
+        tooltip="Frost Fortifying Freeze: +50 Armor per enemy with Cold status in Affinity Range. Also fortifies Snow Globe Initial Health."
       />
       <StatRow
         label="Bonus Armor"
@@ -267,7 +274,7 @@ function FrostFortifyingFreezePassive({ moddedArmor }: { moddedArmor: number }) 
         label="Armor w/ Passive"
         value={(moddedArmor + bonusArmor).toFixed(0)}
         color="text-sky-700 dark:text-sky-400"
-        tooltip="Modded armor + Fortifying Freeze bonus."
+        tooltip="Modded armor + Fortifying Freeze bonus (used by Snow Globe)."
       />
     </div>
   );
@@ -2181,12 +2188,30 @@ function AdaptationSurvivability({ stats }: { stats: WarframeCalculatedStats }) 
   );
 }
 
-export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equippedArcanes, arcaneRanks }: {
-  stats: WarframeCalculatedStats | null; warframe?: Warframe | null;
-  equippedMods?: EquippedMod[]; allMods?: Map<string, Mod>;
+export function WarframeStatsPanel({
+  stats,
+  warframe,
+  equippedMods,
+  allMods,
+  equippedArcanes,
+  arcaneRanks,
+  frostColdEnemies: frostColdEnemiesProp,
+  onFrostColdEnemiesChange,
+}: {
+  stats: WarframeCalculatedStats | null;
+  warframe?: Warframe | null;
+  equippedMods?: EquippedMod[];
+  allMods?: Map<string, Mod>;
   equippedArcanes?: (Mod | null)[];
   arcaneRanks?: number[];
+  /** Controlled Fortifying Freeze sim (builder wires this into Snow Globe). */
+  frostColdEnemies?: number;
+  onFrostColdEnemiesChange?: (n: number) => void;
 }) {
+  const [frostColdEnemiesLocal, setFrostColdEnemiesLocal] = useState(5);
+  const frostColdEnemies = frostColdEnemiesProp ?? frostColdEnemiesLocal;
+  const setFrostColdEnemies = onFrostColdEnemiesChange ?? setFrostColdEnemiesLocal;
+
   const arcaneDisplays = useMemo(() => {
     if (!equippedArcanes || !stats) return [];
     return equippedArcanes
@@ -2234,7 +2259,11 @@ export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equ
           {(warframe.id === "ember" || warframe.id === "ember_prime") && <EmberHeatPassive />}
           {(warframe.id === "garuda" || warframe.id === "garuda_prime") && <GarudaDeathsGatePassive />}
           {(warframe.id === "frost" || warframe.id === "frost_prime") && (
-            <FrostFortifyingFreezePassive moddedArmor={stats.totalArmor} />
+            <FrostFortifyingFreezePassive
+              moddedArmor={stats.totalArmor}
+              coldEnemies={frostColdEnemies}
+              onColdEnemiesChange={setFrostColdEnemies}
+            />
           )}
           {warframe.id === "cyte_09" && <Cyte09PracticedAimPassive />}
           {(warframe.id === "grendel" || warframe.id === "grendel_prime") && (
