@@ -26,6 +26,7 @@ const STATIC_ROUTES: Array<{
   { path: "/compare", changeFrequency: "monthly", priority: 0.6 },
   { path: "/player-sync", changeFrequency: "monthly", priority: 0.55 },
   { path: "/loadouts", changeFrequency: "monthly", priority: 0.55 },
+  { path: "/builds", changeFrequency: "monthly", priority: 0.7 },
   { path: "/updates", changeFrequency: "daily", priority: 0.7 },
   { path: "/about", changeFrequency: "monthly", priority: 0.5 },
   { path: "/guides/how-to-mod", changeFrequency: "monthly", priority: 0.7 },

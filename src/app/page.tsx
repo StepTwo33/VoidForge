@@ -5,6 +5,7 @@ import {
   Shield,
   Dog,
   FolderOpen,
+  Library,
   Dice5,
   BookOpen,
   Target,
@@ -126,12 +127,20 @@ export default function Home() {
                 badges={["15 Enemies", "Elemental Reference"]}
               />
               <FeatureCard
+                href="/builds"
+                title="Your Builds"
+                description="Browse every build on this device and your account — weapons, warframes, modular, and loadouts."
+                icon={Library}
+                accent="primary"
+                badges={["Device", "Account"]}
+              />
+              <FeatureCard
                 href="/loadouts"
                 title="Loadout Manager"
-                description="Save and manage complete loadouts with warframe, weapons, and companion builds."
+                description="Assemble and edit complete kits: warframe, weapons, and companion in one place."
                 icon={FolderOpen}
                 accent="green"
-                badges={["This device", "Account sync"]}
+                badges={["Full kits", "Slot editor"]}
               />
               <FeatureCard
                 href="/discover"

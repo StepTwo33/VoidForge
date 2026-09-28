@@ -46,7 +46,6 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/modular-builder", label: "Modular", desc: "Kitguns, Zaws & more" },
       { href: "/archwing-builder", label: "Archwing", desc: "Archwing & Necramech" },
       { href: "/railjack-builder", label: "Railjack", desc: "Ship components & Plexus" },
-      { href: "/loadouts", label: "Saved Builds", desc: "Local & cloud builds" },
     ],
   },
   {
@@ -63,7 +62,8 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Builds",
     icon: LayoutGrid,
     links: [
-      { href: "/loadouts", label: "Loadouts", desc: "Full loadout slots" },
+      { href: "/builds", label: "Your Builds", desc: "Device & account library" },
+      { href: "/loadouts", label: "Loadouts", desc: "Full loadout kits" },
       { href: "/player-sync", label: "Player Sync", desc: "Import from Warframe account" },
       { href: "/compare", label: "Compare", desc: "Compare items side-by-side" },
       { href: "/import-export", label: "Import / Export", desc: "Share build codes" },

@@ -9,6 +9,7 @@ import {
   loadoutToBuildData,
   mergeCloudLoadoutPreservingSlots,
 } from "@/lib/builds/loadouts";
+import { buildOpenUrl, localBuildOpenUrl } from "@/lib/builds/build-url";
 import type { Loadout } from "@/lib/types";
 
 /** Timestamp-prefixed ids are device-local; cuid / remapped cloud ids are account. */
@@ -103,6 +104,46 @@ export async function mergeYoursBuilds(type: string, limit = 80): Promise<SavedB
   return mergeYoursSavedBuilds(type, limit);
 }
 
+/** All of Yours: single-item builds + loadouts, newest first. */
+export async function mergeAllYoursLibrary(limit = 200): Promise<SavedBuild[]> {
+  const [singles, loadouts] = await Promise.all([
+    (async () => {
+      const local = getSavedBuilds().filter((b) => b.type !== "loadout");
+      let cloud: SavedBuild[] = [];
+      try {
+        cloud = (await getCloudBuilds()).filter((b) => b.type !== "loadout");
+      } catch {
+        /* offline / signed out */
+      }
+      const byId = new Map<string, SavedBuild>();
+      for (const b of [...local, ...cloud]) {
+        const prev = byId.get(b.id);
+        if (!prev || (b.updatedAt ?? 0) >= (prev.updatedAt ?? 0)) {
+          byId.set(b.id, b);
+        }
+      }
+      return Array.from(byId.values());
+    })(),
+    mergeYoursLoadouts(limit),
+  ]);
+
+  return [...singles, ...loadouts]
+    .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
+    .slice(0, limit);
+}
+
 export function savedBuildToLoadout(build: SavedBuild): Loadout {
   return loadoutFromSavedBuild(build);
+}
+
+/** Open URL for a library row: device → localBuild query; account → buildId. */
+export function libraryOpenUrl(build: SavedBuild): string {
+  if (build.type === "loadout") {
+    if (isDeviceBuildId(build.id)) return "/loadouts";
+    return `/loadouts?buildId=${encodeURIComponent(build.id)}`;
+  }
+  if (isDeviceBuildId(build.id)) {
+    return localBuildOpenUrl(build.type, build.id);
+  }
+  return buildOpenUrl(build.type, build.id);
 }
