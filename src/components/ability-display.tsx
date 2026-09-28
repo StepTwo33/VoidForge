@@ -27,6 +27,7 @@ import {
   computeVirulenceDamage,
   lerpBatteryValue,
   lerpBatteryMaxStat,
+  computeFrostPassiveArmor,
   type AbilityDisplayContext,
 } from "@/lib/codex/ability-misc-stats";
 import { SimSlider } from "@/components/stats/stat-primitives";
@@ -350,6 +351,15 @@ export function AbilityStatsBlock({
         absorptionMultiplier: poolAbsorb.absorptionMultiplier,
       }
     : undefined;
+  /** wiki Fortifying Freeze: +50 armor/enemy with Cold in Affinity Range — fortifies Snow Globe. */
+  const frostFamily = (display.warframeId ?? "").replace(/_prime$/, "");
+  const usesFrostGlobeArmor =
+    display.abilityName === "Snow Globe" && frostFamily === "frost";
+  const [frostColdEnemies, setFrostColdEnemies] = useState(0);
+  const frostPassiveArmor = usesFrostGlobeArmor
+    ? computeFrostPassiveArmor(frostColdEnemies)
+    : 0;
+  const armorForPools = (stats?.totalArmor ?? 0) + frostPassiveArmor;
   const hasMassVitrifyAbsorb = display.abilityName === "Mass Vitrify";
   const [vitrifyEnemies, setVitrifyEnemies] = useState(0);
   const [vitrifyEnemyEhpK, setVitrifyEnemyEhpK] = useState(0);
@@ -770,16 +780,27 @@ export function AbilityStatsBlock({
       const unscaled = computeArmorScaledPool(
         ability.health,
         poolMult,
-        stats.totalArmor,
+        armorForPools,
         1,
         poolAbsorbOpts,
       );
       const scaled = computeArmorScaledPool(
         ability.health,
         poolMult,
-        stats.totalArmor,
+        armorForPools,
         str,
         poolAbsorbOpts,
+      );
+      rows.push(
+        <AbilityStatRow
+          key={`${display.abilityName}-armorUsed`}
+          compact={compact}
+          label="Armor (for Globe)"
+          baseValue={armorForPools.toFixed(0)}
+          modifiedValue={armorForPools.toFixed(0)}
+          isModified={frostPassiveArmor > 0}
+          isPositive={frostPassiveArmor > 0}
+        />,
       );
       rows.push(
         <AbilityStatRow
@@ -788,8 +809,8 @@ export function AbilityStatsBlock({
           label={absorbedDamage > 0 ? "Health (w/ Absorb)" : "Initial Health"}
           baseValue={unscaled.toFixed(0)}
           modifiedValue={scaled.toFixed(0)}
-          isModified={str !== 1 || absorbedDamage > 0}
-          isPositive={str > 1 || absorbedDamage > 0}
+          isModified={str !== 1 || absorbedDamage > 0 || frostPassiveArmor > 0}
+          isPositive={str > 1 || absorbedDamage > 0 || frostPassiveArmor > 0}
           scaleHint="strength"
         />,
       );
@@ -1390,6 +1411,16 @@ export function AbilityStatsBlock({
               ? "Damage taken during cast invulnerability. Wiki: (base + armor×mult + absorb×absorbMult) × STR. Halo absorbMult Misc-fixed; Storm Shroud absorbMult also × STR (same form)."
               : "Damage taken during cast invulnerability. Wiki: (base + armor×mult) × STR + absorbed."
           }
+        />
+      )}
+      {usesFrostGlobeArmor && (
+        <SimSlider
+          label="Cold Enemies"
+          value={frostColdEnemies}
+          min={0}
+          max={40}
+          onChange={setFrostColdEnemies}
+          tooltip="Fortifying Freeze: +50 Armor per enemy with Cold status in Affinity Range. Added into Snow Globe health as Additional Armor."
         />
       )}
       {hasMassVitrifyAbsorb && (

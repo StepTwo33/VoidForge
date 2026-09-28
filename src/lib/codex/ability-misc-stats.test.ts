@@ -132,6 +132,14 @@ describe("computeArmorScaledPool", () => {
   it("matches wiki Snow Globe health before absorb", () => {
     expect(computeArmorScaledPool(3500, 5, 600, 1.3)).toBe(8450);
   });
+  // Fortifying Freeze (+50 armor × 5 Cold enemies) stacks as Additional Armor in the same formula
+  it("includes Fortifying Freeze armor in Snow Globe health", () => {
+    const moddedArmor = 600; // Steel Fiber on 300 base
+    const withPassive = moddedArmor + computeFrostPassiveArmor(5); // +250
+    expect(withPassive).toBe(850);
+    // {3500 + 5 × 850} × 1.3 = 10075
+    expect(computeArmorScaledPool(3500, 5, withPassive, 1.3)).toBe(10075);
+  });
   // wiki Mass Vitrify segment: (1600 + 5 × (160 × 2)) × 1.3 = 4160
   it("matches wiki Mass Vitrify segment health before absorb", () => {
     expect(computeArmorScaledPool(1600, 5, 320, 1.3)).toBe(4160);
