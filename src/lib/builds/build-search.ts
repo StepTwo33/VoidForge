@@ -18,6 +18,7 @@ const BUILD_ITEM_CATALOG: BuildSearchItem[] = (() => {
     items.push({ id: w.id, name: w.name, type: "weapon" });
   }
   for (const wf of allWarframes) {
+    if (wf.id === "helminth") continue;
     items.push({ id: wf.id, name: wf.name, type: "warframe" });
     items.push({ id: wf.id, name: `${wf.name} loadouts`, type: "loadout" });
   }

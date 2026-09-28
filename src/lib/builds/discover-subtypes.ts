@@ -200,6 +200,7 @@ export function listDiscoverCatalogItems(
 
   if (type === "warframe") {
     return getEffectiveWarframes()
+      .filter((wf) => wf.id !== "helminth")
       .map((wf) => ({
         id: wf.id,
         name: wf.name,
@@ -278,6 +279,7 @@ export function listDiscoverCatalogItems(
 
   if (type === "loadout") {
     return getEffectiveWarframes()
+      .filter((wf) => wf.id !== "helminth")
       .map((wf) => ({
         id: wf.id,
         name: wf.name,
