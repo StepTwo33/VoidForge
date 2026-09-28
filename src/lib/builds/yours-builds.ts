@@ -153,6 +153,59 @@ export function libraryOpenUrl(build: SavedBuild): string {
 
 const BUILD_NAME_MAX = 200;
 
+/** Cloud id for API ops, if this library row lives on the account. */
+export function accountBuildId(build: SavedBuild): string | null {
+  if (!isDeviceBuildId(build.id)) return build.id;
+  if (build.type === "loadout") {
+    const local = getLoadouts().find((l) => l.id === build.id || l.cloudId === build.id);
+    return local?.cloudId ?? null;
+  }
+  return null;
+}
+
+/**
+ * Toggle Community listing for an account-backed build.
+ * Device-only rows must be saved to the account first.
+ */
+export async function setYoursBuildPublic(
+  build: SavedBuild,
+  isPublic: boolean,
+): Promise<{ ok: true; build: SavedBuild } | { ok: false; error: string }> {
+  const cloudId = accountBuildId(build);
+  if (!cloudId) {
+    return {
+      ok: false,
+      error: "Save this build to your account before listing it in Community.",
+    };
+  }
+
+  const payload: SavedBuild = {
+    ...build,
+    id: cloudId,
+    isPublic,
+    updatedAt: Date.now(),
+  };
+
+  if (build.type === "loadout") {
+    const local = getLoadouts().find((l) => l.id === build.id || l.cloudId === cloudId);
+    if (local) {
+      saveLoadout({ ...local, isPublic, updatedAt: Date.now() });
+      payload.data = loadoutToBuildData({ ...local, isPublic });
+    }
+  } else if (getSavedBuilds().some((b) => b.id === build.id || b.id === cloudId)) {
+    saveBuild({ ...payload, id: cloudId });
+  }
+
+  const cloud = await saveCloudBuild(payload);
+  if (!cloud) {
+    return { ok: false, error: "Could not update Community listing. Sign in and try again." };
+  }
+  return {
+    ok: true,
+    build: { ...build, id: cloud.id, isPublic: cloud.isPublic ?? isPublic, name: cloud.name },
+  };
+}
+
 /**
  * Rename a library build. Updates device storage and, when the row is on the
  * account (or a loadout has cloudId), POSTs the new name to `/api/builds`.

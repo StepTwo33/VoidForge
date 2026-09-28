@@ -3,14 +3,12 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
-import { Trash2, Crosshair, Shield, Dog, Wrench, Plane, LogIn, Camera, Loader2, Check, X, Pencil, Calendar, User as UserIcon, Mail, FileText, Flag, CheckCircle2, Ban, CircleDot, ChevronRight, FolderOpen } from "lucide-react";
+import { Trash2, LogIn, Camera, Loader2, Check, X, Pencil, Calendar, User as UserIcon, Mail, FileText, Flag, CheckCircle2, Ban, CircleDot, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { buildOpenUrl } from "@/lib/builds/build-url";
 import { AvatarImage } from "@/components/game-asset-image";
 import { AvatarCropDialog } from "@/components/avatar-crop-dialog";
 import { SupporterBadge } from "@/components/supporter-badge";
 import { RoleBadge } from "@/components/role-badge";
-import { useConfirmDialog } from "@/components/confirm-dialog-provider";
 
 interface ProfileUser {
   id: string;
@@ -26,18 +24,6 @@ interface ProfileUser {
   _count: { builds: number; reports: number };
 }
 
-interface CloudBuild {
-  id: string;
-  name: string;
-  description?: string;
-  type: string;
-  isPublic?: boolean;
-  upvoteCount?: number;
-  data: Record<string, unknown>;
-  createdAt: number;
-  updatedAt: number;
-}
-
 interface UserReport {
   id: string;
   itemType: string;
@@ -50,33 +36,9 @@ interface UserReport {
   updatedAt: string;
 }
 
-const typeIcons: Record<string, typeof Crosshair> = {
-  weapon: Crosshair,
-  warframe: Shield,
-  companion: Dog,
-  modular: Wrench,
-  archwing: Plane,
-  railjack: Crosshair,
-  loadout: FolderOpen,
-};
-
-const typeColors: Record<string, string> = {
-  weapon: "text-blue-700 dark:text-blue-400 border-blue-500/30",
-  warframe: "text-purple-700 dark:text-purple-400 border-purple-500/30",
-  companion: "text-cyan-700 dark:text-cyan-400 border-cyan-500/30",
-  modular: "text-orange-700 dark:text-orange-400 border-orange-500/30",
-  archwing: "text-teal-700 dark:text-teal-400 border-teal-500/30",
-  railjack: "text-rose-700 dark:text-rose-400 border-rose-500/30",
-  loadout: "text-green-700 dark:text-green-400 border-green-500/30",
-};
-
 export default function ProfilePage() {
-  const { confirm } = useConfirmDialog();
   const [user, setUser] = useState<ProfileUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [builds, setBuilds] = useState<CloudBuild[]>([]);
-  const [buildsLoading, setBuildsLoading] = useState(false);
-  const [filter, setFilter] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<"builds" | "reports" | "settings">("builds");
   const [reports, setReports] = useState<UserReport[]>([]);
   const [reportsLoading, setReportsLoading] = useState(false);
@@ -101,7 +63,6 @@ export default function ProfilePage() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Fetch full profile from dedicated endpoint
     fetch("/api/auth/profile")
       .then((r) => r.json())
       .then((data) => {
@@ -112,13 +73,6 @@ export default function ProfilePage() {
           setBioInput(data.user.bio ?? "");
         }
         setLoading(false);
-        if (data.user) {
-          setBuildsLoading(true);
-          fetch("/api/builds")
-            .then((r) => r.json())
-            .then((b) => { setBuilds(Array.isArray(b) ? b : []); setBuildsLoading(false); })
-            .catch(() => setBuildsLoading(false));
-        }
       })
       .catch(() => setLoading(false));
   }, []);
@@ -307,52 +261,6 @@ export default function ProfilePage() {
     setAvatarUploading(false);
   }, [showMessage, notifyProfileUpdated]);
 
-  const handleDelete = async (id: string) => {
-    const ok = await confirm({
-      title: "Delete build?",
-      description: "This build will be permanently removed from your account.",
-      confirmLabel: "Delete",
-      destructive: true,
-    });
-    if (!ok) return;
-    const res = await fetch(`/api/builds/${id}`, { method: "DELETE" });
-    if (res.ok) {
-      setBuilds((prev) => prev.filter((b) => b.id !== id));
-    }
-  };
-
-  const handleTogglePublic = async (build: CloudBuild) => {
-    const nextPublic = !build.isPublic;
-    const res = await fetch("/api/builds", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: build.id,
-        name: build.name,
-        description: build.description ?? "",
-        isPublic: nextPublic,
-        type: build.type,
-        data: build.data,
-      }),
-    });
-    if (res.ok) {
-      const updated = await res.json();
-      setBuilds((prev) =>
-        prev.map((b) =>
-          b.id === build.id
-            ? { ...b, isPublic: updated.isPublic, upvoteCount: updated.upvoteCount }
-            : b
-        )
-      );
-      showMessage("success", nextPublic ? "Build listed in Community Builds" : "Build removed from community listing");
-    } else {
-      showMessage("error", "Could not update visibility");
-    }
-  };
-
-  const filteredBuilds = filter === "all" ? builds : builds.filter((b) => b.type === filter);
-  const buildCounts = builds.reduce((acc, b) => { acc[b.type] = (acc[b.type] || 0) + 1; return acc; }, {} as Record<string, number>);
-
   if (loading) {
     return (
       <PageShell>
@@ -488,7 +396,7 @@ export default function ProfilePage() {
             {/* Stats */}
             <div className="flex gap-6 sm:gap-4 text-center shrink-0">
               <div>
-                <div className="text-2xl font-bold">{builds.length}</div>
+                <div className="text-2xl font-bold">{user._count.builds}</div>
                 <div className="text-[10px] text-muted-foreground">Builds</div>
               </div>
               <div>
@@ -538,7 +446,7 @@ export default function ProfilePage() {
               activeTab === "builds" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            Builds ({builds.length})
+            Builds ({user._count.builds})
           </button>
           <button
             onClick={() => setActiveTab("reports")}
@@ -927,119 +835,34 @@ export default function ProfilePage() {
         )}
 
         {/* ========== BUILDS TAB ========== */}
-        {activeTab === "builds" && (<>
-          {/* Build Type Filter */}
-          <div className="flex gap-2 mb-6 flex-wrap animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <button
-              onClick={() => setFilter("all")}
-              className={`inline-flex min-h-11 items-center rounded-lg border px-3 text-xs transition-all ${filter === "all" ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
-            >
-              All ({builds.length})
-            </button>
-            {["weapon", "warframe", "companion", "modular", "archwing", "railjack", "loadout"].map((t) => {
-              const Icon = typeIcons[t] ?? Crosshair;
-              return (
-                <button
-                  key={t}
-                  onClick={() => setFilter(t)}
-                  className={`inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 text-xs transition-all ${filter === t ? `${typeColors[t]} bg-white/5` : "border-border text-muted-foreground hover:text-foreground"}`}
-                >
-                  <Icon className="h-3 w-3" />
-                  {t.charAt(0).toUpperCase() + t.slice(1)} ({buildCounts[t] || 0})
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Builds List */}
-          {buildsLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-16 rounded-lg bg-muted animate-pulse border border-border/50" />
-              ))}
-            </div>
-          ) : filteredBuilds.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/70 surface-panel px-4 py-16 text-center animate-in fade-in slide-in-from-bottom-4 duration-500 sm:py-20">
-              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
-                <Shield className="h-8 w-8 text-primary/70" />
-              </div>
-              <h2 className="mb-2 text-lg font-bold sm:text-xl">
-                {builds.length === 0 ? "No cloud builds yet" : "Nothing in this filter"}
-              </h2>
-              <p className="mb-6 max-w-sm text-sm leading-relaxed text-muted-foreground">
-                {builds.length === 0
-                  ? "Save a build from any builder to see it here across devices."
-                  : `No “${filter}” builds saved. Try All or another type.`}
-              </p>
-              {builds.length === 0 && (
-                <Link
-                  href="/weapon-builder"
-                  className="inline-flex h-11 items-center rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                >
-                  Open weapon builder
-                </Link>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {filteredBuilds.map((build) => {
-                const Icon = typeIcons[build.type] ?? Crosshair;
-                const colorClass = typeColors[build.type] ?? "text-muted-foreground border-border";
-                return (
-                  <div
-                    key={build.id}
-                    className="flex items-stretch rounded-lg border border-border bg-card overflow-hidden transition-colors hover:border-primary/35 group"
-                  >
-                    <Link
-                      href={buildOpenUrl(build.type, build.id)}
-                      className="flex flex-1 items-center gap-3 p-4 min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-inset"
-                    >
-                      <div className={`p-2 rounded-lg bg-white/5 shrink-0 ${colorClass.split(" ")[0]}`}>
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex min-w-0 items-center gap-2 text-sm font-medium group-hover:text-primary transition-colors">
-                          <span className="truncate">{build.name}</span>
-                          {build.isPublic ? (
-                            <span className="text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
-                              Public
-                            </span>
-                          ) : (
-                            <span className="text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border shrink-0">
-                              Private
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
-                          {build.type} • {new Date(build.updatedAt).toLocaleDateString()} {new Date(build.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          {(build.upvoteCount ?? 0) > 0 && ` • ${build.upvoteCount} upvotes`}
-                        </div>
-                        <div className="text-[10px] text-primary/80 mt-1">Open in builder</div>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0 self-center" aria-hidden />
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => handleTogglePublic(build)}
-                      title={build.isPublic ? "Remove from community listing" : "List in Community"}
-                      className="flex min-w-14 shrink-0 items-center justify-center border-l border-border px-3 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
-                    >
-                      {build.isPublic ? "Unlist" : "List"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(build.id)}
-                      title="Delete build"
-                      className="flex min-w-11 shrink-0 items-center justify-center border-l border-border px-3 text-muted-foreground transition-colors hover:bg-destructive/15 hover:text-destructive"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+        {activeTab === "builds" && (
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="rounded-2xl border border-border bg-card/60 p-6 sm:p-8">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20">
+                    <Library className="h-5 w-5 text-primary" />
                   </div>
-                );
-              })}
+                  <div>
+                    <h2 className="text-base font-semibold sm:text-lg">Your build library</h2>
+                    <p className="mt-1 max-w-md text-sm text-muted-foreground">
+                      {user._count.builds === 0
+                        ? "Device and account builds live in one place. Open, rename, delete, and list them in Community from the library."
+                        : `${user._count.builds} account build${user._count.builds === 1 ? "" : "s"} synced — manage them alongside device saves in the library.`}
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href="/builds"
+                  className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  <Library className="h-4 w-4" />
+                  Open library
+                </Link>
+              </div>
             </div>
-          )}
-        </>)}
+          </div>
+        )}
       </div>
 
       <AvatarCropDialog

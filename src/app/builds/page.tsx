@@ -22,13 +22,15 @@ import { deleteLoadout, getLoadouts } from "@/lib/builds/loadouts";
 import { extractBuildItemId } from "@/lib/builds/build-types";
 import { resolveBuildItemDisplay } from "@/lib/builds/build-item-display";
 import {
+  accountBuildId,
   isDeviceBuildId,
   libraryOpenUrl,
   mergeAllYoursLibrary,
   ownershipBadge,
   renameYoursBuild,
+  setYoursBuildPublic,
 } from "@/lib/builds/yours-builds";
-import { Edit2, FolderOpen, Library, Loader2, Search, Trash2 } from "lucide-react";
+import { Edit2, FolderOpen, Globe, Library, Loader2, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -70,6 +72,7 @@ export default function BuildsLibraryPage() {
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [listingId, setListingId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -122,6 +125,30 @@ export default function BuildsLibraryPage() {
     }
   };
 
+  const handleTogglePublic = async (build: SavedBuild) => {
+    if (!accountBuildId(build)) {
+      toast.error("Save to your account first", {
+        description: "Open the build, save with List in Community, or sync from Loadouts.",
+      });
+      return;
+    }
+    const next = !build.isPublic;
+    setListingId(build.id);
+    try {
+      const result = await setYoursBuildPublic(build, next);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(next ? "Listed in Community" : "Removed from Community");
+      await refresh();
+    } catch {
+      toast.error("Could not update listing");
+    } finally {
+      setListingId(null);
+    }
+  };
+
   const handleDelete = async (build: SavedBuild) => {
     const ok = await confirm({
       title: "Delete build?",
@@ -161,7 +188,7 @@ export default function BuildsLibraryPage() {
           icon={Library}
           accent="primary"
           title="Your Builds"
-          description="Everything saved on this device and your account — single builds and full loadouts."
+          description="Everything saved on this device and your account. List builds in Community from here."
           actions={
             <Link
               href="/loadouts"
@@ -261,7 +288,14 @@ export default function BuildsLibraryPage() {
                           </div>
                         )}
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium">{build.name}</p>
+                          <div className="flex min-w-0 items-center gap-2">
+                            <p className="truncate text-sm font-medium">{build.name}</p>
+                            {build.isPublic && accountBuildId(build) && (
+                              <span className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide bg-primary/10 text-primary">
+                                Community
+                              </span>
+                            )}
+                          </div>
                           <p className="truncate text-[11px] text-muted-foreground">
                             {display.typeLabel}
                             {display.itemName ? ` · ${display.itemName}` : ""}
@@ -282,7 +316,42 @@ export default function BuildsLibraryPage() {
                       </Link>
                       <button
                         type="button"
-                        disabled={renamingId === build.id || deletingId === build.id}
+                        disabled={
+                          renamingId === build.id ||
+                          deletingId === build.id ||
+                          listingId === build.id
+                        }
+                        onClick={() => void handleTogglePublic(build)}
+                        title={
+                          accountBuildId(build)
+                            ? build.isPublic
+                              ? "Remove from Community"
+                              : "List in Community"
+                            : "Save to account to list in Community"
+                        }
+                        className={cn(
+                          "inline-flex w-11 shrink-0 items-center justify-center border-l border-border/60 transition-colors disabled:opacity-50",
+                          build.isPublic && accountBuildId(build)
+                            ? "text-primary hover:bg-primary/10"
+                            : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                        )}
+                        aria-label={
+                          build.isPublic ? `Unlist ${build.name}` : `List ${build.name} in Community`
+                        }
+                      >
+                        {listingId === build.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Globe className="h-4 w-4" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={
+                          renamingId === build.id ||
+                          deletingId === build.id ||
+                          listingId === build.id
+                        }
                         onClick={() => void handleRename(build)}
                         className="inline-flex w-11 shrink-0 items-center justify-center border-l border-border/60 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
                         aria-label={`Rename ${build.name}`}
@@ -295,7 +364,11 @@ export default function BuildsLibraryPage() {
                       </button>
                       <button
                         type="button"
-                        disabled={renamingId === build.id || deletingId === build.id}
+                        disabled={
+                          renamingId === build.id ||
+                          deletingId === build.id ||
+                          listingId === build.id
+                        }
                         onClick={() => void handleDelete(build)}
                         className="inline-flex w-11 shrink-0 items-center justify-center border-l border-border/60 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
                         aria-label={`Delete ${build.name}`}
