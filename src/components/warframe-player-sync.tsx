@@ -173,6 +173,9 @@ function ImportPreview({
   const slots = [
     result.loadout.warframeBuild?.warframeId && "Warframe",
     result.loadout.warframeBuild?.helminthAbilityId && "Helminth",
+    result.loadout.modularBuilds &&
+      Object.keys(result.loadout.modularBuilds).length > 0 &&
+      `Modular (${Object.keys(result.loadout.modularBuilds).join(", ")})`,
     result.loadout.modularBuild && `Modular (${result.loadout.modularBuild.slot})`,
     result.loadout.primaryBuild?.weaponId && "Primary",
     result.loadout.secondaryBuild?.weaponId && "Secondary",

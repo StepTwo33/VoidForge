@@ -70,9 +70,9 @@ export function BuildVoteButton({
     }
   };
 
-  const iconSize = size === "sm" ? "h-3 w-3" : "h-4 w-4";
-  const pad = size === "sm" ? "px-1.5 py-1 text-[11px]" : "px-3 py-1.5 text-sm";
-  const hit = size === "sm" ? "min-h-9 min-w-9" : "min-h-11 min-w-11";
+  const iconSize = size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4";
+  const pad = size === "sm" ? "px-2 py-1.5 text-xs" : "px-3 py-1.5 text-sm";
+  const hit = size === "sm" ? "min-h-10 min-w-10" : "min-h-11 min-w-11";
 
   return (
     <button
@@ -135,13 +135,13 @@ function BuildItemThumbnail({
   const [imageFailed, setImageFailed] = useState(false);
   const { itemName, itemImage, typeLabel } = resolveBuildItemDisplay(type, itemId);
   const Icon = BUILD_TYPE_ICONS[type] ?? Hammer;
-  const size = compact ? "h-8 w-8" : "h-12 w-12";
+  const size = compact ? "h-9 w-9" : "h-12 w-12";
   const showImage = itemImage && !imageFailed;
 
   return (
     <div
       className={cn(
-        "relative shrink-0 overflow-hidden rounded-md border border-border/50 bg-muted/20",
+        "relative shrink-0 overflow-hidden rounded-lg border border-border/50 bg-muted/20",
         size,
       )}
       title={itemName ?? typeLabel}
@@ -150,14 +150,14 @@ function BuildItemThumbnail({
         <GameAssetImage
           src={itemImage}
           alt={itemName ?? typeLabel}
-          width={compact ? 32 : 48}
-          height={compact ? 32 : 48}
+          width={compact ? 36 : 48}
+          height={compact ? 36 : 48}
           className="h-full w-full object-contain p-0.5"
           onError={() => setImageFailed(true)}
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center bg-primary/5">
-          <Icon className={cn("text-primary/70", compact ? "h-3.5 w-3.5" : "h-5 w-5")} />
+          <Icon className={cn("text-primary/70", compact ? "h-4 w-4" : "h-5 w-5")} />
         </div>
       )}
     </div>
@@ -187,8 +187,8 @@ export function PublicBuildRow({
   return (
     <div
       className={cn(
-        "group flex items-stretch overflow-hidden rounded-lg border border-border/60 bg-card/60 backdrop-blur-sm transition-all duration-200",
-        "hover:border-primary/40 hover:shadow-sm hover:shadow-primary/5",
+        "group flex items-stretch overflow-hidden rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm transition-all duration-200",
+        "hover:border-primary/40 hover:shadow-md hover:shadow-primary/5",
         compact && "text-sm",
       )}
     >
@@ -196,7 +196,7 @@ export function PublicBuildRow({
         href={`/build/${build.id}`}
         className={cn(
           "flex flex-1 items-center min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-inset",
-          compact ? "gap-2 px-2.5 py-2" : "min-h-11 gap-3 p-3 sm:p-4",
+          compact ? "gap-2.5 px-3 py-2.5" : "min-h-11 gap-3 p-3 sm:p-4",
         )}
       >
         {showThumbnails && (
@@ -204,14 +204,14 @@ export function PublicBuildRow({
         )}
         <div className="flex-1 min-w-0">
           {itemDisplay.itemName && (
-            <div className="truncate text-[9px] font-medium uppercase tracking-wide text-muted-foreground leading-tight">
+            <div className="truncate text-[10px] font-medium uppercase tracking-wide text-muted-foreground leading-tight">
               {itemDisplay.itemName}
             </div>
           )}
           <div
             className={cn(
               "font-medium truncate break-words group-hover:text-primary transition-colors",
-              compact ? "text-[13px] leading-snug" : "",
+              compact ? "text-sm leading-snug" : "",
             )}
           >
             {build.name}
@@ -233,19 +233,16 @@ export function PublicBuildRow({
           )}
           <div
             className={cn(
-              "text-[10px] text-muted-foreground flex flex-wrap items-center gap-x-1.5 gap-y-0",
-              compact ? "mt-0.5" : "mt-1 gap-x-2 gap-y-0.5",
+              "text-[10px] text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5",
+              compact ? "mt-1" : "mt-1",
             )}
           >
             {build.author.image && (
               <AvatarImage
                 src={build.author.image}
                 alt=""
-                size={compact ? 12 : 14}
-                className={cn(
-                  "rounded-full object-cover ring-1 ring-border/50",
-                  compact ? "h-3 w-3" : "h-3.5 w-3.5",
-                )}
+                size={14}
+                className="h-3.5 w-3.5 rounded-full object-cover ring-1 ring-border/50"
               />
             )}
             {build.author.profileSlug ? (
@@ -266,7 +263,7 @@ export function PublicBuildRow({
                 }}
                 className={cn(
                   "inline-flex items-center hover:text-primary transition-colors cursor-pointer",
-                  compact ? "min-h-0" : "min-h-11",
+                  compact ? "min-h-0 py-0.5" : "min-h-11",
                 )}
               >
                 @{build.author.username}
@@ -288,7 +285,7 @@ export function PublicBuildRow({
       <div
         className={cn(
           "flex items-center border-l border-border shrink-0",
-          compact ? "gap-0.5 px-1.5" : "gap-1 px-2 sm:px-3",
+          compact ? "gap-1 px-2" : "gap-1 px-2 sm:px-3",
         )}
       >
         {showVote && (
@@ -309,7 +306,7 @@ export function PublicBuildRow({
             title="Load in builder"
             className={cn(
               "inline-flex items-center justify-center rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors",
-              compact ? "h-9 w-9" : "min-h-11 min-w-11 p-2",
+              compact ? "h-10 w-10" : "min-h-11 min-w-11 p-2",
             )}
           >
             <Download className="h-3.5 w-3.5" />

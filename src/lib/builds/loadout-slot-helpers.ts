@@ -40,6 +40,48 @@ export function pickerSlotToWeaponSlot(slot: LoadoutSlotType): LoadoutWeaponSlot
   return null;
 }
 
+/** Modular data for a weapon column, including legacy single-slot kits. */
+export function getLoadoutModular(
+  loadout: Loadout,
+  w: LoadoutWeaponSlot,
+): ModularBuildData | null {
+  const fromMap = loadout.modularBuilds?.[w];
+  if (fromMap) return fromMap;
+  if (loadout.modularBuild?.slot === w) {
+    const { slot: _slot, ...rest } = loadout.modularBuild;
+    return rest;
+  }
+  return null;
+}
+
+/** Write or clear a modular preset on one slot without wiping other slots. */
+export function withLoadoutModular(
+  loadout: Loadout,
+  w: LoadoutWeaponSlot,
+  data: ModularBuildData | null,
+): Loadout {
+  const modularBuilds: NonNullable<Loadout["modularBuilds"]> = {
+    ...(loadout.modularBuilds ?? {}),
+  };
+
+  // Fold legacy single modular into the map before editing.
+  if (loadout.modularBuild?.slot) {
+    const legacySlot = loadout.modularBuild.slot;
+    if (!modularBuilds[legacySlot]) {
+      const { slot: _slot, ...rest } = loadout.modularBuild;
+      modularBuilds[legacySlot] = rest;
+    }
+  }
+
+  if (data) modularBuilds[w] = { ...data };
+  else delete modularBuilds[w];
+
+  const updated: Loadout = { ...loadout, modularBuilds };
+  delete updated.modularBuild;
+  if (Object.keys(modularBuilds).length === 0) delete updated.modularBuilds;
+  return updated;
+}
+
 export function getWeaponSlotPayload(
   loadout: Loadout,
   w: LoadoutWeaponSlot,
@@ -47,8 +89,9 @@ export function getWeaponSlotPayload(
   | { kind: "weapon"; weaponId: string }
   | { kind: "modular"; data: ModularBuildData & { slot: LoadoutWeaponSlot } }
   | null {
-  if (loadout.modularBuild?.slot === w) {
-    return { kind: "modular", data: loadout.modularBuild };
+  const modular = getLoadoutModular(loadout, w);
+  if (modular) {
+    return { kind: "modular", data: { ...modular, slot: w } };
   }
   const weaponId =
     w === "primary"

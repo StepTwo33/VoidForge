@@ -1244,7 +1244,14 @@ export interface Loadout {
       isGilded?: boolean;
     };
   };
-  /** Modular preset occupying one weapon slot (mutually exclusive with that slot's normal weapon build). */
+  /** Modular presets per weapon slot (kitgun / zaw / amp). Prefer over legacy `modularBuild`. */
+  modularBuilds?: Partial<
+    Record<"primary" | "secondary" | "melee", ModularBuildData>
+  >;
+  /**
+   * @deprecated Single modular slot — migrated into `modularBuilds` on load.
+   * Kept so older saved kits still open.
+   */
   modularBuild?: ModularBuildData & {
     slot: "primary" | "secondary" | "melee";
   };

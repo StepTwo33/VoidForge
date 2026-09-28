@@ -470,8 +470,11 @@ function assignWeaponSlot(
 ) {
   if (!mapped) return;
   if (mapped.kind === "modular") {
-    if (!loadout.modularBuild) {
-      loadout.modularBuild = mapped.build;
+    const builds = { ...(loadout.modularBuilds ?? {}) };
+    if (!builds[slot]) {
+      const { slot: _s, ...rest } = mapped.build;
+      builds[slot] = rest;
+      loadout.modularBuilds = builds;
     }
     return;
   }
@@ -623,7 +626,12 @@ export function mapArsenalToImportPayload(
   );
 
   // Archgun (heavy) — import as primary when no primary is set.
-  if (!resultLoadout.primaryBuild && !resultLoadout.modularBuild?.slot && loadout.heavy) {
+  if (
+    !resultLoadout.primaryBuild &&
+    !resultLoadout.modularBuilds?.primary &&
+    !resultLoadout.modularBuild?.slot &&
+    loadout.heavy
+  ) {
     const heavyMapped = weaponBuildFromArsenal(loadout.heavy, rawNormal?.heavy, warnings);
     if (heavyMapped?.kind === "weapon") {
       resultLoadout.primaryBuild = heavyMapped.build;
@@ -654,6 +662,7 @@ export function loadoutHasImportableContent(loadout: ArsenalImportPayload["loado
     loadout.secondaryBuild ||
     loadout.meleeBuild ||
     loadout.modularBuild ||
+    (loadout.modularBuilds && Object.keys(loadout.modularBuilds).length > 0) ||
     loadout.companionBuild ||
     loadout.archwingBuild
   );

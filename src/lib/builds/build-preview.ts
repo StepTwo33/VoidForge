@@ -163,23 +163,34 @@ export function summarizeLoadoutSlots(data: unknown): LoadoutSlotPreview[] {
   );
   if (melee) slots.push(melee);
 
-  const modular = ld.modularBuild as
-    | {
-        modularType?: string;
-        parts?: Record<string, string>;
-        mods?: ModSlot[];
-        arcaneIds?: (string | null)[];
-        slot?: string;
-        customName?: string;
-      }
+  const modularEntries: Array<{
+    slot: string;
+    modularType?: string;
+    parts?: Record<string, string>;
+    mods?: ModSlot[];
+    arcaneIds?: (string | null)[];
+    customName?: string;
+  }> = [];
+  const mbMap = ld.modularBuilds as
+    | Partial<Record<"primary" | "secondary" | "melee", (typeof modularEntries)[number]>>
     | undefined;
-  if (modular?.modularType) {
+  if (mbMap) {
+    for (const slot of ["primary", "secondary", "melee"] as const) {
+      const m = mbMap[slot];
+      if (m?.modularType) modularEntries.push({ ...m, slot });
+    }
+  }
+  const legacyModular = ld.modularBuild as (typeof modularEntries)[number] | undefined;
+  if (legacyModular?.modularType && !modularEntries.some((e) => e.slot === legacyModular.slot)) {
+    modularEntries.push(legacyModular);
+  }
+  for (const modular of modularEntries) {
     const parts = modular.parts ?? {};
     const primaryPartId =
       parts.chamber ?? parts.strike ?? parts.prism ?? Object.values(parts)[0];
     const partWeapon = primaryPartId ? weaponsMap.get(primaryPartId) : undefined;
     const partLines = Object.entries(parts).map(
-      ([slot, id]) => `${slot}: ${weaponsMap.get(id)?.name ?? id}`,
+      ([partSlot, id]) => `${partSlot}: ${weaponsMap.get(id)?.name ?? id}`,
     );
     const slotLabel =
       modular.slot === "primary"
@@ -190,7 +201,7 @@ export function summarizeLoadoutSlots(data: unknown): LoadoutSlotPreview[] {
             ? "Modular (Melee)"
             : "Modular";
     slots.push({
-      id: "modular",
+      id: `modular-${modular.slot ?? "unknown"}`,
       label: slotLabel,
       itemName:
         modular.customName ||

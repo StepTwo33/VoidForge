@@ -70,6 +70,8 @@ import {
   listSavedBuildsForSlot,
   listModularBuildsForWeaponSlot,
   normalizeWarframeBuild,
+  getLoadoutModular,
+  withLoadoutModular,
 } from "@/lib/builds/loadout-slot-helpers";
 
 type SlotType = LoadoutSlotType;
@@ -357,7 +359,8 @@ export default function LoadoutsPage() {
         case "melee":
           {
             const ws = pickerSlotToWeaponSlot(pickerSlot);
-            if (ws && updated.modularBuild?.slot === ws) delete updated.modularBuild;
+            if (!ws) break;
+            const cleared = withLoadoutModular(updated, ws, null);
             const weaponShell: NonNullable<Loadout["primaryBuild"]> = {
               weaponId: itemId,
               mods: [],
@@ -366,6 +369,7 @@ export default function LoadoutsPage() {
               isMR30: false,
               slotPolarities: {},
             };
+            Object.assign(updated, cleared);
             if (pickerSlot === "primary") updated.primaryBuild = weaponShell;
             else if (pickerSlot === "secondary") updated.secondaryBuild = weaponShell;
             else updated.meleeBuild = weaponShell;
@@ -421,12 +425,14 @@ export default function LoadoutsPage() {
           return;
         }
         const ws = pickerSlotToWeaponSlot(pickerSlot);
-        if (ws && updated.modularBuild?.slot === ws) delete updated.modularBuild;
+        let next = updated;
+        if (ws) next = withLoadoutModular(updated, ws, null);
         const payload: NonNullable<Loadout["primaryBuild"]> = {
           ...d,
           arcaneIds: d.arcaneIds ?? [null, null],
           slotPolarities: d.slotPolarities ?? {},
         };
+        Object.assign(updated, next);
         if (pickerSlot === "primary") updated.primaryBuild = payload;
         else if (pickerSlot === "secondary") updated.secondaryBuild = payload;
         else updated.meleeBuild = payload;
@@ -455,11 +461,8 @@ export default function LoadoutsPage() {
       }
       const loadout = loadouts.find((l) => l.id === pickerLoadoutId);
       if (!loadout) return;
-      const updated: Loadout = {
-        ...loadout,
-        modularBuild: { ...data, slot: ws },
-        updatedAt: Date.now(),
-      };
+      let updated = withLoadoutModular(loadout, ws, data);
+      updated = { ...updated, updatedAt: Date.now() };
       if (ws === "primary") delete updated.primaryBuild;
       if (ws === "secondary") delete updated.secondaryBuild;
       if (ws === "melee") delete updated.meleeBuild;
@@ -482,23 +485,23 @@ export default function LoadoutsPage() {
       if (!ok) return;
       const loadout = loadouts.find((l) => l.id === loadoutId);
       if (!loadout) return;
-      const updated = { ...loadout };
+      let updated = { ...loadout };
       switch (slot) {
         case "warframe":
           delete updated.warframeBuild;
           break;
         case "primary":
-          if (loadout.modularBuild?.slot === "primary") delete updated.modularBuild;
-          else delete updated.primaryBuild;
-          break;
         case "secondary":
-          if (loadout.modularBuild?.slot === "secondary") delete updated.modularBuild;
-          else delete updated.secondaryBuild;
+        case "melee": {
+          const ws = pickerSlotToWeaponSlot(slot);
+          if (ws) {
+            updated = withLoadoutModular(updated, ws, null);
+            if (ws === "primary") delete updated.primaryBuild;
+            if (ws === "secondary") delete updated.secondaryBuild;
+            if (ws === "melee") delete updated.meleeBuild;
+          }
           break;
-        case "melee":
-          if (loadout.modularBuild?.slot === "melee") delete updated.modularBuild;
-          else delete updated.meleeBuild;
-          break;
+        }
         case "companion":
           delete updated.companionBuild;
           break;
@@ -600,7 +603,7 @@ export default function LoadoutsPage() {
               <div className="space-y-1">
                 <p>
                   <span className="font-medium text-foreground/80" title="Kitguns, Zaws, and Amps saved in Modular Builder">Modular</span>
-                  {" "}— attach kitgun / zaw / amp presets from the Modular tab when filling a weapon slot.
+                  {" "}— attach kitgun / zaw / amp presets per weapon slot (primary, secondary, and melee can each have one).
                 </p>
                 <p>
                   <Link href="/player-sync" className="font-medium text-primary hover:underline" title="Import equipped gear from your Warframe account via the Arsenal Twitch extension">Player Sync</Link>
@@ -978,8 +981,9 @@ export default function LoadoutsPage() {
             {showModularTab && (
               <TabsContent value="modular" className="flex-1 min-h-0 mt-0 data-[state=inactive]:hidden flex flex-col">
                 <p className="text-[11px] text-muted-foreground mb-2">
-                  Kitgun, Zaw, and Amp presets from Modular Builder. Attaching one <strong>replaces</strong> this weapon
-                  slot (same as in-game).
+                  Kitgun, Zaw, and Amp presets from Modular Builder. Each weapon slot can hold its own
+                  modular (e.g. primary kitgun + secondary kitgun + zaw). Attaching one{" "}
+                  <strong>replaces only this slot&apos;s</strong> weapon or modular.
                 </p>
                 <ScrollArea className="h-[min(50vh,360px)] pr-3">
                   {pickerModularBuilds.length === 0 ? (

@@ -13,8 +13,27 @@ function extractSlotData(loadout: Loadout, kind: BuilderKind, slot: string | nul
       return loadout.warframeBuild;
     case "companion":
       return loadout.companionBuild;
-    case "modular":
-      return loadout.modularBuild;
+    case "modular": {
+      const ws =
+        slot === "secondary" || slot === "melee" || slot === "primary" ? slot : null;
+      if (ws) {
+        const fromMap = loadout.modularBuilds?.[ws];
+        if (fromMap) return fromMap;
+      }
+      // Prefer matching slot on legacy single modular, else any modular for open.
+      if (loadout.modularBuild) {
+        if (!ws || loadout.modularBuild.slot === ws) return loadout.modularBuild;
+      }
+      if (ws && loadout.modularBuilds) {
+        return (
+          loadout.modularBuilds[ws] ??
+          loadout.modularBuilds.primary ??
+          loadout.modularBuilds.secondary ??
+          loadout.modularBuilds.melee
+        );
+      }
+      return loadout.modularBuilds?.primary ?? loadout.modularBuilds?.secondary ?? loadout.modularBuilds?.melee;
+    }
     case "weapon":
       if (slot === "secondary") return loadout.secondaryBuild;
       if (slot === "melee") return loadout.meleeBuild;

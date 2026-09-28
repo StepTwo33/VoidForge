@@ -61,6 +61,23 @@ export function normalizeLoadoutBuildData(data: LoadoutBuildData): LoadoutBuildD
     };
   }
 
+  if (out.modularBuilds) {
+    const slots = ["primary", "secondary", "melee"] as const;
+    const next: NonNullable<LoadoutBuildData["modularBuilds"]> = {};
+    for (const slot of slots) {
+      const mb = out.modularBuilds[slot];
+      if (!mb) continue;
+      next[slot] = {
+        ...mb,
+        hasOrokinCatalyst: mb.hasOrokinCatalyst ?? false,
+        slotPolarities: mb.slotPolarities ?? {},
+        arcaneIds: mb.arcaneIds ?? [null, null],
+        mods: mb.mods ?? [],
+      };
+    }
+    out.modularBuilds = next;
+  }
+
   if (out.modularBuild) {
     const mb = out.modularBuild;
     out.modularBuild = {
@@ -122,6 +139,39 @@ export function mergeCloudLoadoutPreservingSlots(local: Loadout, cloud: SavedBui
     return hasMods(cloudSlot.mods) || cloudSlot.weaponId ? cloudSlot : localSlot;
   };
 
+  const mergeModularMaps = (
+    localMap: LoadoutBuildData["modularBuilds"],
+    cloudMap: LoadoutBuildData["modularBuilds"],
+    legacyLocal: LoadoutBuildData["modularBuild"],
+    legacyCloud: LoadoutBuildData["modularBuild"],
+  ): LoadoutBuildData["modularBuilds"] => {
+    const out: NonNullable<LoadoutBuildData["modularBuilds"]> = {
+      ...(localMap ?? {}),
+    };
+    if (legacyLocal?.slot && !out[legacyLocal.slot]) {
+      const { slot, ...rest } = legacyLocal;
+      out[slot] = rest;
+    }
+    if (cloudMap) {
+      for (const slot of ["primary", "secondary", "melee"] as const) {
+        const c = cloudMap[slot];
+        if (c && (hasMods(c.mods) || c.parts)) out[slot] = c;
+      }
+    }
+    if (legacyCloud?.slot) {
+      const { slot, ...rest } = legacyCloud;
+      if (!out[slot] || hasMods(rest.mods) || rest.parts) out[slot] = rest;
+    }
+    return Object.keys(out).length ? out : undefined;
+  };
+
+  const modularBuilds = mergeModularMaps(
+    localData.modularBuilds,
+    cloudData.modularBuilds,
+    localData.modularBuild,
+    cloudData.modularBuild,
+  );
+
   return {
     ...local,
     name: cloud.name || local.name,
@@ -140,33 +190,39 @@ export function mergeCloudLoadoutPreservingSlots(local: Loadout, cloud: SavedBui
       (hasMods(cloudData.companionBuild.mods) || hasMods(cloudData.companionBuild.weaponMods))
         ? cloudData.companionBuild
         : localData.companionBuild ?? cloudData.companionBuild,
-    modularBuild: cloudData.modularBuild ?? localData.modularBuild,
+    modularBuilds,
     archwingBuild: cloudData.archwingBuild ?? localData.archwingBuild,
   };
 }
 
 function normalizeLoadout(raw: Loadout): Loadout {
-  const m = raw.modularBuild as Record<string, unknown> | undefined;
-  if (!m) return raw;
-  const modularType = (m.modularType ?? m.type) as string | undefined;
-  if (!modularType || !m.parts) return raw;
-  const partial: ModularBuildData = {
-    modularType,
-    parts: m.parts as Record<string, string>,
-    mods: (m.mods as ModSlot[]) || [],
-    hasOrokinCatalyst: Boolean(m.hasOrokinCatalyst),
-    isMR30: m.isMR30 as boolean | undefined,
-    slotPolarities: m.slotPolarities as Record<number, string> | undefined,
-    arcaneIds: m.arcaneIds as (string | null)[] | undefined,
-    customName: (m.customName ?? m.name) as string | undefined,
+  let out: Loadout = { ...raw };
+  const modularBuilds: NonNullable<Loadout["modularBuilds"]> = {
+    ...(out.modularBuilds ?? {}),
   };
-  const slot =
-    (m.slot as "primary" | "secondary" | "melee" | undefined) ?? inferModularLoadoutSlot(partial);
-  const cleaned: ModularBuildData & { slot: "primary" | "secondary" | "melee" } = {
-    ...partial,
-    slot: slot as "primary" | "secondary" | "melee",
-  };
-  return { ...raw, modularBuild: cleaned };
+
+  const m = out.modularBuild as Record<string, unknown> | undefined;
+  if (m && (m.modularType || m.type) && m.parts) {
+    const partial: ModularBuildData = {
+      modularType: (m.modularType ?? m.type) as string,
+      parts: m.parts as Record<string, string>,
+      mods: (m.mods as ModSlot[]) || [],
+      hasOrokinCatalyst: Boolean(m.hasOrokinCatalyst),
+      isMR30: m.isMR30 as boolean | undefined,
+      slotPolarities: m.slotPolarities as Record<number, string> | undefined,
+      arcaneIds: m.arcaneIds as (string | null)[] | undefined,
+      customName: (m.customName ?? m.name) as string | undefined,
+    };
+    const slot =
+      (m.slot as "primary" | "secondary" | "melee" | undefined) ??
+      inferModularLoadoutSlot(partial);
+    if (!modularBuilds[slot]) modularBuilds[slot] = partial;
+  }
+
+  delete out.modularBuild;
+  if (Object.keys(modularBuilds).length > 0) out.modularBuilds = modularBuilds;
+  else delete out.modularBuilds;
+  return out;
 }
 
 export function getLoadouts(): Loadout[] {

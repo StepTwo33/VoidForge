@@ -11,6 +11,7 @@ import { allDualFormMods, getDualFormConfig } from "@/lib/builds/dual-form-warfr
 import { resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
 import { resolveDefaultCompanionWeapon } from "@/lib/weapons/companion-weapons";
 import { weaponFromModularData } from "@/lib/builds/modular-resolve";
+import { getLoadoutModular } from "@/lib/builds/loadout-slot-helpers";
 import { enrichWeapon } from "@/lib/weapons/weapon-enrich";
 import { getMeleeExaltedWeapon, getPrimaryExaltedWeapon } from "@/lib/weapons/exalted-weapons";
 import {
@@ -135,15 +136,17 @@ function resolveCompanionWeaponForLoadout(
 }
 
 export function setBonusLinkageFromLoadout(loadout: Loadout): SetBonusLinkage {
-  const m = loadout.modularBuild;
   const wfMods = loadout.warframeBuild
     ? allDualFormMods(loadout.warframeBuild as WarframeBuildData)
     : undefined;
+  const primaryMod = getLoadoutModular(loadout, "primary");
+  const secondaryMod = getLoadoutModular(loadout, "secondary");
+  const meleeMod = getLoadoutModular(loadout, "melee");
   return {
     warframeMods: wfMods,
-    primaryMods: loadout.primaryBuild?.mods ?? (m?.slot === "primary" ? m.mods : undefined),
-    secondaryMods: loadout.secondaryBuild?.mods ?? (m?.slot === "secondary" ? m.mods : undefined),
-    meleeMods: loadout.meleeBuild?.mods ?? (m?.slot === "melee" ? m.mods : undefined),
+    primaryMods: loadout.primaryBuild?.mods ?? primaryMod?.mods,
+    secondaryMods: loadout.secondaryBuild?.mods ?? secondaryMod?.mods,
+    meleeMods: loadout.meleeBuild?.mods ?? meleeMod?.mods,
     companionMods: loadout.companionBuild?.mods,
     companionWeaponMods: loadout.companionBuild?.weaponMods,
   };
@@ -266,9 +269,9 @@ function calcModularSlotStats(
   buffContext?: WeaponBuffContext,
   steelPath?: boolean,
 ): LoadoutWeaponSlotStats | null {
-  if (loadout.modularBuild?.slot !== slot) return null;
+  const data = getLoadoutModular(loadout, slot);
+  if (!data) return null;
   const modsMap = getEffectiveModsMap();
-  const data = loadout.modularBuild;
   let w = weaponFromModularData(data);
   if (!w) return null;
   w = weaponWithPassive(w);

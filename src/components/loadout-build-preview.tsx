@@ -131,9 +131,11 @@ function slotBuilderHref(loadout: Loadout | null, slotId: string): string | null
         isMR30: wb.isMR30,
       };
     } else if (slotId === "primary" || slotId === "secondary" || slotId === "melee") {
-      const modular = loadout.modularBuild;
-      if (modular?.slot === slotId) {
-        const mb = modular as ModularBuildData & { slot: string };
+      const modular =
+        loadout.modularBuilds?.[slotId] ??
+        (loadout.modularBuild?.slot === slotId ? loadout.modularBuild : undefined);
+      if (modular) {
+        const mb = modular as ModularBuildData;
         share = {
           type: "modular",
           itemId: mb.modularType,
@@ -168,19 +170,25 @@ function slotBuilderHref(loadout: Loadout | null, slotId: string): string | null
           slotPolarities: polaritiesToShare(data.slotPolarities),
         };
       }
-    } else if (slotId === "modular" && loadout.modularBuild) {
-      const mb = loadout.modularBuild as ModularBuildData;
-      share = {
-        type: "modular",
-        itemId: mb.modularType,
-        mods: modsToShare(mb.mods),
-        modularType: mb.modularType,
-        parts: mb.parts,
-        arcanes: (mb.arcaneIds ?? []).map((id) => id ?? ""),
-        hasOrokinCatalyst: mb.hasOrokinCatalyst,
-        isMR30: mb.isMR30,
-        slotPolarities: polaritiesToShare(mb.slotPolarities),
-      };
+    } else if (slotId === "modular") {
+      const mb =
+        loadout.modularBuilds?.primary ??
+        loadout.modularBuilds?.secondary ??
+        loadout.modularBuilds?.melee ??
+        loadout.modularBuild;
+      if (mb) {
+        share = {
+          type: "modular",
+          itemId: mb.modularType,
+          mods: modsToShare(mb.mods),
+          modularType: mb.modularType,
+          parts: mb.parts,
+          arcanes: (mb.arcaneIds ?? []).map((id) => id ?? ""),
+          hasOrokinCatalyst: mb.hasOrokinCatalyst,
+          isMR30: mb.isMR30,
+          slotPolarities: polaritiesToShare(mb.slotPolarities),
+        };
+      }
     }
 
     if (!share) return null;
