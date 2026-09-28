@@ -19,7 +19,12 @@ function toPublicSummary(
     createdAt: Date;
     updatedAt: Date;
     tags?: string;
-    user: { username: string | null; name: string | null; image: string | null };
+    user: {
+      username: string | null;
+      name: string | null;
+      image: string | null;
+      supporterAt: Date | null;
+    };
   },
   voted?: boolean
 ) {
@@ -37,6 +42,7 @@ function toPublicSummary(
       username: build.user.username || build.user.name || "Anonymous",
       profileSlug: build.user.username,
       image: build.user.image,
+      supporter: build.user.supporterAt != null,
     },
     ...(voted !== undefined ? { voted } : {}),
   };
@@ -132,7 +138,7 @@ export async function GET(req: NextRequest) {
         tags: true,
         createdAt: true,
         updatedAt: true,
-        user: { select: { username: true, name: true, image: true } },
+        user: { select: { username: true, name: true, image: true, supporterAt: true } },
       },
     });
   } catch {

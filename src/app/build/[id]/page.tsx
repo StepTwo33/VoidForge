@@ -14,6 +14,7 @@ import { getSession } from "@/lib/auth/auth";
 import { safeParseBuildJson } from "@/lib/builds/build-types";
 import { getSiteUrl } from "@/lib/site/site-metadata";
 import { AvatarImage } from "@/components/game-asset-image";
+import { SupporterHeart } from "@/components/supporter-badge";
 
 interface SharedBuild {
   id: string;
@@ -29,6 +30,7 @@ interface SharedBuild {
     username: string;
     profileSlug?: string | null;
     image?: string;
+    supporter?: boolean;
   };
 }
 
@@ -36,7 +38,7 @@ interface SharedBuild {
 async function getBuild(id: string): Promise<SharedBuild | null> {
   const build = await prisma.build.findUnique({
     where: { id },
-    include: { user: { select: { username: true, name: true, image: true } } },
+    include: { user: { select: { username: true, name: true, image: true, supporterAt: true } } },
   });
   if (!build) return null;
 
@@ -62,6 +64,7 @@ async function getBuild(id: string): Promise<SharedBuild | null> {
       username: build.user.username || build.user.name || "Anonymous",
       profileSlug: build.user.username,
       image: build.user.image ?? undefined,
+      supporter: build.user.supporterAt != null,
     },
   };
 }
@@ -150,13 +153,15 @@ export default async function SharedBuildPage({ params }: { params: Promise<{ id
                 {profileSlug ? (
                   <Link
                     href={`/u/${profileSlug}`}
-                    className="inline-flex min-h-11 items-center text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                    className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
                   >
                     by {build.author.username}
+                    {build.author.supporter && <SupporterHeart />}
                   </Link>
                 ) : (
-                  <span className="text-sm font-medium text-muted-foreground">
+                  <span className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
                     by {build.author.username}
+                    {build.author.supporter && <SupporterHeart />}
                   </span>
                 )}
               </div>

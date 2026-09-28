@@ -192,6 +192,7 @@ export default function LoadoutsPage() {
         toast.success("Loadout saved", {
           description: isPublic ? "Listed in Community." : "Saved to your account.",
         });
+        void import("@/lib/site/support").then((m) => m.maybePromptSupportTip()).catch(() => {});
       } catch (err) {
         console.error("Failed to save loadout", err);
         toast.error("Could not save loadout", { description: "Something went wrong while saving. Try again." });

@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import type { PublicBuildSummary } from "@/lib/builds/build-types";
 import { resolveBuildItemDisplay } from "@/lib/builds/build-item-display";
 import { AvatarImage, GameAssetImage } from "@/components/game-asset-image";
+import { SupporterHeart } from "@/components/supporter-badge";
 import { tagLabel } from "@/lib/builds/build-tags";
 
 interface BuildVoteButtonProps {
@@ -262,14 +263,18 @@ export function PublicBuildRow({
                   }
                 }}
                 className={cn(
-                  "inline-flex items-center hover:text-primary transition-colors cursor-pointer",
+                  "inline-flex items-center gap-1 hover:text-primary transition-colors cursor-pointer",
                   compact ? "min-h-0 py-0.5" : "min-h-11",
                 )}
               >
                 @{build.author.username}
+                {build.author.supporter && <SupporterHeart />}
               </span>
             ) : (
-              <span>@{build.author.username}</span>
+              <span className="inline-flex items-center gap-1">
+                @{build.author.username}
+                {build.author.supporter && <SupporterHeart />}
+              </span>
             )}
             <span className="text-border">·</span>
             <span>{itemDisplay.typeLabel}</span>

@@ -94,7 +94,7 @@ export async function GET(
     where: { id },
     include: {
       user: {
-        select: { username: true, name: true, image: true }
+        select: { username: true, name: true, image: true, supporterAt: true }
       }
     }
   });
@@ -132,6 +132,7 @@ export async function GET(
         username: build.user.username || build.user.name || "Anonymous",
         profileSlug: build.user.username,
         image: build.user.image,
+        supporter: build.user.supporterAt != null,
       },
     },
     {

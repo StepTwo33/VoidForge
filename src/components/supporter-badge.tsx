@@ -21,3 +21,16 @@ export function SupporterBadge({ className, size = "sm" }: SupporterBadgeProps) 
     </span>
   );
 }
+
+/** Compact heart for author lines on build cards. */
+export function SupporterHeart({ className }: { className?: string }) {
+  return (
+    <span
+      title="Supports Voidforge"
+      className={cn("inline-flex shrink-0 text-rose-600 dark:text-rose-400", className)}
+    >
+      <Heart className="h-3 w-3 fill-current" aria-hidden />
+      <span className="sr-only">Supporter</span>
+    </span>
+  );
+}

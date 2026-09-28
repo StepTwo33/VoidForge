@@ -7,6 +7,7 @@ import type { SavedBuild } from "@/lib/builds/build-storage";
 import { fetchCloudBuild } from "@/lib/builds/use-cloud-build-from-url";
 import { buildItemId, type CompareKind } from "@/lib/builds/compare-build";
 import type { PublicBuildSummary } from "@/lib/builds/build-types";
+import { SupporterHeart } from "@/components/supporter-badge";
 import { mergeYoursBuilds, ownershipBadge } from "@/lib/builds/yours-builds";
 import { cn } from "@/lib/utils";
 
@@ -162,7 +163,10 @@ export function BuildSourcePicker({
               className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-xs hover:bg-accent disabled:opacity-60"
             >
               <span className="min-w-0 flex-1 truncate font-medium">{b.name}</span>
-              <span className="shrink-0 text-[10px] text-muted-foreground">@{b.author.username}</span>
+              <span className="inline-flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground">
+                @{b.author.username}
+                {b.author.supporter && <SupporterHeart />}
+              </span>
               {loadingId === b.id && <Loader2 className="h-3 w-3 animate-spin" />}
             </button>
           ))}

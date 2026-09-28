@@ -144,7 +144,7 @@ export function SaveBuildDialog({
               <div>
                 <div className="text-sm font-medium">List in Community</div>
                 <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                  Public builds can be searched and upvoted by anyone. You can change this later in Profile.
+                  Public builds can be searched and upvoted by anyone. You can change this later in Your Builds.
                 </p>
               </div>
             </label>

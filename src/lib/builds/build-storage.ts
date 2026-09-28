@@ -144,6 +144,9 @@ export async function persistSavedBuild(build: SavedBuild): Promise<{
     id = cloudResult.id;
   }
 
+  // Soft tip prompt (rate-limited); dynamic import keeps this module usable without toast on SSR paths.
+  void import("@/lib/site/support").then((m) => m.maybePromptSupportTip()).catch(() => {});
+
   return { id, isPublic, synced, builds: getSavedBuilds(build.type) };
 }
 

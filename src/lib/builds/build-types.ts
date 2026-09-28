@@ -76,5 +76,7 @@ export interface PublicBuildSummary {
     username: string;
     profileSlug?: string | null;
     image: string | null;
+    /** True when the author has a Supporter badge. */
+    supporter?: boolean;
   };
 }

@@ -8,6 +8,7 @@ import { ThemePicker } from "@/components/theme-picker";
 import { BrandMark } from "@/components/brand-mark";
 import { AvatarImage } from "@/components/game-asset-image";
 import { Input } from "@/components/ui/input";
+import { SupporterHeart } from "@/components/supporter-badge";
 import { VOIDFORGE_GITHUB_URL } from "@/lib/site/site-links";
 import { bestBuildCatalogMatch, buildDiscoverUrl, searchBuildCatalog, type BuildSearchItem } from "@/lib/builds/build-search";
 import type { PublicBuildSummary } from "@/lib/builds/build-types";
@@ -372,11 +373,14 @@ function HeaderBuildSearch({ className, onNavigate }: { className?: string; onNa
                         }`}
                       >
                         <span className="truncate text-sm font-medium">{build.name}</span>
-                        <span className="truncate text-[10px] text-muted-foreground">
-                          by {build.author.username}
-                          {" · "}
-                          {BUILD_TYPE_LABELS[build.type] ?? build.type}
-                          {build.upvoteCount > 0 ? ` · ${build.upvoteCount} upvotes` : ""}
+                        <span className="flex min-w-0 items-center gap-1 truncate text-[10px] text-muted-foreground">
+                          <span className="truncate">by {build.author.username}</span>
+                          {build.author.supporter && <SupporterHeart className="shrink-0" />}
+                          <span className="shrink-0">
+                            {" · "}
+                            {BUILD_TYPE_LABELS[build.type] ?? build.type}
+                            {build.upvoteCount > 0 ? ` · ${build.upvoteCount} upvotes` : ""}
+                          </span>
                         </span>
                       </button>
                     );

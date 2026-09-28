@@ -48,6 +48,7 @@ export async function shareBuilderBuild(opts: {
         ? "Community build link copied to clipboard"
         : "Anyone with this link can open the build",
     });
+    void import("@/lib/site/support").then((m) => m.maybePromptSupportTip()).catch(() => {});
     return { kind: "copied", url };
   }
   toast.error("Could not copy link", { description: url });
