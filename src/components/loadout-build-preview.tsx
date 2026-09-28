@@ -1,45 +1,75 @@
 import { GameAssetImage } from "@/components/game-asset-image";
+import { getArcaneImage, getModImage } from "@/lib/display/images";
 import type { BuildPreviewChip, BuildPreviewData, LoadoutSlotPreview } from "@/lib/builds/build-preview";
 import { summarizeLoadoutSlots } from "@/lib/builds/build-preview";
+import { cn } from "@/lib/utils";
 
-function ChipRow({ chips, accent }: { chips: BuildPreviewChip[]; accent?: "arcane" }) {
-  if (chips.length === 0) return null;
+function GearTile({
+  chip,
+  accent,
+}: {
+  chip: BuildPreviewChip;
+  accent?: "arcane";
+}) {
+  const src = accent === "arcane" ? getArcaneImage(chip.label) : getModImage(chip.label);
   return (
-    <div className="flex flex-wrap gap-1.5">
-      {chips.map((chip, i) => (
-        <span
-          key={`${chip.label}-${i}`}
-          className={
-            accent === "arcane"
-              ? "inline-flex rounded-md border border-purple-500/25 bg-purple-500/10 px-2 py-1 text-xs font-medium text-purple-900 dark:text-purple-300"
-              : "inline-flex items-center gap-1 rounded-md border border-border/60 bg-card/80 px-2 py-1 text-xs"
-          }
-        >
-          <span className="font-medium text-foreground">{chip.label}</span>
-          {chip.sublabel && (
-            <span className="text-[10px] text-muted-foreground">{chip.sublabel}</span>
-          )}
+    <div
+      className={cn(
+        "flex items-center gap-2 rounded-lg border px-2 py-1.5",
+        accent === "arcane"
+          ? "border-purple-500/30 bg-purple-500/10"
+          : "border-border/50 bg-card/70",
+      )}
+      title={chip.sublabel ? `${chip.label} ${chip.sublabel}` : chip.label}
+    >
+      <GameAssetImage
+        src={src}
+        alt=""
+        width={28}
+        height={28}
+        className="h-7 w-7 shrink-0 rounded object-contain bg-muted/30"
+        hideOnError
+      />
+      <span className="min-w-0">
+        <span className="block truncate text-[11px] font-medium leading-tight text-foreground">
+          {chip.label}
         </span>
-      ))}
+        {chip.sublabel && (
+          <span className="block text-[9px] text-muted-foreground">{chip.sublabel}</span>
+        )}
+      </span>
     </div>
   );
 }
 
-function SlotCard({ slot }: { slot: LoadoutSlotPreview }) {
+function SlotCard({ slot, featured }: { slot: LoadoutSlotPreview; featured?: boolean }) {
   return (
-    <div className="rounded-xl border border-border/60 bg-muted/15 p-4 space-y-3">
-      <div className="flex items-center gap-3">
+    <div
+      className={cn(
+        "flex h-full flex-col rounded-xl border border-border/60 bg-muted/15 p-4",
+        featured && "md:col-span-2 lg:col-span-3",
+      )}
+    >
+      <div className="mb-3 flex items-center gap-3">
         {slot.itemImage ? (
           <GameAssetImage
             src={slot.itemImage}
             alt={slot.itemName}
-            width={48}
-            height={48}
-            className="h-12 w-12 shrink-0 rounded-lg bg-muted/50 dark:bg-black/20 object-contain p-0.5"
+            width={featured ? 72 : 56}
+            height={featured ? 72 : 56}
+            className={cn(
+              "shrink-0 rounded-lg bg-muted/40 object-contain p-1 dark:bg-black/20",
+              featured ? "h-[4.5rem] w-[4.5rem]" : "h-14 w-14",
+            )}
             hideOnError
           />
         ) : (
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted text-[10px] font-medium text-muted-foreground">
+          <div
+            className={cn(
+              "flex shrink-0 items-center justify-center rounded-lg bg-muted text-[10px] font-medium text-muted-foreground",
+              featured ? "h-[4.5rem] w-[4.5rem]" : "h-14 w-14",
+            )}
+          >
             {slot.label.slice(0, 2).toUpperCase()}
           </div>
         )}
@@ -47,7 +77,12 @@ function SlotCard({ slot }: { slot: LoadoutSlotPreview }) {
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             {slot.label}
           </p>
-          <p className="text-sm font-semibold text-foreground break-words [overflow-wrap:anywhere]">
+          <p
+            className={cn(
+              "font-semibold text-foreground break-words [overflow-wrap:anywhere]",
+              featured ? "text-lg" : "text-sm",
+            )}
+          >
             {slot.itemName}
           </p>
           <p className="text-[11px] text-muted-foreground">
@@ -61,33 +96,55 @@ function SlotCard({ slot }: { slot: LoadoutSlotPreview }) {
         </div>
       </div>
 
-      {slot.modChips.length > 0 && (
-        <div>
-          <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Mods
-          </p>
-          <ChipRow chips={slot.modChips} />
-        </div>
-      )}
-
-      {slot.arcaneChips.length > 0 && (
-        <div>
-          <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Arcanes
-          </p>
-          <ChipRow chips={slot.arcaneChips} accent="arcane" />
-        </div>
-      )}
-
-      {slot.extraLines.length > 0 && (
-        <div className="space-y-1">
-          {slot.extraLines.map((line) => (
-            <p key={line} className="text-xs text-muted-foreground">
-              {line}
+      <div className="mt-auto space-y-3">
+        {slot.modChips.length > 0 && (
+          <div>
+            <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Mods
             </p>
-          ))}
-        </div>
-      )}
+            <div
+              className={cn(
+                "grid gap-1.5",
+                featured
+                  ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+                  : "grid-cols-1 sm:grid-cols-2",
+              )}
+            >
+              {slot.modChips.map((chip, i) => (
+                <GearTile key={`${chip.label}-${i}`} chip={chip} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {slot.arcaneChips.length > 0 && (
+          <div>
+            <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Arcanes
+            </p>
+            <div
+              className={cn(
+                "grid gap-1.5",
+                featured ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" : "grid-cols-1 sm:grid-cols-2",
+              )}
+            >
+              {slot.arcaneChips.map((chip, i) => (
+                <GearTile key={`${chip.label}-${i}`} chip={chip} accent="arcane" />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {slot.extraLines.length > 0 && (
+          <div className="space-y-1 border-t border-border/40 pt-2">
+            {slot.extraLines.map((line) => (
+              <p key={line} className="text-xs text-muted-foreground">
+                {line}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -100,47 +157,73 @@ export function LoadoutBuildPreview({
   summary: BuildPreviewData;
 }) {
   const slots = summarizeLoadoutSlots(data);
+  const warframe = slots.find((s) => s.id === "warframe");
+  const others = slots.filter((s) => s.id !== "warframe");
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 rounded-xl border border-border/60 bg-muted/20 p-4">
+      <div className="flex flex-col gap-4 rounded-xl border border-border/60 bg-muted/20 p-4 sm:flex-row sm:items-center sm:gap-6 sm:p-5">
         {summary.itemImage ? (
           <GameAssetImage
             src={summary.itemImage}
             alt={summary.itemName}
-            width={56}
-            height={56}
-            className="h-14 w-14 shrink-0 rounded-lg bg-muted/50 dark:bg-black/20 object-contain p-1"
+            width={96}
+            height={96}
+            className="h-20 w-20 shrink-0 rounded-xl bg-muted/50 object-contain p-1.5 dark:bg-black/20 sm:h-24 sm:w-24"
             hideOnError
           />
         ) : (
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-muted text-xs font-medium text-muted-foreground">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-muted text-sm font-medium text-muted-foreground sm:h-24 sm:w-24">
             LO
           </div>
         )}
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             Loadout
           </p>
-          <p className="text-lg font-semibold text-foreground break-words [overflow-wrap:anywhere]">
+          <p className="text-xl font-bold tracking-tight text-foreground break-words [overflow-wrap:anywhere] sm:text-2xl">
             {summary.itemName}
           </p>
-          <p className="text-xs text-muted-foreground">{summary.modSummary}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{summary.modSummary}</p>
+          {slots.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {slots.map((s) => (
+                <span
+                  key={s.id}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-card/60 py-0.5 pl-0.5 pr-2.5 text-[11px] text-muted-foreground"
+                >
+                  {s.itemImage ? (
+                    <GameAssetImage
+                      src={s.itemImage}
+                      alt=""
+                      width={20}
+                      height={20}
+                      className="h-5 w-5 rounded-full object-contain bg-muted/40"
+                      hideOnError
+                    />
+                  ) : null}
+                  <span className="font-medium text-foreground/90">{s.label}</span>
+                  <span className="text-muted-foreground/80">· {s.itemName}</span>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       {slots.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No slots filled in this loadout yet.
-        </p>
+        <p className="text-sm text-muted-foreground">No slots filled in this loadout yet.</p>
       ) : (
         <div className="space-y-3">
           <h2 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             Kit slots
           </h2>
-          {slots.map((slot) => (
-            <SlotCard key={slot.id} slot={slot} />
-          ))}
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {warframe && <SlotCard slot={warframe} featured />}
+            {others.map((slot) => (
+              <SlotCard key={slot.id} slot={slot} />
+            ))}
+          </div>
         </div>
       )}
     </div>

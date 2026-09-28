@@ -113,8 +113,14 @@ export default async function SharedBuildPage({ params }: { params: Promise<{ id
 
   return (
     <PageShell>
-      <main className="flex-1 container mx-auto px-4 py-6 sm:py-12 max-w-4xl animate-in fade-in slide-in-from-bottom-8 duration-700">
-        <ContentPanel className="p-6 sm:p-8">
+      <main
+        className={
+          build.type === "loadout"
+            ? "flex-1 container mx-auto px-4 py-6 sm:py-10 max-w-6xl animate-in fade-in slide-in-from-bottom-8 duration-700"
+            : "flex-1 container mx-auto px-4 py-6 sm:py-12 max-w-4xl animate-in fade-in slide-in-from-bottom-8 duration-700"
+        }
+      >
+        <ContentPanel className={build.type === "loadout" ? "p-5 sm:p-8" : "p-6 sm:p-8"}>
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-2">
