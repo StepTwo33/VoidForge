@@ -26,8 +26,9 @@ import { toast } from "sonner";
 import { CompareRow, CompareSideHeader } from "@/components/compare/stat-diff";
 import { SnapshotCompare, WeaponCompareRows } from "@/components/compare/build-stat-rows";
 import { BuildSourcePicker } from "@/components/compare/build-source-picker";
-import { snapshotFromBuild, type CompareKind, type CompareSnapshot } from "@/lib/builds/compare-build";
+import { snapshotFromBuild, equipmentFromLoadoutSlot, type CompareKind, type CompareSnapshot } from "@/lib/builds/compare-build";
 import type { SavedBuild } from "@/lib/builds/build-storage";
+import { EquipmentDiff } from "@/components/compare/equipment-diff";
 
 function weaponImageForName(name: string, weapons: Weapon[]): string {
   const w = weapons.find((x) => x.name === name);
@@ -420,14 +421,26 @@ function sustainedDps(entry: LoadoutStatsResult["primary"]): number {
   return entry.ttk?.sustainedDps ?? entry.stats.sustainedDps;
 }
 
-function SlotSection({ slot, a, b, weapons }: {
+function SlotSection({ slot, a, b, weapons, loadoutA, loadoutB }: {
   slot: SlotType;
   a: LoadoutStatsResult;
   b: LoadoutStatsResult;
   weapons: Weapon[];
+  loadoutA: Loadout | null;
+  loadoutB: Loadout | null;
 }) {
   const [open, setOpen] = useState(true);
   const meta = SLOT_META[slot];
+  const gearA = equipmentFromLoadoutSlot(slot, loadoutA);
+  const gearB = equipmentFromLoadoutSlot(slot, loadoutB);
+  const gearDiff = (
+    <EquipmentDiff
+      a={gearA}
+      b={gearB}
+      aLabel={loadoutA?.name ?? "A"}
+      bLabel={loadoutB?.name ?? "B"}
+    />
+  );
 
   if (slot === "warframe") {
     const wA = a.warframe;
@@ -501,6 +514,7 @@ function SlotSection({ slot, a, b, weapons }: {
                   );
                 })
               : renderWarframeCompare(wA?.name ?? "–", wA?.stats, wB?.name ?? "–", wB?.stats)}
+            {gearDiff}
           </div>
         )}
       </ContentPanel>
@@ -538,6 +552,7 @@ function SlotSection({ slot, a, b, weapons }: {
             <CompareRow label="Armor" a={cA?.bodyStats.totalArmor ?? null} b={cB?.bodyStats.totalArmor ?? null} />
             <CompareRow label="EHP" a={cA?.bodyStats.effectiveHealth ?? null} b={cB?.bodyStats.effectiveHealth ?? null} />
             <CompareRow label="Weapon DPS" a={cA?.weapon ? sustainedDps(cA.weapon) : null} b={cB?.weapon ? sustainedDps(cB.weapon) : null} />
+            {gearDiff}
           </div>
         )}
       </ContentPanel>
@@ -584,6 +599,7 @@ function SlotSection({ slot, a, b, weapons }: {
           <div className="border-t border-border/50 my-1" />
           <CompareRow label="Burst DPS" a={sA?.burstDps ?? null} b={sB?.burstDps ?? null} />
           <CompareRow label="Sustained DPS" a={sA?.sustainedDps ?? null} b={sB?.sustainedDps ?? null} />
+          {gearDiff}
         </div>
       )}
     </ContentPanel>
@@ -692,7 +708,15 @@ function LoadoutCompareTab() {
       {statsA && statsB && (
         <div className="space-y-4">
           {(["warframe", "primary", "secondary", "melee", "exalted", "exaltedMelee", "companion"] as SlotType[]).map((slot) => (
-            <SlotSection key={slot} slot={slot} a={statsA} b={statsB} weapons={allWeapons} />
+            <SlotSection
+              key={slot}
+              slot={slot}
+              a={statsA}
+              b={statsB}
+              weapons={allWeapons}
+              loadoutA={loadoutA}
+              loadoutB={loadoutB}
+            />
           ))}
         </div>
       )}

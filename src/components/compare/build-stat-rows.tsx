@@ -1,8 +1,10 @@
 "use client";
 
+import type { ReactNode } from "react";
 import type { ArchwingCalculatedStats, CalculatedStats, CompanionCalculatedStats, WarframeCalculatedStats } from "@/lib/types";
 import type { CompareSnapshot } from "@/lib/builds/compare-build";
 import { CompareRow, CompareSideHeader } from "@/components/compare/stat-diff";
+import { EquipmentDiff } from "@/components/compare/equipment-diff";
 
 export function WeaponCompareRows({
   a,
@@ -166,17 +168,15 @@ export function ArchwingCompareRows({
 }
 
 export function SnapshotCompare({ a, b }: { a: CompareSnapshot; b: CompareSnapshot }) {
+  let stats: ReactNode = null;
   if (a.kind === "weapon" && b.kind === "weapon") {
-    return <WeaponCompareRows a={a.stats} b={b.stats} aLabel={a.label} bLabel={b.label} />;
-  }
-  if (a.kind === "warframe" && b.kind === "warframe") {
-    return <WarframeCompareRows a={a.stats} b={b.stats} aLabel={a.label} bLabel={b.label} />;
-  }
-  if (a.kind === "modular" && b.kind === "modular") {
-    return <WeaponCompareRows a={a.stats} b={b.stats} aLabel={a.label} bLabel={b.label} />;
-  }
-  if (a.kind === "companion" && b.kind === "companion") {
-    return (
+    stats = <WeaponCompareRows a={a.stats} b={b.stats} aLabel={a.label} bLabel={b.label} />;
+  } else if (a.kind === "warframe" && b.kind === "warframe") {
+    stats = <WarframeCompareRows a={a.stats} b={b.stats} aLabel={a.label} bLabel={b.label} />;
+  } else if (a.kind === "modular" && b.kind === "modular") {
+    stats = <WeaponCompareRows a={a.stats} b={b.stats} aLabel={a.label} bLabel={b.label} />;
+  } else if (a.kind === "companion" && b.kind === "companion") {
+    stats = (
       <CompanionCompareRows
         aBody={a.body}
         bBody={b.body}
@@ -188,9 +188,8 @@ export function SnapshotCompare({ a, b }: { a: CompareSnapshot; b: CompareSnapsh
         bWeaponName={b.weaponName}
       />
     );
-  }
-  if (a.kind === "archwing" && b.kind === "archwing") {
-    return (
+  } else if (a.kind === "archwing" && b.kind === "archwing") {
+    stats = (
       <ArchwingCompareRows
         aFrame={a.frame}
         bFrame={b.frame}
@@ -203,5 +202,11 @@ export function SnapshotCompare({ a, b }: { a: CompareSnapshot; b: CompareSnapsh
       />
     );
   }
-  return null;
+  if (!stats) return null;
+  return (
+    <div>
+      {stats}
+      <EquipmentDiff a={a.equipment} b={b.equipment} aLabel={a.label} bLabel={b.label} />
+    </div>
+  );
 }

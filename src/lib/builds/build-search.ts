@@ -105,6 +105,7 @@ export function buildDiscoverUrl(opts: {
   q?: string;
   type?: string;
   itemId?: string;
+  slot?: string;
   sort?: "recent" | "popular";
   tag?: string;
 }): string {
@@ -112,6 +113,7 @@ export function buildDiscoverUrl(opts: {
   if (opts.sort && opts.sort !== "recent") params.set("sort", opts.sort);
   if (opts.type) params.set("type", opts.type);
   if (opts.itemId) params.set("itemId", opts.itemId);
+  if (opts.slot && opts.slot !== "all") params.set("slot", opts.slot);
   if (opts.q?.trim()) params.set("q", opts.q.trim());
   if (opts.tag?.trim()) params.set("tag", opts.tag.trim());
   const qs = params.toString();

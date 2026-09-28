@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
 import { isAllowedBuildType } from "@/lib/builds/build-types";
 import { parseBuildTags } from "@/lib/builds/build-tags";
+import { resolveSubtypeItemFilter } from "@/lib/builds/discover-subtypes";
 
 const DEFAULT_LIMIT = 24;
 const MAX_LIMIT = 50;
@@ -41,11 +42,12 @@ function toPublicSummary(
   };
 }
 
-// GET /api/builds/public?type=&itemId=&sort=recent|popular&q=&tag=&featured=&limit=&cursor=
+// GET /api/builds/public?type=&itemId=&slot=&sort=recent|popular&q=&tag=&featured=&limit=&cursor=
 export async function GET(req: NextRequest) {
   const params = req.nextUrl.searchParams;
   const type = params.get("type");
   const itemId = params.get("itemId");
+  const slot = params.get("slot");
   const sort = params.get("sort") === "popular" ? "popular" : "recent";
   const q = params.get("q")?.trim() ?? "";
   const tag = params.get("tag")?.trim() ?? "";
@@ -64,7 +66,19 @@ export async function GET(req: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = { isPublic: true, user: { bannedAt: null } };
   if (type) where.type = type;
-  if (itemId) where.itemId = itemId;
+  if (itemId) {
+    where.itemId = itemId;
+  } else if (type && slot) {
+    const filter = resolveSubtypeItemFilter(type, slot);
+    if (filter.kind === "ids") {
+      if (filter.ids.length === 0) {
+        return NextResponse.json({ builds: [], nextCursor: null });
+      }
+      where.itemId = { in: filter.ids };
+    } else if (filter.kind === "prefix") {
+      where.itemId = { startsWith: filter.prefix };
+    }
+  }
   if (userId) where.userId = userId;
   if (tag) {
     // tags stored as JSON array string — match quoted id

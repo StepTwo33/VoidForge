@@ -42,12 +42,13 @@ export function BuildCompareDialog({
       if (!next) setOther(null);
       onOpenChange(next);
     }}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Compare builds</DialogTitle>
         </DialogHeader>
         <p className="text-xs text-muted-foreground">
           This build stays on the left. Pick one of yours or a posted build for the same item.
+          Stats and gear (mods, arcanes, shards) both show below.
         </p>
         <BuildSourcePicker type={type} itemId={itemId} onSelect={pick} />
         {live && other && live.kind === other.kind && (
