@@ -291,7 +291,7 @@ export default function DiscoverPage() {
       : categoryMeta?.label ?? "Discover Builds";
 
   const heroDescription = !inCategory
-    ? "Pick a category, then an item, to browse community builds."
+    ? "Browse community builds by category — pick a type, choose an item, then open a loadout."
     : itemFilter
       ? `Community loadouts for ${itemFilter.name}. Upvote builds you like or open one to copy mods.`
       : "Choose an item to see its public builds. Counts show how many are listed.";

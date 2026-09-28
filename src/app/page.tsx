@@ -95,7 +95,7 @@ export default function Home() {
               />
               <FeatureCard
                 href="/riven-calculator"
-                title="Riven Calculator"
+                title="Riven Grader"
                 description="Grade your in-game riven rolls against disposition-scaled ranges and tier rankings."
                 icon={Dice5}
                 accent="amber"

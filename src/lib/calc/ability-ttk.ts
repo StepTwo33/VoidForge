@@ -3,9 +3,7 @@ import { DEFAULT_SIM_PARAMS } from "@/lib/types";
 import {
   calculateTTK,
   ENEMY_TYPES,
-  scaleArmor,
-  scaleHealth,
-  scaleShield,
+  scaleEnemyPools,
   type EnemyType,
   type TTKResult,
 } from "@/lib/calc/ttk";
@@ -138,13 +136,13 @@ export function calculateAbilityTTK(
   entry: Pick<AbilityTTKEntry, "pseudoStats" | "ignoreArmor">,
   enemy: EnemyType,
   level: number,
+  opts?: { steelPath?: boolean },
 ): TTKResult {
-  const base = calculateTTK(entry.pseudoStats, enemy, level);
+  const base = calculateTTK(entry.pseudoStats, enemy, level, opts);
   if (!entry.ignoreArmor) return base;
 
-  const hp = scaleHealth(enemy.baseHealth, level, enemy.faction);
-  const shield = scaleShield(enemy.baseShield, level);
-  const pool = hp + shield;
+  const pools = scaleEnemyPools(enemy, level, opts);
+  const pool = pools.health + pools.shield;
   const dps = base.sustainedDps > 0 ? base.sustainedDps : base.burstDps;
   if (dps <= 0) return base;
 
@@ -158,6 +156,9 @@ export function calculateAbilityTTK(
     sustainedDps: dps,
     ttk,
     shotsToKill: casts,
+    scaledHealth: pools.health,
+    scaledShield: pools.shield,
+    effectiveHealth: pool,
   };
 }
 

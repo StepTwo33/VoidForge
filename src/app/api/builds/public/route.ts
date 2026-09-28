@@ -72,7 +72,10 @@ export async function GET(req: NextRequest) {
     const filter = resolveSubtypeItemFilter(type, slot);
     if (filter.kind === "ids") {
       if (filter.ids.length === 0) {
-        return NextResponse.json({ builds: [], nextCursor: null });
+        return NextResponse.json(
+          { builds: [], nextCursor: null },
+          { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } },
+        );
       }
       where.itemId = { in: filter.ids };
     } else if (filter.kind === "prefix") {
@@ -133,7 +136,10 @@ export async function GET(req: NextRequest) {
     });
   } catch {
     // Cursor build may have been deleted/unpublished, or tags column not migrated yet.
-    return NextResponse.json({ builds: [], nextCursor: null });
+    return NextResponse.json(
+      { builds: [], nextCursor: null },
+      { headers: { "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30" } },
+    );
   }
 
   const hasMore = builds.length > limit;
@@ -153,8 +159,18 @@ export async function GET(req: NextRequest) {
     votedIds = new Set(votes.map((v) => v.buildId));
   }
 
-  return NextResponse.json({
-    builds: page.map((b) => toPublicSummary(b, session?.user?.id ? votedIds.has(b.id) : undefined)),
-    nextCursor,
-  });
+  const authed = Boolean(session?.user?.id);
+  return NextResponse.json(
+    {
+      builds: page.map((b) => toPublicSummary(b, authed ? votedIds.has(b.id) : undefined)),
+      nextCursor,
+    },
+    {
+      headers: {
+        "Cache-Control": authed
+          ? "private, no-store"
+          : "public, s-maxage=30, stale-while-revalidate=60",
+      },
+    },
+  );
 }

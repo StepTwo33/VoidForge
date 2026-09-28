@@ -32,7 +32,7 @@ export type AccentColor =
   | "emerald"
   | "primary";
 
-const ACCENT: Record<
+export const ACCENT: Record<
   AccentColor,
   { icon: string; hoverBorder: string; hoverBg: string; hoverText: string; shadow: string; badge: string }
 > = {

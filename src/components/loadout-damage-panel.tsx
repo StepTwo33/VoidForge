@@ -151,6 +151,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
   const [scenario, setScenario] = useState<DamageScenario>("midFight");
   const [enemyId, setEnemyId] = useState<string>("heavy_gunner");
   const [enemyLevel, setEnemyLevel] = useState(100);
+  const [steelPath, setSteelPath] = useState(false);
   const [activeAbilityBuffs, setActiveAbilityBuffs] = useState<string[]>([]);
 
   const abilityBuffOptions = useMemo(() => {
@@ -187,12 +188,13 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
         allWeapons,
         enemy: scenario === "vsEnemy" ? enemy : null,
         enemyLevel: scenario === "vsEnemy" ? enemyLevel : undefined,
+        steelPath: scenario === "vsEnemy" ? steelPath : undefined,
       });
     } catch (err) {
       console.warn("Loadout damage estimate failed", err);
       return null;
     }
-  }, [loadout, scenario, enemy, enemyLevel, allWeapons, activeAbilityBuffs]);
+  }, [loadout, scenario, enemy, enemyLevel, steelPath, allWeapons, activeAbilityBuffs]);
 
   const best = useMemo(() => {
     if (!stats) return null;
@@ -256,8 +258,13 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
               ))}
             </select>
           </div>
-          <div className="min-w-0 flex-1 max-w-[10rem]">
-            <EnemyLevelControl value={enemyLevel} onChange={setEnemyLevel} />
+          <div className="min-w-0 flex-1 max-w-[12rem]">
+            <EnemyLevelControl
+              value={enemyLevel}
+              onChange={setEnemyLevel}
+              steelPath={steelPath}
+              onSteelPathChange={setSteelPath}
+            />
           </div>
         </div>
       )}
@@ -303,7 +310,10 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
             Best sustained: <span className="font-medium text-foreground">{best.slot}</span> ({best.name}) —{" "}
             <span className="font-mono text-amber-800 dark:text-amber-300">{fmtDamageNum(best.sustainedDps)}</span>
             {showTtk && scenario === "vsEnemy" && (
-              <span className="ml-1 text-[10px]">vs {enemy.name} L{enemyLevel}</span>
+              <span className="ml-1 text-[10px]">
+                vs {enemy.name} L{enemyLevel}
+                {steelPath ? " SP" : ""}
+              </span>
             )}
           </span>
         </div>

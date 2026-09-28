@@ -94,7 +94,6 @@ export function BuildPreviewStats({ type, data }: { type: string; data: unknown 
               warframe={warframePreview.warframe}
               equippedMods={equippedMods}
               allMods={modsMap}
-              equippedShards={warframePreview.shards}
               equippedArcanes={warframePreview.arcanes}
               arcaneRanks={warframePreview.arcaneRanks}
             />

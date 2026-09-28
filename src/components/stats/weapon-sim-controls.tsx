@@ -424,6 +424,25 @@ export function WeaponSimControls({
               />
               Headshots (2× weak point × Acuity)
             </label>
+            <label
+              className="flex items-center gap-2 text-[10px] text-muted-foreground cursor-pointer"
+              title="Steel Path: ×2.5 Health & Shields after level scaling (armor unchanged). Applies to TIME TO KILL below."
+            >
+              <input
+                type="checkbox"
+                checked={!!simParams.steelPath}
+                onChange={(e) =>
+                  onSimParamsChange({ ...simParams, steelPath: e.target.checked })
+                }
+                className="h-3.5 w-3.5 rounded border-border accent-amber-500"
+              />
+              <span>
+                Steel Path
+                <span className="ml-1 text-[9px] text-amber-800/80 dark:text-amber-400/80">
+                  ×2.5 HP/Shield
+                </span>
+              </span>
+            </label>
             {(Object.keys(stats.triggerStatBonuses ?? {}).length > 0) && (
               <label className="flex items-center gap-2 text-[10px] text-muted-foreground cursor-pointer">
                 <input

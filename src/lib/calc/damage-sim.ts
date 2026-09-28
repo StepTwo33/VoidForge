@@ -18,9 +18,7 @@ import {
   HEALTH_MODIFIERS,
   heatArmorRemaining,
   punctureArmorRemaining,
-  scaleArmor,
-  scaleHealth,
-  scaleShield,
+  scaleEnemyPools,
   SHIELD_MODIFIERS,
   viralHealthMultiplier,
   type EnemyType,
@@ -175,16 +173,19 @@ export function runDamageSim(
   input: DamageSimInputs,
   enemy: EnemyType,
   level: number,
+  opts?: { steelPath?: boolean },
 ): DamageSimResult | null {
   const totalRaw = Object.values(input.dmgTypes).reduce((s, v) => s + v, 0);
   if (totalRaw <= 0) return null;
 
+  const steelPath = !!opts?.steelPath;
   const stats = simInputsToCalculatedStats(input, enemy.faction);
-  const discrete = calculateTTK(stats, enemy, level);
+  const discrete = calculateTTK(stats, enemy, level, { steelPath });
 
-  const hp = scaleHealth(enemy.baseHealth, level, enemy.faction);
-  const baseArmor = scaleArmor(enemy.baseArmor, level);
-  const shield = scaleShield(enemy.baseShield, level);
+  const pools = scaleEnemyPools(enemy, level, { steelPath });
+  const hp = pools.health;
+  const baseArmor = pools.armor;
+  const shield = pools.shield;
 
   const procsPerSec = input.fireRate * input.statusChance * input.multishot;
   const corrosiveWeight = (input.dmgTypes.corrosive ?? 0) / totalRaw;

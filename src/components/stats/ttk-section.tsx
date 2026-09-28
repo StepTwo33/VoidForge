@@ -12,10 +12,28 @@ const FACTION_COLORS: Record<string, string> = {
   Infested: "text-green-700 dark:text-green-400",
   Corrupted: "text-yellow-700 dark:text-yellow-400",
   Stalker: "text-purple-700 dark:text-purple-400",
+  Sentient: "text-violet-700 dark:text-violet-400",
+  Narmer: "text-amber-800 dark:text-amber-400",
+  Murmur: "text-slate-600 dark:text-slate-300",
 };
 
-export function TTKSection({ stats, flash }: { stats: CalculatedStats; flash?: boolean }) {
+export function TTKSection({
+  stats,
+  flash,
+  steelPath: steelPathProp,
+  onSteelPathChange,
+}: {
+  stats: CalculatedStats;
+  flash?: boolean;
+  /** Controlled Steel Path flag (e.g. from SIMULATION). Falls back to local state. */
+  steelPath?: boolean;
+  onSteelPathChange?: (steelPath: boolean) => void;
+}) {
   const [level, setLevel] = useState(100);
+  const [localSteelPath, setLocalSteelPath] = useState(false);
+  const controlled = typeof steelPathProp === "boolean" && typeof onSteelPathChange === "function";
+  const steelPath = controlled ? steelPathProp! : localSteelPath;
+  const setSteelPath = controlled ? onSteelPathChange! : setLocalSteelPath;
   const [selectedFaction, setSelectedFaction] = useState("all");
   const [expandedEnemy, setExpandedEnemy] = useState<string | null>(null);
 
@@ -23,8 +41,8 @@ export function TTKSection({ stats, flash }: { stats: CalculatedStats; flash?: b
     const enemies = selectedFaction === "all"
       ? ENEMY_TYPES
       : ENEMY_TYPES.filter((e) => e.faction === selectedFaction);
-    return enemies.map((e) => calculateTTK(stats, e, level)).sort((a, b) => a.ttk - b.ttk);
-  }, [stats, level, selectedFaction]);
+    return enemies.map((e) => calculateTTK(stats, e, level, { steelPath })).sort((a, b) => a.ttk - b.ttk);
+  }, [stats, level, steelPath, selectedFaction]);
 
   const factions = ["all", ...new Set(ENEMY_TYPES.map((e) => e.faction))];
 
@@ -33,7 +51,13 @@ export function TTKSection({ stats, flash }: { stats: CalculatedStats; flash?: b
   return (
     <CollapsibleSection title="TIME TO KILL" defaultOpen={false} flash={flash}>
       <div className="mb-2 min-w-0">
-        <EnemyLevelControl value={level} onChange={setLevel} label="Enemy level" />
+        <EnemyLevelControl
+          value={level}
+          onChange={setLevel}
+          label="Enemy level"
+          steelPath={steelPath}
+          onSteelPathChange={setSteelPath}
+        />
       </div>
       <div className="flex gap-1 mb-2 flex-wrap">
         {factions.map((f) => (

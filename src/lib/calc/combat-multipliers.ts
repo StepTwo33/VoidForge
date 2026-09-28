@@ -42,7 +42,12 @@ export function normalizeFactionName(faction: string | undefined | null): string
   if (f.includes("narmer")) return "narmer";
   if (f.includes("scaldra")) return "grineer";
   if (f.includes("techrot")) return "corpus";
+  if (f.includes("zariman") || f.includes("duviri")) return "zariman";
+  if (f.includes("arbitration")) return "arbitration";
   if (f.includes("anarch")) return "anarchs";
+  if (f.includes("kuva")) return "grineer";
+  if (f.includes("amalgam")) return "corpus";
+  if (f.includes("deimos") && f.includes("infest")) return "infested";
   return f;
 }
 

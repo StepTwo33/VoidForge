@@ -12,7 +12,6 @@ import {
   getStatTier, getStatTierColor, isValueInStatRange,
 } from "@/lib/calc/riven-calculator";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Plus, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -186,8 +185,8 @@ export default function RivenCalculatorPage() {
                 />
               </div>
               {!selectedWeapon ? (
-                <ScrollArea className="h-56 sm:h-48 mb-4">
-                  <div className="space-y-1 pr-4">
+                <div className="mb-4 max-h-[min(60vh,24rem)] overflow-y-auto rounded-xl border border-border/60 bg-card/40">
+                  <div className="space-y-1 p-2">
                     {filteredWeapons.length === 0 ? (
                       <div className="rounded-lg border border-border/60 bg-muted/20 p-4 text-center">
                         <p className="text-sm text-muted-foreground">No weapons match</p>
@@ -204,11 +203,12 @@ export default function RivenCalculatorPage() {
                       return (
                         <button
                           key={w.id}
+                          type="button"
                           onClick={() => setSelectedWeapon(w.name)}
-                          className="w-full text-left min-h-11 px-3 py-2.5 rounded-lg border border-border hover:border-purple-500/50 hover:bg-purple-500/5 transition-all flex items-center justify-between"
+                          className="flex w-full min-h-11 items-center justify-between rounded-lg border border-transparent px-3 py-2.5 text-left transition-all hover:border-purple-500/50 hover:bg-purple-500/5"
                         >
                           <span className="text-sm font-medium">{w.name}</span>
-                          <span className={cn("text-xs font-mono", dispColor)}>
+                          <span className={cn("shrink-0 text-xs font-mono tabular-nums", dispColor)}>
                             {info.known ? info.value.toFixed(2) : "?"}
                           </span>
                         </button>
@@ -216,7 +216,7 @@ export default function RivenCalculatorPage() {
                     })
                     )}
                   </div>
-                </ScrollArea>
+                </div>
               ) : (
                 <div className="flex flex-wrap items-center gap-3 mb-4 p-3 border border-purple-500/30 bg-purple-500/5 rounded-lg">
                   <span className="font-medium">{selectedWeapon}</span>

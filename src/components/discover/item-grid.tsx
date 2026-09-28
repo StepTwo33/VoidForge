@@ -29,8 +29,9 @@ export function DiscoverItemGrid({
             type="button"
             onClick={() => onSelect(item)}
             className={cn(
-              "group flex flex-col items-center gap-1.5 rounded-xl border border-border/50 bg-card/30 p-2 text-center transition-all",
-              "hover:border-primary/40 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+              "group flex flex-col items-center gap-1.5 rounded-xl border border-border/60 surface-panel p-2 text-center",
+              "transition-all duration-300 active:scale-[0.99] hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/5 hover:shadow-lg hover:shadow-primary/10",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
             )}
           >
             <div className="relative flex h-16 w-16 items-center justify-center rounded-lg bg-muted/30 sm:h-20 sm:w-20">

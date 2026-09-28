@@ -1034,7 +1034,16 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
       )}
 
       {/* TTK */}
-      <TTKSection stats={stats} flash={ttkFlash} />
+      <TTKSection
+        stats={stats}
+        flash={ttkFlash}
+        steelPath={simParams?.steelPath}
+        onSteelPathChange={
+          simParams && onSimParamsChange
+            ? (v) => onSimParamsChange({ ...simParams, steelPath: v })
+            : undefined
+        }
+      />
     </div>
   );
 }

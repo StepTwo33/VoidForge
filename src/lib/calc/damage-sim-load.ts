@@ -1,4 +1,6 @@
 import type { CalculatedStats } from "@/lib/types";
+import { calcSavedWeaponBuildStats } from "@/lib/builds/loadout-stats";
+import { DEFAULT_SIM_PARAMS } from "@/lib/types";
 
 /** Map calculator output into damage-simulator form state. */
 export function calculatedStatsToSimInputs(stats: CalculatedStats): {
@@ -44,9 +46,42 @@ export function calculatedStatsToSimInputs(stats: CalculatedStats): {
   };
 }
 
-export interface SimBuildOption {
-  id: string;
-  label: string;
-  source: "local" | "cloud";
-  type: string;
+export type SimWeaponBuildData = {
+  weaponId?: string;
+  mods?: { modId: string; rank: number; slotIndex: number }[];
+  arcaneIds?: (string | null)[];
+  progenitorElement?: string;
+  progenitorBonusPercent?: number;
+  incarnonEvolutions?: Record<number, number>;
+};
+
+export type AppliedSimBuild = ReturnType<typeof calculatedStatsToSimInputs> & {
+  weaponName: string;
+  buildLabel: string;
+};
+
+/** Resolve a weapon build payload into simulator inputs + display label. */
+export function applyWeaponBuildToSim(
+  buildName: string,
+  data: SimWeaponBuildData,
+): AppliedSimBuild | null {
+  if (!data?.weaponId) return null;
+  const entry = calcSavedWeaponBuildStats(
+    {
+      weaponId: data.weaponId,
+      mods: data.mods ?? [],
+      arcaneIds: data.arcaneIds,
+      progenitorElement: data.progenitorElement,
+      progenitorBonusPercent: data.progenitorBonusPercent,
+      incarnonEvolutions: data.incarnonEvolutions,
+    },
+    { ...DEFAULT_SIM_PARAMS, killStacks: 5, statusTypesOnTarget: 3, arcaneStacks: 12 },
+  );
+  if (!entry) return null;
+  const inputs = calculatedStatsToSimInputs(entry.stats);
+  return {
+    ...inputs,
+    weaponName: entry.name,
+    buildLabel: `${buildName} (${entry.name})`,
+  };
 }

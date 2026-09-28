@@ -116,21 +116,30 @@ export async function GET(
     return NextResponse.json({ error: "Invalid build data" }, { status: 500 });
   }
 
-  return NextResponse.json({
-    id: build.id,
-    name: build.name,
-    description: build.description,
-    isPublic: build.isPublic,
-    type: build.type,
-    itemId: build.itemId,
-    upvoteCount: build.upvoteCount,
-    data: parsed,
-    createdAt: build.createdAt.getTime(),
-    updatedAt: build.updatedAt.getTime(),
-    author: {
-      username: build.user.username || build.user.name || "Anonymous",
-      profileSlug: build.user.username,
-      image: build.user.image,
-    }
-  });
+  return NextResponse.json(
+    {
+      id: build.id,
+      name: build.name,
+      description: build.description,
+      isPublic: build.isPublic,
+      type: build.type,
+      itemId: build.itemId,
+      upvoteCount: build.upvoteCount,
+      data: parsed,
+      createdAt: build.createdAt.getTime(),
+      updatedAt: build.updatedAt.getTime(),
+      author: {
+        username: build.user.username || build.user.name || "Anonymous",
+        profileSlug: build.user.username,
+        image: build.user.image,
+      },
+    },
+    {
+      headers: {
+        "Cache-Control": build.isPublic
+          ? "public, s-maxage=60, stale-while-revalidate=120"
+          : "private, no-store",
+      },
+    },
+  );
 }

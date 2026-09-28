@@ -19,6 +19,7 @@ function fmt(n: number) {
 
 export function AbilityTTKPanel({ entries }: { entries: AbilityTTKEntry[] }) {
   const [level, setLevel] = useState(100);
+  const [steelPath, setSteelPath] = useState(false);
   const [selectedFaction, setSelectedFaction] = useState("all");
   const [expandedKey, setExpandedKey] = useState<string | null>(entries[0]?.key ?? null);
 
@@ -36,10 +37,10 @@ export function AbilityTTKPanel({ entries }: { entries: AbilityTTKEntry[] }) {
     return entries.map((entry) => ({
       entry,
       results: enemies
-        .map((enemy) => calculateAbilityTTK(entry, enemy, level))
+        .map((enemy) => calculateAbilityTTK(entry, enemy, level, { steelPath }))
         .sort((a, b) => a.ttk - b.ttk),
     }));
-  }, [entries, level, selectedFaction]);
+  }, [entries, level, steelPath, selectedFaction]);
 
   if (entries.length === 0) return null;
 
@@ -54,7 +55,13 @@ export function AbilityTTKPanel({ entries }: { entries: AbilityTTKEntry[] }) {
         </p>
       </div>
 
-      <EnemyLevelControl value={level} onChange={setLevel} label="Enemy level" />
+      <EnemyLevelControl
+        value={level}
+        onChange={setLevel}
+        label="Enemy level"
+        steelPath={steelPath}
+        onSteelPathChange={setSteelPath}
+      />
 
       <div className="flex gap-1 flex-wrap">
         {factions.map((f) => (

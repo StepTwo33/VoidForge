@@ -1060,7 +1060,7 @@ export default function WarframeBuilderPage() {
                       One shard set for Sirius &amp; Orion — switching forms keeps these equipped.
                     </p>
                   )}
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap items-start gap-2">
                     {equippedShards.map((shard, i) => (
                       <ArchonShardSlot
                         key={i}
@@ -1261,7 +1261,6 @@ export default function WarframeBuilderPage() {
                   warframe={selectedWarframe}
                   equippedMods={equippedMods}
                   allMods={modsMap}
-                  equippedShards={equippedShards}
                   equippedArcanes={equippedArcanes}
                   arcaneRanks={equippedArcaneRanks}
                 />

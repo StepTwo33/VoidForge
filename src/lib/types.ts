@@ -549,6 +549,11 @@ export interface SimulationParams {
   targetFaction?: string;
   /** Apply headshot / weak-point multiplier (default body shots). */
   applyHeadshots?: boolean;
+  /**
+   * Steel Path TTK: ×2.5 Health & Shields after level scaling (armor unchanged).
+   * Does not affect paper DPS — only TIME TO KILL in the builder sidebar.
+   */
+  steelPath?: boolean;
   /** Include approximate stance damage multiplier on melee DPS. Default true. */
   applyStanceMultiplier?: boolean;
   /**
@@ -588,6 +593,7 @@ export const DEFAULT_SIM_PARAMS: SimulationParams = {
   applyMechaEmpoweredVsMarkedDamage: false,
   targetFaction: undefined,
   applyHeadshots: false,
+  steelPath: false,
   applyStanceMultiplier: true,
   applyTriggerBuffs: false,
 };

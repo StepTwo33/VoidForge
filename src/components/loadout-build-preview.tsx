@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Target, Zap } from "lucide-react";
+import Link from "next/link";
+import { ExternalLink, Target, Zap } from "lucide-react";
 import { GameAssetImage } from "@/components/game-asset-image";
 import { EnemyLevelControl } from "@/components/enemy-level-control";
 import { getArcaneImage, getModImage } from "@/lib/display/images";
@@ -18,13 +19,19 @@ import {
   type LoadoutStatsResult,
   type LoadoutWeaponSlotStats,
 } from "@/lib/builds/loadout-stats";
+import {
+  buildShareUrl,
+  encodeBuild,
+  type ShareableBuild,
+} from "@/lib/builds/build-url";
+import type { WarframeBuildData, WeaponBuildData } from "@/lib/builds/build-storage";
 import { allWarframes } from "@/data/warframes";
 import {
   resolveAbilitiesWithHelminth,
   weaponDamageBuffAbilities,
 } from "@/lib/weapons/weapon-external-buffs";
 import { useWeapons } from "@/lib/weapons/use-data";
-import type { Loadout } from "@/lib/types";
+import type { Loadout, ModularBuildData, WarframeCalculatedStats } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const SCENARIO_LABELS: Record<DamageScenario, string> = {
@@ -78,9 +85,10 @@ function MiniStat({ label, value, highlight }: { label: string; value: string; h
       <div className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
       <div
         className={cn(
-          "font-mono text-xs tabular-nums",
+          "truncate font-mono text-xs tabular-nums",
           highlight && "font-medium text-amber-800 dark:text-amber-300",
         )}
+        title={value}
       >
         {value}
       </div>
@@ -88,28 +96,166 @@ function MiniStat({ label, value, highlight }: { label: string; value: string; h
   );
 }
 
+function modsToShare(mods: { modId: string; rank: number; slotIndex?: number }[] | undefined) {
+  return (mods ?? []).map((m) => ({
+    id: m.modId,
+    rank: m.rank,
+    ...(m.slotIndex != null ? { slotIndex: m.slotIndex } : {}),
+  }));
+}
+
+function polaritiesToShare(pols: Record<number, string> | undefined) {
+  if (!pols) return undefined;
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(pols)) out[k] = v;
+  return Object.keys(out).length ? out : undefined;
+}
+
+/** Encode a loadout kit slot as a builder share URL (full stats / edit). */
+function slotBuilderHref(loadout: Loadout | null, slotId: string): string | null {
+  if (!loadout) return null;
+  try {
+    let share: ShareableBuild | null = null;
+
+    if (slotId === "warframe" && loadout.warframeBuild) {
+      const wb = loadout.warframeBuild as WarframeBuildData;
+      share = {
+        type: "warframe",
+        itemId: wb.warframeId,
+        mods: modsToShare(wb.mods),
+        arcanes: (wb.arcaneIds ?? []).map((id) => id ?? ""),
+        shards: (wb.shards ?? [])
+          .filter((s): s is NonNullable<typeof s> => s != null)
+          .map((s) => ({ id: s.shardId, bonus: s.selectedBonus })),
+        slotPolarities: polaritiesToShare(wb.slotPolarities),
+        isMR30: wb.isMR30,
+      };
+    } else if (slotId === "primary" || slotId === "secondary" || slotId === "melee") {
+      const modular = loadout.modularBuild;
+      if (modular?.slot === slotId) {
+        const mb = modular as ModularBuildData & { slot: string };
+        share = {
+          type: "modular",
+          itemId: mb.modularType,
+          mods: modsToShare(mb.mods),
+          modularType: mb.modularType,
+          parts: mb.parts,
+          arcanes: (mb.arcaneIds ?? []).map((id) => id ?? ""),
+          hasOrokinCatalyst: mb.hasOrokinCatalyst,
+          isMR30: mb.isMR30,
+          slotPolarities: polaritiesToShare(mb.slotPolarities),
+        };
+      } else {
+        const wb =
+          slotId === "primary"
+            ? loadout.primaryBuild
+            : slotId === "secondary"
+              ? loadout.secondaryBuild
+              : loadout.meleeBuild;
+        if (!wb?.weaponId) return null;
+        const data = wb as WeaponBuildData;
+        share = {
+          type: "weapon",
+          itemId: data.weaponId,
+          mods: modsToShare(data.mods),
+          arcanes: (data.arcaneIds ?? []).map((id) => id ?? ""),
+          hasOrokinCatalyst: data.hasOrokinCatalyst,
+          isMR30: data.isMR30,
+          progenitorElement: data.progenitorElement,
+          progenitorBonusPercent: data.progenitorBonusPercent,
+          adversaryFormas: data.adversaryFormas,
+          incarnonEvolutions: data.incarnonEvolutions,
+          slotPolarities: polaritiesToShare(data.slotPolarities),
+        };
+      }
+    } else if (slotId === "modular" && loadout.modularBuild) {
+      const mb = loadout.modularBuild as ModularBuildData;
+      share = {
+        type: "modular",
+        itemId: mb.modularType,
+        mods: modsToShare(mb.mods),
+        modularType: mb.modularType,
+        parts: mb.parts,
+        arcanes: (mb.arcaneIds ?? []).map((id) => id ?? ""),
+        hasOrokinCatalyst: mb.hasOrokinCatalyst,
+        isMR30: mb.isMR30,
+        slotPolarities: polaritiesToShare(mb.slotPolarities),
+      };
+    }
+
+    if (!share) return null;
+    return buildShareUrl(share, encodeBuild(share));
+  } catch {
+    return null;
+  }
+}
+
+function warframeMiniStats(s: WarframeCalculatedStats | null | undefined) {
+  if (!s) return null;
+  return (
+    <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-4">
+      <MiniStat label="EHP" value={fmtDamageNum(s.effectiveHealth ?? 0)} highlight />
+      <MiniStat label="Health" value={fmtDamageNum(s.totalHealth ?? 0)} />
+      <MiniStat label="Shield" value={fmtDamageNum(s.totalShield ?? 0)} />
+      <MiniStat label="Armor" value={fmtDamageNum(s.totalArmor ?? 0)} />
+      <MiniStat label="Energy" value={fmtDamageNum(s.totalEnergy ?? 0)} />
+      <MiniStat label="Strength" value={`${((s.abilityStrength ?? 0) * 100).toFixed(0)}%`} />
+      <MiniStat label="Duration" value={`${((s.abilityDuration ?? 0) * 100).toFixed(0)}%`} />
+      <MiniStat label="Efficiency" value={`${((s.abilityEfficiency ?? 0) * 100).toFixed(0)}%`} />
+      <MiniStat label="Range" value={`${((s.abilityRange ?? 0) * 100).toFixed(0)}%`} />
+      {(s.damageReduction ?? 0) > 0 && (
+        <MiniStat label="DR" value={`${((s.damageReduction ?? 0) * 100).toFixed(0)}%`} />
+      )}
+    </div>
+  );
+}
+
 function weaponMiniStats(entry: LoadoutWeaponSlotStats | null | undefined, showTtk: boolean) {
   if (!entry) return null;
-  const burst = entry.ttk?.burstDps ?? entry.stats.burstDps;
-  const sustained = entry.ttk?.sustainedDps ?? entry.stats.sustainedDps;
+  const { stats, ttk, isMelee } = entry;
+  const burst = ttk?.burstDps ?? stats.burstDps;
+  const sustained = ttk?.sustainedDps ?? stats.sustainedDps;
+  const totalDmg =
+    (stats.arsenalDamage?.totalDamage ?? stats.totalDamage ?? 0) * Math.max(1, stats.multishot ?? 1);
+
   return (
-    <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
       <MiniStat label="Sustained" value={fmtDamageNum(sustained)} highlight />
       <MiniStat label="Burst" value={fmtDamageNum(burst)} highlight />
+      <MiniStat label="Total dmg" value={totalDmg.toFixed(0)} />
       <MiniStat
         label="Crit"
-        value={`${((entry.stats.criticalChance ?? 0) * 100).toFixed(0)}% / ${(entry.stats.criticalMultiplier ?? 0).toFixed(1)}x`}
+        value={`${((stats.criticalChance ?? 0) * 100).toFixed(0)}% / ${(stats.criticalMultiplier ?? 0).toFixed(1)}x`}
       />
-      {showTtk && entry.ttk ? (
-        <MiniStat
-          label="TTK"
-          value={entry.ttk.ttk === Infinity ? "∞" : `${entry.ttk.ttk.toFixed(2)}s`}
-        />
+      <MiniStat label="Status" value={`${((stats.statusChance ?? 0) * 100).toFixed(0)}%`} />
+      <MiniStat label="Multishot" value={(stats.multishot ?? 1).toFixed(2)} />
+      {isMelee ? (
+        (stats.heavyAttackDamage ?? 0) > 0 ? (
+          <MiniStat label="Heavy" value={fmtDamageNum(stats.heavyAttackDamage ?? 0)} />
+        ) : (
+          <MiniStat label="Attack spd" value={(stats.fireRate ?? 0).toFixed(2)} />
+        )
       ) : (
+        <MiniStat label="Fire rate" value={(stats.effectiveFireRate ?? stats.fireRate ?? 0).toFixed(2)} />
+      )}
+      {!isMelee && (
         <MiniStat
-          label="Status"
-          value={`${((entry.stats.statusChance ?? 0) * 100).toFixed(0)}%`}
+          label="Mag / reload"
+          value={`${Math.round(stats.magazine ?? 0)} / ${(stats.reloadTime ?? 0).toFixed(1)}s`}
         />
+      )}
+      {showTtk && ttk && (
+        <>
+          <MiniStat
+            label="TTK"
+            value={ttk.ttk === Infinity ? "∞" : `${ttk.ttk.toFixed(2)}s`}
+            highlight
+          />
+          <MiniStat
+            label="Shots"
+            value={ttk.shotsToKill === Infinity ? "∞" : String(ttk.shotsToKill)}
+          />
+        </>
       )}
     </div>
   );
@@ -120,11 +266,13 @@ function SlotCard({
   featured,
   stats,
   showTtk,
+  builderHref,
 }: {
   slot: LoadoutSlotPreview;
   featured?: boolean;
   stats: LoadoutStatsResult | null;
   showTtk: boolean;
+  builderHref: string | null;
 }) {
   let estimate: React.ReactNode = null;
 
@@ -137,22 +285,12 @@ function SlotCard({
             <p className="mb-1 text-[10px] font-semibold text-purple-800/90 dark:text-purple-300/90">
               {form.label}
             </p>
-            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
-              <MiniStat label="EHP" value={fmtDamageNum(form.stats?.effectiveHealth ?? 0)} highlight />
-              <MiniStat label="Strength" value={`${((form.stats?.abilityStrength ?? 0) * 100).toFixed(0)}%`} />
-              <MiniStat label="Duration" value={`${((form.stats?.abilityDuration ?? 0) * 100).toFixed(0)}%`} />
-              <MiniStat label="Efficiency" value={`${((form.stats?.abilityEfficiency ?? 0) * 100).toFixed(0)}%`} />
-            </div>
+            {warframeMiniStats(form.stats)}
           </div>
         ))}
       </div>
     ) : (
-      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
-        <MiniStat label="EHP" value={fmtDamageNum(wf.stats?.effectiveHealth ?? 0)} highlight />
-        <MiniStat label="Strength" value={`${((wf.stats?.abilityStrength ?? 0) * 100).toFixed(0)}%`} />
-        <MiniStat label="Duration" value={`${((wf.stats?.abilityDuration ?? 0) * 100).toFixed(0)}%`} />
-        <MiniStat label="Efficiency" value={`${((wf.stats?.abilityEfficiency ?? 0) * 100).toFixed(0)}%`} />
-      </div>
+      warframeMiniStats(wf.stats)
     );
   } else if (slot.id === "primary") {
     estimate = weaponMiniStats(stats?.primary, showTtk);
@@ -174,19 +312,18 @@ function SlotCard({
     const c = stats.companion;
     estimate = (
       <div className="space-y-2">
-        <div className="grid grid-cols-3 gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
           <MiniStat label="HP" value={fmtDamageNum(c.bodyStats.totalHealth)} />
           <MiniStat label="Shield" value={fmtDamageNum(c.bodyStats.totalShield)} />
+          <MiniStat label="Armor" value={fmtDamageNum(c.bodyStats.totalArmor)} />
           <MiniStat label="EHP" value={fmtDamageNum(c.bodyStats.effectiveHealth)} highlight />
         </div>
         {c.weapon && (
-          <div className="grid grid-cols-2 gap-1.5">
-            <MiniStat
-              label="Weapon DPS"
-              value={fmtDamageNum(c.weapon.ttk?.sustainedDps ?? c.weapon.stats.sustainedDps)}
-              highlight
-            />
-            <MiniStat label="Weapon" value={c.weapon.name} />
+          <div>
+            <p className="mb-1 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+              {c.weapon.name}
+            </p>
+            {weaponMiniStats(c.weapon, showTtk)}
           </div>
         )}
       </div>
@@ -248,9 +385,20 @@ function SlotCard({
 
       {estimate && (
         <div className="mb-3 rounded-lg border border-amber-500/20 bg-amber-500/[0.04] p-2.5">
-          <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-amber-900/80 dark:text-amber-200/80">
-            Estimate
-          </p>
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <p className="text-[9px] font-semibold uppercase tracking-wider text-amber-900/80 dark:text-amber-200/80">
+              Estimate
+            </p>
+            {builderHref && (
+              <Link
+                href={builderHref}
+                className="inline-flex min-h-8 items-center gap-1 rounded-md border border-border/60 bg-background/60 px-2 py-1 text-[10px] font-medium text-muted-foreground transition-colors hover:border-border hover:text-foreground"
+              >
+                Full stats
+                <ExternalLink className="h-3 w-3" />
+              </Link>
+            )}
+          </div>
           {estimate}
         </div>
       )}
@@ -319,6 +467,7 @@ export function LoadoutBuildPreview({
   const [scenario, setScenario] = useState<DamageScenario>("midFight");
   const [enemyId, setEnemyId] = useState("heavy_gunner");
   const [enemyLevel, setEnemyLevel] = useState(100);
+  const [steelPath, setSteelPath] = useState(false);
   const [activeAbilityBuffs, setActiveAbilityBuffs] = useState<string[]>([]);
 
   const loadout = useMemo((): Loadout | null => {
@@ -369,11 +518,12 @@ export function LoadoutBuildPreview({
         allWeapons,
         enemy: scenario === "vsEnemy" ? enemy : null,
         enemyLevel: scenario === "vsEnemy" ? enemyLevel : undefined,
+        steelPath: scenario === "vsEnemy" ? steelPath : undefined,
       });
     } catch {
       return null;
     }
-  }, [loadout, scenario, enemy, enemyLevel, allWeapons, activeAbilityBuffs]);
+  }, [loadout, scenario, enemy, enemyLevel, steelPath, allWeapons, activeAbilityBuffs]);
 
   const best = useMemo(() => (stats ? bestSustainedDps(stats) : null), [stats]);
   const showTtk = scenario === "vsEnemy";
@@ -471,8 +621,13 @@ export function LoadoutBuildPreview({
                   ))}
                 </select>
               </div>
-              <div className="min-w-0 max-w-[10rem] flex-1">
-                <EnemyLevelControl value={enemyLevel} onChange={setEnemyLevel} />
+              <div className="min-w-0 max-w-[12rem] flex-1">
+                <EnemyLevelControl
+                  value={enemyLevel}
+                  onChange={setEnemyLevel}
+                  steelPath={steelPath}
+                  onSteelPathChange={setSteelPath}
+                />
               </div>
             </div>
           )}
@@ -539,16 +694,28 @@ export function LoadoutBuildPreview({
           </h2>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {warframe && (
-              <SlotCard slot={warframe} featured stats={stats} showTtk={showTtk} />
+              <SlotCard
+                slot={warframe}
+                featured
+                stats={stats}
+                showTtk={showTtk}
+                builderHref={slotBuilderHref(loadout, warframe.id)}
+              />
             )}
             {others.map((slot) => (
-              <SlotCard key={slot.id} slot={slot} stats={stats} showTtk={showTtk} />
+              <SlotCard
+                key={slot.id}
+                slot={slot}
+                stats={stats}
+                showTtk={showTtk}
+                builderHref={slotBuilderHref(loadout, slot.id)}
+              />
             ))}
           </div>
           <p className="text-[10px] leading-relaxed text-muted-foreground/70">
             Estimates use modded stats with scenario assumptions (
             {SCENARIO_LABELS[scenario].toLowerCase()}).
-            {scenario !== "vsEnemy" && " Switch to vs Enemy for TTK against a specific target."}
+            {scenario !== "vsEnemy" && " Switch to vs Enemy for TTK against a specific target. Use Full stats on a slot for the complete builder view."}
           </p>
         </div>
       )}

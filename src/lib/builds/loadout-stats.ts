@@ -113,6 +113,8 @@ export interface CalcLoadoutStatsOptions {
   simParams?: SimulationParams;
   enemy?: EnemyType | null;
   enemyLevel?: number;
+  /** Steel Path ×2.5 HP/Shield after level scaling. */
+  steelPath?: boolean;
   allWeapons?: Weapon[];
 }
 
@@ -177,6 +179,7 @@ function calcWeaponSlotStats(
   enemy?: EnemyType | null,
   enemyLevel?: number,
   buffContext?: WeaponBuffContext,
+  steelPath?: boolean,
 ): LoadoutWeaponSlotStats | null {
   if (!build) return null;
   const weaponsMap = getEffectiveWeaponsMap();
@@ -234,7 +237,9 @@ function calcWeaponSlotStats(
         );
   const isMelee = base.category === "melee" || base.triggerType === "Melee";
   const ttk =
-    enemy && enemyLevel != null && enemyLevel > 0 ? calculateTTK(stats, enemy, enemyLevel) : undefined;
+    enemy && enemyLevel != null && enemyLevel > 0
+      ? calculateTTK(stats, enemy, enemyLevel, { steelPath })
+      : undefined;
   const contributionContext = buildWeaponContributionContext({
     weapon: calcWeapon,
     modSlots,
@@ -259,6 +264,7 @@ function calcModularSlotStats(
   enemy?: EnemyType | null,
   enemyLevel?: number,
   buffContext?: WeaponBuffContext,
+  steelPath?: boolean,
 ): LoadoutWeaponSlotStats | null {
   if (loadout.modularBuild?.slot !== slot) return null;
   const modsMap = getEffectiveModsMap();
@@ -296,7 +302,9 @@ function calcModularSlotStats(
         );
   const isMelee = w.category === "melee" || w.triggerType === "Melee";
   const ttk =
-    enemy && enemyLevel != null && enemyLevel > 0 ? calculateTTK(stats, enemy, enemyLevel) : undefined;
+    enemy && enemyLevel != null && enemyLevel > 0
+      ? calculateTTK(stats, enemy, enemyLevel, { steelPath })
+      : undefined;
   const contributionContext = buildWeaponContributionContext({
     weapon: w,
     modSlots,
@@ -314,6 +322,7 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
   const simParams = options.simParams ?? scenarioSimParams("midFight");
   const enemy = options.enemy ?? null;
   const enemyLevel = options.enemyLevel ?? 100;
+  const steelPath = !!options.steelPath;
   const weaponList = options.allWeapons ?? getEffectiveWeapons();
   const warframesMap = getEffectiveWarframesMap();
   const companionsMap = getEffectiveCompanionsMap();
@@ -450,7 +459,9 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
               );
         const isMelee = base.category === "melee" || base.triggerType === "Melee";
         const ttk =
-          enemy && enemyLevel > 0 ? calculateTTK(statsEx, enemy, enemyLevel) : undefined;
+          enemy && enemyLevel > 0
+            ? calculateTTK(statsEx, enemy, enemyLevel, { steelPath })
+            : undefined;
         const contributions = computeDpsContributions(
           buildWeaponContributionContext({
             weapon: base,
@@ -513,14 +524,14 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
   }
 
   result.primary =
-    calcModularSlotStats(loadout, "primary", simParams, setLinkage, enemy, enemyLevel, buffContext) ??
-    calcWeaponSlotStats(loadout.primaryBuild, simParams, setLinkage, enemy, enemyLevel, buffContext);
+    calcModularSlotStats(loadout, "primary", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath) ??
+    calcWeaponSlotStats(loadout.primaryBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath);
   result.secondary =
-    calcModularSlotStats(loadout, "secondary", simParams, setLinkage, enemy, enemyLevel, buffContext) ??
-    calcWeaponSlotStats(loadout.secondaryBuild, simParams, setLinkage, enemy, enemyLevel, buffContext);
+    calcModularSlotStats(loadout, "secondary", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath) ??
+    calcWeaponSlotStats(loadout.secondaryBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath);
   result.melee =
-    calcModularSlotStats(loadout, "melee", simParams, setLinkage, enemy, enemyLevel, buffContext) ??
-    calcWeaponSlotStats(loadout.meleeBuild, simParams, setLinkage, enemy, enemyLevel, buffContext);
+    calcModularSlotStats(loadout, "melee", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath) ??
+    calcWeaponSlotStats(loadout.meleeBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath);
 
   if (loadout.companionBuild) {
     const c = companionsMap.get(loadout.companionBuild.companionId);
@@ -547,7 +558,9 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
           );
           const isMelee = base.category === "melee" || base.triggerType === "Melee";
           const ttk =
-            enemy && enemyLevel > 0 ? calculateTTK(stats, enemy, enemyLevel) : undefined;
+            enemy && enemyLevel > 0
+              ? calculateTTK(stats, enemy, enemyLevel, { steelPath })
+              : undefined;
           weapon = { name: base.name, stats, ttk, isMelee };
         }
       }

@@ -1,0 +1,83 @@
+[
+  {
+    "name": "Kuva Lich (paper)",
+    "faction_raw": "Grineer",
+    "faction_override": null,
+    "wiki_type": "Boss",
+    "health": 10000,
+    "armor": 500,
+    "shield": 0
+  },
+  {
+    "name": "Sister of Parvos (paper)",
+    "faction_raw": "Corpus",
+    "faction_override": null,
+    "wiki_type": "Boss",
+    "health": 10000,
+    "armor": 0,
+    "shield": 5000
+  },
+  {
+    "name": "Technocyte Coda (paper)",
+    "faction_raw": "Techrot",
+    "faction_override": null,
+    "wiki_type": "Boss",
+    "health": 12000,
+    "armor": 200,
+    "shield": 4000
+  },
+  {
+    "name": "Eximus Heavy Gunner",
+    "faction_raw": "Grineer",
+    "faction_override": null,
+    "wiki_type": "Eximus",
+    "health": 300,
+    "armor": 500,
+    "shield": 0
+  },
+  {
+    "name": "Eximus Bombard",
+    "faction_raw": "Grineer",
+    "faction_override": null,
+    "wiki_type": "Eximus",
+    "health": 300,
+    "armor": 500,
+    "shield": 0
+  },
+  {
+    "name": "Eximus Corpus Tech",
+    "faction_raw": "Corpus",
+    "faction_override": null,
+    "wiki_type": "Eximus",
+    "health": 200,
+    "armor": 0,
+    "shield": 250
+  },
+  {
+    "name": "Eximus Charger",
+    "faction_raw": "Infested",
+    "faction_override": null,
+    "wiki_type": "Eximus",
+    "health": 80,
+    "armor": 0,
+    "shield": 0
+  },
+  {
+    "name": "Eximus Corrupted Heavy Gunner",
+    "faction_raw": "Corrupted",
+    "faction_override": null,
+    "wiki_type": "Eximus",
+    "health": 300,
+    "armor": 500,
+    "shield": 0
+  },
+  {
+    "name": "Arbitration Shield Drone",
+    "faction_raw": "Special",
+    "faction_override": null,
+    "wiki_type": "Support",
+    "health": 35,
+    "armor": 50,
+    "shield": 50
+  }
+]

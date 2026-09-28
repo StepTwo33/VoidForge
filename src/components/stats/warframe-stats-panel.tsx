@@ -1,10 +1,9 @@
 "use client";
 
-import { WarframeCalculatedStats, Warframe, Mod, EquippedMod, EquippedArchonShard } from "@/lib/types";
+import { WarframeCalculatedStats, Warframe, Mod, EquippedMod } from "@/lib/types";
 import { useMemo, useState } from "react";
 import { formatAbilityDescription } from "@/lib/display/ability-text";
 import { cleanModDescription, getModStatDisplayLines } from "@/lib/display/mod-display";
-import { buildShardBonusLines } from "@/lib/display/shard-display";
 import { getArcaneDisplayInfo } from "@/lib/display/arcane-display";
 import {
   ADAPTATION_MAX_STACKS,
@@ -2182,18 +2181,12 @@ function AdaptationSurvivability({ stats }: { stats: WarframeCalculatedStats }) 
   );
 }
 
-export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equippedShards, equippedArcanes, arcaneRanks }: {
+export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equippedArcanes, arcaneRanks }: {
   stats: WarframeCalculatedStats | null; warframe?: Warframe | null;
   equippedMods?: EquippedMod[]; allMods?: Map<string, Mod>;
-  equippedShards?: (EquippedArchonShard | null)[];
   equippedArcanes?: (Mod | null)[];
   arcaneRanks?: number[];
 }) {
-  const shardLines = useMemo(
-    () => buildShardBonusLines(equippedShards ?? []),
-    [equippedShards],
-  );
-
   const arcaneDisplays = useMemo(() => {
     if (!equippedArcanes || !stats) return [];
     return equippedArcanes
@@ -2426,22 +2419,6 @@ export function WarframeStatsPanel({ stats, warframe, equippedMods, allMods, equ
               </>
             )}
           </div>
-        </CollapsibleSection>
-      )}
-
-      {/* Shard Bonuses */}
-      {shardLines.length > 0 && (
-        <CollapsibleSection title="SHARD BONUSES" defaultOpen>
-          {shardLines.map((line, i) => (
-            <div key={i} className="py-0.5">
-              <StatRow
-                label={line.label}
-                value={line.value}
-                color={line.conditional ? "text-muted-foreground" : "text-purple-700 dark:text-purple-400"}
-                tooltip={line.conditional ? `${line.shardName} — conditional` : line.shardName}
-              />
-            </div>
-          ))}
         </CollapsibleSection>
       )}
 

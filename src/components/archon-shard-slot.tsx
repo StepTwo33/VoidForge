@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { GameAssetImage } from "@/components/game-asset-image";
-import { getArchonShardImage, getShardColorName, SHARD_COLORS } from "@/lib/display/shard-display";
+import { getArchonShardImage, getShardColorName, SHARD_COLORS, SHARD_BONUS_LABELS, formatShardBonusValue } from "@/lib/display/shard-display";
 import type { EquippedArchonShard } from "@/lib/types";
 import { Plus } from "lucide-react";
 
@@ -15,6 +15,14 @@ const SHARD_BORDER: Record<string, string> = {
   topaz: "border-orange-500/45 hover:border-orange-400/70",
   emerald: "border-emerald-500/45 hover:border-emerald-400/70",
 };
+
+function shardBonusCaption(shard: EquippedArchonShard): string {
+  const key = shard.selectedBonus;
+  if (!key) return "";
+  const label = SHARD_BONUS_LABELS[key] ?? key;
+  const value = formatShardBonusValue(key, shard.bonusValue);
+  return `${label} ${value}`;
+}
 
 function ShardCrystalFallback({ color, slotIndex }: { color: string; slotIndex: number }) {
   const hex = SHARD_COLORS[color] ?? "#888";
@@ -73,7 +81,7 @@ export function ArchonShardSlot({ shard, slotIndex, onEquip, onRemove }: ArchonS
       <button
         type="button"
         onClick={onEquip}
-        className="flex h-[4.75rem] min-h-11 w-16 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border/80 bg-card/30 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+        className="flex h-[4.75rem] min-h-11 w-[4.5rem] flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border/80 bg-card/30 text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
         title={`Empty shard slot ${slotIndex + 1}`}
       >
         <Plus className="h-4 w-4" />
@@ -85,30 +93,41 @@ export function ArchonShardSlot({ shard, slotIndex, onEquip, onRemove }: ArchonS
   const colorName = getShardColorName(shard.shardColor);
   const border = SHARD_BORDER[shard.shardColor] ?? "border-border/60";
   const isTau = shard.shardTier === 2;
+  const bonus = shardBonusCaption(shard);
 
   return (
-    <button
-      type="button"
-      onClick={onRemove}
-      className={cn(
-        "flex h-[4.75rem] w-16 flex-col items-center justify-between rounded-lg border bg-muted/60 px-1 py-1.5 transition-all hover:bg-muted dark:bg-black/40 dark:hover:bg-black/55",
-        border,
-        isTau && "shadow-[0_0_12px_-2px_rgba(251,191,36,0.35)]",
-      )}
-      title={`${colorName}${isTau ? " (Tauforged)" : ""} — click to remove`}
-    >
-      <ShardArt color={shard.shardColor} tier={shard.shardTier} slotIndex={slotIndex} />
-      <div className="flex w-full flex-col items-center gap-0.5">
-        <span className="max-w-full truncate text-[10px] font-semibold capitalize leading-none text-foreground">
-          {colorName}
-        </span>
-        {isTau && (
-          <span className="rounded bg-amber-500/15 px-1 py-px text-[8px] font-bold uppercase tracking-wide text-amber-800 ring-1 ring-amber-500/25 dark:text-amber-400">
-            Tau
-          </span>
+    <div className="flex w-[5.75rem] flex-col items-center gap-1">
+      <button
+        type="button"
+        onClick={onRemove}
+        className={cn(
+          "flex h-[4.75rem] w-[4.5rem] flex-col items-center justify-between self-center rounded-lg border bg-muted/60 px-1 py-1.5 transition-all hover:bg-muted dark:bg-black/40 dark:hover:bg-black/55",
+          border,
+          isTau && "shadow-[0_0_12px_-2px_rgba(251,191,36,0.35)]",
         )}
-      </div>
-    </button>
+        title={`${colorName}${isTau ? " (Tauforged)" : ""}${bonus ? ` — ${bonus}` : ""} — click to remove`}
+      >
+        <ShardArt color={shard.shardColor} tier={shard.shardTier} slotIndex={slotIndex} />
+        <div className="flex w-full flex-col items-center gap-0.5">
+          <span className="max-w-full truncate text-[10px] font-semibold capitalize leading-none text-foreground">
+            {colorName}
+          </span>
+          {isTau && (
+            <span className="rounded bg-amber-500/15 px-1 py-px text-[8px] font-bold uppercase tracking-wide text-amber-800 ring-1 ring-amber-500/25 dark:text-amber-400">
+              Tau
+            </span>
+          )}
+        </div>
+      </button>
+      {bonus ? (
+        <p
+          className="w-full text-center text-[9px] leading-snug text-purple-800 dark:text-purple-300"
+          title={bonus}
+        >
+          {bonus}
+        </p>
+      ) : null}
+    </div>
   );
 }
 

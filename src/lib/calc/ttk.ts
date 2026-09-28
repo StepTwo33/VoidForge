@@ -11,42 +11,9 @@ import {
   factionTripleDotMultiplier,
 } from "./combat-multipliers";
 
-export interface EnemyType {
-  id: string;
-  name: string;
-  faction: string;
-  baseHealth: number;
-  baseArmor: number;
-  baseShield: number;
-  healthType: string;
-  armorType: string;
-  shieldType: string;
-}
-
-export const ENEMY_TYPES: EnemyType[] = [
-  // Grineer
-  { id: "lancer", name: "Lancer", faction: "Grineer", baseHealth: 100, baseArmor: 100, baseShield: 0, healthType: "cloned_flesh", armorType: "ferrite", shieldType: "none" },
-  { id: "elite_lancer", name: "Elite Lancer", faction: "Grineer", baseHealth: 150, baseArmor: 200, baseShield: 0, healthType: "cloned_flesh", armorType: "alloy", shieldType: "none" },
-  { id: "heavy_gunner", name: "Heavy Gunner", faction: "Grineer", baseHealth: 700, baseArmor: 500, baseShield: 0, healthType: "cloned_flesh", armorType: "ferrite", shieldType: "none" },
-  { id: "bombard", name: "Bombard", faction: "Grineer", baseHealth: 600, baseArmor: 400, baseShield: 0, healthType: "cloned_flesh", armorType: "alloy", shieldType: "none" },
-  { id: "nox", name: "Nox", faction: "Grineer", baseHealth: 4000, baseArmor: 250, baseShield: 0, healthType: "cloned_flesh", armorType: "ferrite", shieldType: "none" },
-  { id: "demolisher", name: "Demolisher", faction: "Grineer", baseHealth: 2000, baseArmor: 500, baseShield: 0, healthType: "cloned_flesh", armorType: "alloy", shieldType: "none" },
-  // Corpus
-  { id: "crewman", name: "Crewman", faction: "Corpus", baseHealth: 60, baseArmor: 0, baseShield: 150, healthType: "flesh", armorType: "none", shieldType: "shield" },
-  { id: "tech", name: "Tech", faction: "Corpus", baseHealth: 200, baseArmor: 25, baseShield: 400, healthType: "flesh", armorType: "none", shieldType: "shield" },
-  { id: "moa", name: "MOA", faction: "Corpus", baseHealth: 100, baseArmor: 50, baseShield: 200, healthType: "robotic", armorType: "none", shieldType: "shield" },
-  { id: "nullifier", name: "Nullifier", faction: "Corpus", baseHealth: 100, baseArmor: 0, baseShield: 300, healthType: "flesh", armorType: "none", shieldType: "shield" },
-  // Infested
-  { id: "charger", name: "Charger", faction: "Infested", baseHealth: 80, baseArmor: 5, baseShield: 0, healthType: "infested", armorType: "none", shieldType: "none" },
-  { id: "ancient_healer", name: "Ancient Healer", faction: "Infested", baseHealth: 400, baseArmor: 50, baseShield: 0, healthType: "fossilized", armorType: "none", shieldType: "none" },
-  { id: "toxic_ancient", name: "Toxic Ancient", faction: "Infested", baseHealth: 400, baseArmor: 50, baseShield: 0, healthType: "fossilized", armorType: "none", shieldType: "none" },
-  // Corrupted
-  { id: "corrupted_heavy", name: "Corrupted Heavy Gunner", faction: "Corrupted", baseHealth: 700, baseArmor: 500, baseShield: 0, healthType: "cloned_flesh", armorType: "ferrite", shieldType: "none" },
-  { id: "corrupted_bombard", name: "Corrupted Bombard", faction: "Corrupted", baseHealth: 600, baseArmor: 400, baseShield: 0, healthType: "cloned_flesh", armorType: "alloy", shieldType: "none" },
-  // Special
-  { id: "eximus_gunner", name: "Eximus Heavy Gunner", faction: "Grineer", baseHealth: 3500, baseArmor: 750, baseShield: 0, healthType: "cloned_flesh", armorType: "ferrite", shieldType: "none" },
-  { id: "acolyte", name: "Acolyte", faction: "Stalker", baseHealth: 15000, baseArmor: 200, baseShield: 3000, healthType: "cloned_flesh", armorType: "ferrite", shieldType: "shield" },
-];
+export type { EnemyType, EnemyKind } from "@/data/enemies";
+export { ENEMY_TYPES, getEnemyById } from "@/data/enemies";
+import type { EnemyType } from "@/data/enemies";
 
 // ── Type modifier tables ──────────────────────────────────────────────
 export const HEALTH_MODIFIERS: Record<string, Record<string, number>> = {
@@ -180,6 +147,35 @@ export function scaleShield(base: number, level: number): number {
   return lo * (1 - sm) + hi * sm;
 }
 
+/**
+ * Steel Path mission modifiers (wiki The Steel Path, post-U36):
+ * ×2.5 Health & Shields after level scaling. Armor is not multiplied.
+ * Level is the enemy's combat level (set node+100 yourself if comparing star-chart nodes).
+ */
+export const STEEL_PATH_HEALTH_MULT = 2.5;
+export const STEEL_PATH_SHIELD_MULT = 2.5;
+
+export type EnemyScaleOpts = {
+  /** Apply Steel Path ×2.5 HP/Shield (no armor bonus). */
+  steelPath?: boolean;
+};
+
+/** Level-scaled pools with optional Steel Path HP/Shield multipliers. */
+export function scaleEnemyPools(
+  enemy: EnemyType,
+  level: number,
+  opts?: EnemyScaleOpts,
+): { health: number; armor: number; shield: number; steelPath: boolean } {
+  const steelPath = !!opts?.steelPath;
+  const health =
+    scaleHealth(enemy.baseHealth, level, enemy.faction) *
+    (steelPath ? STEEL_PATH_HEALTH_MULT : 1);
+  const shield =
+    scaleShield(enemy.baseShield, level) * (steelPath ? STEEL_PATH_SHIELD_MULT : 1);
+  const armor = scaleArmor(enemy.baseArmor, level);
+  return { health, armor, shield, steelPath };
+}
+
 // ── Crit averaging — single source of truth in crit-utils ─────────────
 /** @deprecated Prefer avgCritMultiplier from crit-utils; alias kept for existing imports. */
 export const avgCritMult = avgCritMultiplier;
@@ -206,6 +202,8 @@ export function heatArmorRemaining(heatActive: boolean): number {
 export interface TTKResult {
   enemy: EnemyType;
   level: number;
+  /** Steel Path ×2.5 HP/Shield applied. */
+  steelPath?: boolean;
   effectiveHealth: number;
   scaledArmor: number;
   scaledShield: number;
@@ -315,20 +313,23 @@ export function simulateDiscreteTTK(
   stats: CalculatedStats,
   enemy: EnemyType,
   level: number,
-  opts?: { maxTime?: number; maxShots?: number },
+  opts?: { maxTime?: number; maxShots?: number; steelPath?: boolean },
 ): TTKResult {
   const maxTime = opts?.maxTime ?? 600;
   const maxShots = opts?.maxShots ?? 50_000;
+  const steelPath = !!opts?.steelPath;
 
-  const scaledHp = scaleHealth(enemy.baseHealth, level, enemy.faction);
-  const baseArmor = scaleArmor(enemy.baseArmor, level);
-  const scaledShield = scaleShield(enemy.baseShield, level);
+  const pools = scaleEnemyPools(enemy, level, { steelPath });
+  const scaledHp = pools.health;
+  const baseArmor = pools.armor;
+  const scaledShield = pools.shield;
 
   const dmgTypes = collectDamageTypes(stats);
   const totalRaw = dmgTypes.reduce((s, d) => s + d.value, 0);
   const zero: TTKResult = {
     enemy,
     level,
+    steelPath,
     effectiveHealth: scaledHp + scaledShield,
     scaledArmor: baseArmor,
     scaledShield,
@@ -710,6 +711,7 @@ export function simulateDiscreteTTK(
   return {
     enemy,
     level,
+    steelPath,
     effectiveHealth: scaledHp + scaledShield,
     scaledArmor: endArmor,
     scaledShield,
@@ -726,6 +728,11 @@ export function simulateDiscreteTTK(
 }
 
 /** Main entry — discrete Viral/Corrosive-aware TTK sim. */
-export function calculateTTK(stats: CalculatedStats, enemy: EnemyType, level: number): TTKResult {
-  return simulateDiscreteTTK(stats, enemy, level);
+export function calculateTTK(
+  stats: CalculatedStats,
+  enemy: EnemyType,
+  level: number,
+  opts?: { steelPath?: boolean },
+): TTKResult {
+  return simulateDiscreteTTK(stats, enemy, level, opts);
 }
