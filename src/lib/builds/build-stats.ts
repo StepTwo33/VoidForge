@@ -5,7 +5,8 @@ import {
   getEffectiveWeapons,
   getEffectiveWeaponsMap,
 } from "@/lib/weapons/effective-data";
-import { allHelminthAbilities, type HelminthAbility } from "@/data/helminth";
+import { allHelminthAbilities } from "@/data/helminth";
+import { helminthToAbility } from "@/lib/builds/helminth-resolve";
 import {
   resolveSavedArcaneSlots,
   type ArchwingBuildData,
@@ -60,24 +61,6 @@ export interface PublicBuildWarframePreview {
   exalted: PublicBuildWeaponPreview | null;
   /** Titania Diwata (melee) when Dex Pixia is primary. */
   exaltedMelee: PublicBuildWeaponPreview | null;
-}
-
-function helminthToAbility(h: HelminthAbility): Ability {
-  return {
-    name: h.name,
-    energyCost: h.energyCost,
-    description: h.description,
-    damage: h.damage,
-    damageBuff: h.damageBuff,
-    damageReduction: h.damageReduction,
-    duration: h.duration,
-    range: h.range,
-    radius: h.radius,
-    castTime: h.castTime,
-    statusChance: h.statusChance,
-    damageType: h.damageType,
-    miscStats: h.miscStats,
-  };
 }
 
 function resolveBuildAbilities(data: WarframeBuildData): { ability: Ability; slot: number; helminth?: boolean }[] {

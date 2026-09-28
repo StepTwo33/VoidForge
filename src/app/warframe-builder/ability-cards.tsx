@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { RefreshCw } from "lucide-react";
 import type { Ability, WarframeCalculatedStats, Weapon } from "@/lib/types";
 import type { HelminthAbility } from "@/data/helminth";
+import { hydrateHelminthAbility } from "@/lib/builds/helminth-resolve";
 import { formatAbilityDescription } from "@/lib/display/ability-text";
 import { scaledAbilityEnergyCost } from "@/lib/codex/ability-misc-stats";
 import { augurShieldsFromEnergySpent } from "@/lib/calc/set-bonuses";
@@ -162,10 +163,16 @@ export function HelminthAbilityCard({
   onChange: () => void;
   onRemove: () => void;
 }) {
+  const preview = hydrateHelminthAbility(ability);
   const eff = stats?.abilityEfficiency ?? 1;
   const effectiveCost =
-    typeof ability.energyCost === "number" ? scaledAbilityEnergyCost(ability.energyCost, eff) : null;
-  const display = { warframeId: undefined, abilityName: ability.name, helminth: true as const };
+    typeof preview.energyCost === "number" ? scaledAbilityEnergyCost(preview.energyCost, eff) : null;
+  const sourceId = preview.source !== "helminth" ? preview.source : undefined;
+  const display = {
+    warframeId: sourceId,
+    abilityName: preview.name,
+    helminth: true as const,
+  };
   const augurPct = stats?.augurEnergyToShieldsPercent ?? 0;
 
   return (
@@ -175,16 +182,16 @@ export function HelminthAbilityCard({
           <AbilitySlotBadge slot={gameSlot} />
           <div className="min-w-0">
             <h3 className="truncate text-sm font-semibold leading-tight tracking-tight text-emerald-700 dark:text-emerald-400 sm:text-base">
-              {ability.name}
+              {preview.name}
             </h3>
             <p className="mt-0.5 text-[10px] text-emerald-800/70 dark:text-emerald-400/70">
-              {ability.sourceWarframe ? `Subsumed from ${ability.sourceWarframe}` : "Helminth"}
+              {preview.sourceWarframe ? `Subsumed from ${preview.sourceWarframe}` : "Helminth"}
             </p>
           </div>
         </div>
         <div className="shrink-0">
-          {effectiveCost != null && ability.energyCost != null && (
-            <AbilityEnergyChip baseCost={ability.energyCost} effectiveCost={effectiveCost} />
+          {effectiveCost != null && preview.energyCost != null && (
+            <AbilityEnergyChip baseCost={preview.energyCost} effectiveCost={effectiveCost} />
           )}
           {augurPct > 0 && effectiveCost != null && (
             <AugurShieldsOnCast energySpent={effectiveCost} convertPercent={augurPct} />
@@ -193,11 +200,17 @@ export function HelminthAbilityCard({
       </div>
 
       <p className="mb-2 line-clamp-3 text-[11px] leading-snug text-muted-foreground sm:line-clamp-none sm:text-xs sm:leading-relaxed">
-        {formatAbilityDescription(ability.description)}
+        {formatAbilityDescription(preview.description)}
       </p>
 
+      {preview.damageType && (
+        <div className="mb-2">
+          <AbilityDamageTypeChip type={preview.damageType} />
+        </div>
+      )}
+
       <div className="mb-2">
-        <AbilityStatsBlock ability={ability} stats={stats} display={display} />
+        <AbilityStatsBlock ability={preview} stats={stats} display={display} />
       </div>
 
       <div className="mt-auto flex flex-wrap gap-2 border-t border-emerald-500/15 pt-3">

@@ -1386,6 +1386,9 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
   "narin::Neote": {
     totalDamage: { scale: "strength" },
   },
+  "helminth::Neote": {
+    totalDamage: { scale: "strength" },
+  },
   // Arsenal card: shield per Cold status and Overguard cap × STR; radius is ability.radius.
   "narin::Naraemagi": {
     shieldPerColdStatus: { scale: "strength" },
@@ -1653,7 +1656,16 @@ export function resolveAbilityScalingKey(
   abilityName: string,
   helminth?: boolean,
 ): string | null {
-  if (helminth) return `helminth::${abilityName}`;
+  if (helminth) {
+    const helminthKey = `helminth::${abilityName}`;
+    // Prefer helminth-specific verified rows; fall back to the source frame's key
+    // when a new subsume hasn't been mirrored into the helminth:: namespace yet.
+    if (VERIFIED_MISC_SCALING[helminthKey] || VERIFIED_FIELD_SCALING[helminthKey]) {
+      return helminthKey;
+    }
+    if (warframeId) return abilityKey(warframeId, abilityName);
+    return helminthKey;
+  }
   if (!warframeId) return null;
   return abilityKey(warframeId, abilityName);
 }

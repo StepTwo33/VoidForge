@@ -1,4 +1,5 @@
 import { allHelminthAbilities } from "@/data/helminth";
+import { helminthToAbility } from "@/lib/builds/helminth-resolve";
 import {
   getVerifiedFieldScaling,
   getVerifiedMiscScaling,
@@ -1321,19 +1322,7 @@ export function resolveAbilitiesWithHelminth(
   }
   const h = allHelminthAbilities.find((x) => x.id === helminthAbilityId);
   if (!h) return rows;
-  rows[helminthSlot] = {
-    name: h.name,
-    energyCost: h.energyCost,
-    description: h.description,
-    damage: h.damage,
-    damageBuff: h.damageBuff,
-    damageReduction: h.damageReduction,
-    duration: h.duration,
-    range: h.range,
-    radius: h.radius,
-    castTime: h.castTime,
-    miscStats: h.miscStats,
-  };
+  rows[helminthSlot] = helminthToAbility(h);
   return rows;
 }
 
