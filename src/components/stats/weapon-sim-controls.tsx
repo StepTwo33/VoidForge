@@ -7,8 +7,9 @@ import {
   weaponSupportsHunterCompanionSet,
 } from "@/lib/calc/set-bonuses";
 import { getModStatLabel } from "@/lib/overrides/override-stat-catalog";
-import { CollapsibleSection, SimSlider } from "./stat-primitives";
+import { SimSlider } from "./stat-primitives";
 
+/** Simulation sliders / toggles body — rendered inside the Sim Sheet, not inline in the sidebar. */
 export function WeaponSimControls({
   stats,
   simParams,
@@ -29,7 +30,6 @@ export function WeaponSimControls({
   triggerBuffTotal: number;
 }) {
   return (
-      <CollapsibleSection title="SIMULATION" defaultOpen={hasConditionals}>
         <div className="space-y-1.5 py-1 min-w-0">
           {isMelee && (
             <SimSlider
@@ -569,7 +569,6 @@ export function WeaponSimControls({
               Faction mods active vs {simParams.targetFaction}
             </div>
           )}
-        </div>
         {/* Active conditional summary */}
         {hasConditionals && (
           <div className="border-t border-border/50 pt-1 mt-1 space-y-0.5">
@@ -646,7 +645,7 @@ export function WeaponSimControls({
             )}
           </div>
         )}
-      </CollapsibleSection>
+        </div>
   );
 }
 

@@ -12,7 +12,14 @@ import {
 } from "./combat-multipliers";
 
 export type { EnemyType, EnemyKind } from "@/data/enemies";
-export { ENEMY_TYPES, getEnemyById } from "@/data/enemies";
+export {
+  ENEMY_TYPES,
+  getEnemyById,
+  COMMON_TTK_ENEMY_IDS,
+  getCommonTtkEnemies,
+  filterTtkEnemies,
+  isCommonTtkEnemyId,
+} from "@/data/enemies";
 import type { EnemyType } from "@/data/enemies";
 
 // ── Type modifier tables ──────────────────────────────────────────────

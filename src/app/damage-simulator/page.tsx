@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { PageShell, PageMain, PageHero, FilterChip } from "@/components/page-shell";
 import { cn } from "@/lib/utils";
 import { Crosshair, Shield, Flame, Plus, X, Zap, FolderOpen, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { EnemyType, ENEMY_TYPES, type EnemyKind } from "@/lib/calc/ttk";
 import { runDamageSim, type DamageSimResult } from "@/lib/calc/damage-sim";
-import type { AppliedSimBuild } from "@/lib/calc/damage-sim-load";
+import { consumeDamageSimHandoff, type AppliedSimBuild } from "@/lib/calc/damage-sim-load";
 import { EnemyLevelControl } from "@/components/enemy-level-control";
 import { SimSection, SimInputField, SIM_DAMAGE_TYPES, SIM_ELEMENT_COLORS, SIM_FACTION_COLORS } from "@/components/damage-sim/sim-section";
 import { SimLoadBuildPicker } from "@/components/damage-sim/sim-load-build-picker";
@@ -24,6 +25,7 @@ const KIND_FILTERS: { id: "all" | EnemyKind; label: string }[] = [
 ];
 
 export default function DamageSimulatorPage() {
+  const router = useRouter();
   const [dmgTypes, setDmgTypes] = useState<Record<string, number>>({
     impact: 50,
     puncture: 50,
@@ -66,6 +68,14 @@ export default function DamageSimulatorPage() {
     setPunctureArmorStripPerStack(applied.punctureArmorStripPerStack ?? 0);
     setLoadedBuildLabel(applied.buildLabel);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (new URLSearchParams(window.location.search).get("from") !== "builder") return;
+    const handoff = consumeDamageSimHandoff();
+    if (handoff) onLoaded(handoff);
+    router.replace("/damage-simulator", { scroll: false });
+  }, [onLoaded, router]);
 
   const factions = useMemo(() => ["all", ...new Set(ENEMY_TYPES.map((e) => e.faction))], []);
   const filteredEnemies = useMemo(() => {

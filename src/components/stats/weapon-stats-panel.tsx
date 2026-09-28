@@ -16,7 +16,7 @@ import {
 import { avgCritMultiplier, critTierDamage, critTiersToShow, critTierLabel, critTierColorClass, exceedsWarframeInt32 } from "@/lib/calc/crit-utils";
 import { CollapsibleSection, StatRow, toLightSafeTextColor } from "./stat-primitives";
 import { TTKSection } from "./ttk-section";
-import { WeaponSimControls } from "./weapon-sim-controls";
+import { WeaponSimPanel } from "./weapon-sim-panel";
 import { useSimStatChangeFlash } from "./use-sim-stat-change-flash";
 
 const ELEMENT_COLORS: Record<string, string> = {
@@ -110,7 +110,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
       )}
 
       {simParams && onSimParamsChange && (
-        <WeaponSimControls
+        <WeaponSimPanel
           stats={stats}
           simParams={simParams}
           onSimParamsChange={onSimParamsChange}

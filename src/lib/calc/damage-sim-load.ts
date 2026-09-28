@@ -60,6 +60,49 @@ export type AppliedSimBuild = ReturnType<typeof calculatedStatsToSimInputs> & {
   buildLabel: string;
 };
 
+/** sessionStorage key for builder → damage-simulator handoff. */
+export const DAMAGE_SIM_HANDOFF_KEY = "framehub:damage-sim-handoff";
+
+/** Map live calculated stats into an AppliedSimBuild for the simulator. */
+export function appliedSimBuildFromStats(
+  stats: CalculatedStats,
+  weaponName: string,
+  buildLabel?: string,
+): AppliedSimBuild {
+  const inputs = calculatedStatsToSimInputs(stats);
+  return {
+    ...inputs,
+    weaponName,
+    buildLabel: buildLabel ?? `${weaponName} (current build)`,
+  };
+}
+
+/** Persist current builder stats for the damage simulator to pick up. */
+export function storeDamageSimHandoff(
+  stats: CalculatedStats,
+  weaponName: string,
+  buildLabel?: string,
+): void {
+  if (typeof sessionStorage === "undefined") return;
+  const payload = appliedSimBuildFromStats(stats, weaponName, buildLabel);
+  sessionStorage.setItem(DAMAGE_SIM_HANDOFF_KEY, JSON.stringify(payload));
+}
+
+/** Read and clear a builder handoff payload, if present. */
+export function consumeDamageSimHandoff(): AppliedSimBuild | null {
+  if (typeof sessionStorage === "undefined") return null;
+  const raw = sessionStorage.getItem(DAMAGE_SIM_HANDOFF_KEY);
+  if (!raw) return null;
+  sessionStorage.removeItem(DAMAGE_SIM_HANDOFF_KEY);
+  try {
+    const parsed = JSON.parse(raw) as AppliedSimBuild;
+    if (!parsed?.dmgTypes || typeof parsed.fireRate !== "number") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 /** Resolve a weapon build payload into simulator inputs + display label. */
 export function applyWeaponBuildToSim(
   buildName: string,

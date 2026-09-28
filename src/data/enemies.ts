@@ -990,3 +990,49 @@ export const ENEMY_TYPES: EnemyType[] = [
 export function getEnemyById(id: string): EnemyType | undefined {
   return ENEMY_TYPES.find((e) => e.id === id);
 }
+
+/**
+ * Shortlist for builder TTK sidebars — representative scrap/heavy/eximus per major faction.
+ * Full catalog stays available via search (`filterTtkEnemies`).
+ */
+export const COMMON_TTK_ENEMY_IDS: readonly string[] = [
+  "lancer",
+  "heavy_gunner",
+  "bombard",
+  "eximus_heavy_gunner",
+  "crewman",
+  "corpus_tech",
+  "moa",
+  "nullifier_crewman",
+  "charger",
+  "ancient_healer",
+  "corrupted_heavy_gunner",
+  "corrupted_crewman",
+  "battalyst",
+  "lumbering_fragment",
+  "thrax_centurion",
+] as const;
+
+const COMMON_TTK_ENEMY_ID_SET = new Set(COMMON_TTK_ENEMY_IDS);
+
+export function getCommonTtkEnemies(): EnemyType[] {
+  return COMMON_TTK_ENEMY_IDS.map((id) => getEnemyById(id)).filter(
+    (e): e is EnemyType => e != null,
+  );
+}
+
+/**
+ * Empty/whitespace search → common shortlist.
+ * Non-empty search → full ENEMY_TYPES filtered by name or faction (case-insensitive).
+ */
+export function filterTtkEnemies(search: string): EnemyType[] {
+  const q = search.trim().toLowerCase();
+  if (!q) return getCommonTtkEnemies();
+  return ENEMY_TYPES.filter(
+    (e) => e.name.toLowerCase().includes(q) || e.faction.toLowerCase().includes(q),
+  );
+}
+
+export function isCommonTtkEnemyId(id: string): boolean {
+  return COMMON_TTK_ENEMY_ID_SET.has(id);
+}
