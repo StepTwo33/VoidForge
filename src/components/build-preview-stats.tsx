@@ -2,15 +2,13 @@
 
 import { useMemo } from "react";
 import { AbilityTTKPanel } from "@/components/ability-ttk-panel";
-import { LoadoutDamagePanel } from "@/components/loadout-damage-panel";
 import { WarframeStatsPanel, WeaponStatsPanel } from "@/components/stats-panel";
 import {
   resolvePublicBuildWarframePreview,
   resolvePublicBuildWeaponPreview,
 } from "@/lib/builds/build-stats";
-import type { LoadoutBuildData } from "@/lib/builds/loadouts";
 import { useMods, useWeapons } from "@/lib/weapons/use-data";
-import type { EquippedMod, Loadout } from "@/lib/types";
+import type { EquippedMod } from "@/lib/types";
 
 function StatsDivider() {
   return <div className="w-full h-px bg-border my-8" />;
@@ -48,28 +46,20 @@ export function BuildPreviewStats({ type, data }: { type: string; data: unknown 
   const allWeapons = useWeapons();
   const { modsMap } = useMods();
 
-  const warframePreview = useMemo(
-    () => (type === "warframe" ? resolvePublicBuildWarframePreview(data, allWeapons) : null),
-    [type, data, allWeapons],
-  );
+  // Loadout estimates live inside LoadoutBuildPreview slot cards.
+  const isLoadout = type === "loadout";
 
-  const loadoutPreview = useMemo((): Loadout | null => {
-    if (type !== "loadout" || !data || typeof data !== "object") return null;
-    return {
-      id: "preview",
-      name: "Preview",
-      createdAt: 0,
-      updatedAt: 0,
-      ...(data as LoadoutBuildData),
-    };
-  }, [type, data]);
+  const warframePreview = useMemo(
+    () => (!isLoadout && type === "warframe" ? resolvePublicBuildWarframePreview(data, allWeapons) : null),
+    [isLoadout, type, data, allWeapons],
+  );
 
   const weaponPreview = useMemo(
     () =>
-      type !== "warframe" && type !== "loadout"
+      !isLoadout && type !== "warframe"
         ? resolvePublicBuildWeaponPreview(type, data, allWeapons)
         : null,
-    [type, data, allWeapons],
+    [isLoadout, type, data, allWeapons],
   );
 
   const equippedMods = useMemo((): EquippedMod[] | undefined => {
@@ -87,13 +77,11 @@ export function BuildPreviewStats({ type, data }: { type: string; data: unknown 
     });
   }, [warframePreview, modsMap]);
 
-  if (!warframePreview && !weaponPreview && !loadoutPreview) return null;
+  if (isLoadout || (!warframePreview && !weaponPreview)) return null;
 
   return (
     <>
       <StatsDivider />
-
-      {loadoutPreview && <LoadoutDamagePanel loadout={loadoutPreview} />}
 
       {warframePreview && (
         <div className="space-y-6">
