@@ -23,6 +23,16 @@ export interface AbilityDisplayContext {
    * Comes from the warframe stats-panel sim, not a second ability-card slider.
    */
   extraFlatArmor?: number;
+  /**
+   * Ember Immolation heat gauge (0–100). Shared from the stats-panel sim so
+   * Fireball / Immolation / Fire Blast / Inferno don't each show their own slider.
+   */
+  immolationHeatPct?: number;
+  /**
+   * Gauss battery gauge (0–100). Shared from the stats-panel sim so Kinetic Plating /
+   * Thermal Sunder / Redline / passive don't each show their own slider.
+   */
+  batteryPct?: number;
 }
 
 export interface ScaledMiscStatLine {

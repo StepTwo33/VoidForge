@@ -21,6 +21,7 @@ import {
 import { Loadout } from "@/lib/types";
 import { modularBuildDisplayName, modularBuildMatchesLoadoutSlot } from "@/lib/builds/modular-resolve";
 import { allWarframes } from "@/data/warframes";
+import { isNecramechId } from "@/data/archwing";
 import { allCompanions } from "@/data/companions";
 import { useWeapons } from "@/lib/weapons/use-data";
 import { Input } from "@/components/ui/input";
@@ -518,6 +519,7 @@ export default function LoadoutsPage() {
     const q = pickerSearch.toLowerCase();
     if (pickerSlot === "warframe") {
       return allWarframes
+        .filter((w) => w.id !== "helminth" && !isNecramechId(w.id))
         .filter((w) => !q || w.name.toLowerCase().includes(q))
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((w) => ({ id: w.id, name: w.name, detail: `HP ${w.health} • SH ${w.shield} • AR ${w.armor}` }));

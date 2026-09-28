@@ -42,7 +42,6 @@ import {
   computeRevenantShieldDepletionPulse,
   computeRevenantShieldPulseDamageAtDistance,
   computeOctaviaInspirationPassive,
-  computeOctaviaInspirationEnergyRemaining,
   computeNekrosDeathHealPassive,
   computeNekrosDeathHealTotal,
   computeNovaPassiveOrbChances,
@@ -54,16 +53,13 @@ import {
   computeLokiWallLatchPassive,
   DEFAULT_WALL_LATCH_SEC,
   computeLavosValenceBlockPassive,
-  computeLavosValenceBlockRemaining,
   computeKhoraVenariPassive,
   computeOberonRighteousNegationPassive,
   computeOberonRighteousNegationStacks,
   computeJadeJudgmentPassive,
-  computeJadeJudgmentRemaining,
   computeJadeJudgmentDamageMultiplier,
   computeTempleBackbeatEfficiencyBonus,
   computeOraxiaPredatorsLurkPassive,
-  computeOraxiaPredatorsLurkRemaining,
   computeRhinoHardLandingPulse,
   computeRhinoHardLandingDamageAtDistance,
   computeGaraPassiveBlind,
@@ -72,9 +68,7 @@ import {
   computeLimboRiftEnergyGained,
   computeMagVacuumPassive,
   computeKoumeiFatePassive,
-  computeKoumeiFateRemaining,
   computeBansheeSilencePassive,
-  computeAtlasKnockdownPassive,
   computeNyxPsychicCritChance,
   computeHarrowPassive,
   computeGyreAbilityCritChance,
@@ -82,34 +76,31 @@ import {
   computeChromaDragonFlightPassive,
   computeChromaElementCycle,
   computeTitaniaUpsurgePassive,
-  computeTitaniaUpsurgeRemaining,
   computeHildrynShieldGatePassive,
   computeNidusUndyingPassive,
   computeSiriusOrionPassive,
-  computeSiriusOrionEfficiencyCastsRemaining,
-  computeWispAirborneInvisPassive,
   computeFollieInkblotPassive,
   computeFollieInkblotExpected,
   computeSevagothTombstonePassive,
-  computeSevagothTombstoneSoulsRemaining,
   computeInarosPassive,
   computeInarosFinisherHeal,
   computeNokkoVitalDecayPassive,
-  computeNokkoVitalDecayRemaining,
   computeWukongFiveTechniquesPassive,
   computeVorunaWolvesPassive,
-  computeVorunaUlfrunCooldownRemaining,
   computeUrielLegionPassive,
-  computeUrielDemonResurrectRemaining,
-  type MesaSidearmStyle,
-  type NovaSpeedState,
   type ChromaElement,
 } from "@/lib/codex/ability-misc-stats";
 import { computeMechaSetMarkStats } from "@/lib/calc/set-bonuses";
+import { cn } from "@/lib/utils";
 import { CollapsibleSection, SimSlider, StatRow } from "./stat-primitives";
 
-function GaussPassiveBattery() {
-  const [batteryPct, setBatteryPct] = useState(80);
+function GaussPassiveBattery({
+  batteryPct,
+  onBatteryPctChange,
+}: {
+  batteryPct: number;
+  onBatteryPctChange: (n: number) => void;
+}) {
   const batteryT = Math.min(1, Math.max(0, batteryPct / 100));
   const recharge = computeGaussPassiveShieldRecharge(batteryT);
   const delay = computeGaussPassiveRechargeDelayReduction(batteryT);
@@ -121,8 +112,8 @@ function GaussPassiveBattery() {
         value={batteryPct}
         min={0}
         max={100}
-        onChange={setBatteryPct}
-        tooltip="Gauss passive: shield recharge and delay reduction scale linearly with battery (wiki: 80% → 96%/64%)."
+        onChange={onBatteryPctChange}
+        tooltip="Shared battery gauge for Kinetic Plating DR, Thermal Sunder damage, Redline buffs, and passive shield recharge."
       />
       <StatRow
         label="Shield Recharge"
@@ -141,7 +132,7 @@ function GaussPassiveBattery() {
 }
 
 function BaruukRestraintPassive() {
-  const [erodedPct, setErodedPct] = useState(100);
+  const [erodedPct, setErodedPct] = useState(0);
   const dr = computeBaruukRestraintDr(erodedPct / 100);
 
   return (
@@ -195,12 +186,26 @@ function ValkyrRagePassive() {
   );
 }
 
-function EmberHeatPassive() {
+function EmberHeatPassive({
+  immolationHeatPct,
+  onImmolationHeatPctChange,
+}: {
+  immolationHeatPct: number;
+  onImmolationHeatPctChange: (n: number) => void;
+}) {
   const [heatEnemies, setHeatEnemies] = useState(5);
   const bonusStr = computeEmberPassiveAbilityStrength(heatEnemies);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+      <SimSlider
+        label="Immolation Heat %"
+        value={immolationHeatPct}
+        min={0}
+        max={100}
+        onChange={onImmolationHeatPctChange}
+        tooltip="Shared heat gauge for Fireball combo, Immolation DR, Fire Blast energy/strip, and Inferno Ring DPS."
+      />
       <SimSlider
         label="Heat Enemies"
         value={heatEnemies}
@@ -281,7 +286,7 @@ function FrostFortifyingFreezePassive({
 }
 
 function Cyte09PracticedAimPassive() {
-  const [wpKills, setWpKills] = useState(100);
+  const [wpKills, setWpKills] = useState(0);
   const wpCc = computeCyte09PracticedAimCritChance(wpKills);
 
   return (
@@ -341,7 +346,7 @@ function CalibanAdaptiveArmorPassive({
   effectiveHealth: number;
   armorDrFraction: number;
 }) {
-  const [hits, setHits] = useState(10);
+  const [hits, setHits] = useState(0);
   const typedDr = computeCalibanAdaptiveArmorDr(hits);
   const armorMult = 1 - Math.min(Math.max(armorDrFraction, 0), 0.99);
   const combinedMult = armorMult * (1 - typedDr);
@@ -441,23 +446,17 @@ function StyanaxHoplitePassive({ moddedShield }: { moddedShield: number }) {
 }
 
 function YareliCriticalFlowPassive() {
-  const [moving, setMoving] = useState(1);
-  const cc = computeYareliCriticalFlowCritChance(moving > 0);
+  const cc = computeYareliCriticalFlowCritChance(true);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Moving"
-        value={moving}
-        min={0}
-        max={1}
-        onChange={setMoving}
-        tooltip="Yareli Critical Flow: after 1.5s of movement, +200% Secondary Critical Chance until idle 1s."
-      />
+      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
+        After 1.5s of movement (until idle 1s).
+      </p>
       <StatRow
         label="Secondary CC"
-        value={cc > 0 ? `+${(cc * 100).toFixed(0)}%` : "Inactive"}
-        color={cc > 0 ? "text-sky-700 dark:text-sky-400" : "text-muted-foreground"}
+        value={`+${(cc * 100).toFixed(0)}%`}
+        color="text-sky-700 dark:text-sky-400"
         tooltip="Additive to secondary weapon base crit chance mods (panel-only)."
       />
     </div>
@@ -465,23 +464,17 @@ function YareliCriticalFlowPassive() {
 }
 
 function ZephyrAirbornePassive() {
-  const [airborne, setAirborne] = useState(1);
-  const cc = computeZephyrAirborneCritChance(airborne > 0);
+  const cc = computeZephyrAirborneCritChance(true);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Airborne"
-        value={airborne}
-        min={0}
-        max={1}
-        onChange={setAirborne}
-        tooltip="Zephyr passive: +150% weapon Critical Chance while airborne (also slower fall / more maneuverable)."
-      />
+      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
+        While airborne (also slower fall / more maneuverable).
+      </p>
       <StatRow
         label="Weapon CC"
-        value={cc > 0 ? `+${(cc * 100).toFixed(0)}%` : "Inactive"}
-        color={cc > 0 ? "text-sky-700 dark:text-sky-400" : "text-muted-foreground"}
+        value={`+${(cc * 100).toFixed(0)}%`}
+        color="text-sky-700 dark:text-sky-400"
         tooltip="Additive to all equipped weapons' crit chance while airborne (panel-only)."
       />
     </div>
@@ -489,54 +482,58 @@ function ZephyrAirbornePassive() {
 }
 
 function XakuEvasionPassive() {
-  const [vastUntime, setVastUntime] = useState(0);
-  const { dodgeChance, aoeDamageReduction } = computeXakuPassiveEvasion(vastUntime > 0);
+  const base = computeXakuPassiveEvasion(false);
+  const untamed = computeXakuPassiveEvasion(true);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Vast Untime"
-        value={vastUntime}
-        min={0}
-        max={1}
-        onChange={setVastUntime}
-        tooltip="Xaku passive: 25% dodge + 25% AoE DR; both become 75% while The Vast Untime is active."
-      />
       <StatRow
-        label="Dodge Chance"
-        value={`${(dodgeChance * 100).toFixed(0)}%`}
+        label="Dodge (base)"
+        value={`${(base.dodgeChance * 100).toFixed(0)}%`}
         color="text-violet-800 dark:text-violet-300"
         tooltip="Chance to phase through enemy weapon attacks (separate from Evasion)."
       />
       <StatRow
-        label="AoE DR"
-        value={`${(aoeDamageReduction * 100).toFixed(0)}%`}
+        label="AoE DR (base)"
+        value={`${(base.aoeDamageReduction * 100).toFixed(0)}%`}
         color="text-violet-700 dark:text-violet-400"
         tooltip="Damage reduction vs area-of-effect damage (explosions are not dodged)."
+      />
+      <StatRow
+        label="w/ Vast Untime"
+        value={`${(untamed.dodgeChance * 100).toFixed(0)}% dodge · ${(untamed.aoeDamageReduction * 100).toFixed(0)}% AoE DR`}
+        color="text-amber-800 dark:text-amber-400"
+        tooltip="Both rise to 75% while The Vast Untime is active."
       />
     </div>
   );
 }
 
 function VoltStaticDischargePassive() {
-  const [meters, setMeters] = useState(50);
-  const bonusDmg = computeVoltStaticDischargeDamage(meters);
+  const perMeter = 10;
+  const cap = 1000;
+  const exampleMeters = 50;
+  const exampleDmg = computeVoltStaticDischargeDamage(exampleMeters);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Meters Traveled"
-        value={meters}
-        min={0}
-        max={100}
-        onChange={setMeters}
-        tooltip="Volt Static Discharge: +10 Electricity damage per grounded meter (cap 1000). Discharges on next hit."
+      <StatRow
+        label="Charge Rate"
+        value={`+${perMeter} / m`}
+        color="text-yellow-700 dark:text-yellow-400"
+        tooltip="Electricity damage stored per grounded meter traveled. Discharges on next weapon attack or ability hit. Not × Ability Strength."
       />
       <StatRow
-        label="Bonus Damage"
-        value={`+${bonusDmg.toFixed(0)}`}
-        color="text-yellow-700 dark:text-yellow-400"
-        tooltip="Separate Electricity hit on next weapon attack or ability; not × Ability Strength."
+        label="Cap"
+        value={`${cap}`}
+        color="text-muted-foreground"
+        tooltip={`${cap / perMeter}m of grounded travel fills the gauge.`}
+      />
+      <StatRow
+        label={`Example (${exampleMeters}m)`}
+        value={`+${exampleDmg}`}
+        color="text-muted-foreground"
+        tooltip={`${exampleMeters} × ${perMeter} = ${exampleDmg} Electricity bonus.`}
       />
     </div>
   );
@@ -563,52 +560,35 @@ function TrinityLifegiverPassive({ maxEnergy }: { maxEnergy: number }) {
   );
 }
 
-const MESA_SIDEARM_STYLES: MesaSidearmStyle[] = ["none", "single", "dual"];
-
-function MesaPassiveBonusesPanel({ moddedHealth }: { moddedHealth: number }) {
-  const [sidearmIdx, setSidearmIdx] = useState(2); // dual
-  const [meleeEquipped, setMeleeEquipped] = useState(0);
-  const style = MESA_SIDEARM_STYLES[Math.min(2, Math.max(0, sidearmIdx))] ?? "dual";
-  const bonuses = computeMesaPassiveBonuses({
-    sidearmStyle: style,
-    meleeEquipped: meleeEquipped > 0,
-  });
+  const dual = computeMesaPassiveBonuses({ sidearmStyle: "dual", meleeEquipped: false });
+  const single = computeMesaPassiveBonuses({ sidearmStyle: "single", meleeEquipped: false });
+  const withMelee = computeMesaPassiveBonuses({ sidearmStyle: "none", meleeEquipped: true });
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Sidearm (0 none / 1 single / 2 dual)"
-        value={sidearmIdx}
-        min={0}
-        max={2}
-        onChange={setSidearmIdx}
-        tooltip="Mesa: dual-wield +15% fire rate; one-handed +25% reload. Archmelee still allowed for the health bonus."
-      />
-      <SimSlider
-        label="Melee Equipped"
-        value={meleeEquipped}
-        min={0}
-        max={1}
-        onChange={setMeleeEquipped}
-        tooltip="+50 Health when no melee weapon is equipped in the loadout."
+      <StatRow
+        label="Dual Sidearms FR"
+        value={`+${(dual.fireRateBonus * 100).toFixed(0)}%`}
+        color="text-amber-800 dark:text-amber-400"
+        tooltip="Fire rate bonus while dual-wielding sidearms."
       />
       <StatRow
-        label="Fire Rate"
-        value={bonuses.fireRateBonus > 0 ? `+${(bonuses.fireRateBonus * 100).toFixed(0)}%` : "—"}
-        color={bonuses.fireRateBonus > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
-        tooltip="Dual-wielded sidearms only."
+        label="One-Hand Reload"
+        value={`+${(single.reloadSpeedBonus * 100).toFixed(0)}%`}
+        color="text-amber-800 dark:text-amber-400"
+        tooltip="Reload speed bonus for single one-handed sidearms."
       />
       <StatRow
-        label="Reload Speed"
-        value={bonuses.reloadSpeedBonus > 0 ? `+${(bonuses.reloadSpeedBonus * 100).toFixed(0)}%` : "—"}
-        color={bonuses.reloadSpeedBonus > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
-        tooltip="One-handed sidearms only."
-      />
-      <StatRow
-        label="Health w/ Passive"
-        value={(moddedHealth + bonuses.bonusHealth).toFixed(0)}
+        label="Health (no melee)"
+        value={`+${dual.bonusHealth} → ${(moddedHealth + dual.bonusHealth).toFixed(0)}`}
         color="text-green-700 dark:text-green-400"
-        tooltip={bonuses.bonusHealth > 0 ? "+50 flat Health (no melee)." : "Melee equipped — no Health bonus."}
+        tooltip={`+50 flat Health when no melee is equipped (Archmelee still allowed). With melee: ${moddedHealth.toFixed(0)}.`}
+      />
+      <StatRow
+        label="Health (w/ melee)"
+        value={moddedHealth.toFixed(0)}
+        color="text-muted-foreground"
+        tooltip={`No Health bonus when a melee weapon is equipped (${withMelee.bonusHealth} bonus).`}
       />
     </div>
   );
@@ -630,29 +610,23 @@ function QorvexCoreExposurePassive() {
 }
 
 function ExcaliburSwordsmanshipPassive() {
-  const [wieldingSword, setWieldingSword] = useState(1);
-  const { damageBonus, attackSpeedBonus } = computeExcaliburSwordsmanshipBonuses(wieldingSword > 0);
+  const { damageBonus, attackSpeedBonus } = computeExcaliburSwordsmanshipBonuses(true);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Wielding Sword"
-        value={wieldingSword}
-        min={0}
-        max={1}
-        onChange={setWieldingSword}
-        tooltip="Excalibur Swordsmanship: +10% damage and +10% attack speed with swords, dual swords, nikanas, and rapiers."
-      />
+      <p className="text-[10px] text-muted-foreground leading-snug">
+        Active while wielding swords, dual swords, nikanas, or rapiers.
+      </p>
       <StatRow
         label="Melee Damage"
-        value={damageBonus > 0 ? `+${(damageBonus * 100).toFixed(0)}%` : "Inactive"}
-        color={damageBonus > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
+        value={`+${(damageBonus * 100).toFixed(0)}%`}
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Additive melee damage bonus (panel-only)."
       />
       <StatRow
         label="Attack Speed"
-        value={attackSpeedBonus > 0 ? `+${(attackSpeedBonus * 100).toFixed(0)}%` : "Inactive"}
-        color={attackSpeedBonus > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
+        value={`+${(attackSpeedBonus * 100).toFixed(0)}%`}
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Additive attack speed (panel-only). Umbra also keeps sentience outside Transference."
       />
     </div>
@@ -704,29 +678,23 @@ function KullervoMeleePassive() {
 }
 
 function VaubanIncapacitatedPassive() {
-  const [incapacitated, setIncapacitated] = useState(1);
-  const bonus = computeVaubanIncapacitatedDamageBonus(incapacitated > 0);
+  const bonus = computeVaubanIncapacitatedDamageBonus(true);
   const exampleHit = 100 * (1 + bonus);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Target Incapacitated"
-        value={incapacitated}
-        min={0}
-        max={1}
-        onChange={setIncapacitated}
-        tooltip="Vauban: +25% multiplicative damage vs incapacitated enemies (stun, freeze at 10 stacks, Bastille, etc.)."
-      />
+      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
+        Vs incapacitated enemies (stun, freeze at 10 stacks, Bastille, etc.).
+      </p>
       <StatRow
         label="Damage Bonus"
-        value={bonus > 0 ? `+${(bonus * 100).toFixed(0)}%` : "Inactive"}
-        color={bonus > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
+        value={`+${(bonus * 100).toFixed(0)}%`}
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Multiplicative to total damage (and again on status DoTs applied while incapacitated)."
       />
       <StatRow
         label="Example 100 Hit"
-        value={bonus > 0 ? `${exampleHit.toFixed(0)}` : "100"}
+        value={exampleHit.toFixed(0)}
         color="text-muted-foreground"
         tooltip="100 × (1 + 0.25) when the passive applies."
       />
@@ -764,39 +732,47 @@ function AshSlashPassive() {
 }
 
 function HydroidCorrosivePassive() {
-  const [marked, setMarked] = useState(1);
-  const strip = computeHydroidCorrosiveArmorStrip(marked > 0);
+  const normal = computeHydroidCorrosiveArmorStrip(false);
+  const marked = computeHydroidCorrosiveArmorStrip(true);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Marked by Hydroid"
-        value={marked}
-        min={0}
-        max={1}
-        onChange={setMarked}
-        tooltip="Hydroid: after he damages an enemy, Corrosive from any source gets boosted armor strip."
+      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
+        After Hydroid damages an enemy, Corrosive from any source strips more armor.
+      </p>
+      <StatRow
+        label="1st Stack (normal)"
+        value={`${(normal.firstStackStrip * 100).toFixed(0)}%`}
+        color="text-muted-foreground"
+        tooltip="Standard Corrosive first-stack armor strip."
       />
       <StatRow
-        label="1st Stack Strip"
-        value={`${(strip.firstStackStrip * 100).toFixed(0)}%`}
+        label="1st Stack (marked)"
+        value={`${(marked.firstStackStrip * 100).toFixed(0)}%`}
         color="text-lime-700 dark:text-lime-400"
-        tooltip="Normal Corrosive first stack is 26%; Hydroid-marked enemies take 50%."
+        tooltip="Hydroid-marked: first Corrosive stack strips 50% armor (vs 26%)."
       />
       <StatRow
-        label="Full Stack Strip"
-        value={`${(strip.fullStackStrip * 100).toFixed(0)}%`}
+        label="Full Stacks (normal)"
+        value={`${(normal.fullStackStrip * 100).toFixed(0)}%`}
+        color="text-muted-foreground"
+        tooltip="Standard Corrosive full-stack cap (80%)."
+      />
+      <StatRow
+        label="Full Stacks (marked)"
+        value={`${(marked.fullStackStrip * 100).toFixed(0)}%`}
         color="text-lime-700 dark:text-lime-400"
-        tooltip="Normal Corrosive caps at 80% armor strip; Hydroid-marked can reach 100%."
+        tooltip="Hydroid-marked: Corrosive can fully strip armor (100% vs 80%)."
       />
     </div>
   );
 }
 
 function DanteChroniclersMarkPassive() {
-  const [scanned, setScanned] = useState(1);
   const [baseScPct, setBaseScPct] = useState(40);
-  const scaled = computeDanteChroniclersMarkStatusChance(baseScPct / 100, scanned > 0);
+  const base = baseScPct / 100;
+  const unscanned = computeDanteChroniclersMarkStatusChance(base, false);
+  const scanned = computeDanteChroniclersMarkStatusChance(base, true);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
@@ -806,100 +782,128 @@ function DanteChroniclersMarkPassive() {
         min={0}
         max={100}
         onChange={setBaseScPct}
-        tooltip="Post-mod Status Chance before Chronicler's Mark (multiplicative ×1.5 on fully scanned foes)."
-      />
-      <SimSlider
-        label="Fully Scanned"
-        value={scanned}
-        min={0}
-        max={1}
-        onChange={setScanned}
-        tooltip="Dante: completed Codex research on the enemy type grants Chronicler's Mark."
+        tooltip="Post-mod Status Chance before Chronicler's Mark (multiplicative ×1.5 on fully Codex-scanned foes)."
       />
       <StatRow
-        label="Status Chance"
-        value={`${(scaled * 100).toFixed(0)}%`}
-        color={scanned > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
-        tooltip="Wiki example: 40% × 1.5 = 60% vs fully researched enemies."
+        label="Unscanned"
+        value={`${(unscanned * 100).toFixed(0)}%`}
+        color="text-muted-foreground"
+        tooltip="Status Chance vs enemies without completed Codex research (no Chronicler's Mark)."
+      />
+      <StatRow
+        label="Fully Scanned"
+        value={`${(scanned * 100).toFixed(0)}%`}
+        color="text-amber-800 dark:text-amber-400"
+        tooltip="×1.5 vs fully researched enemies. Wiki example: 40% × 1.5 = 60%."
       />
     </div>
   );
 }
 
 function DagathAbundantAbyssPassive() {
+  // Small Energy/Health = 25, large = 50, Empowered Health = 100
   const [orbValue, setOrbValue] = useState(25);
-  const [forceProc, setForceProc] = useState(2); // 0=off, 1=on, 2=expected
-  const result = computeDagathAbundantAbyss(
-    orbValue,
-    forceProc === 2 ? undefined : { forceProc: forceProc === 1 },
-  );
+  const off = computeDagathAbundantAbyss(orbValue, { forceProc: false });
+  const on = computeDagathAbundantAbyss(orbValue, { forceProc: true });
+  const avg = computeDagathAbundantAbyss(orbValue);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Base Orb Value"
-        value={orbValue}
-        min={25}
-        max={100}
-        onChange={setOrbValue}
-        tooltip="Small Energy/Health orb is 25; large 50; Empowered Health 100."
-      />
-      <SimSlider
-        label="Proc (0 off / 1 on / 2 avg)"
-        value={forceProc}
-        min={0}
-        max={2}
-        onChange={setForceProc}
-        tooltip="Dagath Abundant Abyss: 35% chance orbs are +300% more effective (×4 yield)."
-      />
+      <div className="flex flex-wrap gap-1 pt-0.5">
+        {[
+          { v: 25, label: "Small (25)" },
+          { v: 50, label: "Large (50)" },
+          { v: 100, label: "Empowered (100)" },
+        ].map((opt) => (
+          <button
+            key={opt.v}
+            type="button"
+            onClick={() => setOrbValue(opt.v)}
+            className={cn(
+              "inline-flex min-h-9 items-center rounded border px-2 py-1 text-[10px] transition-colors",
+              orbValue === opt.v
+                ? "border-violet-500/50 bg-violet-500/15 text-violet-800 dark:text-violet-300"
+                : "border-border/60 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
       <StatRow
         label="Proc Chance"
-        value={`${(result.procChance * 100).toFixed(0)}%`}
+        value={`${(avg.procChance * 100).toFixed(0)}%`}
         color="text-violet-800 dark:text-violet-300"
-        tooltip="Rolled separately for Health and Energy on Universal Orbs."
+        tooltip="Abundant Abyss: 35% chance per Health or Energy orb (+300% more effective = ×4 yield). Universal Orbs roll separately for each."
       />
       <StatRow
-        label="Orb Yield"
-        value={result.effectiveValue.toFixed(1)}
+        label="If Procs"
+        value={on.effectiveValue.toFixed(0)}
         color="text-violet-700 dark:text-violet-400"
-        tooltip={
-          forceProc === 2
-            ? `Expected value at ${((result.expectedYieldMultiplier - 1) * 100).toFixed(0)}% average uplift (×${result.expectedYieldMultiplier.toFixed(2)}).`
-            : forceProc === 1
-              ? "Proc active: ×4 yield (+300%)."
-              : "No proc: base orb value."
-        }
+        tooltip={`×${on.procYieldMultiplier} yield (+300%). Base ${orbValue} → ${on.effectiveValue.toFixed(0)}.`}
+      />
+      <StatRow
+        label="Expected"
+        value={avg.effectiveValue.toFixed(1)}
+        color="text-violet-700 dark:text-violet-400"
+        tooltip={`Average over many pickups: ×${avg.expectedYieldMultiplier.toFixed(2)} (${(avg.procChance * 100).toFixed(0)}% at ×${avg.procYieldMultiplier}, else base ${off.effectiveValue.toFixed(0)}).`}
       />
     </div>
   );
 }
 
 function EquinoxOrbConversionPassive() {
-  const [orbKind, setOrbKind] = useState(0); // 0 health, 1 energy
+  const [orbKind, setOrbKind] = useState<"health" | "energy">("health");
   const [orbValue, setOrbValue] = useState(50);
-  const kind = orbKind > 0 ? "energy" : "health";
-  const result = computeEquinoxOrbConversion(orbValue, kind);
+  const result = computeEquinoxOrbConversion(orbValue, orbKind);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Orb (0 Health / 1 Energy)"
-        value={orbKind}
-        min={0}
-        max={1}
-        onChange={setOrbKind}
-        tooltip="Equinox: 10% of Health Orbs convert to Energy; 10% of Energy Orbs convert to Health."
-      />
-      <SimSlider
-        label="Orb Value"
-        value={orbValue}
-        min={25}
-        max={100}
-        onChange={setOrbValue}
-        tooltip="Primary restore amount before conversion (small 25 / large 50 / Empowered 100)."
-      />
+      <div className="flex flex-wrap gap-1 pt-0.5">
+        {(
+          [
+            { v: "health" as const, label: "Health Orb" },
+            { v: "energy" as const, label: "Energy Orb" },
+          ] as const
+        ).map((opt) => (
+          <button
+            key={opt.v}
+            type="button"
+            onClick={() => setOrbKind(opt.v)}
+            className={cn(
+              "inline-flex min-h-9 items-center rounded border px-2 py-1 text-[10px] transition-colors",
+              orbKind === opt.v
+                ? "border-sky-500/50 bg-sky-500/15 text-sky-800 dark:text-sky-300"
+                : "border-border/60 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {[
+          { v: 25, label: "Small (25)" },
+          { v: 50, label: "Large (50)" },
+          { v: 100, label: "Empowered (100)" },
+        ].map((opt) => (
+          <button
+            key={opt.v}
+            type="button"
+            onClick={() => setOrbValue(opt.v)}
+            className={cn(
+              "inline-flex min-h-9 items-center rounded border px-2 py-1 text-[10px] transition-colors",
+              orbValue === opt.v
+                ? "border-violet-500/50 bg-violet-500/15 text-violet-800 dark:text-violet-300"
+                : "border-border/60 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
       <StatRow
-        label={kind === "health" ? "Health" : "Energy"}
+        label={orbKind === "health" ? "Health" : "Energy"}
         value={`+${result.primaryAmount.toFixed(0)}`}
         color="text-sky-700 dark:text-sky-400"
         tooltip="Full orb value applied to its primary resource."
@@ -916,30 +920,27 @@ function EquinoxOrbConversionPassive() {
 
 function RevenantShieldPulsePassive() {
   const pulse = computeRevenantShieldDepletionPulse();
-  const [distancePct, setDistancePct] = useState(0);
-  const dmg = computeRevenantShieldPulseDamageAtDistance(distancePct / 100, pulse);
+  const edgeDmg = computeRevenantShieldPulseDamageAtDistance(1, pulse);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Distance % of Radius"
-        value={distancePct}
-        min={0}
-        max={100}
-        onChange={setDistancePct}
-        tooltip={`Revenant: on shield break, ${pulse.damage} Impact knockdown in ${pulse.radius}m (${(pulse.maxFalloff * 100).toFixed(0)}% falloff at edge).`}
+      <StatRow
+        label="Pulse Damage (center)"
+        value={pulse.damage.toFixed(0)}
+        color="text-violet-700 dark:text-violet-400"
+        tooltip="Impact knockdown on shield depletion. Not affected by Ability Strength."
       />
       <StatRow
-        label="Pulse Damage"
-        value={dmg.toFixed(0)}
-        color="text-violet-700 dark:text-violet-400"
-        tooltip="Not affected by Ability Strength. Knocks down enemies in range."
+        label="Pulse Damage (edge)"
+        value={edgeDmg.toFixed(0)}
+        color="text-muted-foreground"
+        tooltip={`${(pulse.maxFalloff * 100).toFixed(0)}% falloff at the edge of the pulse.`}
       />
       <StatRow
         label="Radius"
         value={`${pulse.radius}m`}
         color="text-muted-foreground"
-        tooltip="Fixed 7.5m radial pulse on shield depletion."
+        tooltip="Fixed radial pulse on shield depletion."
       />
     </div>
   );
@@ -947,30 +948,26 @@ function RevenantShieldPulsePassive() {
 
 function OctaviaInspirationPassivePanel() {
   const insp = computeOctaviaInspirationPassive();
-  const [elapsedSec, setElapsedSec] = useState(0);
-  const remaining = computeOctaviaInspirationEnergyRemaining(elapsedSec, insp);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Elapsed (s)"
-        value={elapsedSec}
-        min={0}
-        max={insp.durationSec}
-        onChange={setElapsedSec}
-        tooltip="Octavia Inspiration: casting an ability grants 1 energy/s for 30s to allies within 15m (recast refreshes)."
-      />
       <StatRow
         label="Energy/s"
         value={`${insp.energyPerSecond}/s`}
         color="text-sky-700 dark:text-sky-400"
-        tooltip={`Within ${insp.radiusM}m. Not affected by Ability Strength/Duration.`}
+        tooltip={`Casting an ability grants this to Octavia and allies within ${insp.radiusM}m for ${insp.durationSec}s (recast refreshes). Not affected by Ability Strength/Duration.`}
       />
       <StatRow
-        label="Remaining Energy"
-        value={`+${remaining.toFixed(0)}`}
-        color="text-sky-700 dark:text-sky-400"
+        label="Duration"
+        value={`${insp.durationSec}s`}
+        color="text-muted-foreground"
         tooltip={`Full buff restores ${insp.totalEnergy} energy over ${insp.durationSec}s.`}
+      />
+      <StatRow
+        label="Total Energy"
+        value={`+${insp.totalEnergy}`}
+        color="text-sky-700 dark:text-sky-400"
+        tooltip={`If the buff runs its full ${insp.durationSec}s without refresh.`}
       />
     </div>
   );
@@ -1007,80 +1004,50 @@ function NekrosDeathHealPassivePanel() {
   );
 }
 
-const NOVA_SPEED_STATES: NovaSpeedState[] = ["none", "slowed", "sped"];
-
 function NovaOrbDropPassive() {
-  const [speedIdx, setSpeedIdx] = useState(1); // slowed
-  const [kills, setKills] = useState(20);
-  const speedState = NOVA_SPEED_STATES[Math.min(2, Math.max(0, speedIdx))] ?? "slowed";
-  const chances = computeNovaPassiveOrbChances(speedState);
-  const expected = computeNovaPassiveExpectedOrbs(kills, speedState);
+  const slowed = computeNovaPassiveOrbChances("slowed");
+  const sped = computeNovaPassiveOrbChances("sped");
+  const sampleKills = 20;
+  const expectedSlow = computeNovaPassiveExpectedOrbs(sampleKills, "slowed");
+  const expectedSped = computeNovaPassiveExpectedOrbs(sampleKills, "sped");
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Speed (0 none / 1 slow / 2 sped)"
-        value={speedIdx}
-        min={0}
-        max={2}
-        onChange={setSpeedIdx}
-        tooltip="Nova: kills while slowed drop Health Orbs (15%); while sped up drop Energy Orbs (15%). Any slow/speed source."
-      />
-      <SimSlider
-        label="Kills"
-        value={kills}
-        min={0}
-        max={100}
-        onChange={setKills}
-        tooltip="Expected orb count = kills × drop chance."
+      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
+        Any slow/speed source works (incl. Molecular Prime). Mutually exclusive per kill.
+      </p>
+      <StatRow
+        label="Health Orb (slowed)"
+        value={`${(slowed.healthOrbChance * 100).toFixed(0)}%`}
+        color="text-green-700 dark:text-green-400"
+        tooltip={`Kill while slowed → ${(slowed.healthOrbChance * 100).toFixed(0)}% Health Orb. ≈${expectedSlow.expectedHealthOrbs.toFixed(0)} per ${sampleKills} kills.`}
       />
       <StatRow
-        label="Health Orb Chance"
-        value={chances.healthOrbChance > 0 ? `${(chances.healthOrbChance * 100).toFixed(0)}%` : "—"}
-        color={chances.healthOrbChance > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
-        tooltip="Only while the enemy is slowed at death."
+        label="Energy Orb (sped up)"
+        value={`${(sped.energyOrbChance * 100).toFixed(0)}%`}
+        color="text-sky-700 dark:text-sky-400"
+        tooltip={`Kill while sped up → ${(sped.energyOrbChance * 100).toFixed(0)}% Energy Orb. ≈${expectedSped.expectedEnergyOrbs.toFixed(0)} per ${sampleKills} kills.`}
       />
       <StatRow
-        label="Energy Orb Chance"
-        value={chances.energyOrbChance > 0 ? `${(chances.energyOrbChance * 100).toFixed(0)}%` : "—"}
-        color={chances.energyOrbChance > 0 ? "text-sky-700 dark:text-sky-400" : "text-muted-foreground"}
-        tooltip="Only while the enemy is sped up at death."
-      />
-      <StatRow
-        label="Expected Orbs"
-        value={
-          expected.expectedHealthOrbs > 0
-            ? `${expected.expectedHealthOrbs.toFixed(1)} Health`
-            : expected.expectedEnergyOrbs > 0
-              ? `${expected.expectedEnergyOrbs.toFixed(1)} Energy`
-              : "0"
-        }
-        color="text-amber-800 dark:text-amber-400"
-        tooltip="Average orbs from the selected kill count and speed state."
+        label={`Expected / ${sampleKills} kills`}
+        value={`${expectedSlow.expectedHealthOrbs.toFixed(0)} HP · ${expectedSped.expectedEnergyOrbs.toFixed(0)} EN`}
+        color="text-muted-foreground"
+        tooltip="Average orbs if all sample kills were slowed vs all sped up (not both at once)."
       />
     </div>
   );
 }
 
 function IvaraRadarPassive() {
-  const [extraRadar, setExtraRadar] = useState(0);
-  const range = computeIvaraEnemyRadarRange(extraRadar);
+  const range = computeIvaraEnemyRadarRange(0);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Extra Radar (m)"
-        value={extraRadar}
-        min={0}
-        max={160}
-        onChange={setExtraRadar}
-        tooltip="Ivara innate radar is 50m (vs normal 30m). Add Enemy Radar / Animal Instinct / squad auras here."
-      />
       <StatRow
         label="Enemy Radar"
         value={`${range}m`}
         color="text-emerald-700 dark:text-emerald-400"
-        tooltip={`Ivara base 50m + extras. Default Warframes sense ${DEFAULT_ENEMY_RADAR_M}m.`}
+        tooltip={`Ivara innate enemy radar (wiki). Default Warframes sense ${DEFAULT_ENEMY_RADAR_M}m. Stacks additively with Enemy Radar / Animal Instinct / auras.`}
       />
       <StatRow
         label="vs Default"
@@ -1157,24 +1124,14 @@ function LokiWallLatchPassive() {
 
 function LavosValenceBlockPassivePanel() {
   const valence = computeLavosValenceBlockPassive();
-  const [elapsedSec, setElapsedSec] = useState(0);
-  const remaining = computeLavosValenceBlockRemaining(elapsedSec, valence);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Elapsed (s)"
-        value={elapsedSec}
-        min={0}
-        max={valence.immunityDurationSec}
-        onChange={setElapsedSec}
-        tooltip="Lavos Valence Block: Energy/Universal Orbs grant status immunity for 10s (orb pickup cooldown 5s)."
-      />
       <StatRow
         label="Status Immunity"
-        value={remaining > 0 ? `${remaining.toFixed(0)}s left` : "Inactive"}
-        color={remaining > 0 ? "text-cyan-700 dark:text-cyan-400" : "text-muted-foreground"}
-        tooltip="Cleanses and blocks negative status effects while active. Renewed to full on a new orb pickup."
+        value={`${valence.immunityDurationSec}s`}
+        color="text-cyan-700 dark:text-cyan-400"
+        tooltip="Energy/Universal Orbs grant status immunity (cleanses and blocks negatives). Renewed to full on a new qualifying orb pickup."
       />
       <StatRow
         label="Orb Cooldown"
@@ -1187,23 +1144,17 @@ function LavosValenceBlockPassivePanel() {
 }
 
 function KhoraVenariPassivePanel() {
-  const [venariAlive, setVenariAlive] = useState(1);
-  const venari = computeKhoraVenariPassive(venariAlive > 0);
+  const venari = computeKhoraVenariPassive(true);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Venari Alive"
-        value={venariAlive}
-        min={0}
-        max={1}
-        onChange={setVenariAlive}
-        tooltip="Khora: Venari grants +15% move speed while alive; respawns after 45s if killed (or instantly via Venari ability)."
-      />
+      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
+        While Venari is alive (respawns after {venari.respawnSec}s if killed).
+      </p>
       <StatRow
         label="Move Speed"
-        value={venari.moveSpeedBonus > 0 ? `+${(venari.moveSpeedBonus * 100).toFixed(0)}%` : "Inactive"}
-        color={venari.moveSpeedBonus > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
+        value={`+${(venari.moveSpeedBonus * 100).toFixed(0)}%`}
+        color="text-amber-800 dark:text-amber-400"
         tooltip="Tied to Venari's presence (modifiable via Venari ability mods)."
       />
       <StatRow
@@ -1251,35 +1202,18 @@ function OberonRighteousNegationPassivePanel() {
 
 function JadeJudgmentPassivePanel() {
   const judgment = computeJadeJudgmentPassive();
-  const [judged, setJudged] = useState(1);
-  const [elapsedSec, setElapsedSec] = useState(0);
-  const remaining = computeJadeJudgmentRemaining(elapsedSec, judgment);
-  const active = judged > 0 && remaining > 0;
-  const dmgMult = computeJadeJudgmentDamageMultiplier(active);
+  const dmgMult = computeJadeJudgmentDamageMultiplier(true);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Judged"
-        value={judged}
-        min={0}
-        max={1}
-        onChange={setJudged}
-        tooltip="Jade Judgments: +50% damage vulnerability for 10s. Also has two Aura mod slots."
-      />
-      <SimSlider
-        label="Elapsed (s)"
-        value={elapsedSec}
-        min={0}
-        max={judgment.durationSec}
-        onChange={setElapsedSec}
-        tooltip="Judgment duration countdown (kills while Judged can extend ability durations separately)."
-      />
+      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
+        Some abilities apply Judgment: enemies take more damage for {judgment.durationSec}s.
+      </p>
       <StatRow
-        label="Vulnerability"
-        value={active ? `+${(judgment.damageVulnerability * 100).toFixed(0)}%` : "Inactive"}
-        color={active ? "text-rose-700 dark:text-rose-400" : "text-muted-foreground"}
-        tooltip={`Enemy takes ×${dmgMult.toFixed(1)} damage while Judged (${remaining.toFixed(0)}s left).`}
+        label="Judgment Vulnerability"
+        value={`+${(judgment.damageVulnerability * 100).toFixed(0)}%`}
+        color="text-rose-700 dark:text-rose-400"
+        tooltip={`Judged enemies take ×${dmgMult.toFixed(1)} damage for ${judgment.durationSec}s.`}
       />
       <StatRow
         label="Aura Slots"
@@ -1292,31 +1226,31 @@ function JadeJudgmentPassivePanel() {
 }
 
 function TempleBackbeatPassivePanel({ abilityEfficiency }: { abilityEfficiency: number }) {
-  const [onBeat, setOnBeat] = useState(1);
-  const bonus = computeTempleBackbeatEfficiencyBonus(onBeat > 0);
-  const effectiveEff = abilityEfficiency + bonus;
+  const bonus = computeTempleBackbeatEfficiencyBonus(true);
+  const onBeatEff = abilityEfficiency + bonus;
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="On Backbeat"
-        value={onBeat}
-        min={0}
-        max={1}
-        onChange={setOnBeat}
-        tooltip="Temple: casting while the metronome is in the Backbeat zone grants +50% Ability Efficiency and amplifies the ability."
-      />
+      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
+        Cast while the metronome is in the Backbeat zone to amplify the ability and gain Efficiency.
+      </p>
       <StatRow
         label="Backbeat EFF"
-        value={bonus > 0 ? `+${(bonus * 100).toFixed(0)}%` : "Missed"}
-        color={bonus > 0 ? "text-fuchsia-700 dark:text-fuchsia-400" : "text-muted-foreground"}
+        value={`+${(bonus * 100).toFixed(0)}%`}
+        color="text-fuchsia-700 dark:text-fuchsia-400"
         tooltip="Additive Ability Efficiency on timed casts (also fuels Exalted and per-ability bonuses)."
       />
       <StatRow
-        label="Effective EFF"
-        value={`${(effectiveEff * 100).toFixed(0)}%`}
+        label="EFF on Backbeat"
+        value={`${(onBeatEff * 100).toFixed(0)}%`}
         color="text-amber-800 dark:text-amber-400"
-        tooltip="Current Ability Efficiency + Backbeat bonus when on beat."
+        tooltip={`Your Ability Efficiency (${(abilityEfficiency * 100).toFixed(0)}%) + Backbeat bonus.`}
+      />
+      <StatRow
+        label="EFF off Beat"
+        value={`${(abilityEfficiency * 100).toFixed(0)}%`}
+        color="text-muted-foreground"
+        tooltip="Ability Efficiency without a Backbeat cast."
       />
     </div>
   );
@@ -1324,24 +1258,14 @@ function TempleBackbeatPassivePanel({ abilityEfficiency }: { abilityEfficiency: 
 
 function OraxiaPredatorsLurkPassivePanel() {
   const lurk = computeOraxiaPredatorsLurkPassive();
-  const [elapsedSec, setElapsedSec] = useState(0);
-  const remaining = computeOraxiaPredatorsLurkRemaining(elapsedSec, lurk);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Elapsed (s)"
-        value={elapsedSec}
-        min={0}
-        max={lurk.invisibilitySec}
-        onChange={setElapsedSec}
-        tooltip="Oraxia Predator's Lurk: wall latch grants 8s invisibility (refresh by re-latching). Does not break on attacks."
-      />
       <StatRow
         label="Invisibility"
-        value={remaining > 0 ? `${remaining.toFixed(0)}s left` : "Inactive"}
-        color={remaining > 0 ? "text-violet-700 dark:text-violet-400" : "text-muted-foreground"}
-        tooltip="Also applies to Oraxia's companion. Silken Thread wall latch triggers the same duration."
+        value={`${lurk.invisibilitySec}s`}
+        color="text-violet-700 dark:text-violet-400"
+        tooltip="Wall latch (or Silken Thread latch) grants Predator's Lurk invisibility. Refresh by re-latching. Does not break on attacks. Also applies to Oraxia's companion."
       />
     </div>
   );
@@ -1349,30 +1273,27 @@ function OraxiaPredatorsLurkPassivePanel() {
 
 function RhinoHardLandingPassivePanel() {
   const pulse = computeRhinoHardLandingPulse();
-  const [distancePct, setDistancePct] = useState(0);
-  const dmg = computeRhinoHardLandingDamageAtDistance(distancePct / 100, pulse);
+  const edgeDmg = computeRhinoHardLandingDamageAtDistance(1, pulse);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Distance % of Radius"
-        value={distancePct}
-        min={0}
-        max={100}
-        onChange={setDistancePct}
-        tooltip={`Rhino: hard landing shockwave deals ${pulse.damage} Impact in ${pulse.radius}m (${(pulse.maxFalloff * 100).toFixed(0)}% falloff at edge). Stacks with Heavy Impact.`}
+      <StatRow
+        label="Pulse Damage (center)"
+        value={pulse.damage.toFixed(0)}
+        color="text-amber-800 dark:text-amber-400"
+        tooltip="Impact knockdown on hard landing. Not affected by Ability Strength. Stacks with Heavy Impact."
       />
       <StatRow
-        label="Pulse Damage"
-        value={dmg.toFixed(0)}
-        color="text-amber-800 dark:text-amber-400"
-        tooltip="Not affected by Ability Strength. Knocks down enemies in range."
+        label="Pulse Damage (edge)"
+        value={edgeDmg.toFixed(0)}
+        color="text-muted-foreground"
+        tooltip={`${(pulse.maxFalloff * 100).toFixed(0)}% falloff at the edge of the pulse.`}
       />
       <StatRow
         label="Radius"
         value={`${pulse.radius}m`}
         color="text-muted-foreground"
-        tooltip="Fixed 6m radial pulse on hard landing."
+        tooltip="Fixed radial pulse on hard landing."
       />
     </div>
   );
@@ -1380,24 +1301,38 @@ function RhinoHardLandingPassivePanel() {
 
 function GaraPassiveBlindPanel() {
   const blind = computeGaraPassiveBlind();
-  const [missedCasts, setMissedCasts] = useState(0);
-  const chance = computeGaraPassiveBlindChance(missedCasts);
+  /** Consecutive casts that failed to blind — pity adds +20% each until a proc resets. */
+  const [missStreak, setMissStreak] = useState(0);
+  const chance = computeGaraPassiveBlindChance(missStreak);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Missed Casts"
-        value={missedCasts}
-        min={0}
-        max={5}
-        onChange={setMissedCasts}
-        tooltip="Gara: each ability cast has a chance to radial blind. Chance rises +20% after each miss until it procs, then resets."
-      />
+      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
+        Each ability cast: {(blind.baseChance * 100).toFixed(0)}% blind, then +
+        {(blind.chanceIncreasePerMiss * 100).toFixed(0)}% per failed cast until it procs.
+      </p>
+      <div className="flex flex-wrap gap-1">
+        {[0, 1, 2, 3, 4, 5].map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => setMissStreak(n)}
+            className={cn(
+              "inline-flex min-h-9 items-center rounded border px-2 py-1 text-[10px] transition-colors",
+              missStreak === n
+                ? "border-cyan-500/50 bg-cyan-500/15 text-cyan-800 dark:text-cyan-300"
+                : "border-border/60 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {n === 0 ? "Fresh" : `${n} miss${n === 1 ? "" : "es"}`}
+          </button>
+        ))}
+      </div>
       <StatRow
         label="Blind Chance"
         value={`${(chance * 100).toFixed(0)}%`}
         color="text-cyan-700 dark:text-cyan-400"
-        tooltip={`Base ${(blind.baseChance * 100).toFixed(0)}% + ${(blind.chanceIncreasePerMiss * 100).toFixed(0)}% × misses (cap 100%).`}
+        tooltip={`Base ${(blind.baseChance * 100).toFixed(0)}% + ${(blind.chanceIncreasePerMiss * 100).toFixed(0)}% × consecutive misses (cap 100%). Resets when it blinds.`}
       />
       <StatRow
         label="Blind"
@@ -1466,30 +1401,20 @@ function MagVacuumPassivePanel() {
 
 function KoumeiFatePassivePanel() {
   const fate = computeKoumeiFatePassive();
-  const [elapsedSec, setElapsedSec] = useState(0);
-  const remaining = computeKoumeiFateRemaining(elapsedSec, fate);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Elapsed (s)"
-        value={elapsedSec}
-        min={0}
-        max={fate.durationSec}
-        onChange={setElapsedSec}
-        tooltip="Koumei: every 60s, fate picks one equipped weapon to inflict random Status Effects for 60s."
+      <StatRow
+        label="Status Window"
+        value={`${fate.durationSec}s`}
+        color="text-rose-700 dark:text-rose-400"
+        tooltip={`Every ${fate.intervalSec}s, fate picks one equipped weapon to inflict random Status Effects for ${fate.durationSec}s. Can select unequipped weapon types.`}
       />
       <StatRow
-        label="Fate Status"
-        value={remaining > 0 ? `${remaining.toFixed(0)}s left` : "Waiting"}
-        color={remaining > 0 ? "text-rose-700 dark:text-rose-400" : "text-muted-foreground"}
-        tooltip={`Interval ${fate.intervalSec}s · Duration ${fate.durationSec}s. Can select unequipped weapon types.`}
-      />
-      <StatRow
-        label="Cycle"
-        value={`${fate.intervalSec}s / ${fate.durationSec}s`}
+        label="Cycle Interval"
+        value={`${fate.intervalSec}s`}
         color="text-muted-foreground"
-        tooltip="Separate from The Five Fates dice rolls on ability casts."
+        tooltip="How often a new weapon is chosen. Separate from The Five Fates dice rolls on ability casts."
       />
     </div>
   );
@@ -1517,24 +1442,13 @@ function BansheeSilencePassivePanel() {
 }
 
 function AtlasKnockdownPassivePanel() {
-  const [grounded, setGrounded] = useState(1);
-  const kd = computeAtlasKnockdownPassive(grounded > 0);
-
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Grounded"
-        value={grounded}
-        min={0}
-        max={1}
-        onChange={setGrounded}
-        tooltip="Atlas: immune to Knockdown while on the ground. Does not apply in the air or to pushback."
-      />
       <StatRow
-        label="Knockdown"
-        value={kd.knockdownImmuneWhileGrounded ? "Immune" : "Vulnerable"}
-        color={kd.knockdownImmuneWhileGrounded ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
-        tooltip="Rubble armor from petrified enemies is a separate Atlas passive mechanic."
+        label="Knockdown (grounded)"
+        value="Immune"
+        color="text-amber-800 dark:text-amber-400"
+        tooltip="Atlas is immune to Knockdown while on the ground. Does not apply in the air or to pushback. Rubble armor from petrified enemies is a separate mechanic."
       />
     </div>
   );
@@ -1693,8 +1607,6 @@ function ChromaPassivePanel() {
 
 function TitaniaUpsurgePassivePanel() {
   const upsurge = computeTitaniaUpsurgePassive();
-  const [elapsedSec, setElapsedSec] = useState(0);
-  const remaining = computeTitaniaUpsurgeRemaining(elapsedSec, upsurge);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
@@ -1704,19 +1616,17 @@ function TitaniaUpsurgePassivePanel() {
         color="text-pink-800 dark:text-pink-300"
         tooltip="Titania: +25% Bullet Jump and Rolling distance."
       />
-      <SimSlider
-        label="Elapsed (s)"
-        value={elapsedSec}
-        min={0}
-        max={upsurge.durationSec}
-        onChange={setElapsedSec}
-        tooltip="Upsurge: casting an ability heals Titania and allies within 15m for 4 HP/s over 20s (refreshes)."
-      />
       <StatRow
         label="Upsurge Heal"
-        value={remaining > 0 ? `${upsurge.healPerSec}/s · ${remaining.toFixed(0)}s` : "Inactive"}
-        color={remaining > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
-        tooltip={`${upsurge.healRadiusM}m radius · ${upsurge.durationSec}s duration.`}
+        value={`${upsurge.healPerSec}/s`}
+        color="text-green-700 dark:text-green-400"
+        tooltip={`Casting an ability heals Titania and allies within ${upsurge.healRadiusM}m for ${upsurge.healPerSec} HP/s (refreshes on cast).`}
+      />
+      <StatRow
+        label="Upsurge Duration"
+        value={`${upsurge.durationSec}s`}
+        color="text-muted-foreground"
+        tooltip={`${upsurge.healRadiusM}m radius · refreshes when you cast again.`}
       />
     </div>
   );
@@ -1785,24 +1695,17 @@ function NidusUndyingPassivePanel() {
 
 function SiriusOrionPassivePanel() {
   const passive = computeSiriusOrionPassive();
-  const [castsSinceSwap, setCastsSinceSwap] = useState(0);
-  const remaining = computeSiriusOrionEfficiencyCastsRemaining(castsSinceSwap, passive);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Casts Since Swap"
-        value={castsSinceSwap}
-        min={0}
-        max={passive.casts}
-        onChange={setCastsSinceSwap}
-        tooltip="Sirius & Orion: swapping forms grants +45% Ability Efficiency for the next 2 casts."
-      />
+      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
+        After swapping forms, the next {passive.casts} ability casts get the Efficiency buff.
+      </p>
       <StatRow
-        label="Efficiency Buff"
-        value={remaining > 0 ? `+${(passive.efficiencyBonus * 100).toFixed(0)}% × ${remaining}` : "Expired"}
-        color={remaining > 0 ? "text-sky-700 dark:text-sky-400" : "text-muted-foreground"}
-        tooltip={`${passive.casts} casts after each form swap.`}
+        label="Post-Swap EFF"
+        value={`+${(passive.efficiencyBonus * 100).toFixed(0)}% × ${passive.casts}`}
+        color="text-sky-700 dark:text-sky-400"
+        tooltip={`+${(passive.efficiencyBonus * 100).toFixed(0)}% Ability Efficiency for the next ${passive.casts} casts after each form swap.`}
       />
       <StatRow
         label="Energy Steal"
@@ -1815,24 +1718,13 @@ function SiriusOrionPassivePanel() {
 }
 
 function WispAirborneInvisPassivePanel() {
-  const [airborne, setAirborne] = useState(1);
-  const invis = computeWispAirborneInvisPassive(airborne > 0);
-
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Airborne"
-        value={airborne}
-        min={0}
-        max={1}
-        onChange={setAirborne}
-        tooltip="Wisp: invisible to enemies while in the air."
-      />
       <StatRow
-        label="Visibility"
-        value={invis.invisibleWhileAirborne ? "Invisible" : "Visible"}
-        color={invis.invisibleWhileAirborne ? "text-violet-800 dark:text-violet-300" : "text-muted-foreground"}
-        tooltip="Landing ends the dimensional cloak until airborne again."
+        label="While Airborne"
+        value="Invisible"
+        color="text-violet-800 dark:text-violet-300"
+        tooltip="Wisp is invisible to enemies in the air. Landing ends the cloak until airborne again."
       />
     </div>
   );
@@ -1871,30 +1763,20 @@ function FollieInkblotPassivePanel() {
 
 function SevagothTombstonePassivePanel() {
   const tomb = computeSevagothTombstonePassive();
-  const [souls, setSouls] = useState(0);
-  const remaining = computeSevagothTombstoneSoulsRemaining(souls, tomb);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Souls Harvested"
-        value={souls}
-        min={0}
-        max={tomb.soulsRequired}
-        onChange={setSouls}
-        tooltip="Sevagoth Tombstone: on fatal damage, control Shadow and harvest 5 enemy souls to revive (allies can also interact)."
-      />
       <StatRow
-        label="Souls Left"
-        value={remaining > 0 ? `${remaining}` : "Revived"}
-        color={remaining > 0 ? "text-violet-800 dark:text-violet-300" : "text-green-700 dark:text-green-400"}
-        tooltip={`Track range ${tomb.soulTrackRangeM}m. Consume (passive) costs 0 Energy and instantly kills non-bosses.`}
+        label="Souls to Revive"
+        value={`${tomb.soulsRequired}`}
+        color="text-violet-800 dark:text-violet-300"
+        tooltip="On fatal damage, control Shadow and harvest enemy souls to rebuild the tombstone (allies can also interact). Consume (passive) costs 0 Energy and instantly kills non-bosses."
       />
       <StatRow
         label="Track Range"
         value={`${tomb.soulTrackRangeM}m`}
         color="text-muted-foreground"
-        tooltip="Targeted enemy must be within 14m to count toward the soul counter."
+        tooltip="Targeted enemy must be within this range to count toward the soul counter."
       />
     </div>
   );
@@ -1924,39 +1806,23 @@ function InarosPassivePanel({ maxHealth }: { maxHealth: number }) {
 
 function NokkoVitalDecayPassivePanel() {
   const decay = computeNokkoVitalDecayPassive();
-  const [elapsedSec, setElapsedSec] = useState(0);
-  const [hasMushroom, setHasMushroom] = useState(1);
-  const remaining = computeNokkoVitalDecayRemaining(elapsedSec, decay);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Active Mushroom"
-        value={hasMushroom}
-        min={0}
-        max={1}
-        onChange={setHasMushroom}
-        tooltip="Nokko Vital Decay requires ≥1 Stinkbrain or Brightbonnet placed to trigger on fatal damage."
-      />
-      <SimSlider
-        label="Elapsed (s)"
-        value={elapsedSec}
-        min={0}
-        max={decay.timeLimitSec}
-        onChange={setElapsedSec}
-        tooltip="Sprodling form: reach a glowing mushroom within 15s to revive (3s anim + 1s invuln)."
+      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
+        Needs ≥1 Stinkbrain or Brightbonnet placed. Fatal hit → Sprodling; touch a glowing mushroom to revive.
+      </p>
+      <StatRow
+        label="Sprodling Window"
+        value={`${decay.timeLimitSec}s`}
+        color="text-green-700 dark:text-green-400"
+        tooltip="Time to reach a glowing mushroom. Miss it and Nokko uses a self-revive. Fungal Spores grant move speed but not healing. Does not work in Arbitrations."
       />
       <StatRow
-        label="Vital Decay"
-        value={
-          hasMushroom <= 0
-            ? "Bleedout"
-            : remaining > 0
-              ? `${remaining.toFixed(0)}s left`
-              : "Expired"
-        }
-        color={hasMushroom > 0 && remaining > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
-        tooltip="Fungal Spores grant move speed but not healing. Does not work in Arbitrations."
+        label="Post-Revive Invuln"
+        value={`${decay.postReviveInvulnSec}s`}
+        color="text-muted-foreground"
+        tooltip="Invulnerability after the ~3s revive animation."
       />
     </div>
   );
@@ -1964,86 +1830,88 @@ function NokkoVitalDecayPassivePanel() {
 
 function WukongFiveTechniquesPassivePanel() {
   const five = computeWukongFiveTechniquesPassive();
-  const [techIdx, setTechIdx] = useState(0);
-  const tech =
-    five.techniques[Math.min(Math.max(0, Math.floor(techIdx)), five.techniques.length - 1)]
-    ?? five.techniques[0]!;
+  const [techId, setTechId] = useState(five.techniques[0]!.id);
+  const tech = five.techniques.find((t) => t.id === techId) ?? five.techniques[0]!;
 
   return (
-    <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+    <div className="py-1 space-y-1.5 border-t border-border/60 mt-1">
       <StatRow
         label="Per Mission"
         value={`${five.techniquesPerMission} of ${five.techniques.length}`}
         color="text-amber-800 dark:text-amber-400"
         tooltip={`On fatal damage: ${five.deathGateInvulnSec}s invuln + ${(five.deathGateHealFraction * 100).toFixed(0)}% Health, then a random remaining technique buff.`}
       />
-      <SimSlider
-        label="Technique (0–4)"
-        value={techIdx}
-        min={0}
-        max={five.techniques.length - 1}
-        onChange={setTechIdx}
-        tooltip="Browse the five techniques. Three are chosen at random per mission."
-      />
-      <StatRow
-        label={tech.name}
-        value={`${tech.summary} · ${tech.durationSec}s`}
-        color="text-violet-800 dark:text-violet-300"
-        tooltip="Buffs cannot be dispelled by Nullifiers or ability disable."
-      />
+      <div className="flex flex-wrap gap-1">
+        {five.techniques.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setTechId(t.id)}
+            className={cn(
+              "inline-flex min-h-9 items-center rounded border px-2 py-1 text-[10px] transition-colors",
+              techId === t.id
+                ? "border-violet-500/50 bg-violet-500/15 text-violet-800 dark:text-violet-300"
+                : "border-border/60 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {t.name}
+          </button>
+        ))}
+      </div>
+      <div className="rounded border border-border/50 bg-muted/20 px-2 py-1.5 space-y-0.5">
+        <div className="text-[11px] font-medium text-violet-800 dark:text-violet-300">{tech.name}</div>
+        <p className="text-[10px] text-muted-foreground leading-snug">
+          {tech.summary} · {tech.durationSec}s
+        </p>
+      </div>
     </div>
   );
 }
 
 function VorunaWolvesPassivePanel() {
   const pack = computeVorunaWolvesPassive();
-  const [wolfIdx, setWolfIdx] = useState(0);
-  const [ulfrunElapsed, setUlfrunElapsed] = useState(0);
-  const wolf =
-    pack.wolves[Math.min(Math.max(0, Math.floor(wolfIdx)), pack.wolves.length - 1)]
-    ?? pack.wolves[0]!;
-  const ulfrunCd = computeVorunaUlfrunCooldownRemaining(ulfrunElapsed, pack);
+  const [wolfId, setWolfId] = useState(pack.wolves[0]!.id);
+  const wolf = pack.wolves.find((w) => w.id === wolfId) ?? pack.wolves[0]!;
 
   return (
-    <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Wolf (0 Dynar / 1 Raksh / 2 Lycath / 3 Ulfrun)"
-        value={wolfIdx}
-        min={0}
-        max={pack.wolves.length - 1}
-        onChange={setWolfIdx}
-        tooltip="Voruna: hold ability 1–4 to invoke that wolf's passive. Helminth replacements disable the matching wolf."
-      />
-      <StatRow
-        label={`${wolf.name} (Hold ${wolf.abilitySlot})`}
-        value={wolf.summary}
-        color="text-rose-800 dark:text-rose-300"
-        tooltip={
-          wolf.id === "lycath"
-            ? `HAE hard-caps at ${(pack.heavyAttackEfficiencyCap * 100).toFixed(0)}%; +100% only helps with negative HAE Rivens.`
-            : wolf.id === "ulfrun"
-              ? `${wolf.invulnSec}s invuln + full Health/Shields; ${wolf.cooldownSec}s cooldown after sacrifice or swap-out.`
-              : "Persists until swapped or revoked. Not disabled by Nullifiers."
-        }
-      />
-      {wolf.id === "ulfrun" && (
-        <>
-          <SimSlider
-            label="Ulfrun CD Elapsed (s)"
-            value={ulfrunElapsed}
-            min={0}
-            max={wolf.cooldownSec ?? 60}
-            onChange={setUlfrunElapsed}
-            tooltip="Cooldown starts after Ulfrun sacrifices himself or when the passive is swapped out."
-          />
-          <StatRow
-            label="Ulfrun Ready"
-            value={ulfrunCd > 0 ? `${ulfrunCd.toFixed(0)}s CD` : "Ready"}
-            color={ulfrunCd > 0 ? "text-muted-foreground" : "text-green-700 dark:text-green-400"}
-            tooltip="Death prevention only while Ulfrun's passive is active and off cooldown."
-          />
-        </>
-      )}
+    <div className="py-1 space-y-1.5 border-t border-border/60 mt-1">
+      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
+        Hold ability 1–4 to invoke that wolf. Helminth replacements disable the matching wolf.
+      </p>
+      <div className="flex flex-wrap gap-1">
+        {pack.wolves.map((w) => (
+          <button
+            key={w.id}
+            type="button"
+            onClick={() => setWolfId(w.id)}
+            className={cn(
+              "inline-flex min-h-9 items-center rounded border px-2 py-1 text-[10px] transition-colors",
+              wolfId === w.id
+                ? "border-rose-500/50 bg-rose-500/15 text-rose-800 dark:text-rose-300"
+                : "border-border/60 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {w.name}
+          </button>
+        ))}
+      </div>
+      <div className="rounded border border-border/50 bg-muted/20 px-2 py-1.5 space-y-0.5">
+        <div className="text-[11px] font-medium text-rose-800 dark:text-rose-300">
+          {wolf.name}
+          <span className="ml-1.5 font-normal text-muted-foreground">Hold {wolf.abilitySlot}</span>
+        </div>
+        <p className="text-[10px] text-muted-foreground leading-snug">{wolf.summary}</p>
+        {wolf.id === "lycath" && (
+          <p className="text-[10px] text-muted-foreground leading-snug">
+            Heavy Attack Efficiency hard-caps at {(pack.heavyAttackEfficiencyCap * 100).toFixed(0)}%.
+          </p>
+        )}
+        {wolf.id === "ulfrun" && (
+          <p className="text-[10px] text-muted-foreground leading-snug">
+            {wolf.invulnSec}s invuln + full Health/Shields · {wolf.cooldownSec}s cooldown after sacrifice or swap-out.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -2084,12 +1952,8 @@ function MechaMarkTimingPanel({ pieces }: { pieces: number }) {
 
 function UrielLegionPassivePanel() {
   const legion = computeUrielLegionPassive();
-  const [demonIdx, setDemonIdx] = useState(0);
-  const [deadElapsed, setDeadElapsed] = useState(0);
-  const demon =
-    legion.demons[Math.min(Math.max(0, Math.floor(demonIdx)), legion.demons.length - 1)]
-    ?? legion.demons[0]!;
-  const resurrectLeft = computeUrielDemonResurrectRemaining(deadElapsed, legion);
+  const [demonId, setDemonId] = useState(legion.demons[0]!.id);
+  const demon = legion.demons.find((d) => d.id === demonId) ?? legion.demons[0]!;
 
   let detail = "";
   if (demon.id === "catenach") {
@@ -2104,40 +1968,40 @@ function UrielLegionPassivePanel() {
   }
 
   return (
-    <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Demon (0 Catenach / 1 Gulphagor / 2 Vythelas)"
-        value={demonIdx}
-        min={0}
-        max={legion.demons.length - 1}
-        onChange={setDemonIdx}
-        tooltip="Uriel's Legion: three Health-based intangible summons. Helminth keeps the demon but freezes its stats at defaults."
-      />
+    <div className="py-1 space-y-1.5 border-t border-border/60 mt-1">
+      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
+        Three Health-based intangible summons. Helminth keeps a demon but freezes its stats at defaults.
+      </p>
+      <div className="flex flex-wrap gap-1">
+        {legion.demons.map((d) => (
+          <button
+            key={d.id}
+            type="button"
+            onClick={() => setDemonId(d.id)}
+            className={cn(
+              "inline-flex min-h-9 items-center rounded border px-2 py-1 text-[10px] transition-colors",
+              demonId === d.id
+                ? "border-orange-500/50 bg-orange-500/15 text-orange-800 dark:text-orange-300"
+                : "border-border/60 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {d.name}
+          </button>
+        ))}
+      </div>
+      <div className="rounded border border-border/50 bg-muted/20 px-2 py-1.5 space-y-1">
+        <div className="text-[11px] font-medium text-orange-800 dark:text-orange-300">
+          {demon.name}
+          <span className="ml-1.5 font-normal text-muted-foreground">via {demon.unlockAbility}</span>
+        </div>
+        <p className="text-[10px] text-muted-foreground leading-snug">{demon.summary}</p>
+        <p className="text-[10px] text-amber-800 dark:text-amber-400 leading-snug break-words">{detail}</p>
+      </div>
       <StatRow
-        label={`${demon.name} (${demon.unlockAbility})`}
-        value={demon.summary}
-        color="text-orange-700 dark:text-orange-400"
-        tooltip={detail}
-      />
-      <StatRow
-        label="Key Stats"
-        value={detail}
-        color="text-amber-800 dark:text-amber-400"
-        tooltip="Base (unmodded) values from wiki; Ability Strength scales some fields when the unlock ability is equipped."
-      />
-      <SimSlider
-        label="Dead Elapsed (s)"
-        value={deadElapsed}
-        min={0}
-        max={legion.resurrectSec}
-        onChange={setDeadElapsed}
+        label="Auto-Resurrect"
+        value={`${legion.resurrectSec}s`}
+        color="text-muted-foreground"
         tooltip={`Demons auto-resurrect after ${legion.resurrectSec}s. Remedium heals/revives instantly. Teleport if >${legion.teleportRangeM}m from Uriel.`}
-      />
-      <StatRow
-        label="Resurrect"
-        value={resurrectLeft > 0 ? `${resurrectLeft.toFixed(0)}s` : "Alive"}
-        color={resurrectLeft > 0 ? "text-muted-foreground" : "text-green-700 dark:text-green-400"}
-        tooltip="Brimstone gauge builds from chained/latched kills, rune pickups, and Demonium split-soul hits."
       />
     </div>
   );
@@ -2197,6 +2061,10 @@ export function WarframeStatsPanel({
   arcaneRanks,
   frostColdEnemies: frostColdEnemiesProp,
   onFrostColdEnemiesChange,
+  emberImmolationHeatPct: emberImmolationHeatPctProp,
+  onEmberImmolationHeatPctChange,
+  gaussBatteryPct: gaussBatteryPctProp,
+  onGaussBatteryPctChange,
 }: {
   stats: WarframeCalculatedStats | null;
   warframe?: Warframe | null;
@@ -2207,9 +2075,21 @@ export function WarframeStatsPanel({
   /** Controlled Fortifying Freeze sim (builder wires this into Snow Globe). */
   frostColdEnemies?: number;
   onFrostColdEnemiesChange?: (n: number) => void;
+  /** Controlled Immolation heat gauge (builder wires into Ember ability cards). */
+  emberImmolationHeatPct?: number;
+  onEmberImmolationHeatPctChange?: (n: number) => void;
+  /** Controlled Gauss battery gauge (builder wires into ability cards + passive). */
+  gaussBatteryPct?: number;
+  onGaussBatteryPctChange?: (n: number) => void;
 }) {
   const [frostColdEnemiesLocal, setFrostColdEnemiesLocal] = useState(5);
   const frostColdEnemies = frostColdEnemiesProp ?? frostColdEnemiesLocal;
+  const [emberHeatLocal, setEmberHeatLocal] = useState(0);
+  const emberImmolationHeatPct = emberImmolationHeatPctProp ?? emberHeatLocal;
+  const setEmberImmolationHeatPct = onEmberImmolationHeatPctChange ?? setEmberHeatLocal;
+  const [gaussBatteryLocal, setGaussBatteryLocal] = useState(80);
+  const gaussBatteryPct = gaussBatteryPctProp ?? gaussBatteryLocal;
+  const setGaussBatteryPct = onGaussBatteryPctChange ?? setGaussBatteryLocal;
   const setFrostColdEnemies = onFrostColdEnemiesChange ?? setFrostColdEnemiesLocal;
 
   const arcaneDisplays = useMemo(() => {
@@ -2253,10 +2133,20 @@ export function WarframeStatsPanel({
       {warframe?.passive && (
         <CollapsibleSection title="PASSIVE" defaultOpen>
           <p className="text-[11px] text-muted-foreground leading-relaxed py-1">{formatAbilityDescription(warframe.passive)}</p>
-          {(warframe.id === "gauss" || warframe.id === "gauss_prime") && <GaussPassiveBattery />}
+          {(warframe.id === "gauss" || warframe.id === "gauss_prime") && (
+            <GaussPassiveBattery
+              batteryPct={gaussBatteryPct}
+              onBatteryPctChange={setGaussBatteryPct}
+            />
+          )}
           {(warframe.id === "baruuk" || warframe.id === "baruuk_prime") && <BaruukRestraintPassive />}
           {(warframe.id === "valkyr" || warframe.id === "valkyr_prime") && <ValkyrRagePassive />}
-          {(warframe.id === "ember" || warframe.id === "ember_prime") && <EmberHeatPassive />}
+          {(warframe.id === "ember" || warframe.id === "ember_prime") && (
+            <EmberHeatPassive
+              immolationHeatPct={emberImmolationHeatPct}
+              onImmolationHeatPctChange={setEmberImmolationHeatPct}
+            />
+          )}
           {(warframe.id === "garuda" || warframe.id === "garuda_prime") && <GarudaDeathsGatePassive />}
           {(warframe.id === "frost" || warframe.id === "frost_prime") && (
             <FrostFortifyingFreezePassive

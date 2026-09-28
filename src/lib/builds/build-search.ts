@@ -1,4 +1,4 @@
-import { archwings, necramechs } from "@/data/archwing";
+import { archwings, isNecramechId, necramechs } from "@/data/archwing";
 import { allCompanions } from "@/data/companions";
 import { ampPrisms, kitgunChambers, zawStrikes } from "@/data/modular-weapons";
 import { reactors } from "@/data/railjack";
@@ -18,7 +18,7 @@ const BUILD_ITEM_CATALOG: BuildSearchItem[] = (() => {
     items.push({ id: w.id, name: w.name, type: "weapon" });
   }
   for (const wf of allWarframes) {
-    if (wf.id === "helminth") continue;
+    if (wf.id === "helminth" || isNecramechId(wf.id)) continue;
     items.push({ id: wf.id, name: wf.name, type: "warframe" });
     items.push({ id: wf.id, name: `${wf.name} loadouts`, type: "loadout" });
   }

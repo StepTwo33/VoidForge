@@ -1,5 +1,6 @@
 "use client";
 
+import { useLayoutEffect, useRef } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { AccentColor } from "@/components/page-shell";
 import { EmptyState, FilterChip, PageHero } from "@/components/page-shell";
+
+/** Survives remount so ← Change restores list scroll after picking an item. */
+const pickerListScrollY = new Map<string, number>();
 
 const PICKER_ACCENT: Record<
   AccentColor,
@@ -118,6 +122,25 @@ export function ItemPickerScreen({
 }) {
   const showTabs = savedPanel != null && onPickerTabChange != null;
   const onSaved = showTabs && pickerTab === "saved";
+  const scrollKey = `${title}:${onSaved ? "saved" : "catalog"}`;
+  const listRootRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const root = listRootRef.current;
+    if (!root) return;
+    const vp = root.querySelector<HTMLElement>("[data-slot='scroll-area-viewport']");
+    if (!vp) return;
+    const saved = pickerListScrollY.get(scrollKey);
+    if (saved != null) vp.scrollTop = saved;
+    const onScroll = () => {
+      pickerListScrollY.set(scrollKey, vp.scrollTop);
+    };
+    vp.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      pickerListScrollY.set(scrollKey, vp.scrollTop);
+      vp.removeEventListener("scroll", onScroll);
+    };
+  }, [scrollKey]);
 
   return (
     <div className={cn("mx-auto max-w-3xl", className)}>
@@ -182,7 +205,10 @@ export function ItemPickerScreen({
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-border/60 bg-card/40 ring-1 ring-border/30">
+      <div
+        ref={listRootRef}
+        className="overflow-hidden rounded-xl border border-border/60 bg-card/40 ring-1 ring-border/30"
+      >
         <ScrollArea className="h-[min(60vh,32rem)] sm:h-[60vh]">
           <div className="space-y-2 p-2 pr-3">
             {onSaved ? (

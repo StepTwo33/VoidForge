@@ -34,3 +34,10 @@ export const necramechs: Necramech[] = [
   { id: "voidrig", name: "Voidrig", health: 3000, shield: 0, armor: 350, energy: 150, description: "Heavy artillery Necramech. Exalted weapon: Arquebex." },
   { id: "bonewidow", name: "Bonewidow", health: 3500, shield: 0, armor: 450, energy: 100, description: "Melee-focused Necramech with shield and sword." },
 ];
+
+/** Ids that also have ability rows in warframes.ts for calc/codex — not selectable Warframes. */
+export const NECRAMECH_IDS = new Set(necramechs.map((n) => n.id));
+
+export function isNecramechId(id: string): boolean {
+  return NECRAMECH_IDS.has(id);
+}

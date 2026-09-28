@@ -11,6 +11,7 @@ import {
   getEffectiveWarframes,
   getEffectiveWeapons,
 } from "@/lib/weapons/effective-data";
+import { isNecramechId } from "@/data/archwing";
 import { getModCategory } from "@/lib/weapons/weapon-categories";
 import {
   CODEX_COMPANION_TYPE_FILTERS,
@@ -200,7 +201,7 @@ export function listDiscoverCatalogItems(
 
   if (type === "warframe") {
     return getEffectiveWarframes()
-      .filter((wf) => wf.id !== "helminth")
+      .filter((wf) => wf.id !== "helminth" && !isNecramechId(wf.id))
       .map((wf) => ({
         id: wf.id,
         name: wf.name,
@@ -279,7 +280,7 @@ export function listDiscoverCatalogItems(
 
   if (type === "loadout") {
     return getEffectiveWarframes()
-      .filter((wf) => wf.id !== "helminth")
+      .filter((wf) => wf.id !== "helminth" && !isNecramechId(wf.id))
       .map((wf) => ({
         id: wf.id,
         name: wf.name,

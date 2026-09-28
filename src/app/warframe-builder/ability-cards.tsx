@@ -47,6 +47,8 @@ export function AbilityCard({
   formLabel,
   warframeId,
   extraFlatArmor,
+  immolationHeatPct,
+  batteryPct,
   footer,
   exaltedWeapon,
 }: {
@@ -58,11 +60,15 @@ export function AbilityCard({
   warframeId?: string;
   /** e.g. Frost Fortifying Freeze from the stats-panel Cold Enemies sim. */
   extraFlatArmor?: number;
+  /** Ember Immolation heat from the stats-panel sim (shared across ability cards). */
+  immolationHeatPct?: number;
+  /** Gauss battery from the stats-panel sim (shared across ability cards). */
+  batteryPct?: number;
   footer?: ReactNode;
   exaltedWeapon?: Weapon | null;
 }) {
   const eff = stats?.abilityEfficiency ?? 1;
-  const display = { warframeId, abilityName: ability.name, extraFlatArmor };
+  const display = { warframeId, abilityName: ability.name, extraFlatArmor, immolationHeatPct, batteryPct };
   const effectiveCost =
     typeof ability.energyCost === "number" ? scaledAbilityEnergyCost(ability.energyCost, eff) : null;
   const slotNum = gameSlot ?? index + 1;

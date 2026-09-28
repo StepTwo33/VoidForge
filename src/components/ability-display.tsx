@@ -369,8 +369,10 @@ export function AbilityStatsBlock({
     typeof ability.energyCost === "number" ? ability.energyCost : 25,
   );
   const hasMetamorphosisDecay = display.abilityName === "Metamorphosis";
-  const [metaElapsedSec, setMetaElapsedSec] = useState(0);
   const metaDurationSec = Math.max(0, (ability.duration ?? 25) * dur);
+  /** 0 = peak, 0.5 = half duration, 1 = expired — chips instead of an Elapsed slider. */
+  const [metaDecayT, setMetaDecayT] = useState(0);
+  const metaElapsedSec = metaDecayT * metaDurationSec;
   const hasCovenantCrit =
     display.abilityName === "Covenant" &&
     typeof ability.miscStats?.baseCriticalChance === "number";
@@ -403,7 +405,10 @@ export function AbilityStatsBlock({
     hasImmolationDrHeat ||
     hasFireBlastStripHeat ||
     hasFireballHeat;
-  const [immolationHeatPct, setImmolationHeatPct] = useState(0);
+  /** Builder lifts heat to the stats panel; local slider only for standalone / uncontrolled cards. */
+  const heatControlled = display.immolationHeatPct != null;
+  const [immolationHeatLocal, setImmolationHeatLocal] = useState(0);
+  const immolationHeatPct = heatControlled ? display.immolationHeatPct! : immolationHeatLocal;
   const heatT = Math.min(1, Math.max(0, immolationHeatPct / 100));
   const [fireballPriorCasts, setFireballPriorCasts] = useState(0);
   const hasKineticPlatingBattery = display.abilityName === "Kinetic Plating";
@@ -422,9 +427,12 @@ export function AbilityStatsBlock({
   const hasRedlineBattery = display.abilityName === "Redline";
   const usesBattery =
     hasKineticPlatingBattery || hasThermalSunderBattery || hasRedlineBattery;
-  const [batteryPct, setBatteryPct] = useState(
+  /** Builder lifts battery to the stats panel; local slider only when uncontrolled. */
+  const batteryControlled = display.batteryPct != null;
+  const [batteryPctLocal, setBatteryPctLocal] = useState(
     hasKineticPlatingBattery || hasRedlineBattery || hasThermalSunderBattery ? 80 : 0,
   );
+  const batteryPct = batteryControlled ? display.batteryPct! : batteryPctLocal;
   const batteryT = Math.min(1, Math.max(0, batteryPct / 100));
 
   const scaledMisc = ability.miscStats
@@ -1283,7 +1291,8 @@ export function AbilityStatsBlock({
     const daySpeed = Number(ability.miscStats.daySpeedBonus);
     const dBase = ability.duration ?? 25;
     const dScaled = metaDurationSec;
-    const atLabel = metaElapsedSec > 0 ? " (at Elapsed)" : " (Peak)";
+    const atLabel =
+      metaDecayT <= 0 ? " (Peak)" : metaDecayT >= 1 ? " (End)" : " (Half)";
     const metaRows: {
       key: string;
       label: string;
@@ -1429,13 +1438,13 @@ export function AbilityStatsBlock({
           />
         </>
       )}
-      {usesImmolationHeat && (
+      {usesImmolationHeat && !heatControlled && (
         <SimSlider
           label="Immolation Heat %"
-          value={immolationHeatPct}
+          value={immolationHeatLocal}
           min={0}
           max={100}
-          onChange={setImmolationHeatPct}
+          onChange={setImmolationHeatLocal}
           tooltip={
             hasFireballHeat
               ? "Fireball: heat adds up to +4× to the combo multiplier (first cast ×3 dmg at max heat)."
@@ -1457,13 +1466,13 @@ export function AbilityStatsBlock({
           tooltip="Fireball 1.5s combo window: chain 1×/2×/4×/8× + up to 4× from heat. Dmg = (base÷2)×(combo+1)×STR (wiki: max 5200/1950)."
         />
       )}
-      {usesBattery && (
+      {usesBattery && !batteryControlled && (
         <SimSlider
           label="Battery %"
-          value={batteryPct}
+          value={batteryPctLocal}
           min={0}
           max={100}
-          onChange={setBatteryPct}
+          onChange={setBatteryPctLocal}
           tooltip={
             hasKineticPlatingBattery
               ? "Kinetic Plating DR = MinDR + (MaxDR − MinDR) × battery (wiki; default slider 80%)."
@@ -1484,14 +1493,29 @@ export function AbilityStatsBlock({
         />
       )}
       {hasMetamorphosisDecay && (
-        <SimSlider
-          label="Elapsed (s)"
-          value={metaElapsedSec}
-          min={0}
-          max={Math.max(1, Math.ceil(metaDurationSec))}
-          onChange={setMetaElapsedSec}
-          tooltip="Metamorphosis bonuses decay linearly to 0 over duration×DUR (wiki)."
-        />
+        <div className="flex flex-wrap gap-1 px-0.5 pb-0.5">
+          {(
+            [
+              { t: 0, label: "Peak" },
+              { t: 0.5, label: "Half" },
+              { t: 1, label: "End" },
+            ] as const
+          ).map((opt) => (
+            <button
+              key={opt.label}
+              type="button"
+              onClick={() => setMetaDecayT(opt.t)}
+              className={cn(
+                "inline-flex min-h-9 items-center rounded border px-2 py-1 text-[10px] transition-colors",
+                metaDecayT === opt.t
+                  ? "border-violet-500/50 bg-violet-500/15 text-violet-800 dark:text-violet-300"
+                  : "border-border/60 text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       )}
       {hasCovenantCrit && (
         <SimSlider

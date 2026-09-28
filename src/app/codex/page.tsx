@@ -33,6 +33,7 @@ import {
 } from "@/lib/codex/arcane-browser-meta";
 import { getArcaneDisplayInfo } from "@/lib/display/arcane-display";
 import { getExaltedWeaponsForWarframe } from "@/lib/weapons/exalted-weapons";
+import { isNecramechId } from "@/data/archwing";
 import {
   useMods,
   useArcanes,
@@ -215,7 +216,7 @@ function CodexPageContent() {
   );
 
   const filteredWarframes = useMemo(() => {
-    let list = [...warframes];
+    let list = warframes.filter((w) => w.id !== "helminth" && !isNecramechId(w.id));
     if (searchQuery.trim()) {
       list = list.filter((w) =>
         matchesCodexSearch(searchQuery, [w.name, w.id, w.description, w.passive]),

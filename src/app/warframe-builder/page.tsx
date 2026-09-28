@@ -38,7 +38,11 @@ import { warframeArcanes } from "@/data/arcanes";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import { ArchonShardSlot } from "@/components/archon-shard-slot";
 import { allHelminthAbilities, HelminthAbility } from "@/data/helminth";
+import { isNecramechId } from "@/data/archwing";
 import { computeFrostPassiveArmor } from "@/lib/codex/ability-misc-stats";
+import { buildAbilityTTKEntries } from "@/lib/calc/ability-ttk";
+import { helminthToAbility } from "@/lib/builds/helminth-resolve";
+import { AbilityTTKPanel } from "@/components/ability-ttk-panel";
 import { cn } from "@/lib/utils";
 import { appendReturnTo } from "@/lib/site/nav-return";
 import {
@@ -119,6 +123,10 @@ export default function WarframeBuilderPage() {
   const [helminthPickerSlot, setHelminthPickerSlot] = useState(0);
   /** Fortifying Freeze sim — shared with Snow Globe Initial Health. */
   const [frostColdEnemies, setFrostColdEnemies] = useState(5);
+  /** Immolation heat gauge — shared across Ember ability cards. */
+  const [emberImmolationHeatPct, setEmberImmolationHeatPct] = useState(0);
+  /** Battery gauge — shared across Gauss ability cards + passive. */
+  const [gaussBatteryPct, setGaussBatteryPct] = useState(80);
   const [modPickerMode, setModPickerMode] = useState<"mods" | "arcanes">("mods");
   const [equippedArcanes, setEquippedArcanes] = useState<(Mod | null)[]>([null, null]);
   const [equippedArcaneRanks, setEquippedArcaneRanks] = useState<number[]>([5, 5]);
@@ -596,17 +604,46 @@ export default function WarframeBuilderPage() {
 
   const filteredWarframes = useMemo(() => {
     const sorted = [...allWarframes]
-      .filter((w) => w.id !== "helminth")
+      .filter((w) => w.id !== "helminth" && !isNecramechId(w.id))
       .sort((a, b) => a.name.localeCompare(b.name));
     if (!warframeSearch.trim()) return sorted;
     const q = warframeSearch.toLowerCase();
     return sorted.filter((w) => w.name.toLowerCase().includes(q));
-  }, [warframeSearch]);
+  }, [allWarframes, warframeSearch]);
 
   const abilityDisplayEntries = useMemo(() => {
     if (!selectedWarframe) return [];
     return buildAbilityDisplayEntries(selectedWarframe, !!dualFormConfig, activeDualFormId);
   }, [selectedWarframe, dualFormConfig, activeDualFormId]);
+
+  const abilityTTKEntries = useMemo(() => {
+    if (!calculatedStats || abilityDisplayEntries.length === 0) return [];
+    const rows = abilityDisplayEntries.map((entry) => {
+      const slotIndex = entry.gameSlot - 1;
+      if (
+        helminthSlot != null &&
+        helminthAbility != null &&
+        helminthSlot === slotIndex
+      ) {
+        return {
+          ability: helminthToAbility(helminthAbility),
+          slot: entry.gameSlot,
+          helminth: true as const,
+        };
+      }
+      return {
+        ability: entry.ability,
+        slot: entry.gameSlot,
+        helminth: false as boolean | undefined,
+      };
+    });
+    return buildAbilityTTKEntries(rows, calculatedStats);
+  }, [
+    calculatedStats,
+    abilityDisplayEntries,
+    helminthSlot,
+    helminthAbility,
+  ]);
 
   const baseCapacity = warframeBaseCapacity(hasOrokinReactor);
   const auraBonus = useMemo(
@@ -1144,6 +1181,18 @@ export default function WarframeBuilderPage() {
                                 stats={calculatedStats}
                                 warframeId={selectedWarframe.id}
                                 extraFlatArmor={frostExtraFlatArmor}
+                                immolationHeatPct={
+                                  selectedWarframe.id === "ember" ||
+                                  selectedWarframe.id === "ember_prime"
+                                    ? emberImmolationHeatPct
+                                    : undefined
+                                }
+                                batteryPct={
+                                  selectedWarframe.id === "gauss" ||
+                                  selectedWarframe.id === "gauss_prime"
+                                    ? gaussBatteryPct
+                                    : undefined
+                                }
                                 exaltedWeapon={getExaltedWeaponForAbility(
                                   selectedWarframe.id,
                                   entry.ability.name,
@@ -1275,7 +1324,14 @@ export default function WarframeBuilderPage() {
                   arcaneRanks={equippedArcaneRanks}
                   frostColdEnemies={frostColdEnemies}
                   onFrostColdEnemiesChange={setFrostColdEnemies}
+                  emberImmolationHeatPct={emberImmolationHeatPct}
+                  onEmberImmolationHeatPctChange={setEmberImmolationHeatPct}
+                  gaussBatteryPct={gaussBatteryPct}
+                  onGaussBatteryPctChange={setGaussBatteryPct}
                 />
+                {abilityTTKEntries.length > 0 && (
+                  <AbilityTTKPanel entries={abilityTTKEntries} />
+                )}
               </div>
             </div>
           </div>
