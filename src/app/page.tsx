@@ -5,7 +5,6 @@ import {
   Shield,
   Dog,
   FolderOpen,
-  Library,
   Dice5,
   BookOpen,
   Target,
@@ -125,14 +124,6 @@ export default function Home() {
                 icon={Target}
                 accent="red"
                 badges={["15 Enemies", "Elemental Reference"]}
-              />
-              <FeatureCard
-                href="/builds"
-                title="Your Builds"
-                description="Browse every build on this device and your account — weapons, warframes, modular, and loadouts."
-                icon={Library}
-                accent="primary"
-                badges={["Device", "Account"]}
               />
               <FeatureCard
                 href="/loadouts"

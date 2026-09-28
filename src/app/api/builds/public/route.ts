@@ -94,20 +94,21 @@ export async function GET(req: NextRequest) {
     ];
   }
   if (featured) {
-    // Build of the day pool: last 14 days, at least 1 upvote
+    // Build of the day pool: listed in the last 14 days, at least 1 upvote
     const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
-    where.updatedAt = { gte: since };
+    where.createdAt = { gte: since };
     where.upvoteCount = { gte: 1 };
   } else if (sort === "popular") {
     // Top rated: only builds that have actually been upvoted
     where.upvoteCount = { gte: 1 };
   }
 
+  // Recent = when first shared (createdAt). Edits/renames must not bump the feed.
   // `id` tie-breaker keeps cursor pagination stable when sort keys collide.
   const orderBy =
     featured || sort === "popular"
-      ? [{ upvoteCount: "desc" as const }, { updatedAt: "desc" as const }, { id: "desc" as const }]
-      : [{ updatedAt: "desc" as const }, { id: "desc" as const }];
+      ? [{ upvoteCount: "desc" as const }, { createdAt: "desc" as const }, { id: "desc" as const }]
+      : [{ createdAt: "desc" as const }, { id: "desc" as const }];
 
   let builds;
   try {

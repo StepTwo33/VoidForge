@@ -19,7 +19,7 @@ export const HOME_SIDEBAR_PANEL_CLASS = [
   "max-h-[calc(100dvh-6rem)] h-[calc(100dvh-6rem)]",
 ].join(" ");
 
-export const HOME_SIDEBAR_BODY_CLASS = "min-h-0 flex-1 space-y-2 overflow-y-auto p-3";
+export const HOME_SIDEBAR_BODY_CLASS = "min-h-0 flex-1 space-y-1.5 overflow-y-auto p-2.5";
 
 export const HOME_SIDEBAR_TAB_ROW_CLASS =
   "flex gap-1 border-b border-border/60 px-3 py-2";

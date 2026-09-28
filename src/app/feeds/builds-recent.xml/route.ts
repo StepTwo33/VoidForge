@@ -13,8 +13,8 @@ export async function GET() {
   const xml = await buildCommunityBuildsRss({
     siteUrl,
     title: latestBuildsRssTitle(),
-    description: "Recently updated public builds shared on Voidforge.",
-    orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+    description: "Recently shared public builds on Voidforge.",
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
   });
 
   return new NextResponse(xml, { headers: RSS_RESPONSE_HEADERS });

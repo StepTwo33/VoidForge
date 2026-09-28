@@ -8,6 +8,8 @@ export const BUILDS_FEED_LIMIT = 25;
 export const TOP_BUILDS_MIN_UPVOTES = 1;
 
 type BuildsOrderBy =
+  | [{ upvoteCount: "desc" }, { createdAt: "desc" }, { id: "desc" }]
+  | [{ createdAt: "desc" }, { id: "desc" }]
   | [{ upvoteCount: "desc" }, { updatedAt: "desc" }, { id: "desc" }]
   | [{ updatedAt: "desc" }, { id: "desc" }];
 
@@ -25,6 +27,7 @@ export async function buildCommunityBuildsRss(opts: {
     description: string;
     type: string;
     upvoteCount: number;
+    createdAt: Date;
     updatedAt: Date;
     user: { username: string | null; name: string | null };
   }> = [];
@@ -46,6 +49,7 @@ export async function buildCommunityBuildsRss(opts: {
         description: true,
         type: true,
         upvoteCount: true,
+        createdAt: true,
         updatedAt: true,
         user: { select: { username: true, name: true } },
       },
@@ -66,7 +70,8 @@ export async function buildCommunityBuildsRss(opts: {
       description: desc,
       link: `${opts.siteUrl}/build/${b.id}`,
       guid: `${opts.siteUrl}/build/${b.id}`,
-      pubDate: b.updatedAt,
+      // Prefer first-shared time so renames don't look like new posts in readers.
+      pubDate: b.createdAt,
       author,
     };
   });
