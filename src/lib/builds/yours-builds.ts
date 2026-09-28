@@ -1,6 +1,8 @@
 import {
   getCloudBuilds,
   getSavedBuilds,
+  saveBuild,
+  saveCloudBuild,
   type SavedBuild,
 } from "@/lib/builds/build-storage";
 import {
@@ -8,6 +10,7 @@ import {
   loadoutFromSavedBuild,
   loadoutToBuildData,
   mergeCloudLoadoutPreservingSlots,
+  saveLoadout,
 } from "@/lib/builds/loadouts";
 import { buildOpenUrl, localBuildOpenUrl } from "@/lib/builds/build-url";
 import type { Loadout } from "@/lib/types";
@@ -146,4 +149,76 @@ export function libraryOpenUrl(build: SavedBuild): string {
     return localBuildOpenUrl(build.type, build.id);
   }
   return buildOpenUrl(build.type, build.id);
+}
+
+const BUILD_NAME_MAX = 200;
+
+/**
+ * Rename a library build. Updates device storage and, when the row is on the
+ * account (or a loadout has cloudId), POSTs the new name to `/api/builds`.
+ */
+export async function renameYoursBuild(
+  build: SavedBuild,
+  rawName: string,
+): Promise<{ ok: true; build: SavedBuild } | { ok: false; error: string }> {
+  const name = rawName.trim();
+  if (!name) return { ok: false, error: "Name is required" };
+  if (name.length > BUILD_NAME_MAX) {
+    return { ok: false, error: `Name must be at most ${BUILD_NAME_MAX} characters` };
+  }
+
+  const updated: SavedBuild = { ...build, name, updatedAt: Date.now() };
+
+  if (build.type === "loadout") {
+    const local = getLoadouts().find((l) => l.id === build.id || l.cloudId === build.id);
+    if (local) {
+      saveLoadout({ ...local, name, updatedAt: Date.now() });
+    }
+    const cloudId = local?.cloudId ?? (!isDeviceBuildId(build.id) ? build.id : null);
+    if (cloudId) {
+      const cloudPayload: SavedBuild = {
+        ...updated,
+        id: cloudId,
+        data: local ? loadoutToBuildData({ ...local, name }) : build.data,
+      };
+      const cloud = await saveCloudBuild(cloudPayload);
+      if (!cloud) {
+        return {
+          ok: false,
+          error: local
+            ? "Renamed on this device, but account sync failed. Sign in and try again."
+            : "Could not rename on your account. Sign in and try again.",
+        };
+      }
+      return { ok: true, build: { ...updated, id: cloud.id, name: cloud.name } };
+    }
+    if (!local && isDeviceBuildId(build.id)) {
+      // Cloud-only merge miss: still try writing a local stub name via saveLoadout
+      saveLoadout({ ...loadoutFromSavedBuild(updated), name });
+    }
+    return { ok: true, build: updated };
+  }
+
+  // Single-item builds
+  const hasLocal = getSavedBuilds().some((b) => b.id === build.id);
+  if (hasLocal || isDeviceBuildId(build.id)) {
+    saveBuild(updated);
+  }
+
+  if (!isDeviceBuildId(build.id)) {
+    const cloud = await saveCloudBuild(updated);
+    if (!cloud) {
+      return {
+        ok: false,
+        error: hasLocal
+          ? "Renamed on this device, but account sync failed. Sign in and try again."
+          : "Could not rename on your account. Sign in and try again.",
+      };
+    }
+    // Keep a local mirror with the cloud id so Device/Account stay in sync
+    saveBuild({ ...updated, id: cloud.id, name: cloud.name, isPublic: cloud.isPublic });
+    return { ok: true, build: { ...updated, id: cloud.id, name: cloud.name } };
+  }
+
+  return { ok: true, build: updated };
 }

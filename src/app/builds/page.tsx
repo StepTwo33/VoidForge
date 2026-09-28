@@ -26,8 +26,9 @@ import {
   libraryOpenUrl,
   mergeAllYoursLibrary,
   ownershipBadge,
+  renameYoursBuild,
 } from "@/lib/builds/yours-builds";
-import { FolderOpen, Library, Loader2, Search, Trash2 } from "lucide-react";
+import { Edit2, FolderOpen, Library, Loader2, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -62,11 +63,12 @@ function formatUpdated(ts: number): string {
 }
 
 export default function BuildsLibraryPage() {
-  const { confirm } = useConfirmDialog();
+  const { confirm, prompt } = useConfirmDialog();
   const [builds, setBuilds] = useState<SavedBuild[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [renamingId, setRenamingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
@@ -90,6 +92,35 @@ export default function BuildsLibraryPage() {
       return b.name.toLowerCase().includes(q);
     });
   }, [builds, query, typeFilter]);
+
+  const handleRename = async (build: SavedBuild) => {
+    const next = await prompt({
+      title: "Rename build",
+      description:
+        ownershipBadge(build.id) === "Account"
+          ? "This updates the name on your account (and Community listing if it’s public)."
+          : "This updates the name saved on this device.",
+      inputLabel: "Name",
+      defaultValue: build.name,
+      placeholder: "Build name",
+      confirmLabel: "Save",
+    });
+    if (next === null) return;
+    setRenamingId(build.id);
+    try {
+      const result = await renameYoursBuild(build, next);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Name updated");
+      await refresh();
+    } catch {
+      toast.error("Could not rename build");
+    } finally {
+      setRenamingId(null);
+    }
+  };
 
   const handleDelete = async (build: SavedBuild) => {
     const ok = await confirm({
@@ -251,7 +282,20 @@ export default function BuildsLibraryPage() {
                       </Link>
                       <button
                         type="button"
-                        disabled={deletingId === build.id}
+                        disabled={renamingId === build.id || deletingId === build.id}
+                        onClick={() => void handleRename(build)}
+                        className="inline-flex w-11 shrink-0 items-center justify-center border-l border-border/60 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-50"
+                        aria-label={`Rename ${build.name}`}
+                      >
+                        {renamingId === build.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Edit2 className="h-4 w-4" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={renamingId === build.id || deletingId === build.id}
                         onClick={() => void handleDelete(build)}
                         className="inline-flex w-11 shrink-0 items-center justify-center border-l border-border/60 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
                         aria-label={`Delete ${build.name}`}

@@ -277,14 +277,38 @@ export default function LoadoutsPage() {
   }, []);
 
   const handleSaveEdit = useCallback(
-    (id: string) => {
+    async (id: string) => {
       const loadout = loadouts.find((l) => l.id === id);
-      if (loadout && editName.trim()) {
-        saveLoadout({ ...loadout, name: editName.trim() });
-        refresh();
-        toast.success("Name updated");
+      const name = editName.trim();
+      if (!loadout || !name) {
+        setEditingId(null);
+        return;
       }
+      saveLoadout({ ...loadout, name });
       setEditingId(null);
+      refresh();
+
+      if (loadout.cloudId) {
+        const cloudResult = await saveCloudBuild({
+          id: loadout.cloudId,
+          name,
+          description: loadout.description,
+          isPublic: loadout.isPublic,
+          type: "loadout",
+          createdAt: loadout.createdAt,
+          updatedAt: Date.now(),
+          data: loadoutToBuildData({ ...loadout, name }),
+        });
+        if (!cloudResult) {
+          toast.success("Name updated on this device", {
+            description: "Account sync failed — sign in and save again to update Community.",
+          });
+          return;
+        }
+        toast.success("Name updated", { description: "Synced to your account." });
+        return;
+      }
+      toast.success("Name updated");
     },
     [loadouts, editName, refresh]
   );
