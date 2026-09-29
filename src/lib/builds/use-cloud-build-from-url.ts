@@ -40,7 +40,7 @@ export function clearCloudBuildInUrl() {
   cloudBuildLoadedIdRef.current = null;
 }
 
-/** Call after loading a cloud build in-page so the URL hook does not re-fetch. */
+/** Call after loading a cloud build in-page so a later URL sync can recognize it. */
 export function markCloudBuildLoaded(buildId: string) {
   cloudBuildLoadedIdRef.current = buildId;
 }
@@ -52,10 +52,10 @@ export function useCloudBuildFromUrl(
 ) {
   const onLoadRef = useRef(onLoad);
   onLoadRef.current = onLoad;
-  /** Per mount — avoids skipping load when remounting the same `?buildId=` after leaving the builder. */
+  /** Per mount — dedupes StrictMode double-invoke within the same mount cycle. */
   const loadedInMountRef = useRef<string | null>(null);
 
-  const syncFromUrl = useCallback(async () => {
+  const syncFromUrl = useCallback(async (opts?: { cancelled: () => boolean }) => {
     const buildId = new URLSearchParams(window.location.search).get("buildId");
     if (!buildId) {
       loadedInMountRef.current = null;
@@ -63,17 +63,15 @@ export function useCloudBuildFromUrl(
       return;
     }
     if (loadedInMountRef.current === buildId) return;
-    // Skip when a save/load in-page already applied this build (see markCloudBuildLoaded).
-    if (cloudBuildLoadedIdRef.current === buildId) {
-      loadedInMountRef.current = buildId;
-      return;
-    }
-    // Mark as attempted up-front so failures aren't retried (and toasts aren't
-    // duplicated) by StrictMode's double mount
+
+    // Mark as attempted up-front so StrictMode's double effect invoke (same mount)
+    // does not fire duplicate fetches/toasts. Cleared on unmount so reopening the
+    // same ?buildId= after leaving the builder loads again.
     loadedInMountRef.current = buildId;
     cloudBuildLoadedIdRef.current = buildId;
 
     const build = await fetchCloudBuild(buildId);
+    if (opts?.cancelled()) return;
     if (!build) {
       loadedInMountRef.current = null;
       cloudBuildLoadedIdRef.current = null;
@@ -91,9 +89,15 @@ export function useCloudBuildFromUrl(
   }, [expectedType]);
 
   useEffect(() => {
-    queueMicrotask(() => { void syncFromUrl(); });
+    let cancelled = false;
+    queueMicrotask(() => {
+      void syncFromUrl({ cancelled: () => cancelled });
+    });
     return () => {
+      cancelled = true;
       loadedInMountRef.current = null;
+      // Link nav away does not fire popstate — clear so the same buildId can load on re-entry.
+      cloudBuildLoadedIdRef.current = null;
     };
   }, [syncFromUrl]);
 
