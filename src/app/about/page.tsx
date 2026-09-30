@@ -1,9 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { Swords, Shield, Bug, Wrench, BarChart3, Users, User, Github, Info, BookOpen, FolderOpen, Plane, Rocket } from "lucide-react";
+import {
+  Swords,
+  Shield,
+  Bug,
+  Wrench,
+  BarChart3,
+  Users,
+  User,
+  Github,
+  Info,
+  BookOpen,
+  FolderOpen,
+  Plane,
+  Rocket,
+  Instagram,
+  ExternalLink,
+  Palette,
+} from "lucide-react";
 import { VOIDFORGE_GITHUB_URL } from "@/lib/site/site-links";
 import { PageShell, PageMain, PageHero, ContentPanel } from "@/components/page-shell";
+
+const CONTRIBUTORS = [
+  { name: "Step-Bro_Prime", role: "Lead Developer", profileUrl: "/u/steptwo" },
+  { name: "Axel Shade", role: "Data & Design", profileUrl: "/u/axel-shade" },
+] as const;
+
+const LOGO_ARTIST = {
+  name: "LD",
+  role: "Logo art",
+  handle: "@l3mondoodl3s",
+  href: "https://www.instagram.com/l3mondoodl3s",
+} as const;
 
 export default function AboutPage() {
   return (
@@ -106,60 +135,50 @@ export default function AboutPage() {
               Contributors
             </h2>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {[
-                { name: "Step-Bro_Prime", role: "Lead Developer", profileUrl: "/u/steptwo" },
-                { name: "Axel Shade", role: "Data & Design", profileUrl: "/u/axel-shade" },
-                { name: "LD", role: "Logo art", profileUrl: "https://www.instagram.com/l3mondoodl3s" },
-              ].map((c) =>
-                c.profileUrl ? (
-                  c.profileUrl.startsWith("/") ? (
-                    <Link
-                      key={c.name}
-                      href={c.profileUrl}
-                      className="group flex min-h-11 items-center gap-3 rounded-lg border border-border/50 bg-background/40 p-3 transition-all hover:border-primary/40 hover:bg-primary/5"
-                    >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                        {c.name.charAt(0)}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-semibold transition-colors group-hover:text-primary">{c.name}</div>
-                        <div className="truncate text-xs text-muted-foreground">{c.role}</div>
-                      </div>
-                      <User className="ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                    </Link>
-                  ) : (
-                    <a
-                      key={c.name}
-                      href={c.profileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex min-h-11 items-center gap-3 rounded-lg border border-border/50 bg-background/40 p-3 transition-all hover:border-primary/40 hover:bg-primary/5"
-                    >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                        {c.name.charAt(0)}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-semibold transition-colors group-hover:text-primary">{c.name}</div>
-                        <div className="truncate text-xs text-muted-foreground">{c.role}</div>
-                      </div>
-                      <User className="ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                    </a>
-                  )
-                ) : (
-                  <div
-                    key={c.name}
-                    className="flex items-center gap-3 rounded-lg border border-border/50 bg-background/40 p-3"
-                  >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                      {c.name.charAt(0)}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-semibold">{c.name}</div>
-                      <div className="truncate text-xs text-muted-foreground">{c.role}</div>
-                    </div>
+              {CONTRIBUTORS.map((c) => (
+                <Link
+                  key={c.name}
+                  href={c.profileUrl}
+                  className="group flex min-h-11 items-center gap-3 rounded-lg border border-border/50 bg-background/40 p-3 transition-all hover:border-primary/40 hover:bg-primary/5"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+                    {c.name.charAt(0)}
                   </div>
-                ),
-              )}
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold transition-colors group-hover:text-primary">{c.name}</div>
+                    <div className="truncate text-xs text-muted-foreground">{c.role}</div>
+                  </div>
+                  <User className="ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                </Link>
+              ))}
+
+              <a
+                href={LOGO_ARTIST.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative col-span-1 flex min-h-11 flex-col justify-center gap-2 overflow-hidden rounded-lg border border-fuchsia-500/30 bg-gradient-to-br from-fuchsia-500/10 via-background/40 to-amber-500/10 p-3 transition-all hover:border-fuchsia-400/50 hover:shadow-md hover:shadow-fuchsia-500/10 sm:col-span-2 sm:flex-row sm:items-center sm:gap-3"
+              >
+                <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-fuchsia-500/10 blur-2xl" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500/25 to-amber-500/20 text-fuchsia-700 ring-1 ring-fuchsia-500/30 dark:text-fuchsia-300">
+                  <Palette className="h-[18px] w-[18px]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <span className="text-sm font-semibold transition-colors group-hover:text-fuchsia-700 dark:group-hover:text-fuchsia-300">
+                      Art by {LOGO_ARTIST.name}
+                    </span>
+                    <span className="rounded-full bg-fuchsia-500/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-fuchsia-800 dark:text-fuchsia-300">
+                      Logo
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{LOGO_ARTIST.role} for Voidforge</p>
+                </div>
+                <span className="inline-flex items-center gap-1.5 self-start rounded-md border border-border/60 bg-background/60 px-2 py-1.5 text-xs font-medium text-foreground/90 transition-colors group-hover:border-fuchsia-500/40 group-hover:text-fuchsia-800 dark:group-hover:text-fuchsia-300 sm:self-center">
+                  <Instagram className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{LOGO_ARTIST.handle}</span>
+                  <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
+                </span>
+              </a>
             </div>
           </ContentPanel>
 
