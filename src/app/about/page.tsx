@@ -109,6 +109,7 @@ export default function AboutPage() {
               {[
                 { name: "Step-Bro_Prime", role: "Lead Developer", profileUrl: "/u/steptwo" },
                 { name: "Axel Shade", role: "Data & Design", profileUrl: "/u/axel-shade" },
+                { name: "LD", role: "Logo art", profileUrl: "https://www.instagram.com/l3mondoodl3s" },
               ].map((c) =>
                 c.profileUrl ? (
                   c.profileUrl.startsWith("/") ? (
