@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ThumbsUp,
   Loader2,
@@ -180,7 +179,6 @@ export function PublicBuildRow({
   compact = false,
   showThumbnails = true,
 }: PublicBuildRowProps) {
-  const router = useRouter();
   const itemDisplay = resolveBuildItemDisplay(build.type, build.itemId);
   // Shared-at time: renames must not look like brand-new posts.
   const sharedAt = build.createdAt || build.updatedAt;
@@ -246,36 +244,11 @@ export function PublicBuildRow({
                 className="h-3.5 w-3.5 rounded-full object-cover ring-1 ring-border/50"
               />
             )}
-            {build.author.profileSlug ? (
-              <span
-                role="link"
-                tabIndex={0}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  router.push(`/u/${build.author.profileSlug}`);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    router.push(`/u/${build.author.profileSlug}`);
-                  }
-                }}
-                className={cn(
-                  "inline-flex items-center gap-1 hover:text-primary transition-colors cursor-pointer",
-                  compact ? "min-h-0 py-0.5" : "min-h-11",
-                )}
-              >
-                @{build.author.username}
-                {build.author.supporter && <SupporterHeart />}
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1">
-                @{build.author.username}
-                {build.author.supporter && <SupporterHeart />}
-              </span>
-            )}
+            {/* Username is display-only on list cards so clicks open the build, not /u/… */}
+            <span className="inline-flex items-center gap-1">
+              @{build.author.username}
+              {build.author.supporter && <SupporterHeart />}
+            </span>
             <span className="text-border">·</span>
             <span>{itemDisplay.typeLabel}</span>
             <span className="text-border">·</span>
