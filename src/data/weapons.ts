@@ -10582,7 +10582,7 @@ export const allWeapons: Weapon[] = [
     "magazine": 8,
     "reloadTime": 2.3499999,
     "multishot": 1,
-    "triggerType": "Pistol",
+    "triggerType": "Semi",
     "modSlots": 8,
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
