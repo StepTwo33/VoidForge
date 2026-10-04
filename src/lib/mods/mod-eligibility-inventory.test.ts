@@ -86,6 +86,32 @@ describe("mod eligibility inventory", () => {
     expect(MOD_EXCLUSIVE_WEAPON_IDS.avenging_truth).toContain("silva_&_aegis_prime");
     expect(MOD_EXCLUSIVE_WEAPON_IDS.stockpiled_blight).toContain("mk1_kunai");
     expect(MOD_EXCLUSIVE_WEAPON_IDS.winds_of_purity).toContain("mk1_furis");
+    expect(MOD_EXCLUSIVE_WEAPON_IDS.volatile_variant).toEqual(["sporothrix", "coda_sporothrix"]);
+  });
+
+  it("allows Critical Deceleration on Coda Bubonico (shotgun), not rifles", () => {
+    const mod = modsById.get("critical_deceleration")!;
+    expect(mod.category).toBe("shotgun");
+    const bubonico = weaponsById.get("coda_bubonico")!;
+    const braton = weaponsById.get("braton")!;
+    expect(
+      modEligibleForWeaponSlot(
+        mod,
+        "primary",
+        bubonico.category,
+        "regular",
+        getWeaponModProfile(bubonico),
+      ),
+    ).toBe(true);
+    expect(
+      modEligibleForWeaponSlot(
+        mod,
+        "primary",
+        braton.category,
+        "regular",
+        getWeaponModProfile(braton),
+      ),
+    ).toBe(false);
   });
 
   it("places Bhisaj-Bal on primary Exilus for Paris Prime", () => {

@@ -356,7 +356,7 @@ export const MOD_EXCLUSIVE_WEAPON_IDS: Record<string, readonly string[]> = {
   "unseen_dread": ["dread"],
   "velox_conclusion": ["velox", "velox_prime"],
   "vile_discharge": ["embolist"],
-  "volatile_variant": ["sporothrix"],
+  "volatile_variant": ["sporothrix", "coda_sporothrix"],
   "voltage_sequence": ["lanka"],
   "vulcan_blitz": ["jat_kittag"],
   "wild_frenzy": ["grakata"],

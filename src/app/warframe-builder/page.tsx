@@ -88,11 +88,24 @@ const EMPTY_SHARDS: (EquippedArchonShard | null)[] = [null, null, null, null, nu
 // Slot layout: 0=Aura, 1-8=Regular, 9=Exilus
 const AURA_SLOT = 0;
 const EXILUS_SLOT = 9;
+/** Exalted weapon Exilus matches weapon-builder (index 8). */
+const EXALTED_WEAPON_EXILUS_SLOT = 8;
 
 function getSlotType(index: number): SlotType {
   if (index === AURA_SLOT) return "aura";
   if (index === EXILUS_SLOT) return "exilus";
   return "regular";
+}
+
+function exaltedWeaponModSlotType(weapon: Weapon, slotIndex: number): SlotType {
+  if (slotIndex !== EXALTED_WEAPON_EXILUS_SLOT) return "regular";
+  if (weapon.category === "melee" || weapon.category === "archmelee" || weapon.category === "beast_claw") {
+    return "weapon_exilus_melee";
+  }
+  if (["pistol", "secondary", "dual_pistols"].includes(weapon.category)) {
+    return "weapon_exilus_secondary";
+  }
+  return "weapon_exilus_primary";
 }
 
 export default function WarframeBuilderPage() {
@@ -1390,6 +1403,7 @@ export default function WarframeBuilderPage() {
                 ? "secondary"
                 : "primary"
           }
+          slotType={exaltedWeaponModSlotType(exaltedWeapon, exaltedActiveSlot)}
           equippedModIds={exaltedMods.map((m) => m.modId)}
           weaponCategory={exaltedWeapon.category}
           weapon={exaltedWeapon}
@@ -1427,6 +1441,7 @@ export default function WarframeBuilderPage() {
           onClose={() => setExaltedMeleeModPickerOpen(false)}
           mods={allMods}
           category="melee"
+          slotType={exaltedWeaponModSlotType(exaltedMeleeWeapon, exaltedMeleeActiveSlot)}
           equippedModIds={exaltedMeleeMods.map((m) => m.modId)}
           weaponCategory={exaltedMeleeWeapon.category}
           weapon={exaltedMeleeWeapon}

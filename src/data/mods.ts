@@ -308,7 +308,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "rifle",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "criticalChance": 33.3333,

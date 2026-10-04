@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { parseBmcDonationWebhook, verifyBmcWebhookSignature } from "@/lib/auth/bmc-webhook";
+import {
+  bmcEventShouldGrant,
+  bmcEventShouldRevoke,
+  parseBmcDonationWebhook,
+  verifyBmcWebhookSignature,
+} from "@/lib/auth/bmc-webhook";
 import { logServerError } from "@/lib/log-server-error";
 import { prisma } from "@/lib/prisma";
 import {
@@ -20,7 +25,9 @@ export async function POST(req: NextRequest) {
   const rawBody = await req.text();
   const signature =
     req.headers.get("x-signature-sha256") ??
-    req.headers.get("X-Signature-Sha256");
+    req.headers.get("X-Signature-Sha256") ??
+    req.headers.get("x-bmc-signature") ??
+    req.headers.get("X-Bmc-Signature");
   const eventHeader =
     req.headers.get("x-bmc-event") ??
     req.headers.get("X-Bmc-Event");
@@ -56,11 +63,18 @@ export async function POST(req: NextRequest) {
     });
 
     if (user) {
-      if (donation.eventType === "donation.created") {
+      if (bmcEventShouldGrant(donation.eventType)) {
         await grantSupporter(user.id);
-      } else if (donation.eventType === "donation.refunded") {
+      } else if (bmcEventShouldRevoke(donation.eventType)) {
         await revokeSupporter(user.id);
       }
+    } else {
+      logServerError(
+        "POST /api/webhooks/buymeacoffee",
+        new Error(
+          `No verified Voidforge account matched BMC supporter email for ${donation.eventType}`,
+        ),
+      );
     }
 
     return NextResponse.json({ ok: true, matched: Boolean(user) });

@@ -10,6 +10,9 @@ import { cn } from "@/lib/utils";
 import type { CalculatedStats, EquippedMod, Mod, Weapon } from "@/lib/types";
 import type { WeaponDpsCalcContext } from "@/lib/calc/dps-contributions";
 
+/** Matches weapon-builder: regular slots 0–7, Exilus at index 8. */
+const WEAPON_EXILUS_SLOT_INDEX = 8;
+
 export function ExaltedWeaponSection({
   exaltedWeapon,
   exaltedWeapons,
@@ -111,6 +114,32 @@ export function ExaltedWeaponSection({
           );
         })}
       </div>
+
+      {(() => {
+        const i = WEAPON_EXILUS_SLOT_INDEX;
+        const equipped = exaltedMods.find((m) => m.slotIndex === i);
+        const mod = equipped ? (modsMap.get(equipped.modId) ?? null) : null;
+        return (
+          <div className="mt-2.5">
+            <span className="mb-1 block text-[10px] font-semibold tracking-wider text-cyan-700 dark:text-cyan-400">
+              EXILUS
+            </span>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              <ModSlotCard
+                key={`ex${i}`}
+                mod={mod}
+                rank={equipped?.rank ?? 0}
+                slotIndex={i}
+                label="Exilus"
+                slotPolarity={exaltedSlotPolarities[i]}
+                onAdd={() => onAddMod(i)}
+                onRemove={() => onRemoveMod(i)}
+                onPolarize={(p) => onPolarize(i, p)}
+              />
+            </div>
+          </div>
+        );
+      })()}
 
       {exaltedArcaneConfig.slots > 0 && (
         <div className="mt-4 border-t border-violet-500/15 pt-4">
