@@ -20,27 +20,35 @@ export function warframeBaseCapacity(hasOrokinReactor: boolean): number {
   return hasOrokinReactor ? 60 : 30;
 }
 
+function normalizeAuraSlotIndices(auraSlots: number | readonly number[] = 0): number[] {
+  return typeof auraSlots === "number" ? [auraSlots] : [...auraSlots];
+}
+
 /**
  * Aura drain adds capacity on warframes (does not consume it).
- * `auraSlotIndex` defaults to 0.
+ * Pass every Aura slot index (Jade has two).
  */
 export function computeWarframeAuraBonus(
   equippedMods: Pick<EquippedMod, "modId" | "rank" | "slotIndex">[],
   modsMap: Map<string, Pick<Mod, "drain" | "polarity">>,
   slotPolarities: Record<number, string | undefined>,
-  auraSlotIndex = 0,
+  auraSlots: number | readonly number[] = 0,
 ): number {
-  const auraMod = equippedMods.find((m) => m.slotIndex === auraSlotIndex);
-  if (!auraMod) return 0;
-  const mod = modsMap.get(auraMod.modId);
-  if (!mod) return 0;
-  const drainAtRank = modCapacityAtRank(mod.drain, auraMod.rank);
-  const effectiveDrain = modSlotCapacityCost(
-    drainAtRank,
-    slotPolarities[auraSlotIndex],
-    mod.polarity,
-  );
-  return Math.abs(effectiveDrain);
+  let total = 0;
+  for (const auraSlotIndex of normalizeAuraSlotIndices(auraSlots)) {
+    const auraMod = equippedMods.find((m) => m.slotIndex === auraSlotIndex);
+    if (!auraMod) continue;
+    const mod = modsMap.get(auraMod.modId);
+    if (!mod) continue;
+    const drainAtRank = modCapacityAtRank(mod.drain, auraMod.rank);
+    const effectiveDrain = modSlotCapacityCost(
+      drainAtRank,
+      slotPolarities[auraSlotIndex],
+      mod.polarity,
+    );
+    total += Math.abs(effectiveDrain);
+  }
+  return total;
 }
 
 /** Capacity used by non-aura warframe slots. */
@@ -48,10 +56,11 @@ export function computeWarframeCapacityUsed(
   equippedMods: Pick<EquippedMod, "modId" | "rank" | "slotIndex">[],
   modsMap: Map<string, Pick<Mod, "drain" | "polarity">>,
   slotPolarities: Record<number, string | undefined>,
-  auraSlotIndex = 0,
+  auraSlots: number | readonly number[] = 0,
 ): number {
+  const auraSet = new Set(normalizeAuraSlotIndices(auraSlots));
   return computeUsedCapacity(
-    equippedMods.filter((m) => m.slotIndex !== auraSlotIndex),
+    equippedMods.filter((m) => !auraSet.has(m.slotIndex)),
     modsMap,
     slotPolarities,
   );

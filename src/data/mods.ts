@@ -4791,15 +4791,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": 10,
     "maxRank": 5,
-    "category": "augment",
+    "category": "warframe",
     "subCategory": "",
     "stats": {
       "armorOnOrb": 15,
       "duration": 0.5
     },
     "description": "Health Orbs grant 450 Armor, stacking up to 3x. Taking damage will consume a stack after 3s.",
-    "rarity": "rare",
-    "warframeId": "garuda"
+    "rarity": "rare"
   },
   {
     "id": "augment_universal_energy_conversion",
@@ -4807,15 +4806,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 5,
-    "category": "augment",
+    "category": "warframe",
     "subCategory": "",
     "stats": {
       "strengthOnOrb": 9,
       "abilityStrength": 8.333333
     },
     "description": "Energy Orbs grant 50% more Ability Strength to your next cast.",
-    "rarity": "rare",
-    "warframeId": "citrine"
+    "rarity": "rare"
   },
   {
     "id": "augment_universal_shattering_impact",

@@ -30,8 +30,15 @@ import {
 import { resolveCompanionParts } from "@/lib/companions/companion-parts-resolve";
 import { resolveRivenUpgrade } from "@/lib/warframe-arsenal/riven-resolve";
 
-/** Warframe builder layout: 0=Aura, 1–8=regular, 9=Exilus. */
-export const WARFRAME_IMPORT_AURA_SLOT = 0;
+import {
+  getWarframeAuraSlotIndices,
+  WARFRAME_AURA_SLOT,
+  WARFRAME_SECOND_AURA_SLOT,
+} from "@/lib/warframes/aura-slots";
+
+/** Warframe builder layout: 0=Aura, 1–8=regular, 9=Exilus, 10=Jade second Aura. */
+export const WARFRAME_IMPORT_AURA_SLOT = WARFRAME_AURA_SLOT;
+export const WARFRAME_IMPORT_SECOND_AURA_SLOT = WARFRAME_SECOND_AURA_SLOT;
 export const WARFRAME_IMPORT_EXILUS_SLOT = 9;
 export const WARFRAME_IMPORT_REGULAR_SLOTS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 
@@ -241,23 +248,33 @@ function mapUpgradeMods(
 
 /**
  * Place warframe mods into builder slots by type (not arsenal list order).
- * Aura → 0, Exilus → 9, remaining fill 1–8. Extra exilus can sit in regular slots (in-game legal).
+ * Aura → 0 (and Jade second Aura → 10), Exilus → 9, remaining fill 1–8.
+ * Extra exilus can sit in regular slots (in-game legal).
  */
 export function mapWarframeUpgradeMods(
   mods: ModUnion[],
   warnings: ArsenalImportWarning[],
+  warframeId?: string | null,
 ): { mods: ModSlot[] } {
   const { entries } = resolveUpgradeEntries(mods, warnings);
+  const auraSlotIndices = getWarframeAuraSlotIndices(warframeId);
+  const allowSecondAura = auraSlotIndices.length > 1;
 
   let aura: ResolvedUpgradeMod | undefined;
+  let secondAura: ResolvedUpgradeMod | undefined;
   let exilus: ResolvedUpgradeMod | undefined;
   const regular: ResolvedUpgradeMod[] = [];
 
   for (const entry of entries) {
     const mod = entry.fhMod;
     if (mod && isAuraMod(mod)) {
-      if (!aura) aura = entry;
-      else warnings.push({ kind: "mod", label: `${mod.name} (extra aura skipped)` });
+      if (!aura) {
+        aura = entry;
+      } else if (allowSecondAura && !secondAura) {
+        secondAura = entry;
+      } else {
+        warnings.push({ kind: "mod", label: `${mod.name} (extra aura skipped)` });
+      }
       continue;
     }
     if (mod && isWarframeExilusMod(mod)) {
@@ -281,6 +298,7 @@ export function mapWarframeUpgradeMods(
   });
 
   if (aura) slots.push(toSlot(aura, WARFRAME_IMPORT_AURA_SLOT));
+  if (secondAura) slots.push(toSlot(secondAura, WARFRAME_IMPORT_SECOND_AURA_SLOT));
   if (exilus) slots.push(toSlot(exilus, WARFRAME_IMPORT_EXILUS_SLOT));
 
   let regularCursor = 0;
@@ -502,7 +520,11 @@ export function mapArsenalToImportPayload(
     warnings.push({ kind: "warframe", label: wfLabel });
   }
 
-  const wfMapped = mapWarframeUpgradeMods(loadout.warframe.upgrades.mods, warnings);
+  const wfMapped = mapWarframeUpgradeMods(
+    loadout.warframe.upgrades.mods,
+    warnings,
+    fhWarframe?.id,
+  );
   const wfArcanes = mapArcaneIds(loadout.warframe.upgrades.arcanes, warnings);
 
   const helminthOverride = readAbilityOverride(rawNormal?.warframe);

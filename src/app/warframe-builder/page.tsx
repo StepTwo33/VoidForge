@@ -82,17 +82,22 @@ import { AbilityCard, HelminthAbilityCard, HelminthSubsumeButton } from "./abili
 import { ShardPickerDialog } from "./shard-picker-dialog";
 import { HelminthPickerDialog } from "./helminth-picker-dialog";
 import { ExaltedWeaponSection } from "./exalted-weapon-section";
+import {
+  getWarframeAuraSlotIndices,
+  WARFRAME_AURA_SLOT,
+  WARFRAME_SECOND_AURA_SLOT,
+} from "@/lib/warframes/aura-slots";
 
 const EMPTY_SHARDS: (EquippedArchonShard | null)[] = [null, null, null, null, null];
 
-// Slot layout: 0=Aura, 1-8=Regular, 9=Exilus
-const AURA_SLOT = 0;
+// Slot layout: 0=Aura, 1-8=Regular, 9=Exilus, 10=Jade second Aura
+const AURA_SLOT = WARFRAME_AURA_SLOT;
 const EXILUS_SLOT = 9;
 /** Exalted weapon Exilus matches weapon-builder (index 8). */
 const EXALTED_WEAPON_EXILUS_SLOT = 8;
 
 function getSlotType(index: number): SlotType {
-  if (index === AURA_SLOT) return "aura";
+  if (index === AURA_SLOT || index === WARFRAME_SECOND_AURA_SLOT) return "aura";
   if (index === EXILUS_SLOT) return "exilus";
   return "regular";
 }
@@ -658,17 +663,22 @@ export default function WarframeBuilderPage() {
     helminthAbility,
   ]);
 
+  const auraSlotIndices = useMemo(
+    () => getWarframeAuraSlotIndices(selectedWarframe?.id),
+    [selectedWarframe?.id],
+  );
+
   const baseCapacity = warframeBaseCapacity(hasOrokinReactor);
   const auraBonus = useMemo(
-    () => computeWarframeAuraBonus(equippedMods, modsMap, slotPolarities, AURA_SLOT),
-    [equippedMods, modsMap, slotPolarities],
+    () => computeWarframeAuraBonus(equippedMods, modsMap, slotPolarities, auraSlotIndices),
+    [equippedMods, modsMap, slotPolarities, auraSlotIndices],
   );
 
   const totalCapacity = baseCapacity + auraBonus;
 
   const capacityUsed = useMemo(
-    () => computeWarframeCapacityUsed(equippedMods, modsMap, slotPolarities, AURA_SLOT),
-    [equippedMods, modsMap, slotPolarities],
+    () => computeWarframeCapacityUsed(equippedMods, modsMap, slotPolarities, auraSlotIndices),
+    [equippedMods, modsMap, slotPolarities, auraSlotIndices],
   );
 
   const handleSelectWarframe = useCallback((warframe: Warframe) => {
@@ -1024,28 +1034,43 @@ export default function WarframeBuilderPage() {
                   </div>
 
 
-                  {/* Aura + Exilus — top row (matches in-game warframe mod layout) */}
-                  <div className="mb-2 grid grid-cols-2 gap-2 min-w-0">
-                    <div>
-                      <span className="mb-1 block text-[10px] font-semibold tracking-wider text-purple-700 dark:text-purple-400">AURA</span>
-                      {(() => {
-                        const equipped = equippedMods.find((m) => m.slotIndex === AURA_SLOT);
-                        const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
-                        return (
+                  {/* Aura + Exilus — top row (matches in-game warframe mod layout; Jade has 2 Auras) */}
+                  <div
+                    className={cn(
+                      "mb-2 grid gap-2 min-w-0",
+                      auraSlotIndices.length > 1 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2",
+                    )}
+                  >
+                    {auraSlotIndices.map((slotIndex, auraOrdinal) => {
+                      const equipped = equippedMods.find((m) => m.slotIndex === slotIndex);
+                      const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
+                      const label = auraSlotIndices.length > 1 ? `Aura ${auraOrdinal + 1}` : "Aura";
+                      return (
+                        <div key={`aura-${slotIndex}`}>
+                          <span className="mb-1 block text-[10px] font-semibold tracking-wider text-purple-700 dark:text-purple-400">
+                            {label.toUpperCase()}
+                          </span>
                           <ModSlotCard
                             mod={mod}
                             rank={equipped?.rank ?? 0}
-                            slotIndex={AURA_SLOT}
-                            label="Aura"
-                            slotPolarity={slotPolarities[AURA_SLOT]}
+                            slotIndex={slotIndex}
+                            label={label}
+                            slotPolarity={slotPolarities[slotIndex]}
                             equippedModIds={equippedModIds}
-                            onAdd={() => handleOpenModPicker(AURA_SLOT)}
-                            onRemove={() => handleRemoveMod(AURA_SLOT)}
-                            onPolarize={(p) => setSlotPolarities((prev) => { const next = { ...prev }; if (p) next[AURA_SLOT] = p; else delete next[AURA_SLOT]; return next; })}
+                            onAdd={() => handleOpenModPicker(slotIndex)}
+                            onRemove={() => handleRemoveMod(slotIndex)}
+                            onPolarize={(p) =>
+                              setSlotPolarities((prev) => {
+                                const next = { ...prev };
+                                if (p) next[slotIndex] = p;
+                                else delete next[slotIndex];
+                                return next;
+                              })
+                            }
                           />
-                        );
-                      })()}
-                    </div>
+                        </div>
+                      );
+                    })}
                     <div>
                       <span className="mb-1 block text-[10px] font-semibold tracking-wider text-cyan-700 dark:text-cyan-400" title="Utility / mobility mods — not Aura">
                         EXILUS

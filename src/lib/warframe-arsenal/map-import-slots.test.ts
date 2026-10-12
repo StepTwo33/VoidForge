@@ -4,6 +4,7 @@ import {
   mapWarframeUpgradeMods,
   WARFRAME_IMPORT_AURA_SLOT,
   WARFRAME_IMPORT_EXILUS_SLOT,
+  WARFRAME_IMPORT_SECOND_AURA_SLOT,
 } from "@/lib/warframe-arsenal/map-import";
 import type { ArsenalImportWarning } from "@/lib/warframe-arsenal/map-import";
 
@@ -69,5 +70,25 @@ describe("mapWarframeUpgradeMods slot placement", () => {
     expect(warnings.filter((w) => w.label.includes("Dreamer"))).toEqual([]);
     expect(mods.find((m) => m.modId === "dreamers_bond")?.slotIndex).toBe(WARFRAME_IMPORT_AURA_SLOT);
     expect(mods.find((m) => m.modId === "power_drift")?.slotIndex).toBe(WARFRAME_IMPORT_EXILUS_SLOT);
+  });
+
+  it("places Jade's second aura instead of skipping it", () => {
+    const warnings: ArsenalImportWarning[] = [];
+    const { mods } = mapWarframeUpgradeMods(
+      [
+        named("Growing Power"),
+        named("Corrosive Projection"),
+        named("Power Drift"),
+        named("Primed Continuity", 10),
+      ],
+      warnings,
+      "jade",
+    );
+    const byId = new Map(mods.map((m) => [m.modId, m.slotIndex]));
+    expect(byId.get("growing_power")).toBe(WARFRAME_IMPORT_AURA_SLOT);
+    expect(byId.get("corrosive_projection") ?? byId.get("aura_corrosive_projection")).toBe(
+      WARFRAME_IMPORT_SECOND_AURA_SLOT,
+    );
+    expect(warnings.filter((w) => w.label.includes("extra aura"))).toEqual([]);
   });
 });
