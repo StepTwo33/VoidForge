@@ -37,22 +37,22 @@ export type AbilityScaleHint = AbilityScaleAttribute;
 const SLOT_STYLES: Record<number, { border: string; badge: string; glow: string }> = {
   1: {
     border: "border-l-orange-500/70",
-    badge: "bg-orange-500/15 text-orange-700 dark:text-orange-400 ring-orange-500/30",
+    badge: "bg-orange-500/15 text-orange-800 dark:text-orange-400 ring-orange-500/30",
     glow: "shadow-[inset_3px_0_12px_-4px_rgba(249,115,22,0.35)]",
   },
   2: {
     border: "border-l-cyan-500/70",
-    badge: "bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 ring-cyan-500/30",
+    badge: "bg-cyan-500/15 text-cyan-800 dark:text-cyan-400 ring-cyan-500/30",
     glow: "shadow-[inset_3px_0_12px_-4px_rgba(34,211,238,0.35)]",
   },
   3: {
     border: "border-l-violet-500/70",
-    badge: "bg-violet-500/15 text-violet-700 dark:text-violet-400 ring-violet-500/30",
+    badge: "bg-violet-500/15 text-violet-800 dark:text-violet-400 ring-violet-500/30",
     glow: "shadow-[inset_3px_0_12px_-4px_rgba(139,92,246,0.35)]",
   },
   4: {
     border: "border-l-amber-400/80",
-    badge: "bg-amber-500/15 text-amber-800 dark:text-amber-300 ring-amber-500/40",
+    badge: "bg-amber-500/15 text-amber-900 dark:text-amber-300 ring-amber-500/40",
     glow: "shadow-[inset_3px_0_12px_-4px_rgba(251,191,36,0.4)]",
   },
 };

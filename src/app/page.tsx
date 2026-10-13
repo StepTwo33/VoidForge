@@ -167,7 +167,7 @@ export default function Home() {
               />
             </div>
 
-            <p className="mt-10 border-t border-border/30 pt-6 text-center text-xs leading-relaxed text-muted-foreground/80">
+            <p className="mt-10 border-t border-border/30 pt-6 text-center text-xs leading-relaxed text-foreground/80">
               Community shout-out:{" "}
               <a
                 href="https://buff0000n.github.io/dojocad/"

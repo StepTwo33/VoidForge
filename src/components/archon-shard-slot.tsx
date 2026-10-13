@@ -85,7 +85,7 @@ export function ArchonShardSlot({ shard, slotIndex, onEquip, onRemove }: ArchonS
         title={`Empty shard slot ${slotIndex + 1}`}
       >
         <Plus className="h-4 w-4" />
-        <span className="text-[9px] font-medium text-muted-foreground/80">Add {slotIndex + 1}</span>
+        <span className="text-[10px] font-medium text-muted-foreground">Add {slotIndex + 1}</span>
       </button>
     );
   }

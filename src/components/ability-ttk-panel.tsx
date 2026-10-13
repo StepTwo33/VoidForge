@@ -51,7 +51,7 @@ export function AbilityTTKPanel({ entries }: { entries: AbilityTTKEntry[] }) {
         <h3 className="text-[10px] font-semibold tracking-wider text-muted-foreground mb-1">
           ABILITY TIME TO KILL
         </h3>
-        <p className="text-[10px] text-muted-foreground/80 leading-snug">
+        <p className="text-[10px] text-muted-foreground leading-snug">
           Modeled from ability damage at your build&apos;s strength. Finisher-style damage ignores armor.
         </p>
       </div>
@@ -74,7 +74,7 @@ export function AbilityTTKPanel({ entries }: { entries: AbilityTTKEntry[] }) {
           aria-label="Search enemies"
         />
       </div>
-      <p className="text-[9px] text-muted-foreground/70 -mt-1">
+      <p className="text-[10px] text-muted-foreground -mt-1">
         {searching
           ? `${enemies.length} match${enemies.length === 1 ? "" : "es"}`
           : `${enemies.length} common · search for any enemy`}
@@ -152,7 +152,7 @@ export function AbilityTTKPanel({ entries }: { entries: AbilityTTKEntry[] }) {
                     )}
                   </div>
                   {entry.ignoreArmor && (
-                    <p className="text-[9px] text-muted-foreground/70 pt-1">
+                    <p className="text-[10px] text-muted-foreground pt-1">
                       Finisher-style — armor DR not applied.
                     </p>
                   )}

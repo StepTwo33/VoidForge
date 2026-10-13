@@ -63,7 +63,7 @@ export function CodexActionLinks({
       )}
       <a
         href={returnTo ? appendReturnTo(reportHref, returnTo) : reportHref}
-        className="inline-flex min-h-11 items-center gap-1 rounded border border-amber-500/30 px-2.5 py-2 text-xs text-amber-800/80 hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 sm:min-h-0 sm:px-2 sm:py-1 sm:text-[10px]"
+        className="inline-flex min-h-11 items-center gap-1 rounded border border-amber-500/30 px-2.5 py-2 text-xs text-amber-800 hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 sm:min-h-0 sm:px-2 sm:py-1 sm:text-[10px]"
       >
         <Flag className="h-2.5 w-2.5" /> Report
       </a>

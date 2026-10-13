@@ -563,7 +563,7 @@ export function Header() {
 
             <Link
               href="/report-issue"
-              className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm text-amber-800/80 hover:text-amber-900 transition-colors rounded-lg hover:bg-amber-500/5 dark:text-amber-400/70 dark:hover:text-amber-400"
+              className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm text-amber-800 hover:text-amber-900 transition-colors rounded-lg hover:bg-amber-500/5 dark:text-amber-400/70 dark:hover:text-amber-400"
             >
               <Flag className="h-3.5 w-3.5" />
               Report
@@ -711,7 +711,7 @@ export function Header() {
             <Link
               href="/report-issue"
               onClick={() => setMobileOpen(false)}
-              className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-amber-800/80 transition-colors hover:bg-secondary hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400"
+              className="flex min-h-11 items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-amber-800 transition-colors hover:bg-secondary hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400"
             >
               <Flag className="h-4 w-4" />
               Report Issue
