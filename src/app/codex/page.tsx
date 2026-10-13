@@ -333,7 +333,7 @@ function CodexPageContent() {
             <p className="text-xs text-muted-foreground">Browse and verify game data across the full database</p>
           </div>
         </div>
-        <div className="relative ml-auto min-w-0 w-full flex-1 sm:min-w-[200px] sm:max-w-sm">
+        <div className="relative ml-auto min-w-0 w-full basis-full sm:basis-0 sm:flex-1 sm:min-w-[200px] sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search codex..."
@@ -359,7 +359,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => selectSection(s.id)}
                     className={cn(
-                      "flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors",
+                      "flex min-h-11 w-full items-center lg:min-h-0 gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors",
                       active
                         ? accentTone.amber.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -383,7 +383,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
+                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                       modCategory === cat.id
                         ? accentTone.indigo.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -406,7 +406,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
+                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                       weaponCategory === cat.id
                         ? accentTone.blue.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -423,7 +423,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ aoe: null, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
+                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                       !weaponAoeOnly
                         ? accentTone.blue.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -435,7 +435,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ aoe: "1", id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
+                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                       weaponAoeOnly
                         ? accentTone.orange.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -458,7 +458,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
+                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                       companionType === cat.id
                         ? accentTone.orange.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -479,7 +479,7 @@ function CodexPageContent() {
                   type="button"
                   onClick={() => setParams({ slot: "all", id: null })}
                   className={cn(
-                    "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
+                    "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                     arcaneSlot === "all"
                       ? accentTone.purple.chipActive
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -493,7 +493,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ slot: f.id, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors sm:py-1.5",
+                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                       arcaneSlot === f.id
                         ? accentTone.purple.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",

@@ -113,7 +113,7 @@ export default function SupportPage() {
           )}
 
           <details className="mx-auto mt-8 max-w-xs text-center">
-            <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
+            <summary className="inline-flex min-h-11 items-center lg:min-h-0 cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
               Or scan a QR code
             </summary>
             <a
@@ -132,7 +132,7 @@ export default function SupportPage() {
             </a>
           </details>
 
-          <p className="mt-8 text-center text-xs text-muted-foreground/80 leading-relaxed">
+          <p className="mt-8 text-center text-xs text-muted-foreground leading-relaxed">
             Donations are voluntary gifts, not purchases. The Supporter badge is cosmetic only — it does not unlock
             features. If you tip with a different email, ask via{" "}
             <Link href="/report-issue" className="inline-flex min-h-11 items-center text-primary underline-offset-2 hover:underline">

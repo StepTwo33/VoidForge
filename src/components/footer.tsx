@@ -22,7 +22,7 @@ export function Footer() {
       <div className="container mx-auto px-3.5 py-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:px-4">
         <div className="flex flex-col items-center justify-between gap-3 sm:flex-row sm:items-center">
           <div className="text-center sm:text-left">
-            <Link href="/" className="inline-flex min-h-11 items-center transition-opacity hover:opacity-90 sm:min-h-0">
+            <Link href="/" className="inline-flex min-h-11 items-center transition-opacity hover:opacity-90 lg:min-h-0">
               <span className="text-base font-bold tracking-tight text-primary">
                 Voidforge
               </span>
@@ -44,7 +44,7 @@ export function Footer() {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center gap-1 rounded-md px-2.5 transition-colors hover:text-foreground sm:min-h-0 sm:px-1"
+                  className="inline-flex min-h-11 items-center gap-1 rounded-md px-2.5 transition-colors hover:text-foreground lg:min-h-0 lg:px-1"
                 >
                   <Github className="h-3 w-3" />
                   {link.label}
@@ -53,7 +53,7 @@ export function Footer() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="inline-flex min-h-11 items-center rounded-md px-2.5 transition-colors hover:text-foreground sm:min-h-0 sm:px-1"
+                  className="inline-flex min-h-11 items-center rounded-md px-2.5 transition-colors hover:text-foreground lg:min-h-0 lg:px-1"
                 >
                   {link.label}
                 </Link>

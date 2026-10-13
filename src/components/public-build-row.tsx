@@ -72,7 +72,7 @@ export function BuildVoteButton({
 
   const iconSize = size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4";
   const pad = size === "sm" ? "px-2 py-1.5 text-xs" : "px-3 py-1.5 text-sm";
-  const hit = size === "sm" ? "min-h-10 min-w-10" : "min-h-11 min-w-11";
+  const hit = size === "sm" ? "min-h-11 min-w-11 lg:min-h-10 lg:min-w-10" : "min-h-11 min-w-11";
 
   return (
     <button
@@ -208,6 +208,7 @@ export function PublicBuildRow({
             </div>
           )}
           <div
+            title={build.name}
             className={cn(
               "font-medium truncate break-words group-hover:text-primary transition-colors",
               compact ? "text-sm leading-snug" : "",
@@ -249,9 +250,9 @@ export function PublicBuildRow({
               @{build.author.username}
               {build.author.supporter && <SupporterHeart />}
             </span>
-            <span className="text-border">·</span>
+            <span aria-hidden="true" className="text-border">·</span>
             <span>{itemDisplay.typeLabel}</span>
-            <span className="text-border">·</span>
+            <span aria-hidden="true" className="text-border">·</span>
             <span>{formatRelativeTime(sharedAt)}</span>
           </div>
         </div>
