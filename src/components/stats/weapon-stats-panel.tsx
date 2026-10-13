@@ -150,12 +150,12 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
               changed={flash.has("arsenalTotal") || flash.has("totalDamage")}
             />
             {stats.multishot > 1 && (
-              <div className="text-[9px] text-muted-foreground/60 -mt-0.5 mb-0.5">
+              <div className="text-[10px] text-muted-foreground -mt-0.5 mb-0.5">
                 {dmg.totalDamage.toFixed(1)} per pellet × {stats.multishot.toFixed(2)} multishot (projectile / hit)
               </div>
             )}
             {stats.multishot <= 1 && (
-              <div className="text-[9px] text-muted-foreground/60 -mt-0.5 mb-0.5">
+              <div className="text-[10px] text-muted-foreground -mt-0.5 mb-0.5">
                 Projectile / hit damage (excludes radial explosions)
               </div>
             )}
@@ -203,7 +203,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
         const showOverflow = hitValues.some(exceedsWarframeInt32);
         return (
           <CollapsibleSection title="HIT DAMAGE" defaultOpen>
-            <p className="text-[9px] text-muted-foreground/70 mb-1 leading-snug">
+            <p className="text-[10px] text-muted-foreground mb-1 leading-snug">
               Per pellet / swing — not DPS (no multishot or fire rate). Orange/red+ rows are tier hit values; Avg hit only blends tiers your crit chance can roll.
             </p>
             <StatRow

@@ -29,8 +29,8 @@ export function Footer() {
             </Link>
             <p className="mt-0.5 text-xs text-muted-foreground">
               Fan-made Warframe build planner
-              <span className="mx-1.5 text-muted-foreground/35">·</span>
-              <span className="inline-flex items-center gap-0.5 text-muted-foreground/80">
+              <span className="mx-1.5 text-muted-foreground">·</span>
+              <span className="inline-flex items-center gap-0.5 text-muted-foreground">
                 Built for the community <Heart className="h-2.5 w-2.5 text-rose-600/80 dark:text-rose-400/80" />
               </span>
             </p>

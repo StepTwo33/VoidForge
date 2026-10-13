@@ -86,7 +86,7 @@ export function WeaponSimPanel({
           ))}
         </div>
       ) : (
-        <p className="text-[10px] text-muted-foreground/70 leading-snug">
+        <p className="text-[10px] text-muted-foreground leading-snug">
           Default stacks — edit to model mid-fight buffs
         </p>
       )}

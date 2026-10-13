@@ -50,7 +50,7 @@ export function AdminSubnav({ isFullAdmin }: { isFullAdmin: boolean }) {
               className={cn(
                 "shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 min-h-11 text-xs font-medium transition-colors",
                 active
-                  ? "bg-primary/15 text-primary"
+                  ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground",
               )}
             >

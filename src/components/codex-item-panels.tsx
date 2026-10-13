@@ -143,7 +143,7 @@ export function CodexModRow({
       ) : (
         <span className="font-mono text-[10px] text-muted-foreground" title="Capacity drain at R0 → max rank">
           {mod.drain}
-          <span className="text-muted-foreground/60"> → {maxCap}</span>
+          <span className="text-muted-foreground"> → {maxCap}</span>
         </span>
       )}
     </button>

@@ -154,7 +154,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
             <Plus className="h-4 w-4" />
           </div>
           <span className="text-xs font-medium">{label || `Slot ${slotIndex + 1}`}</span>
-          <span className="text-[10px] text-muted-foreground/80 group-hover:text-primary/80">Tap to add mod</span>
+          <span className="text-[10px] text-muted-foreground group-hover:text-primary/80">Tap to add mod</span>
         </button>
         {onPolarize && (
           <div className="mt-1.5 flex justify-end">
