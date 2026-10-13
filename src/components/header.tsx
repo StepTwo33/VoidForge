@@ -538,18 +538,20 @@ export function Header() {
         <nav className="hidden lg:flex items-center gap-1 shrink-0">
           <Link
             href="/discover"
-            className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-primary hover:text-primary/90 transition-colors rounded-lg hover:bg-primary/10"
+            title="Discover"
+            className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-2 py-1.5 text-sm font-medium text-primary hover:text-primary/90 transition-colors rounded-lg hover:bg-primary/10"
           >
             <Users className="h-3.5 w-3.5" />
-            Discover
+            <span className="sr-only xl:not-sr-only">Discover</span>
           </Link>
 
           <Link
             href="/guides/how-to-mod"
-            className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
+            title="How to Mod"
+            className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-2 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
           >
             <BookOpen className="h-3.5 w-3.5" />
-            How to Mod
+            <span className="sr-only 2xl:not-sr-only">How to Mod</span>
           </Link>
 
           {navGroups.map((group) => (
@@ -567,27 +569,30 @@ export function Header() {
 
             <Link
               href="/support"
-              className="flex min-h-11 items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium text-rose-800 hover:text-rose-700 transition-colors rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/15 dark:text-rose-400 dark:hover:text-rose-300"
+              title="Support"
+              className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-2.5 py-1.5 text-sm font-medium text-rose-800 hover:text-rose-700 transition-colors rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/15 dark:text-rose-400 dark:hover:text-rose-300"
             >
               <Heart className="h-3.5 w-3.5" />
-              Support
+              <span className="sr-only 2xl:not-sr-only">Support</span>
             </Link>
 
             <Link
               href="/report-issue"
-              className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm text-amber-800 hover:text-amber-900 transition-colors rounded-lg hover:bg-amber-500/5 dark:text-amber-400/70 dark:hover:text-amber-400"
+              title="Report an issue"
+              className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-2 py-1.5 text-sm text-amber-800 hover:text-amber-900 transition-colors rounded-lg hover:bg-amber-500/5 dark:text-amber-400/70 dark:hover:text-amber-400"
             >
               <Flag className="h-3.5 w-3.5" />
-              Report
+              <span className="sr-only 2xl:not-sr-only">Report</span>
             </Link>
 
             {isAdmin && (
               <Link
                 href="/admin/reports"
-                className="relative flex min-h-11 items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium text-red-700 hover:text-red-800 transition-colors rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/15 dark:text-red-400 dark:hover:text-red-300"
+                title="Admin"
+                className="relative flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-2.5 py-1.5 text-sm font-medium text-red-700 hover:text-red-800 transition-colors rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/15 dark:text-red-400 dark:hover:text-red-300"
               >
                 <Shield className="h-3.5 w-3.5" />
-                Admin
+                <span className="sr-only 2xl:not-sr-only">Admin</span>
                 <AdminOpenReportsBadge count={openReportCount} />
               </Link>
             )}
@@ -620,13 +625,13 @@ export function Header() {
           {loading ? (
             <span className="w-7 h-7 rounded-full bg-muted animate-pulse ml-1" />
           ) : user ? (
-            <Link href="/profile" className="ml-1 inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-1 transition-opacity hover:opacity-80 lg:min-h-0">
+            <Link href="/profile" className="ml-1 inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-1 transition-opacity hover:opacity-80">
               {user.image ? (
                 <AvatarImage src={user.image} alt="" size={28} className="w-7 h-7 rounded-full border border-border" />
               ) : (
                 <User className="w-5 h-5 text-muted-foreground" />
               )}
-              <span className="hidden xl:inline text-xs text-muted-foreground max-w-[100px] truncate">
+              <span className="hidden 2xl:inline text-xs text-muted-foreground max-w-[100px] truncate">
                 {user.name?.split(" ")[0]}
               </span>
             </Link>
