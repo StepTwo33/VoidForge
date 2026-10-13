@@ -73,7 +73,7 @@ export default function SupportPage() {
                 href={BUY_ME_A_COFFEE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary underline-offset-2 hover:underline"
+                className="inline-flex min-h-11 items-center text-primary underline-offset-2 hover:underline"
               >
                 buymeacoffee.com/StepTwo
               </a>
@@ -105,7 +105,7 @@ export default function SupportPage() {
           {!account && (
             <p className="mx-auto mt-6 max-w-md text-center text-xs text-muted-foreground leading-relaxed">
               Tips work without an account.{" "}
-              <Link href="/signin" className="text-primary underline-offset-2 hover:underline">
+              <Link href="/signin" className="inline-flex min-h-11 items-center text-primary underline-offset-2 hover:underline">
                 Sign in
               </Link>{" "}
               and use the same email when tipping if you want a cosmetic Supporter badge on your profile.
@@ -135,11 +135,11 @@ export default function SupportPage() {
           <p className="mt-8 text-center text-xs text-muted-foreground/80 leading-relaxed">
             Donations are voluntary gifts, not purchases. The Supporter badge is cosmetic only — it does not unlock
             features. If you tip with a different email, ask via{" "}
-            <Link href="/report-issue" className="text-primary underline-offset-2 hover:underline">
+            <Link href="/report-issue" className="inline-flex min-h-11 items-center text-primary underline-offset-2 hover:underline">
               Report Issue
             </Link>
             . See our{" "}
-            <Link href="/terms" className="text-primary underline-offset-2 hover:underline">
+            <Link href="/terms" className="inline-flex min-h-11 items-center text-primary underline-offset-2 hover:underline">
               Terms of Service
             </Link>
             .

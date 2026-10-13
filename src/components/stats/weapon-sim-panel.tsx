@@ -96,7 +96,7 @@ export function WeaponSimPanel({
           type="button"
           variant="outline"
           size="xs"
-          className="h-7 text-[10px]"
+          className="h-7 min-h-11 text-[10px]"
           onClick={() => setOpen(true)}
         >
           <SlidersHorizontal className="size-3" />
@@ -106,7 +106,7 @@ export function WeaponSimPanel({
           type="button"
           variant="ghost"
           size="xs"
-          className="h-7 text-[10px] text-muted-foreground"
+          className="h-7 min-h-11 text-[10px] text-muted-foreground"
           onClick={openInDamageSim}
         >
           <ExternalLink className="size-3" />
@@ -142,7 +142,7 @@ export function WeaponSimPanel({
               type="button"
               variant="outline"
               size="sm"
-              className="w-full justify-center"
+              className="min-h-11 w-full justify-center"
               onClick={openInDamageSim}
             >
               <ExternalLink className="size-3.5" />

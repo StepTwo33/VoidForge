@@ -232,7 +232,7 @@ function BuildCompareTab() {
                   <button
                     type="button"
                     onClick={() => setSourceOpen(side)}
-                    className="w-full text-left text-sm font-medium text-primary hover:underline"
+                    className="min-h-11 w-full text-left text-sm font-medium text-primary hover:underline"
                   >
                     Load from Yours or Community
                   </button>

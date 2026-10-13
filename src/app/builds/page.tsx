@@ -389,7 +389,7 @@ export default function BuildsLibraryPage() {
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
           Need a full kit editor?{" "}
-          <Link href="/loadouts" className="text-primary hover:underline">
+          <Link href="/loadouts" className="inline-flex min-h-11 items-center text-primary hover:underline">
             Open Loadouts
           </Link>
         </p>
