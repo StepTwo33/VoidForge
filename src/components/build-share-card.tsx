@@ -75,7 +75,7 @@ export function BuildShareCard({
           {copied === "discord" ? "Copied Discord text" : "Copy Discord text"}
         </button>
       </div>
-      <pre className="text-[10px] text-muted-foreground/80 bg-background/60 rounded-lg border border-border/50 p-2 overflow-x-auto whitespace-pre-wrap">
+      <pre className="text-[11px] break-all text-muted-foreground/80 bg-background/60 rounded-lg border border-border/50 p-2 overflow-x-auto whitespace-pre-wrap">
         {discordText}
       </pre>
     </div>

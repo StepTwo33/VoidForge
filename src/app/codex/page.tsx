@@ -562,7 +562,7 @@ function CodexPageContent() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-1 p-2 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-1 p-2 [&>*]:[content-visibility:auto] [&>*]:[contain-intrinsic-size:auto_5.125rem] sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {section === "mods" &&
               filteredMods.map((mod) => (
                 <CodexModRow

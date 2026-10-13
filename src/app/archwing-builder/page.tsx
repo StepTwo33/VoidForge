@@ -335,7 +335,7 @@ export default function ArchwingBuilderPage() {
                     )}
                   >
                     <span className="font-medium text-sm">{aw.name}</span>
-                    <div className="text-[10px] text-muted-foreground mt-0.5">
+                    <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                       HP {aw.health} • SH {aw.shield} • ARM {aw.armor}
                     </div>
                   </button>
@@ -357,7 +357,7 @@ export default function ArchwingBuilderPage() {
                     )}
                   >
                     <span className="font-medium text-sm">{nm.name}</span>
-                    <div className="text-[10px] text-muted-foreground mt-0.5">
+                    <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                       HP {nm.health} • ARM {nm.armor} • EN {nm.energy}
                     </div>
                   </button>
@@ -462,7 +462,7 @@ export default function ArchwingBuilderPage() {
                     <span className={cn("ml-1.5 text-[10px]", w.category === "archgun" ? "text-blue-700 dark:text-blue-400" : "text-green-700 dark:text-green-400")}>
                       {w.category}
                     </span>
-                    <div className="text-[10px] text-muted-foreground mt-0.5">
+                    <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                       DMG {w.damage} • CC {(w.criticalChance * 100).toFixed(0)}% • SC {(w.statusChance * 100).toFixed(0)}%
                     </div>
                   </button>

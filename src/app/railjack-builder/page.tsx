@@ -551,7 +551,7 @@ export default function RailjackBuilderPage() {
                   </div>
                   <span className="text-sm font-medium">{selectedReactor?.name ?? "None"}</span>
                   {selectedReactor && (
-                    <div className="text-[10px] text-muted-foreground mt-0.5">
+                    <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                       Avionics {selectedReactor.stats.avionicsCapacity}
                       {selectedReactor.stats.abilityStrength != null && ` • STR +${Math.round(selectedReactor.stats.abilityStrength * 100)}%`}
                       {selectedReactor.stats.abilityRange != null && ` • RNG +${Math.round(selectedReactor.stats.abilityRange * 100)}%`}
@@ -574,7 +574,7 @@ export default function RailjackBuilderPage() {
                   </div>
                   <span className="text-sm font-medium">{selectedShield?.name ?? "None"}</span>
                   {selectedShield && (
-                    <div className="text-[10px] text-muted-foreground mt-0.5">
+                    <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                       Cap {selectedShield.stats.shieldCapacity} • {selectedShield.stats.shieldRecharge}%/s
                       {(selectedShield.stats.shieldRechargeDelayReduction ?? 0) > 0 &&
                         ` • Delay −${selectedShield.stats.shieldRechargeDelayReduction}s`}
@@ -596,7 +596,7 @@ export default function RailjackBuilderPage() {
                   </div>
                   <span className="text-sm font-medium">{selectedEngine?.name ?? "None"}</span>
                   {selectedEngine && (
-                    <div className="text-[10px] text-muted-foreground mt-0.5">
+                    <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                       Cruise +{selectedEngine.stats.speed} m/s
                       {(selectedEngine.stats.boostMultiplier ?? 0) > 0 &&
                         ` • Boost +${selectedEngine.stats.boostMultiplier}×`}
@@ -618,7 +618,7 @@ export default function RailjackBuilderPage() {
                   </div>
                   <span className="text-sm font-medium">{selectedPlating?.name ?? "None"}</span>
                   {selectedPlating && (
-                    <div className="text-[10px] text-muted-foreground mt-0.5">
+                    <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                       Hull {selectedPlating.stats.hullBonus} • Armor {selectedPlating.stats.armorBonus}
                     </div>
                   )}
@@ -742,7 +742,7 @@ export default function RailjackBuilderPage() {
                   </button>
                 </div>
               </div>
-              <p className="text-[10px] text-muted-foreground mb-2">
+              <p className="text-xs lg:text-[10px] text-muted-foreground mb-2">
                 Dirac / Avionics Grid removed in U29.10 (→ Endo). Rank Plexus mods + Forma as usual.
               </p>
               <div className="border border-border rounded-xl p-3 bg-card space-y-2.5">
@@ -768,7 +768,7 @@ export default function RailjackBuilderPage() {
                         }}
                         className="w-full"
                       />
-                      <p className="text-[10px] text-muted-foreground mt-0.5" title={tree.blurb}>
+                      <p className="text-xs lg:text-[10px] text-muted-foreground mt-0.5" title={tree.blurb}>
                         {rankName}
                       </p>
                     </label>
@@ -795,7 +795,7 @@ export default function RailjackBuilderPage() {
             {/* Crew A/B/C */}
             <div>
               <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-1">CREW</h2>
-              <p className="text-[10px] text-muted-foreground mb-3">
+              <p className="text-xs lg:text-[10px] text-muted-foreground mb-3">
                 Slots unlock at Command 1 / 3 / 5. Adversaries need Command 8; elites need Command 10. Hired from Ticker (Fortuna).
               </p>
               <div className="space-y-2">
@@ -927,7 +927,7 @@ export default function RailjackBuilderPage() {
                           {selectedTurrets[slot]?.name ?? "Select turret"}
                         </p>
                         {selectedTurrets[slot] && (
-                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                          <p className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                             DMG {selectedTurrets[slot]!.damage} • CC {(selectedTurrets[slot]!.critChance * 100).toFixed(0)}%
                           </p>
                         )}
@@ -936,7 +936,7 @@ export default function RailjackBuilderPage() {
                   </div>
                   {showTurretPicker && (
                     <div className="mt-3 border border-border rounded-xl p-3 bg-card max-h-[240px] overflow-y-auto">
-                      <p className="text-[10px] text-muted-foreground mb-2">Equipping {TURRET_SLOT_LABELS[activeTurretSlot]} turret</p>
+                      <p className="text-xs lg:text-[10px] text-muted-foreground mb-2">Equipping {TURRET_SLOT_LABELS[activeTurretSlot]} turret</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                         {allTurrets.map((t) => (
                           <button
@@ -959,7 +959,7 @@ export default function RailjackBuilderPage() {
                             )}
                           >
                             <span className="font-medium">{t.name}</span>
-                            <div className="text-[10px] text-muted-foreground mt-0.5">
+                            <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                               DMG {t.damage} • CC {(t.critChance * 100).toFixed(0)}% • SC {(t.statusChance * 100).toFixed(0)}%
                             </div>
                           </button>
@@ -989,7 +989,7 @@ export default function RailjackBuilderPage() {
                   >
                     <span className="text-sm font-medium">{selectedOrdnance?.name ?? "Select ordnance (Milati / Tycho / Galvarc)"}</span>
                     {selectedOrdnance && (
-                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                      <p className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                         DMG {selectedOrdnance.damage} • CC {(selectedOrdnance.critChance * 100).toFixed(0)}% • FR {Number(selectedOrdnance.fireRate).toFixed(2)}
                       </p>
                     )}
@@ -1014,7 +1014,7 @@ export default function RailjackBuilderPage() {
                             )}
                           >
                             <span className="font-medium">{o.name}</span>
-                            <div className="text-[10px] text-muted-foreground mt-0.5">
+                            <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                               DMG {o.damage} • CC {(o.critChance * 100).toFixed(0)}% • FR {Number(o.fireRate).toFixed(2)}
                             </div>
                           </button>
@@ -1272,7 +1272,7 @@ export default function RailjackBuilderPage() {
                         <span className="font-medium">{ability.name}</span>
                         <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{ability.category}</span>
                       </div>
-                      <p className="text-[10px] text-muted-foreground mt-1">{ability.description}</p>
+                      <p className="text-xs lg:text-[10px] text-muted-foreground mt-1">{ability.description}</p>
                       <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-[10px] font-mono text-cyan-700 dark:text-cyan-400">
                         {ability.energyCost !== undefined && <span>Energy {ability.energyCost}</span>}
                         {ability.cooldownSec !== undefined && <span>CD {ability.cooldownSec}s</span>}

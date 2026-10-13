@@ -468,7 +468,7 @@ export default function ModularBuilderPage() {
                         )}
                       >
                         <span className="font-medium">{c.name}</span>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                           {c.description}
                         </div>
                       </button>
@@ -495,7 +495,7 @@ export default function ModularBuilderPage() {
                         <span className={cn("ml-1.5 text-[10px]", g.type === "primary" ? "text-blue-700 dark:text-blue-400" : "text-green-700 dark:text-green-400")}>
                           {g.type}
                         </span>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                           {g.description}
                         </div>
                       </button>
@@ -519,7 +519,7 @@ export default function ModularBuilderPage() {
                         )}
                       >
                         <span className="font-medium">{l.name}</span>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                           CC {l.critChanceBonus > 0 ? "+" : ""}{(l.critChanceBonus * 100).toFixed(0)}% •
                           CM {l.critMultiplierBonus > 0 ? "+" : ""}{l.critMultiplierBonus.toFixed(1)}x •
                           SC {l.statusChanceBonus > 0 ? "+" : ""}{(l.statusChanceBonus * 100).toFixed(0)}%
@@ -552,7 +552,7 @@ export default function ModularBuilderPage() {
                         )}
                       >
                         <span className="font-medium">{s.name}</span>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                           {s.description}
                         </div>
                       </button>
@@ -577,7 +577,7 @@ export default function ModularBuilderPage() {
                       >
                         <span className="font-medium">{g.name}</span>
                         <span className={cn("ml-1.5 text-[10px]", g.type === "1h" ? "text-green-700 dark:text-green-400" : "text-amber-800 dark:text-amber-400")}>{g.type}</span>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                           {g.description}
                         </div>
                       </button>
@@ -601,7 +601,7 @@ export default function ModularBuilderPage() {
                         )}
                       >
                         <span className="font-medium text-xs">{l.name}</span>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                           CC {l.critBonus > 0 ? "+" : ""}{(l.critBonus * 100).toFixed(0)}% •
                           SC {l.statusBonus > 0 ? "+" : ""}{(l.statusBonus * 100).toFixed(0)}% •
                           DMG {l.damageBonus > 0 ? "+" : ""}{l.damageBonus}
@@ -634,7 +634,7 @@ export default function ModularBuilderPage() {
                         )}
                       >
                         <span className="font-medium">{p.name}</span>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                           DMG {p.damage} • {p.triggerType} • CC {(p.criticalChance * 100).toFixed(0)}%
                         </div>
                       </button>
@@ -658,7 +658,7 @@ export default function ModularBuilderPage() {
                         )}
                       >
                         <span className="font-medium">{s.name}</span>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                           DMG {s.damage} • {s.description}
                         </div>
                       </button>
@@ -682,7 +682,7 @@ export default function ModularBuilderPage() {
                         )}
                       >
                         <span className="font-medium">{b.name}</span>
-                        <div className="text-[10px] text-muted-foreground mt-0.5">
+                        <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                           {b.description}
                         </div>
                       </button>
@@ -706,7 +706,7 @@ export default function ModularBuilderPage() {
                     >
                       <div className="font-medium text-sm">{b.name}</div>
                       <div className="text-[10px] text-cyan-700 dark:text-cyan-400 font-mono mt-0.5">{b.parts.join(" + ")}</div>
-                      <div className="text-[10px] text-muted-foreground mt-1">{b.description}</div>
+                      <div className="text-xs lg:text-[10px] text-muted-foreground mt-1">{b.description}</div>
                       <div className="flex gap-1 mt-1.5 flex-wrap">
                         {b.tags.map((t) => (
                           <span key={t} className="text-[9px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">{t}</span>
