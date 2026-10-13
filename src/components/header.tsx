@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LogIn, User, Menu, X, ChevronDown, Swords, Wrench, LayoutGrid, Flag, Shield, Github, Users, Heart, Search, BookOpen } from "lucide-react";
 import { useEffect, useState, useRef, useCallback, useMemo, type FormEvent } from "react";
 import { ThemePicker } from "@/components/theme-picker";
 import { BrandMark } from "@/components/brand-mark";
 import { AvatarImage } from "@/components/game-asset-image";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { SupporterHeart } from "@/components/supporter-badge";
 import { VOIDFORGE_GITHUB_URL } from "@/lib/site/site-links";
@@ -88,7 +89,13 @@ const DISCORD_SVG = (
 function NavDropdown({ group }: { group: NavGroup }) {
   const [open, setOpen] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const pathname = usePathname();
   const Icon = group.icon;
+
+  const isLinkActive = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`);
+
+  const groupActive = group.links.some((link) => isLinkActive(link.href));
 
   const handleEnter = useCallback(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -102,7 +109,12 @@ function NavDropdown({ group }: { group: NavGroup }) {
   return (
     <div className="relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
       <button
-        className="flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
+        className={cn(
+          "flex min-h-11 items-center gap-1.5 px-2 py-1.5 text-sm transition-colors rounded-lg",
+          groupActive
+            ? "text-foreground bg-secondary/50"
+            : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
+        )}
         onClick={() => setOpen(!open)}
       >
         <Icon className="h-3.5 w-3.5" />
@@ -113,21 +125,32 @@ function NavDropdown({ group }: { group: NavGroup }) {
       {open && (
         <div className="absolute top-full left-0 pt-1 z-50" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
           <div className="w-56 bg-popover backdrop-blur-xl border border-border/60 rounded-xl shadow-elevation p-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
-            {group.links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="flex flex-col gap-0.5 px-3 py-2 rounded-lg hover:bg-secondary/70 transition-colors group"
-              >
-                <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                  {link.label}
-                </span>
-                <span className="text-[10px] text-muted-foreground leading-tight">
-                  {link.desc}
-                </span>
-              </Link>
-            ))}
+            {group.links.map((link) => {
+              const active = isLinkActive(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "flex min-h-11 flex-col justify-center gap-0.5 px-3 py-2 rounded-lg hover:bg-secondary/70 transition-colors group",
+                    active && "bg-primary/10",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "text-sm font-medium transition-colors",
+                      active ? "text-primary" : "text-foreground group-hover:text-primary",
+                    )}
+                  >
+                    {link.label}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground leading-tight">
+                    {link.desc}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

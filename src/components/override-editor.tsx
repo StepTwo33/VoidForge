@@ -453,14 +453,14 @@ export function OverrideEditor({ onSave, onCancel, backLink, prefill }: Override
               {backLink.label}
             </Link>
           )}
-          <h2 className="text-sm font-semibold text-purple-400">
+          <h2 className="text-sm font-semibold text-purple-800 dark:text-purple-400">
             {prefill?.existingOverrideId ? "Edit data fix" : action === "remove" ? "Hide item from site" : action === "add" ? "Add new item" : "Fix item data"}
           </h2>
           <p className="mt-0.5 text-[11px] text-muted-foreground">
             Pick an item, click a field to edit its current value, then save.
           </p>
         </div>
-        <button type="button" onClick={onCancel} className="shrink-0 text-muted-foreground hover:text-foreground" aria-label="Close editor">
+        <button type="button" onClick={onCancel} className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-muted-foreground hover:text-foreground" aria-label="Close editor">
           <X className="h-4 w-4" />
         </button>
       </div>
@@ -478,7 +478,7 @@ export function OverrideEditor({ onSave, onCancel, backLink, prefill }: Override
               type="button"
               onClick={() => setAction(id)}
               className={cn(
-                "rounded-lg border px-3 py-1.5 text-xs transition-colors",
+                "rounded-lg border px-3 min-h-11 text-xs transition-colors",
                 action === id ? "border-purple-600 bg-purple-600 text-white" : "border-border text-muted-foreground hover:text-foreground",
               )}
             >
@@ -497,7 +497,7 @@ export function OverrideEditor({ onSave, onCancel, backLink, prefill }: Override
               type="button"
               onClick={() => handleCategoryChange(cat)}
               className={cn(
-                "rounded-lg border px-2.5 py-1.5 text-xs transition-colors",
+                "rounded-lg border px-2.5 min-h-11 text-xs transition-colors",
                 category === cat ? "border-purple-600 bg-purple-600 text-white" : "border-border text-muted-foreground hover:text-foreground",
               )}
             >
@@ -543,7 +543,7 @@ export function OverrideEditor({ onSave, onCancel, backLink, prefill }: Override
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Type to search..."
-                      className="h-8 w-full rounded-md border border-border bg-background pl-8 pr-3 text-sm focus:border-purple-500/50 focus:outline-none"
+                      className="min-h-11 h-11 w-full rounded-md border border-border bg-background pl-8 pr-3 text-sm focus:border-purple-500/50 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -554,7 +554,7 @@ export function OverrideEditor({ onSave, onCancel, backLink, prefill }: Override
                       type="button"
                       onClick={() => handleSelectItem(item.id)}
                       className={cn(
-                        "flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-muted/50",
+                        "flex min-h-11 w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-muted/50",
                         selectedItemId === item.id && "bg-purple-500/10 text-purple-800 dark:text-purple-400",
                         item.hidden && "opacity-70 italic",
                       )}
@@ -706,7 +706,7 @@ export function OverrideEditor({ onSave, onCancel, backLink, prefill }: Override
 
       {selectedItemId && action === "remove" && (
         <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3">
-          <p className="text-sm text-red-400">
+          <p className="text-sm text-red-700 dark:text-red-400">
             <strong>{selectedItemName || selectedItemId}</strong> will be hidden on the site until this fix is removed.
           </p>
         </div>
@@ -726,7 +726,7 @@ export function OverrideEditor({ onSave, onCancel, backLink, prefill }: Override
         type="button"
         onClick={handleSave}
         disabled={action !== "add" && !selectedItemId}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-2.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+        className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-purple-600 py-2.5 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
       >
         <Save className="h-4 w-4" />
         {action === "remove" ? "Save hide" : prefill?.existingOverrideId ? "Update fix" : `Save fix${changedCount > 0 ? ` (${changedCount} change${changedCount === 1 ? "" : "s"})` : ""}`}
