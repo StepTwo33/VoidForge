@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -57,8 +57,59 @@ export function CodexDetailCard({ children, onClose }: { children: ReactNode; on
     };
   }, []);
 
+  const panelRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  // Focus handling: move focus into the panel, keep Tab inside it, close on Esc,
+  // and return focus to the element that opened it.
+  useEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const panel = panelRef.current;
+    const focusables = () =>
+      panel
+        ? Array.from(
+            panel.querySelectorAll<HTMLElement>(
+              'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+            ),
+          ).filter((el) => el.tabIndex >= 0 && (el.offsetParent !== null || el === document.activeElement))
+        : [];
+    focusables()[0]?.focus({ preventScroll: true });
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (e.defaultPrevented) return;
+        e.preventDefault();
+        onCloseRef.current();
+        return;
+      }
+      if (e.key !== "Tab" || !panel) return;
+      const items = focusables();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+      if (!panel.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      if (opener && opener.isConnected) opener.focus({ preventScroll: true });
+    };
+  }, []);
+
   return (
     <div
+      ref={panelRef}
       className="fixed inset-0 z-[60] flex items-end justify-stretch overscroll-none sm:items-end sm:justify-end sm:p-4 sm:pb-[max(1rem,env(safe-area-inset-bottom,0px))] lg:p-6 lg:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]"
       role="dialog"
       aria-modal="true"
@@ -67,6 +118,7 @@ export function CodexDetailCard({ children, onClose }: { children: ReactNode; on
       <button
         type="button"
         aria-label="Dismiss details"
+        tabIndex={-1}
         className="absolute inset-0 bg-background/55 backdrop-blur-[1px]"
         onClick={onClose}
       />
