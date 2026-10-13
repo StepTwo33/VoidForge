@@ -362,7 +362,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => { setActiveTab("settings"); setEditingName(true); setNameInput(user.name ?? ""); }}
-                  className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors shrink-0"
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center lg:min-h-0 lg:min-w-0 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors shrink-0"
                   title="Edit display name"
                 >
                   <Pencil className="h-3.5 w-3.5" />

@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
 import { isUserBanned } from "@/lib/auth/admin";
 import { AdminSubnav } from "@/components/admin-subnav";
+import { PageShellSubnavProvider } from "@/components/page-shell";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -22,9 +23,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const isFullAdmin = user.role === "admin";
 
   return (
-    <div>
-      <AdminSubnav isFullAdmin={isFullAdmin} />
+    <PageShellSubnavProvider subnav={<AdminSubnav isFullAdmin={isFullAdmin} />}>
       {children}
-    </div>
+    </PageShellSubnavProvider>
   );
 }

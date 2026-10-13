@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { createContext, useContext } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Header } from "@/components/header";
 import { resolvePageIcon, type PageIconName } from "@/lib/display/page-icons";
@@ -150,19 +151,32 @@ export const ACCENT: Record<
   },
 };
 
+/** Optional bar rendered directly below the site header (e.g. the admin subnav), provided by a route layout. */
+const PageShellSubnavContext = createContext<React.ReactNode>(null);
+
+export function PageShellSubnavProvider({ subnav, children }: { subnav: React.ReactNode; children: React.ReactNode }) {
+  return <PageShellSubnavContext.Provider value={subnav}>{children}</PageShellSubnavContext.Provider>;
+}
+
 /** Site-wide page wrapper with ambient background and header. */
 export function PageShell({
   children,
   ambient = true,
   className,
+  subnav,
 }: {
   children: React.ReactNode;
   ambient?: boolean;
   className?: string;
+  /** Optional bar rendered below the header. Falls back to a layout-provided subnav. */
+  subnav?: React.ReactNode;
 }) {
+  const layoutSubnav = useContext(PageShellSubnavContext);
+  const bar = subnav ?? layoutSubnav;
   return (
     <div className={cn("flex flex-1 flex-col", ambient && "page-ambient", className)}>
       <Header />
+      {bar}
       {children}
     </div>
   );
