@@ -46,6 +46,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
   const [pending, setPending] = useState<PendingDialog | null>(null);
   const [promptValue, setPromptValue] = useState("");
   const pendingRef = useRef<PendingDialog | null>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
   pendingRef.current = pending;
 
   const finish = useCallback((value: boolean | string | null) => {
@@ -60,12 +61,14 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const confirm = useCallback<ConfirmFn>((options) => {
+    returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     return new Promise<boolean>((resolve) => {
       setPending({ kind: "confirm", options, resolve });
     });
   }, []);
 
   const prompt = useCallback<PromptFn>((options) => {
+    returnFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     return new Promise<string | null>((resolve) => {
       setPromptValue(options.defaultValue ?? "");
       setPending({ kind: "prompt", options, resolve });
@@ -80,7 +83,17 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
     <ConfirmDialogContext.Provider value={{ confirm, prompt }}>
       {children}
       <Dialog open={pending != null} onOpenChange={handleOpenChange}>
-        <DialogContent showCloseButton={false} className="max-w-[calc(100%-2rem)] sm:max-w-md">
+        <DialogContent
+          showCloseButton={false}
+          onCloseAutoFocus={(e) => {
+            const el = returnFocusRef.current;
+            returnFocusRef.current = null;
+            if (el && el.isConnected) {
+              e.preventDefault();
+              el.focus();
+            }
+          }}
+          className="max-w-[calc(100%-2rem)] sm:max-w-md">
           {pending && (
             <>
               <DialogHeader>

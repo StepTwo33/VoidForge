@@ -69,7 +69,7 @@ export function DiscoverCategoryHub({
             className={cn(
               "group flex min-h-[9.5rem] flex-col items-start gap-3 rounded-xl border border-border/60 surface-panel p-4 text-left sm:min-h-[10.5rem] sm:p-5",
               "transition-all duration-300 active:scale-[0.99] hover:-translate-y-1 hover:shadow-xl",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
               colors.hoverBorder,
               colors.hoverBg,
               colors.shadow,

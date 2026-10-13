@@ -32,6 +32,7 @@ type ArcaneValuesDialogProps = {
   effects: ArcaneEffectDef | undefined;
   returnTo?: string;
   onSaved?: () => void;
+  returnFocusRef?: React.RefObject<HTMLElement | null>;
 };
 
 export function ArcaneValuesDialog({
@@ -42,6 +43,7 @@ export function ArcaneValuesDialog({
   effects,
   returnTo,
   onSaved,
+  returnFocusRef,
 }: ArcaneValuesDialogProps) {
   const [lines, setLines] = useState<ArcaneEffectLineDraft[]>([]);
   const [trigger, setTrigger] = useState<ArcaneTrigger>("passive");
@@ -87,7 +89,14 @@ export function ArcaneValuesDialog({
 
   return (
     <Dialog open={open} onOpenChange={(next) => !saving && onOpenChange(next)}>
-      <DialogContent className="max-h-[85vh] max-w-[calc(100%-2rem)] overflow-y-auto sm:max-w-lg" showCloseButton={!saving}>
+      <DialogContent
+        onCloseAutoFocus={(e) => {
+          if (returnFocusRef?.current) {
+            e.preventDefault();
+            returnFocusRef.current.focus();
+          }
+        }}
+        className="max-h-[85vh] max-w-[calc(100%-2rem)] overflow-y-auto sm:max-w-lg" showCloseButton={!saving}>
         <DialogHeader>
           <DialogTitle>Edit base values — {arcaneName}</DialogTitle>
           <DialogDescription>

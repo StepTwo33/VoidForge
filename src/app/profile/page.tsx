@@ -334,7 +334,7 @@ export default function ProfilePage() {
               <button
                 onClick={() => avatarInputRef.current?.click()}
                 disabled={avatarUploading}
-                className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring transition-opacity flex items-center justify-center cursor-pointer"
               >
                 {avatarUploading ? (
                   <Loader2 className="h-5 w-5 text-white animate-spin" />
@@ -372,14 +372,14 @@ export default function ProfilePage() {
                 {user.supporterAt && <SupporterBadge />}
               </div>
               {publicProfileHref ? (
-                <Link href={publicProfileHref} className="text-xs text-primary hover:underline mb-2 inline-block">
+                <Link href={publicProfileHref} className="text-xs text-primary hover:underline mb-2 inline-flex min-h-11 items-center lg:min-h-0">
                   @{user.username}
                 </Link>
               ) : (
                 <button
                   type="button"
                   onClick={() => { setActiveTab("settings"); setEditingUsername(true); setUsernameInput(user.username ?? ""); }}
-                  className="text-xs text-primary hover:underline mb-2 inline-block"
+                  className="text-xs text-primary hover:underline mb-2 inline-flex min-h-11 items-center lg:min-h-0"
                 >
                   Set a public username →
                 </button>
@@ -388,7 +388,7 @@ export default function ProfilePage() {
                 <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{user.bio}</p>
               )}
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1 truncate max-w-[200px] sm:max-w-none"><Mail className="h-3 w-3 shrink-0" /> {user.email}</span>
+                <span title={user.email ?? undefined} className="flex min-w-0 max-w-full items-center gap-1 break-all"><Mail className="h-3 w-3 shrink-0" /> {user.email}</span>
                 <span className="flex items-center gap-1"><Calendar className="h-3 w-3 shrink-0" /> Joined {memberSince}</span>
               </div>
             </div>
@@ -411,7 +411,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={() => setActiveTab("settings")}
-              className="text-xs text-primary hover:underline transition-colors"
+              className="inline-flex min-h-11 items-center text-xs text-primary hover:underline transition-colors lg:min-h-0"
             >
               Edit profile
             </button>
@@ -508,7 +508,7 @@ export default function ProfilePage() {
                 <div className="space-y-1">
                   <p className="text-sm">{user.username ? `@${user.username}` : <span className="text-muted-foreground italic">No username set</span>}</p>
                   {publicProfileHref && (
-                    <Link href={publicProfileHref} className="text-xs text-primary hover:underline break-all">
+                    <Link href={publicProfileHref} className="inline-flex min-h-11 items-center text-xs text-primary hover:underline break-all lg:min-h-0">
                       void-forge.org{publicProfileHref}
                     </Link>
                   )}
@@ -772,7 +772,7 @@ export default function ProfilePage() {
                 <p className="text-sm text-muted-foreground mb-4">No reports yet, or none tied to this account.</p>
                 <Link
                   href="/report-issue"
-                  className="text-xs text-primary hover:underline"
+                  className="inline-flex min-h-11 items-center text-xs text-primary hover:underline lg:min-h-0"
                 >
                   Submit a data issue
                 </Link>

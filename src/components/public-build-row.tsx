@@ -194,7 +194,7 @@ export function PublicBuildRow({
       <Link
         href={`/build/${build.id}`}
         className={cn(
-          "flex flex-1 items-center min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-inset",
+          "flex flex-1 items-center min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
           compact ? "gap-2.5 px-3 py-2.5" : "min-h-11 gap-3 p-3 sm:p-4",
         )}
       >

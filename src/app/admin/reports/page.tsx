@@ -200,7 +200,7 @@ export default function AdminReportsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search reports..."
-              className="w-full min-h-11 h-11 text-xs pl-8 pr-3 rounded-lg border border-border bg-background focus:outline-none focus:border-primary/50"
+              className="w-full min-h-11 h-11 text-xs pl-8 pr-3 rounded-lg border border-border bg-background focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
 
@@ -435,7 +435,7 @@ export default function AdminReportsPage() {
                             maxLength={4000}
                             rows={3}
                             placeholder="Explain what you fixed or why this won't be changed. Shown on their Profile → Reports."
-                            className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background resize-y focus:outline-none focus:border-primary/50"
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background resize-y focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring"
                           />
                           <p className="text-[10px] text-muted-foreground mt-1">
                             Signed-in reporters always see status and this reply on their profile. Email is off unless you check below.

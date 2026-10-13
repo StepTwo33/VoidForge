@@ -350,6 +350,7 @@ export default function AdminUpdatesPage() {
                     <button
                       type="button"
                       onClick={() => startEdit(update)}
+                      aria-label="Edit update"
                       className="inline-flex items-center justify-center min-h-11 min-w-11 rounded-md p-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                     >
                       <Pencil className="h-4 w-4" />
@@ -357,6 +358,7 @@ export default function AdminUpdatesPage() {
                     <button
                       type="button"
                       onClick={() => deleteUpdate(update.id)}
+                      aria-label="Delete update"
                       className="inline-flex items-center justify-center min-h-11 min-w-11 rounded-md p-2 text-muted-foreground hover:bg-red-500/10 hover:text-red-700 dark:hover:text-red-400"
                     >
                       <Trash2 className="h-4 w-4" />

@@ -28,8 +28,8 @@ export function AdminSubnav({ isFullAdmin }: { isFullAdmin: boolean }) {
   const pathname = usePathname();
 
   return (
-    <div className="sticky top-14 z-40 border-b border-border/60 bg-card/80 backdrop-blur-xl">
-      <div className="container mx-auto flex items-center gap-1 px-4 py-2 overflow-x-auto min-w-0">
+    <div className="relative z-40 border-b border-border/60 bg-card/80 backdrop-blur-xl">
+      <div className="container mx-auto flex items-center gap-1 px-4 py-2 overflow-x-auto min-w-0 [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] sm:[mask-image:none]">
         <Link
           href="/"
           className="shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 min-h-11 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"

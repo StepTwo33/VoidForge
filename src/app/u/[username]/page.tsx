@@ -80,7 +80,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
               {user.bio ? (
                 <p className="text-sm text-muted-foreground mt-3 leading-relaxed max-w-full break-words [overflow-wrap:anywhere]">{user.bio}</p>
               ) : (
-                <p className="text-sm text-muted-foreground/80 mt-3">No bio yet.</p>
+                <p className="text-sm text-muted-foreground mt-3">No bio yet.</p>
               )}
             </div>
 

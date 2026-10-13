@@ -165,7 +165,7 @@ export default function AdminUsersPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-medium">{user.name ?? user.username ?? "Tenno"}</span>
                         {user.username && (
-                          <Link href={`/u/${user.username}`} className="text-xs text-primary hover:underline">
+                          <Link href={`/u/${user.username}`} className="inline-flex min-h-11 items-center text-xs text-primary hover:underline lg:min-h-0">
                             @{user.username}
                           </Link>
                         )}
@@ -194,7 +194,7 @@ export default function AdminUsersPage() {
                         </span>
                       </div>
                       <p className="mt-1 break-all text-xs text-muted-foreground">{user.email ?? "No email"}</p>
-                      <p className="mt-1 text-[10px] text-muted-foreground/80">
+                      <p className="mt-1 text-[10px] text-muted-foreground">
                         {user._count.builds} builds · joined {new Date(user.createdAt).toLocaleDateString()}
                       </p>
                       {user.banReason && (

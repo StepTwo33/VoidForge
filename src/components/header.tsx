@@ -456,6 +456,18 @@ export function Header() {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileToggleRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      setMobileOpen(false);
+      mobileToggleRef.current?.focus();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
   const [openReportCount, setOpenReportCount] = useState(0);
 
@@ -608,7 +620,7 @@ export function Header() {
           {loading ? (
             <span className="w-7 h-7 rounded-full bg-muted animate-pulse ml-1" />
           ) : user ? (
-            <Link href="/profile" className="ml-1 inline-flex min-h-11 items-center gap-2 rounded-lg px-1 transition-opacity hover:opacity-80 sm:min-h-0">
+            <Link href="/profile" className="ml-1 inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-1 transition-opacity hover:opacity-80 lg:min-h-0">
               {user.image ? (
                 <AvatarImage src={user.image} alt="" size={28} className="w-7 h-7 rounded-full border border-border" />
               ) : (
@@ -628,6 +640,8 @@ export function Header() {
           )}
 
           <button
+            ref={mobileToggleRef}
+            aria-expanded={mobileOpen}
             onClick={() => setMobileOpen(!mobileOpen)}
             className="tap-target inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:hidden"
             aria-label="Toggle menu"

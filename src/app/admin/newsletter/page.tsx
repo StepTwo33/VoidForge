@@ -190,7 +190,7 @@ export default function AdminNewsletterPage() {
   }
 
   const fieldClass =
-    "w-full min-h-11 h-11 px-3 text-sm rounded-lg border border-border bg-background focus:outline-none focus:border-primary/50";
+    "w-full min-h-11 h-11 px-3 text-sm rounded-lg border border-border bg-background focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring";
   const labelClass = "text-[10px] font-semibold text-muted-foreground uppercase mb-1.5 block";
 
   return (
@@ -255,7 +255,7 @@ export default function AdminNewsletterPage() {
                 placeholder={
                   "Write your update.\n\nSupports **bold**, *italic*, [links](https://…),\n## headings, and - bullet lists.\nBlank lines become paragraphs."
                 }
-                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background resize-y focus:outline-none focus:border-primary/50 font-mono"
+                className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background resize-y focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring font-mono"
               />
               <p className="text-[10px] text-muted-foreground mt-1">
                 {body.length}/20000 · Markdown subset: **bold**, *italic*, links, ## headings, - lists
@@ -346,6 +346,7 @@ export default function AdminNewsletterPage() {
             <div className="rounded-lg border border-border overflow-hidden bg-[#0f172a]">
               <iframe
                 title="Newsletter email preview"
+                tabIndex={-1}
                 srcDoc={previewSrcDoc}
                 sandbox=""
                 className="w-full h-[min(70vh,720px)] border-0 bg-[#0f172a]"

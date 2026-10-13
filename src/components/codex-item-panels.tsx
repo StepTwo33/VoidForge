@@ -530,6 +530,7 @@ export function ArcaneDetailPanel({
 }) {
   const isStaff = useStaffRole();
   const [editValuesOpen, setEditValuesOpen] = useState(false);
+  const editValuesRef = useRef<HTMLButtonElement>(null);
   const behavior = getVerifiedArcaneBehavior(arcane.id);
 
   return (
@@ -658,6 +659,7 @@ export function ArcaneDetailPanel({
             <PanelHeading>Base values @ R{rank}</PanelHeading>
             {isStaff && (
               <button
+                ref={editValuesRef}
                 type="button"
                 onClick={() => setEditValuesOpen(true)}
                 className={cn(
@@ -699,6 +701,7 @@ export function ArcaneDetailPanel({
           arcaneName={arcane.name}
           effects={effects}
           returnTo={returnTo}
+          returnFocusRef={editValuesRef}
         />
       )}
 
