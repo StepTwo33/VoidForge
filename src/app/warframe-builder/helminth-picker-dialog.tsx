@@ -60,7 +60,7 @@ export function HelminthPickerDialog({
               placeholder="Search Helminth abilities..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-11 pl-9 text-sm md:h-9"
+              className="h-11 pl-9 text-sm lg:h-9"
               aria-label="Search Helminth abilities"
             />
           </div>
@@ -102,7 +102,7 @@ export function HelminthPickerDialog({
                 >
                   <div className="flex items-start justify-between gap-2">
                     <span className="min-w-0 flex-1 truncate text-sm font-medium">{ability.name}</span>
-                    <span className="shrink-0 text-[10px] text-green-700/80 dark:text-green-400/70">
+                    <span className="shrink-0 text-[10px] text-green-800 dark:text-green-400/70">
                       {ability.sourceWarframe ? ability.sourceWarframe : "Helminth"}
                     </span>
                   </div>
