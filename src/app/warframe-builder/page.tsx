@@ -1012,6 +1012,7 @@ export default function WarframeBuilderPage() {
                       MOD CONFIGURATION{dualFormConfig ? ` — ${dualFormConfig.forms.find((f) => f.id === activeDualFormId)?.label ?? ""}` : ""}
                     </h2>
                     <div className="flex flex-wrap items-center gap-2">
+                      <a href="#build-stats" className="inline-flex min-h-11 items-center rounded-md px-2 text-xs font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden">Jump to stats ↓</a>
                       <span className={cn(
                         "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
                         capacityUsed > totalCapacity ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
@@ -1352,7 +1353,7 @@ export default function WarframeBuilderPage() {
                 </div>
               </div>
 
-              <div className="space-y-4 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:self-start lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:overflow-y-auto lg:overscroll-contain">
+              <div id="build-stats" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] space-y-4 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:self-start lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:overflow-y-auto lg:overscroll-contain">
                 <WarframeStatsPanel
                   stats={calculatedStats}
                   warframe={selectedWarframe}

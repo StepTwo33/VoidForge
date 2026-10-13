@@ -376,32 +376,9 @@ export default function RailjackBuilderPage() {
     toast.success(`Loaded ${preset.name} (components + Plexus)`);
   }, [beginNewRailjackDraft, modsMap]);
 
-  return (
-    <PageShell>
-      <main className="container mx-auto px-4 py-8">
-        {/* Title bar */}
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h1 className="min-w-0 text-xl font-bold sm:text-3xl">Railjack Builder</h1>
-          <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <input
-              type="text"
-              value={buildName}
-              onChange={(e) => setBuildName(e.target.value)}
-              placeholder="Build name..."
-              className="h-11 w-full max-w-[12rem] rounded-lg border border-border bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground sm:h-9 sm:w-40"
-            />
-            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 sm:min-h-9 sm:min-w-0 sm:py-1.5" title="Save Build">
-              <Save className="h-3.5 w-3.5" /> <span>Save</span>
-            </button>
-            <button onClick={() => { setSavedBuilds(getSavedBuilds("railjack")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-9 sm:min-w-0 sm:py-1.5" title="Load Build">
-              <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
-            </button>
-          </div>
-        </div>
-        <p className="text-muted-foreground mb-4">Configure your Railjack components, armaments, and Plexus mods</p>
-
-        <div className="mb-6 border border-rose-500/20 rounded-xl p-4 bg-rose-500/5">
-          <h2 className="text-xs font-semibold tracking-wider text-rose-800 mb-2 dark:text-rose-300">URANUS PROXIMA (UPDATE 43)</h2>
+  // Uranus Proxima event body, shared by the open desktop card and the mobile <details>.
+  const eventCardBody = (
+    <>
           <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
             Jade Shadows: Constellations adds Pontis Tower, Steel Path Railjack, four new Arcanes, and two story missions with reference ship loadouts.
           </p>
@@ -427,7 +404,44 @@ export default function RailjackBuilderPage() {
           <p className="text-[10px] text-muted-foreground/80 mt-2">
             Presets apply ship components, Nose/Swivel turrets, ordnance, and max-rank Plexus mods.
           </p>
+    </>
+  );
+
+  return (
+    <PageShell>
+      <main className="container mx-auto px-4 py-8">
+        {/* Title bar */}
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h1 className="min-w-0 text-xl font-bold sm:text-3xl">Railjack Builder</h1>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <input
+              type="text"
+              value={buildName}
+              onChange={(e) => setBuildName(e.target.value)}
+              placeholder="Build name..."
+              className="h-11 w-full max-w-[12rem] rounded-lg border border-border bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground sm:h-9 sm:w-40"
+            />
+            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 sm:min-h-9 sm:min-w-0 sm:py-1.5" title="Save Build">
+              <Save className="h-3.5 w-3.5" /> <span>Save</span>
+            </button>
+            <button onClick={() => { setSavedBuilds(getSavedBuilds("railjack")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-9 sm:min-w-0 sm:py-1.5" title="Load Build">
+              <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
+            </button>
+          </div>
         </div>
+        <p className="text-muted-foreground mb-4">Configure your Railjack components, armaments, and Plexus mods</p>
+
+        <div className="mb-6 hidden border border-rose-500/20 rounded-xl p-4 bg-rose-500/5 lg:block">
+          <h2 className="text-xs font-semibold tracking-wider text-rose-800 mb-2 dark:text-rose-300">URANUS PROXIMA (UPDATE 43)</h2>
+          {eventCardBody}
+        </div>
+        <details className="group mb-6 border border-rose-500/20 rounded-xl p-4 bg-rose-500/5 lg:hidden">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+            <h2 className="text-xs font-semibold tracking-wider text-rose-800 dark:text-rose-300">URANUS PROXIMA (UPDATE 43)</h2>
+            <span aria-hidden className="text-xs text-rose-800 transition-transform group-open:rotate-180 dark:text-rose-300">▾</span>
+          </summary>
+          <div className="mt-2">{eventCardBody}</div>
+        </details>
 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* ── Left Column: Ship Components & Stats ── */}

@@ -861,6 +861,7 @@ export default function WeaponBuilderPage() {
                     <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
                     {computeUsedCapacity(equippedMods, modsMap, slotPolarities)} / {modCapacity}
                   </span>
+                  <a href="#build-stats" className="inline-flex min-h-11 items-center rounded-md px-2 text-xs font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden">Jump to stats ↓</a>
                 </div>
                 {showImporter && (
                   <div className="mb-4">
@@ -1017,7 +1018,7 @@ export default function WeaponBuilderPage() {
                 </div>
               </div>
 
-              <div className="space-y-4 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:self-start lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:overflow-y-auto lg:overscroll-contain">
+              <div id="build-stats" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] space-y-4 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:self-start lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:overflow-y-auto lg:overscroll-contain">
                 <WeaponStatsPanel
                   stats={calculatedStats}
                   baseStats={baseStats}

@@ -757,6 +757,7 @@ export default function ModularBuilderPage() {
                         <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
                         {capacityUsed} / {capacity}
                       </span>
+                      <a href="#build-stats" className="inline-flex min-h-11 items-center rounded-md px-2 text-xs font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden">Jump to stats ↓</a>
                     </div>
                     {isSecondaryKitgun && (
                       <p className="mb-2 text-[11px] leading-snug text-muted-foreground">
@@ -816,7 +817,7 @@ export default function ModularBuilderPage() {
 
           {/* Right: Stats panel */}
           <div>
-            <div className="border border-border rounded-xl bg-card p-4 sm:p-6 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:self-start lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:overflow-y-auto lg:overscroll-contain">
+            <div id="build-stats" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] border border-border rounded-xl bg-card p-4 sm:p-6 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:self-start lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:overflow-y-auto lg:overscroll-contain">
               <h3 className="text-sm font-semibold tracking-wider text-muted-foreground mb-4">
                 {assembledWeapon ? "WEAPON STATS" : "SELECT ALL PARTS"}
               </h3>
