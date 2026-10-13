@@ -55,6 +55,13 @@ export function SaveBuildDialog({
   // opens. Inline props like `defaultTags={[]}` create a new reference every
   // render; depending on them directly caused an infinite setState loop
   // ("Maximum update depth exceeded") that crashed the page on open.
+  // Remember the opener at the moment the dialog opens so Esc/close returns focus to it.
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const wasOpenRef = useRef(false);
+  if (open && !wasOpenRef.current && typeof document !== "undefined") {
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
+  }
+  wasOpenRef.current = open;
   const defaultsRef = useRef({ defaultName, defaultDescription, defaultIsPublic, defaultTags });
   defaultsRef.current = { defaultName, defaultDescription, defaultIsPublic, defaultTags };
 
@@ -88,7 +95,16 @@ export function SaveBuildDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-md">
+      <DialogContent
+        className="max-w-[calc(100%-2rem)] sm:max-w-md"
+        onCloseAutoFocus={(e) => {
+          const el = returnFocusRef.current;
+          if (el?.isConnected) {
+            e.preventDefault();
+            el.focus();
+          }
+        }}
+      >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>

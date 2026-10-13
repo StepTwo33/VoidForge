@@ -36,6 +36,15 @@ interface UserReport {
   updatedAt: string;
 }
 
+/** Refocus the opener when an inline editor closes, so focus never drops to the page body. */
+function useRefocusOnClose(open: boolean, ref: React.RefObject<HTMLElement | null>) {
+  const wasOpen = useRef(open);
+  useEffect(() => {
+    if (wasOpen.current && !open && ref.current?.isConnected) ref.current.focus();
+    wasOpen.current = open;
+  }, [open, ref]);
+}
+
 export default function ProfilePage() {
   const [user, setUser] = useState<ProfileUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,6 +70,14 @@ export default function ProfilePage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const avatarCropSrcRef = useRef<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const usernameEditRef = useRef<HTMLButtonElement>(null);
+  const nameEditRef = useRef<HTMLButtonElement>(null);
+  const bioEditRef = useRef<HTMLButtonElement>(null);
+  const deleteOpenRef = useRef<HTMLButtonElement>(null);
+  useRefocusOnClose(editingUsername, usernameEditRef);
+  useRefocusOnClose(editingName, nameEditRef);
+  useRefocusOnClose(editingBio, bioEditRef);
+  useRefocusOnClose(deleteAccountOpen, deleteOpenRef);
 
   useEffect(() => {
     fetch("/api/auth/profile")
@@ -478,7 +495,7 @@ export default function ProfilePage() {
                   <UserIcon className="h-3.5 w-3.5" /> USERNAME
                 </label>
                 {!editingUsername && (
-                  <button onClick={() => { setEditingUsername(true); setUsernameInput(user.username ?? ""); }} className="inline-flex min-h-11 items-center gap-1 px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
+                  <button ref={usernameEditRef} onClick={() => { setEditingUsername(true); setUsernameInput(user.username ?? ""); }} className="inline-flex min-h-11 items-center gap-1 px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
                     <Pencil className="h-3 w-3" /> Edit
                   </button>
                 )}
@@ -491,7 +508,7 @@ export default function ProfilePage() {
                       onChange={(e) => setUsernameInput(e.target.value)}
                       maxLength={24}
                       placeholder="your-handle"
-                      className="min-h-11 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary/50 focus:outline-none"
+                      className="min-h-11 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       autoFocus
                       onKeyDown={(e) => { if (e.key === "Enter") handleSaveUsername(); if (e.key === "Escape") setEditingUsername(false); }}
                     />
@@ -523,7 +540,7 @@ export default function ProfilePage() {
                   <UserIcon className="h-3.5 w-3.5" /> DISPLAY NAME
                 </label>
                 {!editingName && (
-                  <button onClick={() => { setEditingName(true); setNameInput(user.name ?? ""); }} className="inline-flex min-h-11 items-center gap-1 px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
+                  <button ref={nameEditRef} onClick={() => { setEditingName(true); setNameInput(user.name ?? ""); }} className="inline-flex min-h-11 items-center gap-1 px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
                     <Pencil className="h-3 w-3" /> Edit
                   </button>
                 )}
@@ -535,7 +552,7 @@ export default function ProfilePage() {
                     onChange={(e) => setNameInput(e.target.value)}
                     maxLength={50}
                     placeholder="Your display name"
-                    className="min-h-11 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary/50 focus:outline-none"
+                    className="min-h-11 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     autoFocus
                     onKeyDown={(e) => { if (e.key === "Enter") handleSaveName(); if (e.key === "Escape") setEditingName(false); }}
                   />
@@ -558,7 +575,7 @@ export default function ProfilePage() {
                   <FileText className="h-3.5 w-3.5" /> BIO
                 </label>
                 {!editingBio && (
-                  <button onClick={() => { setEditingBio(true); setBioInput(user.bio ?? ""); }} className="inline-flex min-h-11 items-center gap-1 px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
+                  <button ref={bioEditRef} onClick={() => { setEditingBio(true); setBioInput(user.bio ?? ""); }} className="inline-flex min-h-11 items-center gap-1 px-2 text-xs text-muted-foreground transition-colors hover:text-foreground">
                     <Pencil className="h-3 w-3" /> Edit
                   </button>
                 )}
@@ -571,7 +588,8 @@ export default function ProfilePage() {
                     maxLength={300}
                     rows={3}
                     placeholder="Tell others about yourself..."
-                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm resize-none focus:outline-none focus:border-primary/50"
+                    onKeyDown={(e) => { if (e.key === "Escape") setEditingBio(false); }}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm resize-none focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-ring"
                     autoFocus
                   />
                   <div className="flex items-center justify-between">
@@ -655,10 +673,11 @@ export default function ProfilePage() {
                   type="button"
                   role="switch"
                   aria-checked={user.newsletterOptIn !== false}
+                  aria-label="Newsletters"
                   disabled={saving}
                   onClick={() => handleNewsletterToggle(!(user.newsletterOptIn ?? true))}
                   className={cn(
-                    "relative shrink-0 w-11 h-6 rounded-full transition-colors disabled:opacity-50",
+                    "relative shrink-0 w-11 h-6 rounded-full after:absolute after:-inset-y-2.5 after:inset-x-0 after:content-[''] transition-colors disabled:opacity-50",
                     user.newsletterOptIn !== false ? "bg-primary" : "bg-muted border border-border",
                   )}
                 >
@@ -683,6 +702,7 @@ export default function ProfilePage() {
               </p>
               {!deleteAccountOpen ? (
                 <button
+                  ref={deleteOpenRef}
                   type="button"
                   onClick={() => {
                     setDeleteAccountOpen(true);
@@ -701,8 +721,15 @@ export default function ProfilePage() {
                   <input
                     value={deleteConfirmInput}
                     onChange={(e) => setDeleteConfirmInput(e.target.value)}
-                    className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:border-red-500/50"
+                    className="min-h-11 w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:border-red-500 focus-visible:ring-2 focus-visible:ring-ring"
                     placeholder={user.username || user.email || "confirm"}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape" && !deletingAccount) {
+                        setDeleteAccountOpen(false);
+                        setDeleteConfirmInput("");
+                        setDeleteError(null);
+                      }
+                    }}
                     autoFocus
                   />
                   {deleteError && <p className="text-xs text-red-700 dark:text-red-400">{deleteError}</p>}
