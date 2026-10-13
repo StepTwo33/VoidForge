@@ -225,7 +225,7 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Close import"
         >
           <X className="h-4 w-4" />
@@ -281,7 +281,7 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
                   <button
                     type="button"
                     onClick={() => handleRemoveMod(i)}
-                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:text-red-700 dark:hover:text-red-400 sm:min-h-0 sm:min-w-0"
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:text-red-700 dark:hover:text-red-400 lg:min-h-0 lg:min-w-0"
                     aria-label={`Remove ${mod.name}`}
                   >
                     <X className="h-3.5 w-3.5" />
@@ -297,7 +297,7 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
                 onFocus={() => setShowSuggestions(true)}
                 placeholder="Type a mod name..."
                 disabled={selectedMods.length >= numSlots}
-                className="min-h-11 h-11 w-full rounded-lg border border-border bg-background py-2 pl-8 pr-3 text-base focus:border-blue-500/50 focus:outline-none disabled:opacity-50 sm:h-9 sm:min-h-9 sm:text-sm"
+                className="min-h-11 h-11 w-full rounded-lg border border-border bg-background py-2 pl-8 pr-3 text-base focus:border-blue-500/50 focus:outline-none focus-visible:ring-[3px] focus-visible:ring-ring placeholder:text-muted-foreground disabled:opacity-50 lg:h-9 lg:min-h-9 sm:text-sm"
               />
               {showSuggestions && suggestions.length > 0 && (
                 <div className="absolute z-50 mt-1 w-full bg-card border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -338,7 +338,7 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
               placeholder={"Paste mod names, one per line or comma-separated:\nSerration, Split Chamber, Heavy Caliber\nVital Sense, Point Strike"}
-              className="h-24 w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-base focus:border-blue-500/50 focus:outline-none sm:text-sm"
+              className="h-24 w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-base focus:border-blue-500/50 focus:outline-none focus-visible:ring-[3px] focus-visible:ring-ring placeholder:text-muted-foreground sm:text-sm"
             />
           </div>
           <button
