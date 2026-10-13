@@ -57,12 +57,12 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
   return (
     <PageShell>
       <PageMain maxWidth="md">
-        <ContentPanel className="p-6 sm:p-8">
-          <div className="flex w-full min-w-0 flex-col sm:flex-row items-center sm:items-start gap-5">
+        <ContentPanel className="px-4 py-5 sm:p-8">
+          <div className="flex w-full min-w-0 flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-5">
             {user.image ? (
-              <AvatarImage src={user.image} alt="" size={80} className="w-20 h-20 rounded-full border-2 border-border object-cover" />
+              <AvatarImage src={user.image} alt="" size={80} className="h-16 w-16 rounded-full border-2 sm:h-20 sm:w-20 border-border object-cover" />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center border-2 border-border">
+              <div className="h-16 w-16 rounded-full bg-muted sm:h-20 sm:w-20 flex items-center justify-center border-2 border-border">
                 <span className="text-3xl font-bold text-muted-foreground">
                   {(user.name ?? user.username ?? "?").charAt(0).toUpperCase()}
                 </span>

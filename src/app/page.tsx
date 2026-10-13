@@ -62,13 +62,7 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Mobile / tablet: side columns stack above the grid */}
-            <div className={HOME_SIDEBAR_INLINE_CLASS}>
-              <SiteUpdatesSidebar variant="inline" limit={4} />
-              <CommunityBuildsSidebar variant="inline" limit={6} />
-            </div>
-
-            <div className="grid w-full gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+            <div className="grid w-full grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
               <FeatureCard
                 href="/weapon-builder"
                 title="Weapon Builder"
@@ -165,6 +159,12 @@ export default function Home() {
                 accent="teal"
                 badges={["Build vs Build", "Loadout vs Loadout"]}
               />
+            </div>
+
+            {/* Mobile / tablet: side columns stack below the grid */}
+            <div className={cn(HOME_SIDEBAR_INLINE_CLASS, "mb-0 mt-8")}>
+              <SiteUpdatesSidebar variant="inline" limit={4} />
+              <CommunityBuildsSidebar variant="inline" limit={6} />
             </div>
 
             <p className="mt-10 border-t border-border/30 pt-6 text-center text-xs leading-relaxed text-foreground/80">

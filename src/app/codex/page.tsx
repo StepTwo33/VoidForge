@@ -319,7 +319,7 @@ function CodexPageContent() {
   return (
     <div
       className={cn(
-        "mx-auto flex min-h-[calc(100vh-4rem)] max-w-[1600px] flex-col px-4 py-4 sm:px-6",
+        "mx-auto flex min-h-[calc(100vh-4rem)] w-full min-w-0 max-w-[1600px] flex-col px-4 py-4 sm:px-6",
         hasSelection && "pb-[min(88dvh,40rem)] sm:pb-[min(75vh,32rem)]",
       )}
     >
@@ -344,12 +344,12 @@ function CodexPageContent() {
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 lg:flex-row">
         {/* Left sidebar — sections + subcategories */}
         <aside className={cn("flex shrink-0 flex-col gap-3 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:w-52 lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pb-4", hasSelection && "hidden lg:flex")}>
           <ContentPanel className="shrink-0 overflow-visible p-2">
             <PanelHeading>Sections</PanelHeading>
-            <nav className="mt-2 space-y-0.5">
+            <nav className="mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
               {CODEX_SECTIONS.map((s) => {
                 const Icon = s.icon;
                 const active = section === s.id;
@@ -359,7 +359,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => selectSection(s.id)}
                     className={cn(
-                      "flex min-h-11 w-full items-center lg:min-h-0 gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors",
+                      "flex min-h-11 shrink-0 whitespace-nowrap items-center lg:w-full lg:whitespace-normal lg:min-h-0 gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors",
                       active
                         ? accentTone.amber.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -376,14 +376,14 @@ function CodexPageContent() {
           {section === "mods" && (
             <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Mod type</PanelHeading>
-              <nav className="mt-2 max-h-[40vh] space-y-0.5 overflow-y-auto overscroll-contain lg:max-h-none lg:overflow-visible">
+              <nav className="mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
                 {CODEX_MOD_CATEGORIES.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                       modCategory === cat.id
                         ? accentTone.indigo.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -399,14 +399,14 @@ function CodexPageContent() {
           {section === "weapons" && (
             <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Weapon type</PanelHeading>
-              <nav className="mt-2 max-h-[40vh] space-y-0.5 overflow-y-auto overscroll-contain lg:max-h-none lg:overflow-visible">
+              <nav className="mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
                 {CODEX_WEAPON_CATEGORY_FILTERS.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                       weaponCategory === cat.id
                         ? accentTone.blue.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -418,12 +418,12 @@ function CodexPageContent() {
               </nav>
               <div className="mt-3 border-t border-border pt-2">
                 <PanelHeading>AoE filter</PanelHeading>
-                <nav className="mt-2 space-y-0.5">
+                <nav className="mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
                   <button
                     type="button"
                     onClick={() => setParams({ aoe: null, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                       !weaponAoeOnly
                         ? accentTone.blue.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -435,7 +435,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ aoe: "1", id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                       weaponAoeOnly
                         ? accentTone.orange.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -451,14 +451,14 @@ function CodexPageContent() {
           {section === "companions" && (
             <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Companion type</PanelHeading>
-              <nav className="mt-2 space-y-0.5">
+              <nav className="mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
                 {CODEX_COMPANION_TYPE_FILTERS.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                       companionType === cat.id
                         ? accentTone.orange.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -474,12 +474,12 @@ function CodexPageContent() {
           {section === "arcanes" && (
             <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Slot</PanelHeading>
-              <nav className="mt-2 space-y-0.5">
+              <nav className="mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
                 <button
                   type="button"
                   onClick={() => setParams({ slot: "all", id: null })}
                   className={cn(
-                    "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                    "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                     arcaneSlot === "all"
                       ? accentTone.purple.chipActive
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -493,7 +493,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ slot: f.id, id: null })}
                     className={cn(
-                      "block w-full rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
                       arcaneSlot === f.id
                         ? accentTone.purple.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",

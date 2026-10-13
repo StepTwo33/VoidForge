@@ -60,7 +60,7 @@ export default function AboutPage() {
 
           <ContentPanel>
             <h2 className="mb-4 text-lg font-semibold">Features</h2>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {[
                 { icon: Swords, title: "Weapon Builder", desc: "Full mod, arcane, riven, and Incarnon support with burst/sustained DPS, status proc breakdowns, and elemental combo resolution." },
                 { icon: Shield, title: "Warframe Builder", desc: "Mod slots, archon shards, Helminth abilities, ability scaling preview, augment detection, and survivability stats." },
@@ -75,7 +75,7 @@ export default function AboutPage() {
               ].map((f) => (
                 <div
                   key={f.title}
-                  className="rounded-lg border border-border/50 bg-background/40 p-4 transition-colors hover:border-primary/30"
+                  className="min-w-0 rounded-lg border border-border/50 bg-background/40 p-3 transition-colors hover:border-primary/30 sm:p-4"
                 >
                   <div className="mb-2 flex items-center gap-2">
                     <div className="rounded-md bg-primary/10 p-1.5">

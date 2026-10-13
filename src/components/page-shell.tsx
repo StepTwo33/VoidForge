@@ -317,7 +317,7 @@ export function FeatureCard({
   const inner = (
     <div
       className={cn(
-        "group flex min-h-11 h-full flex-col rounded-xl border border-border/60 surface-panel p-4 sm:p-6",
+        "group flex min-h-11 h-full flex-col rounded-xl border border-border/60 surface-panel p-3 sm:p-6",
         "transition-all duration-300 active:scale-[0.99] hover:-translate-y-1 hover:shadow-xl",
         colors.hoverBorder,
         colors.hoverBg,
@@ -329,7 +329,7 @@ export function FeatureCard({
           <Icon className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className={cn("text-base font-semibold transition-colors sm:text-lg", colors.hoverText)}>
+          <h2 className={cn("text-sm font-semibold transition-colors sm:text-lg", colors.hoverText)}>
             {title}
           </h2>
           {subtitle && (
@@ -337,7 +337,7 @@ export function FeatureCard({
           )}
         </div>
       </div>
-      <p className="flex-1 text-sm leading-relaxed text-muted-foreground">{description}</p>
+      <p className="line-clamp-2 flex-1 text-sm leading-relaxed text-muted-foreground sm:line-clamp-none" title={description}>{description}</p>
       {badges && badges.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
           {badges.map((badge) => (

@@ -154,7 +154,7 @@ export function SiteUpdatesSidebar({
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
           </div>
         ) : updates.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border/70 px-3 py-8 text-center">
+          <div className="rounded-lg border border-dashed border-border/70 px-3 py-3 text-center min-[1400px]:py-8">
             <p className="text-xs text-muted-foreground">No site updates posted yet.</p>
           </div>
         ) : (
