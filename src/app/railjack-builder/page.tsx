@@ -818,7 +818,7 @@ export default function RailjackBuilderPage() {
                   const boarding =
                     slot && weapon ? computeCrewBoardingDps(slot, weapon, modsMap) : null;
                   return (
-                    <div key={slotIdx} className={cn("rounded-lg border p-2.5", unlocked ? "border-border bg-card" : "border-border/40 opacity-60")}>
+                    <div key={slotIdx} className={cn("rounded-lg border p-2.5", unlocked ? "border-border bg-card" : "border-dashed border-border bg-muted/20")}>
                       <div className="flex items-start justify-between gap-2">
                         <button
                           type="button"
@@ -1050,7 +1050,7 @@ export default function RailjackBuilderPage() {
                       )}
                     >
                       {tab}
-                      <span className="ml-1.5 text-[10px] opacity-90 dark:opacity-70">{count}/{max}</span>
+                      <span className="ml-1.5 text-[10px]">{count}/{max}</span>
                     </button>
                   );
                 })}
