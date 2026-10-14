@@ -1,5 +1,6 @@
 "use client";
 
+import { cleanModDescription } from "@/lib/display/mod-display";
 import { useState, useMemo } from "react";
 import { Mod } from "@/lib/types";
 import { Input } from "@/components/ui/input";
@@ -157,7 +158,7 @@ export function ArcanePicker({ open, onOpenChange, arcanes, equippedArcaneIds, o
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5 truncate pl-5.5">
-                    {arcane.description.replace(/<[^>]+>/g, "").substring(0, 80)}
+                    {cleanModDescription(arcane.description).substring(0, 80)}
                   </p>
                 </button>
               );

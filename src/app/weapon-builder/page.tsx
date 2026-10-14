@@ -1,5 +1,6 @@
 "use client";
 
+import { cleanModDescription } from "@/lib/display/mod-display";
 import { BuilderSectionNav } from "@/components/builder-section-nav";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -956,7 +957,7 @@ export default function WeaponBuilderPage() {
                           </span>
                         </div>
                         <p className="text-[10px] text-muted-foreground mt-1 truncate">
-                          {stanceMod.description.replace(/<[^>]+>/g, "").substring(0, 60)}
+                          {cleanModDescription(stanceMod.description).substring(0, 60)}
                         </p>
                       </div>
                     ) : (

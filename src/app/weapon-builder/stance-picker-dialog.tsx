@@ -1,5 +1,6 @@
 "use client";
 
+import { cleanModDescription } from "@/lib/display/mod-display";
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -89,7 +90,7 @@ export function StancePickerDialog({
                         <PolarityIcon polarity={mod.polarity} size={14} />
                       </div>
                       <p className="text-[10px] text-muted-foreground mt-0.5">
-                        {mod.description.replace(/<[^>]+>/g, "").substring(0, 80)}
+                        {cleanModDescription(mod.description).substring(0, 80)}
                       </p>
                     </button>
                   ))}

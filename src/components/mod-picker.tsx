@@ -627,7 +627,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                        {arcane.description.replace(/<[^>]+>/g, "").substring(0, 100)}
+                        {cleanModDescription(arcane.description).substring(0, 100)}
                       </p>
                       {isEquipped && (
                         <span className="text-[10px] text-muted-foreground">Already equipped</span>
@@ -667,7 +667,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                        {mod.description.replace(/<[^>]+>/g, "").substring(0, 80)}
+                        {cleanModDescription(mod.description).substring(0, 80)}
                       </p>
                       {isEquipped && (
                         <span className="text-[10px] text-muted-foreground">Already equipped</span>
