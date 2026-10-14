@@ -1,5 +1,6 @@
 "use client";
 
+import { BuilderSectionNav } from "@/components/builder-section-nav";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { PageShell } from "@/components/page-shell";
 import { ModSlotCard } from "@/components/mod-slot";
@@ -409,7 +410,7 @@ export default function RailjackBuilderPage() {
 
   return (
     <PageShell>
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 pt-8 pb-24 lg:pb-8">
         {/* Title bar */}
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <h1 className="min-w-0 text-xl font-bold sm:text-3xl">Railjack Builder</h1>
@@ -447,7 +448,7 @@ export default function RailjackBuilderPage() {
           {/* ── Left Column: Ship Components & Stats ── */}
           <div className="space-y-6">
             {/* Ship Stats Overview */}
-            <div className="border border-border rounded-xl p-4 bg-card">
+            <div id="rj-stats" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] border border-border rounded-xl p-4 bg-card">
               <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">RAILJACK STATS</h2>
               <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
                 <div className="flex justify-between"><span className="text-muted-foreground">Hull</span><span className="font-mono">{computedStats.hull}</span></div>
@@ -534,7 +535,7 @@ export default function RailjackBuilderPage() {
             </div>
 
             {/* Component Selectors */}
-            <div>
+            <div id="rj-components" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
               <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">COMPONENTS</h2>
               <div className="grid grid-cols-2 gap-3">
                 {/* Reactor */}
@@ -897,7 +898,7 @@ export default function RailjackBuilderPage() {
             </div>
 
             {/* Armaments — Nose + Swivel + Ordnance */}
-            <div>
+            <div id="rj-armaments" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
               <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">ARMAMENTS</h2>
               <div className="space-y-3">
                 <div>
@@ -1029,7 +1030,7 @@ export default function RailjackBuilderPage() {
 
           {/* ── Right Column: Plexus Mods ── */}
           <div className="space-y-6">
-            <div>
+            <div id="rj-plexus" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
               <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">PLEXUS MODS</h2>
 
               {/* Tab selector */}
@@ -1373,6 +1374,7 @@ export default function RailjackBuilderPage() {
         showDescription={false}
         onSave={handleSaveBuildConfirm}
       />
+      <BuilderSectionNav sections={[{ id: "rj-stats", label: "Stats" }, { id: "rj-components", label: "Parts" }, { id: "rj-armaments", label: "Guns" }, { id: "rj-plexus", label: "Plexus" }]} />
     </PageShell>
   );
 }

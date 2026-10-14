@@ -1,5 +1,6 @@
 "use client";
 
+import { BuilderSectionNav } from "@/components/builder-section-nav";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { PageShell } from "@/components/page-shell";
 import { ModSlotCard } from "@/components/mod-slot";
@@ -368,7 +369,7 @@ export default function ModularBuilderPage() {
 
   return (
     <PageShell>
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 pt-8 pb-24 lg:pb-8">
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <h1 className="text-xl sm:text-3xl font-bold">Modular Builder</h1>
           <div className="flex items-center gap-2">
@@ -742,7 +743,7 @@ export default function ModularBuilderPage() {
                 </div>
 
                 {totalModSlots > 0 && (
-                  <div>
+                  <div id="build-mods" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
                     <div className={cn(
                       "sticky z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none",
                       hasKitSummary
@@ -989,6 +990,7 @@ export default function ModularBuilderPage() {
         showDescription={false}
         onSave={handleSaveBuildConfirm}
       />
+      <BuilderSectionNav sections={[{ id: "build-mods", label: "Mods" }, { id: "build-stats", label: "Stats" }]} />
     </PageShell>
   );
 }

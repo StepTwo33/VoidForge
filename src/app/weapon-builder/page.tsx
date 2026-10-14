@@ -1,5 +1,6 @@
 "use client";
 
+import { BuilderSectionNav } from "@/components/builder-section-nav";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
@@ -565,7 +566,7 @@ export default function WeaponBuilderPage() {
   return (
     <PageShell>
 
-      <main className="container mx-auto flex-1 px-3.5 py-5 sm:px-4 sm:py-6">
+      <main className="container mx-auto flex-1 px-3.5 pt-5 pb-24 sm:px-4 sm:pt-6 lg:pb-6">
         {showWeaponList || !selectedWeapon ? (
           <ItemPickerScreen
             icon={Crosshair}
@@ -848,7 +849,7 @@ export default function WeaponBuilderPage() {
             </div>
 
             <div className="grid lg:grid-cols-[1fr_320px] gap-6">
-              <div>
+              <div id="build-mods" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
                 <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
                   <h2 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">
                     MOD CONFIGURATION
@@ -1113,6 +1114,7 @@ export default function WeaponBuilderPage() {
         defaultIsPublic={saveDialogDefaultPublic}
         onSave={handleSaveBuildConfirm}
       />
+      <BuilderSectionNav sections={[{ id: "build-mods", label: "Mods" }, { id: "build-stats", label: "Stats" }]} />
     </PageShell>
   );
 }

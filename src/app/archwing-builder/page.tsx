@@ -1,5 +1,6 @@
 "use client";
 
+import { BuilderSectionNav } from "@/components/builder-section-nav";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { PageShell } from "@/components/page-shell";
 import { ModSlotCard } from "@/components/mod-slot";
@@ -262,7 +263,7 @@ export default function ArchwingBuilderPage() {
 
   return (
     <PageShell>
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 pt-8 pb-24 lg:pb-8">
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <h1 className="text-xl sm:text-3xl font-bold">Archwing & Necramech Builder</h1>
           <div className="flex items-center gap-2">
@@ -367,7 +368,7 @@ export default function ArchwingBuilderPage() {
 
             {/* Frame mod slots */}
             {((mode === "archwing" && selectedArchwing) || (mode === "necramech" && selectedNecramech)) && (
-              <div>
+              <div id="aw-mods" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
                 <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
                   <h2 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">
                     {mode === "archwing" ? "ARCHWING MODS" : "NECRAMECH MODS"}
@@ -422,7 +423,7 @@ export default function ArchwingBuilderPage() {
                 </div>
 
                 {/* Stats display */}
-                <div className="mt-4">
+                <div id="aw-stats" className="mt-4 scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+6.5rem)]">
                   <ArchwingStatsPanel
                     stats={frameStats}
                     title={mode === "archwing" ? "ARCHWING STATS" : "NECRAMECH STATS"}
@@ -471,7 +472,7 @@ export default function ArchwingBuilderPage() {
             </div>
 
             {selectedWeapon && (
-              <div>
+              <div id="ag-mods" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
                 <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
                   <h2 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">WEAPON MODS</h2>
                   <div className="flex flex-wrap items-center gap-2">
@@ -514,7 +515,7 @@ export default function ArchwingBuilderPage() {
 
                 {/* Weapon stats */}
                 {weaponStats && (
-                  <div className="mt-4 border border-border rounded-xl p-4 bg-card">
+                  <div id="ag-stats" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+6.5rem)] mt-4 border border-border rounded-xl p-4 bg-card">
                     <WeaponStatsPanel
                       stats={weaponStats}
                       weapon={selectedWeapon ?? undefined}
@@ -607,6 +608,7 @@ export default function ArchwingBuilderPage() {
         showDescription={false}
         onSave={handleSaveBuildConfirm}
       />
+      <BuilderSectionNav sections={[{ id: "aw-mods", label: "Mods" }, { id: "aw-stats", label: "Stats" }, { id: "ag-mods", label: "Gun mods" }, { id: "ag-stats", label: "Gun stats" }]} />
     </PageShell>
   );
 }

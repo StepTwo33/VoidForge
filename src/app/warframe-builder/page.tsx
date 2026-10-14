@@ -1,5 +1,6 @@
 "use client";
 
+import { BuilderSectionNav } from "@/components/builder-section-nav";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
@@ -810,7 +811,7 @@ export default function WarframeBuilderPage() {
   return (
     <PageShell>
 
-      <main className="container mx-auto flex-1 px-3.5 py-5 sm:px-4 sm:py-6">
+      <main className="container mx-auto flex-1 px-3.5 pt-5 pb-24 sm:px-4 sm:pt-6 lg:pb-6">
         {showWarframeList || !selectedWarframe ? (
           <ItemPickerScreen
             icon={Shield}
@@ -994,7 +995,7 @@ export default function WarframeBuilderPage() {
             <div className="grid lg:grid-cols-[1fr_320px] gap-6">
               <div className="space-y-6">
                 {/* Mod Configuration */}
-                <div>
+                <div id="build-mods" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
                   {dualFormConfig && (
                     <div className="mb-4 space-y-2">
                       <DualFormTabs
@@ -1542,6 +1543,7 @@ export default function WarframeBuilderPage() {
         defaultIsPublic={saveDialogDefaultPublic}
         onSave={handleSaveBuildConfirm}
       />
+      <BuilderSectionNav sections={[{ id: "build-mods", label: "Mods" }, { id: "build-stats", label: "Stats" }]} />
     </PageShell>
   );
 }
