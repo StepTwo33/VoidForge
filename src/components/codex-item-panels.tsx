@@ -133,7 +133,7 @@ export function CodexDetailCard({ children, onClose }: { children: ReactNode; on
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-2.5 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground lg:min-h-0 lg:py-1 sm:text-[10px]"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-2.5 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground lg:pointer-fine:min-h-0 lg:py-1 sm:text-[10px]"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to list

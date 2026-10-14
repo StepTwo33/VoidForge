@@ -379,7 +379,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => { setActiveTab("settings"); setEditingName(true); setNameInput(user.name ?? ""); }}
-                  className="inline-flex min-h-11 min-w-11 items-center justify-center lg:min-h-0 lg:min-w-0 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors shrink-0"
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center lg:pointer-fine:min-h-0 lg:min-w-0 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors shrink-0"
                   title="Edit display name"
                 >
                   <Pencil className="h-3.5 w-3.5" />
@@ -389,14 +389,14 @@ export default function ProfilePage() {
                 {user.supporterAt && <SupporterBadge />}
               </div>
               {publicProfileHref ? (
-                <Link href={publicProfileHref} className="text-xs text-primary hover:underline mb-2 inline-flex min-h-11 items-center lg:min-h-0">
+                <Link href={publicProfileHref} className="text-xs text-primary hover:underline mb-2 inline-flex min-h-11 items-center lg:pointer-fine:min-h-0">
                   @{user.username}
                 </Link>
               ) : (
                 <button
                   type="button"
                   onClick={() => { setActiveTab("settings"); setEditingUsername(true); setUsernameInput(user.username ?? ""); }}
-                  className="text-xs text-primary hover:underline mb-2 inline-flex min-h-11 items-center lg:min-h-0"
+                  className="text-xs text-primary hover:underline mb-2 inline-flex min-h-11 items-center lg:pointer-fine:min-h-0"
                 >
                   Set a public username →
                 </button>
@@ -428,7 +428,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={() => setActiveTab("settings")}
-              className="inline-flex min-h-11 items-center text-xs text-primary hover:underline transition-colors lg:min-h-0"
+              className="inline-flex min-h-11 items-center text-xs text-primary hover:underline transition-colors lg:pointer-fine:min-h-0"
             >
               Edit profile
             </button>
@@ -525,7 +525,7 @@ export default function ProfilePage() {
                 <div className="space-y-1">
                   <p className="text-sm">{user.username ? `@${user.username}` : <span className="text-muted-foreground italic">No username set</span>}</p>
                   {publicProfileHref && (
-                    <Link href={publicProfileHref} className="inline-flex min-h-11 items-center text-xs text-primary hover:underline break-all lg:min-h-0">
+                    <Link href={publicProfileHref} className="inline-flex min-h-11 items-center text-xs text-primary hover:underline break-all lg:pointer-fine:min-h-0">
                       void-forge.org{publicProfileHref}
                     </Link>
                   )}
@@ -799,7 +799,7 @@ export default function ProfilePage() {
                 <p className="text-sm text-muted-foreground mb-4">No reports yet, or none tied to this account.</p>
                 <Link
                   href="/report-issue"
-                  className="inline-flex min-h-11 items-center text-xs text-primary hover:underline lg:min-h-0"
+                  className="inline-flex min-h-11 items-center text-xs text-primary hover:underline lg:pointer-fine:min-h-0"
                 >
                   Submit a data issue
                 </Link>

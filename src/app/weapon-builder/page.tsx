@@ -690,14 +690,14 @@ export default function WeaponBuilderPage() {
                       setSaveDialogDefaultPublic(buildIsPublic);
                       setSaveDialogOpen(true);
                     }}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:min-h-0 lg:py-1.5 text-muted-foreground hover:text-green-700 dark:hover:text-green-400 hover:bg-green-500/10 transition-all font-medium"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:pointer-fine:min-h-0 lg:py-1.5 text-muted-foreground hover:text-green-700 dark:hover:text-green-400 hover:bg-green-500/10 transition-all font-medium"
                     title="Save Build"
                   >
                     <Save className="h-3.5 w-3.5" /> <span className="inline">Save</span>
                   </button>
                   <button
                     onClick={() => { setSavedBuilds(getSavedBuilds("weapon")); setShowSavedBuilds(true); }}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:min-h-0 lg:py-1.5 text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:pointer-fine:min-h-0 lg:py-1.5 text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium"
                     title="Load Build"
                   >
                     <FolderOpen className="h-3.5 w-3.5" /> <span className="inline">Load</span>
@@ -706,7 +706,7 @@ export default function WeaponBuilderPage() {
                   <button
                     onClick={() => setShowImporter(!showImporter)}
                     className={cn(
-                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:min-h-0 lg:py-1.5",
+                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
                       showImporter
                         ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
                         : "text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10"
@@ -718,7 +718,7 @@ export default function WeaponBuilderPage() {
                   <button
                     onClick={handleShareBuild}
                     className={cn(
-                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:min-h-0 lg:py-1.5",
+                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
                       shareCopied
                         ? "bg-green-500/10 text-green-700 dark:text-green-400"
                         : "text-muted-foreground hover:text-purple-700 dark:hover:text-purple-400 hover:bg-purple-500/10"
@@ -730,7 +730,7 @@ export default function WeaponBuilderPage() {
                   </button>
                   <button
                     onClick={() => setCompareOpen(true)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-400 lg:min-h-0 lg:py-1.5"
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-400 lg:pointer-fine:min-h-0 lg:py-1.5"
                     title="Compare this build to a saved or posted build"
                   >
                     <ArrowLeftRight className="h-3.5 w-3.5" />
@@ -743,7 +743,7 @@ export default function WeaponBuilderPage() {
                     <button
                       onClick={() => setAdversaryFormas((n) => (n >= 5 ? 0 : n + 1))}
                       className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:min-h-0 lg:py-1.5",
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
                         adversaryFormas > 0
                           ? "bg-amber-500/10 text-amber-800 dark:text-amber-400"
                           : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -756,7 +756,7 @@ export default function WeaponBuilderPage() {
                   <button
                     onClick={() => setHasOrokinCatalyst(!hasOrokinCatalyst)}
                     className={cn(
-                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:min-h-0 lg:py-1.5",
+                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
                       hasOrokinCatalyst
                         ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
                         : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -769,7 +769,7 @@ export default function WeaponBuilderPage() {
                     <button
                       onClick={() => setGravimagMode((v) => !v)}
                       className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:min-h-0 lg:py-1.5",
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
                         gravimagMode
                           ? "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
                           : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -795,7 +795,7 @@ export default function WeaponBuilderPage() {
                         });
                       }}
                       className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:min-h-0 lg:py-1.5",
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
                         alternateMode
                           ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
                           : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -831,7 +831,7 @@ export default function WeaponBuilderPage() {
                     `/report-issue?type=weapon&name=${encodeURIComponent(selectedWeapon.name)}&id=${encodeURIComponent(selectedWeapon.id)}`,
                     builderReturnTo,
                   )}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-2 text-xs font-medium text-amber-800 transition-colors hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 lg:min-h-0 lg:py-1.5"
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-2 text-xs font-medium text-amber-800 transition-colors hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 lg:pointer-fine:min-h-0 lg:py-1.5"
                 >
                   <Flag className="h-3 w-3" /> <span className="inline">Report</span>
                 </a>

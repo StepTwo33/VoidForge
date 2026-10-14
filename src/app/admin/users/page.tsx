@@ -165,7 +165,7 @@ export default function AdminUsersPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-medium">{user.name ?? user.username ?? "Tenno"}</span>
                         {user.username && (
-                          <Link href={`/u/${user.username}`} className="inline-flex min-h-11 items-center text-xs text-primary hover:underline lg:min-h-0">
+                          <Link href={`/u/${user.username}`} className="inline-flex min-h-11 items-center text-xs text-primary hover:underline lg:pointer-fine:min-h-0">
                             @{user.username}
                           </Link>
                         )}

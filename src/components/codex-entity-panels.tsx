@@ -56,21 +56,21 @@ export function CodexActionLinks({
           href={wikiUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center gap-1 rounded border border-border px-2.5 py-2 text-xs text-muted-foreground hover:border-purple-500/40 hover:text-purple-800 dark:hover:text-purple-300 lg:min-h-0 lg:px-2 lg:py-1 sm:text-[10px]"
+          className="inline-flex min-h-11 items-center gap-1 rounded border border-border px-2.5 py-2 text-xs text-muted-foreground hover:border-purple-500/40 hover:text-purple-800 dark:hover:text-purple-300 lg:pointer-fine:min-h-0 lg:px-2 lg:py-1 sm:text-[10px]"
         >
           <ExternalLink className="h-2.5 w-2.5" /> Wiki
         </a>
       )}
       <a
         href={returnTo ? appendReturnTo(reportHref, returnTo) : reportHref}
-        className="inline-flex min-h-11 items-center gap-1 rounded border border-amber-500/30 px-2.5 py-2 text-xs text-amber-800 hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 lg:min-h-0 lg:px-2 lg:py-1 sm:text-[10px]"
+        className="inline-flex min-h-11 items-center gap-1 rounded border border-amber-500/30 px-2.5 py-2 text-xs text-amber-800 hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 lg:pointer-fine:min-h-0 lg:px-2 lg:py-1 sm:text-[10px]"
       >
         <Flag className="h-2.5 w-2.5" /> Report
       </a>
       {isStaff && (
         <Link
           href={returnTo ? appendReturnTo(overrideHref, returnTo) : overrideHref}
-          className="inline-flex min-h-11 items-center gap-1 rounded border border-purple-500/30 px-2.5 py-2 text-xs text-purple-800/80 hover:bg-purple-500/5 hover:text-purple-900 dark:text-purple-400/70 dark:hover:text-purple-400 lg:min-h-0 lg:px-2 lg:py-1 sm:text-[10px]"
+          className="inline-flex min-h-11 items-center gap-1 rounded border border-purple-500/30 px-2.5 py-2 text-xs text-purple-800/80 hover:bg-purple-500/5 hover:text-purple-900 dark:text-purple-400/70 dark:hover:text-purple-400 lg:pointer-fine:min-h-0 lg:px-2 lg:py-1 sm:text-[10px]"
         >
           <Wrench className="h-2.5 w-2.5" /> {editValuesLabel ?? "Edit in Data Fixes"}
         </Link>

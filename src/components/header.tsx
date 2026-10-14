@@ -638,7 +638,7 @@ export function Header() {
           ) : (
             <a
               href="/signin"
-              className="ml-1 inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-primary/50 hover:text-foreground lg:min-h-0 lg:py-1.5"
+              className="ml-1 inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-primary/50 hover:text-foreground lg:pointer-fine:min-h-0 lg:py-1.5"
             >
               <LogIn className="h-3.5 w-3.5" /> Sign in
             </a>

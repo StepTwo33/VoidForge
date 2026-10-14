@@ -113,7 +113,7 @@ export default function SupportPage() {
           )}
 
           <details className="mx-auto mt-8 max-w-xs text-center">
-            <summary className="inline-flex min-h-11 items-center lg:min-h-0 cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
+            <summary className="inline-flex min-h-11 items-center lg:pointer-fine:min-h-0 cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
               Or scan a QR code
             </summary>
             <a

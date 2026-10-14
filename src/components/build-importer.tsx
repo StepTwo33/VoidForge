@@ -281,7 +281,7 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
                   <button
                     type="button"
                     onClick={() => handleRemoveMod(i)}
-                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:text-red-700 dark:hover:text-red-400 lg:min-h-0 lg:min-w-0"
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:text-red-700 dark:hover:text-red-400 lg:pointer-fine:min-h-0 lg:min-w-0"
                     aria-label={`Remove ${mod.name}`}
                   >
                     <X className="h-3.5 w-3.5" />
