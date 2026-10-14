@@ -359,7 +359,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => selectSection(s.id)}
                     className={cn(
-                      "flex min-h-11 shrink-0 whitespace-nowrap items-center lg:w-full lg:whitespace-normal lg:min-h-0 gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors",
+                      "flex min-h-11 shrink-0 whitespace-nowrap items-center lg:w-full lg:whitespace-normal lg:pointer-fine:min-h-0 gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors",
                       active
                         ? accentTone.amber.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -383,7 +383,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
-                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
                       modCategory === cat.id
                         ? accentTone.indigo.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -406,7 +406,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
-                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
                       weaponCategory === cat.id
                         ? accentTone.blue.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -423,7 +423,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ aoe: null, id: null })}
                     className={cn(
-                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
                       !weaponAoeOnly
                         ? accentTone.blue.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -435,7 +435,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ aoe: "1", id: null })}
                     className={cn(
-                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
                       weaponAoeOnly
                         ? accentTone.orange.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -458,7 +458,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
-                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
                       companionType === cat.id
                         ? accentTone.orange.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -479,7 +479,7 @@ function CodexPageContent() {
                   type="button"
                   onClick={() => setParams({ slot: "all", id: null })}
                   className={cn(
-                    "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                    "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
                     arcaneSlot === "all"
                       ? accentTone.purple.chipActive
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -493,7 +493,7 @@ function CodexPageContent() {
                     type="button"
                     onClick={() => setParams({ slot: f.id, id: null })}
                     className={cn(
-                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:min-h-0 lg:py-1.5",
+                      "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
                       arcaneSlot === f.id
                         ? accentTone.purple.chipActive
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -522,7 +522,7 @@ function CodexPageContent() {
                       type="button"
                       onClick={() => setPolarityFilter(p)}
                       className={cn(
-                        "rounded px-2 py-0.5 text-[10px] capitalize transition-colors",
+                        "inline-flex min-h-11 items-center rounded px-2 py-0.5 text-[10px] capitalize transition-colors pointer-fine:min-h-0",
                         polarityFilter === p
                           ? accentTone.indigo.chipStrong
                           : "text-muted-foreground hover:bg-muted/50",
@@ -537,7 +537,7 @@ function CodexPageContent() {
                 <select
                   value={arcaneTrigger}
                   onChange={(e) => setArcaneTrigger(e.target.value)}
-                  className="rounded border border-border bg-background px-2 py-0.5 text-[10px]"
+                  className="min-h-11 rounded border border-border bg-background px-2 py-0.5 text-[10px] pointer-fine:min-h-0"
                 >
                   {ARCANE_TRIGGER_FILTERS.map((f) => (
                     <option key={f.id} value={f.id}>
@@ -550,7 +550,7 @@ function CodexPageContent() {
                 <select
                   value={rarityFilter}
                   onChange={(e) => setRarityFilter(e.target.value as (typeof RARITIES)[number])}
-                  className="ml-auto rounded border border-border bg-background px-2 py-0.5 text-[10px]"
+                  className="ml-auto min-h-11 rounded border border-border bg-background px-2 py-0.5 text-[10px] pointer-fine:min-h-0"
                 >
                   {RARITIES.map((r) => (
                     <option key={r} value={r}>

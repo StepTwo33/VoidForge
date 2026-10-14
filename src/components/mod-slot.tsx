@@ -73,7 +73,7 @@ function FormaPolarizeButton({
                 : "border-border/60 bg-card/80 text-muted-foreground hover:border-primary/35 hover:bg-secondary/70 hover:text-foreground"
             )
           : cn(
-              "h-11 min-w-11 gap-1 px-2 text-[10px] font-medium leading-none text-muted-foreground sm:h-7 sm:min-w-0",
+              "h-11 min-w-11 gap-1 px-2 text-[10px] font-medium leading-none text-muted-foreground sm:pointer-fine:h-7 sm:pointer-fine:min-w-0",
               active
                 ? "border-amber-600/70 bg-amber-500/15 text-amber-950 ring-1 ring-amber-500/30 dark:border-amber-400/60 dark:bg-amber-500/20 dark:text-amber-200"
                 : "border-border/70 bg-muted/30 hover:border-amber-600/40 hover:bg-amber-500/10 hover:text-amber-900 dark:hover:border-amber-500/40 dark:hover:text-amber-300"
