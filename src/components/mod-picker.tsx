@@ -423,6 +423,9 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                   <div className="text-[10px] text-purple-700/70 uppercase tracking-wider dark:text-purple-300/60">
                     Configure Riven Stats (up to 4)
                   </div>
+                  <p className="text-[11px] leading-snug text-muted-foreground">
+                    Enter values as shown in game. A riven can carry one spliced trait; it is always positive.
+                  </p>
                   {Object.keys(rivenStats).length > 0 && (
                     <div className="space-y-1">
                       {Object.entries(rivenStats).map(([key, value]) => {
@@ -430,7 +433,17 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                         const asPercent = statDef?.isPercent !== false;
                         return (
                           <div key={key} className="flex items-center justify-between text-xs p-1.5 rounded bg-background">
-                            <span className="text-muted-foreground">{statDef?.label || key}</span>
+                            <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
+                              <span className="truncate">{statDef?.spliced ? statDef.label.replace(" (Spliced)", "") : statDef?.label || key}</span>
+                              {statDef?.spliced && (
+                                <span
+                                  className="shrink-0 rounded border border-cyan-600/40 bg-cyan-500/10 px-1 py-px text-[9px] font-semibold uppercase tracking-wide text-cyan-700 dark:text-cyan-300"
+                                  title={statDef.displayOnly ? "Spliced trait (Riven Splicer). Shown on the riven; not part of the DPS math." : "Spliced trait (Riven Splicer)"}
+                                >
+                                  Spliced{statDef.displayOnly ? " · info" : ""}
+                                </span>
+                              )}
+                            </span>
                             <div className="flex items-center gap-2">
                               <span className={value >= 0 ? "cmp-win" : "cmp-lose"}>
                                 {value >= 0 ? "+" : ""}
@@ -460,9 +473,16 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                         className="min-h-11 min-w-0 flex-1 rounded border border-border bg-background px-2 py-2 text-xs sm:min-h-9 sm:py-1.5"
                       >
                         <option value="">Select stat...</option>
-                        {rivenPool.filter((s) => !(s.key in rivenStats)).map((s) => (
+                        {rivenPool.filter((s) => !s.spliced && !(s.key in rivenStats)).map((s) => (
                           <option key={s.key} value={s.key}>{s.label}</option>
                         ))}
+                        {!rivenPool.some((s) => s.spliced && s.key in rivenStats) && rivenPool.some((s) => s.spliced) && (
+                          <optgroup label="Spliced traits (Riven Splicer, max 1)">
+                            {rivenPool.filter((s) => s.spliced).map((s) => (
+                              <option key={s.key} value={s.key}>{s.label.replace(" (Spliced)", "")}{s.displayOnly ? " (info only)" : ""}</option>
+                            ))}
+                          </optgroup>
+                        )}
                       </select>
                       <input
                         type="number"

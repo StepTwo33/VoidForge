@@ -136,6 +136,23 @@ function findCombo(a: string, b: string): string | null {
   return null;
 }
 
+/**
+ * Faction bonus for the sim target, plus spliced riven Damage vs Scaldra / Techrot.
+ * normalizeFactionName maps Scaldra→Grineer and Techrot→Corpus for Bane mods; the
+ * spliced traits apply only to their own faction and add on top (identical to
+ * factionBonusFromStats when no spliced faction trait is present).
+ */
+function targetFactionBonus(stats: CalculatedStats, targetFaction: string | undefined | null): number {
+  const base = factionBonusFromStats(stats.factionBonuses, targetFaction);
+  const spliced = stats.splicedFactionBonuses;
+  if (!spliced || !targetFaction) return base;
+  const f = targetFaction.toLowerCase();
+  let extra = 0;
+  if (f.includes('scaldra')) extra += spliced.scaldra ?? 0;
+  if (f.includes('techrot')) extra += spliced.techrot ?? 0;
+  return base + extra;
+}
+
 // ── Status Proc Calculations ────────────────────────────────────────────
 const STATUS_INFO: Record<string, { duration: number; ticks: number; desc: string }> = {
   impact:      { duration: 1, ticks: 1, desc: 'Stagger + mercy threshold (max 5)' },
@@ -180,7 +197,7 @@ function statusDotTickBase(stats: CalculatedStats, moddedBaseDamage: number, sim
   // Devouring Attrition double-dips into DoTs on non-crit proccing hits.
   avgCrit += Math.max(0, 1 - effCC) * (stats.devouringAttritionBonus ?? 0);
   const statusDmg = 1 + (stats.statusDamageBonus ?? 0);
-  const factionBonus = factionBonusFromStats(stats.factionBonuses, sim?.targetFaction);
+  const factionBonus = targetFactionBonus(stats, sim?.targetFaction);
   const factionDot = factionDotMultiplier(factionBonus);
   // Headshot multi applies to the proccing hit (and thus DoT) when enabled
   const head =
@@ -331,7 +348,7 @@ function calculateStatusProcs(
     let avgCrit = avgCritMultiplier(effCC, stats.criticalMultiplier);
     avgCrit += Math.max(0, 1 - effCC) * (stats.devouringAttritionBonus ?? 0);
     const statusDmg = 1 + (stats.statusDamageBonus ?? 0);
-    const factionBonus = factionBonusFromStats(stats.factionBonuses, sim?.targetFaction);
+    const factionBonus = targetFactionBonus(stats, sim?.targetFaction);
     const factionTriple = factionTripleDotMultiplier(factionBonus);
     const head =
       sim?.applyHeadshots
@@ -1371,6 +1388,42 @@ export function calculateWeaponBuild(
           stats.rawElements = elementalMods.map(e => ({ ...e }));
           stats.elements = resolveElementalCombos(elementalMods);
           break;
+        // Spliced riven combined elements (Update 44.1): already-combined, so they
+        // never pair with other elements; same final type merges with mod-made combos.
+        case 'radiation': case 'magnetic': case 'viral': case 'corrosive': case 'gas': case 'blast':
+          if (!relativeCritStatus) break; // riven-only key
+          elementalMods.push({ type: stat, value: baseWeapon.damage * damageMultTotal * value });
+          stats.rawElements = elementalMods.map(e => ({ ...e }));
+          stats.elements = resolveElementalCombos(elementalMods);
+          break;
+        // Spliced Status Damage: same bucket as Galvanized Elementalist-style status damage.
+        case 'statusDamage':
+          if (!relativeCritStatus) break; // riven-only key
+          stats.statusDamageBonus = (stats.statusDamageBonus ?? 0) + value;
+          break;
+        // Spliced Weak Point Damage: adds to the weak point multiplier like Primary Acuity.
+        case 'weakPointDamage':
+          if (!relativeCritStatus) break; // riven-only key
+          stats.headshotDamageBonus = (stats.headshotDamageBonus ?? 0) + value;
+          break;
+        // Spliced Weak Point Crit Chance: applied after this loop (additive on base CC, headshot sim only).
+        case 'weakPointCritChance':
+          break;
+        // Spliced Damage vs Scaldra / Techrot: own faction only (see targetFactionBonus).
+        case 'factionScaldra':
+        case 'factionTechrot': {
+          if (!relativeCritStatus) break; // riven-only key
+          const id = stat === 'factionScaldra' ? 'scaldra' : 'techrot';
+          if (!stats.splicedFactionBonuses) stats.splicedFactionBonuses = {};
+          stats.splicedFactionBonuses[id] = (stats.splicedFactionBonuses[id] ?? 0) + value;
+          break;
+        }
+        // Spliced traits with no Voidforge damage model (display on the riven only).
+        case 'reloadWhileHolstered':
+        case 'heavyAttackDamageBonus':
+        case 'slamDamage':
+        case 'parryAngle':
+          break;
         // Physical damage type bonuses (from rivens)
         case 'impact': stats.impact *= (1 + value); break;
         case 'puncture': stats.puncture *= (1 + value); break;
@@ -1553,6 +1606,12 @@ export function calculateWeaponBuild(
   };
   if (incarnonStatChanges) applyStatChanges(incarnonStatChanges, false);
   if (rivenStatChanges) applyStatChanges(rivenStatChanges, true);
+  // Spliced Weak Point Critical Chance: wiki Enemy Body Parts, "additive with bonuses
+  // like Point Strike" → +value × base CC, only on weak point hits (headshot sim).
+  const wpcc = rivenStatChanges?.weakPointCritChance;
+  if (wpcc && sim.applyHeadshots) {
+    stats.criticalChance += evolvedBaseCC * wpcc;
+  }
 
   // Infusion augments (Fireball Frenzy etc.): parallel elemental after combos × STR.
   applyParallelExternalElementals(
@@ -2261,7 +2320,7 @@ function calculateBurstDps(stats: CalculatedStats): number {
   const nonCritFraction = Math.max(0, 1 - effectiveCritChance);
   avgCrit += nonCritFraction * (stats.devouringAttritionBonus ?? 0);
   const sim = stats.simParams ?? DEFAULT_SIM_PARAMS;
-  const factionBonus = factionBonusFromStats(stats.factionBonuses, sim.targetFaction);
+  const factionBonus = targetFactionBonus(stats, sim.targetFaction);
   const combatMult = combatDamageMultiplier({
     factionBonus,
     applyHeadshots: sim.applyHeadshots,

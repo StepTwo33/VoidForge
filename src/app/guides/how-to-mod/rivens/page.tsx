@@ -67,6 +67,73 @@ export default function HowToModRivensPage() {
       </ContentPanel>
 
       <ContentPanel>
+        <h2 className="mb-3 text-lg font-semibold">Trait Locking</h2>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          When you cycle a riven, you can lock one trait so it stays put while the rest
+          reroll. Locking is free, but every cycle with a lock costs{" "}
+          <span className="font-medium text-foreground">double Kuva</span>.
+        </p>
+        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
+          <li>Only one trait can be locked at a time. You can unlock or move the lock for free.</li>
+          <li>
+            The lock clears when you close the cycle menu. Lock it again each time you come
+            back.
+          </li>
+          <li>
+            While a trait is locked, the riven keeps its count of positives and negatives
+            (a 3-positive, 1-negative roll stays that shape). Unlock everything to reroll
+            the layout.
+          </li>
+        </ul>
+        <GuideTip>
+          Lock the one trait you would be sad to lose (usually crit chance, multishot, or
+          damage), then cycle for the rest. The doubled cost adds up fast, so set a budget
+          first.
+        </GuideTip>
+      </ContentPanel>
+
+      <ContentPanel>
+        <h2 className="mb-3 text-lg font-semibold">Riven Splicing</h2>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          A <span className="font-medium text-foreground">Riven Splicer</span> (one per
+          successful run of The Icebind) merges two specific traits into a new{" "}
+          <span className="font-medium text-foreground">spliced trait</span> you can&apos;t
+          roll normally. For example, Toxin + Cold becomes Viral, and Damage + Multishot
+          becomes Weak Point Damage.
+        </p>
+        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
+          <li>
+            Both source traits are used up. The spliced trait and one random trait take
+            their place. The random trait is a negative if either source trait was negative.
+          </li>
+          <li>
+            A spliced trait is always positive, and a riven can only hold one. Its value
+            takes the higher roll of the two traits you spliced.
+          </li>
+          <li>
+            It stays locked through cycling and doesn&apos;t double the Kuva cost, so you
+            can still lock one more trait on top of it.
+          </li>
+          <li>
+            While it&apos;s on the riven, the positive/negative layout is fixed. You can
+            unlock it and cycle it off to splice something else.
+          </li>
+          <li>
+            Every weapon type can splice combined elements (Viral, Corrosive, Gas,
+            Radiation, Blast, Magnetic), Status Damage, and Damage to Orokin, Scaldra, or
+            Techrot. Guns also get Weak Point Damage, Weak Point Crit Chance, Ammo
+            Efficiency, and Reload While Holstered (not archguns). Melee gets Heavy Attack
+            Wind Up, Melee Damage On Heavy Attack, Slam Damage, and Parry Angle.
+          </li>
+        </ul>
+        <GuideTip>
+          In the Weapon Builder, add spliced traits from the &quot;Spliced traits&quot;
+          group in the riven stat picker. Weak point traits only count when Headshots is on,
+          and Scaldra or Techrot damage only counts with that target faction picked.
+        </GuideTip>
+      </ContentPanel>
+
+      <ContentPanel>
         <h2 className="mb-3 text-lg font-semibold">Rolling without going broke</h2>
         <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
           <li>

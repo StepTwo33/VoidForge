@@ -855,6 +855,8 @@ export interface CalculatedStats {
   fireRateLocked?: boolean;
   /** Normalized faction id → Bane-style damage bonus fraction. */
   factionBonuses?: Record<string, number>;
+  /** Spliced riven Damage vs Scaldra / Techrot (fraction). Added on top of factionBonuses when the target matches. */
+  splicedFactionBonuses?: Record<string, number>;
   /** Average stance damage mult applied to melee light DPS (1 = no stance). */
   stanceDamageMultiplier?: number;
   /**
@@ -1271,6 +1273,10 @@ export interface RivenStatDef {
   key: string;       // calculator key (e.g. "damage", "criticalChance")
   label: string;     // display name
   isPercent: boolean; // whether value is entered as %
+  /** Riven Splicer trait (Update 44.1). Always positive, max one per riven. */
+  spliced?: boolean;
+  /** Spliced trait has no DPS model in Voidforge (shown on the riven only). */
+  displayOnly?: boolean;
 }
 
 // Stats available per weapon category for rivens
@@ -1353,15 +1359,50 @@ const RIVEN_ARCHGUN: RivenStatDef[] = [
   { key: "recoil", label: "Recoil", isPercent: true },
 ];
 
+// Spliced traits (Riven Splicer, Update 44.1). Wiki Riven Mods "Spliced Values".
+const RIVEN_SPLICED_ALL: RivenStatDef[] = [
+  { key: "viral", label: "Viral Damage (Spliced)", isPercent: true, spliced: true },
+  { key: "corrosive", label: "Corrosive Damage (Spliced)", isPercent: true, spliced: true },
+  { key: "gas", label: "Gas Damage (Spliced)", isPercent: true, spliced: true },
+  { key: "radiation", label: "Radiation Damage (Spliced)", isPercent: true, spliced: true },
+  { key: "blast", label: "Blast Damage (Spliced)", isPercent: true, spliced: true },
+  { key: "magnetic", label: "Magnetic Damage (Spliced)", isPercent: true, spliced: true },
+  { key: "statusDamage", label: "Status Damage (Spliced)", isPercent: true, spliced: true },
+  { key: "factionOrokin", label: "Damage to Orokin (Spliced)", isPercent: true, spliced: true },
+  { key: "factionScaldra", label: "Damage to Scaldra (Spliced)", isPercent: true, spliced: true },
+  { key: "factionTechrot", label: "Damage to Techrot (Spliced)", isPercent: true, spliced: true },
+];
+
+const RIVEN_SPLICED_RANGED: RivenStatDef[] = [
+  ...RIVEN_SPLICED_ALL,
+  { key: "weakPointDamage", label: "Weak Point Damage (Spliced)", isPercent: true, spliced: true },
+  { key: "weakPointCritChance", label: "Weak Point Critical Chance (Spliced)", isPercent: true, spliced: true },
+  { key: "ammoEfficiency", label: "Ammo Efficiency (Spliced)", isPercent: true, spliced: true },
+];
+
+const RIVEN_SPLICED_RELOAD_HOLSTERED: RivenStatDef = {
+  key: "reloadWhileHolstered", label: "Reload While Holstered (Spliced)", isPercent: true, spliced: true, displayOnly: true,
+};
+
+const RIVEN_SPLICED_MELEE: RivenStatDef[] = [
+  ...RIVEN_SPLICED_ALL,
+  { key: "heavyAttackWindUp", label: "Heavy Attack Wind Up Speed (Spliced)", isPercent: true, spliced: true },
+  { key: "heavyAttackDamageBonus", label: "Melee Damage On Heavy Attack (Spliced)", isPercent: true, spliced: true, displayOnly: true },
+  { key: "slamDamage", label: "Slam Attack Damage (Spliced)", isPercent: true, spliced: true, displayOnly: true },
+  { key: "parryAngle", label: "Parry Angle (Spliced)", isPercent: true, spliced: true, displayOnly: true },
+];
+
 // Get riven stats filtered by weapon category
-export function getRivenStatsForCategory(weaponCategory: string): RivenStatDef[] {
+export function getRivenStatsForCategory(weaponCategory: string, opts: { includeSpliced?: boolean } = {}): RivenStatDef[] {
   const cat = weaponCategory.toLowerCase();
-  if (cat === "melee" || cat === "zaw_strike" || cat === "archmelee") return RIVEN_MELEE;
-  if (cat === "shotgun") return RIVEN_SHOTGUN;
-  if (cat === "pistol" || cat === "secondary" || cat === "dual_pistols" || cat === "kitgun_chamber" || cat === "sentinel_weapon") return RIVEN_PISTOL;
-  if (cat === "archgun") return RIVEN_ARCHGUN;
+  const spliced = opts.includeSpliced !== false;
+  if (cat === "melee" || cat === "zaw_strike" || cat === "archmelee") return spliced ? [...RIVEN_MELEE, ...RIVEN_SPLICED_MELEE] : RIVEN_MELEE;
+  if (cat === "shotgun") return spliced ? [...RIVEN_SHOTGUN, ...RIVEN_SPLICED_RANGED, RIVEN_SPLICED_RELOAD_HOLSTERED] : RIVEN_SHOTGUN;
+  if (cat === "pistol" || cat === "secondary" || cat === "dual_pistols" || cat === "kitgun_chamber" || cat === "sentinel_weapon") return spliced ? [...RIVEN_PISTOL, ...RIVEN_SPLICED_RANGED, RIVEN_SPLICED_RELOAD_HOLSTERED] : RIVEN_PISTOL;
+  // Archgun: no Reload While Holstered (wiki splicing table).
+  if (cat === "archgun") return spliced ? [...RIVEN_ARCHGUN, ...RIVEN_SPLICED_RANGED] : RIVEN_ARCHGUN;
   // rifle, bow, launcher, primary, etc.
-  return RIVEN_RIFLE;
+  return spliced ? [...RIVEN_RIFLE, ...RIVEN_SPLICED_RANGED, RIVEN_SPLICED_RELOAD_HOLSTERED] : RIVEN_RIFLE;
 }
 
 // Legacy: flat list for backward compat

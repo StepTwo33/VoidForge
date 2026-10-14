@@ -71,6 +71,7 @@ export default function RivenCalculatorPage() {
       positiveCount: Math.max(1, graderPositives.filter((s) => s.name).length || 2),
       hasNegative: !!(graderNegative && graderNegative.name),
       rank: graderRank,
+      includeSpliced: true,
     }),
     [graderPositives, graderNegative, graderRank],
   );
@@ -97,6 +98,7 @@ export default function RivenCalculatorPage() {
           baseValue: s.value,
           minValue: pool?.minValue ?? s.value * 0.5,
           maxValue: pool?.maxValue ?? s.value * 1.5,
+          spliced: pool?.spliced,
         };
       });
     const negPool = graderNegative?.name
@@ -140,7 +142,9 @@ export default function RivenCalculatorPage() {
 
   const availablePositiveStats = useMemo(() => {
     const usedNames = new Set(graderPositives.map((s) => s.name));
-    return scaledPositivePool.filter((s) => !usedNames.has(s.name));
+    // One spliced trait per riven (Riven Splicer).
+    const hasSpliced = scaledPositivePool.some((p) => p.spliced && usedNames.has(p.name));
+    return scaledPositivePool.filter((s) => !usedNames.has(s.name) && !(hasSpliced && s.spliced));
   }, [scaledPositivePool, graderPositives]);
 
   return (
@@ -383,11 +387,19 @@ export default function RivenCalculatorPage() {
                   <p className="text-[10px] text-muted-foreground mt-3">
                     Grade is a community heuristic (stat weights + curse quality), not market price or DPS uplift.
                   </p>
+                  {graderPositives.some((s) => scaledPositivePool.find((p) => p.name === s.name)?.spliced) && (
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Spliced traits are left out of the score. They are new (Update 44.1), so there are no community weights for them yet. The range check still applies.
+                    </p>
+                  )}
                 </div>
               )}
 
               <div className="border border-border rounded-xl p-4 bg-card">
                 <h3 className="text-sm font-semibold text-muted-foreground mb-2">REROLL KUVA COST</h3>
+                <p className="mb-2 text-[11px] text-muted-foreground">
+                  Locking a trait doubles each cycle&apos;s cost. A spliced trait stays locked without doubling it.
+                </p>
                 <div className="grid grid-cols-5 gap-1 text-[10px] sm:text-xs">
                   {Array.from({ length: 10 }, (_, i) => (
                     <div key={i} className="min-w-0 text-center p-1.5 bg-background rounded">

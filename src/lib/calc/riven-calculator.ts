@@ -7,6 +7,8 @@ export interface RivenStat {
   baseValue: number;
   minValue: number;
   maxValue: number;
+  /** Riven Splicer trait (Update 44.1): always positive, max one per riven, not scored. */
+  spliced?: boolean;
 }
 
 export interface RivenMod {
@@ -25,6 +27,8 @@ export interface RivenRangeOptions {
   hasNegative?: boolean;
   /** Rank 0–8; ranges shown at max rank by default. */
   rank?: number;
+  /** Append spliced traits (Riven Splicer) to the positive pool. Default false. */
+  includeSpliced?: boolean;
 }
 
 export function formatRivenStatValue(stat: RivenStat): string {
@@ -179,6 +183,58 @@ export function getStatsForCategory(category: string): RivenStat[] {
   return getRifleStats();
 }
 
+// ============================================================
+// SPLICED TRAITS (Riven Splicer, Update 44.1)
+// Base values: wiki Riven Mods "Spliced Values" (from DE Public Export).
+// Roll band uses the same ratio as the regular pools above (90 → 54.5–119.9).
+// ============================================================
+const SPLICED_MIN_RATIO = 54.5 / 90;
+const SPLICED_MAX_RATIO = 119.9 / 90;
+
+function spliced(name: string, baseValue: number): RivenStat {
+  return {
+    name,
+    type: "percent",
+    baseValue,
+    minValue: Math.round(baseValue * SPLICED_MIN_RATIO * 10) / 10,
+    maxValue: Math.round(baseValue * SPLICED_MAX_RATIO * 10) / 10,
+    spliced: true,
+  };
+}
+
+export function getSplicedStats(category: string): RivenStat[] {
+  const cat = category.toLowerCase();
+  const all = [
+    spliced("Viral Damage (Spliced)", 90),
+    spliced("Corrosive Damage (Spliced)", 90),
+    spliced("Gas Damage (Spliced)", 90),
+    spliced("Radiation Damage (Spliced)", 90),
+    spliced("Blast Damage (Spliced)", 90),
+    spliced("Magnetic Damage (Spliced)", 90),
+    spliced("Status Damage (Spliced)", 90),
+    spliced("Damage to Orokin (Spliced)", 45),
+    spliced("Damage to Scaldra (Spliced)", 45),
+    spliced("Damage to Techrot (Spliced)", 45),
+  ];
+  if (cat === "melee") {
+    return [
+      ...all,
+      spliced("Heavy Attack Wind Up Speed (Spliced)", 119.7),
+      spliced("Melee Damage On Heavy Attack (Spliced)", 119.7),
+      spliced("Slam Attack Damage (Spliced)", 119.7),
+      spliced("Parry Angle (Spliced)", 81),
+    ];
+  }
+  const ranged = [
+    ...all,
+    spliced("Weak Point Damage (Spliced)", 225),
+    spliced("Weak Point Critical Chance (Spliced)", 247.5),
+    spliced("Ammo Efficiency (Spliced)", 45),
+  ];
+  if (cat === "archgun") return ranged;
+  return [...ranged, spliced("Reload While Holstered (Spliced)", 90)];
+}
+
 /** Scale pool min/max by disposition × rank × buff-count (plus ±10% roll band already in base min/max). */
 export function getStatsWithDisposition(
   category: string,
@@ -190,7 +246,10 @@ export function getStatsWithDisposition(
   const hasNegative = options.hasNegative ?? true;
   const scale = disposition * rivenRankMultiplier(rank) * rivenBuffCountMultiplier(positiveCount, hasNegative);
 
-  return getStatsForCategory(category).map((stat) => ({
+  const pool = options.includeSpliced
+    ? [...getStatsForCategory(category), ...getSplicedStats(category)]
+    : getStatsForCategory(category);
+  return pool.map((stat) => ({
     ...stat,
     minValue: Math.round(stat.minValue * scale * 10) / 10,
     maxValue: Math.round(stat.maxValue * scale * 10) / 10,
@@ -309,6 +368,9 @@ export function evaluateRiven(riven: RivenMod): number {
   let greatStats = 0;
 
   for (const stat of riven.positiveStats) {
+    // Spliced traits are excluded from the community-weight score: there is no
+    // established community value for them yet (Update 44.1).
+    if (stat.spliced) continue;
     const weight = STAT_WEIGHTS[stat.name] ?? 0.3;
     const value = scoringMagnitude(stat);
 
