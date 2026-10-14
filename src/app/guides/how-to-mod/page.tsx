@@ -1,7 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentPanel } from "@/components/page-shell";
 import { GuideCtaLink } from "@/components/guides/how-to-mod-ui";
 import { HOW_TO_MOD_SECTIONS } from "@/lib/guides/how-to-mod-sections";
+
+// Metadata only (tab title).
+export const metadata: Metadata = { title: "How to Mod" };
 
 export default function HowToModOverviewPage() {
   return (

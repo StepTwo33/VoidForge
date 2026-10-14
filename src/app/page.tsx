@@ -39,11 +39,6 @@ export default function Home() {
       <PageMain maxWidth="full" className="max-w-none overflow-x-hidden py-6 sm:py-12 lg:py-16 xl:px-5 2xl:px-6">
         {/* Equal side tracks keep the center grid centered; side panels pin to the outer edges. */}
         <div className={HOME_GRID_CLASS}>
-          {/* Left: site updates — outer edge */}
-          <aside className={cn(HOME_SIDEBAR_ASIDE_CLASS, HOME_LEFT_ASIDE_CLASS)}>
-            <SiteUpdatesSidebar variant="sidebar" limit={10} />
-          </aside>
-
           {/* Center: hero + feature grid */}
           <div className={HOME_CENTER_CLASS}>
             <div className="mx-auto mb-6 max-w-3xl text-center sm:mb-12">
@@ -181,6 +176,12 @@ export default function Home() {
               {" "}by buff0000n — clan dojo layout planning. Thanks for building this for the community.
             </p>
           </div>
+
+          {/* Left: site updates — outer edge. After the hero in the DOM so the H1 comes first;
+              row-start-1 keeps it in the left column visually. */}
+          <aside className={cn(HOME_SIDEBAR_ASIDE_CLASS, HOME_LEFT_ASIDE_CLASS, "min-[1400px]:row-start-1")}>
+            <SiteUpdatesSidebar variant="sidebar" limit={10} />
+          </aside>
 
           {/* Right: community builds — outer edge */}
           <aside className={cn(HOME_SIDEBAR_ASIDE_CLASS, HOME_RIGHT_ASIDE_CLASS)}>

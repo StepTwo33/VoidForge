@@ -3,7 +3,7 @@
 import { ListSkeleton } from "@/components/list-skeleton";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, Sparkles, TrendingUp } from "lucide-react";
+import { ChevronRight, Sparkles, TrendingUp, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PublicBuildSummary } from "@/lib/builds/build-types";
 import { PublicBuildRow } from "@/components/public-build-row";
@@ -13,6 +13,7 @@ import {
   HOME_SIDEBAR_TAB_ROW_CLASS,
 } from "@/lib/site/home-sidebar-layout";
 import { ContentPanel } from "@/components/page-shell";
+import { EmptyState } from "@/components/empty-state";
 import { CopyRssFeedButton } from "@/components/copy-rss-feed-button";
 
 type SortMode = "recent" | "popular";
@@ -120,18 +121,14 @@ export function CommunityBuildsSidebar({
         {loading ? (
           <ListSkeleton variant="compact" rows={3} label="Loading community builds…" />
         ) : builds.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border/70 px-3 py-8 text-center">
-            <p className="text-xs font-medium text-foreground">No public builds yet</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Save a build and check &quot;List in Community&quot; to share it.
-            </p>
-            <Link
-              href="/discover"
-              className="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-primary hover:underline"
-            >
-              Browse Discover
-            </Link>
-          </div>
+          <EmptyState
+            size="compact"
+            titleAs="p"
+            icon={Users}
+            title="No public builds yet"
+            description={<>Save a build and check &quot;List in Community&quot; to share it.</>}
+            action={{ href: "/discover", label: "Browse Discover" }}
+          />
         ) : (
           builds.map((build) => (
             <PublicBuildRow key={build.id} build={build} compact showThumbnails />

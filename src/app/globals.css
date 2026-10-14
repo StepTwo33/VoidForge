@@ -773,3 +773,10 @@ html:not(.dark) [data-sonner-toaster] [data-sonner-toast][data-type="warning"] {
     padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* Shared section heading (builders, compare): title case in source, uppercase visually only. */
+@layer components {
+  .section-title {
+    @apply text-sm font-semibold uppercase tracking-wider text-muted-foreground;
+  }
+}

@@ -314,8 +314,8 @@ export default function ArchwingBuilderPage() {
           <div className="space-y-6">
             {/* Frame selection */}
             <div>
-              <h2 className="text-sm font-semibold tracking-wider text-muted-foreground mb-3">
-                {mode === "archwing" ? "SELECT ARCHWING" : "SELECT NECRAMECH"}
+              <h2 className="section-title mb-3">
+                {mode === "archwing" ? "Select Archwing" : "Select Necramech"}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {mode === "archwing" ? archwingList.map((aw) => (
@@ -370,8 +370,8 @@ export default function ArchwingBuilderPage() {
             {((mode === "archwing" && selectedArchwing) || (mode === "necramech" && selectedNecramech)) && (
               <div id="aw-mods" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
                 <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
-                  <h2 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">
-                    {mode === "archwing" ? "ARCHWING MODS" : "NECRAMECH MODS"}
+                  <h2 className="min-w-0 truncate section-title">
+                    {mode === "archwing" ? "Archwing Mods" : "Necramech Mods"}
                   </h2>
                   <div className="flex flex-wrap items-center gap-2">
                     <button
@@ -436,8 +436,8 @@ export default function ArchwingBuilderPage() {
           {/* Right: Weapon selection + mods */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-sm font-semibold tracking-wider text-muted-foreground mb-3">
-                {mode === "archwing" ? "ARCHGUN / ARCHMELEE" : "ARCHGUN (NECRAMECH)"}
+              <h2 className="section-title mb-3">
+                {mode === "archwing" ? "Archgun / Archmelee" : "Archgun (Necramech)"}
               </h2>
               <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto">
                 {archWeapons
@@ -459,9 +459,12 @@ export default function ArchwingBuilderPage() {
                         : "border-border hover:border-cyan-500/30"
                     )}
                   >
-                    <span className="font-medium">{w.name}</span>
-                    <span className={cn("ml-1.5 text-[10px]", w.category === "archgun" ? "text-blue-700 dark:text-blue-400" : "text-green-700 dark:text-green-400")}>
-                      {w.category}
+                    {/* Name and category as separate items with a real space, so they never read as one word. */}
+                    <span className="flex flex-wrap items-baseline gap-x-1.5">
+                      <span className="font-medium">{w.name}</span>{" "}
+                      <span className={cn("text-[10px]", w.category === "archgun" ? "text-blue-700 dark:text-blue-400" : "text-green-700 dark:text-green-400")}>
+                        {w.category}
+                      </span>
                     </span>
                     <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
                       DMG {w.damage} • CC {(w.criticalChance * 100).toFixed(0)}% • SC {(w.statusChance * 100).toFixed(0)}%
@@ -474,7 +477,7 @@ export default function ArchwingBuilderPage() {
             {selectedWeapon && (
               <div id="ag-mods" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
                 <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
-                  <h2 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">WEAPON MODS</h2>
+                  <h2 className="min-w-0 truncate section-title">Weapon Mods</h2>
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => setHasCatalyst(!hasCatalyst)}

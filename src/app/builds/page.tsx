@@ -241,27 +241,33 @@ export default function BuildsLibraryPage() {
                 ? "Save a build in any builder, or create a loadout kit. Community builds live on Discover."
                 : "Try a different filter or search."
             }
+            // One primary CTA; Loadouts is already linked below the list.
+            action={builds.length === 0 ? { href: "/weapon-builder", label: "Open Weapon Builder" } : undefined}
+            secondaryAction={builds.length === 0 ? { href: "/discover", label: "Browse Discover" } : undefined}
           >
-            <div className="flex flex-wrap justify-center gap-2">
-              <Link
-                href="/weapon-builder"
-                className="inline-flex h-11 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-              >
-                Weapon Builder
-              </Link>
-              <Link
-                href="/loadouts"
-                className="inline-flex h-11 items-center rounded-lg border border-border px-4 text-sm hover:bg-accent"
-              >
-                Loadouts
-              </Link>
-              <Link
-                href="/discover"
-                className="inline-flex h-11 items-center rounded-lg border border-border px-4 text-sm hover:bg-accent"
-              >
-                Discover
-              </Link>
-            </div>
+            {/* No shared filter reset exists on this page, so the filter-empty case keeps its previous links. */}
+            {builds.length > 0 && (
+              <>
+                <Link
+                  href="/weapon-builder"
+                  className="inline-flex h-11 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                >
+                  Weapon Builder
+                </Link>
+                <Link
+                  href="/loadouts"
+                  className="inline-flex h-11 items-center rounded-lg border border-border px-4 text-sm hover:bg-accent"
+                >
+                  Loadouts
+                </Link>
+                <Link
+                  href="/discover"
+                  className="inline-flex h-11 items-center rounded-lg border border-border px-4 text-sm hover:bg-accent"
+                >
+                  Discover
+                </Link>
+              </>
+            )}
           </EmptyState>
         ) : (
           <ul className="space-y-1.5">

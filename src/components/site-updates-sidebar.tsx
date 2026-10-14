@@ -11,6 +11,7 @@ import {
   HOME_SIDEBAR_TAB_ROW_CLASS,
 } from "@/lib/site/home-sidebar-layout";
 import { ContentPanel } from "@/components/page-shell";
+import { EmptyState } from "@/components/empty-state";
 import { CopyRssFeedButton } from "@/components/copy-rss-feed-button";
 
 interface SiteUpdatesSidebarProps {
@@ -154,9 +155,7 @@ export function SiteUpdatesSidebar({
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
           </div>
         ) : updates.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border/70 px-3 py-3 text-center min-[1400px]:py-8">
-            <p className="text-xs text-muted-foreground">No site updates posted yet.</p>
-          </div>
+          <EmptyState size="compact" titleAs="p" icon={Megaphone} title="No site updates posted yet" />
         ) : (
           updates.map((update) => (
             <UpdateCard key={update.id} update={update} compact={isSidebar} />

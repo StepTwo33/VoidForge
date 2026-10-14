@@ -14,6 +14,7 @@ import {
   modSlotCapacityCost,
 } from "@/lib/calc/mod-capacity";
 import { cleanModDescription, formatModStatValue } from "@/lib/display/mod-display";
+import { PointerVerb } from "@/components/pointer-verb";
 
 const rarityBorderColors: Record<string, string> = {
   common: "border-amber-700/40 dark:border-amber-900/50",
@@ -154,7 +155,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
             <Plus className="h-4 w-4" />
           </div>
           <span className="text-xs font-medium">{label || `Slot ${slotIndex + 1}`}</span>
-          <span className="hidden text-xs text-muted-foreground group-hover:text-primary sm:inline sm:text-[10px]">Tap to add mod</span>
+          <span className="hidden text-xs text-muted-foreground group-hover:text-primary sm:inline sm:text-[10px]"><PointerVerb capitalize /> to add mod</span>
         </button>
         {onPolarize && (
           <div className="flex items-end sm:hidden">

@@ -448,44 +448,8 @@ export function PanelHeading({
   );
 }
 
-/** Empty state block for lists and search results. */
-export function EmptyState({
-  icon,
-  iconName,
-  title,
-  description,
-  children,
-  className,
-}: {
-  icon?: LucideIcon;
-  iconName?: PageIconName;
-  title: string;
-  description?: string;
-  children?: React.ReactNode;
-  className?: string;
-}) {
-  const Icon = resolvePageIcon(icon, iconName);
-  if (!Icon) {
-    throw new Error("EmptyState requires icon or iconName");
-  }
-  return (
-    <div
-      className={cn(
-        "rounded-xl border border-dashed border-border/70 bg-card/40 px-5 py-12 text-center surface-panel sm:px-6 sm:py-16",
-        className,
-      )}
-    >
-      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
-        <Icon className="h-7 w-7 text-primary/70" />
-      </div>
-      <h2 className="text-base font-semibold sm:text-lg">{title}</h2>
-      {description && (
-        <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">{description}</p>
-      )}
-      {children && <div className="mt-5 flex flex-wrap items-center justify-center gap-2">{children}</div>}
-    </div>
-  );
-}
+/** Shared empty state lives in components/empty-state.tsx; re-exported for existing imports. */
+export { EmptyState } from "@/components/empty-state";
 
 /** Prose wrapper for legal / long-form pages. */
 export function ProsePanel({ children, className }: { children: React.ReactNode; className?: string }) {

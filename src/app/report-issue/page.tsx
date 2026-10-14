@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { PageShell, PageMain, PageHero } from "@/components/page-shell";
+import { EmptyState } from "@/components/empty-state";
 import { OverrideCategory, OVERRIDE_CATEGORIES } from "@/lib/overrides/data-overrides";
 import { dataFixesHref } from "@/lib/overrides/data-fixes-url";
 import { DataFixesPanel, prefillFromReport } from "@/components/data-fixes-panel";
@@ -482,17 +483,16 @@ export default function ReportIssuePage() {
           {/* Report List */}
           <div className="space-y-2">
             {filteredReports.length === 0 && (
-              <div className="py-12 text-center text-muted-foreground">
-                <AlertTriangle className="mx-auto mb-3 h-8 w-8 opacity-50" />
-                <p className="text-sm font-medium text-foreground/80">
-                  {reports.length === 0 ? "No reports yet." : "No reports match these filters."}
-                </p>
-                <p className="mt-1 text-xs">
-                  {reports.length === 0
-                    ? 'Click "New Report" to flag incorrect stats or missing items.'
-                    : "Try clearing search or status filters."}
-                </p>
-              </div>
+              <EmptyState
+                icon={AlertTriangle}
+                titleAs="p"
+                title={reports.length === 0 ? "No reports yet" : "No reports match these filters"}
+                description={
+                  reports.length === 0
+                    ? 'Use "New Report" to flag incorrect stats or missing items.'
+                    : "Try clearing search or status filters."
+                }
+              />
             )}
             {filteredReports.map((report) => {
               const isExpanded = expandedReport === report.id;

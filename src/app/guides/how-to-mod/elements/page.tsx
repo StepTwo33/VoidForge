@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ContentPanel } from "@/components/page-shell";
 import {
   GuideCtaLink,
@@ -13,6 +14,9 @@ const COMBOS: { a: string; b: string; result: string; note: string }[] = [
   { a: "Cold", b: "Electricity", result: "Magnetic", note: "Shields. Corpus / shield-heavy content." },
   { a: "Heat", b: "Electricity", result: "Radiation", note: "Confusion. Good vs some factions / bosses." },
 ];
+
+// Metadata only (tab title).
+export const metadata: Metadata = { title: "How to Mod: Elements" };
 
 export default function HowToModElementsPage() {
   return (

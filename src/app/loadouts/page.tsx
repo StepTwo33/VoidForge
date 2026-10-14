@@ -74,6 +74,7 @@ import {
   getLoadoutModular,
   withLoadoutModular,
 } from "@/lib/builds/loadout-slot-helpers";
+import { PointerVerb } from "@/components/pointer-verb";
 
 type SlotType = LoadoutSlotType;
 
@@ -622,16 +623,8 @@ export default function LoadoutsPage() {
             icon={Sparkles}
             title="No loadouts yet"
             description="Create a kit, then attach saved builds from the Warframe, Weapon, and Companion builders."
-          >
-            <button
-              type="button"
-              onClick={handleCreate}
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm text-primary-foreground transition-colors hover:bg-primary/90"
-            >
-              <Plus className="h-4 w-4" />
-              New loadout
-            </button>
-          </EmptyState>
+            action={{ onClick: handleCreate, label: "New loadout", icon: Plus }}
+          />
         ) : (
           <div className="space-y-4">
             {loadouts.map((loadout) => (
@@ -769,7 +762,7 @@ export default function LoadoutsPage() {
                               <span className="block text-xs font-medium text-muted-foreground group-hover:text-foreground">
                                 {cfg.label}
                               </span>
-                              <span className="text-[11px] text-muted-foreground/70">Tap to add</span>
+                              <span className="text-[11px] text-muted-foreground/70"><PointerVerb capitalize /> to add</span>
                             </div>
                           </button>
                         );

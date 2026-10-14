@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentPanel } from "@/components/page-shell";
 import {
@@ -5,6 +6,9 @@ import {
   GuideMistake,
   GuideTip,
 } from "@/components/guides/how-to-mod-ui";
+
+// Metadata only (tab title).
+export const metadata: Metadata = { title: "How to Mod: Basics" };
 
 export default function HowToModBasicsPage() {
   return (

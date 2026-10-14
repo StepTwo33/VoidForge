@@ -60,11 +60,13 @@ const CONTRIBUTION_CATEGORY_COLORS: Record<DpsContributionCategory, string> = {
   other: "text-muted-foreground",
 };
 
-export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEvolutions, allEvolutions, simParams, onSimParamsChange, contributionContext }: {
+export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEvolutions, allEvolutions, simParams, onSimParamsChange, contributionContext, heading }: {
   stats: CalculatedStats | null; baseStats?: CalculatedStats | null; weapon?: Weapon | null; isMelee?: boolean;
   selectedEvolutions?: Record<number, number>; allEvolutions?: IncarnonEvolution[];
   simParams?: SimulationParams; onSimParamsChange?: (p: SimulationParams) => void;
   contributionContext?: WeaponDpsCalcContext | null;
+  /** Panel heading override (e.g. "Build A stats" on Compare, so the two panels are distinct). */
+  heading?: string;
 }) {
   const dpsContributions = useMemo(
     () => (contributionContext ? computeDpsContributions(contributionContext) : []),
@@ -75,7 +77,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
   if (!stats) {
     return (
       <div className="border border-border rounded-xl p-4 bg-card">
-        <h3 className="text-[10px] font-semibold tracking-wider text-muted-foreground mb-3">STATS</h3>
+        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">{heading ?? "Stats"}</h3>
         <p className="text-xs text-muted-foreground">Select a weapon to see stats</p>
       </div>
     );
@@ -101,7 +103,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
 
   return (
     <div className="border border-border rounded-xl p-4 bg-card space-y-1 min-w-0 overflow-x-hidden">
-      <h3 className="text-[10px] font-semibold tracking-wider text-muted-foreground mb-2">WEAPON STATS</h3>
+      <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{heading ?? "Weapon Stats"}</h3>
 
       {weapon?.passive && (
         <CollapsibleSection title="PASSIVE" defaultOpen>

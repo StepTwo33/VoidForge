@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import type { AccentColor } from "@/components/page-shell";
 import { EmptyState, FilterChip, PageHero } from "@/components/page-shell";
+import { PointerVerb } from "@/components/pointer-verb";
 
 /** Survives remount so ← Change restores list scroll after picking an item. */
 const pickerListScrollY = new Map<string, number>();
@@ -198,7 +199,7 @@ export function ItemPickerScreen({
             ) : (
               <>
                 <span className="font-mono font-medium tabular-nums text-foreground">{count}</span>
-                {" "}to pick from — tap a row to open the builder
+                {" "}to pick from — <PointerVerb /> a row to open the builder
               </>
             )}
           </p>

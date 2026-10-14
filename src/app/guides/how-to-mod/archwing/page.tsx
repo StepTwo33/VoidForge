@@ -1,9 +1,13 @@
+import type { Metadata } from "next";
 import { ContentPanel } from "@/components/page-shell";
 import {
   GuideCtaLink,
   GuideMistake,
   GuideTip,
 } from "@/components/guides/how-to-mod-ui";
+
+// Metadata only (tab title).
+export const metadata: Metadata = { title: "How to Mod: Archwing & Mech" };
 
 export default function HowToModArchwingPage() {
   return (

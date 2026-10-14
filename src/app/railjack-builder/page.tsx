@@ -433,12 +433,13 @@ export default function RailjackBuilderPage() {
         <p className="text-muted-foreground mb-4">Configure your Railjack components, armaments, and Plexus mods</p>
 
         <div className="mb-6 hidden border border-rose-500/20 rounded-xl p-4 bg-rose-500/5 lg:block">
-          <h2 className="text-xs font-semibold tracking-wider text-rose-800 mb-2 dark:text-rose-300">URANUS PROXIMA (UPDATE 43)</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-rose-800 mb-2 dark:text-rose-300">Uranus Proxima (Update 43)</h2>
           {eventCardBody}
         </div>
         <details className="group mb-6 border border-rose-500/20 rounded-xl p-4 bg-rose-500/5 lg:hidden">
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-            <h2 className="text-xs font-semibold tracking-wider text-rose-800 dark:text-rose-300">URANUS PROXIMA (UPDATE 43)</h2>
+            {/* Same event title as the lg+ card: one heading in the DOM, so this copy is the disclosure label only. */}
+            <span className="text-xs font-semibold uppercase tracking-wider text-rose-800 dark:text-rose-300">Uranus Proxima (Update 43)</span>
             <span aria-hidden className="text-xs text-rose-800 transition-transform group-open:rotate-180 dark:text-rose-300">▾</span>
           </summary>
           <div className="mt-2">{eventCardBody}</div>
@@ -449,7 +450,7 @@ export default function RailjackBuilderPage() {
           <div className="space-y-6">
             {/* Ship Stats Overview */}
             <div id="rj-stats" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] border border-border rounded-xl p-4 bg-card">
-              <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">RAILJACK STATS</h2>
+              <h2 className="section-title mb-3">Railjack Stats</h2>
               <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
                 <div className="flex justify-between"><span className="text-muted-foreground">Hull</span><span className="font-mono">{computedStats.hull}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Armor</span><span className="font-mono">{computedStats.armor}</span></div>
@@ -467,7 +468,7 @@ export default function RailjackBuilderPage() {
               </div>
               {(computedStats.activeHouseTraits?.length ?? 0) > 0 && (
                 <div className="mt-3 pt-3 border-t border-border/50">
-                  <h3 className="text-[10px] font-semibold tracking-wider text-muted-foreground mb-1.5">ACTIVE HOUSE TRAITS</h3>
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Active House Traits</h3>
                   <ul className="space-y-1 text-[11px] text-muted-foreground">
                     {computedStats.activeHouseTraits!.map((t) => (
                       <li key={t.id}>• {t.text}</li>
@@ -477,7 +478,7 @@ export default function RailjackBuilderPage() {
               )}
               {(computedStats.turretDamageBonus > 0 || computedStats.turretCritBonus > 0 || computedStats.turretCritDmgBonus > 0 || computedStats.ordnanceDamageBonus > 0 || computedStats.artilleryDamageBonus > 0 || computedStats.munitionsCapacityBonus > 0 || (computedStats.abilityTurretDamageBonus ?? 0) > 0 || (computedStats.crewBonuses?.speedBonus ?? 0) > 0 || (computedStats.crewBonuses?.houseTurretDamageBonus ?? 0) > 0) && (
                 <div className="mt-3 pt-3 border-t border-border/50">
-                  <h3 className="text-[10px] font-semibold tracking-wider text-muted-foreground mb-1.5">PLEXUS / CREW BONUSES</h3>
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Plexus / Crew Bonuses</h3>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
                     {computedStats.turretDamageBonus > 0 && (
                       <div className="flex justify-between"><span className="text-muted-foreground">Turret Damage</span><span className="font-mono text-cyan-700 dark:text-cyan-400">+{(computedStats.turretDamageBonus * 100).toFixed(0)}%</span></div>
@@ -518,7 +519,7 @@ export default function RailjackBuilderPage() {
               )}
               {(computedStats.abilityStrengthBonus || computedStats.abilityRangeBonus || computedStats.abilityDurationBonus) && (
                 <div className="mt-3 pt-3 border-t border-border/50">
-                  <h3 className="text-[10px] font-semibold tracking-wider text-muted-foreground mb-1.5">REACTOR BATTLE SCALING</h3>
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Reactor Battle Scaling</h3>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
                     {computedStats.abilityStrengthBonus ? (
                       <div className="flex justify-between"><span className="text-muted-foreground">Strength</span><span className="font-mono text-orange-700 dark:text-orange-400">+{(computedStats.abilityStrengthBonus * 100).toFixed(0)}%</span></div>
@@ -536,7 +537,7 @@ export default function RailjackBuilderPage() {
 
             {/* Component Selectors */}
             <div id="rj-components" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
-              <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">COMPONENTS</h2>
+              <h2 className="section-title mb-3">Components</h2>
               <div className="grid grid-cols-2 gap-3">
                 {/* Reactor */}
                 <button
@@ -678,7 +679,7 @@ export default function RailjackBuilderPage() {
                 ["Engines", selectedEngine, engineTraitId, setEngineTraitId],
               ] as const).some(([, comp]) => comp && getRailjackComponentTraits(comp.id).length > 0) && (
                 <div className="mt-3 border border-border rounded-xl p-3 bg-card space-y-2">
-                  <h3 className="text-[10px] font-semibold tracking-wider text-muted-foreground">HOUSE TRAIT ROLLS</h3>
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">House Trait Rolls</h3>
                   {([
                     ["Reactor", selectedReactor, reactorTraitId, setReactorTraitId],
                     ["Shield", selectedShield, shieldTraitId, setShieldTraitId],
@@ -713,7 +714,7 @@ export default function RailjackBuilderPage() {
             {/* Intrinsics */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-semibold tracking-wider text-muted-foreground">INTRINSICS</h2>
+                <h2 className="section-title">Intrinsics</h2>
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -795,7 +796,7 @@ export default function RailjackBuilderPage() {
 
             {/* Crew A/B/C */}
             <div>
-              <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-1">CREW</h2>
+              <h2 className="section-title mb-1">Crew</h2>
               <p className="text-xs lg:text-[10px] text-muted-foreground mb-3">
                 Slots unlock at Command 1 / 3 / 5. Adversaries need Command 8; elites need Command 10. Hired from Ticker (Fortuna).
               </p>
@@ -903,7 +904,7 @@ export default function RailjackBuilderPage() {
 
             {/* Armaments — Nose + Swivel + Ordnance */}
             <div id="rj-armaments" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
-              <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">ARMAMENTS</h2>
+              <h2 className="section-title mb-3">Armaments</h2>
               <div className="space-y-3">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
@@ -1035,7 +1036,7 @@ export default function RailjackBuilderPage() {
           {/* ── Right Column: Plexus Mods ── */}
           <div className="space-y-6">
             <div id="rj-plexus" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
-              <h2 className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">PLEXUS MODS</h2>
+              <h2 className="section-title mb-3">Plexus Mods</h2>
 
               {/* Tab selector */}
               <div className="mb-4 flex flex-wrap gap-2">
@@ -1063,7 +1064,7 @@ export default function RailjackBuilderPage() {
               {/* Capacity — Integrated only */}
               {plexusTab === "integrated" && (
                 <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
-                  <h3 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">INTEGRATED</h3>
+                  <h3 className="min-w-0 truncate text-sm font-semibold uppercase tracking-wider text-muted-foreground">Integrated</h3>
                   <div className="flex flex-wrap items-center gap-2">
                     {auraBonus > 0 && (
                       <span className="text-[10px] text-green-700/80 dark:text-green-400/70">+{auraBonus} aura</span>
@@ -1169,7 +1170,7 @@ export default function RailjackBuilderPage() {
             {/* Simulation toggles for conditional mods & active abilities */}
             {showSimulationPanel && (
               <div className="border border-amber-500/20 rounded-xl p-4 bg-amber-500/5">
-                <h3 className="text-xs font-semibold tracking-wider text-amber-800 mb-3 dark:text-amber-300">SIMULATION</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-amber-800 mb-3 dark:text-amber-300">Simulation</h3>
                 <div className="space-y-3 text-xs">
                   {hasCrimsonFugue && (
                     <div>
@@ -1267,8 +1268,8 @@ export default function RailjackBuilderPage() {
             {/* Battle / Tactical abilities */}
             {plexusTab !== "integrated" && (computedStats.battleAbilities?.length || computedStats.tacticalAbilities?.length) ? (
               <div className="border border-border rounded-xl p-4 bg-card">
-                <h3 className="text-xs font-semibold tracking-wider text-muted-foreground mb-3">
-                  {plexusTab === "battle" ? "BATTLE ABILITIES" : "TACTICAL ABILITIES"}
+                <h3 className="section-title mb-3">
+                  {plexusTab === "battle" ? "Battle Abilities" : "Tactical Abilities"}
                 </h3>
                 <div className="space-y-2">
                   {(plexusTab === "battle" ? computedStats.battleAbilities : computedStats.tacticalAbilities)?.map((ability) => (
@@ -1293,7 +1294,7 @@ export default function RailjackBuilderPage() {
 
             {/* Armament Stats */}
             <div className="border border-border rounded-xl p-4 bg-card">
-              <h3 className="text-xs font-semibold text-muted-foreground mb-3">ARMAMENT STATS (WITH PLEXUS)</h3>
+              <h3 className="section-title mb-3">Armament Stats (With Plexus)</h3>
               {computedStats.artillery && (
                 <div>
                   <div className="text-xs font-medium text-orange-700 dark:text-orange-400 mb-1.5">Forward Artillery — {computedStats.artillery.name}</div>

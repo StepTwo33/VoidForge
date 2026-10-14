@@ -458,7 +458,7 @@ export default function ModularBuilderPage() {
             {/* KITGUN PARTS */}
             {modularType === "kitgun" && (
               <div className="space-y-4">
-                <h2 className="text-sm font-semibold tracking-wider text-muted-foreground">KITGUN PARTS</h2>
+                <h2 className="section-title">Kitgun Parts</h2>
 
                 {/* Chamber */}
                 <div>
@@ -542,7 +542,7 @@ export default function ModularBuilderPage() {
             {/* ZAW PARTS */}
             {modularType === "zaw" && (
               <div className="space-y-4">
-                <h2 className="text-sm font-semibold tracking-wider text-muted-foreground">ZAW PARTS</h2>
+                <h2 className="section-title">Zaw Parts</h2>
 
                 {/* Strike */}
                 <div>
@@ -624,7 +624,7 @@ export default function ModularBuilderPage() {
             {/* AMP PARTS */}
             {modularType === "amp" && (
               <div className="space-y-4">
-                <h2 className="text-sm font-semibold tracking-wider text-muted-foreground">AMP PARTS</h2>
+                <h2 className="section-title">Amp Parts</h2>
 
                 {/* Prism */}
                 <div>
@@ -703,7 +703,7 @@ export default function ModularBuilderPage() {
             {/* Recommended builds */}
             {!assembledWeapon && (
               <div className="space-y-3">
-                <h2 className="text-sm font-semibold tracking-wider text-muted-foreground">RECOMMENDED BUILDS</h2>
+                <h2 className="section-title">Recommended Builds</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {recommendedBuilds.filter((b) => b.type === modularType).map((b, i) => (
                     <button
@@ -757,7 +757,7 @@ export default function ModularBuilderPage() {
                         ? "top-[calc(3.5rem+env(safe-area-inset-top,0px)+4.25rem)]"
                         : "top-[calc(3.5rem+env(safe-area-inset-top,0px))]",
                     )}>
-                      <h3 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">MOD CONFIGURATION</h3>
+                      <h3 className="min-w-0 truncate section-title">Mod Configuration</h3>
                       <span className={cn(
                         "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
                         capacityUsed > capacity ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
@@ -796,9 +796,9 @@ export default function ModularBuilderPage() {
 
                 {arcaneConfig.slots > 0 && (
                   <div className="mt-6">
-                    <h3 className="text-sm font-semibold tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
                       <Gem className="h-4 w-4 text-purple-700 dark:text-purple-400" />
-                      ARCANES
+                      Arcanes
                     </h3>
                     <div className={cn("grid gap-2", arcaneConfig.slots === 2 ? "grid-cols-2" : "grid-cols-1")}>
                       {Array.from({ length: arcaneConfig.slots }).map((_, i) => (
@@ -821,9 +821,9 @@ export default function ModularBuilderPage() {
           {/* Right: Stats panel */}
           <div>
             <div id="build-stats" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] border border-border rounded-xl bg-card p-4 sm:p-6 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:self-start lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:overflow-y-auto lg:overscroll-contain">
-              <h3 className="text-sm font-semibold tracking-wider text-muted-foreground mb-4">
-                {assembledWeapon ? "WEAPON STATS" : "SELECT ALL PARTS"}
-              </h3>
+              <h2 className="section-title mb-4">
+                {assembledWeapon ? "Weapon Stats" : "Select All Parts"}
+              </h2>
               {assembledWeapon && calculatedStats ? (
                 <WeaponStatsPanel
                   stats={calculatedStats}

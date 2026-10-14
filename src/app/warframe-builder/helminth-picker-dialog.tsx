@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { EmptyState } from "@/components/page-shell";
 import { allHelminthAbilities, type HelminthAbility } from "@/data/helminth";
+import { PointerVerb } from "@/components/pointer-verb";
 
 export function HelminthPickerDialog({
   open,
@@ -70,7 +71,7 @@ export function HelminthPickerDialog({
             ) : (
               <>
                 <span className="font-mono tabular-nums text-foreground">{filtered.length}</span>
-                {" "}abilities — tap to subsume
+                {" "}abilities — <PointerVerb /> to subsume
               </>
             )}
           </p>

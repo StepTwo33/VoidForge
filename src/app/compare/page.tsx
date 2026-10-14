@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import { CompareRow, CompareSideHeader } from "@/components/compare/stat-diff";
 import { SnapshotCompare, WeaponCompareRows } from "@/components/compare/build-stat-rows";
 import { EquipmentDiff } from "@/components/compare/equipment-diff";
+import { PointerVerb } from "@/components/pointer-verb";
 
 function weaponImageForName(name: string, weapons: Weapon[]): string {
   const w = weapons.find((x) => x.name === name);
@@ -300,7 +301,7 @@ function BuildCompareTab() {
                     <div className="py-5 text-center text-muted-foreground">
                       <ChevronDown className="mx-auto mb-1.5 h-5 w-5 text-primary/70" />
                       <span className="block text-sm font-medium text-foreground">Select build {side + 1}</span>
-                      <span className="mt-0.5 block text-[11px]">Tap to pick a weapon build</span>
+                      <span className="mt-0.5 block text-[11px]"><PointerVerb capitalize /> to pick a weapon build</span>
                     </div>
                   )}
                 </button>
@@ -353,6 +354,7 @@ function BuildCompareTab() {
               <WeaponStatsPanel
                 stats={build.stats}
                 weapon={build.weapon}
+                heading={`Build ${side + 1} stats`}
                 isMelee={build.weapon?.category === "melee" || build.weapon?.triggerType === "Melee"}
               />
               </>
@@ -364,7 +366,7 @@ function BuildCompareTab() {
 
       {kind === "weapon" && weaponStats(0) && weaponStats(1) && (
         <ContentPanel className="mt-8">
-          <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground">COMPARISON</h2>
+          <h2 className="mb-4 section-title">Comparison</h2>
           <WeaponCompareRows
             a={weaponStats(0)}
             b={weaponStats(1)}
@@ -375,7 +377,7 @@ function BuildCompareTab() {
       )}
       {kind !== "weapon" && loaded[0]?.kind === kind && loaded[1]?.kind === kind && (
         <ContentPanel className="mt-8">
-          <h2 className="mb-4 text-sm font-semibold tracking-wider text-muted-foreground">COMPARISON</h2>
+          <h2 className="mb-4 section-title">Comparison</h2>
           <SnapshotCompare a={loaded[0]} b={loaded[1]} />
         </ContentPanel>
       )}
@@ -739,17 +741,14 @@ function LoadoutCompareTab() {
           icon={Trophy}
           title="Pick two loadouts to compare"
           description="Choose from Yours (this device + account) or Community posted kits — no need to import first."
-        >
-          <a href="/loadouts" className="inline-flex h-11 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-            Open Loadouts
-          </a>
-        </EmptyState>
+          action={{ href: "/loadouts", label: "Open Loadouts" }}
+        />
       )}
 
       {aggregate && (
         <ContentPanel className="mb-6 border-primary/30 bg-primary/5">
-          <h2 className="mb-3 flex items-center gap-1.5 text-xs font-semibold tracking-wider text-muted-foreground">
-            <Trophy className="h-3.5 w-3.5 text-primary" /> AGGREGATE
+          <h2 className="mb-3 flex items-center gap-1.5 section-title">
+            <Trophy className="h-3.5 w-3.5 text-primary" /> Aggregate
           </h2>
           <CompareSideHeader aLabel={labelA} bLabel={labelB} />
           <CompareRow label="Total Sustained DPS" a={aggregate.totalDpsA} b={aggregate.totalDpsB} format={(v) => fmtDamageNum(v)} />

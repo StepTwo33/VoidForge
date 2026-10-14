@@ -48,6 +48,7 @@ import {
   type ModSortId,
   type ModStatFilterId,
 } from "@/lib/mods/mod-stat-filters";
+import { PointerVerb } from "@/components/pointer-verb";
 
 export type SlotType = WeaponModSlotType | "aura" | "exilus" | "companion_precept";
 
@@ -586,7 +587,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                       : (
                         <>
                           <span className="font-mono tabular-nums text-foreground">{displayedMods.length}</span>
-                          {" "}mods — tap to equip
+                          {" "}mods — <PointerVerb /> to equip
                         </>
                       )}
                   </p>
@@ -611,7 +612,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                     : (
                       <>
                         <span className="font-mono tabular-nums text-foreground">{filteredArcanes.length}</span>
-                        {" "}arcanes — tap to equip
+                        {" "}arcanes — <PointerVerb /> to equip
                       </>
                     )}
                 </p>
