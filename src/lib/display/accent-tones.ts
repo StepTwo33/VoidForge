@@ -2,7 +2,7 @@
 export const accentTone = {
   amber: {
     text: "text-amber-800 dark:text-amber-300",
-    textSoft: "text-amber-700/90 dark:text-amber-300/90",
+    textSoft: "text-amber-800/90 dark:text-amber-300/90",
     textMuted: "text-amber-800/80 dark:text-amber-200/80",
     chipActive: "bg-amber-500/15 font-medium text-amber-900 dark:text-amber-300",
     badge: "border-amber-500/30 text-amber-900 dark:text-amber-300",
