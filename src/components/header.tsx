@@ -171,7 +171,7 @@ function AdminOpenReportsBadge({ count }: { count: number }) {
   const label = count > 99 ? "99+" : String(count);
   return (
     <span
-      className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold dark:bg-red-500 leading-none text-white shadow-sm shadow-red-500/40"
+      className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold dark:bg-red-700 leading-none text-white shadow-sm shadow-red-500/40"
       aria-label={`${count} open reports`}
     >
       {label}
