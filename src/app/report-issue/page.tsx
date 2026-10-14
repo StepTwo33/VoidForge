@@ -260,7 +260,7 @@ export default function ReportIssuePage() {
             <div className="flex flex-wrap gap-1">
               <button
                 onClick={() => setActiveTab("reports")}
-                className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-lg px-4 py-2 text-sm transition-colors", activeTab === "reports" ? "bg-amber-600 text-white" : "text-muted-foreground hover:text-foreground")}
+                className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-lg px-4 py-2 text-sm transition-colors", activeTab === "reports" ? "bg-amber-700 text-white dark:bg-amber-600" : "text-muted-foreground hover:text-foreground")}
               >
                 <Flag className="h-4 w-4" /> Reports {openCount > 0 && <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px]">{openCount}</span>}
               </button>
@@ -282,7 +282,7 @@ export default function ReportIssuePage() {
                 )}
                 <button
                   onClick={() => setShowForm(!showForm)}
-                  className={cn("inline-flex min-h-11 items-center gap-1 rounded-lg px-3 py-2 text-xs transition-colors", showForm ? "bg-red-700 text-white dark:bg-red-600" : "bg-amber-600 text-white hover:bg-amber-700")}
+                  className={cn("inline-flex min-h-11 items-center gap-1 rounded-lg px-3 py-2 text-xs transition-colors", showForm ? "bg-red-700 text-white dark:bg-red-600" : "bg-amber-700 text-white dark:bg-amber-600 hover:bg-amber-700")}
                 >
                   {showForm ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                   {showForm ? "Cancel" : "New Report"}
@@ -314,7 +314,7 @@ export default function ReportIssuePage() {
                       onClick={() => { setFormType(t); setFormItemName(""); setFormItemId(""); setItemSearch(""); }}
                       className={cn(
                         "min-h-11 rounded-lg border px-2.5 py-2 text-xs capitalize transition-colors",
-                        formType === t ? "border-amber-600 bg-amber-600 text-white" : "border-border text-muted-foreground"
+                        formType === t ? "border-amber-600 bg-amber-700 text-white dark:bg-amber-600" : "border-border text-muted-foreground"
                       )}
                     >
                       {t.replace("_", " ")}
@@ -592,7 +592,7 @@ export default function ReportIssuePage() {
             <span>Need to reach us directly?</span>
             <a href="mailto:support@void-forge.org" className="inline-flex min-h-11 items-center break-all text-primary underline-offset-2 hover:underline">support@void-forge.org</a>
             <span aria-hidden>·</span>
-            <a href="https://discord.gg/bqQXaYdTjS" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[#5865F2] underline-offset-2 hover:underline">Discord</a>
+            <a href="https://discord.gg/bqQXaYdTjS" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[#4752C4] underline-offset-2 dark:text-[#5865F2] hover:underline">Discord</a>
           </p>
         </div>
       </PageMain>

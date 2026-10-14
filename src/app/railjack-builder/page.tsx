@@ -402,7 +402,7 @@ export default function RailjackBuilderPage() {
               </button>
             ))}
           </div>
-          <p className="text-[10px] text-muted-foreground/80 mt-2">
+          <p className="text-[10px] text-muted-foreground dark:text-muted-foreground/80 mt-2">
             Presets apply ship components, Nose/Swivel turrets, ordnance, and max-rank Plexus mods.
           </p>
     </>
@@ -830,7 +830,7 @@ export default function RailjackBuilderPage() {
                             <Users className="h-3 w-3 shrink-0 text-violet-800 dark:text-violet-400" />
                             <span className="text-xs font-medium">Slot {label}</span>
                             {!unlocked && (
-                              <span className="text-[10px] text-amber-600 dark:text-amber-300">
+                              <span className="text-[10px] text-amber-800 dark:text-amber-300">
                                 Command {slotIdx === 0 ? 1 : slotIdx === 1 ? 3 : 5}+
                               </span>
                             )}
@@ -1050,7 +1050,7 @@ export default function RailjackBuilderPage() {
                       )}
                     >
                       {tab}
-                      <span className="ml-1.5 text-[10px] opacity-70">{count}/{max}</span>
+                      <span className="ml-1.5 text-[10px] opacity-90 dark:opacity-70">{count}/{max}</span>
                     </button>
                   );
                 })}

@@ -182,7 +182,7 @@ export default function AboutPage() {
             </div>
           </ContentPanel>
 
-          <p className="text-center text-xs text-muted-foreground/70">
+          <p className="text-center text-xs text-muted-foreground dark:text-muted-foreground/70">
             Warframe and the Warframe logo are registered trademarks of Digital Extremes Ltd.
             Voidforge is a fan-made tool and is not affiliated with, endorsed, or sponsored by Digital Extremes.
           </p>
