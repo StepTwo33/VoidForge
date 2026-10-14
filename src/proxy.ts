@@ -41,7 +41,9 @@ function buildCsp(nonce: string, isProd: boolean): string {
     `img-src 'self' data: blob: https://lh3.googleusercontent.com https://lh4.googleusercontent.com https://lh5.googleusercontent.com https://lh6.googleusercontent.com`,
     `font-src 'self' data:`,
     `style-src 'self' 'unsafe-inline'`,
-    `script-src 'self' 'nonce-${nonce}' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://unpkg.com`,
+    // Dev only: React's dev build uses eval() for callstack reconstruction (it never
+    // does in production). Production script-src is unchanged.
+    `script-src 'self' 'nonce-${nonce}' 'wasm-unsafe-eval'${isProd ? "" : " 'unsafe-eval'"} blob: https://cdn.jsdelivr.net https://unpkg.com`,
     `worker-src 'self' blob:`,
     `connect-src 'self' blob: data: https://cdn.jsdelivr.net https://unpkg.com https://tessdata.projectnaptha.com`,
     `manifest-src 'self'`,
