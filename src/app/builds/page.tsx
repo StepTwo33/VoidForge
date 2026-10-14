@@ -163,17 +163,23 @@ export default function BuildsLibraryPage() {
 
     setDeletingId(build.id);
     try {
+      // deleteCloudBuild resolves false (it never throws) when the API call fails.
+      let cloudOk = true;
       if (build.type === "loadout") {
         const local = getLoadouts().find((l) => l.id === build.id || l.cloudId === build.id);
         const cloudId = local?.cloudId ?? (!isDeviceBuildId(build.id) ? build.id : null);
         if (local) deleteLoadout(local.id);
         else if (isDeviceBuildId(build.id)) deleteLoadout(build.id);
-        if (cloudId) await deleteCloudBuild(cloudId);
+        if (cloudId) cloudOk = await deleteCloudBuild(cloudId);
       } else {
         deleteBuild(build.id);
-        if (!isDeviceBuildId(build.id)) await deleteCloudBuild(build.id);
+        if (!isDeviceBuildId(build.id)) cloudOk = await deleteCloudBuild(build.id);
       }
-      toast.success("Build deleted");
+      if (cloudOk) {
+        toast.success("Build deleted");
+      } else {
+        toast.error("Could not delete build from your account. Try again.");
+      }
       await refresh();
     } catch {
       toast.error("Could not delete build");
