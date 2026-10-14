@@ -209,13 +209,9 @@ function enumerateSources(ctx: WeaponDpsCalcContext): OmitSource[] {
       apply: (base) => {
         const next = cloneCtx(base);
         next.modSlots = next.modSlots.filter((s) => s.slotIndex !== slot.slotIndex);
-        if (isRiven) {
-          const riven = next.rivenStatChanges ? { ...next.rivenStatChanges } : undefined;
-          if (riven) {
-            delete riven[slot.slotIndex];
-            next.rivenStatChanges = Object.keys(riven).length > 0 ? riven : undefined;
-          }
-        }
+        // rivenStatChanges is the merged stat map of the (single) equipped riven, not
+        // slot-keyed — removing the riven slot removes its stats too.
+        if (isRiven) next.rivenStatChanges = undefined;
         return next;
       },
     });

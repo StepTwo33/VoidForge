@@ -661,6 +661,49 @@ function applyNightwaveWeaponAugmentEffects(
   }
 }
 
+// ── Riven stats that stack like normal mods ─────────────────────────────
+// Wiki Critical Hit / Point Strike / Calculating Bonuses / Reload: riven % bonuses
+// add into the same pool as the matching mods (base × (1 + mods + riven)).
+const RIVEN_ADDITIVE_POOL: Record<string, keyof WeaponModAccumulators> = {
+  damage: 'damageBonus',
+  criticalChance: 'critChanceBonus',
+  criticalMultiplier: 'critMultBonus',
+  statusChance: 'statusBonus',
+  fireRate: 'fireRateBonus',
+  multishot: 'multishotBonus',
+  magazine: 'magBonus',
+  reloadSpeed: 'reloadBonus',
+  impact: 'impactBonus',
+  puncture: 'punctureBonus',
+  slash: 'slashBonus',
+};
+/** Riven elements (base + spliced combined) join the slot-ordered element list. */
+const RIVEN_ELEMENT_KEYS = new Set([
+  'heat', 'cold', 'toxin', 'electricity',
+  'radiation', 'magnetic', 'viral', 'corrosive', 'gas', 'blast',
+]);
+
+/**
+ * Fold riven pool stats + elements in at the riven's slot. Wiki Riven Mods: a riven's
+ * elements are applied bottom-up (last listed first) in the slot combine order.
+ */
+function applyRivenAtSlot(
+  riven: Record<string, number>,
+  acc: WeaponModAccumulators,
+  elementalMods: { type: string; value: number }[],
+  baseWeaponDamage: number,
+): void {
+  for (const [stat, value] of Object.entries(riven)) {
+    const pool = RIVEN_ADDITIVE_POOL[stat];
+    if (pool) (acc[pool] as number) += value;
+  }
+  const elems = Object.entries(riven).filter(([stat]) => RIVEN_ELEMENT_KEYS.has(stat));
+  for (let i = elems.length - 1; i >= 0; i--) {
+    const [type, value] = elems[i];
+    elementalMods.push({ type, value: baseWeaponDamage * value });
+  }
+}
+
 // ── Main Weapon Calculator ──────────────────────────────────────────────
 export function calculateWeaponBuild(
   rawWeapon: Weapon,
@@ -817,7 +860,15 @@ export function calculateWeaponBuild(
   // Elemental combo order follows mod slot order: left→right, top→bottom (slotIndex).
   const orderedMods = [...equippedMods].sort((a, b) => a.slotIndex - b.slotIndex);
 
+  // Riven additive stats / elements enter at the equipped riven's slot; with no riven
+  // slot (stats passed directly) they enter after all mods.
+  const rivenSlotPresent = !!rivenStatChanges && orderedMods.some((s) => s.modId.startsWith('riven_'));
+  let rivenFolded = false;
   for (const modSlot of orderedMods) {
+    if (rivenStatChanges && !rivenFolded && modSlot.modId.startsWith('riven_')) {
+      applyRivenAtSlot(rivenStatChanges, weaponModAcc, elementalMods, baseWeapon.damage);
+      rivenFolded = true;
+    }
     const mod = allMods.get(modSlot.modId);
     if (!mod) continue;
 
@@ -858,6 +909,11 @@ export function calculateWeaponBuild(
         },
       });
     }
+  }
+
+  if (rivenStatChanges && !rivenSlotPresent) {
+    applyRivenAtSlot(rivenStatChanges, weaponModAcc, elementalMods, baseWeapon.damage);
+    rivenFolded = true;
   }
 
   // Combo Fury / Mark Of The Beast / Amalgam Furax·Ripkas cross-slot lines (Sim5).
@@ -1173,9 +1229,10 @@ export function calculateWeaponBuild(
   }
 
   // Reload: positive bonus = faster, negative bonus = slower (Burdened Magazine etc.)
+  // Wiki Reload: Total Reload Time = Reload Time / (1 + Reload Speed Bonus), for
+  // negative totals too (e.g. −50% → ×2). Floor the divisor to avoid ÷0.
   if (reloadBonus !== 0) {
-    if (reloadBonus > 0) stats.reloadTime /= Math.max(0.01, 1 + reloadBonus);
-    else stats.reloadTime *= (1 + Math.abs(reloadBonus));
+    stats.reloadTime /= Math.max(0.01, 1 + reloadBonus);
   }
 
   // Scale mod-sourced elemental damage by the total damage multiplier (Serration/etc.)
@@ -1605,7 +1662,15 @@ export function calculateWeaponBuild(
     stats.totalDamage = physDmg2 + eleDmg2 + residual;
   };
   if (incarnonStatChanges) applyStatChanges(incarnonStatChanges, false);
-  if (rivenStatChanges) applyStatChanges(rivenStatChanges, true);
+  if (rivenStatChanges) {
+    // Pool stats and elements were folded in with the mods above; the rest apply here.
+    const rivenLate: Record<string, number> = {};
+    for (const [k, v] of Object.entries(rivenStatChanges)) {
+      if (rivenFolded && (RIVEN_ADDITIVE_POOL[k] || RIVEN_ELEMENT_KEYS.has(k))) continue;
+      rivenLate[k] = v;
+    }
+    applyStatChanges(rivenLate, true);
+  }
   // Spliced Weak Point Critical Chance: wiki Enemy Body Parts, "additive with bonuses
   // like Point Strike" → +value × base CC, only on weak point hits (headshot sim).
   const wpcc = rivenStatChanges?.weakPointCritChance;

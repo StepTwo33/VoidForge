@@ -50,7 +50,9 @@ export function mergeIncarnonStatChanges(
 
 /**
  * Sum riven stats from slots that currently have a riven equipped.
- * Calculator applies these multiplicatively.
+ * Calculator adds % stats (damage, crit, status, fire rate, multishot, magazine,
+ * reload, IPS) into the same pools as normal mods, and riven elements enter the
+ * combine order at the riven's slot (wiki Critical Hit / Riven Mods).
  */
 export function mergeRivenStatChanges(
   rivenStatsMap: Record<number, Record<string, number>> | undefined,

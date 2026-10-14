@@ -733,7 +733,7 @@ describe("primary magazine/reload cores (wiki max rank, Phase M7)", () => {
     const weapon = requireWeapon("braton");
     const stats = withMod("braton", "tainted_mag");
     expect(stats.magazine).toBe(Math.round(weapon.magazine * 1.66));
-    expect(stats.reloadTime).toBeCloseTo(weapon.reloadTime * 1.33, 8);
+    expect(stats.reloadTime).toBeCloseTo(weapon.reloadTime / (1 - 0.33), 8);
   });
 
   it("Depleted Reload R5: −60% magazine, +48% reload speed", () => {
@@ -747,7 +747,7 @@ describe("primary magazine/reload cores (wiki max rank, Phase M7)", () => {
     const weapon = requireWeapon("braton");
     const stats = withMod("braton", "maximum_capacity");
     expect(stats.magazine).toBe(Math.round(weapon.magazine * 1.3));
-    expect(stats.reloadTime).toBeCloseTo(weapon.reloadTime * 1.15, 8);
+    expect(stats.reloadTime).toBeCloseTo(weapon.reloadTime / (1 - 0.15), 8);
   });
 });
 
@@ -774,14 +774,14 @@ describe("secondary magazine/reload cores (wiki max rank, Phase M7)", () => {
     const weapon = requireWeapon("lex");
     const stats = withMod("lex", "tainted_clip");
     expect(stats.magazine).toBe(Math.round(weapon.magazine * 1.6));
-    expect(stats.reloadTime).toBeCloseTo(weapon.reloadTime * 1.3, 8);
+    expect(stats.reloadTime).toBeCloseTo(weapon.reloadTime / (1 - 0.3), 8);
   });
 
   it("Full Capacity R5: +30% magazine, −15% reload speed", () => {
     const weapon = requireWeapon("lex");
     const stats = withMod("lex", "full_capacity");
     expect(stats.magazine).toBe(Math.round(weapon.magazine * 1.3));
-    expect(stats.reloadTime).toBeCloseTo(weapon.reloadTime * 1.15, 8);
+    expect(stats.reloadTime).toBeCloseTo(weapon.reloadTime / (1 - 0.15), 8);
   });
 
   it("Merciless Gunfight R5: +45% crit damage", () => {
@@ -820,7 +820,7 @@ describe("shotgun magazine cores (wiki max rank, Phase M7)", () => {
     const weapon = requireWeapon("strun");
     const stats = withMod("strun", "burdened_magazine");
     expect(stats.magazine).toBe(Math.round(weapon.magazine * 1.6));
-    expect(stats.reloadTime).toBeCloseTo(weapon.reloadTime * 1.18, 8);
+    expect(stats.reloadTime).toBeCloseTo(weapon.reloadTime / (1 - 0.18), 8);
   });
 });
 
@@ -1027,7 +1027,7 @@ describe("shotgun general cores (wiki max rank, Phase M9)", () => {
     const weapon = requireWeapon("strun");
     const stats = withMod("strun", "loaded_capacity");
     expect(stats.magazine).toBe(Math.round(weapon.magazine * 1.3));
-    expect(stats.reloadTime).toBeCloseTo(weapon.reloadTime * 1.15, 8);
+    expect(stats.reloadTime).toBeCloseTo(weapon.reloadTime / (1 - 0.15), 8);
   });
 
   it("Loose Chamber R5: +30% reload speed", () => {

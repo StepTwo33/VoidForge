@@ -46,7 +46,10 @@ describe("spliced combined elements", () => {
 
   it("does not combine with a base element: toxin stays toxin", () => {
     const s = calc("lato", { toxin: 0.5, viral: 0.9 });
-    expect(s.elements).toEqual([{ type: "toxin", value: 20 }, { type: "viral", value: 36.25 }]);
+    // Riven elements apply bottom-up (wiki Riven Mods), so list order is viral, toxin.
+    expect(s.elements).toHaveLength(2);
+    expect(s.elements).toContainEqual({ type: "toxin", value: 20 });
+    expect(s.elements).toContainEqual({ type: "viral", value: 36.25 });
   });
 
   it("merges with the same combined type made from heat + cold (20 + 20 + 36 = 76 → 76.25 blast)", () => {
