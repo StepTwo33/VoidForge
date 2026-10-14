@@ -52,7 +52,7 @@ import {
   type PlexusModTab,
 } from "@/lib/mods/railjack-plexus-mods";
 import { cn } from "@/lib/utils";
-import { Save, FolderOpen, Crosshair, Shield, Zap, Gauge, ChevronRight, Users } from "lucide-react";
+import { Save, FolderOpen, Crosshair, Shield, Zap, Gauge, ChevronRight, Users, Lock } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, RailjackBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
 import { toast } from "sonner";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
@@ -818,7 +818,7 @@ export default function RailjackBuilderPage() {
                   const boarding =
                     slot && weapon ? computeCrewBoardingDps(slot, weapon, modsMap) : null;
                   return (
-                    <div key={slotIdx} className={cn("rounded-lg border p-2.5", unlocked ? "border-border bg-card" : "border-dashed border-border bg-muted/20")}>
+                    <div key={slotIdx} className={cn("rounded-lg border p-2.5", unlocked ? "border-border bg-card" : "border-2 border-dashed border-foreground/35 bg-muted/30 bg-[repeating-linear-gradient(135deg,rgb(127_127_127/0.10)_0_6px,transparent_6px_12px)]")}>
                       <div className="flex items-start justify-between gap-2">
                         <button
                           type="button"
@@ -827,10 +827,14 @@ export default function RailjackBuilderPage() {
                           className="min-h-11 flex-1 min-w-0 py-1 text-left"
                         >
                           <div className="flex items-center gap-1.5">
-                            <Users className="h-3 w-3 shrink-0 text-violet-800 dark:text-violet-400" />
+                            {unlocked ? (
+                              <Users className="h-3 w-3 shrink-0 text-violet-800 dark:text-violet-400" />
+                            ) : (
+                              <Lock className="h-3.5 w-3.5 shrink-0 text-foreground/80" aria-hidden />
+                            )}
                             <span className="text-xs font-medium">Slot {label}</span>
                             {!unlocked && (
-                              <span className="text-[10px] text-amber-800 dark:text-amber-300">
+                              <span className="rounded border border-amber-700/40 bg-card px-1 text-[10px] font-medium text-amber-800 dark:border-amber-300/40 dark:text-amber-300">
                                 Command {slotIdx === 0 ? 1 : slotIdx === 1 ? 3 : 5}+
                               </span>
                             )}
