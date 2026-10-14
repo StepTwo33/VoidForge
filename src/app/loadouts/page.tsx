@@ -875,7 +875,7 @@ export default function LoadoutsPage() {
             className="flex flex-col flex-1 min-h-0 px-5 pb-5 pt-3"
           >
             <TabsList className={cn("mb-3 grid h-auto min-h-11 w-full shrink-0 lg:h-9", showModularTab ? "grid-cols-3" : "grid-cols-2")}>
-              <TabsTrigger value="saved" className="min-h-11 lg:min-h-0 gap-1.5 text-xs sm:text-sm">
+              <TabsTrigger value="saved" className="min-h-11 lg:pointer-fine:min-h-0 gap-1.5 text-xs sm:text-sm">
                 <Library className="h-3.5 w-3.5" />
                 <span className="truncate">Saved</span>
                 {savedCount > 0 && (
@@ -885,7 +885,7 @@ export default function LoadoutsPage() {
                 )}
               </TabsTrigger>
               {showModularTab && (
-                <TabsTrigger value="modular" className="min-h-11 lg:min-h-0 gap-1.5 text-xs sm:text-sm">
+                <TabsTrigger value="modular" className="min-h-11 lg:pointer-fine:min-h-0 gap-1.5 text-xs sm:text-sm">
                   <Wrench className="h-3.5 w-3.5" />
                   <span className="truncate">Modular</span>
                   {modularCount > 0 && (
@@ -895,7 +895,7 @@ export default function LoadoutsPage() {
                   )}
                 </TabsTrigger>
               )}
-              <TabsTrigger value="catalog" className="min-h-11 lg:min-h-0 gap-1.5 text-xs sm:text-sm">
+              <TabsTrigger value="catalog" className="min-h-11 lg:pointer-fine:min-h-0 gap-1.5 text-xs sm:text-sm">
                 <Crosshair className="h-3.5 w-3.5" />
                 Catalog
               </TabsTrigger>
