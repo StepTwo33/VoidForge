@@ -765,7 +765,6 @@ export default function ModularBuilderPage() {
                         <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
                         {capacityUsed} / {capacity}
                       </span>
-                      <a href="#build-stats" className="inline-flex min-h-11 items-center rounded-md px-2 text-xs font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden">Jump to stats ↓</a>
                     </div>
                     {isSecondaryKitgun && (
                       <p className="mb-2 text-[11px] leading-snug text-muted-foreground">

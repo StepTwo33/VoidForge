@@ -752,3 +752,24 @@ html:not(.dark) [data-sonner-toaster] [data-sonner-toast][data-type="warning"] {
   position: relative;
   z-index: 1;
 }
+
+/* Builder section switcher (BuilderSectionNav): below lg only one section is shown at a time. */
+:root {
+  /* Sticky site header (h-14 = 3.5rem) + safe area + 0.75rem breathing room; read by BuilderSectionNav. */
+  --builder-scroll-offset: calc(3.5rem + env(safe-area-inset-top, 0px) + 0.75rem);
+}
+@media (max-width: 1023.98px) {
+  [data-section-hidden] {
+    display: none !important;
+  }
+  [data-section-host] > :not([data-section-active]):not(:has([data-section-active])) {
+    display: none !important;
+  }
+  [data-section-active] {
+    scroll-margin-top: var(--builder-scroll-offset);
+  }
+  /* Keep the end of the page (footer, last controls) reachable above the fixed tab bar (~70px). */
+  body:has(> [data-builder-section-nav]) {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}

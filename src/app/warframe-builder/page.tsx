@@ -1013,7 +1013,6 @@ export default function WarframeBuilderPage() {
                       MOD CONFIGURATION{dualFormConfig ? ` — ${dualFormConfig.forms.find((f) => f.id === activeDualFormId)?.label ?? ""}` : ""}
                     </h2>
                     <div className="flex flex-wrap items-center gap-2">
-                      <a href="#build-stats" className="inline-flex min-h-11 items-center rounded-md px-2 text-xs font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden">Jump to stats ↓</a>
                       <span className={cn(
                         "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
                         capacityUsed > totalCapacity ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
@@ -1025,7 +1024,7 @@ export default function WarframeBuilderPage() {
                         <span className="text-[10px] text-green-700/80 dark:text-green-400/70">+{auraBonus} aura</span>
                       )}
                       {calculatedStats && (
-                        <span className="hidden text-[10px] font-mono tabular-nums text-muted-foreground sm:inline">
+                        <span className="hidden text-[10px] font-mono tabular-nums text-muted-foreground lg:inline">
                           STR {(calculatedStats.abilityStrength * 100).toFixed(0)}%
                           {" · "}DUR {(calculatedStats.abilityDuration * 100).toFixed(0)}%
                           {" · "}EFF {(calculatedStats.abilityEfficiency * 100).toFixed(0)}%

@@ -1385,7 +1385,7 @@ export default function RailjackBuilderPage() {
         showDescription={false}
         onSave={handleSaveBuildConfirm}
       />
-      <BuilderSectionNav sections={[{ id: "rj-stats", label: "Stats" }, { id: "rj-components", label: "Parts" }, { id: "rj-armaments", label: "Guns" }, { id: "rj-plexus", label: "Plexus" }]} />
+      <BuilderSectionNav sections={[{ id: "rj-plexus", label: "Plexus" }, { id: "rj-armaments", label: "Guns" }, { id: "rj-components", label: "Parts" }, { id: "rj-stats", label: "Stats" }]} />
     </PageShell>
   );
 }
