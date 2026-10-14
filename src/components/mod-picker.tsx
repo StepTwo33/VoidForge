@@ -516,10 +516,10 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                       type="button"
                       onClick={() => setStatFilter(option.id)}
                       className={cn(
-                        "inline-flex min-h-11 items-center rounded-full px-3 py-2.5 text-xs font-medium transition-colors ring-1 lg:min-h-8 lg:px-2.5 lg:py-1 lg:text-[11px]",
+                        "inline-flex min-h-11 items-center rounded-full px-3 py-2.5 text-xs font-medium transition-colors ring-1 lg:pointer-fine:min-h-8 lg:px-2.5 lg:py-1 lg:text-[11px]",
                         statFilter === option.id
                           ? "bg-primary text-primary-foreground ring-primary/40"
-                          : "bg-secondary/40 text-muted-foreground ring-border hover:text-foreground hover:bg-secondary/70",
+                          : "bg-secondary/40 text-muted-foreground ring-foreground/20 hover:text-foreground hover:bg-secondary/70",
                       )}
                     >
                       {option.label}
@@ -539,12 +539,12 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                         </>
                       )}
                   </p>
-                  <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <label className="flex w-full items-center gap-2 text-xs text-muted-foreground sm:w-auto sm:gap-1.5 sm:text-[11px]">
                     Sort
                     <select
                       value={sortId}
                       onChange={(e) => setSortId(e.target.value as ModSortId)}
-                      className="min-h-11 rounded-md border border-border bg-background px-2.5 py-2 text-xs text-foreground sm:min-h-8 sm:py-1 sm:text-[11px]"
+                      className="min-h-11 flex-1 rounded-md border border-border bg-background px-2.5 py-2 text-sm text-foreground sm:flex-none sm:pointer-fine:min-h-8 sm:py-1 sm:text-[11px]"
                     >
                       <option value="name">Name (A–Z)</option>
                       <option value="drain-asc">Drain (low → high)</option>
@@ -659,7 +659,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                         </div>
                         <div className="flex shrink-0 items-center gap-1.5">
                           {!hasStats && (
-                            <span className="text-[10px] text-yellow-500/70">utility</span>
+                            <span className="text-[10px] text-yellow-800 dark:text-yellow-500/70">utility</span>
                           )}
                           <Badge variant="outline" className={cn("text-[10px]", RARITY_BADGE_COLORS[mod.rarity])}>
                             {mod.rarity}

@@ -393,7 +393,7 @@ export function FilterChip({
       style={style}
       title={title}
       className={cn(
-        "inline-flex min-h-11 shrink-0 items-center rounded-full border px-3.5 py-2.5 text-xs font-medium transition-all lg:min-h-9 lg:px-3 lg:py-1.5",
+        "inline-flex min-h-11 shrink-0 items-center rounded-full border px-3.5 py-2.5 text-xs font-medium transition-all lg:pointer-fine:min-h-9 lg:px-3 lg:py-1.5",
         active
           ? "border-primary bg-primary/10 text-primary shadow-sm shadow-primary/10"
           : "border-border/70 text-muted-foreground hover:border-border hover:bg-muted/40 hover:text-foreground",
