@@ -1,5 +1,6 @@
 "use client";
 
+import { ListSkeleton } from "@/components/list-skeleton";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -388,9 +389,7 @@ export default function DiscoverPage() {
                 </div>
 
                 {countsLoading && catalogItems.length === 0 ? (
-                  <div className="flex items-center justify-center py-24 text-muted-foreground">
-                    <Loader2 className="h-7 w-7 animate-spin text-primary" />
-                  </div>
+                  <ListSkeleton variant="grid" rows={8} label="Loading items…" />
                 ) : (
                   <DiscoverItemGrid
                     items={filteredCatalog}
@@ -504,14 +503,12 @@ export default function DiscoverPage() {
                 </ContentPanel>
 
                 {loading ? (
-                  <div className="flex items-center justify-center py-24 text-muted-foreground">
-                    <Loader2 className="h-7 w-7 animate-spin text-primary" />
-                  </div>
+                  <ListSkeleton rows={4} label="Loading builds…" />
                 ) : builds.length === 0 ? (
                   <EmptyState
                     icon={Users}
                     title={`No builds for ${itemFilter?.name ?? "this item"} yet`}
-                    description={`Be the first to share a ${itemFilter?.name ?? ""} build — save in the builder and enable “List in Community”.`}
+                    description={`${itemFilter?.name ? `Be the first to share a ${itemFilter.name} build.` : "Be the first to share one."} Save it in the builder and turn on “List in Community”.`}
                   />
                 ) : (
                   <>

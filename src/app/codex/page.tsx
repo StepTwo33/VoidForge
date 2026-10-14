@@ -1,5 +1,6 @@
 "use client";
 
+import { ListSkeleton } from "@/components/list-skeleton";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Library } from "lucide-react";
@@ -689,9 +690,9 @@ export default function CodexPage() {
     <PageShell>
       <Suspense
         fallback={
-          <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
-            Loading codex…
-          </div>
+          <main className="container mx-auto px-4 py-8">
+            <ListSkeleton rows={8} label="Loading codex…" className="mx-auto max-w-3xl" />
+          </main>
         }
       >
         <CodexPageContent />

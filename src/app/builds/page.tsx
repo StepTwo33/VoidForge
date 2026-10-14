@@ -1,5 +1,6 @@
 "use client";
 
+import { ListSkeleton } from "@/components/list-skeleton";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -224,9 +225,7 @@ export default function BuildsLibraryPage() {
         </ContentPanel>
 
         {loading ? (
-          <div className="flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading your builds…
-          </div>
+          <ListSkeleton rows={5} label="Loading your builds…" />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={Library}

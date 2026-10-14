@@ -1,8 +1,9 @@
 "use client";
 
+import { ListSkeleton } from "@/components/list-skeleton";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, Loader2, Sparkles, TrendingUp } from "lucide-react";
+import { ChevronRight, Sparkles, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { PublicBuildSummary } from "@/lib/builds/build-types";
 import { PublicBuildRow } from "@/components/public-build-row";
@@ -117,9 +118,7 @@ export function CommunityBuildsSidebar({
 
       <div className={cn(isSidebar ? HOME_SIDEBAR_BODY_CLASS : "space-y-2 p-3")}>
         {loading ? (
-          <div className="flex items-center justify-center py-10 text-muted-foreground">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          </div>
+          <ListSkeleton variant="compact" rows={3} label="Loading community builds…" />
         ) : builds.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border/70 px-3 py-8 text-center">
             <p className="text-xs font-medium text-foreground">No public builds yet</p>
