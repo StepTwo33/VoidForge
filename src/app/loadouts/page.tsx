@@ -39,7 +39,8 @@ import {
   Dog,
   Crosshair,
   Search,
-  ExternalLink,
+  Pencil,
+  AlertTriangle,
   Copy,
   Info,
   Library,
@@ -741,6 +742,30 @@ export default function LoadoutsPage() {
                     </div>
                   </div>
 
+                  {loadout.importWarnings && loadout.importWarnings.length > 0 && (
+                    <div role="note" className="mb-3 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700 dark:text-amber-300" aria-hidden />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-amber-900 dark:text-amber-200">
+                          {loadout.importWarnings.length} item(s) from the import could not be mapped. Add them in the builder.
+                        </p>
+                        <p className="mt-0.5 break-words text-muted-foreground">{loadout.importWarnings.join(", ")}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          saveLoadout({ ...loadout, importWarnings: undefined });
+                          refresh();
+                        }}
+                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground lg:pointer-fine:h-8 lg:pointer-fine:w-8"
+                        aria-label="Dismiss import warnings"
+                        title="Dismiss"
+                      >
+                        <X className="h-4 w-4" aria-hidden />
+                      </button>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                     {(["warframe", "primary", "secondary", "melee", "companion"] as SlotType[]).map((slot) => {
                       const cfg = SLOT_CONFIG[slot];
@@ -801,7 +826,7 @@ export default function LoadoutsPage() {
                               href={`${isModularSlot ? "/modular-builder" : cfg.builderPath}?loadout=${encodeURIComponent(loadout.id)}&slot=${slot}`}
                               className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-background/60 text-xs font-medium transition-colors hover:border-primary/35 hover:text-primary"
                             >
-                              Open builder <ExternalLink className="h-3 w-3 opacity-70" />
+                              <Pencil className="h-3 w-3 opacity-70" aria-hidden /> Edit in builder
                             </a>
                             <div className="grid grid-cols-2 gap-1.5">
                               <button

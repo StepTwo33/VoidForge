@@ -74,6 +74,7 @@ export function WarframePlayerSync({ onImported, className }: WarframePlayerSync
     const now = Date.now();
     const loadout: Loadout = {
       ...result.loadout,
+      ...(result.warnings.length > 0 ? { importWarnings: result.warnings.map((w) => w.label) } : {}),
       id: generateId(),
       createdAt: now,
       updatedAt: now,

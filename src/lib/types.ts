@@ -1158,6 +1158,8 @@ export interface Loadout {
   isPublic?: boolean;
   /** Cloud build id when saved to account (for share links and sync). */
   cloudId?: string;
+  /** Local-only: labels Player Sync could not map (shown on the loadout card until dismissed). */
+  importWarnings?: string[];
   createdAt: number;
   updatedAt: number;
   /** Matches warframe builder / saved build payload so mods, arcanes, helminth, etc. round-trip. */

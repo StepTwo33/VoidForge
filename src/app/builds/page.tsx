@@ -308,8 +308,17 @@ export default function BuildsLibraryPage() {
                             )}
                           </div>
                           <p className="truncate text-[11px] text-muted-foreground">
-                            {display.typeLabel}
-                            {display.itemName ? ` · ${display.itemName}` : ""}
+                            <span
+                              className={cn(
+                                "mr-1 rounded px-1 py-px font-medium",
+                                build.type === "loadout"
+                                  ? "bg-amber-500/15 text-amber-800 dark:text-amber-300"
+                                  : "bg-muted text-foreground/80",
+                              )}
+                            >
+                              {display.typeLabel}
+                            </span>
+                            {display.itemName ? ` ${display.itemName}` : ""}
                             {" · "}
                             {formatUpdated(build.updatedAt ?? build.createdAt)}
                           </p>
@@ -321,8 +330,9 @@ export default function BuildsLibraryPage() {
                               ? "bg-muted text-muted-foreground"
                               : "bg-primary/10 text-primary",
                           )}
+                          title={badge === "Device" ? "Saved in this browser only" : "Saved to your account"}
                         >
-                          {badge}
+                          {badge === "Device" ? "This device" : "Synced"}
                         </span>
                       </Link>
                       <button

@@ -7,7 +7,7 @@ const STORAGE_KEY = "overframe_loadouts";
 /** Slot payloads only — name/description/isPublic live on SavedBuild when cloud-synced. */
 export type LoadoutBuildData = Omit<
   Loadout,
-  "id" | "name" | "description" | "isPublic" | "cloudId" | "createdAt" | "updatedAt"
+  "id" | "name" | "description" | "isPublic" | "cloudId" | "importWarnings" | "createdAt" | "updatedAt"
 >;
 
 /** Ensure cloud-safe defaults on slot payloads before POST /api/builds. */
@@ -103,6 +103,8 @@ export function loadoutToBuildData(loadout: Loadout): LoadoutBuildData {
     updatedAt: _updatedAt,
     ...data
   } = loadout;
+  // Import warnings are a local-only hint; never send them to the account.
+  delete (data as { importWarnings?: string[] }).importWarnings;
   return normalizeLoadoutBuildData(data);
 }
 

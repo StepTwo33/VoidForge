@@ -20,6 +20,13 @@ export interface SaveBuildDialogValues {
   description: string;
   isPublic: boolean;
   tags: string[];
+  /** "loadout" = update the loadout slot the builder was opened from; "new" = save as a standalone build. */
+  target: "loadout" | "new";
+}
+
+export interface SaveBuildLoadoutTarget {
+  loadoutName: string;
+  slotLabel: string;
 }
 
 interface SaveBuildDialogProps {
@@ -32,6 +39,8 @@ interface SaveBuildDialogProps {
   showDescription?: boolean;
   title?: string;
   onSave: (values: SaveBuildDialogValues) => Promise<void>;
+  /** When set, the dialog offers "Update loadout slot" (default) or "Save as new build". */
+  loadoutTarget?: SaveBuildLoadoutTarget | null;
 }
 
 export function SaveBuildDialog({
@@ -44,7 +53,9 @@ export function SaveBuildDialog({
   showDescription = true,
   title = "Save Build",
   onSave,
+  loadoutTarget = null,
 }: SaveBuildDialogProps) {
+  const [target, setTarget] = useState<"loadout" | "new">(loadoutTarget ? "loadout" : "new");
   const [name, setName] = useState(defaultName);
   const [description, setDescription] = useState(defaultDescription);
   const [isPublic, setIsPublic] = useState(defaultIsPublic);
@@ -62,6 +73,8 @@ export function SaveBuildDialog({
     returnFocusRef.current = document.activeElement as HTMLElement | null;
   }
   wasOpenRef.current = open;
+  const loadoutTargetRef = useRef(loadoutTarget);
+  loadoutTargetRef.current = loadoutTarget;
   const defaultsRef = useRef({ defaultName, defaultDescription, defaultIsPublic, defaultTags });
   defaultsRef.current = { defaultName, defaultDescription, defaultIsPublic, defaultTags };
 
@@ -72,8 +85,11 @@ export function SaveBuildDialog({
       setDescription(d.defaultDescription);
       setIsPublic(d.defaultIsPublic);
       setTags(d.defaultTags);
+      setTarget(loadoutTargetRef.current ? "loadout" : "new");
     }
   }, [open]);
+
+  const toLoadoutMode = Boolean(loadoutTarget) && target === "loadout";
 
   const toggleTag = (id: string) => {
     setTags((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
@@ -81,10 +97,11 @@ export function SaveBuildDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    const toLoadout = Boolean(loadoutTarget) && target === "loadout";
+    if (!toLoadout && !name.trim()) return;
     setSaving(true);
     try {
-      await onSave({ name: name.trim(), description: description.trim(), isPublic, tags });
+      await onSave({ name: name.trim(), description: description.trim(), isPublic, tags, target: toLoadout ? "loadout" : "new" });
       onOpenChange(false);
     } catch (err) {
       console.error("Save build dialog failed", err);
@@ -107,12 +124,46 @@ export function SaveBuildDialog({
       >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle>{toLoadoutMode ? "Save to loadout" : title}</DialogTitle>
             <DialogDescription>
-              Save to your account. Optionally list it in Community so others can find and upvote it.
+              {toLoadoutMode
+                ? `Update the ${loadoutTarget!.slotLabel} slot in ${loadoutTarget!.loadoutName}.`
+                : "Save to your account. Optionally list it in Community so others can find and upvote it."}
             </DialogDescription>
           </DialogHeader>
 
+          {loadoutTarget && (
+            <fieldset className="mt-4 grid gap-2">
+              <legend className="sr-only">Where to save</legend>
+              {([
+                ["loadout", "Update loadout slot", `Replace the ${loadoutTarget.slotLabel} in ${loadoutTarget.loadoutName} with this build.`],
+                ["new", "Save as new build", "Keep the loadout as it is and add a separate build to Your Builds."],
+              ] as const).map(([value, label, hint]) => (
+                <label
+                  key={value}
+                  className={cn(
+                    "flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors",
+                    target === value ? "border-primary/50 bg-primary/5" : "border-border hover:bg-secondary/30",
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="save-target"
+                    value={value}
+                    checked={target === value}
+                    onChange={() => setTarget(value)}
+                    className="mt-0.5 h-4 w-4 accent-primary"
+                  />
+                  <span>
+                    <span className="block text-sm font-medium">{label}</span>
+                    <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">{hint}</span>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+          )}
+
+          {!toLoadoutMode && (
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <label htmlFor="build-name" className="text-sm font-medium">
@@ -195,12 +246,15 @@ export function SaveBuildDialog({
             )}
           </div>
 
+          )}
+          {toLoadoutMode && <div className="py-2" />}
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
               Cancel
             </Button>
-            <Button type="submit" disabled={saving || !name.trim()}>
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+            <Button type="submit" disabled={saving || (!toLoadoutMode && !name.trim())}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : toLoadoutMode ? "Update loadout" : "Save"}
             </Button>
           </DialogFooter>
         </form>

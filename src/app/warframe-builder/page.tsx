@@ -60,6 +60,8 @@ import { getWarframeImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
 import { BuildImporter } from "@/components/build-importer";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
+import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
+import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
 import { CommunityBuildsPanel } from "@/components/community-builds-panel";
 import { DualFormTabs } from "@/components/dual-form-tabs";
 import { useCloudBuildFromUrl, fetchCloudBuild, setCloudBuildInUrl, clearCloudBuildInUrl, markCloudBuildLoaded } from "@/lib/builds/use-cloud-build-from-url";
@@ -409,9 +411,9 @@ export default function WarframeBuilderPage() {
     setBuildIsPublic(result.isPublic);
     setSavedBuilds(result.builds);
     if (result.synced) {
-      toast.success("Build saved", { description: `${name} saved to your account` });
+      toast.success(currentBuildId ? "Build saved" : "Saved as new build", { description: `${name} saved to your account` });
     } else {
-      toast.success("Build saved locally", { description: "Log in to sync builds to your account" });
+      toast.success(currentBuildId ? "Build saved locally" : "Saved as new build", { description: currentBuildId ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
     }
   }, [buildWarframeData, selectedWarframe, currentBuildId]);
 
@@ -432,11 +434,35 @@ export default function WarframeBuilderPage() {
 
   useCloudBuildFromUrl("warframe", (build) => applyLoadedBuild(build, { silent: true }));
   useLocalBuildFromUrl("warframe", (build) => applyLoadedBuild(build, { silent: true }));
-  useLoadoutSlotFromUrl(
+  const { context: loadoutCtx, clearContext: clearLoadoutCtx } = useLoadoutSlotFromUrl(
     "warframe",
     useCallback((build) => applyLoadedBuild(build, { silent: true }), [applyLoadedBuild]),
     allWarframes.length > 0,
   );
+
+  const handleSaveDialog = useCallback(async (values: SaveBuildDialogValues) => {
+    if (values.target === "loadout" && loadoutCtx) {
+      const data = buildWarframeData();
+      if (!data) return;
+      const res = await updateLoadoutSlot(loadoutCtx, data);
+      if (!res.ok) {
+        toast.error("Loadout not found", { description: "It may have been deleted. Use Save as new build instead." });
+        clearLoadoutCtx();
+        return;
+      }
+      if (res.cloud === "failed") {
+        toast.warning(`Saved to ${loadoutCtx.loadoutName} on this device`, {
+          description: "Account sync failed. Open Loadouts and save the loadout again to sync it.",
+        });
+      } else {
+        toast.success(`Saved to ${loadoutCtx.loadoutName} loadout`, {
+          description: `${loadoutSlotLabel(loadoutCtx.slot)} slot updated${res.cloud === "synced" ? " and synced to your account" : ""}.`,
+        });
+      }
+      return;
+    }
+    await handleSaveBuildConfirm(values);
+  }, [loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildWarframeData]);
 
   const handleDeleteBuild = useCallback((id: string) => {
     deleteBuild(id);
@@ -812,6 +838,7 @@ export default function WarframeBuilderPage() {
     <PageShell>
 
       <main className="container mx-auto flex-1 px-3.5 pt-5 pb-24 sm:px-4 sm:pt-6 lg:pb-6">
+        <LoadoutEditBanner context={loadoutCtx} onDetach={clearLoadoutCtx} />
         {showWarframeList || !selectedWarframe ? (
           <ItemPickerScreen
             icon={Shield}
@@ -1549,7 +1576,8 @@ export default function WarframeBuilderPage() {
         defaultName={buildName || (selectedWarframe ? `${selectedWarframe.name} Build` : "Warframe Build")}
         defaultDescription={buildDescription}
         defaultIsPublic={saveDialogDefaultPublic}
-        onSave={handleSaveBuildConfirm}
+        onSave={handleSaveDialog}
+        loadoutTarget={loadoutCtx ? { loadoutName: loadoutCtx.loadoutName, slotLabel: loadoutSlotLabel(loadoutCtx.slot) } : null}
       />
       <BuilderSectionNav sections={[{ id: "build-mods", label: "Mods" }, { id: "build-stats", label: "Stats" }]} />
     </PageShell>

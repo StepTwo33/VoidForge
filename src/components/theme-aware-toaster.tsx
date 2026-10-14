@@ -19,6 +19,8 @@ export function ThemeAwareToaster() {
     <Toaster
       theme={theme}
       position="bottom-right"
+      // Phones: sit above the fixed builder bottom bar (Mods / Stats).
+      mobileOffset={{ bottom: "calc(5rem + env(safe-area-inset-bottom))" }}
       richColors
       closeButton
       toastOptions={{

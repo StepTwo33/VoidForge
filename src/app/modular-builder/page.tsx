@@ -28,6 +28,8 @@ import { cn } from "@/lib/utils";
 import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
 import { resolveArcaneById } from "@/lib/builds/build-storage";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
+import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
+import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { snapshotFromBuild } from "@/lib/builds/compare-build";
@@ -282,9 +284,9 @@ export default function ModularBuilderPage() {
     setBuildIsPublic(result.isPublic);
     setSavedBuilds(result.builds);
     if (result.synced) {
-      toast.success("Build saved", { description: `${name} saved to your account` });
+      toast.success(currentBuildId ? "Build saved" : "Saved as new build", { description: `${name} saved to your account` });
     } else {
-      toast.success("Build saved locally", { description: "Log in to sync builds to your account" });
+      toast.success(currentBuildId ? "Build saved locally" : "Saved as new build", { description: currentBuildId ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
     }
   };
 
@@ -323,7 +325,31 @@ export default function ModularBuilderPage() {
   }, []);
 
   useCloudBuildFromUrl("modular", handleLoadBuild);
-  useLoadoutSlotFromUrl("modular", handleLoadBuild);
+  const { context: loadoutCtx, clearContext: clearLoadoutCtx } = useLoadoutSlotFromUrl("modular", handleLoadBuild);
+
+  const handleSaveDialog = async (values: SaveBuildDialogValues) => {
+    if (values.target === "loadout" && loadoutCtx) {
+      const data = buildModularData();
+      if (!data) return;
+      const res = await updateLoadoutSlot(loadoutCtx, data);
+      if (!res.ok) {
+        toast.error("Loadout not found", { description: "It may have been deleted. Use Save as new build instead." });
+        clearLoadoutCtx();
+        return;
+      }
+      if (res.cloud === "failed") {
+        toast.warning(`Saved to ${loadoutCtx.loadoutName} on this device`, {
+          description: "Account sync failed. Open Loadouts and save the loadout again to sync it.",
+        });
+      } else {
+        toast.success(`Saved to ${loadoutCtx.loadoutName} loadout`, {
+          description: `${loadoutSlotLabel(loadoutCtx.slot)} slot updated${res.cloud === "synced" ? " and synced to your account" : ""}.`,
+        });
+      }
+      return;
+    }
+    await handleSaveBuildConfirm(values);
+  };
 
   const handleDeleteBuild = (id: string) => {
     deleteBuild(id);
@@ -377,6 +403,7 @@ export default function ModularBuilderPage() {
   return (
     <PageShell>
       <main className="container mx-auto px-4 pt-8 pb-24 lg:pb-8">
+        <LoadoutEditBanner context={loadoutCtx} onDetach={clearLoadoutCtx} />
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <h1 className="text-xl sm:text-3xl font-bold">Modular Builder</h1>
           <div className="flex items-center gap-2">
@@ -991,7 +1018,8 @@ export default function ModularBuilderPage() {
         defaultName={buildName || `${modularType} Build`}
         defaultIsPublic={buildIsPublic}
         showDescription={false}
-        onSave={handleSaveBuildConfirm}
+        onSave={handleSaveDialog}
+        loadoutTarget={loadoutCtx ? { loadoutName: loadoutCtx.loadoutName, slotLabel: loadoutSlotLabel(loadoutCtx.slot) } : null}
       />
       <BuilderSectionNav sections={[{ id: "build-mods", label: "Mods" }, { id: "build-stats", label: "Stats" }]} />
     </PageShell>
