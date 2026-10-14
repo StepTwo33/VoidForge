@@ -4,7 +4,7 @@ import { BuilderSectionNav } from "@/components/builder-section-nav";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { PageShell } from "@/components/page-shell";
 import { ModSlotCard } from "@/components/mod-slot";
-import { ModPicker } from "@/components/mod-picker";
+import { ModPicker, buildSlotNav } from "@/components/mod-picker";
 import { useMods, useWeapons, useArchwings, useNecramechs } from "@/lib/weapons/use-data";
 import { enrichWeapon } from "@/lib/weapons/weapon-enrich";
 import { filterArchmeleeMods } from "@/lib/mods/archmelee-mods";
@@ -392,7 +392,7 @@ export default function ArchwingBuilderPage() {
                     </span>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
                   {Array.from({ length: mode === "necramech" ? 12 : 8 }, (_, i) => {
                     const mods = mode === "archwing" ? archwingMods : necramechMods;
                     const pols = mode === "archwing" ? archwingPolarities : necramechPolarities;
@@ -494,7 +494,7 @@ export default function ArchwingBuilderPage() {
                     </span>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
                   {Array.from({ length: selectedWeapon.modSlots }, (_, i) => {
                     const equipped = weaponMods.find((m) => m.slotIndex === i);
                     const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
@@ -538,6 +538,7 @@ export default function ArchwingBuilderPage() {
         category="archwing"
         archwingId={selectedArchwing?.id}
         equippedModIds={archwingMods.map((m) => m.modId)}
+        slotNav={buildSlotNav(Array.from({ length: 8 }, (_, i) => i), archwingActiveSlot, setArchwingActiveSlot)}
         onSelect={(mod, rank) => {
           setArchwingMods((prev) => {
             const filtered = prev.filter((m) => m.slotIndex !== archwingActiveSlot);
@@ -553,6 +554,7 @@ export default function ArchwingBuilderPage() {
         mods={filteredFrameMods}
         category="_prefiltered"
         equippedModIds={necramechMods.map((m) => m.modId)}
+        slotNav={buildSlotNav(Array.from({ length: 12 }, (_, i) => i), necramechActiveSlot, setNecramechActiveSlot)}
         onSelect={(mod, rank) => {
           setNecramechMods((prev) => {
             const filtered = prev.filter((m) => m.slotIndex !== necramechActiveSlot);
@@ -568,6 +570,7 @@ export default function ArchwingBuilderPage() {
         mods={filteredWeaponMods}
         category="_prefiltered"
         equippedModIds={weaponMods.map((m) => m.modId)}
+        slotNav={buildSlotNav(Array.from({ length: selectedWeapon?.modSlots ?? 0 }, (_, i) => i), weaponActiveSlot, setWeaponActiveSlot)}
         onSelect={(mod, rank) => {
           setWeaponMods((prev) => {
             const filtered = prev.filter((m) => m.slotIndex !== weaponActiveSlot);

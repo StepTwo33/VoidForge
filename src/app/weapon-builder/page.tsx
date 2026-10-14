@@ -15,7 +15,7 @@ import {
 } from "@/components/item-picker";
 import { ModSlotCard } from "@/components/mod-slot";
 import { WeaponStatsPanel } from "@/components/stats-panel";
-import { ModPicker, type SlotType } from "@/components/mod-picker";
+import { ModPicker, buildSlotNav, type SlotType } from "@/components/mod-picker";
 import { useWeapons, useMods } from "@/lib/weapons/use-data";
 import { calculateWeaponBuild, calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
 import { modCapacityAtRank } from "@/lib/calc/mod-capacity";
@@ -885,7 +885,7 @@ export default function WeaponBuilderPage() {
                     {" "}— only Exilus-eligible mods for this weapon.
                   </p>
                 )}
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 sm:gap-2.5">
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-2.5 lg:grid-cols-4">
                   {Array.from({ length: numSlots }, (_, i) => {
                     const equipped = equippedMods.find((m) => m.slotIndex === i);
                     const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
@@ -916,7 +916,7 @@ export default function WeaponBuilderPage() {
                       <span className="mb-1 block text-[10px] font-semibold tracking-wider text-cyan-700 dark:text-cyan-400">
                         {exilusLabel.toUpperCase()}
                       </span>
-                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 sm:gap-2.5">
+                      <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 sm:gap-2.5 lg:grid-cols-4">
                         <ModSlotCard
                           key={i}
                           mod={mod}
@@ -1049,6 +1049,11 @@ export default function WeaponBuilderPage() {
         onSelectRiven={handleSelectRiven}
         weaponCategory={selectedWeapon?.category}
         weapon={selectedWeapon ?? undefined}
+        slotNav={buildSlotNav(
+          [...Array.from({ length: numSlots }, (_, i) => i), ...(hasWeaponExilusSlot ? [WEAPON_EXILUS_SLOT_INDEX] : [])],
+          activeSlotIndex,
+          handleOpenModPicker,
+        )}
       />
 
       {/* Weapon Arcane Picker */}

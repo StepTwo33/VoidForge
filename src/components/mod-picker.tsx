@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { Search, Plus, X } from "lucide-react";
+import { Search, Plus, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { PolarityIcon } from "@/components/polarity-icon";
 import { getModImage, getArcaneImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
@@ -73,9 +73,20 @@ interface ModPickerProps {
   pickerMode?: "mods" | "arcanes";
   initialBrowseTab?: "mods" | "arcanes";
   equippedArcaneIds?: string[];
+  /** Phone/tablet (below lg) slot stepper shown in the bottom sheet. Display/navigation only. */
+  slotNav?: ModPickerSlotNav;
 }
 
-export function ModPicker({ open, onClose, mods, category, slotType = "regular", equippedModIds, onSelect, onSelectRiven, weaponCategory, weapon, warframeId, helminthAbility, archwingId, arcaneCatalog, pickerMode = "mods", initialBrowseTab = "mods", equippedArcaneIds = [] }: ModPickerProps) {
+export interface ModPickerSlotNav {
+  /** Short visible position label, e.g. "3 / 9". */
+  label: string;
+  /** Spoken form for assistive tech, e.g. "Slot 3 of 9". */
+  ariaLabel?: string;
+  onPrev?: () => void;
+  onNext?: () => void;
+}
+
+export function ModPicker({ open, onClose, mods, category, slotType = "regular", equippedModIds, onSelect, onSelectRiven, weaponCategory, weapon, warframeId, helminthAbility, archwingId, arcaneCatalog, pickerMode = "mods", initialBrowseTab = "mods", equippedArcaneIds = [], slotNav }: ModPickerProps) {
   const [search, setSearch] = useState("");
   const [selectedMod, setSelectedMod] = useState<Mod | null>(null);
   const [selectedRank, setSelectedRank] = useState(0);
@@ -85,6 +96,14 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
   const [rivenStatKey, setRivenStatKey] = useState("");
   const [rivenStatValue, setRivenStatValue] = useState("");
   const [statFilter, setStatFilter] = useState<ModStatFilterId>("all");
+  // Slot stepper: keep the chosen stat chip while moving between slots of the same type,
+  // but reset it when the slot type changes (e.g. regular -> Aura/Exilus), whose chip set differs.
+  // Adjust-state-during-render pattern (no effect) — UI state only.
+  const [prevSlotType, setPrevSlotType] = useState(slotType);
+  if (prevSlotType !== slotType) {
+    setPrevSlotType(slotType);
+    setStatFilter("all");
+  }
   const [sortId, setSortId] = useState<ModSortId>("name");
 
   const statFilterOptions = useMemo(
@@ -286,7 +305,8 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="flex max-h-[85vh] min-h-0 w-full max-w-[calc(100%-2rem)] flex-col overflow-hidden p-0 sm:max-w-2xl">
+      <DialogContent className="flex max-h-[85vh] min-h-0 w-full max-w-[calc(100%-2rem)] flex-col overflow-hidden p-0 sm:max-w-2xl max-lg:top-auto max-lg:bottom-0 max-lg:max-h-[85dvh] max-lg:max-w-none! max-lg:translate-y-0 max-lg:rounded-b-none max-lg:border-x-0 max-lg:border-b-0 max-lg:pb-[env(safe-area-inset-bottom)] max-lg:data-[state=closed]:zoom-out-100 max-lg:data-[state=open]:zoom-in-100 max-lg:data-[state=open]:slide-in-from-bottom-8 max-lg:data-[state=closed]:slide-out-to-bottom-8">
+        <div aria-hidden className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-muted-foreground/40 lg:hidden" />
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>
             {isArcaneBrowse
@@ -322,6 +342,37 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
             <p className="mt-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-2 text-[11px] leading-snug text-emerald-950 dark:text-emerald-200">
               Helminth unlock — <span className="font-semibold">{helminthAbility.abilityName} Augment</span> is available in this list while that ability is subsumed.
             </p>
+          )}
+          {slotNav && (
+            <div className="mt-2 flex items-center gap-2 lg:hidden" data-slot-nav>
+              <button
+                type="button"
+                onClick={() => { setSelectedMod(null); setSearch(""); slotNav.onPrev?.(); }}
+                disabled={!slotNav.onPrev}
+                className="inline-flex min-h-11 flex-1 items-center justify-center gap-1 rounded-md border border-border bg-secondary/40 px-3 text-sm font-medium transition-colors hover:border-primary/40 hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+              >
+                <ChevronLeft className="h-4 w-4" aria-hidden />
+                Prev slot
+              </button>
+              <span
+                role="status"
+                aria-live="polite"
+                aria-label={slotNav.ariaLabel ?? slotNav.label}
+                className="shrink-0 px-1 text-xs tabular-nums text-muted-foreground"
+              >
+                <span aria-hidden>{slotNav.label}</span>
+                <span className="sr-only">{slotNav.ariaLabel ?? slotNav.label}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => { setSelectedMod(null); setSearch(""); slotNav.onNext?.(); }}
+                disabled={!slotNav.onNext}
+                className="inline-flex min-h-11 flex-1 items-center justify-center gap-1 rounded-md border border-border bg-secondary/40 px-3 text-sm font-medium transition-colors hover:border-primary/40 hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+              >
+                Next slot
+                <ChevronRight className="h-4 w-4" aria-hidden />
+              </button>
+            </div>
           )}
         </DialogHeader>
 
@@ -685,4 +736,20 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
       </DialogContent>
     </Dialog>
   );
+}
+
+/** Builds the below-lg Prev/Next slot stepper from an ordered list of slot ids. UI navigation only. */
+export function buildSlotNav<T>(
+  order: readonly T[],
+  active: T,
+  open: (slot: T) => void,
+): ModPickerSlotNav | undefined {
+  const pos = order.indexOf(active);
+  if (pos < 0 || order.length < 2) return undefined;
+  return {
+    label: `${pos + 1} / ${order.length}`,
+    ariaLabel: `Slot ${pos + 1} of ${order.length}`,
+    onPrev: pos > 0 ? () => open(order[pos - 1]) : undefined,
+    onNext: pos < order.length - 1 ? () => open(order[pos + 1]) : undefined,
+  };
 }

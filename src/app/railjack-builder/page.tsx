@@ -4,7 +4,7 @@ import { BuilderSectionNav } from "@/components/builder-section-nav";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { PageShell } from "@/components/page-shell";
 import { ModSlotCard } from "@/components/mod-slot";
-import { ModPicker } from "@/components/mod-picker";
+import { ModPicker, buildSlotNav } from "@/components/mod-picker";
 import { useMods, useWeapons } from "@/lib/weapons/use-data";
 import { computeCrewBoardingDps } from "@/lib/calc/railjack-crew-boarding";
 import {
@@ -1111,7 +1111,7 @@ export default function RailjackBuilderPage() {
                       );
                     })()}
                   </div>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2">
                     {Array.from({ length: 8 }, (_, idx) => {
                       const i = idx + 1;
                       const equipped = integratedMods.find((m) => m.slotIndex === i);
@@ -1136,7 +1136,7 @@ export default function RailjackBuilderPage() {
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 sm:gap-2">
                   {PLEXUS_ABILITY_SLOT_CATEGORIES.map((category, i) => {
                     const equipped = currentMods.find((m) => m.slotIndex === i);
                     const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
@@ -1346,6 +1346,13 @@ export default function RailjackBuilderPage() {
         mods={slotRailjackMods}
         category="_prefiltered"
         equippedModIds={currentMods.map((m) => m.modId)}
+        slotNav={buildSlotNav(
+          plexusTab === "integrated"
+            ? [INTEGRATED_AURA_SLOT, ...Array.from({ length: 8 }, (_, i) => i + 1)]
+            : PLEXUS_ABILITY_SLOT_CATEGORIES.map((_, i) => i),
+          activeSlotIndex,
+          setActiveSlotIndex,
+        )}
         onSelect={(mod, rank) => {
           beginNewRailjackDraft();
           setCurrentMods((prev) => {

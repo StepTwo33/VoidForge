@@ -13,7 +13,7 @@ import {
 } from "@/components/item-picker";
 import { ModSlotCard } from "@/components/mod-slot";
 import { WarframeStatsPanel } from "@/components/stats-panel";
-import { ModPicker, SlotType } from "@/components/mod-picker";
+import { ModPicker, buildSlotNav, SlotType } from "@/components/mod-picker";
 import { useWeapons, useWarframes, useMods, useArchonShards } from "@/lib/weapons/use-data";
 import { calculateWarframeBuild, calculateWeaponBuild, calculateWeaponBuildWithArcanes, applyWarframeShardsAndArcanes } from "@/lib/calc/calculator";
 import {
@@ -1039,7 +1039,7 @@ export default function WarframeBuilderPage() {
                   {/* Aura + Exilus — top row (matches in-game warframe mod layout; Jade has 2 Auras) */}
                   <div
                     className={cn(
-                      "mb-2 grid gap-2 min-w-0",
+                      "mb-2 grid min-w-0 gap-1.5 sm:gap-2",
                       auraSlotIndices.length > 1 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2",
                     )}
                   >
@@ -1114,7 +1114,7 @@ export default function WarframeBuilderPage() {
                     </div>
                   )}
                   {/* Regular Mod Slots (1-8) */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2.5">
                     {Array.from({ length: 8 }, (_, i) => {
                       const slotIdx = i + 1;
                       const equipped = equippedMods.find((m) => m.slotIndex === slotIdx);
@@ -1395,6 +1395,15 @@ export default function WarframeBuilderPage() {
         arcaneCatalog={modPickerMode === "arcanes" ? warframeArcanes : undefined}
         pickerMode={modPickerMode}
         equippedArcaneIds={equippedArcanes.filter(Boolean).map((a) => a!.id)}
+        slotNav={
+          modPickerMode === "mods"
+            ? buildSlotNav(
+                [...auraSlotIndices, EXILUS_SLOT, ...Array.from({ length: 8 }, (_, i) => i + 1)],
+                activeSlotIndex,
+                handleOpenModPicker,
+              )
+            : undefined
+        }
       />
 
       <ShardPickerDialog

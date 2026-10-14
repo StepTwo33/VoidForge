@@ -145,19 +145,29 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
 
   if (!mod) {
     return (
-      <div className="relative flex min-h-24 flex-col">
+      <div className="relative flex min-h-[4.5rem] flex-row gap-1 sm:min-h-24 sm:flex-col sm:gap-0">
         <button
           onClick={onAdd}
-          className="group flex min-h-28 flex-1 flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-border/80 bg-card/20 px-2 text-muted-foreground transition-all hover:border-solid hover:border-primary/45 hover:bg-primary/5 hover:text-primary"
+          className="group flex min-h-[4.5rem] flex-1 flex-col items-center justify-center gap-1 rounded-xl sm:min-h-28 sm:gap-1.5 border border-dashed border-border/80 bg-card/20 px-2 text-muted-foreground transition-all hover:border-solid hover:border-primary/45 hover:bg-primary/5 hover:text-primary"
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted/40 ring-1 ring-border/50 transition-colors group-hover:bg-primary/10 group-hover:ring-primary/30">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full sm:h-8 sm:w-8 bg-muted/40 ring-1 ring-border/50 transition-colors group-hover:bg-primary/10 group-hover:ring-primary/30">
             <Plus className="h-4 w-4" />
           </div>
           <span className="text-xs font-medium">{label || `Slot ${slotIndex + 1}`}</span>
-          <span className="text-xs sm:text-[10px] text-muted-foreground group-hover:text-primary">Tap to add mod</span>
+          <span className="hidden text-xs text-muted-foreground group-hover:text-primary sm:inline sm:text-[10px]">Tap to add mod</span>
         </button>
         {onPolarize && (
-          <div className="mt-1.5 flex justify-end">
+          <div className="flex items-end sm:hidden">
+            <FormaPolarizeButton
+              inline
+              active={showPolarityPicker}
+              slotPolarity={slotPolarity}
+              onClick={(e) => { e.stopPropagation(); setShowPolarityPicker(!showPolarityPicker); }}
+            />
+          </div>
+        )}
+        {onPolarize && (
+          <div className="mt-1.5 hidden justify-end sm:flex">
             <FormaPolarizeButton
               inline
               active={showPolarityPicker}
@@ -204,7 +214,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
       >
         <X className="h-3.5 w-3.5" />
       </button>
-      <div className="flex min-h-0 flex-1 items-start gap-2.5 pr-10 sm:pr-8">
+      <div className="flex min-h-0 flex-1 items-start gap-2.5 pr-10 max-sm:flex-col max-sm:gap-1.5 max-sm:pr-0 sm:pr-8">
         <GameAssetImage
           src={getModImage(mod.name)}
           alt=""
@@ -213,13 +223,14 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
           className={cn(
             "mt-0.5 shrink-0 rounded bg-muted/20 object-contain",
             compact ? "h-9 w-9" : "h-11 w-11",
+            "max-sm:h-8 max-sm:w-8",
           )}
           hideOnError
         />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 max-sm:w-full">
           <div className="mb-0.5 flex items-start gap-1.5">
             <PolarityIcon polarity={mod.polarity} size={14} className="mt-0.5 shrink-0" />
-            <span className={cn("break-words font-semibold leading-snug", compact ? "text-xs" : "text-[13px] sm:line-clamp-2")}>
+            <span className={cn("break-words font-semibold leading-snug max-sm:line-clamp-2 max-sm:text-[13px]", compact ? "text-xs" : "text-[13px] sm:line-clamp-2")}>
               {mod.name}
             </span>
           </div>
@@ -233,9 +244,9 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
               {Object.keys(rivenStats).length > 3 && <div className="text-purple-600/70 dark:text-purple-400/60">+{Object.keys(rivenStats).length - 3} more</div>}
             </div>
           ) : statEntries.length > 0 ? (
-            <div className="mt-0.5 space-y-0.5 text-[11px] leading-snug text-cyan-800/90 dark:text-cyan-300/80">
+            <div className="mt-0.5 space-y-0.5 text-[11px] leading-snug text-cyan-800/90 dark:text-cyan-300/80 max-sm:[&>*:nth-child(n+2)]:hidden">
               {statEntries.map(([k, v]) => (
-                <div key={k} className={compact ? "line-clamp-1" : "line-clamp-2"}>{formatStat(k, v as number)}</div>
+                <div key={k} className={cn(compact ? "line-clamp-1" : "line-clamp-2", "max-sm:line-clamp-1")}>{formatStat(k, v as number)}</div>
               ))}
             </div>
           ) : (

@@ -5,7 +5,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { PageShell } from "@/components/page-shell";
 import { ModSlotCard } from "@/components/mod-slot";
 import { WeaponStatsPanel } from "@/components/stats-panel";
-import { ModPicker } from "@/components/mod-picker";
+import { ModPicker, buildSlotNav } from "@/components/mod-picker";
 import { useMods, useArcanes, useWeapons } from "@/lib/weapons/use-data";
 import { calculateWeaponBuild, calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
 import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
@@ -366,6 +366,13 @@ export default function ModularBuilderPage() {
     : modularType === "zaw"
       ? Boolean(zawStrike || zawGripSel || zawLinkSel)
       : Boolean(ampPrism || ampScaffold || ampBrace);
+
+  const openModSlot = (i: number) => {
+    const isExilus = isSecondaryKitgun && i === SECONDARY_EXILUS_SLOT_INDEX;
+    setActiveSlotIndex(i);
+    setModPickerSlotType(isExilus ? "weapon_exilus_secondary" : "regular");
+    setModPickerOpen(true);
+  };
 
   return (
     <PageShell>
@@ -765,7 +772,7 @@ export default function ModularBuilderPage() {
                         Last slot is <span className="font-medium text-foreground/80">Exilus</span> for secondary kitguns.
                       </p>
                     )}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
                       {Array.from({ length: totalModSlots }, (_, i) => {
                         const equipped = equippedMods.find((m) => m.slotIndex === i);
                         const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
@@ -778,11 +785,7 @@ export default function ModularBuilderPage() {
                             slotIndex={i}
                             label={isExilus ? "Exilus" : undefined}
                             slotPolarity={slotPolarities[i]}
-                            onAdd={() => {
-                              setActiveSlotIndex(i);
-                              setModPickerSlotType(isExilus ? "weapon_exilus_secondary" : "regular");
-                              setModPickerOpen(true);
-                            }}
+                            onAdd={() => openModSlot(i)}
                             onRemove={() => setEquippedMods((prev) => prev.filter((m) => m.slotIndex !== i))}
                             onPolarize={(p) => setSlotPolarities((prev) => { const next = { ...prev }; if (p) next[i] = p; else delete next[i]; return next; })}
                           />
@@ -931,6 +934,7 @@ export default function ModularBuilderPage() {
           weaponCategory={assembledWeapon.category}
           weapon={assembledWeapon}
           equippedModIds={equippedMods.map((m) => m.modId)}
+          slotNav={buildSlotNav(Array.from({ length: totalModSlots }, (_, i) => i), activeSlotIndex, openModSlot)}
           onSelect={(mod, rank) => {
             setEquippedMods((prev) => {
               const filtered = prev.filter((m) => m.slotIndex !== activeSlotIndex);
