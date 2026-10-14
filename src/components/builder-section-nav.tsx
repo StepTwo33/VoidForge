@@ -51,7 +51,7 @@ export function BuilderSectionNav({ sections }: { sections: BuilderSection[] }) 
   return (
     <nav
       aria-label="Builder sections"
-      className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-3 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] pt-2 pointer-events-none lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 flex justify-center [body[data-scroll-locked]_&]:hidden px-3 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] pt-2 pointer-events-none lg:hidden"
     >
       <div className="pointer-events-auto flex max-w-full gap-1 overflow-x-auto rounded-full border border-border/70 bg-card/95 p-1 shadow-lg shadow-[var(--shadow-color)] backdrop-blur-md supports-[backdrop-filter]:bg-card/85">
         {present.map((s) => {
