@@ -1,7 +1,7 @@
 "use client";
 
 import { ListSkeleton } from "@/components/list-skeleton";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Library } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -103,10 +103,15 @@ function CodexPageContent() {
   const [arcaneTrigger, setArcaneTrigger] = useState<string>("all");
   const [previewRank, setPreviewRank] = useState<number | null>(null);
 
-  useEffect(() => {
+  // Re-sync the search box from ?q= whenever the URL params change (same as the
+  // former effect, but adjusted during render to avoid a setState-in-effect pass).
+  const paramsKey = searchParams.toString();
+  const [syncedParamsKey, setSyncedParamsKey] = useState(paramsKey);
+  if (paramsKey !== syncedParamsKey) {
+    setSyncedParamsKey(paramsKey);
     const q = searchParams.get("q");
     if (q !== null) setSearchQuery(q);
-  }, [searchParams]);
+  }
 
   const setParams = useCallback(
     (updates: Record<string, string | null>) => {
