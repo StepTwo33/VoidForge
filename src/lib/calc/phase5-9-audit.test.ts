@@ -2314,7 +2314,8 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
     expect(full.totalDamage).toBeCloseTo(bare.totalDamage, 4);
     const heat = full.elements.find((e) => e.type === "heat")?.value ?? 0;
     expect(heat).toBeCloseTo(bare.totalDamage * 0.96, 4);
-    expect(full.impact + full.puncture + full.slash).toBeCloseTo(bare.totalDamage * 0.04, 4);
+    // Amp damage is pure Void (wiki): the unconverted 4% stays Void, not IPS.
+    expect(full.impact + full.puncture + full.slash).toBeCloseTo(0, 4);
     expect(full.arcaneBonuses?.voidConversion).toBeCloseTo(96, 4);
   });
 

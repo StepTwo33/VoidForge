@@ -42,7 +42,8 @@ const KITGUN_CHAMBER_GOLDENS = [
 const AMP_PRISM_GOLDENS = [
   { id: "amp_raplak", damage: 3000, fireRate: 2, criticalChance: 0.38, criticalMultiplier: 2.6, statusChance: 0.1 },
   { id: "amp_shwaak", damage: 3500, fireRate: 1.33, criticalChance: 0.1, criticalMultiplier: 1.6, statusChance: 0.2 },
-  { id: "amp_granmu", damage: 1000, fireRate: 1, criticalChance: 0.26, criticalMultiplier: 2, statusChance: 0.12 },
+  // Granmu: per-trigger sum Direct Hit 1000 + Explosion 1400 Void (same convention as scaffolds)
+  { id: "amp_granmu", damage: 2400, fireRate: 1, criticalChance: 0.26, criticalMultiplier: 2, statusChance: 0.12 },
   { id: "amp_rahn", damage: 1000, fireRate: 5.67, criticalChance: 0.3, criticalMultiplier: 2, statusChance: 0.04 },
   { id: "amp_cantic", damage: 1460, fireRate: 2.67, criticalChance: 0.34, criticalMultiplier: 2.2, statusChance: 0.1 },
   { id: "amp_lega", damage: 600, fireRate: 7.5, criticalChance: 0.08, criticalMultiplier: 1.6, statusChance: 0.34 },

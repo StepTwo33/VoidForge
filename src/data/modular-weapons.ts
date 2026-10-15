@@ -508,16 +508,18 @@ export function buildZaw(strike: ZawStrike, grip: ZawGrip, link: ZawLink): Weapo
 
 // ── AMP SYSTEM ──────────────────────────────────────────────────────────
 // Amp damage is Void type (not represented in IPS). All damage goes into total.
+// Values: wiki Module:Weapons/data/modular (wiki.warframe.com + fandom agree). Magazine = 100 amp
+// energy; ammoCost = energy per shot (per tick for Held). The main weapon list mirrors these.
 
 export const ampPrisms: Weapon[] = [
-  { id: "amp_raplak", name: "Raplak", category: "amp_prism", damage: 3000, impact: 0, puncture: 0, slash: 0, fireRate: 2.00, criticalChance: 0.38, criticalMultiplier: 2.6, statusChance: 0.10, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Semi-Auto", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
-  { id: "amp_shwaak", name: "Shwaak", category: "amp_prism", damage: 3500, impact: 0, puncture: 0, slash: 0, fireRate: 1.33, criticalChance: 0.10, criticalMultiplier: 1.6, statusChance: 0.20, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Semi-Auto", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
-  // wiki Granmu Prism Direct Hit Void 1000 (Explosion 1400 separate)
-  { id: "amp_granmu", name: "Granmu", category: "amp_prism", damage: 1000, impact: 0, puncture: 0, slash: 0, fireRate: 1.00, criticalChance: 0.26, criticalMultiplier: 2.0, statusChance: 0.12, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Burst", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
-  { id: "amp_rahn", name: "Rahn", category: "amp_prism", damage: 1000, impact: 0, puncture: 0, slash: 0, fireRate: 5.67, criticalChance: 0.30, criticalMultiplier: 2.0, statusChance: 0.04, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Auto", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
-  { id: "amp_cantic", name: "Cantic", category: "amp_prism", damage: 1460, impact: 0, puncture: 0, slash: 0, fireRate: 2.67, criticalChance: 0.34, criticalMultiplier: 2.2, statusChance: 0.10, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Burst", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
-  { id: "amp_lega", name: "Lega", category: "amp_prism", damage: 600, impact: 0, puncture: 0, slash: 0, fireRate: 7.50, criticalChance: 0.08, criticalMultiplier: 1.6, statusChance: 0.34, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Held", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
-  { id: "amp_klamora", name: "Klamora", category: "amp_prism", damage: 600, impact: 0, puncture: 0, slash: 0, fireRate: 12.0, criticalChance: 0.38, criticalMultiplier: 2.4, statusChance: 0.10, magazine: 40, reloadTime: 2, multishot: 1, triggerType: "Held", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
+  { id: "amp_raplak", name: "Raplak", category: "amp_prism", damage: 3000, impact: 0, puncture: 0, slash: 0, fireRate: 2.0, criticalChance: 0.38, criticalMultiplier: 2.6, statusChance: 0.1, magazine: 100, ammoCost: 10, reloadTime: 2, multishot: 1, triggerType: "Semi-Auto", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
+  { id: "amp_shwaak", name: "Shwaak", category: "amp_prism", damage: 3500, impact: 0, puncture: 0, slash: 0, fireRate: 1.33, criticalChance: 0.1, criticalMultiplier: 1.6, statusChance: 0.2, magazine: 100, ammoCost: 10, reloadTime: 2, multishot: 1, triggerType: "Semi-Auto", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
+  // wiki Granmu Prism: Direct Hit 1000 Void + Explosion 1400 Void per shot (per-trigger sum, as for scaffolds); 3-round burst, 0.15s
+  { id: "amp_granmu", name: "Granmu", category: "amp_prism", damage: 2400, impact: 0, puncture: 0, slash: 0, fireRate: 1.0, criticalChance: 0.26, criticalMultiplier: 2.0, statusChance: 0.12, magazine: 100, ammoCost: 5, reloadTime: 2, multishot: 1, triggerType: "Burst", burstCount: 3, burstDelay: 0.15, modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
+  { id: "amp_rahn", name: "Rahn", category: "amp_prism", damage: 1000, impact: 0, puncture: 0, slash: 0, fireRate: 5.67, criticalChance: 0.3, criticalMultiplier: 2.0, statusChance: 0.04, magazine: 100, ammoCost: 3, reloadTime: 2, multishot: 1, triggerType: "Auto", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
+  { id: "amp_cantic", name: "Cantic", category: "amp_prism", damage: 1460, impact: 0, puncture: 0, slash: 0, fireRate: 2.67, criticalChance: 0.34, criticalMultiplier: 2.2, statusChance: 0.1, magazine: 100, ammoCost: 3, reloadTime: 2, multishot: 1, triggerType: "Burst", burstCount: 3, burstDelay: 0.08, modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
+  { id: "amp_lega", name: "Lega", category: "amp_prism", damage: 600, impact: 0, puncture: 0, slash: 0, fireRate: 7.5, criticalChance: 0.08, criticalMultiplier: 1.6, statusChance: 0.34, magazine: 100, ammoCost: 0.8, reloadTime: 2, multishot: 1, triggerType: "Held", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
+  { id: "amp_klamora", name: "Klamora", category: "amp_prism", damage: 600, impact: 0, puncture: 0, slash: 0, fireRate: 12.0, criticalChance: 0.38, criticalMultiplier: 2.4, statusChance: 0.1, magazine: 100, ammoCost: 2.5, reloadTime: 2, multishot: 1, triggerType: "Held", modSlots: 0, hasPrimaryArcaneSlot: false, hasSecondaryArcaneSlot: false, isIncarnon: false, hasRivenSlot: false },
 ];
 
 export interface AmpScaffold {
@@ -529,17 +531,22 @@ export interface AmpScaffold {
   criticalMultiplier: number;
   statusChance: number;
   description: string;
+  /** Shots per burst / in-burst delay (s) for burst scaffolds (wiki BurstCount / BurstDelay). */
+  burstCount?: number;
+  burstDelay?: number;
 }
 
 // Damage is the per-trigger sum of the scaffold's attacks (wiki Module:Weapons/data/modular):
-// Phahd 3000 direct + 1100 explosion; Shraksun 3000 + 4500; Dissic 15 impact + 6600 explosion + 9 × 300 fragments.
+// Phahd 3000 direct + 1100 explosion; Shraksun 3000 + 4500; Dissic 15 impact + 6600 explosion + 9 × 300 fragments;
+// Exard 200 impact + 2600 explosion per shot, 3-round burst (0.12s) at Fire Rate 1 (fandom's older 5 / 0.111 was
+// corrected to 3 / 0.12 on wiki.warframe.com by the same editor in Feb 2025).
 export const ampScaffolds: AmpScaffold[] = [
   { id: "amp_pencha", name: "Pencha", damage: 9000, fireRate: 2.0, criticalChance: 0.14, criticalMultiplier: 1.6, statusChance: 0.18, description: "Charged beam" },
   { id: "amp_shraksun", name: "Shraksun", damage: 7500, fireRate: 1.33, criticalChance: 0.20, criticalMultiplier: 2.0, statusChance: 0.20, description: "Explosive short-range" },
   { id: "amp_klebrik", name: "Klebrik", damage: 320, fireRate: 12.0, criticalChance: 0.16, criticalMultiplier: 1.6, statusChance: 0.14, description: "Homing beam" },
   { id: "amp_phahd", name: "Phahd", damage: 4100, fireRate: 1.67, criticalChance: 0.34, criticalMultiplier: 2.6, statusChance: 0.12, description: "Bouncing glaive" },
-  { id: "amp_exard", name: "Exard", damage: 2800, fireRate: 6.67, criticalChance: 0.17, criticalMultiplier: 1.9, statusChance: 0.33, description: "Full-auto explosive" },
-  { id: "amp_dissic", name: "Dissic", damage: 9315, fireRate: 0.5, criticalChance: 0.03, criticalMultiplier: 1.5, statusChance: 0.37, description: "Lobbed fragmenting explosive" },
+  { id: "amp_exard", name: "Exard", damage: 2800, fireRate: 1.0, criticalChance: 0.17, criticalMultiplier: 1.9, statusChance: 0.33, description: "Full-auto explosive", burstCount: 3, burstDelay: 0.12 },
+  { id: "amp_dissic", name: "Dissic", damage: 9315, fireRate: 1.0, criticalChance: 0.03, criticalMultiplier: 1.5, statusChance: 0.37, description: "Lobbed fragmenting explosive" },
   { id: "amp_propa", name: "Propa", damage: 9000, fireRate: 2.0, criticalChance: 0.30, criticalMultiplier: 2.0, statusChance: 0.0, description: "Deployable mine" },
 ];
 
