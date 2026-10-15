@@ -278,7 +278,8 @@ export function runDamageSim(
     const pps = procsPerSec * (heatRaw / totalRaw);
     const tickDmg = totalRaw * 0.5 * acm * dotMult;
     const hm = enemyDamageTypeMultiplier(enemy, "heat") - 1;
-    heatDotDps = pps * tickDmg * dotTicks * (1 + hm) * (1 - armorDR);
+    // wiki Viral Damage: every DoT tick to health takes the Viral multiplier (matches ttk.ts).
+    heatDotDps = pps * tickDmg * dotTicks * (1 + hm) * (1 - armorDR) * viralMult;
   }
 
   let toxinDotDps = 0;
@@ -287,7 +288,8 @@ export function runDamageSim(
     const pps = procsPerSec * (toxinRaw / totalRaw);
     const tickDmg = totalRaw * 0.5 * acm * dotMult;
     const hm = enemyDamageTypeMultiplier(enemy, "toxin") - 1;
-    toxinDotDps = pps * tickDmg * dotTicks * (1 + hm) * (1 - armorDR);
+    // wiki Viral Damage: every DoT tick to health takes the Viral multiplier (matches ttk.ts).
+    toxinDotDps = pps * tickDmg * dotTicks * (1 + hm) * (1 - armorDR) * viralMult;
   }
 
   const totalDotDps = slashDotDps + heatDotDps + toxinDotDps;
