@@ -456,7 +456,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       const cap = capLine ? scaleArcaneEffectLine(capLine, rank, def.maxRank) : 420;
       const steps = Math.max(ctx.simStacks ?? stacks, 0);
       const totalPct = Math.min(cap, perStep * steps);
-      if (totalPct > 0) applyWeaponDamageMult(stats, totalPct);
+      if (totalPct > 0) applyAdditiveBaseDamage(stats, totalPct); // wiki: additive with Pressure Point
       trackBonus(stats, "meleeDamagePerShield", totalPct);
       trackBonus(stats, "meleeDamagePerShieldCap", cap);
       return true;
@@ -549,7 +549,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // wiki R5: on melee kill (30%), +300% primary damage for 12s. Paper: stacks>0 = buff up.
       const dmgLine = findEffect(def, "damage");
       const dmg = dmgLine ? scaleArcaneEffectLine(dmgLine, rank, def.maxRank) : 0;
-      if (dmg > 0) applyWeaponDamageMult(stats, dmg);
+      if (dmg > 0) applyAdditiveBaseDamage(stats, dmg); // wiki: additive with Serration
       trackBonus(stats, "damage", dmg);
       const chanceLine = findEffect(def, "armorBonusChance");
       if (chanceLine) {
@@ -658,7 +658,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       );
       const armorPts = Math.min(Math.max(armor - threshold, 0), armorPtsTowardCap);
       const dmgPct = armorPts * perArmorPct;
-      if (dmgPct > 0) applyWeaponDamageMult(stats, dmgPct);
+      if (dmgPct > 0) applyAdditiveBaseDamage(stats, dmgPct); // wiki: additive with Serration
       trackBonus(stats, "damagePerArmorOver", dmgPct);
       trackBonus(stats, "damagePerArmorThreshold", threshold);
       return true;
@@ -1032,11 +1032,8 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // Fury: +180% melee dmg on crit. Blade Charger: +300% melee dmg on primary kill.
       const dmgLine = findEffect(def, "meleeDamageBonus");
       const dmg = dmgLine ? scaleArcaneEffectLine(dmgLine, rank, def.maxRank) : 0;
-      // wiki Arcane Fury: additive with base damage mods (Pressure Point). Blade Charger unverified — unchanged.
-      if (dmg > 0) {
-        if (arcaneId === "arcane_fury") applyAdditiveBaseDamage(stats, dmg);
-        else applyWeaponDamageMult(stats, dmg);
-      }
+      // wiki Arcane Fury / Arcane Blade Charger: additive with base damage mods (Pressure Point).
+      if (dmg > 0) applyAdditiveBaseDamage(stats, dmg);
       trackBonus(stats, "meleeDamageBonus", dmg);
       const chanceLine = findEffect(def, "meleeDamageChance");
       if (chanceLine) {
@@ -1049,7 +1046,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // wiki: +150% damage while wall-latched. Paper: stacks>0 = wall-latching.
       const dmgLine = findEffect(def, "wallLatchDamage");
       const dmg = dmgLine ? scaleArcaneEffectLine(dmgLine, rank, def.maxRank) : 0;
-      if (dmg > 0) applyWeaponDamageMult(stats, dmg);
+      if (dmg > 0) applyAdditiveBaseDamage(stats, dmg); // wiki: additive with Serration
       trackBonus(stats, "wallLatchDamage", dmg);
       return true;
     }
@@ -1184,7 +1181,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // Paper: stacks>0 = buff active after reload.
       const mag = ctx.baseWeapon?.magazine ?? 0;
       const dmgPct = mag > 0 ? 15 * Math.sqrt(5 * mag) : 0;
-      if (dmgPct > 0) applyWeaponDamageMult(stats, dmgPct);
+      if (dmgPct > 0) applyAdditiveBaseDamage(stats, dmgPct); // wiki: additive with Serration
       trackBonus(stats, "reloadDamageRamp", dmgPct);
       const durLine = findEffect(def, "buffDuration");
       if (durLine) {
