@@ -22,6 +22,19 @@ export interface Necramech {
   description: string;
 }
 
+/**
+ * Rank 0 → rank 30 stat gains. Since the Health/Shield/Energy/Armor overhaul, Archwing and
+ * Necramech mods multiply the max-rank stat (wiki Archwing / Necramech patch history:
+ * "updated to apply Health / Shield / Energy / Armor values to Max Rank stats").
+ * Every Archwing gains +250 health / +200 shields / +50 energy (e.g. Elytron 765→1015,
+ * 745→945, 120→170); Necramechs gain +1000 / +200 / +50 (Voidrig 1400→2400, 850→1050,
+ * 175→225). Armor does not scale with rank.
+ * Necramechs can reach rank 40 via Forma; no source gives extra stats past rank 30, so
+ * builds assume rank 30.
+ */
+export const ARCHWING_RANK30_BONUS = { health: 250, shield: 200, energy: 50 } as const;
+export const NECRAMECH_RANK30_BONUS = { health: 1000, shield: 200, energy: 50 } as const;
+
 export const archwings: Archwing[] = [
   { id: "odonata", name: "Odonata", health: 425, shield: 430, armor: 100, energy: 85, speed: 1.0, description: "Balanced starter Archwing" },
   { id: "odonata_prime", name: "Odonata Prime", health: 650, shield: 640, armor: 100, energy: 85, speed: 1.05, description: "Prime balanced Archwing" },

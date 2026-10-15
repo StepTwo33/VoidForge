@@ -1,5 +1,6 @@
 import { getEffectiveModsMap } from "@/lib/weapons/effective-data";
 import type { Archwing, Necramech } from "@/data/archwing";
+import { ARCHWING_RANK30_BONUS, NECRAMECH_RANK30_BONUS } from "@/data/archwing";
 import {
   applyVerifiedModStatToArchwing,
   applyVerifiedModStatToNecramech,
@@ -59,19 +60,23 @@ export function calculateArchwingBuild(
   allMods: Map<string, Mod> = getEffectiveModsMap(),
 ): ArchwingCalculatedStats {
   const { acc, panel } = applyArchwingMods(equippedMods, allMods);
+  // Mods scale the max-rank (rank 30) stat.
+  const baseHealthR30 = archwing.health + ARCHWING_RANK30_BONUS.health;
+  const baseShieldR30 = archwing.shield + ARCHWING_RANK30_BONUS.shield;
+  const baseEnergyR30 = archwing.energy + ARCHWING_RANK30_BONUS.energy;
 
-  const totalHealth = archwing.health * (1 + acc.healthBonus);
-  const totalShield = archwing.shield * (1 + acc.shieldBonus);
+  const totalHealth = baseHealthR30 * (1 + acc.healthBonus);
+  const totalShield = baseShieldR30 * (1 + acc.shieldBonus);
   const totalArmor = archwing.armor * (1 + acc.armorBonus);
-  const totalEnergy = archwing.energy * (1 + acc.energyBonus);
+  const totalEnergy = baseEnergyR30 * (1 + acc.energyBonus);
   const totalFlightSpeed = archwing.speed * (1 + acc.flightSpeedBonus);
   const armorDR = totalArmor > 0 ? totalArmor / (totalArmor + 300) : 0;
 
   return {
-    baseHealth: archwing.health,
-    baseShield: archwing.shield,
+    baseHealth: baseHealthR30,
+    baseShield: baseShieldR30,
     baseArmor: archwing.armor,
-    baseEnergy: archwing.energy,
+    baseEnergy: baseEnergyR30,
     baseFlightSpeed: archwing.speed,
     healthBonus: acc.healthBonus,
     shieldBonus: acc.shieldBonus,
@@ -121,18 +126,22 @@ export function calculateNecramechBuild(
   allMods: Map<string, Mod> = getEffectiveModsMap(),
 ): ArchwingCalculatedStats {
   const { acc, panel } = applyNecramechMods(equippedMods, allMods);
+  // Mods scale the max-rank (rank 30) stat.
+  const baseHealthR30 = necramech.health + NECRAMECH_RANK30_BONUS.health;
+  const baseShieldR30 = necramech.shield + NECRAMECH_RANK30_BONUS.shield;
+  const baseEnergyR30 = necramech.energy + NECRAMECH_RANK30_BONUS.energy;
 
-  const totalHealth = necramech.health * (1 + acc.healthBonus);
-  const totalShield = necramech.shield * (1 + acc.shieldBonus);
+  const totalHealth = baseHealthR30 * (1 + acc.healthBonus);
+  const totalShield = baseShieldR30 * (1 + acc.shieldBonus);
   const totalArmor = necramech.armor * (1 + acc.armorBonus);
-  const totalEnergy = necramech.energy * (1 + acc.energyBonus);
+  const totalEnergy = baseEnergyR30 * (1 + acc.energyBonus);
   const armorDR = totalArmor > 0 ? totalArmor / (totalArmor + 300) : 0;
 
   return {
-    baseHealth: necramech.health,
-    baseShield: necramech.shield,
+    baseHealth: baseHealthR30,
+    baseShield: baseShieldR30,
     baseArmor: necramech.armor,
-    baseEnergy: necramech.energy,
+    baseEnergy: baseEnergyR30,
     baseFlightSpeed: 0,
     healthBonus: acc.healthBonus,
     shieldBonus: acc.shieldBonus,
