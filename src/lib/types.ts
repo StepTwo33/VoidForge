@@ -763,6 +763,12 @@ export interface CalculatedStats {
   statusProcs: StatusProc[];
   // Heavy attack / combo (melee)
   heavyAttackDamage: number;
+  /** Slam attack damage (avg crit, no combo multiplier); undefined when no wiki data. */
+  slamAttackDamage?: number;
+  /** Slide attack damage (avg crit, no combo multiplier); undefined when no wiki data. */
+  slideAttackDamage?: number;
+  slamBaseMultiplier?: number;
+  slideBaseMultiplier?: number;
   /** Heavy base / normal base × Killing Blow factor (wiki Module:Weapons HeavyAttack). */
   heavyAttackBaseMultiplier?: number;
   /** Weapon base Follow Through (wiki Module:Weapons melee); `followThrough` holds bonuses. */

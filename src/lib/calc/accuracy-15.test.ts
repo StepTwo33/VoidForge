@@ -219,3 +219,19 @@ describe("R7-11: Komorex zoom buffs (wiki Komorex, both wikis)", () => {
     expect(c.fireRate).toBeCloseTo(5, 3);
   });
 });
+
+describe("R7-13: Slam / Slide stat lines (wiki Module:Weapons melee, both wikis)", () => {
+  it("Skana unmodded: slam 240 × avg crit, slide 75 × avg crit", () => {
+    const s = build("skana");
+    const A = 1 + s.criticalChance * (s.criticalMultiplier - 1);
+    const q = s.totalDamage / 120; // 1/32 quantization of the 120 base
+    expect(s.slamAttackDamage!).toBeCloseTo(240 * q * A, 6);
+    expect(s.slideAttackDamage!).toBeCloseTo(75 * q * A, 6);
+  });
+  it("Condition Overload raises slide (direct) but not slam (AoE)", () => {
+    const a = build("skana");
+    const b = build("skana", ["condition_overload"], { statusTypesOnTarget: 3 });
+    expect(b.slamAttackDamage!).toBeCloseTo(a.slamAttackDamage!, 6);
+    expect(b.slideAttackDamage!).toBeGreaterThan(a.slideAttackDamage! * 2);
+  });
+});

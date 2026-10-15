@@ -185,4 +185,9 @@ export function applyMeleeComboToStats(
     (stats.heavyAttackBaseMultiplier ?? 1) *
     stats.heavyAttackComboMultiplier *
     avgCritMultiplier(heavyCC, stats.criticalMultiplier);
+  const avg = avgCritMultiplier(stats.criticalChance, stats.criticalMultiplier);
+  stats.slamAttackDamage =
+    stats.slamBaseMultiplier != null ? stats.totalDamage * stats.slamBaseMultiplier * avg : undefined;
+  stats.slideAttackDamage =
+    stats.slideBaseMultiplier != null ? stats.totalDamage * stats.slideBaseMultiplier * avg : undefined;
 }

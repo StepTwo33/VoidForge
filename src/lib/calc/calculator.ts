@@ -2023,6 +2023,13 @@ export function calculateWeaponBuild(
     const dmgMult = 1 + damageBonus;
     const kb = dmgMult > 0 ? (dmgMult + heavyDamageBonus) / dmgMult : 1;
     stats.heavyAttackBaseMultiplier = ratio * kb;
+    // Slam / slide (wiki Module:Weapons slam + SlideAttack): per-weapon bases scaled by the
+    // same mods; slams are AoE so direct-only per-status bonuses (CO / Galvanized) drop out.
+    if (baseWeapon.damage > 0) {
+      const aoe = dmgMult > 0 ? (dmgMult - directOnlyDamageBonus) / dmgMult : 1;
+      stats.slamBaseMultiplier = md?.slam ? (md.slam.damage / baseWeapon.damage) * aoe : undefined;
+      stats.slideBaseMultiplier = md?.slideAttack ? md.slideAttack / baseWeapon.damage : undefined;
+    }
     stats.heavyCritChanceBonus = heavyCritExtra;
   }
 

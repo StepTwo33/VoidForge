@@ -725,6 +725,12 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           />
           <StatRow label="Combo Duration" value={`${stats.comboDuration.toFixed(0)}s`} />
           <StatRow label="Heavy Attack" value={stats.heavyAttackDamage.toFixed(0)} highlighted changed={flash.has("heavyAttack")} />
+          {stats.slamAttackDamage != null && stats.slamAttackDamage > 0 && (
+            <StatRow label="Slam" value={stats.slamAttackDamage.toFixed(0)} />
+          )}
+          {stats.slideAttackDamage != null && stats.slideAttackDamage > 0 && (
+            <StatRow label="Slide" value={stats.slideAttackDamage.toFixed(0)} />
+          )}
           {stats.finisherDamage != null && stats.finisherDamage !== 0 && (
             <StatRow
               label="Finisher Damage"
