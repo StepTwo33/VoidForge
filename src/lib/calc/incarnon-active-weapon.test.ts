@@ -1522,7 +1522,7 @@ describe("evolution numeric fixes", () => {
 
     const bronco = incarnonDataMap.get("bronco")!;
     expect(mergeIncarnonStatChanges(bronco, { 2: 1 }, "bronco")?.flatBaseDamage).toBe(60);
-    expect(mergeIncarnonStatChanges(bronco, { 2: 1 }, "bronco_prime")?.flatBaseDamage).toBe(56);
+    expect(mergeIncarnonStatChanges(bronco, { 2: 1 }, "bronco_prime")?.flatBaseDamage).toBe(52); // wiki Bronco Prime: X = 16, Y = 9 × 4
 
     const gammacor = incarnonDataMap.get("gammacor")!;
     expect(mergeIncarnonStatChanges(gammacor, { 2: 1 }, "gammacor")?.flatBaseDamage).toBe(26);
