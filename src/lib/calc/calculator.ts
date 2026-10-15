@@ -1067,6 +1067,13 @@ export function calculateWeaponBuild(
   impactBonus = weaponModAcc.impactBonus;
   punctureBonus = weaponModAcc.punctureBonus;
   slashBonus = weaponModAcc.slashBonus;
+  // Komorex 3.5x zoom: +100% IPS additive with physical mods; −75% fire rate additive.
+  const zoomForIps = SNIPER_DATA[baseWeapon.id]?.zooms[(sim.sniperZoomLevel ?? 0) - 1];
+  if (zoomForIps?.physicalBonus) {
+    impactBonus += zoomForIps.physicalBonus;
+    punctureBonus += zoomForIps.physicalBonus;
+    slashBonus += zoomForIps.physicalBonus;
+  }
   hasBloodRush = weaponModAcc.hasBloodRush;
   bloodRushValue = weaponModAcc.bloodRushValue;
   hasConditionOverload = weaponModAcc.hasConditionOverload;
@@ -1301,6 +1308,8 @@ export function calculateWeaponBuild(
     s.modId === "semi_pistol_cannonade" ||
     s.modId === "semi_shotgun_cannonade",
   );
+  if (zoomForIps?.fireRateBonus) fireRateBonus += zoomForIps.fireRateBonus;
+  stats.sniperZoomRadialMult = zoomForIps?.zoomRadialMult ?? 0;
   if (fireRateLocked) {
     fireRateBonus = 0;
     stats.fireRateLocked = true;

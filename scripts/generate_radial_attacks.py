@@ -21,6 +21,11 @@ DAMAGE_KEYS = (
 
 # Innate explosions not modeled as AoE child attacks in Module:Weapons/data.
 MANUAL_RADIAL_ATTACKS: dict[str, list[dict]] = {
+    # Komorex: both wikis' article text give a 3.5 m explosion (Module lists 3.6 m).
+    "komorex": [
+        {"name": "3.5x Zoom Radial Attack", "viral": 53.0, "totalDamage": 53.0,
+         "radius": 3.5, "falloffReduction": 0.4},
+    ],
     # wiki Exalted Blade (both wikis): every swing also fires a 40 m wave with the swing's
     # base damage (Module "Normal Attack" Range 40, ShotSpeed 15); hits separately.
     "exalted_blade": [

@@ -200,3 +200,22 @@ describe("R7-10: bosses take at most 4 Cold stacks (wiki Cold Damage, both wikis
     expect(boss).toBeCloseTo(31.93, 1); // 31.10 s before (10-stack Cold crit + freeze)
   });
 });
+
+describe("R7-11: Komorex zoom buffs (wiki Komorex, both wikis)", () => {
+  it("unzoomed / 2x: no explosion; 3.5x: IPS ×2, fire rate ×0.25, 106 Viral explosion at 3.5 m", () => {
+    const z0 = build("komorex");
+    const z1 = build("komorex", [], { sniperZoomLevel: 1 });
+    const z2 = build("komorex", [], { sniperZoomLevel: 2 });
+    expect(z0.radialBurstDps ?? 0).toBe(0);
+    expect(z1.totalDamage).toBeCloseTo(z0.totalDamage, 9);
+    expect(z2.slash / z0.slash).toBeCloseTo(2, 0); // ≈2.07 after 1/32 damage quantization
+    expect(z2.fireRate / z0.fireRate).toBeCloseTo(0.25, 6);
+    const wave = z2.radialAttacks!.find((a) => /zoom radial/i.test(a.name))!;
+    expect(Math.abs(wave.totalDamage - 106)).toBeLessThan(5); // 53 × total-damage ratio ≈2.07
+    expect(wave.radius).toBe(3.5);
+  });
+  it("Semi-Rifle Cannonade nulls the −75% fire rate (wiki)", () => {
+    const c = build("komorex", ["semi_rifle_cannonade"], { sniperZoomLevel: 2 });
+    expect(c.fireRate).toBeCloseTo(5, 3);
+  });
+});

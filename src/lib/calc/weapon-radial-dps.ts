@@ -144,7 +144,11 @@ export function scaleRadialAttacksWithDps(
 
   let radialBurstDps = 0;
   const scaled: ScaledRadialAttack[] = attacks.map((attack) => {
-    const totalDamage = attack.totalDamage * mult;
+    // Komorex: "3.5x Zoom Radial Attack" only exists at max zoom; its 53 → 106 doubling comes
+    // through `mult` (the zoom's +100% IPS doubles total damage).
+    const zoomRadial = /zoom radial/i.test(attack.name);
+    const zoomMult = zoomRadial ? (stats.sniperZoomRadialMult ?? 0) : 1;
+    const totalDamage = attack.totalDamage * mult * zoomMult;
     const scaledAttack: WeaponRadialAttack = {
       name: attack.name,
       radius: attack.radius,
@@ -162,13 +166,13 @@ export function scaleRadialAttacksWithDps(
       "radiation", "viral", "corrosive", "blast", "gas", "magnetic", "tau",
     ] as const) {
       const val = attack[key];
-      if (val != null && val > 0) scaledAttack[key] = val * mult;
+      if (val != null && val > 0) scaledAttack[key] = val * mult * zoomMult;
     }
 
     const avgDamage = avgRadialDamage(scaledAttack);
     // Incarnon-form radials don't fire in normal form — exclude from DPS
     // unless Incarnon evolutions are active in the build.
-    const gatedOut = isIncarnonFormAttack(scaledAttack) && !incarnonActive;
+    const gatedOut = (isIncarnonFormAttack(scaledAttack) && !incarnonActive) || zoomMult === 0;
     // Match this radial against the weapon's residual damage: if the residual
     // roughly equals the explosion, it's already counted in direct DPS.
     let includedInDirect = false;

@@ -790,7 +790,7 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "name": "3.5x Zoom Radial Attack",
       "viral": 53.0,
       "totalDamage": 53.0,
-      "radius": 3.6,
+      "radius": 3.5,
       "falloffReduction": 0.4
     }
   ],

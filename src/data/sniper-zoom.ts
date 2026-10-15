@@ -13,8 +13,11 @@
  *  - Critical Chance (Lanka): flat +X added after mods.
  *  - Critical Multiplier: additive with crit-damage mods ("treated like a respective mod").
  *  - Headshot Damage: additive with headshot-damage mods.
- * Komorex zoom buffs (recoil/punch through; 3.5x IPS +100%, Viral burst, −75% fire rate) are
- * not modelled — Komorex gets the combo counter only.
+ * Komorex (both wikis): 2x zoom −50% recoil, +2 m punch through (no DPS effect); 3.5x zoom
+ * +100% Impact/Puncture/Slash (additive with physical mods), −75% fire rate (additive with
+ * mods; nulled by Cannonade) and enables the Viral explosion (53 base → 106 at zoom; radius
+ * 3.5 m per both wikis' article text — Module:Weapons/data lists 3.6 m).
+ * Not modelled: the zoom's +100% elemental multiplier on status proc damage (fandom note).
  */
 
 export interface SniperZoomLevel {
@@ -23,6 +26,12 @@ export interface SniperZoomLevel {
   critChanceFlat?: number;
   critMultBonus?: number;
   headshotDamageBonus?: number;
+  /** Additive with Impact/Puncture/Slash mods (Komorex 3.5x: +1.0). */
+  physicalBonus?: number;
+  /** Additive with fire-rate mods (Komorex 3.5x: −0.75). */
+  fireRateBonus?: number;
+  /** Enables the weapon's "Zoom Radial Attack" explosion, × this damage multiplier. */
+  zoomRadialMult?: number;
 }
 
 export interface SniperData {
@@ -38,7 +47,11 @@ const cm = (label: string, v: number): SniperZoomLevel => ({ label, critMultBonu
 const cc = (label: string, v: number): SniperZoomLevel => ({ label, critChanceFlat: v });
 
 export const SNIPER_DATA: Record<string, SniperData> = {
-  komorex: { minCombo: 5, comboDuration: 2, zooms: [] },
+  komorex: {
+    minCombo: 5,
+    comboDuration: 2,
+    zooms: [{ label: "2x" }, { label: "3.5x", physicalBonus: 1, fireRateBonus: -0.75, zoomRadialMult: 1 }],
+  },
   lanka: { minCombo: 2, comboDuration: 6, zooms: [cc("3x", 0.2), cc("5x", 0.3), cc("8x", 0.5)] },
   perigale: { minCombo: 1, comboDuration: 2, zooms: [cm("2x", 0.2), cm("4x", 0.4)] },
   rubico: { minCombo: 1, comboDuration: 2, zooms: [cm("3.5x", 0.35), cm("6x", 0.5)] },
