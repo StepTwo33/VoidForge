@@ -16,9 +16,19 @@ import { GameAssetImage } from "@/components/game-asset-image";
 import { EmptyState } from "@/components/page-shell";
 import { getBlockedModIds } from "@/data/mod-exclusions";
 import { cleanModDescription, getModStatDisplayLines } from "@/lib/display/mod-display";
+import { getRivenWeaponType, rivenModMatchesWeapon } from "@/lib/weapons/riven-weapon-type";
 
 function isRivenMod(mod: Mod): boolean {
   return mod.subCategory === "riven" || mod.id.startsWith("riven_");
+}
+
+/** Riven stat pool category for the picker (Kuva Hek / Phantasma use the shotgun pool). */
+function rivenPoolCategory(
+  weapon: (Pick<Weapon, "name" | "category"> & { hasRivenSlot?: boolean }) | undefined,
+  fallback: string,
+): string {
+  const type = weapon ? getRivenWeaponType(weapon) : null;
+  return type ? type.toLowerCase() : fallback;
 }
 
 import {
@@ -145,16 +155,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
       (category === "primary" || category === "secondary" || category === "melee")
     ) {
       categoryMods = mods.filter((m) => {
-        if (m.subCategory === "riven") {
-          // Exalted weapons, amps, arch-melee etc. cannot equip rivens.
-          if (weapon?.hasRivenSlot === false) return false;
-          const wc = weaponCategory.toLowerCase();
-          if (m.id === "riven_rifle") return ["rifle", "bow", "primary", "launcher"].includes(wc);
-          if (m.id === "riven_shotgun") return wc === "shotgun";
-          if (m.id === "riven_pistol") return ["pistol", "secondary", "dual_pistols"].includes(wc);
-          if (m.id === "riven_melee") return wc === "melee";
-          return false;
-        }
+        if (m.subCategory === "riven") return rivenModMatchesWeapon(m.id, weapon, weaponCategory);
         return modEligibleForWeaponSlot(m, category, weaponCategory, "regular", weaponModProfile);
       });
     } else {
@@ -165,15 +166,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
         if (category !== "archmelee" && (m.category === "archmelee" || isArchmeleeMod(m))) return false;
         if (category !== "archgun" && m.category === "archgun") return false;
         // Riven mods: only show the riven matching the specific weapon category
-        if (m.subCategory === "riven") {
-          if (!weaponCategory || weapon?.hasRivenSlot === false) return false;
-          const wc = weaponCategory.toLowerCase();
-          if (m.id === "riven_rifle") return ["rifle", "bow", "primary", "launcher"].includes(wc);
-          if (m.id === "riven_shotgun") return wc === "shotgun";
-          if (m.id === "riven_pistol") return ["pistol", "secondary", "dual_pistols"].includes(wc);
-          if (m.id === "riven_melee") return wc === "melee";
-          return false;
-        }
+        if (m.subCategory === "riven") return rivenModMatchesWeapon(m.id, weapon, weaponCategory);
         if (category === "primary") return ["primary", "rifle", "shotgun", "bow", "general"].includes(m.category);
         if (category === "secondary") return ["secondary", "pistol", "general"].includes(m.category);
         if (category === "melee") return m.category === "melee" || (m.category === "general" && !isArchmeleeMod(m));
@@ -240,7 +233,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
         m.name.toLowerCase().includes(q) ||
         m.description.toLowerCase().includes(q)
     );
-  }, [mods, category, slotType, search, warframeId, helminthAbility, archwingId, weaponCategory, weaponModProfile, weapon?.id, weapon?.hasRivenSlot]);
+  }, [mods, category, slotType, search, warframeId, helminthAbility, archwingId, weaponCategory, weaponModProfile, weapon]);
 
   const displayedMods = useMemo(() => {
     let list = filteredMods;
@@ -419,7 +412,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
             </div>
 
             {isRivenMod(selectedMod) ? (() => {
-              const rivenPool = getRivenStatsForCategory(weaponCategory || category);
+              const rivenPool = getRivenStatsForCategory(rivenPoolCategory(weapon, weaponCategory || category));
               return (
                 <div className="space-y-3">
                   <div className="text-[10px] text-purple-700/70 uppercase tracking-wider dark:text-purple-300/60">

@@ -158,7 +158,10 @@ export default function WeaponBuilderPage() {
         const shared = await extractBuildFromUrlAsync(params);
         if (cancelled || !shared || shared.type !== "weapon") return;
         const weapon = allWeapons.find((w) => w.id === shared.itemId);
-        if (!weapon) return;
+        if (!weapon) {
+          toast.error("Weapon not found", { description: "This shared build uses a weapon that is no longer in the catalog." });
+          return;
+        }
         if (isCompanionWeaponCategory(weapon.category)) {
           toast.error("Companion weapons are built in Companion Builder", {
             description: `${weapon.name} — open Companion Builder to configure this weapon.`,

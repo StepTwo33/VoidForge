@@ -62,3 +62,32 @@ describe("riven weapon types", () => {
     for (const n of ["Ruhang", "Ruhang II", "Korb", "Clapkra"]) expect(strikes).not.toContain(n);
   });
 });
+
+describe("accuracy-3: zaw strike stubs and builder riven picker", async () => {
+  const { zawStrikes } = await import("@/data/modular-weapons");
+  const { rivenModMatchesWeapon } = await import("@/lib/weapons/riven-weapon-type");
+  it.each(zawStrikes.map((z) => [z.id]))("%s stub matches modular strike (wiki)", (id) => {
+    const z = zawStrikes.find((x) => x.id === id)!;
+    const w = allWeapons.find((x) => x.id === id)!;
+    expect(w.damage).toBeCloseTo(z.damage, 3);
+    expect(w.impact).toBeCloseTo(z.impact, 3);
+    expect(w.puncture).toBeCloseTo(z.puncture, 3);
+    expect(w.slash).toBeCloseTo(z.slash, 3);
+    expect(w.criticalChance).toBeCloseTo(z.criticalChance, 3);
+    expect(w.criticalMultiplier).toBeCloseTo(z.criticalMultiplier, 3);
+    expect(w.statusChance).toBeCloseTo(z.statusChance, 3);
+  });
+  it("Ooltha stub is 224 (22.4 / 89.6 / 112), 0.92 speed", () => {
+    const w = allWeapons.find((x) => x.id === "zaw_ooltha")!;
+    expect([w.damage, w.impact, w.puncture, w.slash, w.fireRate]).toEqual([224, 22.4, 89.6, 112, 0.92]);
+  });
+  it("builder offers Shotgun rivens on Kuva Hek / Phantasma and none on exalted weapons", () => {
+    for (const n of ["Kuva Hek", "Phantasma", "Phantasma Prime"]) {
+      expect(rivenModMatchesWeapon("riven_shotgun", byName(n), "primary")).toBe(true);
+      expect(rivenModMatchesWeapon("riven_rifle", byName(n), "primary")).toBe(false);
+    }
+    expect(rivenModMatchesWeapon("riven_rifle", byName("Braton"), "primary")).toBe(true);
+    expect(rivenModMatchesWeapon("riven_melee", byName("Exalted Blade"), "melee")).toBe(false);
+    expect(rivenModMatchesWeapon("riven_pistol", byName("Regulators"), "secondary")).toBe(false);
+  });
+});

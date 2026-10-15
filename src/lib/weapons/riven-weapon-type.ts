@@ -44,3 +44,15 @@ export function getRivenWeaponType(
   if (c === "archgun") return "Archgun";
   return null;
 }
+
+/** Riven placeholder for this weapon: same rules as the riven grader (getRivenWeaponType). */
+export function rivenModMatchesWeapon(
+  modId: string,
+  weapon: (Pick<Weapon, "name" | "category"> & { hasRivenSlot?: boolean }) | undefined,
+  weaponCategory: string | undefined,
+): boolean {
+  const target = weapon ?? (weaponCategory ? { name: "", category: weaponCategory } : undefined);
+  const type = target ? getRivenWeaponType(target) : null;
+  return type !== null && modId === `riven_${type.toLowerCase()}`;
+}
+
