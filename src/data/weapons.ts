@@ -5975,6 +5975,18 @@ export const allWeapons: Weapon[] = [
     "reloadTime": 2,
     "multishot": 1,
     "triggerType": "Rifle",
+    "alternateModeStats": {
+      "label": "Semi-Auto",
+      "damage": 60,
+      "impact": 12,
+      "puncture": 12,
+      "slash": 36,
+      "fireRate": 2.5,
+      "criticalChance": 0.15,
+      "criticalMultiplier": 2,
+      "statusChance": 0.1,
+      "triggerType": "Semi-Auto"
+    },
     "modSlots": 8,
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
@@ -7943,6 +7955,7 @@ export const allWeapons: Weapon[] = [
     "reloadTime": 2.3,
     "multishot": 1,
     "triggerType": "Burst",
+    "defaultModeLabel": "Auto",
     "alternateModeStats": {
       "label": "Burst",
       "damage": 30,
@@ -7957,6 +7970,21 @@ export const allWeapons: Weapon[] = [
       "burstCount": 5,
       "burstDelay": 0.07
     },
+    "additionalAlternateModes": [
+      {
+        "label": "Semi-Auto",
+        "damage": 90,
+        "impact": 18,
+        "puncture": 18,
+        "slash": 54,
+        "fireRate": 2.5,
+        "criticalChance": 0.37,
+        "criticalMultiplier": 2.9,
+        "statusChance": 0.21,
+        "ammoCost": 3,
+        "triggerType": "Semi-Auto"
+      }
+    ],
     "modSlots": 8,
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
@@ -8190,6 +8218,7 @@ export const allWeapons: Weapon[] = [
     "reloadTime": 2,
     "multishot": 1,
     "triggerType": "Burst",
+    "defaultModeLabel": "Auto",
     "alternateModeStats": {
       "label": "Burst",
       "fireRate": 5,
@@ -8200,6 +8229,16 @@ export const allWeapons: Weapon[] = [
       "burstCount": 3,
       "burstDelay": 0.08
     },
+    "additionalAlternateModes": [
+      {
+        "label": "Semi-Auto",
+        "fireRate": 5,
+        "criticalChance": 0.42,
+        "criticalMultiplier": 3.4,
+        "statusChance": 0.18,
+        "triggerType": "Semi-Auto"
+      }
+    ],
     "modSlots": 8,
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,

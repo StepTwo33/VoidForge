@@ -96,6 +96,14 @@ export interface Weapon {
    * Heavy Blade). Catalog default is the primary form; toggle merges these fields.
    */
   alternateModeStats?: WeaponAlternateModeStats;
+  /**
+   * Further alternate fire modes beyond `alternateModeStats` (e.g. Kuva Hind /
+   * Tiberon Prime: Auto default, Burst, Semi-Auto). Mode index 0 is always
+   * `alternateModeStats`; these follow as indices 1..n.
+   */
+  additionalAlternateModes?: WeaponAlternateModeStats[];
+  /** UI label for the catalog default mode when the weapon has 2+ alternate modes. */
+  defaultModeLabel?: string;
 }
 
 /** Stat overrides applied when an archgun is deployed via Gravimag (atmosphere). */
