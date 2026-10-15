@@ -2006,14 +2006,10 @@ export function calculateWeaponBuild(
   const sniperComboTier = SNIPER_DATA[baseWeapon.id] ? (sim.sniperComboTier ?? 0) : 0;
   if (sniperComboTier > 0) {
     const sm = sniperComboMultiplier(sniperComboTier);
+    // In-game scope text (Jason, 2026-10-15): the combo multiplies critical damage only —
+    // crit hits ×sm, non-crits / status DoTs / AoE unchanged. Both wikis still say "total
+    // damage". Applied in calculateBurstDps and the TTK sim's direct hits.
     stats.sniperComboMultiplier = sm;
-    stats.impact *= sm;
-    stats.puncture *= sm;
-    stats.slash *= sm;
-    for (const e of stats.elements) e.value *= sm;
-    for (const e of stats.rawElements) e.value *= sm;
-    stats.totalDamage = stats.impact + stats.puncture + stats.slash +
-      stats.elements.reduce((sum, e) => sum + e.value, 0);
   }
 
   // wiki Melee § Heavy Attack (Module:Weapons HeavyAttack): heavies use a per-weapon base
@@ -2572,6 +2568,11 @@ function calculateBurstDps(stats: CalculatedStats): number {
   // Critical headshots: 2 × total crit multiplier on headcrit-able factions (wiki Critical Hit).
   const critMult = stats.criticalMultiplier * headCritFactor(sim.applyHeadshots, sim.targetFaction);
   let avgCrit = avgCritMultiplier(effectiveCritChance, critMult);
+  // Sniper Shot Combo: crit hits ×combo only (non-crit fraction unchanged).
+  const sniperCombo = Math.max(1, stats.sniperComboMultiplier ?? 1);
+  if (sniperCombo > 1) {
+    avgCrit = sniperCombo * avgCrit - (sniperCombo - 1) * Math.max(0, 1 - effectiveCritChance);
+  }
   // Devouring/Devastating Attrition: non-crit hits average +bonus damage.
   // Only the non-crit fraction of hits benefits; at ≥100% CC there are none.
   const nonCritFraction = Math.max(0, 1 - effectiveCritChance);

@@ -488,6 +488,7 @@ export function simulateDiscreteTTK(
   // Critical headshots: 2 × total crit multiplier on headcrit-able factions (wiki Critical Hit).
   const headCrit = headCritFactor(sim?.applyHeadshots, targetFaction);
   const acm = avgCritMultiplier(stats.criticalChance, stats.criticalMultiplier * headCrit);
+  const sniperCombo = Math.max(1, stats.sniperComboMultiplier ?? 1);
   // wiki Cold / Puncture (both wikis): Cold adds +0.1 crit damage at 1 stack, +0.05 per
   // further stack (+0.5 at 9), +1.0 while frozen (10 stacks, 3 s, then 3 stacks remain);
   // additive with crit-damage mods, before tiers. Puncture adds flat +5% crit chance per
@@ -755,6 +756,11 @@ export function simulateDiscreteTTK(
     if (frozenUntil <= 0) coldStacks = coldT.count(time);
     const acmShot = acmAt();
     critScale = acm > 0 ? acmShot / acm : 1;
+    // Sniper Shot Combo multiplies critical damage only (in-game scope text): crit hits ×combo,
+    // non-crits unchanged; DoTs keep acmShot.
+    const ccShot = Math.max(0, stats.criticalChance + 0.05 * punctureCritStacks);
+    const acmDirect =
+      sniperCombo * acmShot - (sniperCombo - 1) * Math.max(0, 1 - ccShot);
 
     // Overguard layer first (all types incl. Toxin; faction-neutral; Void +50%).
     let ogPass = 1;
@@ -762,7 +768,7 @@ export function simulateDiscreteTTK(
       let raw = 0;
       let voidRaw = 0;
       for (const d of dmgTypes) {
-        const v = d.value * multishot * acmShot * factionHit;
+        const v = d.value * multishot * acmDirect * factionHit;
         raw += v;
         if (d.type === "void") voidRaw += v;
       }
@@ -775,7 +781,7 @@ export function simulateDiscreteTTK(
     let toxinBypass = 0;
     const hasShields = shield > 0;
     for (const d of dmgTypes) {
-      const base = d.value * multishot * acmShot * factionHit * ogPass;
+      const base = d.value * multishot * acmDirect * factionHit * ogPass;
       if (d.type === "toxin") {
         // toxin bypasses shields → health
         toxinBypass += typeHitDamage(d.type, base, enemy, armorNow, viralMult, "health");
@@ -796,7 +802,7 @@ export function simulateDiscreteTTK(
         let overflowHealth = 0;
         for (const d of dmgTypes) {
           if (d.type === "toxin") continue;
-          const base = d.value * multishot * acmShot * factionHit * ogPass;
+          const base = d.value * multishot * acmDirect * factionHit * ogPass;
           overflowHealth +=
             typeHitDamage(d.type, base, enemy, armorNow, viralMult, "health") * overflowFrac;
         }
@@ -812,7 +818,7 @@ export function simulateDiscreteTTK(
     if (extraFrac > 0 && totalRaw > 0) {
       const fHit = factionHitMultiplier(factionBonus);
       const extraRaw =
-        totalRaw * extraFrac * multishot * acmShot * factionHit * fHit * extraInstances;
+        totalRaw * extraFrac * multishot * acmDirect * factionHit * fHit * extraInstances;
       const extraBase =
         extraRaw * hitOverguard(extraRaw, stats.extraHitGuaranteedToxin ? 0 : extraRaw);
       if (stats.extraHitGuaranteedToxin) {

@@ -20,16 +20,23 @@ describe("Sniper Shot Combo Counter (wiki Sniper Rifle, both wikis)", () => {
     expect([0, 1, 2, 3, 4, 5].map(sniperComboMultiplier)).toEqual([1, 1.5, 2, 2.5, 3, 3.5]);
     expect([1, 2, 3, 4, 5].map((t) => sniperComboHitsRequired(4, t))).toEqual([4, 12, 36, 108, 324]);
   });
-  it("Vectis 2× tier doubles total damage and burst DPS; default sim unchanged", () => {
+  // accuracy-15 R7-12: the combo multiplies critical damage only (in-game scope text);
+  // crit hits ×combo, non-crits unchanged: avg = combo·A − (combo−1)·(1−CC), A = 1 + CC(CM−1).
+  it("Vectis 2× tier: total damage unchanged; burst × (2A − (1−CC))/A", () => {
     const base = build("vectis");
     const c = build("vectis", [], { sniperComboTier: 2 });
-    expect(c.totalDamage).toBeCloseTo(base.totalDamage * 2, 6);
-    expect(c.burstDps).toBeCloseTo(base.burstDps * 2, 6);
+    expect(c.totalDamage).toBe(base.totalDamage);
+    const cc = base.criticalChance;
+    const A = 1 + cc * (base.criticalMultiplier - 1);
+    expect(c.burstDps / base.burstDps).toBeCloseTo((2 * A - (1 - cc)) / A, 9);
     expect(build("vectis", [], { sniperComboTier: 0 }).totalDamage).toBe(base.totalDamage);
   });
-  it("combo is applied after 1/32 quantization: Rubico/Komorex burst exactly ×2.5 at tier 3", () => {
+  it("Rubico / Komorex tier 3 (2.5×): crit-only ratio", () => {
     for (const id of ["rubico", "komorex"]) {
-      expect(build(id, [], { sniperComboTier: 3 }).burstDps / build(id).burstDps).toBeCloseTo(2.5, 9);
+      const b = build(id);
+      const cc = b.criticalChance;
+      const A = 1 + cc * (b.criticalMultiplier - 1);
+      expect(build(id, [], { sniperComboTier: 3 }).burstDps / b.burstDps).toBeCloseTo((2.5 * A - 1.5 * (1 - cc)) / A, 9);
     }
   });
   it("non-sniper ignores combo/zoom params", () => {
