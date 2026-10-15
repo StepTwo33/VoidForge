@@ -1,4 +1,5 @@
 // Advanced Build Calculator - ported from Dart with elemental combos, status procs, heavy attacks
+import { CONTINUOUS_WEAPON_IDS } from "@/data/continuous-weapons";
 import { Mod, Weapon, Warframe, ModSlot, CalculatedStats, WarframeCalculatedStats, ElementalDamage, StatusProc, SimulationParams, DEFAULT_SIM_PARAMS, WeaponCalculationOptions, SetBonusLinkage, EquippedArchonShard, WeaponExternalBuff } from '../types';
 import { avgCritMultiplier, quantizeBaseCritMultiplier } from './crit-utils';
 import { resolveEffectiveFireRate } from './effective-fire-rate';
@@ -1253,6 +1254,12 @@ export function calculateWeaponBuild(
     lastShotBaseMsEv = lastShotBaseMs * (burst / baseWeapon.magazine);
   }
   stats.multishot = (baseWeapon.multishot + lastShotBaseMsEv) * (1 + multishotBonus);
+  // wiki Multishot: beam ticks merge multishot (damage × MS bonus per beam) → status DoT
+  // damage scales with the per-beam multishot factor on top of SC × MS procs.
+  stats.continuousMultishotFactor =
+    CONTINUOUS_WEAPON_IDS.has(baseWeapon.id) && calcOptions?.incarnonFormActive !== true
+      ? Math.max(0, 1 + multishotBonus)
+      : undefined;
   stats.statusChance *= (1 + statusBonus);
   // Final SC (Entropy Burst / Napalm Grenades): absolute after multiplicative SC mods.
   if (weaponModAcc.statusChanceFlatBonus !== 0) {

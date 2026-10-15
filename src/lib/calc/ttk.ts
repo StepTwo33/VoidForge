@@ -439,6 +439,8 @@ export function simulateDiscreteTTK(
     head *
     (sim?.applyStanceMultiplier === false ? 1 : (stats.stanceDamageMultiplier ?? 1));
 
+  const beamDotFactor = Math.max(0, stats.continuousMultishotFactor ?? 1);
+
   const typeBonus = (type: string): number => {
     const el = dmgTypes.find((d) => d.type === type);
     if (!el || moddedBase <= 0) return 0;
@@ -514,7 +516,9 @@ export function simulateDiscreteTTK(
   ) => {
     if (expectedCount <= 0 || frac <= 0) return;
     // DoT ticks keep their damage type, so the faction modifier applies (wiki Damage).
-    const perTick = frac * dotBase * optsDot.typeMult * enemyDamageTypeMultiplier(enemy, type);
+    // wiki Multishot: beam ticks merge multishot, so damaging status scales twice.
+    const perTick =
+      frac * dotBase * beamDotFactor * optsDot.typeMult * enemyDamageTypeMultiplier(enemy, type);
     if (perTick <= 0) return;
     // Spawn floor(expected) full procs + fractional expected as partial damage
     const full = Math.floor(expectedCount);

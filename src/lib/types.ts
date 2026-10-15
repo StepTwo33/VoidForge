@@ -638,6 +638,8 @@ export interface CalculatedStats {
   criticalMultiplier: number;
   statusChance: number;
   statusChancePerShot: number;
+  /** Beam weapons: per-beam multishot factor applied to status DoT damage (wiki Multishot). */
+  continuousMultishotFactor?: number;
   magazine: number;
   reloadTime: number;
   /** Ammo consumed per shot (default 1). Used with ammoEfficiency for sustained DPS. */
