@@ -267,16 +267,16 @@ export default function ArchwingBuilderPage() {
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <h1 className="text-xl sm:text-3xl font-bold">Archwing & Necramech Builder</h1>
           <div className="flex items-center gap-2">
-            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 sm:min-h-9 sm:py-1.5" title="Save Build">
+            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:py-1.5" title="Save Build">
               <Save className="h-3.5 w-3.5" /> <span>Save</span>
             </button>
-            <button onClick={() => { setSavedBuilds(getSavedBuilds("archwing")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-9 sm:py-1.5" title="Load Build">
+            <button onClick={() => { setSavedBuilds(getSavedBuilds("archwing")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-9 sm:py-1.5" title="Load Build">
               <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
             </button>
             <button
               onClick={() => setCompareOpen(true)}
               disabled={!selectedFrame}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-teal-500/50 hover:text-teal-700 disabled:pointer-events-none disabled:opacity-40 dark:hover:text-teal-400 sm:min-h-9 sm:py-1.5"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-teal-500/50 hover:text-teal-700 disabled:pointer-events-none disabled:opacity-40 dark:hover:text-teal-400 lg:pointer-fine:min-h-9 sm:py-1.5"
               title={selectedFrame ? "Compare this build to a saved or posted build" : "Select an archwing or necramech first"}
             >
               <ArrowLeftRight className="h-3.5 w-3.5" /> <span>Compare</span>
@@ -298,7 +298,7 @@ export default function ArchwingBuilderPage() {
                 setBuildName("");
               }}
               className={cn(
-                "inline-flex min-h-11 items-center rounded-lg border px-4 py-2.5 text-sm font-medium capitalize transition-all sm:min-h-9 sm:py-2",
+                "inline-flex min-h-11 items-center rounded-lg border px-4 py-2.5 text-sm font-medium capitalize transition-all lg:pointer-fine:min-h-9 sm:py-2",
                 mode === m
                   ? "bg-cyan-500/10 border-cyan-500/50 text-cyan-700 dark:text-cyan-400"
                   : "border-border text-muted-foreground hover:text-foreground"
@@ -377,7 +377,7 @@ export default function ArchwingBuilderPage() {
                     <button
                       onClick={() => setHasReactor(!hasReactor)}
                       className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all lg:pointer-fine:min-h-9 sm:py-1.5",
                         hasReactor ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400" : "border-border text-muted-foreground"
                       )}
                     >
@@ -482,7 +482,7 @@ export default function ArchwingBuilderPage() {
                     <button
                       onClick={() => setHasCatalyst(!hasCatalyst)}
                       className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all lg:pointer-fine:min-h-9 sm:py-1.5",
                         hasCatalyst ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400" : "border-border text-muted-foreground"
                       )}
                     >

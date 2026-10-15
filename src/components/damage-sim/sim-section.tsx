@@ -61,7 +61,7 @@ export function SimInputField({
           min={min ?? 0}
           value={value}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-          className="w-full min-h-11 min-w-0 max-w-full appearance-none rounded-lg border border-border bg-background px-2.5 py-2 font-mono text-base [appearance:textfield] sm:min-h-9 sm:text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          className="w-full min-h-11 min-w-0 max-w-full appearance-none rounded-lg border border-border bg-background px-2.5 py-2 font-mono text-base [appearance:textfield] lg:pointer-fine:min-h-9 sm:text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
         />
         {suffix && (
           <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">

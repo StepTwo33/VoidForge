@@ -168,7 +168,7 @@ export default function Home() {
                 href="https://buff0000n.github.io/dojocad/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-medium text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
+                className="-my-[13px] inline-flex items-center gap-1 py-[13px] font-medium text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
               >
                 DojoCAD
                 <ExternalLink className="h-3 w-3 opacity-50" aria-hidden />

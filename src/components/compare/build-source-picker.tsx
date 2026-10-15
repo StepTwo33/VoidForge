@@ -101,7 +101,7 @@ export function BuildSourcePicker({
             type="button"
             onClick={() => setTab(t.id)}
             className={cn(
-              "min-h-11 lg:min-h-9 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring flex-1 rounded-md px-3 text-xs font-medium transition-colors",
+              "min-h-11 lg:pointer-fine:min-h-9 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring flex-1 rounded-md px-3 text-xs font-medium transition-colors",
               tab === t.id
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
@@ -117,7 +117,7 @@ export function BuildSourcePicker({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={tab === "community" ? "Search community…" : "Filter yours…"}
-          className="h-11 lg:h-9 pl-8 text-xs"
+          className="h-11 lg:pointer-fine:h-9 pl-8 text-xs"
         />
       </div>
       <div className="max-h-48 space-y-0.5 overflow-y-auto">

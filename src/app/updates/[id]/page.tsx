@@ -17,7 +17,7 @@ export async function generateMetadata({
 
   const excerpt = update.body.slice(0, 160).replace(/\s+/g, " ").trim();
   return {
-    title: `${update.title} - Voidforge`,
+    title: update.title,
     description: excerpt || "Voidforge site update",
   };
 }

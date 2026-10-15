@@ -5,7 +5,7 @@ import { formatSiteUpdateTime } from "@/lib/site/site-updates";
 import { cn } from "@/lib/utils";
 
 export const metadata = {
-  title: "What's New - Voidforge",
+  title: "What's New",
   description: "Updates and announcements from the Voidforge team.",
 };
 

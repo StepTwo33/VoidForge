@@ -396,7 +396,7 @@ export default function RailjackBuilderPage() {
               <button
                 key={p.id}
                 onClick={() => applyRailjackPreset(p.id)}
-                className="inline-flex min-h-11 items-center rounded-lg border border-rose-500/30 px-3 py-2 text-xs text-rose-800 transition-colors hover:bg-rose-500/10 sm:min-h-9 sm:py-1.5 dark:text-rose-300"
+                className="inline-flex min-h-11 items-center rounded-lg border border-rose-500/30 px-3 py-2 text-xs text-rose-800 transition-colors hover:bg-rose-500/10 lg:pointer-fine:min-h-9 sm:py-1.5 dark:text-rose-300"
               >
                 Load {p.name} ({p.owner})
               </button>
@@ -420,12 +420,12 @@ export default function RailjackBuilderPage() {
               value={buildName}
               onChange={(e) => setBuildName(e.target.value)}
               placeholder="Build name..."
-              className="h-11 w-full max-w-[12rem] rounded-lg border border-border bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground sm:h-9 sm:w-40"
+              className="h-11 w-full max-w-[12rem] rounded-lg border border-border bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground lg:pointer-fine:h-9 sm:w-40"
             />
-            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 sm:min-h-9 sm:min-w-0 sm:py-1.5" title="Save Build">
+            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:min-w-0 sm:py-1.5" title="Save Build">
               <Save className="h-3.5 w-3.5" /> <span>Save</span>
             </button>
-            <button onClick={() => { setSavedBuilds(getSavedBuilds("railjack")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-9 sm:min-w-0 sm:py-1.5" title="Load Build">
+            <button onClick={() => { setSavedBuilds(getSavedBuilds("railjack")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-9 sm:min-w-0 sm:py-1.5" title="Load Build">
               <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
             </button>
           </div>
@@ -768,7 +768,7 @@ export default function RailjackBuilderPage() {
                           const next = Number(e.target.value) as number;
                           setIntrinsics((prev) => ({ ...prev, [tree.id]: next }));
                         }}
-                        className="w-full"
+                        className="w-full pointer-coarse:-my-3.5 pointer-coarse:block pointer-coarse:py-3.5"
                       />
                       <p className="text-xs lg:text-[10px] text-muted-foreground mt-0.5" title={tree.blurb}>
                         {rankName}
@@ -1048,7 +1048,7 @@ export default function RailjackBuilderPage() {
                       key={tab}
                       onClick={() => setPlexusTab(tab)}
                       className={cn(
-                        "inline-flex min-h-11 items-center rounded-lg border px-3 py-2 text-sm font-medium capitalize transition-all sm:min-h-9 sm:px-4",
+                        "inline-flex min-h-11 items-center rounded-lg border px-3 py-2 text-sm font-medium capitalize transition-all lg:pointer-fine:min-h-9 sm:px-4",
                         plexusTab === tab
                           ? "bg-rose-500/10 border-rose-500/50 text-rose-700 dark:text-rose-400"
                           : "border-border text-muted-foreground hover:text-foreground"
@@ -1182,13 +1182,13 @@ export default function RailjackBuilderPage() {
                         step={1}
                         value={crimsonFugueStacks}
                         onChange={(e) => setCrimsonFugueStacks(Number(e.target.value))}
-                        className="w-full"
+                        className="w-full pointer-coarse:-my-3.5 pointer-coarse:block pointer-coarse:py-3.5"
                       />
                       <span className="font-mono text-amber-800 dark:text-amber-300">{crimsonFugueStacks}</span>
                     </div>
                   )}
                   {hasCruisingSpeed && (
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className="relative flex items-center gap-2 cursor-pointer pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-3.5 pointer-coarse:after:content-['']">
                       <input
                         type="checkbox"
                         checked={cruisingSpeedActive}
@@ -1199,7 +1199,7 @@ export default function RailjackBuilderPage() {
                     </label>
                   )}
                   {hasProtectiveShots && (
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className="relative flex items-center gap-2 cursor-pointer pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-3.5 pointer-coarse:after:content-['']">
                       <input
                         type="checkbox"
                         checked={protectiveShotsActive}
@@ -1209,7 +1209,7 @@ export default function RailjackBuilderPage() {
                       <span>Protective Shots active (shields above 75%)</span>
                     </label>
                   )}
-                  <label className="flex items-center gap-2 cursor-pointer">
+                  <label className="relative flex items-center gap-2 cursor-pointer pointer-coarse:after:absolute pointer-coarse:after:inset-x-0 pointer-coarse:after:-inset-y-3.5 pointer-coarse:after:content-['']">
                     <input
                       type="checkbox"
                       checked={shieldsDepleted}

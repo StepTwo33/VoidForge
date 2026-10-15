@@ -151,7 +151,7 @@ export function SimLoadBuildPicker({
             type="button"
             onClick={() => setTab(t.id)}
             className={cn(
-              "min-h-9 flex-1 rounded-md px-3 text-xs font-medium transition-colors",
+              "min-h-11 lg:pointer-fine:min-h-9 flex-1 rounded-md px-3 text-xs font-medium transition-colors",
               tab === t.id
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground",

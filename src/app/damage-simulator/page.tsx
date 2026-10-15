@@ -181,7 +181,7 @@ export default function DamageSimulatorPage() {
                 <SimInputField label="Reload (s)" value={reloadTime} onChange={setReloadTime} step={0.1} />
                 <div className="min-w-0">
                   <label className="mb-0.5 block text-[10px] text-muted-foreground">Total damage</label>
-                  <div className="flex min-h-11 min-w-0 max-w-full items-center rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-2 font-mono text-sm font-bold tabular-nums text-amber-900 dark:text-amber-300 sm:min-h-9 sm:text-xs">
+                  <div className="flex min-h-11 min-w-0 max-w-full items-center rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-2 font-mono text-sm font-bold tabular-nums text-amber-900 dark:text-amber-300 lg:pointer-fine:min-h-9 sm:text-xs">
                     {totalRaw.toFixed(1)}
                   </div>
                 </div>
@@ -206,7 +206,7 @@ export default function DamageSimulatorPage() {
                       type="number"
                       value={val}
                       onChange={(e) => setDmg(type, parseFloat(e.target.value) || 0)}
-                      className="min-h-11 min-w-0 max-w-full flex-1 rounded-lg border border-border bg-background px-2.5 py-2 font-mono text-base [appearance:textfield] sm:min-h-9 sm:text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      className="min-h-11 min-w-0 max-w-full flex-1 rounded-lg border border-border bg-background px-2.5 py-2 font-mono text-base [appearance:textfield] lg:pointer-fine:min-h-9 sm:text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     />
                     <span className="w-8 shrink-0 text-right text-[10px] text-muted-foreground sm:w-10">
                       {totalRaw > 0 ? `${((val / totalRaw) * 100).toFixed(0)}%` : "0%"}

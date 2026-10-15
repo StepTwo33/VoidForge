@@ -43,7 +43,7 @@ export function EnemyLevelControl({
               title="Steel Path: ×2.5 Health & Shields after level scaling (armor unchanged)"
               aria-pressed={steelPath}
               className={cn(
-                "inline-flex h-6 shrink-0 items-center rounded border px-1.5 text-[9px] font-semibold tracking-wide transition-colors",
+                "relative inline-flex h-6 shrink-0 items-center rounded border px-1.5 pointer-coarse:after:absolute pointer-coarse:after:-inset-[11px] pointer-coarse:after:content-[''] text-[9px] font-semibold tracking-wide transition-colors",
                 steelPath
                   ? "border-amber-500/60 bg-amber-500/15 text-amber-900 dark:text-amber-300"
                   : "border-border/60 text-muted-foreground hover:border-amber-500/40 hover:text-foreground",
@@ -62,7 +62,7 @@ export function EnemyLevelControl({
             const v = Number(e.target.value);
             if (!Number.isNaN(v)) onChange(clamp(v));
           }}
-          className="h-11 w-16 shrink-0 rounded border border-border bg-background px-1.5 py-1 text-right font-mono text-base [appearance:textfield] sm:h-8 sm:w-14 sm:text-[10px] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="h-11 w-16 shrink-0 rounded border border-border bg-background px-1.5 py-1 text-right font-mono text-base [appearance:textfield] lg:pointer-fine:h-8 sm:w-14 sm:text-[10px] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
       </div>
       <input
@@ -71,7 +71,7 @@ export function EnemyLevelControl({
         max={ENEMY_LEVEL_SLIDER_MAX}
         value={Math.min(value, ENEMY_LEVEL_SLIDER_MAX)}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="h-2 w-full min-w-0 cursor-pointer accent-primary touch-manipulation sm:h-1.5"
+        className="h-2 w-full min-w-0 cursor-pointer accent-primary touch-manipulation sm:h-1.5 pointer-coarse:box-content pointer-coarse:py-5"
       />
       {value > ENEMY_LEVEL_SLIDER_MAX && (
         <p className="text-[9px] text-muted-foreground/80">
