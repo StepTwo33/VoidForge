@@ -23,11 +23,11 @@ export interface Necramech {
 }
 
 export const archwings: Archwing[] = [
-  { id: "odonata", name: "Odonata", health: 300, shield: 300, armor: 100, energy: 150, speed: 1.0, description: "Balanced starter Archwing" },
-  { id: "odonata_prime", name: "Odonata Prime", health: 400, shield: 400, armor: 150, energy: 200, speed: 1.1, description: "Prime balanced Archwing" },
-  { id: "elytron", name: "Elytron", health: 765, shield: 745, armor: 145, energy: 125, speed: 0.9, description: "Heavy bomber Archwing" },
-  { id: "itzal", name: "Itzal", health: 200, shield: 220, armor: 50, energy: 200, speed: 1.2, description: "Stealth and support Archwing" },
-  { id: "amesha", name: "Amesha", health: 650, shield: 220, armor: 195, energy: 200, speed: 1.1, description: "Support Archwing with healing and buffs" },
+  { id: "odonata", name: "Odonata", health: 425, shield: 430, armor: 100, energy: 85, speed: 1.0, description: "Balanced starter Archwing" },
+  { id: "odonata_prime", name: "Odonata Prime", health: 650, shield: 640, armor: 100, energy: 85, speed: 1.05, description: "Prime balanced Archwing" },
+  { id: "elytron", name: "Elytron", health: 765, shield: 745, armor: 145, energy: 120, speed: 0.9, description: "Heavy bomber Archwing" },
+  { id: "itzal", name: "Itzal", health: 200, shield: 220, armor: 50, energy: 220, speed: 1.2, description: "Stealth and support Archwing" },
+  { id: "amesha", name: "Amesha", health: 650, shield: 220, armor: 195, energy: 220, speed: 1.1, description: "Support Archwing with healing and buffs" },
 ];
 
 export const necramechs: Necramech[] = [
