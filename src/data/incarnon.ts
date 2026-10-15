@@ -38,6 +38,10 @@ export interface IncarnonForm {
   criticalMultiplier: number;
   statusChance: number;
   triggerType: string;
+  /** Shots per burst when the form's burst differs from the base weapon (wiki BurstCount). */
+  burstCount?: number;
+  /** In-burst delay (s) when it differs from the base weapon (wiki BurstDelay). */
+  burstDelay?: number;
   magazine?: number;
   reloadTime?: number;
   multishot?: number;
@@ -1024,6 +1028,7 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
         criticalMultiplier: 3.0,
         statusChance: 0.2,
         triggerType: "Burst",
+        burstCount: 4, // wiki: 4-round burst (base Sybaris is 2)
         magazine: 200,
         reloadTime: 2.0,
         impact: 29.7,
@@ -1152,6 +1157,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
         criticalMultiplier: 2.8,
         statusChance: 0.0267,
         triggerType: "Burst",
+        burstCount: 6, // wiki Vasto/Vasto Prime Incarnon Form: 6-round burst
+        burstDelay: 0.1,
         magazine: 24,
         reloadTime: 1.5,
         multishot: 6,

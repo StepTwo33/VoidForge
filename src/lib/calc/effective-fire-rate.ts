@@ -56,6 +56,18 @@ export function isBurstTrigger(triggerType: string): boolean {
 }
 
 /**
+ * Whether burst timing (burstCount/burstDelay) applies. Many arsenal entries carry a
+ * category label ("Rifle", "Pistol", "Sniper") instead of a trigger type, so any
+ * weapon with explicit burst timing counts as burst unless its trigger names a
+ * different firing mode (e.g. Incarnon Form "Auto" on Burston).
+ */
+export function usesBurstTiming(triggerType: string): boolean {
+  const t = triggerType.toLowerCase();
+  if (t.includes("burst")) return true;
+  return !/^(auto|semi|charge|held|bow|melee|duplex|active|spool|continuous|beam)/.test(t);
+}
+
+/**
  * Resolve the true shots-per-second used for DPS / TTK.
  * Falls back to moddedFireRate when timing data is incomplete.
  */
@@ -95,7 +107,7 @@ export function resolveEffectiveFireRate(input: FireTimingInput): number {
   }
 
   // —— Burst ——
-  if (burstCount != null && burstCount > 1 && isBurstTrigger(triggerType)) {
+  if (burstCount != null && burstCount > 1 && usesBurstTiming(triggerType)) {
     const fr = Math.max(1e-6, moddedFireRate);
     // Wiki Fire Rate (both wikis): the Fire Rate bonus "affects both the speed of the burst
     // as well as the time between bursts", but "Burst Delay is not affected by net negative

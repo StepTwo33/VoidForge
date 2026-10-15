@@ -431,6 +431,8 @@ export function applyIncarnonFormToWeapon(base: Weapon, form: IncarnonForm): Wea
     reloadTime: form.reloadTime ?? base.reloadTime,
     multishot: form.multishot ?? base.multishot,
     radialAttacks: formRadials,
+    ...(form.burstCount != null ? { burstCount: form.burstCount } : {}),
+    ...(form.burstDelay != null ? { burstDelay: form.burstDelay } : {}),
   };
 
   for (const k of ELEM_KEYS) {

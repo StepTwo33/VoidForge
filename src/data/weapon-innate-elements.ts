@@ -157,15 +157,36 @@ export const WEAPON_FIRE_TIMING: Record<string, WeaponInnateFill> = {
   lenz: { chargeTime: 1.2, chargeMode: "standard" },
   balefire: { chargeTime: 2.0, chargeMode: "standard" },
   balefire_prime: { chargeTime: 2.0, chargeMode: "standard" },
-  // Burst weapons (common 3-round)
-  burston: { burstCount: 3, burstDelay: 0.04 },
+  // Burst weapons — BurstCount / BurstDelay from Module:Weapons/data/{primary,secondary,archwing}
+  // (wiki.warframe.com; fandom agrees unless noted). Only where VF's base fireRate is the
+  // wiki's burst-mode Fire Rate (bursts per second), so the burst formula isn't double-counted.
+  // Kuva Hind (FR 10) and Tiberon Prime (FR 8.33) are modelled in their Auto mode: no burst timing.
+  burston: { burstCount: 3, burstDelay: 0.061 },
   burston_prime: { burstCount: 3, burstDelay: 0.04 },
   sicarus: { burstCount: 3, burstDelay: 0.04 },
   sicarus_prime: { burstCount: 3, burstDelay: 0.04 },
-  hind: { burstCount: 5, burstDelay: 0.04 },
-  kuva_hind: { burstCount: 5, burstDelay: 0.04 },
+  hind: { burstCount: 5, burstDelay: 0.12 },
   tiberon: { burstCount: 3, burstDelay: 0.06 },
-  tiberon_prime: { burstCount: 3, burstDelay: 0.06 },
+  akarius: { burstCount: 2, burstDelay: 0.12 },
+  akarius_prime: { burstCount: 2, burstDelay: 0.12 },
+  ballistica: { burstCount: 4, burstDelay: 0.05 },
+  rakta_ballistica: { burstCount: 4, burstDelay: 0.05 },
+  battacor: { burstCount: 2, burstDelay: 0.08 },
+  hema: { burstCount: 3, burstDelay: 0.1 },
+  coda_hema: { burstCount: 3, burstDelay: 0.1 }, // wiki.warframe.com only (not on fandom)
+  cyngas: { burstCount: 3, burstDelay: 0.06 },
+  sybaris: { burstCount: 2, burstDelay: 0.101 },
+  sybaris_prime: { burstCount: 2, burstDelay: 0.062 },
+  dex_sybaris: { burstCount: 2, burstDelay: 0.09 },
+  harpak: { burstCount: 3, burstDelay: 0.1 },
+  higasa: { burstCount: 5, burstDelay: 0.1 },
+  kraken: { burstCount: 2, burstDelay: 0.05 },
+  kuva_kraken: { burstCount: 3, burstDelay: 0.03 },
+  paracyst: { burstCount: 3, burstDelay: 0.05 },
+  perigale: { burstCount: 4, burstDelay: 0.04 },
+  perigale_prime: { burstCount: 4, burstDelay: 0.04 }, // wiki.warframe.com only
+  thornbak: { burstCount: 4, burstDelay: 0.066 }, // wiki.warframe.com only
+  // Tigris family is Duplex on both wikis (no BurstCount); kept as the prior 2-shot approximation.
   tigris: { burstCount: 2, burstDelay: 0.15 },
   tigris_prime: { burstCount: 2, burstDelay: 0.15 },
   sancti_tigris: { burstCount: 2, burstDelay: 0.15 },
