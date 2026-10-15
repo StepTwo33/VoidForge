@@ -24,7 +24,7 @@ export {
 } from "@/data/enemies";
 import type { EnemyType } from "@/data/enemies";
 import { enemyDamageTypeMultiplier } from "@/data/faction-damage-modifiers";
-import { DOT_BASE_DURATION, dotFirstTickDelay, dotTickCount } from "@/lib/calc/dot-ticks";
+import { BLAST_FUSE_SECONDS, DOT_BASE_DURATION, dotFirstTickDelay, dotTickCount } from "@/lib/calc/dot-ticks";
 
 // ── Damage type modifiers (Update 36) ─────────────────────────────────
 // Health / armor / shield classes were removed in Update 36; vulnerabilities and
@@ -503,7 +503,8 @@ export function simulateDiscreteTTK(
   };
 
   // Status Duration mods lengthen DoTs (more ticks), matching calculateStatusProcs.
-  const dotDuration = DOT_BASE_DURATION * Math.max(0, 1 + (stats.statusDurationBonus ?? 0));
+  const durScale = Math.max(0, 1 + (stats.statusDurationBonus ?? 0));
+  const dotDuration = DOT_BASE_DURATION * durScale;
 
   const spawnDot = (
     type: string,
@@ -673,6 +674,24 @@ export function simulateDiscreteTTK(
       useViral: true,
       typeMult: 1 + typeBonus("gas"),
     });
+
+    // Blast Detonate: one hit of 0.3 × modded base per proc after the 1.5s fuse
+    // (wiki Damage/Blast). No Heat/Cold type bonus; armor and Viral apply.
+    const blastProcs = expectedProcs("blast");
+    if (blastProcs > 0) {
+      const perHit = 0.3 * dotBase * enemyDamageTypeMultiplier(enemy, "blast") * blastProcs;
+      if (perHit > 0) {
+        dots.push({
+          nextTick: time + BLAST_FUSE_SECONDS * durScale,
+          remainingTicks: 1,
+          damagePerTick: perHit,
+          type: "blast",
+          ignoreArmor: false,
+          ignoreShields: false,
+          useViral: true,
+        });
+      }
+    }
 
     // Toxic Lash: guaranteed Toxin DoT per pellet; ticks use faction³
     if (stats.extraHitGuaranteedToxin && extraFrac > 0) {

@@ -26,3 +26,6 @@ export function dotTickCount(type: string, duration: number = DOT_BASE_DURATION)
   // Ticks at 1,2,… up to and including the duration.
   return Math.floor(duration + 1e-9);
 }
+
+/** wiki Blast: each Detonate stack fires once, 1.5s (× Status Duration) after the proc. */
+export const BLAST_FUSE_SECONDS = 1.5;

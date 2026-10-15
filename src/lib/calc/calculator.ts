@@ -183,7 +183,8 @@ const STATUS_INFO: Record<string, { duration: number; ticks: number; desc: strin
   cold:        { duration: 6, ticks: 1, desc: '-50% move/fire/attack (stacks to -90%), +crit mult received' },
   toxin:       { duration: 6, ticks: 6, desc: 'Poison (50% base/tick, bypasses shields)' },
   electricity: { duration: 6, ticks: 6, desc: 'Chain DoT (50% base/tick) + stun' },
-  blast:       { duration: 6, ticks: 1, desc: 'Detonate: 30% base/stack after 1.5s; AoE on max stacks/death' },
+  // wiki Blast: 1.5s fuse (× Status Duration), then 30% modded base to the target.
+  blast:       { duration: 1.5, ticks: 1, desc: 'Detonate: 30% base/stack after 1.5s; AoE on max stacks/death' },
   corrosive:   { duration: 8, ticks: 1, desc: '-26% armor first stack, -6% each after (max -80% at 10)' },
   gas:         { duration: 6, ticks: 6, desc: 'Gas cloud DoT (50% base/tick, AoE)' },
   magnetic:    { duration: 6, ticks: 1, desc: '+100% dmg to shields/overguard (stacks to +325%)' },
@@ -202,6 +203,14 @@ const DOT_TICK_FRACTION: Record<string, number> = {
   electricity: 0.5,
   gas: 0.5,
 };
+
+/**
+ * Blast (Detonate) single-target damage per proc: 0.3 × modded base × faction² ×
+ * status damage × crit/head (wiki Damage/Blast; fandom agrees). Heat/Cold elemental
+ * bonuses don't apply. The 10-stack / on-death 300%/stack AoE only hits *other*
+ * enemies, so it isn't part of single-target DPS/TTK.
+ */
+export const BLAST_DETONATE_FRACTION = 0.3;
 
 /**
  * DoT tick base per proc: modded base damage (Serration-style only) × avg crit.
@@ -273,6 +282,8 @@ function calculateStatusProcs(
       // Slash has no type-damage bonus mult; Heat/Toxin/Elec/Gas use (1 + type%).
       const typeMult = d.type === 'slash' ? 1 : 1 + elementalTypeBonus(stats, d.type, moddedBaseDamage);
       dpt = frac * dotBase * typeMult;
+    } else if (d.type === 'blast') {
+      dpt = BLAST_DETONATE_FRACTION * dotBase;
     }
     return {
       type: d.type,
@@ -336,6 +347,9 @@ function calculateStatusProcs(
       const typeMult =
         guaranteedEl === "slash" ? 1 : 1 + elementalTypeBonus(stats, guaranteedEl, moddedBaseDamage);
       dpt = frac * dotBase * typeMult;
+    } else if (guaranteedEl === "blast") {
+      // wiki: Valence Formation doesn't raise Blast proc damage (no type bonus).
+      dpt = BLAST_DETONATE_FRACTION * dotBase;
     }
     procs.push({
       type: guaranteedEl,

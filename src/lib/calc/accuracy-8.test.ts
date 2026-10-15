@@ -78,3 +78,15 @@ describe("charge times (wiki Module:Weapons + Fire Rate)", () => {
     expect(efr("epitaph_prime")).toBeCloseTo(1 / 0.96, 4);
   });
 });
+
+describe("Blast (Detonate) proc damage (wiki Damage/Blast)", () => {
+  it("Angstrum: one hit of 0.3 × modded base × avg crit after a 1.5s fuse; no Heat/Cold bonus", () => {
+    const s = calculateWeaponBuild(enrichWeapon(allWeapons.find((x) => x.id === "angstrum")!), [], modsMap);
+    const blast = s.statusProcs.find((p) => p.type === "blast")!;
+    const avg = 1 + s.criticalChance * (s.criticalMultiplier - 1);
+    expect(blast.damagePerTick).toBeCloseTo(0.3 * s.moddedBaseDamage! * avg, 6);
+    expect(blast.ticks).toBe(1);
+    expect(blast.duration).toBeCloseTo(1.5, 6);
+    expect(blast.totalDamage).toBeCloseTo(blast.damagePerTick, 6);
+  });
+});
