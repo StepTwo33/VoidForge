@@ -193,7 +193,7 @@ function BuildCompareTab() {
           Archwing
         </FilterChip>
       </div>
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid gap-6 min-[360px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[360px]:gap-2 md:gap-6">
         {([0, 1] as const).map((side) => {
           const build = builds[side];
           const loadedBuild = loaded[side];
