@@ -106,3 +106,23 @@ describe("R7-5: status stacks expire on their own timers (wiki Status Effect, bo
     expect(v.count(12)).toBe(0);
   });
 });
+
+describe("R7-6: Hunter Munitions / Internal Bleeding (wiki, both wikis)", () => {
+  it("Lenz + HM: Slash tick = 0.35 × 60 × CM (crit-conditional), not × avg crit", () => {
+    const s = build("lenz", ["hunter_munitions"]);
+    const hm = s.statusProcs!.find((p) => p.description.includes("Hunter Munitions"))!;
+    expect(hm.chance).toBeCloseTo(0.3 * 0.5, 9);
+    expect(hm.damagePerTick).toBeCloseTo(0.35 * 60 * s.criticalMultiplier, 6); // 42.01 (was 31.51)
+  });
+  it("HM and IB Slash now reach the TTK sim", async () => {
+    const { calculateTTK, ENEMY_TYPES } = await import("@/lib/calc/ttk");
+    const hel = ENEMY_TYPES.find((e) => e.id === "hellion")!;
+    const crew = ENEMY_TYPES.find((e) => e.id === "crewman")!;
+    const plain = calculateTTK(build("rubico_prime"), hel, 100).ttk;
+    const hm = calculateTTK(build("rubico_prime", ["hunter_munitions"]), hel, 100).ttk;
+    expect(hm).toBeLessThan(plain);
+    expect(hm).toBeCloseTo(64.45, 1); // 114.64 s before
+    expect(calculateTTK(build("braton_prime", ["hunter_munitions", "internal_bleeding"]), crew, 100).ttk)
+      .toBeCloseTo(37.45, 1); // 44.93 s before
+  });
+});

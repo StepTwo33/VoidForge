@@ -304,7 +304,13 @@ function calculateStatusProcs(
   if (slashOnCrit > 0 && stats.criticalChance > 0) {
     const duration = STATUS_INFO.slash.duration * durMult;
     const ticks = dotTickCount('slash', duration);
-    const dpt = DOT_TICK_FRACTION.slash * dotBase;
+    // wiki Hunter Munitions: the proc comes from a crit, so use E[crit mult | crit]
+    // instead of the average (ratio applied to the avg-crit DoT base).
+    const effCC = Math.min(1, stats.criticalChance + (stats.vigilanteCritBonus ?? 0));
+    const cmHM = stats.criticalMultiplier * headCritFactor(sim?.applyHeadshots, sim?.targetFaction);
+    const avgHM = avgCritMultiplier(stats.criticalChance + (stats.vigilanteCritBonus ?? 0), cmHM);
+    const critGivenHM = effCC > 0 ? (avgHM - (1 - effCC)) / effCC : avgHM;
+    const dpt = DOT_TICK_FRACTION.slash * dotBase * (avgHM > 0 ? critGivenHM / avgHM : 1);
     const chance = slashOnCrit * Math.min(stats.criticalChance, 1);
     procs.push({
       type: 'slash',

@@ -932,6 +932,31 @@ export function simulateDiscreteTTK(
       useViral: true,
       typeMult: 1,
     });
+    // Hunter Munitions (wiki, both): forced Slash on critical hits — the proccing hit is a
+    // crit, so its DoT uses the crit-conditional multiplier, not the average.
+    const hmChance = stats.slashOnCritChance ?? 0;
+    const ccNow = Math.max(0, stats.criticalChance + 0.05 * punctureCritStacks);
+    if (hmChance > 0 && ccNow > 0) {
+      const p = Math.min(ccNow, 1);
+      const critGiven = (acmShot - (1 - p)) / p;
+      spawnDot("slash", hmChance * p * multishot, 0.35, {
+        ignoreArmor: true,
+        ignoreShields: false,
+        useViral: true,
+        typeMult: acmShot > 0 ? critGiven / acmShot : 1,
+      });
+    }
+    // Internal Bleeding / Hemorrhage (wiki): Slash per Impact proc, ×2 below 2.5 fire rate.
+    const ibChance = stats.slashOnImpactProcChance ?? 0;
+    if (ibChance > 0) {
+      const rateMult = stats.fireRate < 2.5 ? 2 : 1;
+      spawnDot("slash", expectedProcs("impact") * Math.min(1, ibChance * rateMult), 0.35, {
+        ignoreArmor: true,
+        ignoreShields: false,
+        useViral: true,
+        typeMult: 1,
+      });
+    }
     // Heat DoT: consolidated pool above (wiki Heat Damage), not independent stacks.
     spawnDot("toxin", expectedProcs("toxin"), 0.5, {
       ignoreArmor: false,
