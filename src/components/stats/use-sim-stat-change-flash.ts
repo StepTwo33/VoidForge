@@ -31,7 +31,8 @@ export function buildSimFlashSnapshot(stats: CalculatedStats): Record<string, nu
     .filter((p) => p.totalDamage > 0)
     .reduce((sum, p) => {
       const pps = efr * stats.multishot * p.chance;
-      return sum + (pps * p.totalDamage) / p.duration;
+      // Steady state: procs/s × damage per proc (DoT stacks run on independent timers).
+      return sum + pps * p.totalDamage;
     }, 0);
 
   return {

@@ -25,6 +25,9 @@ import {
 } from "@/lib/calc/ttk";
 import { DEFAULT_SIM_PARAMS, type CalculatedStats } from "@/lib/types";
 
+/** Damage ticks per DoT proc at base 6s duration (matches the TTK sim). */
+const DOT_TICKS_PER_PROC = 7;
+
 export interface DamageSimInputs {
   dmgTypes: Record<string, number>;
   fireRate: number;
@@ -255,15 +258,17 @@ export function runDamageSim(
   const shieldDmgPerShot = shieldSum * input.multishot * acm * combatMult;
   const healthDmgPerShot = healthSum * input.multishot * acm * combatMult;
 
-  // DoT paper DPS — tick fractions match ttk spawnDot (slash 0.35, heat/toxin 0.5)
+  // DoT paper DPS — tick fractions match ttk spawnDot (slash 0.35, heat/toxin 0.5).
+  // Steady state: procs/s × ticks per proc × tick damage (stacks run independently).
+  const dotTicks = DOT_TICKS_PER_PROC;
   let slashDotDps = 0;
   const slashRaw = input.dmgTypes.slash ?? 0;
   if (slashRaw > 0 && procsPerSec > 0) {
     const pps = procsPerSec * (slashRaw / totalRaw);
     const tickDmg = totalRaw * 0.35 * acm * dotMult;
     const hm = enemyDamageTypeMultiplier(enemy, "slash") - 1;
-    // Slash DoT is cinematic (ignores armor); 7 ticks / 6s → duty factor 7/6
-    slashDotDps = pps * tickDmg * (7 / 6) * (1 + hm) * viralMult;
+    // Slash DoT is cinematic (ignores armor).
+    slashDotDps = pps * tickDmg * dotTicks * (1 + hm) * viralMult;
   }
 
   let heatDotDps = 0;
@@ -272,7 +277,7 @@ export function runDamageSim(
     const pps = procsPerSec * (heatRaw / totalRaw);
     const tickDmg = totalRaw * 0.5 * acm * dotMult;
     const hm = enemyDamageTypeMultiplier(enemy, "heat") - 1;
-    heatDotDps = pps * tickDmg * (1 + hm) * (1 - armorDR);
+    heatDotDps = pps * tickDmg * dotTicks * (1 + hm) * (1 - armorDR);
   }
 
   let toxinDotDps = 0;
@@ -281,7 +286,7 @@ export function runDamageSim(
     const pps = procsPerSec * (toxinRaw / totalRaw);
     const tickDmg = totalRaw * 0.5 * acm * dotMult;
     const hm = enemyDamageTypeMultiplier(enemy, "toxin") - 1;
-    toxinDotDps = pps * tickDmg * (1 + hm) * (1 - armorDR);
+    toxinDotDps = pps * tickDmg * dotTicks * (1 + hm) * (1 - armorDR);
   }
 
   const totalDotDps = slashDotDps + heatDotDps + toxinDotDps;

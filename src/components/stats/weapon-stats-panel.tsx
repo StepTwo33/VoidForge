@@ -215,7 +215,8 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           const dotProcs = stats.statusProcs.filter(p => p.totalDamage > 0);
           const statusDps = dotProcs.reduce((sum, p) => {
             const pps = efr * stats.multishot * p.chance;
-            return sum + pps * p.totalDamage / p.duration;
+            // Steady state: procs/s × damage per proc (DoT stacks run on independent timers).
+            return sum + pps * p.totalDamage;
           }, 0);
           return (
             <>
