@@ -576,7 +576,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                 />
               </div>
               {!isArcaneBrowse && statFilterOptions.length > 1 && (
-                <div className="mt-3 flex flex-wrap gap-1.5">
+                <div className="codex-chip-row mt-3 flex flex-nowrap gap-1.5 overflow-x-auto overscroll-x-contain lg:flex-wrap lg:overflow-visible [&>*]:shrink-0">
                   {statFilterOptions.map((option) => (
                     <button
                       key={option.id}
@@ -611,7 +611,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                     <select
                       value={sortId}
                       onChange={(e) => setSortId(e.target.value as ModSortId)}
-                      className="min-h-11 flex-1 rounded-md border border-border bg-background px-2.5 py-2 text-sm text-foreground sm:flex-none sm:pointer-fine:min-h-8 sm:py-1 sm:text-[11px]"
+                      className="min-h-11 flex-1 rounded-md border border-border bg-background px-2.5 py-2 text-sm text-foreground sm:flex-none lg:pointer-fine:min-h-8 sm:py-1 sm:text-[11px]"
                     >
                       <option value="name">Name (A–Z)</option>
                       <option value="drain-asc">Drain (low → high)</option>
