@@ -1258,7 +1258,7 @@ export function calculateWeaponBuild(
   }
 
   // Innate weapon elements + progenitor: applied LAST in combo order (wiki Calculating Bonuses).
-  const innateElemTypes = ['heat', 'cold', 'toxin', 'electricity', 'radiation', 'viral', 'corrosive', 'gas', 'magnetic', 'blast', 'tau'] as const;
+  const innateElemTypes = ['heat', 'cold', 'toxin', 'electricity', 'radiation', 'viral', 'corrosive', 'gas', 'magnetic', 'blast', 'tau', 'void'] as const;
   const innateElements: { type: string; value: number }[] = [];
   for (const elem of innateElemTypes) {
     const baseVal = (baseWeapon as unknown as Record<string, unknown>)[elem] as number | undefined;

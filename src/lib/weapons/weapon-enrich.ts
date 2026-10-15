@@ -20,6 +20,7 @@ const ELEM_KEYS = [
   "gas",
   "magnetic",
   "tau",
+  "void",
 ] as const;
 
 function ipsSum(w: Weapon): number {

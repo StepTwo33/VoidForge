@@ -236,7 +236,7 @@ export const allCompanions: Companion[] = [
     "name": "Adarza Kavat",
     "type": "kavat",
     "health": 310,
-    "shield": 270,
+    "shield": 230,
     "armor": 300,
     "description": "Reflective kavat that buffs critical chance",
     "precept": "Reflect - Reflects damage and Cat's Eye - Critical buff"

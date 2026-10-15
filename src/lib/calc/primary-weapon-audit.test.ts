@@ -112,7 +112,7 @@ describe("primary bare wiki goldens", () => {
       ["amprex", "electricity"],
       ["alternox", "electricity"],
       ["arca_plasmor", "radiation"],
-      ["sirocco", "tau"],
+      ["sirocco", "void"],
     ] as const) {
       const w = allWeapons.find((x) => x.id === id)!;
       const stats = calculateWeaponBuild(w, [], modsMap());

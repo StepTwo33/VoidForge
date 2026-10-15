@@ -34,6 +34,8 @@ export interface Weapon {
   gas?: number;
   magnetic?: number;
   tau?: number;
+  /** Void damage type (e.g. Sirocco). */
+  void?: number;
   fireRate: number;
   criticalChance: number;
   criticalMultiplier: number;

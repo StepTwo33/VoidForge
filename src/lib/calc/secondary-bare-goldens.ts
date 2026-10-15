@@ -1175,7 +1175,7 @@ export const SECONDARY_BARE_GOLDENS: Array<{
     "slash": 18.75,
     "criticalChance": 0.050000001,
     "criticalMultiplier": 1.5,
-    "statusChance": 0.10000002,
+    "statusChance": 0.05,
     "fireRate": 6.67,
     "multishot": 1.0
   },

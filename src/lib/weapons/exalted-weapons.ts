@@ -16,6 +16,7 @@ const EXALTED_DAMAGE_KEYS = [
   "gas",
   "magnetic",
   "tau",
+  "void",
 ] as const;
 
 /** Ability names that summon an exalted weapon (normalized lowercase). */

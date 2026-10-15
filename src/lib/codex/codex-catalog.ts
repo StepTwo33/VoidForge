@@ -105,6 +105,7 @@ export const WEAPON_ELEMENT_KEYS = [
   "gas",
   "magnetic",
   "tau",
+  "void",
 ] as const;
 
 export function weaponElementEntries(weapon: Weapon): { label: string; value: number }[] {

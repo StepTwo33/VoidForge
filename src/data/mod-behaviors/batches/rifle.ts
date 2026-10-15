@@ -17,7 +17,7 @@ export const MOD_BEHAVIORS_RIFLE: Record<string, VerifiedModBehavior> = {
   amalgam_serration: mod("amalgam_serration", [
     line("damage", "weapon_dps", "multiplicative_percent", "Amalgam Serration: damage — +11% Damage per rank (max +155%)"),
     // Sprint speed is a Warframe movement buff from a rifle mod (cross-slot while equipped).
-    line("sprintSpeed", "warframe_totals", "multiplicative_percent", "Amalgam Serration: sprintSpeed — +5% Sprint Speed per rank (max +55%)"),
+    line("sprintSpeed", "warframe_totals", "multiplicative_percent", "Amalgam Serration: sprintSpeed — +2.27% Sprint Speed per rank (max +25%)"),
   ]),
   argon_scope: mod("argon_scope", [
     line("criticalChanceOnHeadshot", "weapon_dps", "conditional_crit_on_headshot", "wiki: Argon Scope \u2014 On Weak Point: +135% Critical Chance when Aiming for 9s"),

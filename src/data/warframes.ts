@@ -330,7 +330,7 @@ export const allWarframes: Warframe[] = [
       },
       {
         "name": "Sound Quake",
-        "energyCost": 25,
+        "energyCost": 75,
         "description": "Banshee slams the ground and leaves an area that violently shakes enemies. Foes in the area take guaranteed Blast status, which is weaker farther from the center. Banshee is briefly invulnerable while casting.",
         "damage": 200,
         "range": 20,
@@ -398,7 +398,7 @@ export const allWarframes: Warframe[] = [
       },
       {
         "name": "Sound Quake",
-        "energyCost": 25,
+        "energyCost": 75,
         "description": "Banshee slams the ground and leaves an area that violently shakes enemies. Foes in the area take guaranteed Blast status, which is weaker farther from the center. Banshee is briefly invulnerable while casting.",
         "damage": 200,
         "range": 20,
@@ -7088,7 +7088,7 @@ export const allWarframes: Warframe[] = [
       },
       {
         "name": "Tribute",
-        "energyCost": 50,
+        "energyCost": 25,
         "description": "Cycle through and extract one of the four Buffs when cast on an enemy. Thorns reduces incoming damage. Dust degrades enemy accuracy. Full Moon increases companion damage. Entangle slows enemies.",
         "damage": 500,
         "range": 25,
@@ -7160,7 +7160,7 @@ export const allWarframes: Warframe[] = [
       },
       {
         "name": "Tribute",
-        "energyCost": 50,
+        "energyCost": 25,
         "description": "Cycle through and extract one of the four Buffs when cast on an enemy. Thorns reduces incoming damage. Dust degrades enemy accuracy. Full Moon increases companion damage. Entangle slows enemies.",
         "damage": 500,
         "range": 25,

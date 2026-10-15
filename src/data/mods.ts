@@ -326,11 +326,11 @@ const RAW_MODS: Mod[] = [
     "category": "rifle",
     "subCategory": "weapon",
     "stats": {
-      // Max rank: +155% damage (14.0909×11), +55% sprint speed (5×11).
+      // Max rank: +155% damage (14.0909×11), +25% sprint speed (2.272727×11) per wiki Module:Mods/data.
       "damage": 14.0909,
-      "sprintSpeed": 5
+      "sprintSpeed": 2.272727
     },
-    "description": "+155% Damage, +55% Sprint Speed at max rank",
+    "description": "+155% Damage, +25% Sprint Speed at max rank",
     "rarity": "rare"
   },
   {
@@ -13176,11 +13176,11 @@ const RAW_MODS: Mod[] = [
     "name": "Primed Streamline",
     "polarity": "naramon",
     "drain": 4,
-    "maxRank": 14,
+    "maxRank": 10,
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "abilityEfficiency": 3.666667
+      "abilityEfficiency": 5
     },
     "description": "+55% Ability Efficiency",
     "rarity": "legendary"

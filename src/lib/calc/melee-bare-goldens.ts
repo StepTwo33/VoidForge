@@ -1953,7 +1953,7 @@ export const MELEE_BARE_GOLDENS: Array<{
     "criticalChance": 0.2,
     "criticalMultiplier": 2.0,
     "statusChance": 0.14999998,
-    "fireRate": 0.83333337,
+    "fireRate": 0.883,
     "multishot": 1.0
   },
   {

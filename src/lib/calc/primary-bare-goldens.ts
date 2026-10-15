@@ -546,7 +546,7 @@ export const PRIMARY_BARE_GOLDENS = [
   {
     "id": "drakgoon",
     "damage": 70,
-    "criticalChance": 0.05,
+    "criticalChance": 0.075,
     "criticalMultiplier": 2,
     "statusChance": 0.069,
     "fireRate": 3.33,
@@ -907,7 +907,7 @@ export const PRIMARY_BARE_GOLDENS = [
   {
     "id": "kuva_drakgoon",
     "damage": 46,
-    "criticalChance": 0.19,
+    "criticalChance": 0.21,
     "criticalMultiplier": 2.5,
     "statusChance": 0.089999974,
     "fireRate": 3.3333335,
@@ -931,7 +931,7 @@ export const PRIMARY_BARE_GOLDENS = [
   {
     "id": "kuva_hind",
     "damage": 30,
-    "criticalChance": 0.25,
+    "criticalChance": 0.21,
     "criticalMultiplier": 1.9,
     "statusChance": 0.33000004,
     "fireRate": 10,
@@ -1022,7 +1022,7 @@ export const PRIMARY_BARE_GOLDENS = [
   {
     "id": "lanka",
     "damage": 525,
-    "criticalChance": 0.2,
+    "criticalChance": 0.25,
     "criticalMultiplier": 2,
     "statusChance": 0.25,
     "fireRate": 1,
@@ -1589,7 +1589,7 @@ export const PRIMARY_BARE_GOLDENS = [
   {
     "id": "sirocco",
     "damage": 2000.0,
-    "tau": 2000.0,
+    "void": 2000.0,
     "criticalChance": 0.40000001,
     "criticalMultiplier": 2.0,
     "statusChance": 0.19999999,

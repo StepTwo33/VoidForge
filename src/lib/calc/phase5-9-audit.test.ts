@@ -4674,7 +4674,7 @@ describe("Phase 8 — ability scaling registry + sets", () => {
     const helminth = allHelminthAbilities.find((h) => h.id === "subsume_mirage")!;
     expect(helminth.duration).toBe(25);
     expect(helminth.damageBuff).toBe(0.3);
-    expect(helminth.energyCost).toBe(50);
+    expect(helminth.energyCost).toBe(25);
     expect(getVerifiedMiscScaling("mirage_prime", "Hall Of Mirrors", "cloneRangedDamage")).toEqual({
       scale: "strength",
     });
