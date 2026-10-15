@@ -252,6 +252,12 @@ function elementalTypeBonus(stats: CalculatedStats, type: string, moddedBaseDama
   return el.value / moddedBaseDamage;
 }
 
+/** Emerald shard Toxin status damage, additive with Elementalist: (1+sd+tox)/(1+sd). */
+function toxinStatusFactor(stats: CalculatedStats): number {
+  const sd = 1 + (stats.statusDamageBonus ?? 0);
+  return sd > 0 ? (sd + (stats.toxinStatusDamageBonus ?? 0)) / sd : 1;
+}
+
 function calculateStatusProcs(
   stats: CalculatedStats,
   moddedBaseDamage: number,
@@ -285,6 +291,7 @@ function calculateStatusProcs(
       // Slash has no type-damage bonus mult; Heat/Toxin/Elec/Gas use (1 + type%).
       const typeMult = d.type === 'slash' ? 1 : 1 + elementalTypeBonus(stats, d.type, moddedBaseDamage);
       dpt = frac * dotBase * typeMult;
+      if (d.type === 'toxin') dpt *= toxinStatusFactor(stats);
     } else if (d.type === 'blast') {
       dpt = BLAST_DETONATE_FRACTION * dotBase;
     }
@@ -356,6 +363,7 @@ function calculateStatusProcs(
       const typeMult =
         guaranteedEl === "slash" ? 1 : 1 + elementalTypeBonus(stats, guaranteedEl, moddedBaseDamage);
       dpt = frac * dotBase * typeMult;
+      if (guaranteedEl === "toxin") dpt *= toxinStatusFactor(stats);
     } else if (guaranteedEl === "blast") {
       // wiki: Valence Formation doesn't raise Blast proc damage (no type bonus).
       dpt = BLAST_DETONATE_FRACTION * dotBase;
@@ -406,7 +414,7 @@ function calculateStatusProcs(
       sim?.targetFaction,
     );
     const toxinMult = 1 + (stats.toxinModBonusFraction ?? 0);
-    const extraHit = stats.totalDamage * tlFrac;
+    const extraHit = stats.totalDamage * tlFrac * toxinStatusFactor(stats);
     const dpt = 0.5 * extraHit * avgCrit * toxinMult * statusDmg * factionTriple * head;
     const duration = STATUS_INFO.toxin.duration * durMult;
     const ticks = dotTickCount('toxin', duration);
@@ -1070,6 +1078,14 @@ export function calculateWeaponBuild(
   galvMultishotOnKillPerStack = weaponModAcc.galvMultishotOnKillPerStack;
   galvDamagePerStatusPerStack = weaponModAcc.galvDamagePerStatusPerStack;
   stats.statusDamageBonus = weaponModAcc.statusDamageBonus;
+  for (const b of calcOptions?.externalBuffs ?? []) {
+    if (b.toxinStatusDamageBonus) {
+      stats.toxinStatusDamageBonus = (stats.toxinStatusDamageBonus ?? 0) + b.toxinStatusDamageBonus;
+    }
+    if (b.corrosionMaxStacksBonus) {
+      stats.corrosionMaxStacksBonus = (stats.corrosionMaxStacksBonus ?? 0) + b.corrosionMaxStacksBonus;
+    }
+  }
   stats.headshotDamageBonus = weaponModAcc.headshotDamageBonus;
   stats.weakPointDamageBonus = weaponModAcc.weakPointDamageBonus;
   stats.statusDurationBonus = weaponModAcc.statusDurationBonus;
@@ -2401,7 +2417,16 @@ export function applyWarframeShardsAndArcanes(
       case 'abilityDamageRadiation':
       case 'abilityDamageCorrosion':
         break;
-      case 'primaryElectricityDamage':
+      case 'primaryElectricityDamage': {
+        // wiki Archon Shard (both): +30% (+45%) Primary Electricity, plus +10% (+15%) per
+        // Crimson, Azure or Violet shard equipped (this shard included).
+        const cav = (shards ?? []).filter(
+          (s) => s && ['crimson', 'azure', 'violet'].includes(s.shardColor),
+        ).length;
+        stats.primaryElectricityShardBonus =
+          (stats.primaryElectricityShardBonus ?? 0) + bonusValue + (bonusValue / 3) * cav;
+        break;
+      }
       case 'orbConversion':
         break;
       // Topaz (all conditional/on-kill)
@@ -2411,10 +2436,13 @@ export function applyWarframeShardsAndArcanes(
         break;
       // Emerald (conditional)
       case 'toxinStatusDamage':
-        stats.statusDurationBonus += bonusValue;
+        // wiki: Toxin status damage, additive with Elementalist (not status duration).
+        stats.toxinStatusDamageShardBonus = (stats.toxinStatusDamageShardBonus ?? 0) + bonusValue;
+        break;
+      case 'corrosionMaxStacks':
+        stats.corrosionMaxStacksShardBonus = (stats.corrosionMaxStacksShardBonus ?? 0) + bonusValue;
         break;
       case 'toxinHealthRecovery':
-      case 'corrosionMaxStacks':
         break;
     }
   }

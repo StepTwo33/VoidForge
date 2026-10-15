@@ -126,3 +126,46 @@ describe("R7-6: Hunter Munitions / Internal Bleeding (wiki, both wikis)", () => 
       .toBeCloseTo(37.45, 1); // 44.93 s before
   });
 });
+
+describe("R7-8: Emerald / Violet shard weapon effects (wiki Archon Shard, both wikis)", () => {
+  const shard = (color: string, bonus: string, value: number, i: number) => ({
+    shardId: `${color}_standard`, shardColor: color, shardTier: 1, selectedBonus: bonus, bonusValue: value, slotIndex: i,
+  });
+  const wfStats = async (shards: ReturnType<typeof shard>[]) => {
+    const { applyWarframeShardsAndArcanes } = await import("@/lib/calc/calculator");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const base: any = { statusDurationBonus: 0, secondaryShardBonus: 0, primaryShardBonus: 0, meleeCritDamageBonus: 0 };
+    return applyWarframeShardsAndArcanes(base, shards);
+  };
+  it("Violet: +30% primary Electricity + 10% per Crimson/Azure/Violet (self included)", async () => {
+    const s = await wfStats([
+      shard("violet", "primaryElectricityDamage", 30, 0),
+      shard("crimson", "abilityStrength", 10, 1),
+      shard("amber", "castingSpeed", 25, 2),
+    ]);
+    expect(s.primaryElectricityShardBonus).toBeCloseTo(30 + 10 * 2, 9); // violet + crimson; amber excluded
+  });
+  it("Emerald toxin status no longer adds Status Duration; feeds Toxin DoT additively with Elementalist", async () => {
+    const s = await wfStats([shard("emerald", "toxinStatusDamage", 30, 0), shard("emerald", "corrosionMaxStacks", 2, 1)]);
+    expect(s.statusDurationBonus).toBe(0);
+    expect(s.toxinStatusDamageShardBonus).toBe(30);
+    expect(s.corrosionMaxStacksShardBonus).toBe(2);
+    const { calculateWeaponBuild } = await import("@/lib/calc/calculator");
+    const w = enrichWeapon(allWeapons.find((x) => x.id === "kuva_nukor")!);
+    const plain = build("kuva_nukor", ["infected_clip_r3"]);
+    const buffs = [{ id: "x", label: "x", category: "shard" as const, toxinStatusDamageBonus: 0.3 }];
+    const withShard = calculateWeaponBuild(
+      w,
+      [{ modId: "infected_clip_r3", rank: modsMap.get("infected_clip_r3")!.maxRank, slotIndex: 0 }],
+      modsMap, undefined, { ...DEFAULT_SIM_PARAMS }, { externalBuffs: buffs },
+    );
+    const tox = (b: typeof plain) => b.statusProcs!.find((p) => p.type === "toxin")!.damagePerTick;
+    expect(tox(withShard) / tox(plain)).toBeCloseTo(1.3, 9); // no Elementalist: (1+0.3)/1
+  });
+  it("Corrosion cap: 13 stacks = 98% strip, 14 = 100% (wiki Corrosive)", async () => {
+    const { corrosiveArmorRemaining } = await import("@/lib/calc/ttk");
+    expect(corrosiveArmorRemaining(13, 13)).toBeCloseTo(0.02, 9);
+    expect(corrosiveArmorRemaining(14, 14)).toBe(0);
+    expect(corrosiveArmorRemaining(13)).toBeCloseTo(0.2, 9); // default cap 10
+  });
+});

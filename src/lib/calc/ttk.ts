@@ -68,12 +68,13 @@ export function enemyArmorDamageReduction(armor: number): number {
  * Stack 1: −26%; stacks 2–10: −6% each of original; max −80% at 10 stacks.
  * Fractional stacks (TTK estimates) are linearly interpolated.
  */
-export function corrosiveArmorRemaining(stacks: number): number {
+export function corrosiveArmorRemaining(stacks: number, maxStacks = 10): number {
   if (stacks <= 0) return 1;
-  const s = Math.min(10, stacks);
+  // wiki Corrosive: Emerald shards raise the cap (+2/+3); 13 stacks = 98%, 14 = 100%.
+  const s = Math.min(maxStacks, stacks);
   const reductionAt = (n: number) => {
     if (n <= 0) return 0;
-    return Math.min(0.8, 0.26 + 0.06 * Math.max(0, n - 1));
+    return Math.min(1, 0.26 + 0.06 * Math.max(0, n - 1));
   };
   const lo = Math.floor(s);
   const hi = Math.ceil(s);
@@ -420,7 +421,7 @@ function currentArmorFromStrips(
 ): number {
   return (
     baseArmor *
-    corrosiveArmorRemaining(corrosiveStacks) *
+    corrosiveArmorRemaining(corrosiveStacks, Math.max(10, corrosiveStacks)) *
     heatRemaining *
     punctureArmorRemaining(punctureStacks, punctureStripPerStack)
   );
@@ -519,6 +520,8 @@ export function simulateDiscreteTTK(
   // factionHit already includes faction once; DoT needs faction²
   const factionDot = factionDotMultiplier(factionBonus);
   const statusDmg = 1 + (stats.statusDamageBonus ?? 0);
+  // Emerald shard: Toxin status damage, additive with Elementalist.
+  const toxinStatus = statusDmg > 0 ? (statusDmg + (stats.toxinStatusDamageBonus ?? 0)) / statusDmg : 1;
   const head = headshotMultiplier(
     sim?.applyHeadshots,
     stats.headshotDamageBonus ?? 0,
@@ -663,7 +666,8 @@ export function simulateDiscreteTTK(
   // wiki Status Effect durations (both wikis), × Status Duration: Viral / Cold / Puncture /
   // Magnetic 6 s, Corrosive 8 s; each stack expires on its own timer.
   const viralT = new StackTimers(6 * durScale, 10);
-  const corrosiveT = new StackTimers(8 * durScale, 10);
+  const corrosiveCap = 10 + Math.max(0, stats.corrosionMaxStacksBonus ?? 0);
+  const corrosiveT = new StackTimers(8 * durScale, corrosiveCap);
   const magneticT = new StackTimers(6 * durScale, 10);
   const coldT = new StackTimers(6 * durScale, 10);
   const punctureCritT = new StackTimers(6 * durScale, 5);
@@ -962,7 +966,7 @@ export function simulateDiscreteTTK(
       ignoreArmor: false,
       ignoreShields: true,
       useViral: true, // wiki Viral: amplifies every DoT tick dealt to health,
-      typeMult: 1 + typeBonus("toxin"),
+      typeMult: (1 + typeBonus("toxin")) * toxinStatus,
     });
     spawnDot("electricity", expectedProcs("electricity"), 0.5, {
       ignoreArmor: false,
@@ -1008,6 +1012,7 @@ export function simulateDiscreteTTK(
         acmShot *
         toxinMult *
         statusDmg *
+        toxinStatus *
         fTriple *
         head *
         stance *

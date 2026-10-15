@@ -1244,6 +1244,33 @@ function resolveShardBuffs(weapon: Weapon, ctx: WeaponBuffContext): WeaponExtern
     });
   }
 
+  if (isPrimaryWeapon(weapon) && (stats.primaryElectricityShardBonus ?? 0) > 0) {
+    const v = stats.primaryElectricityShardBonus!;
+    buffs.push({
+      id: "shard:primary-electricity",
+      label: "Archon Shard (Primary Electricity)",
+      category: "shard",
+      // wiki: combines with mods like Stormbringer (not parallel).
+      elemental: [{ type: "electricity", bonusFraction: v / 100 }],
+      nominal: `+${v}% primary Electricity damage`,
+    });
+  }
+
+  if ((stats.toxinStatusDamageShardBonus ?? 0) > 0 || (stats.corrosionMaxStacksShardBonus ?? 0) > 0) {
+    const tox = stats.toxinStatusDamageShardBonus ?? 0;
+    const cor = stats.corrosionMaxStacksShardBonus ?? 0;
+    buffs.push({
+      id: "shard:emerald-status",
+      label: "Archon Shard (Toxin / Corrosion status)",
+      category: "shard",
+      toxinStatusDamageBonus: tox / 100,
+      corrosionMaxStacksBonus: cor,
+      nominal: [tox ? `+${tox}% Toxin status damage` : "", cor ? `+${cor} Corrosion stacks` : ""]
+        .filter(Boolean)
+        .join(", "),
+    });
+  }
+
   if (isSecondaryWeapon(weapon) && stats.secondaryShardBonus > 0) {
     buffs.push({
       id: "shard:secondary-crit",

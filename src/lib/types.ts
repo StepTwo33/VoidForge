@@ -365,6 +365,10 @@ export interface WeaponExternalBuff {
   extraHitDamageFraction?: number;
   /** Toxic Lash: Extra Hit always procs Toxin (feeds DoT + faction triple-dip). */
   extraHitGuaranteedToxin?: boolean;
+  /** Extra Toxin status damage fraction (Emerald shard; additive with Elementalist). */
+  toxinStatusDamageBonus?: number;
+  /** Extra max Corrosion stacks (Emerald shard). */
+  corrosionMaxStacksBonus?: number;
   /**
    * Forced status proc on every hit (Valence Formation). Independent of status chance /
    * damage weighting — stacks with normal weighted procs.
@@ -923,6 +927,10 @@ export interface CalculatedStats {
    * Used for Toxic Lash Toxin tick type mult.
    */
   toxinModBonusFraction?: number;
+  /** Toxin-only status damage bonus (Emerald shard), additive with statusDamageBonus. */
+  toxinStatusDamageBonus?: number;
+  /** Extra Corrosion max stacks above 10 (Emerald shard). */
+  corrosionMaxStacksBonus?: number;
   /** Flat initial combo from Incarnon Adept Reflexes etc. */
   incarnonInitialCombo?: number;
   /** Crit/status before Blood Rush / Weeping; used when combo count changes after arcanes. */
@@ -972,6 +980,12 @@ export interface WarframeCalculatedStats {
   elementalResistance: number;
   primaryShardBonus: number;
   secondaryShardBonus: number;
+  /** Violet shard: % Primary Electricity damage (incl. +10/15% per Crimson/Azure/Violet shard). */
+  primaryElectricityShardBonus?: number;
+  /** Emerald shard: % Toxin status damage (additive with Elementalist status damage). */
+  toxinStatusDamageShardBonus?: number;
+  /** Emerald shard: + max Corrosion stacks. */
+  corrosionMaxStacksShardBonus?: number;
   meleeCritDamageBonus: number;
   healingBonus: number;
   statusDurationBonus: number;
