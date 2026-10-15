@@ -182,6 +182,36 @@ export type EnemyScaleOpts = {
   steelPath?: boolean;
 };
 
+/**
+ * Eximus base-stat level factor k(x) (wiki Enemy Level Scaling § Eximus); x = current level.
+ * 1 up to 15, then piecewise linear: 1.25 @25, 2.5 @35, 4.5 @50, 6 @100, flat 6 above.
+ */
+export function eximusLevelFactor(level: number): number {
+  const x = level;
+  if (x <= 15) return 1;
+  if (x <= 25) return 1 + 0.025 * (x - 15);
+  if (x <= 35) return 1.25 + 0.125 * (x - 25);
+  if (x <= 50) return 2.5 + (2 / 15) * (x - 35);
+  if (x <= 100) return 4.5 + 0.03 * (x - 50);
+  return 6;
+}
+
+/**
+ * Eximus base health/shields before faction level scaling (wiki Enemy Level Scaling § Eximus).
+ * Health: max(1.1·base, c·(base + 900)·k), c = 0.25 with shields or armor, 0.375 without.
+ * Shields: max(1.1·base, base·k). Overguard is not modelled.
+ */
+export function eximusBasePools(
+  enemy: Pick<EnemyType, "baseHealth" | "baseShield" | "baseArmor">,
+  level: number,
+): { health: number; shield: number } {
+  const k = eximusLevelFactor(level);
+  const c = enemy.baseShield > 0 || enemy.baseArmor > 0 ? 0.25 : 0.375;
+  const health = Math.max(enemy.baseHealth * 1.1, c * (enemy.baseHealth + 900) * k);
+  const shield = enemy.baseShield > 0 ? Math.max(enemy.baseShield * 1.1, enemy.baseShield * k) : 0;
+  return { health, shield };
+}
+
 /** Level-scaled pools with optional Steel Path HP/Shield multipliers. */
 export function scaleEnemyPools(
   enemy: EnemyType,
@@ -189,11 +219,14 @@ export function scaleEnemyPools(
   opts?: EnemyScaleOpts,
 ): { health: number; armor: number; shield: number; steelPath: boolean } {
   const steelPath = !!opts?.steelPath;
+  const eximus = enemy.kind === "eximus" ? eximusBasePools(enemy, level) : null;
+  const baseHealth = eximus ? eximus.health : enemy.baseHealth;
+  const baseShield = eximus ? eximus.shield : enemy.baseShield;
   const health =
-    scaleHealth(enemy.baseHealth, level, enemy.faction) *
+    scaleHealth(baseHealth, level, enemy.faction) *
     (steelPath ? STEEL_PATH_HEALTH_MULT : 1);
   const shield =
-    scaleShield(enemy.baseShield, level, enemy.faction) * (steelPath ? STEEL_PATH_SHIELD_MULT : 1);
+    scaleShield(baseShield, level, enemy.faction) * (steelPath ? STEEL_PATH_SHIELD_MULT : 1);
   const armor = scaleArmor(enemy.baseArmor, level);
   return { health, armor, shield, steelPath };
 }
