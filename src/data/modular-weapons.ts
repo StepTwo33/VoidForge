@@ -296,21 +296,23 @@ export interface ZawStrike {
   criticalMultiplier: number;
   statusChance: number;
   twoHandMult: number;
+  /** Strike attack-speed modifier added to grip + link base speed (wiki Zaw § Strike "Speed"). */
+  speedBonus: number;
   weaponTypes: { oneHand: string; twoHand: string };
 }
 
 export const zawStrikes: ZawStrike[] = [
-  { id: "zaw_balla", name: "Balla", description: "Fast dagger (1H) or staff (2H). Puncture/Slash focused.", damage: 224, impact: 11.2, puncture: 134.4, slash: 78.4, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.00, weaponTypes: { oneHand: "Dagger", twoHand: "Staff" } },
-  { id: "zaw_cyath", name: "Cyath", description: "Machete (1H) or polearm (2H). Slash focused.", damage: 230, impact: 46.0, puncture: 11.5, slash: 172.5, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.08, weaponTypes: { oneHand: "Machete", twoHand: "Polearm" } },
-  { id: "zaw_dehtat", name: "Dehtat", description: "Rapier (1H) or polearm (2H). Balanced Puncture/Slash.", damage: 224, impact: 22.4, puncture: 112.0, slash: 89.6, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.09, weaponTypes: { oneHand: "Rapier", twoHand: "Polearm" } },
-  { id: "zaw_dokrahm", name: "Dokrahm", description: "Scythe (1H) or heavy blade (2H). High base damage, Slash focused.", damage: 309, impact: 46.4, puncture: 108.1, slash: 154.5, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 0.93, weaponTypes: { oneHand: "Scythe", twoHand: "Heavy Blade" } },
-  { id: "zaw_kronsh", name: "Kronsh", description: "Machete (1H) or polearm (2H). Impact heavy, no Puncture.", damage: 234, impact: 163.8, puncture: 0, slash: 70.2, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.07, weaponTypes: { oneHand: "Machete", twoHand: "Polearm" } },
-  { id: "zaw_mewan", name: "Mewan", description: "Sword (1H) or polearm (2H). Balanced distribution.", damage: 224, impact: 56.0, puncture: 78.4, slash: 89.6, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.09, weaponTypes: { oneHand: "Sword", twoHand: "Polearm" } },
-  { id: "zaw_ooltha", name: "Ooltha", description: "Sword (1H) or staff (2H). Puncture/Slash balanced.", damage: 224, impact: 22.4, puncture: 89.6, slash: 112.0, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.00, weaponTypes: { oneHand: "Sword", twoHand: "Staff" } },
-  { id: "zaw_rabvee", name: "Rabvee", description: "Machete (1H) or hammer (2H). Impact heavy.", damage: 234, impact: 140.4, puncture: 11.7, slash: 81.9, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.08, weaponTypes: { oneHand: "Machete", twoHand: "Hammer" } },
-  { id: "zaw_sepfahn", name: "Sepfahn", description: "Nikana (1H) or staff (2H). Higher crit/status than average. Slash focused.", damage: 226, impact: 22.6, puncture: 56.5, slash: 146.9, criticalChance: 0.20, criticalMultiplier: 2.0, statusChance: 0.20, twoHandMult: 1.00, weaponTypes: { oneHand: "Nikana", twoHand: "Staff" } },
-  { id: "zaw_plague_kripath", name: "Plague Kripath", description: "Rapier (1H) or polearm (2H). Has innate Viral damage. High crit.", damage: 213, impact: 30.0, puncture: 70.0, slash: 49.0, viral: 64.0, criticalChance: 0.22, criticalMultiplier: 2.2, statusChance: 0.18, twoHandMult: 1.08, weaponTypes: { oneHand: "Rapier", twoHand: "Polearm" } },
-  { id: "zaw_plague_keewar", name: "Plague Keewar", description: "Scythe (1H) or staff (2H). Has innate Viral damage. High status.", damage: 306, impact: 88.0, puncture: 57.0, slash: 91.0, viral: 70.0, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.22, twoHandMult: 0.85, weaponTypes: { oneHand: "Scythe", twoHand: "Staff" } },
+  { id: "zaw_balla", name: "Balla", description: "Fast dagger (1H) or staff (2H). Puncture/Slash focused.", damage: 224, impact: 11.2, puncture: 134.4, slash: 78.4, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.00, speedBonus: 0.083, weaponTypes: { oneHand: "Dagger", twoHand: "Staff" } },
+  { id: "zaw_cyath", name: "Cyath", description: "Machete (1H) or polearm (2H). Slash focused.", damage: 230, impact: 46.0, puncture: 11.5, slash: 172.5, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.08, speedBonus: 0.000, weaponTypes: { oneHand: "Machete", twoHand: "Polearm" } },
+  { id: "zaw_dehtat", name: "Dehtat", description: "Rapier (1H) or polearm (2H). Balanced Puncture/Slash.", damage: 224, impact: 22.4, puncture: 112.0, slash: 89.6, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.09, speedBonus: 0.083, weaponTypes: { oneHand: "Rapier", twoHand: "Polearm" } },
+  { id: "zaw_dokrahm", name: "Dokrahm", description: "Scythe (1H) or heavy blade (2H). High base damage, Slash focused.", damage: 309, impact: 46.4, puncture: 108.1, slash: 154.5, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 0.93, speedBonus: 0.083, weaponTypes: { oneHand: "Scythe", twoHand: "Heavy Blade" } },
+  { id: "zaw_kronsh", name: "Kronsh", description: "Machete (1H) or polearm (2H). Impact heavy, no Puncture.", damage: 234, impact: 163.8, puncture: 0, slash: 70.2, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.07, speedBonus: -0.067, weaponTypes: { oneHand: "Machete", twoHand: "Polearm" } },
+  { id: "zaw_mewan", name: "Mewan", description: "Sword (1H) or polearm (2H). Balanced distribution.", damage: 224, impact: 56.0, puncture: 78.4, slash: 89.6, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.09, speedBonus: -0.067, weaponTypes: { oneHand: "Sword", twoHand: "Polearm" } },
+  { id: "zaw_ooltha", name: "Ooltha", description: "Sword (1H) or staff (2H). Puncture/Slash balanced.", damage: 224, impact: 22.4, puncture: 89.6, slash: 112.0, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.00, speedBonus: 0.000, weaponTypes: { oneHand: "Sword", twoHand: "Staff" } },
+  { id: "zaw_rabvee", name: "Rabvee", description: "Machete (1H) or hammer (2H). Impact heavy.", damage: 234, impact: 140.4, puncture: 11.7, slash: 81.9, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.18, twoHandMult: 1.08, speedBonus: -0.067, weaponTypes: { oneHand: "Machete", twoHand: "Hammer" } },
+  { id: "zaw_sepfahn", name: "Sepfahn", description: "Nikana (1H) or staff (2H). Higher crit/status than average. Slash focused.", damage: 226, impact: 22.6, puncture: 56.5, slash: 146.9, criticalChance: 0.20, criticalMultiplier: 2.0, statusChance: 0.20, twoHandMult: 1.00, speedBonus: 0.000, weaponTypes: { oneHand: "Nikana", twoHand: "Staff" } },
+  { id: "zaw_plague_kripath", name: "Plague Kripath", description: "Rapier (1H) or polearm (2H). Has innate Viral damage. High crit.", damage: 213, impact: 30.0, puncture: 70.0, slash: 49.0, viral: 64.0, criticalChance: 0.22, criticalMultiplier: 2.2, statusChance: 0.18, twoHandMult: 1.08, speedBonus: 0.033, weaponTypes: { oneHand: "Rapier", twoHand: "Polearm" } },
+  { id: "zaw_plague_keewar", name: "Plague Keewar", description: "Scythe (1H) or staff (2H). Has innate Viral damage. High status.", damage: 306, impact: 88.0, puncture: 57.0, slash: 91.0, viral: 70.0, criticalChance: 0.18, criticalMultiplier: 2.0, statusChance: 0.22, twoHandMult: 0.85, speedBonus: -0.033, weaponTypes: { oneHand: "Scythe", twoHand: "Staff" } },
 ];
 
 // ── ZAW GRIPS ────────────────────────────────────────────────────────────
@@ -350,7 +352,7 @@ export const zawLinks: ZawLink[] = [
   { id: "zaw_link_ruhang", name: "Ruhang", critBonus: 0.0, statusBonus: 0.0, damageBonus: 14, speedBonus: -0.067 },
   { id: "zaw_link_jai", name: "Jai", critBonus: 0.0, statusBonus: 0.0, damageBonus: -4, speedBonus: 0.083 },
   { id: "zaw_link_ruhang_2", name: "Ruhang II", critBonus: 0.0, statusBonus: 0.0, damageBonus: 28, speedBonus: -0.133 },
-  { id: "zaw_link_jai_2", name: "Jai II", critBonus: 0.0, statusBonus: 0.0, damageBonus: -14, speedBonus: 0.167 },
+  { id: "zaw_link_jai_2", name: "Jai II", critBonus: 0.0, statusBonus: 0.0, damageBonus: -8, speedBonus: 0.167 },
   { id: "zaw_link_vargeet_ruhang", name: "Vargeet Ruhang", critBonus: 0.07, statusBonus: -0.04, damageBonus: 14, speedBonus: -0.067 },
   { id: "zaw_link_vargeet_2_ruhang", name: "Vargeet II Ruhang", critBonus: 0.14, statusBonus: -0.08, damageBonus: 14, speedBonus: -0.067 },
   { id: "zaw_link_vargeet_ruhang_2", name: "Vargeet Ruhang II", critBonus: 0.07, statusBonus: -0.04, damageBonus: 28, speedBonus: -0.133 },
@@ -359,10 +361,10 @@ export const zawLinks: ZawLink[] = [
   { id: "zaw_link_ekwana_ruhang_2", name: "Ekwana Ruhang II", critBonus: -0.04, statusBonus: 0.07, damageBonus: 28, speedBonus: -0.133 },
   { id: "zaw_link_vargeet_jai", name: "Vargeet Jai", critBonus: 0.07, statusBonus: -0.04, damageBonus: -4, speedBonus: 0.083 },
   { id: "zaw_link_vargeet_2_jai", name: "Vargeet II Jai", critBonus: 0.14, statusBonus: -0.08, damageBonus: -4, speedBonus: 0.083 },
-  { id: "zaw_link_vargeet_jai_2", name: "Vargeet Jai II", critBonus: 0.07, statusBonus: -0.04, damageBonus: -14, speedBonus: 0.167 },
+  { id: "zaw_link_vargeet_jai_2", name: "Vargeet Jai II", critBonus: 0.07, statusBonus: -0.04, damageBonus: -8, speedBonus: 0.167 },
   { id: "zaw_link_ekwana_jai", name: "Ekwana Jai", critBonus: -0.04, statusBonus: 0.07, damageBonus: -4, speedBonus: 0.083 },
   { id: "zaw_link_ekwana_2_jai", name: "Ekwana II Jai", critBonus: -0.08, statusBonus: 0.14, damageBonus: -4, speedBonus: 0.083 },
-  { id: "zaw_link_ekwana_jai_2", name: "Ekwana Jai II", critBonus: -0.04, statusBonus: 0.07, damageBonus: -14, speedBonus: 0.167 },
+  { id: "zaw_link_ekwana_jai_2", name: "Ekwana Jai II", critBonus: -0.04, statusBonus: 0.07, damageBonus: -8, speedBonus: 0.167 },
 ];
 
 // ── BUILD ZAW ────────────────────────────────────────────────────────────
@@ -371,7 +373,7 @@ export function buildZaw(strike: ZawStrike, grip: ZawGrip, link: ZawLink): Weapo
   const mult = grip.type === "2h" ? strike.twoHandMult : 1.0;
   const totalDamage = Math.round(rawDamage * mult);
   const ratio = totalDamage / (strike.damage || 1);
-  const speed = +(grip.baseSpeed + link.speedBonus).toFixed(3);
+  const speed = +(grip.baseSpeed + link.speedBonus + strike.speedBonus).toFixed(3);
   const weaponType = grip.type === "1h" ? strike.weaponTypes.oneHand : strike.weaponTypes.twoHand;
 
   return {
