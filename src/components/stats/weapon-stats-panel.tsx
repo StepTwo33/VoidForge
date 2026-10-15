@@ -278,9 +278,17 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
         />
         <StatRow
           label="Status Chance"
-          value={`${(stats.statusChancePerShot * 100).toFixed(1)}%`}
+          value={`${(stats.statusChance * 100).toFixed(1)}%`}
           changed={flash.has("statusChance")}
+          tooltip="Per pellet, as shown in the in-game Arsenal."
         />
+        {Math.abs(stats.statusChancePerShot - stats.statusChance) > 1e-9 && (
+          <StatRow
+            label="↳ Proc chance per shot"
+            value={`${(stats.statusChancePerShot * 100).toFixed(1)}%`}
+            tooltip="Chance that at least one pellet of a shot procs a status, from per-pellet status chance and multishot."
+          />
+        )}
         {!isMelee && (
           <StatRow label="Multishot" value={stats.multishot.toFixed(2)} changed={flash.has("multishot")} />
         )}

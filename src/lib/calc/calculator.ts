@@ -41,6 +41,7 @@ import {
   weaponAcceptsSynthReloadBonus,
 } from './set-bonuses';
 import { WARFRAME_ENERGY_RANK30 } from '@/data/warframe-energy-rank30';
+import { WARFRAME_HEALTH_RANK30, WARFRAME_SHIELD_RANK30 } from '@/data/warframe-health-shield-rank30';
 import {
   applyCrossSlotMeleeWeaponBuffs,
   applyVerifiedModStatToWarframe,
@@ -60,6 +61,18 @@ import {
   factionTripleDotMultiplier,
   resolveStanceDamageMultiplier,
 } from '@/lib/calc/combat-multipliers';
+
+/**
+ * Unmodded rank-30 health / shields: the base Vitality, Redirection, etc. scale since
+ * Update 34 (wiki Vitality / Redirection). Frames without a wiki row (Necramechs,
+ * Helminth) keep their listed value.
+ */
+export function getWarframeHealthModBase(warframe: Warframe): number {
+  return WARFRAME_HEALTH_RANK30[warframe.id] ?? warframe.health;
+}
+export function getWarframeShieldModBase(warframe: Warframe): number {
+  return WARFRAME_SHIELD_RANK30[warframe.id] ?? warframe.shield;
+}
 
 /** Unmodded rank-30 energy capacity — the pool Flow and +% max energy mods scale (wiki Energy Capacity). */
 export function getWarframeEnergyModBase(warframe: Warframe): number {
@@ -1973,8 +1986,8 @@ export function calculateWarframeBuild(
   linkage?: SetBonusLinkage,
 ): WarframeCalculatedStats {
   const stats: WarframeCalculatedStats = {
-    baseHealth: warframe.health,
-    baseShield: warframe.shield,
+    baseHealth: getWarframeHealthModBase(warframe),
+    baseShield: getWarframeShieldModBase(warframe),
     baseArmor: warframe.armor,
     baseEnergy: getWarframeEnergyModBase(warframe),
     baseSprint: warframe.sprintSpeed,
@@ -1993,8 +2006,8 @@ export function calculateWarframeBuild(
     abilityDuration: 1.0,
     abilityEfficiency: 1.0,
     abilityRange: 1.0,
-    totalHealth: warframe.health,
-    totalShield: warframe.shield,
+    totalHealth: getWarframeHealthModBase(warframe),
+    totalShield: getWarframeShieldModBase(warframe),
     totalArmor: warframe.armor,
     totalEnergy: getWarframeEnergyModBase(warframe),
     totalSprint: warframe.sprintSpeed,

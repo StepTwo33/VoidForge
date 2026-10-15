@@ -14520,7 +14520,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "abilityStrength": 5
     },
-    "description": "+55% Ability Strength",
+    "description": "+30% Ability Strength",
     "rarity": "rare"
   },
   {
@@ -14691,7 +14691,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "abilityEfficiency": 5.0
     },
-    "description": "+12% Ability Efficiency",
+    "description": "+30% Ability Efficiency",
     "rarity": "rare"
   },
   {
