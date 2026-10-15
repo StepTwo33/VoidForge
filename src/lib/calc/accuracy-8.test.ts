@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-const DOT_TICKS = 7;
+const DOT_TICKS = 6;
 import { ENEMY_TYPES, enemyDamageTypeMultiplier } from "@/lib/calc/ttk";
 import { runDamageSim } from "@/lib/calc/damage-sim";
+import { dotFirstTickDelay, dotTickCount } from "@/lib/calc/dot-ticks";
 
 const lancer = ENEMY_TYPES.find((e) => e.id === "lancer")!;
 const baseInput = {
@@ -36,5 +37,21 @@ describe("status DoT steady-state DPS = procs/s × ticks × tick damage", () => 
     const toxOne = pps * tick * enemyDamageTypeMultiplier(lancer, "toxin") * (1 - r.armorDR);
     expect(r.heatDotDps / heatOne).toBeCloseTo(DOT_TICKS, 6);
     expect(r.toxinDotDps / toxOne).toBeCloseTo(DOT_TICKS, 6);
+  });
+});
+
+describe("DoT tick count and timing (wiki Damage over Time)", () => {
+  it("6 ticks at base 6s for every DoT type", () => {
+    for (const t of ["slash", "heat", "toxin", "electricity", "gas"]) expect(dotTickCount(t, 6)).toBe(6);
+  });
+  it("first tick 1s after proc for Slash/Heat/Toxin, on application for Electricity/Gas", () => {
+    expect(["slash", "heat", "toxin"].map(dotFirstTickDelay)).toEqual([1, 1, 1]);
+    expect(["electricity", "gas"].map(dotFirstTickDelay)).toEqual([0, 0]);
+  });
+  it("status duration: +100% → 12s → 12 ticks; 6.5s → Slash 6 (1…6s), Electricity 7 (0…6s)", () => {
+    expect(dotTickCount("slash", 12)).toBe(12);
+    expect(dotTickCount("electricity", 12)).toBe(12);
+    expect(dotTickCount("slash", 6.5)).toBe(6);
+    expect(dotTickCount("electricity", 6.5)).toBe(7);
   });
 });

@@ -270,7 +270,7 @@ describe("status DoT tick fractions (wiki Damage/Calculation)", () => {
 
     const avgCrit = avgCritMultiplier(stats.criticalChance, stats.criticalMultiplier);
     expect(slashProc.damagePerTick).toBeCloseTo(stats.moddedBaseDamage * 0.35 * avgCrit, 2);
-    expect(slashProc.ticks).toBe(7);
+    expect(slashProc.ticks).toBe(6); // wiki Damage over Time: 1…6s
   });
 });
 
@@ -312,7 +312,7 @@ describe("Acuity mods (wiki: weak point damage/crit, multishot locked)", () => {
 });
 
 describe("status duration mods extend DoT ticks (wiki Status Effect)", () => {
-  it("Continuous Misery (+100%) doubles slash duration: 12s / 13 ticks", () => {
+  it("Continuous Misery (+100%) doubles slash duration: 12s / 12 ticks", () => {
     const weapon = allWeapons.find((w) => w.id === "braton_prime" || w.name === "Braton Prime");
     const misery = allMods.find((m) => m.id === "continuous_misery");
     if (!weapon || !misery) return;
@@ -328,10 +328,10 @@ describe("status duration mods extend DoT ticks (wiki Status Effect)", () => {
     if (!baseSlash || !moddedSlash) return;
 
     expect(baseSlash.duration).toBe(6);
-    expect(baseSlash.ticks).toBe(7);
+    expect(baseSlash.ticks).toBe(6);
     expect(moddedSlash.duration).toBeCloseTo(12, 5);
-    expect(moddedSlash.ticks).toBe(13);
-    expect(moddedSlash.totalDamage).toBeCloseTo(baseSlash.totalDamage * (13 / 7), 3);
+    expect(moddedSlash.ticks).toBe(12);
+    expect(moddedSlash.totalDamage).toBeCloseTo(baseSlash.totalDamage * 2, 3);
   });
 });
 

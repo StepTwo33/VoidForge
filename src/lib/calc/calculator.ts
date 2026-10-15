@@ -7,6 +7,7 @@ import {
   applyMeleeComboToStats,
   resolveEffectiveComboCount,
 } from './melee-combo';
+import { dotTickCount } from './dot-ticks';
 import { enrichWeapon } from '../weapons/weapon-enrich';
 import { resolveExaltedStrengthForCalc } from '../weapons/exalted-weapons';
 import { sentientIncisionElementForFaction } from './sentient-incision';
@@ -176,15 +177,15 @@ function targetFactionBonus(stats: CalculatedStats, targetFaction: string | unde
 const STATUS_INFO: Record<string, { duration: number; ticks: number; desc: string }> = {
   impact:      { duration: 1, ticks: 1, desc: 'Stagger + mercy threshold (max 5)' },
   puncture:    { duration: 10, ticks: 1, desc: '-40% dmg dealt (stacks to -80%), +crit received' },
-  // DoTs: tick at application + once per second for 6s → 7 ticks
-  slash:       { duration: 6, ticks: 7, desc: 'Bleed (35% base/tick, cinematic/True, ignores armor)' },
-  heat:        { duration: 6, ticks: 7, desc: 'Ignite (50% base/tick), panic, armor strip to 50%' },
+  // DoTs: 6 ticks over 6s (Slash/Heat/Toxin at 1…6s; Electricity/Gas at 0…5s) — dot-ticks.ts
+  slash:       { duration: 6, ticks: 6, desc: 'Bleed (35% base/tick, cinematic/True, ignores armor)' },
+  heat:        { duration: 6, ticks: 6, desc: 'Ignite (50% base/tick), panic, armor strip to 50%' },
   cold:        { duration: 6, ticks: 1, desc: '-50% move/fire/attack (stacks to -90%), +crit mult received' },
-  toxin:       { duration: 6, ticks: 7, desc: 'Poison (50% base/tick, bypasses shields)' },
-  electricity: { duration: 6, ticks: 7, desc: 'Chain DoT (50% base/tick) + stun' },
+  toxin:       { duration: 6, ticks: 6, desc: 'Poison (50% base/tick, bypasses shields)' },
+  electricity: { duration: 6, ticks: 6, desc: 'Chain DoT (50% base/tick) + stun' },
   blast:       { duration: 6, ticks: 1, desc: 'Detonate: 30% base/stack after 1.5s; AoE on max stacks/death' },
   corrosive:   { duration: 8, ticks: 1, desc: '-26% armor first stack, -6% each after (max -80% at 10)' },
-  gas:         { duration: 6, ticks: 7, desc: 'Gas cloud DoT (50% base/tick, AoE)' },
+  gas:         { duration: 6, ticks: 6, desc: 'Gas cloud DoT (50% base/tick, AoE)' },
   magnetic:    { duration: 6, ticks: 1, desc: '+100% dmg to shields/overguard (stacks to +325%)' },
   radiation:   { duration: 12, ticks: 1, desc: 'Confusion + friendly-fire dmg (stacks to +550%)' },
   viral:       { duration: 6, ticks: 1, desc: '+100% health dmg first stack, +25% each after (max +325%)' },
@@ -257,7 +258,7 @@ function calculateStatusProcs(
 
   const dotBase = statusDotTickBase(stats, moddedBaseDamage, sim);
   // Status duration mods (Continuous Misery, etc.) extend proc duration;
-  // DoTs tick once per second, so extra duration adds ticks (ticks = floor(dur) + 1).
+  // DoTs tick once per second, so extra duration adds ticks (wiki: ⌊dur − delay⌋ + 1).
   const durMult = 1 + (stats.statusDurationBonus ?? 0);
 
   const procs: StatusProc[] = allDamageTypes.map(d => {
@@ -266,7 +267,7 @@ function calculateStatusProcs(
     const chance = stats.statusChance * weight;
     const frac = DOT_TICK_FRACTION[d.type];
     const duration = info.duration * durMult;
-    const ticks = frac != null ? Math.floor(duration) + 1 : info.ticks;
+    const ticks = frac != null ? dotTickCount(d.type, duration) : info.ticks;
     let dpt = 0;
     if (frac != null) {
       // Slash has no type-damage bonus mult; Heat/Toxin/Elec/Gas use (1 + type%).
@@ -288,7 +289,7 @@ function calculateStatusProcs(
   const slashOnCrit = stats.slashOnCritChance ?? 0;
   if (slashOnCrit > 0 && stats.criticalChance > 0) {
     const duration = STATUS_INFO.slash.duration * durMult;
-    const ticks = Math.floor(duration) + 1;
+    const ticks = dotTickCount('slash', duration);
     const dpt = DOT_TICK_FRACTION.slash * dotBase;
     const chance = slashOnCrit * Math.min(stats.criticalChance, 1);
     procs.push({
@@ -309,7 +310,7 @@ function calculateStatusProcs(
   if (slashOnImpact > 0 && impactProc && impactProc.chance > 0) {
     const rateMult = stats.fireRate < 2.5 ? 2 : 1;
     const duration = STATUS_INFO.slash.duration * durMult;
-    const ticks = Math.floor(duration) + 1;
+    const ticks = dotTickCount('slash', duration);
     const dpt = DOT_TICK_FRACTION.slash * dotBase;
     const chance = impactProc.chance * Math.min(slashOnImpact * rateMult, 1);
     procs.push({
@@ -329,7 +330,7 @@ function calculateStatusProcs(
     const info = STATUS_INFO[guaranteedEl] || { duration: 6, ticks: 1, desc: "Unknown" };
     const frac = DOT_TICK_FRACTION[guaranteedEl];
     const duration = info.duration * durMult;
-    const ticks = frac != null ? Math.floor(duration) + 1 : info.ticks;
+    const ticks = frac != null ? dotTickCount(guaranteedEl, duration) : info.ticks;
     let dpt = 0;
     if (frac != null) {
       const typeMult =
@@ -351,7 +352,7 @@ function calculateStatusProcs(
   const extraElec = stats.extraElectricProcChance ?? 0;
   if (extraElec > 0) {
     const duration = STATUS_INFO.electricity.duration * durMult;
-    const ticks = Math.floor(duration) + 1;
+    const ticks = dotTickCount('electricity', duration);
     const typeMult = 1 + elementalTypeBonus(stats, "electricity", moddedBaseDamage);
     const dpt = DOT_TICK_FRACTION.electricity * dotBase * typeMult;
     procs.push({
@@ -385,7 +386,7 @@ function calculateStatusProcs(
     const extraHit = stats.totalDamage * tlFrac;
     const dpt = 0.5 * extraHit * avgCrit * toxinMult * statusDmg * factionTriple * head;
     const duration = STATUS_INFO.toxin.duration * durMult;
-    const ticks = Math.floor(duration) + 1;
+    const ticks = dotTickCount('toxin', duration);
     procs.push({
       type: "toxin",
       chance: 1,

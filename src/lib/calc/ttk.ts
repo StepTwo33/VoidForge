@@ -24,6 +24,7 @@ export {
 } from "@/data/enemies";
 import type { EnemyType } from "@/data/enemies";
 import { enemyDamageTypeMultiplier } from "@/data/faction-damage-modifiers";
+import { DOT_BASE_DURATION, dotFirstTickDelay, dotTickCount } from "@/lib/calc/dot-ticks";
 
 // ── Damage type modifiers (Update 36) ─────────────────────────────────
 // Health / armor / shield classes were removed in Update 36; vulnerabilities and
@@ -501,6 +502,9 @@ export function simulateDiscreteTTK(
     }
   };
 
+  // Status Duration mods lengthen DoTs (more ticks), matching calculateStatusProcs.
+  const dotDuration = DOT_BASE_DURATION * Math.max(0, 1 + (stats.statusDurationBonus ?? 0));
+
   const spawnDot = (
     type: string,
     expectedCount: number,
@@ -517,8 +521,10 @@ export function simulateDiscreteTTK(
     const addOne = (scale: number) => {
       if (scale <= 0) return;
       dots.push({
-        nextTick: time, // first tick on application (wiki: immediate + 6 more)
-        remainingTicks: 7,
+        // wiki Damage over Time: Slash/Heat/Toxin first tick 1s after the proc,
+        // Electricity/Gas on application; 6 ticks at base duration.
+        nextTick: time + dotFirstTickDelay(type),
+        remainingTicks: dotTickCount(type, dotDuration),
         damagePerTick: perTick * scale,
         type,
         ignoreArmor: optsDot.ignoreArmor,
@@ -691,8 +697,8 @@ export function simulateDiscreteTTK(
         const addTl = (scale: number) => {
           if (scale <= 0) return;
           dots.push({
-            nextTick: time,
-            remainingTicks: 7,
+            nextTick: time + dotFirstTickDelay("toxin"),
+            remainingTicks: dotTickCount("toxin", dotDuration),
             damagePerTick: tlTick * scale,
             type: "toxin",
             ignoreArmor: false,
@@ -713,9 +719,9 @@ export function simulateDiscreteTTK(
     tickDot(time);
   }
 
-  // Drain remaining DoTs if still alive but DoTs would finish (up to 7s of ticks)
+  // Drain remaining DoTs if still alive but DoTs would finish (delay + duration of ticks)
   if (health > 0 && dots.length > 0) {
-    const drainEnd = Math.min(maxTime, time + 7);
+    const drainEnd = Math.min(maxTime, time + 1 + dotDuration);
     const healthBeforeDrain = health;
     // Step 0.25s so TTK reflects the tick that actually kills
     let t = time;

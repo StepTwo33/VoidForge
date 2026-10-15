@@ -124,6 +124,6 @@ describe("status DoT base", () => {
     const elec = stats.statusProcs.find((p) => p.type === "electricity");
     expect(elec).toBeDefined();
     expect(elec!.damagePerTick).toBeGreaterThan(0);
-    expect(elec!.ticks).toBe(7);
+    expect(elec!.ticks).toBe(6); // wiki: 0…5s, last tick at 6s deals nothing
   });
 });

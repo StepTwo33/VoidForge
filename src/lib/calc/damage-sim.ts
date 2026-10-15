@@ -4,6 +4,7 @@
  * (wiki Armor / Status Effect). Do not reimplement those formulas here.
  */
 import { avgCritMultiplier } from "@/lib/calc/crit-utils";
+import { dotTickCount } from "@/lib/calc/dot-ticks";
 import {
   combatDamageMultiplier,
   factionBonusFromStats,
@@ -25,8 +26,8 @@ import {
 } from "@/lib/calc/ttk";
 import { DEFAULT_SIM_PARAMS, type CalculatedStats } from "@/lib/types";
 
-/** Damage ticks per DoT proc at base 6s duration (matches the TTK sim). */
-const DOT_TICKS_PER_PROC = 7;
+/** Damage ticks per DoT proc at base 6s duration (wiki: 6; matches the TTK sim). */
+const DOT_TICKS_PER_PROC = dotTickCount("slash");
 
 export interface DamageSimInputs {
   dmgTypes: Record<string, number>;
