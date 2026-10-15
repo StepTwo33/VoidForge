@@ -100,10 +100,16 @@ export function scaleRadialAttacksWithDps(
   incarnonActive = false,
   /** Extra radials from selected evolutions (Sawblade Storm, etc.). */
   extraRadials: WeaponRadialAttack[] = [],
-): { attacks: ScaledRadialAttack[]; radialBurstDps: number; radialSustainedDps: number } {
+): {
+  attacks: ScaledRadialAttack[];
+  radialBurstDps: number;
+  radialSustainedDps: number;
+  /** Fraction of direct burst DPS to remove (folded explosion losing direct-only bonuses). */
+  directAoeCorrection: number;
+} {
   const attacks = [...getWeaponRadialAttacks(baseWeapon), ...extraRadials];
   if (!attacks.length || !baseWeapon.damage) {
-    return { attacks: [], radialBurstDps: 0, radialSustainedDps: 0 };
+    return { attacks: [], radialBurstDps: 0, radialSustainedDps: 0, directAoeCorrection: 0 };
   }
 
   const isMelee =
@@ -122,7 +128,12 @@ export function scaleRadialAttacksWithDps(
     (["heat", "cold", "toxin", "electricity", "blast", "radiation", "gas", "magnetic", "viral", "corrosive", "tau"] as const)
       .reduce((sum, key) => sum + ((baseWeapon as unknown as Record<string, number>)[key] ?? 0), 0);
   let directResidual = Math.max(0, baseWeapon.damage - partsSum);
-  const mult = stats.totalDamage / baseWeapon.damage;
+  // wiki (both): Galvanized per-status / CO bonuses are direct-hit only, not AoE.
+  const applied = stats.appliedBaseDamageBonus ?? 0;
+  const directOnly = stats.directOnlyDamageBonus ?? 0;
+  const aoeFactor = directOnly > 0 && 1 + applied > 0 ? (1 + applied - directOnly) / (1 + applied) : 1;
+  const mult = (stats.totalDamage / baseWeapon.damage) * aoeFactor;
+  let directAoeCorrection = 0;
   const avgCrit = avgCritMultiplier(
     stats.criticalChance + (stats.vigilanteCritBonus ?? 0),
     stats.criticalMultiplier,
@@ -165,6 +176,8 @@ export function scaleRadialAttacksWithDps(
       attack.totalDamage <= directResidual * 2.5
     ) {
       includedInDirect = true;
+      // Share of the direct hit that is really this explosion loses the direct-only bonus.
+      directAoeCorrection += Math.min(1, attack.totalDamage / baseWeapon.damage) * (1 - aoeFactor);
       directResidual = 0;
     }
     const rate =
@@ -203,5 +216,5 @@ export function scaleRadialAttacksWithDps(
     }
   }
 
-  return { attacks: scaled, radialBurstDps, radialSustainedDps };
+  return { attacks: scaled, radialBurstDps, radialSustainedDps, directAoeCorrection };
 }

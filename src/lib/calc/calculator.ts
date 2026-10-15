@@ -475,13 +475,19 @@ function applyRadialAttacks(
   incarnonStatChanges?: Record<string, number>,
 ): void {
   const extra = evolutionExtraRadials(incarnonStatChanges, incarnonActive);
-  const { attacks, radialBurstDps, radialSustainedDps } = scaleRadialAttacksWithDps(
+  const { attacks, radialBurstDps, radialSustainedDps, directAoeCorrection } = scaleRadialAttacksWithDps(
     baseWeapon,
     stats,
     incarnonActive,
     extra,
   );
   if (!attacks.length) return;
+  // Launcher explosions folded into the direct damage stat must not keep direct-only bonuses.
+  if (directAoeCorrection > 0 && stats.burstDps > 0) {
+    const susRatio = stats.sustainedDps / stats.burstDps;
+    stats.burstDps *= 1 - directAoeCorrection;
+    stats.sustainedDps = stats.burstDps * susRatio;
+  }
   stats.radialAttacks = attacks;
   stats.radialBurstDps = radialBurstDps;
   stats.radialSustainedDps = radialSustainedDps;
@@ -1064,8 +1070,12 @@ export function calculateWeaponBuild(
   stats.factionBonuses = { ...weaponModAcc.factionBonuses };
 
   // Apply Condition Overload: multiplicative damage per status type on target
+  // wiki: CO, Galvanized Aptitude/Savvy/Shot and Fatal Affliction are direct-hit only (not
+  // slams / radial explosions / AoE, both wikis) — tracked so radials can strip them.
+  let directOnlyDamageBonus = 0;
   if (hasConditionOverload && sim.statusTypesOnTarget > 0) {
     damageBonus += conditionOverloadPerStatus * sim.statusTypesOnTarget;
+    directOnlyDamageBonus += conditionOverloadPerStatus * sim.statusTypesOnTarget;
   }
   stats.conditionOverloadBonus = conditionOverloadPerStatus;
 
@@ -1073,6 +1083,7 @@ export function calculateWeaponBuild(
   const fatalAfflictionPerStatus = incarnonStatChanges?.fatalAfflictionPerStatus ?? 0;
   if (fatalAfflictionPerStatus > 0 && sim.statusTypesOnTarget > 0) {
     damageBonus += fatalAfflictionPerStatus * sim.statusTypesOnTarget;
+    directOnlyDamageBonus += fatalAfflictionPerStatus * sim.statusTypesOnTarget;
   }
   // Reaver's Rapture etc.: stack-capped +Damage additive with Serration (not late ×damage).
   damageBonus += incarnonStatChanges?.additiveBaseDamage ?? 0;
@@ -1097,6 +1108,7 @@ export function calculateWeaponBuild(
   const galvConditionStacks = Math.min(sim.killStacks, weaponModAcc.galvDamagePerStatusStackCap);
   if (galvDamagePerStatusPerStack > 0 && galvConditionStacks > 0 && sim.statusTypesOnTarget > 0) {
     damageBonus += galvDamagePerStatusPerStack * galvConditionStacks * sim.statusTypesOnTarget;
+    directOnlyDamageBonus += galvDamagePerStatusPerStack * galvConditionStacks * sim.statusTypesOnTarget;
   }
   stats.galvanizedDamagePerStatus = galvDamagePerStatusPerStack;
   stats.galvanizedDamagePerStatusStackCap = weaponModAcc.galvDamagePerStatusStackCap;
@@ -1223,6 +1235,7 @@ export function calculateWeaponBuild(
   stats.slash *= (1 + slashBonus);
   const dmgMult = 1 + damageBonus;
   stats.appliedBaseDamageBonus = damageBonus;
+  stats.directOnlyDamageBonus = directOnlyDamageBonus;
   stats.totalDamage *= dmgMult;
   stats.impact *= dmgMult;
   stats.puncture *= dmgMult;

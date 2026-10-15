@@ -888,6 +888,8 @@ export interface CalculatedStats {
   headshotDamageBonus?: number;
   /** Sum of additive base-damage bonuses already applied (Serration/Hornet Strike/Pressure Point + riven, Condition Overload, …), as a fraction. Used by additive damage arcanes. */
   appliedBaseDamageBonus?: number;
+  /** Part of appliedBaseDamageBonus that only applies to direct hits (CO / Galvanized per-status). */
+  directOnlyDamageBonus?: number;
   /** Weak point damage bonus (fraction; Acuity, Pain Points, spliced WP) — adds to the weak point multiplier, ×1.5 on heads. */
   weakPointDamageBonus?: number;
   /** Status duration bonus (fraction) — extends DoT proc duration/ticks. */
