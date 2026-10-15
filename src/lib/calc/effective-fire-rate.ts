@@ -25,6 +25,8 @@ export interface FireTimingInput {
   /** Base (unmodded) charge time in seconds, if known. */
   chargeTime?: number;
   chargeMode?: ChargeMode;
+  /** Apply charge timing although the trigger label isn't "Charge" (Auto-Charge weapons). */
+  chargeTimingAlways?: boolean;
   burstCount?: number;
   /** Inter-shot delay inside a burst (seconds), unmodded. */
   burstDelay?: number;
@@ -80,6 +82,7 @@ export function resolveEffectiveFireRate(input: FireTimingInput): number {
     reloadTime,
     chargeTime,
     chargeMode,
+    chargeTimingAlways,
     burstCount,
     burstDelay,
     weaponId,
@@ -91,7 +94,7 @@ export function resolveEffectiveFireRate(input: FireTimingInput): number {
     (weaponId === "lanka" ? "lanka" : isBowLike(triggerType) ? "bow" : "standard");
 
   // —— Charge family ——
-  if (chargeTime != null && chargeTime > 0 && (isChargeTrigger(triggerType) || mode === "bow" || mode === "lanka" || weaponId === "lanka")) {
+  if (chargeTime != null && chargeTime > 0 && (chargeTimingAlways || isChargeTrigger(triggerType) || mode === "bow" || mode === "lanka" || weaponId === "lanka")) {
     const ct = moddedChargeTime(chargeTime, bonus);
     if (mode === "lanka" || (baseFireRate <= 0 && mode !== "bow")) {
       return ct > 0 ? 1 / ct : 0;

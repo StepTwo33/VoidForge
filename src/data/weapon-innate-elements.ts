@@ -38,6 +38,8 @@ export interface WeaponInnateFill {
    * - lanka: 1 / CT  (no inter-shot delay)
    */
   chargeMode?: "standard" | "bow" | "lanka";
+  /** Apply charge timing although triggerType is a category label (Auto-Charge weapons). */
+  chargeTimingAlways?: boolean;
 }
 
 /**
@@ -133,7 +135,8 @@ export const WEAPON_FIRE_TIMING: Record<string, WeaponInnateFill> = {
   cernos_prime: { chargeTime: 0.5, chargeMode: "bow" },
   rakta_cernos: { chargeTime: 0.5, chargeMode: "bow" },
   mutalist_cernos: { chargeTime: 0.5, chargeMode: "bow" },
-  proboscis_cernos: { chargeTime: 0.5, chargeMode: "bow" },
+  // wiki Module:Weapons (both wikis) + Fire Rate list: 0.70s
+  proboscis_cernos: { chargeTime: 0.7, chargeMode: "bow" },
   daikyu: { chargeTime: 1.0, chargeMode: "bow" },
   daikyu_prime: { chargeTime: 1.0, chargeMode: "bow" },
   nagantaka: { chargeTime: 0.5, chargeMode: "bow" },
@@ -149,10 +152,21 @@ export const WEAPON_FIRE_TIMING: Record<string, WeaponInnateFill> = {
   kuva_ogris: { chargeTime: 0.3, chargeMode: "standard" },
   kuva_bramma: { chargeTime: 0.4, chargeMode: "standard" },
   ferrox: { chargeTime: 0.5, chargeMode: "standard" },
-  tenet_ferrox: { chargeTime: 0.5, chargeMode: "standard" },
+  // wiki Module:Weapons (both wikis) + Fire Rate list: 0.40s
+  tenet_ferrox: { chargeTime: 0.4, chargeMode: "standard" },
   tenet_envoy: { chargeTime: 1.2, chargeMode: "standard" },
   angstrum: { chargeTime: 0.5, chargeMode: "standard" },
-  prisma_angstrum: { chargeTime: 0.5, chargeMode: "standard" },
+  // wiki Module:Weapons (both wikis) + Fire Rate list: 0.20s single rocket
+  prisma_angstrum: { chargeTime: 0.2, chargeMode: "standard" },
+  // wiki Auto-Charge (wiki.warframe.com; no fandom page): 1 / (CT + 1/FR)
+  vadarya_prime: { chargeTime: 0.75, chargeMode: "standard", chargeTimingAlways: true },
+  // wiki Module:Weapons (both wikis) Auto-Charge projectile: CT 0.30s
+  javlok: { chargeTime: 0.3, chargeMode: "standard", chargeTimingAlways: true },
+  // wiki Nunchasa (Narin bow; wiki.warframe.com only) Charged Shot CT 0.60s; bow cycle CT + reload
+  nunchasa: { chargeTime: 0.6, chargeMode: "bow" },
+  // wiki Fire Rate: Epitaph charged shot uses the bow formula 1 / (CT + reload); CT 0.36s (both wikis)
+  epitaph: { chargeTime: 0.36, chargeMode: "bow" },
+  epitaph_prime: { chargeTime: 0.36, chargeMode: "bow" },
   drakgoon: { chargeTime: 0.3, chargeMode: "standard" },
   lenz: { chargeTime: 1.2, chargeMode: "standard" },
   balefire: { chargeTime: 2.0, chargeMode: "standard" },

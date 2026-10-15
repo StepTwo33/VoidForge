@@ -3,6 +3,10 @@ const DOT_TICKS = 6;
 import { ENEMY_TYPES, enemyDamageTypeMultiplier } from "@/lib/calc/ttk";
 import { runDamageSim } from "@/lib/calc/damage-sim";
 import { dotFirstTickDelay, dotTickCount } from "@/lib/calc/dot-ticks";
+import { allWeapons } from "@/data/weapons";
+import { calculateWeaponBuild } from "@/lib/calc/calculator";
+import { enrichWeapon } from "@/lib/weapons/weapon-enrich";
+import { modsMap } from "@/data/mods";
 
 const lancer = ENEMY_TYPES.find((e) => e.id === "lancer")!;
 const baseInput = {
@@ -53,5 +57,24 @@ describe("DoT tick count and timing (wiki Damage over Time)", () => {
     expect(dotTickCount("electricity", 12)).toBe(12);
     expect(dotTickCount("slash", 6.5)).toBe(6);
     expect(dotTickCount("electricity", 6.5)).toBe(7);
+  });
+});
+
+describe("charge times (wiki Module:Weapons + Fire Rate)", () => {
+  const efr = (id: string) =>
+    calculateWeaponBuild(enrichWeapon(allWeapons.find((x) => x.id === id)!), [], modsMap).effectiveFireRate;
+  it("Auto-Charge (standard 1/(CT + 1/FR)): Vadarya Prime 0.75s @2.8, Javlok 0.3s @3.33", () => {
+    expect(efr("vadarya_prime")).toBeCloseTo(1 / (0.75 + 1 / 2.8), 4); // 0.9032
+    expect(efr("javlok")).toBeCloseTo(1 / (0.3 + 1 / 3.3333335), 4); // 1.6667
+  });
+  it("standard charge: Tenet Ferrox 0.4s @2.67 → 1.290; Prisma Angstrum 0.2s @2 → 1.429", () => {
+    expect(efr("tenet_ferrox")).toBeCloseTo(1 / (0.4 + 1 / 2.6667), 3);
+    expect(efr("prisma_angstrum")).toBeCloseTo(1 / (0.2 + 0.5), 4);
+  });
+  it("bow cycle 1/(CT + reload): Proboscis Cernos 0.7+0.6, Nunchasa 0.6+0.6, Epitaph/Prime 0.36+0.6", () => {
+    expect(efr("proboscis_cernos")).toBeCloseTo(1 / 1.3, 4);
+    expect(efr("nunchasa")).toBeCloseTo(1 / 1.2, 4);
+    expect(efr("epitaph")).toBeCloseTo(1 / 0.96, 4);
+    expect(efr("epitaph_prime")).toBeCloseTo(1 / 0.96, 4);
   });
 });

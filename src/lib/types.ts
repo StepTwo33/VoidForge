@@ -81,6 +81,11 @@ export interface Weapon {
   chargeTime?: number;
   /** Charge FR mode: standard | bow | lanka (wiki Fire Rate). */
   chargeMode?: "standard" | "bow" | "lanka";
+  /**
+   * Apply charge timing even though triggerType is a category label ("Sniper",
+   * "Rifle") rather than "Charge" — e.g. Auto-Charge Vadarya Prime / Javlok.
+   */
+  chargeTimingAlways?: boolean;
   /** Shots per burst (burst trigger weapons). */
   burstCount?: number;
   /** Delay between shots inside a burst (seconds). */

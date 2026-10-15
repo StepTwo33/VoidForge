@@ -66,6 +66,7 @@ function applyFireTiming(w: Weapon): Weapon {
     ...w,
     ...(timing.chargeTime != null ? { chargeTime: w.chargeTime ?? timing.chargeTime } : {}),
     ...(timing.chargeMode ? { chargeMode: w.chargeMode ?? timing.chargeMode } : {}),
+    ...(timing.chargeTimingAlways ? { chargeTimingAlways: true } : {}),
     ...(timing.burstCount != null ? { burstCount: w.burstCount ?? timing.burstCount } : {}),
     ...(timing.burstDelay != null ? { burstDelay: w.burstDelay ?? timing.burstDelay } : {}),
   };
