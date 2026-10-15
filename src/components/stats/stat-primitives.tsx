@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -83,6 +83,7 @@ export function CollapsibleSection({ title, defaultOpen, children, flash }: {
   title: string; defaultOpen?: boolean; children: React.ReactNode; flash?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen ?? true);
+  const bodyId = useId();
   return (
     <div
       className={cn(
@@ -91,9 +92,12 @@ export function CollapsibleSection({ title, defaultOpen, children, flash }: {
       )}
     >
       <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={open ? bodyId : undefined}
         onClick={() => setOpen(!open)}
         className={cn(
-          "flex min-h-11 w-full items-center gap-1.5 py-2 text-left text-[11px] font-semibold uppercase tracking-wider transition-colors sm:min-h-0",
+          "flex min-h-11 w-full items-center gap-1.5 py-2 text-left text-[11px] font-semibold uppercase tracking-wider transition-colors lg:pointer-fine:min-h-0",
           flash ? "text-amber-800 dark:text-amber-300" : "text-muted-foreground hover:text-foreground",
         )}
       >
@@ -101,7 +105,7 @@ export function CollapsibleSection({ title, defaultOpen, children, flash }: {
         {title}
         {flash && <span className="ml-1 text-[9px] font-normal normal-case tracking-normal opacity-80">updated</span>}
       </button>
-      {open && <div className="ml-1 min-w-0 overflow-x-hidden">{children}</div>}
+      {open && <div id={bodyId} className="ml-1 min-w-0 overflow-x-hidden">{children}</div>}
     </div>
   );
 }

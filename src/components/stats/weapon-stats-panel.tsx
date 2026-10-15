@@ -105,39 +105,131 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
     <div className="border border-border rounded-xl p-4 bg-card space-y-1 min-w-0 overflow-x-hidden">
       <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{heading ?? "Weapon Stats"}</h3>
 
-      {weapon?.passive && (
-        <CollapsibleSection title="PASSIVE" defaultOpen>
-          <p className="text-[11px] text-muted-foreground leading-relaxed py-1">{weapon.passive}</p>
-        </CollapsibleSection>
-      )}
-
-      {simParams && onSimParamsChange && (
-        <WeaponSimPanel
-          stats={stats}
-          simParams={simParams}
-          onSimParamsChange={onSimParamsChange}
-          weapon={weapon}
-          isMelee={isMelee}
-          hasConditionals={hasConditionals}
-          onKillBuffTotal={onKillBuffTotal}
-          triggerBuffTotal={triggerBuffTotal}
-        />
-      )}
-      {stats.setBonusSummary && stats.setBonusSummary.length > 0 && (
-        <CollapsibleSection title="SET BONUSES" defaultOpen={false}>
-          <div className="space-y-1 py-1">
-            {stats.setBonusSummary.map((row) => (
-              <div key={row.setId} className="text-[10px] leading-snug">
-                <span className={row.active ? "text-green-700 dark:text-green-400 font-medium" : "text-muted-foreground"}>
-                  {row.label}: {row.pieces}/{row.required}
-                  {row.active ? " ✓" : ""}
-                </span>
-                <div className="text-[9px] text-muted-foreground/80 pl-0.5">{row.description}</div>
-              </div>
-            ))}
-          </div>
-        </CollapsibleSection>
-      )}
+      {/* DPS — direct hit vs radial shown separately; totals include both when radial applies */}
+      <CollapsibleSection title="DPS" defaultOpen>
+        {(() => {
+          const radialBurst = stats.radialBurstDps ?? 0;
+          const radialSustained = stats.radialSustainedDps ?? 0;
+          const contagionCloud = stats.contagionCloudDps ?? 0;
+          const mechaSpread = stats.mechaSpreadDps ?? 0;
+          const shardChain = stats.shardChainDps ?? 0;
+          const extraAoE = contagionCloud + mechaSpread + shardChain;
+          const directBurst = Math.max(0, stats.burstDps - radialBurst - extraAoE);
+          const directSustained = Math.max(0, stats.sustainedDps - radialSustained - extraAoE);
+          const showOverflow = [directBurst, directSustained, stats.burstDps, stats.sustainedDps].some(
+            exceedsWarframeInt32,
+          );
+          const showTotals = radialBurst > 0 || extraAoE > 0;
+          return (
+            <>
+              <StatRow
+                label="Direct Burst DPS"
+                value={directBurst.toFixed(0)}
+                highlighted
+                changed={flash.has("directBurstDps") || flash.has("burstDps")}
+                tooltip="Projectile / hit DPS only (no radial / Contagion / Mecha spread / shards). dmg × multishot × fire rate × avg crit × (faction × headshot × stance when enabled)."
+              />
+              <StatRow
+                label="Direct Sustained DPS"
+                value={directSustained.toFixed(0)}
+                highlighted
+                changed={flash.has("directSustainedDps") || flash.has("sustainedDps")}
+                tooltip="Direct burst × (mag time / mag+reload cycle). Melee uses burst (no reload)."
+              />
+              {radialBurst > 0 && (
+                <>
+                  <StatRow
+                    label="Radial Burst DPS"
+                    value={radialBurst.toFixed(0)}
+                    color="text-orange-800 dark:text-orange-300"
+                    changed={flash.has("radialBurstDps")}
+                    tooltip="Innate explosion / AoE DPS (not slam radials)."
+                  />
+                  <StatRow
+                    label="Radial Sustained DPS"
+                    value={radialSustained.toFixed(0)}
+                    color="text-orange-800 dark:text-orange-300"
+                    changed={flash.has("radialSustainedDps")}
+                    tooltip="Radial DPS adjusted for magazine and reload cycle."
+                  />
+                </>
+              )}
+              {contagionCloud > 0 && (
+                <StatRow
+                  label="Contagion Cloud DPS"
+                  value={contagionCloud.toFixed(0)}
+                  color="text-lime-800 dark:text-lime-300"
+                  changed={flash.has("contagionCloudDps")}
+                  tooltip="Toxic Lash Contagion Cloud (augment): ability toxin DPS × Strength (×2 melee) × sim enemies. Not in TTK."
+                />
+              )}
+              {mechaSpread > 0 && (
+                <StatRow
+                  label="Mecha Spread DPS"
+                  value={mechaSpread.toFixed(0)}
+                  color="text-cyan-800 dark:text-cyan-300"
+                  changed={flash.has("mechaSpreadDps")}
+                  tooltip="Mecha mark-kill status spread: transferred DoT ticks × claw elemental × (spread + cascade) enemies / mark cooldown. Cascade is a sim estimate, not AI. Not in TTK."
+                />
+              )}
+              {shardChain > 0 && (
+                <StatRow
+                  label="Shard Chain DPS"
+                  value={shardChain.toFixed(0)}
+                  color="text-violet-800 dark:text-violet-300"
+                  changed={flash.has("shardChainDps")}
+                  tooltip="Thalys form embed triggers (+ Explosive Growth ×2 erupts) + Chain Shatter heavy detonations (sim shard hosts). Combo on host only. Not in TTK."
+                />
+              )}
+              {showTotals && (
+                <>
+                  <div className="border-t border-border/50 my-1" />
+                  <StatRow
+                    label="Total Burst DPS"
+                    value={stats.burstDps.toFixed(0)}
+                    changed={flash.has("burstDps")}
+                    tooltip="Direct + radial + Contagion / Mecha spread / shard chain burst DPS combined."
+                  />
+                  <StatRow
+                    label="Total Sustained DPS"
+                    value={stats.sustainedDps.toFixed(0)}
+                    changed={flash.has("sustainedDps")}
+                    tooltip="Direct + radial + Contagion / Mecha spread / shard chain sustained DPS combined."
+                  />
+                </>
+              )}
+              {showOverflow && (
+                <p className="text-[9px] text-amber-500/90 mt-1.5 leading-snug">
+                  Note: DPS above ~2.147B can wrap to large negatives in-game (signed 32-bit). Voidforge shows uncapped math.
+                </p>
+              )}
+            </>
+          );
+        })()}
+        {stats.statusProcs && stats.statusProcs.length > 0 && (() => {
+          const efr = stats.effectiveFireRate ?? stats.fireRate;
+          const procsPerSec = stats.statusProcs.reduce(
+            (sum, p) => sum + efr * stats.multishot * p.chance,
+            0,
+          );
+          const dotProcs = stats.statusProcs.filter(p => p.totalDamage > 0);
+          const statusDps = dotProcs.reduce((sum, p) => {
+            const pps = efr * stats.multishot * p.chance;
+            return sum + pps * p.totalDamage / p.duration;
+          }, 0);
+          return (
+            <>
+              <div className="border-t border-border/50 my-1" />
+              <StatRow label="Procs / Sec" value={procsPerSec.toFixed(1)} color="text-teal-700 dark:text-teal-400" changed={flash.has("procsPerSec")} />
+              {statusDps > 0 && (
+                <StatRow label="Status DPS" value={statusDps.toFixed(0)} color="text-teal-700 dark:text-teal-400"
+                  changed={flash.has("statusDps")}
+                  tooltip="Estimated DPS from DoT status effects (Slash, Heat, Toxin, Gas)" />
+              )}
+            </>
+          );
+        })()}
+      </CollapsibleSection>
 
       {/* Physical Damage — arsenal-style: unquantized, total × multishot like in-game */}
       {(() => {
@@ -189,6 +281,40 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           </CollapsibleSection>
         );
       })()}
+
+      {weapon?.passive && (
+        <CollapsibleSection title="PASSIVE" defaultOpen>
+          <p className="text-[11px] text-muted-foreground leading-relaxed py-1">{weapon.passive}</p>
+        </CollapsibleSection>
+      )}
+
+      {simParams && onSimParamsChange && (
+        <WeaponSimPanel
+          stats={stats}
+          simParams={simParams}
+          onSimParamsChange={onSimParamsChange}
+          weapon={weapon}
+          isMelee={isMelee}
+          hasConditionals={hasConditionals}
+          onKillBuffTotal={onKillBuffTotal}
+          triggerBuffTotal={triggerBuffTotal}
+        />
+      )}
+      {stats.setBonusSummary && stats.setBonusSummary.length > 0 && (
+        <CollapsibleSection title="SET BONUSES" defaultOpen={false}>
+          <div className="space-y-1 py-1">
+            {stats.setBonusSummary.map((row) => (
+              <div key={row.setId} className="text-[10px] leading-snug">
+                <span className={row.active ? "text-green-700 dark:text-green-400 font-medium" : "text-muted-foreground"}>
+                  {row.label}: {row.pieces}/{row.required}
+                  {row.active ? " ✓" : ""}
+                </span>
+                <div className="text-[9px] text-muted-foreground/80 pl-0.5">{row.description}</div>
+              </div>
+            ))}
+          </div>
+        </CollapsibleSection>
+      )}
 
       {/* Per-hit damage — no multishot, fire rate, or DPS averaging */}
       {(() => {
@@ -752,132 +878,6 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           )}
         </CollapsibleSection>
       )}
-
-      {/* DPS — direct hit vs radial shown separately; totals include both when radial applies */}
-      <CollapsibleSection title="DPS" defaultOpen>
-        {(() => {
-          const radialBurst = stats.radialBurstDps ?? 0;
-          const radialSustained = stats.radialSustainedDps ?? 0;
-          const contagionCloud = stats.contagionCloudDps ?? 0;
-          const mechaSpread = stats.mechaSpreadDps ?? 0;
-          const shardChain = stats.shardChainDps ?? 0;
-          const extraAoE = contagionCloud + mechaSpread + shardChain;
-          const directBurst = Math.max(0, stats.burstDps - radialBurst - extraAoE);
-          const directSustained = Math.max(0, stats.sustainedDps - radialSustained - extraAoE);
-          const showOverflow = [directBurst, directSustained, stats.burstDps, stats.sustainedDps].some(
-            exceedsWarframeInt32,
-          );
-          const showTotals = radialBurst > 0 || extraAoE > 0;
-          return (
-            <>
-              <StatRow
-                label="Direct Burst DPS"
-                value={directBurst.toFixed(0)}
-                highlighted
-                changed={flash.has("directBurstDps") || flash.has("burstDps")}
-                tooltip="Projectile / hit DPS only (no radial / Contagion / Mecha spread / shards). dmg × multishot × fire rate × avg crit × (faction × headshot × stance when enabled)."
-              />
-              <StatRow
-                label="Direct Sustained DPS"
-                value={directSustained.toFixed(0)}
-                highlighted
-                changed={flash.has("directSustainedDps") || flash.has("sustainedDps")}
-                tooltip="Direct burst × (mag time / mag+reload cycle). Melee uses burst (no reload)."
-              />
-              {radialBurst > 0 && (
-                <>
-                  <StatRow
-                    label="Radial Burst DPS"
-                    value={radialBurst.toFixed(0)}
-                    color="text-orange-800 dark:text-orange-300"
-                    changed={flash.has("radialBurstDps")}
-                    tooltip="Innate explosion / AoE DPS (not slam radials)."
-                  />
-                  <StatRow
-                    label="Radial Sustained DPS"
-                    value={radialSustained.toFixed(0)}
-                    color="text-orange-800 dark:text-orange-300"
-                    changed={flash.has("radialSustainedDps")}
-                    tooltip="Radial DPS adjusted for magazine and reload cycle."
-                  />
-                </>
-              )}
-              {contagionCloud > 0 && (
-                <StatRow
-                  label="Contagion Cloud DPS"
-                  value={contagionCloud.toFixed(0)}
-                  color="text-lime-800 dark:text-lime-300"
-                  changed={flash.has("contagionCloudDps")}
-                  tooltip="Toxic Lash Contagion Cloud (augment): ability toxin DPS × Strength (×2 melee) × sim enemies. Not in TTK."
-                />
-              )}
-              {mechaSpread > 0 && (
-                <StatRow
-                  label="Mecha Spread DPS"
-                  value={mechaSpread.toFixed(0)}
-                  color="text-cyan-800 dark:text-cyan-300"
-                  changed={flash.has("mechaSpreadDps")}
-                  tooltip="Mecha mark-kill status spread: transferred DoT ticks × claw elemental × (spread + cascade) enemies / mark cooldown. Cascade is a sim estimate, not AI. Not in TTK."
-                />
-              )}
-              {shardChain > 0 && (
-                <StatRow
-                  label="Shard Chain DPS"
-                  value={shardChain.toFixed(0)}
-                  color="text-violet-800 dark:text-violet-300"
-                  changed={flash.has("shardChainDps")}
-                  tooltip="Thalys form embed triggers (+ Explosive Growth ×2 erupts) + Chain Shatter heavy detonations (sim shard hosts). Combo on host only. Not in TTK."
-                />
-              )}
-              {showTotals && (
-                <>
-                  <div className="border-t border-border/50 my-1" />
-                  <StatRow
-                    label="Total Burst DPS"
-                    value={stats.burstDps.toFixed(0)}
-                    changed={flash.has("burstDps")}
-                    tooltip="Direct + radial + Contagion / Mecha spread / shard chain burst DPS combined."
-                  />
-                  <StatRow
-                    label="Total Sustained DPS"
-                    value={stats.sustainedDps.toFixed(0)}
-                    changed={flash.has("sustainedDps")}
-                    tooltip="Direct + radial + Contagion / Mecha spread / shard chain sustained DPS combined."
-                  />
-                </>
-              )}
-              {showOverflow && (
-                <p className="text-[9px] text-amber-500/90 mt-1.5 leading-snug">
-                  Note: DPS above ~2.147B can wrap to large negatives in-game (signed 32-bit). Voidforge shows uncapped math.
-                </p>
-              )}
-            </>
-          );
-        })()}
-        {stats.statusProcs && stats.statusProcs.length > 0 && (() => {
-          const efr = stats.effectiveFireRate ?? stats.fireRate;
-          const procsPerSec = stats.statusProcs.reduce(
-            (sum, p) => sum + efr * stats.multishot * p.chance,
-            0,
-          );
-          const dotProcs = stats.statusProcs.filter(p => p.totalDamage > 0);
-          const statusDps = dotProcs.reduce((sum, p) => {
-            const pps = efr * stats.multishot * p.chance;
-            return sum + pps * p.totalDamage / p.duration;
-          }, 0);
-          return (
-            <>
-              <div className="border-t border-border/50 my-1" />
-              <StatRow label="Procs / Sec" value={procsPerSec.toFixed(1)} color="text-teal-700 dark:text-teal-400" changed={flash.has("procsPerSec")} />
-              {statusDps > 0 && (
-                <StatRow label="Status DPS" value={statusDps.toFixed(0)} color="text-teal-700 dark:text-teal-400"
-                  changed={flash.has("statusDps")}
-                  tooltip="Estimated DPS from DoT status effects (Slash, Heat, Toxin, Gas)" />
-              )}
-            </>
-          );
-        })()}
-      </CollapsibleSection>
 
       {dpsContributions.length > 0 && (
         <CollapsibleSection title="DPS CONTRIBUTIONS" defaultOpen={false}>
