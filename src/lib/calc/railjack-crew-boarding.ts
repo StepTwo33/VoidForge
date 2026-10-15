@@ -56,10 +56,34 @@ export function computeCrewBoardingDps(
     }
   }
 
+  // Wiki Railjack/Crew: Combat damage "is additive with other damage mods" (Serration-style).
+  let boardingDps = baseDps;
+  if (combatDamageBonus > 0) {
+    const boarded = calculateWeaponBuild(
+      weapon,
+      loadout.mods ?? [],
+      allMods,
+      undefined,
+      undefined,
+      {
+        ...calcOptions,
+        externalBuffs: [
+          {
+            id: "crew_combat_competency",
+            label: "Crew Combat competency",
+            category: "other",
+            damageBonus: combatDamageBonus,
+          },
+        ],
+      },
+    );
+    boardingDps = boarded.sustainedDps ?? boarded.burstDps ?? 0;
+  }
+
   return {
     weaponId: weapon.id,
     baseDps,
-    boardingDps: baseDps * (1 + combatDamageBonus),
+    boardingDps,
     combatDamageBonus,
   };
 }
