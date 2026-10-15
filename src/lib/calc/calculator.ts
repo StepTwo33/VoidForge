@@ -1,5 +1,6 @@
 // Advanced Build Calculator - ported from Dart with elemental combos, status procs, heavy attacks
 import { CONTINUOUS_WEAPON_IDS } from "@/data/continuous-weapons";
+import { MELEE_ATTACK_DATA } from "@/data/melee-attack-data";
 import { Mod, Weapon, Warframe, ModSlot, CalculatedStats, WarframeCalculatedStats, ElementalDamage, StatusProc, SimulationParams, DEFAULT_SIM_PARAMS, WeaponCalculationOptions, SetBonusLinkage, EquippedArchonShard, WeaponExternalBuff } from '../types';
 import { avgCritMultiplier, quantizeBaseCritMultiplier } from './crit-utils';
 import { resolveEffectiveFireRate } from './effective-fire-rate';
@@ -821,6 +822,8 @@ export function calculateWeaponBuild(
 
   // Collect elemental mods in order and other stat bonuses
   let damageBonus = 0;
+  let heavyCritExtra = 0;
+  let heavyDamageBonus = 0;
   let critChanceBonus = 0;
   let critMultBonus = 0;
   let fireRateBonus = 0;
@@ -938,6 +941,23 @@ export function calculateWeaponBuild(
         modValue = (value * setMult) / 100.0;
       }
       if (statName === "fireRate") modValue *= bowFireRateMult;
+      // wiki True Steel / Sacrificial Steel / Amalgam Ripkas True Steel: "x2 for Heavy
+      // Attacks" — the crit chance bonus counts twice on heavies.
+      if (statName === "criticalChance" && /x2 for Heavy Attack/i.test(mod.description ?? "")) {
+        heavyCritExtra += modValue;
+      }
+      // wiki Killing Blow: +120% heavy damage (additive with Pressure Point) and +60%
+      // wind-up speed (stored as heavyAttackEfficiency in mod data; it is not efficiency).
+      if (modSlot.modId === "killing_blow") {
+        if (statName === "heavyAttackDamage") {
+          heavyDamageBonus += modValue;
+          continue;
+        }
+        if (statName === "heavyAttackEfficiency") {
+          weaponModAcc.heavyAttackWindUpBonus += modValue;
+          continue;
+        }
+      }
       applyVerifiedModStatToWeapon(stats, {
         modId: modSlot.modId,
         statKey: statName,
@@ -1187,6 +1207,10 @@ export function calculateWeaponBuild(
   stats.berserkerFuryBonus = berserkerFuryPerStack;
 
   // Melee Elementalist / wind-up speed mods: +N% shortens windup time.
+  const meleeData = MELEE_ATTACK_DATA[baseWeapon.id];
+  if (meleeData?.windUp != null && meleeData.windUp > 0) {
+    stats.heavyAttackWindUp = meleeData.windUp;
+  }
   const windUpBonus = weaponModAcc.heavyAttackWindUpBonus;
   if (windUpBonus > -1 && windUpBonus !== 0) {
     stats.heavyAttackWindUp /= 1 + windUpBonus;
@@ -1916,6 +1940,20 @@ export function calculateWeaponBuild(
   const moddedBaseDamage = baseWeapon.damage * damageMultTotal;
   stats.moddedBaseDamage = moddedBaseDamage;
   quantizeStatsDamage(stats, moddedBaseDamage);
+
+  // wiki Melee § Heavy Attack (Module:Weapons HeavyAttack): heavies use a per-weapon base
+  // (e.g. Skana 600 vs 120 normal); Killing Blow adds to base-damage mods for heavies.
+  {
+    const md = MELEE_ATTACK_DATA[baseWeapon.id];
+    const ratio =
+      md?.heavyAttack != null && md.heavyAttack > 0 && baseWeapon.damage > 0
+        ? md.heavyAttack / baseWeapon.damage
+        : 1;
+    const dmgMult = 1 + damageBonus;
+    const kb = dmgMult > 0 ? (dmgMult + heavyDamageBonus) / dmgMult : 1;
+    stats.heavyAttackBaseMultiplier = ratio * kb;
+    stats.heavyCritChanceBonus = heavyCritExtra;
+  }
 
   // Melee-specific: combo system, heavy attacks, blood rush, weeping wounds, gladiator set
   if (isMelee) {

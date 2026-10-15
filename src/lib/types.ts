@@ -745,6 +745,10 @@ export interface CalculatedStats {
   statusProcs: StatusProc[];
   // Heavy attack / combo (melee)
   heavyAttackDamage: number;
+  /** Heavy base / normal base × Killing Blow factor (wiki Module:Weapons HeavyAttack). */
+  heavyAttackBaseMultiplier?: number;
+  /** Extra crit-chance fraction on heavies from "x2 for Heavy Attacks" Steel mods. */
+  heavyCritChanceBonus?: number;
   heavyAttackWindUp: number;
   comboCount: number;
   comboDuration: number;
