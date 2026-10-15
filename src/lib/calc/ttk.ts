@@ -103,37 +103,70 @@ export function averageProcsPerShot(statusChance: number, multishot: number): nu
   return sc * ms;
 }
 
+type ScaleCurve = { c1: number; e1: number; c2: number; e2: number };
+
+/** Wiki Enemy Level Scaling § Health (base level 1, smoothstep 70→80 on level difference). */
+const HEALTH_CURVES: Record<string, ScaleCurve> = {
+  grineer: { c1: 0.015, e1: 2.12, c2: 10.7332, e2: 0.72 },
+  corpus: { c1: 0.015, e1: 2.12, c2: 13.4165, e2: 0.55 },
+  infested: { c1: 0.0225, e1: 2.12, c2: 16.0998, e2: 0.72 },
+  corrupted: { c1: 0.015, e1: 2.1, c2: 10.7332, e2: 0.685 },
+  techrot: { c1: 0.02, e1: 2.12, c2: 15.0998, e2: 0.7 },
+  /** Murmur, Sentient and Unaffiliated. */
+  other: { c1: 0.015, e1: 2, c2: 10.7332, e2: 0.5 },
+};
+
+/** Wiki Enemy Level Scaling § Shields. */
+const SHIELD_CURVES: Record<string, ScaleCurve> = {
+  corpus: { c1: 0.02, e1: 1.76, c2: 2, e2: 0.76 },
+  corrupted: { c1: 0.02, e1: 1.75, c2: 2, e2: 0.75 },
+  techrot: { c1: 0.02, e1: 1.76, c2: 3.5, e2: 0.76 },
+  /** Grineer and Sentient (also used for factions the wiki lists no shield curve for). */
+  other: { c1: 0.02, e1: 1.75, c2: 1.6, e2: 0.75 },
+};
+
+function healthCurveKey(faction?: string): string {
+  switch ((faction ?? "").toLowerCase()) {
+    case "grineer":
+    case "scaldra":
+      return "grineer";
+    case "corpus":
+      return "corpus";
+    case "infested":
+      return "infested";
+    case "corrupted":
+    case "anarch":
+    case "anarchs":
+      return "corrupted";
+    case "techrot":
+      return "techrot";
+    default:
+      return "other";
+  }
+}
+
+function shieldCurveKey(faction?: string): string {
+  const k = healthCurveKey(faction);
+  return k === "corpus" || k === "corrupted" || k === "techrot" ? k : "other";
+}
+
+function curveMultiplier(c: ScaleCurve, d: number): number {
+  const f1 = 1 + c.c1 * Math.pow(d, c.e1);
+  const f2 = 1 + c.c2 * Math.pow(d, c.e2);
+  return f1 + (f2 - f1) * smoothstepWeight(d, 70, 80);
+}
+
+/** Enemy health at level (wiki Enemy Level Scaling § Health, per faction; base level 1). */
 export function scaleHealth(base: number, level: number, faction?: string): number {
   const d = level - 1;
   if (d <= 0) return base;
-  const exp = faction?.toLowerCase() === "infested" ? 2.15 : 2.0;
-  if (d < 70) return base * (1 + 0.015 * Math.pow(d, exp));
-  if (d > 80) {
-    const a80 = base * (1 + 0.015 * Math.pow(80, exp));
-    return a80 * (1 + (d - 80) * 0.005);
-  }
-  const t = (d - 70) / 10;
-  const sm = t * t * (3 - 2 * t);
-  const lo = base * (1 + 0.015 * Math.pow(d, exp));
-  const a80 = base * (1 + 0.015 * Math.pow(80, exp));
-  const hi = a80 * (1 + (d - 80) * 0.005);
-  return lo * (1 - sm) + hi * sm;
+  return base * curveMultiplier(HEALTH_CURVES[healthCurveKey(faction)], d);
 }
 
-export function scaleShield(base: number, level: number): number {
+/** Enemy shields at level (wiki Enemy Level Scaling § Shields, per faction; base level 1). */
+export function scaleShield(base: number, level: number, faction?: string): number {
   if (base <= 0 || level <= 1) return base;
-  const d = level - 1;
-  if (d < 70) return base * (1 + 0.0075 * Math.pow(d, 2));
-  if (d > 80) {
-    const a80 = base * (1 + 0.0075 * Math.pow(80, 2));
-    return a80 * (1 + (d - 80) * 0.003);
-  }
-  const t = (d - 70) / 10;
-  const sm = t * t * (3 - 2 * t);
-  const lo = base * (1 + 0.0075 * Math.pow(d, 2));
-  const a80 = base * (1 + 0.0075 * Math.pow(80, 2));
-  const hi = a80 * (1 + (d - 80) * 0.003);
-  return lo * (1 - sm) + hi * sm;
+  return base * curveMultiplier(SHIELD_CURVES[shieldCurveKey(faction)], level - 1);
 }
 
 /**
@@ -160,7 +193,7 @@ export function scaleEnemyPools(
     scaleHealth(enemy.baseHealth, level, enemy.faction) *
     (steelPath ? STEEL_PATH_HEALTH_MULT : 1);
   const shield =
-    scaleShield(enemy.baseShield, level) * (steelPath ? STEEL_PATH_SHIELD_MULT : 1);
+    scaleShield(enemy.baseShield, level, enemy.faction) * (steelPath ? STEEL_PATH_SHIELD_MULT : 1);
   const armor = scaleArmor(enemy.baseArmor, level);
   return { health, armor, shield, steelPath };
 }

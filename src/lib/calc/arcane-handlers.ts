@@ -50,6 +50,23 @@ function applyWeaponDamageMult(stats: CalculatedStats, pct: number): void {
   for (const e of stats.rawElements ?? []) e.value *= 1 + scaled;
 }
 
+/**
+ * Additive base-damage arcane (wiki: Merciless/Deadhead/Dexterity/Cascadia Flare/Fury/Rage
+ * "stack additively with Serration / Hornet Strike / Pressure Point").
+ * Rescales damage from (1 + modBonus) to (1 + modBonus + arcane).
+ */
+function applyAdditiveBaseDamage(stats: CalculatedStats, pct: number): void {
+  const db = stats.appliedBaseDamageBonus ?? 0;
+  const before = 1 + db;
+  const add = pct / 100;
+  if (before <= 0) {
+    applyWeaponDamageMult(stats, pct);
+  } else {
+    applyWeaponDamageMult(stats, (add / before) * 100);
+  }
+  stats.appliedBaseDamageBonus = db + add;
+}
+
 /** Virtuos Forge/Spike/Surge/Trojan: convert a fraction of amp (Void-proxy) damage to an element/IPS type. */
 const VIRTUOS_VOID_CONVERSION: Record<string, "heat" | "puncture" | "electricity" | "viral"> = {
   virtuos_forge: "heat",
@@ -294,7 +311,7 @@ function applyStackingDamageHandler(
 ): void {
   const { def, rank, stacks } = ctx;
   const dmg = scaledLine(def, findEffect(def, "damage"), rank, stacks);
-  if (dmg > 0) applyWeaponDamageMult(stats, dmg);
+  if (dmg > 0) applyAdditiveBaseDamage(stats, dmg);
   if (opts?.reload) {
     // Merciless reload is a Rank-5 passive (wiki), not per-stack — apply once at rank value.
     const reloadLine = findEffect(def, "reloadSpeed");
@@ -335,7 +352,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
     case "arcane_secondary_deadhead": {
       // Damage stacks; R5 headshot mult / recoil are passives (wiki — not per-stack).
       const dmg = scaledLine(def, findEffect(def, "damage"), rank, stacks);
-      if (dmg > 0) applyWeaponDamageMult(stats, dmg);
+      if (dmg > 0) applyAdditiveBaseDamage(stats, dmg);
       trackBonus(stats, "deadheadStacks", stacks);
       const hsLine = findEffect(def, "headshotMultiplier");
       if (hsLine) {
@@ -354,7 +371,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
     case "arcane_secondary_dexterity": {
       // Damage stacks; R5 combo duration is a flat passive (wiki — not per-stack).
       const dmg = scaledLine(def, findEffect(def, "damage"), rank, stacks);
-      if (dmg > 0) applyWeaponDamageMult(stats, dmg);
+      if (dmg > 0) applyAdditiveBaseDamage(stats, dmg);
       trackBonus(stats, "dexterityStacks", stacks);
       const comboLine = findEffect(def, "comboDuration");
       if (comboLine) {
@@ -586,7 +603,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // Rise: +150% primary dmg on reload. Data uses holsterDamage — paper: stacks>0 = buff up.
       const dmgLine = findEffect(def, "holsterDamage") ?? findEffect(def, "damage");
       const dmg = dmgLine ? scaleArcaneEffectLine(dmgLine, rank, def.maxRank) : 0;
-      if (dmg > 0) applyWeaponDamageMult(stats, dmg);
+      if (dmg > 0) applyAdditiveBaseDamage(stats, dmg);
       trackBonus(stats, "holsterDamage", dmg);
       const chanceLine = findEffect(def, "healthRegenChance");
       if (chanceLine) {
@@ -1005,7 +1022,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // wiki R5: +300% secondary damage for 18s on headshot (not HS-only multiplier).
       const dmgLine = findEffect(def, "headshotDamage") ?? findEffect(def, "damage");
       const dmg = dmgLine ? scaleArcaneEffectLine(dmgLine, rank, def.maxRank) : 0;
-      if (dmg > 0) applyWeaponDamageMult(stats, dmg);
+      if (dmg > 0) applyAdditiveBaseDamage(stats, dmg);
       trackBonus(stats, "headshotDamage", dmg);
       return true;
     }
@@ -1015,7 +1032,11 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // Fury: +180% melee dmg on crit. Blade Charger: +300% melee dmg on primary kill.
       const dmgLine = findEffect(def, "meleeDamageBonus");
       const dmg = dmgLine ? scaleArcaneEffectLine(dmgLine, rank, def.maxRank) : 0;
-      if (dmg > 0) applyWeaponDamageMult(stats, dmg);
+      // wiki Arcane Fury: additive with base damage mods (Pressure Point). Blade Charger unverified — unchanged.
+      if (dmg > 0) {
+        if (arcaneId === "arcane_fury") applyAdditiveBaseDamage(stats, dmg);
+        else applyWeaponDamageMult(stats, dmg);
+      }
       trackBonus(stats, "meleeDamageBonus", dmg);
       const chanceLine = findEffect(def, "meleeDamageChance");
       if (chanceLine) {

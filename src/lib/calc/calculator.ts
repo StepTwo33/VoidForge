@@ -1181,6 +1181,7 @@ export function calculateWeaponBuild(
   stats.puncture *= (1 + punctureBonus);
   stats.slash *= (1 + slashBonus);
   const dmgMult = 1 + damageBonus;
+  stats.appliedBaseDamageBonus = damageBonus;
   stats.totalDamage *= dmgMult;
   stats.impact *= dmgMult;
   stats.puncture *= dmgMult;
