@@ -429,13 +429,15 @@ export interface AmpScaffold {
   description: string;
 }
 
+// Damage is the per-trigger sum of the scaffold's attacks (wiki Module:Weapons/data/modular):
+// Phahd 3000 direct + 1100 explosion; Shraksun 3000 + 4500; Dissic 15 impact + 6600 explosion + 9 × 300 fragments.
 export const ampScaffolds: AmpScaffold[] = [
   { id: "amp_pencha", name: "Pencha", damage: 9000, fireRate: 2.0, criticalChance: 0.14, criticalMultiplier: 1.6, statusChance: 0.18, description: "Charged beam" },
-  { id: "amp_shraksun", name: "Shraksun", damage: 7500, fireRate: 1.0, criticalChance: 0.20, criticalMultiplier: 2.0, statusChance: 0.20, description: "Explosive short-range" },
+  { id: "amp_shraksun", name: "Shraksun", damage: 7500, fireRate: 1.33, criticalChance: 0.20, criticalMultiplier: 2.0, statusChance: 0.20, description: "Explosive short-range" },
   { id: "amp_klebrik", name: "Klebrik", damage: 320, fireRate: 12.0, criticalChance: 0.16, criticalMultiplier: 1.6, statusChance: 0.14, description: "Homing beam" },
-  { id: "amp_phahd", name: "Phahd", damage: 4100, fireRate: 1.0, criticalChance: 0.34, criticalMultiplier: 2.6, statusChance: 0.12, description: "Bouncing glaive" },
+  { id: "amp_phahd", name: "Phahd", damage: 4100, fireRate: 1.67, criticalChance: 0.34, criticalMultiplier: 2.6, statusChance: 0.12, description: "Bouncing glaive" },
   { id: "amp_exard", name: "Exard", damage: 2800, fireRate: 6.67, criticalChance: 0.17, criticalMultiplier: 1.9, statusChance: 0.33, description: "Full-auto explosive" },
-  { id: "amp_dissic", name: "Dissic", damage: 6600, fireRate: 0.5, criticalChance: 0.03, criticalMultiplier: 1.5, statusChance: 0.37, description: "Lobbed fragmenting explosive" },
+  { id: "amp_dissic", name: "Dissic", damage: 9315, fireRate: 0.5, criticalChance: 0.03, criticalMultiplier: 1.5, statusChance: 0.37, description: "Lobbed fragmenting explosive" },
   { id: "amp_propa", name: "Propa", damage: 9000, fireRate: 2.0, criticalChance: 0.30, criticalMultiplier: 2.0, statusChance: 0.0, description: "Deployable mine" },
 ];
 
