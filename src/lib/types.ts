@@ -579,6 +579,8 @@ export interface SimulationParams {
    * Forward / Forward Block / Block / Heavy / Slide use wiki hit-avg scalars.
    */
   stanceComboDirection?: "neutral" | "forward" | "forwardBlock" | "block" | "heavy" | "slide";
+  /** Enemies hit per melee swing (Follow Through multi-target; default 1 = single target). */
+  meleeTargetsHit?: number;
   /**
    * Stance DPS model (C6b). Default / unset = hit-avg (B1/C6).
    * `cycle` = wiki Avg Dmg Multi/s (ΣDmg%/Duration) × Attack Speed.
@@ -747,6 +749,10 @@ export interface CalculatedStats {
   heavyAttackDamage: number;
   /** Heavy base / normal base × Killing Blow factor (wiki Module:Weapons HeavyAttack). */
   heavyAttackBaseMultiplier?: number;
+  /** Weapon base Follow Through (wiki Module:Weapons melee); `followThrough` holds bonuses. */
+  baseFollowThrough?: number;
+  /** Σ FT^(n−1) over meleeTargetsHit targets (wiki Melee § Follow Through); 1 = single target. */
+  followThroughTargetFactor?: number;
   /** Extra crit-chance fraction on heavies from "x2 for Heavy Attacks" Steel mods. */
   heavyCritChanceBonus?: number;
   heavyAttackWindUp: number;

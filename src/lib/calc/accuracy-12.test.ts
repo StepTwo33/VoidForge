@@ -4,6 +4,7 @@ import { calculateWeaponBuild } from "@/lib/calc/calculator";
 import { enrichWeapon } from "@/lib/weapons/weapon-enrich";
 import { modsMap } from "@/data/mods";
 import { MELEE_ATTACK_DATA } from "@/data/melee-attack-data";
+import { DEFAULT_SIM_PARAMS } from "@/lib/types";
 
 const build = (id: string, mods: string[] = []) =>
   calculateWeaponBuild(
@@ -44,5 +45,26 @@ describe("Heavy attacks use the per-weapon heavy base (wiki Melee § Heavy Attac
     const s = build("skana", ["true_steel_r3"]);
     expect(s.criticalChance).toBeCloseTo(0.11, 9); // light attacks still +120%
     expect(s.heavyAttackDamage).toBeCloseTo(651, 1);
+  });
+});
+
+describe("Follow Through multi-target (wiki Melee § Follow Through)", () => {
+  const withTargets = (n: number, mods: string[] = []) =>
+    calculateWeaponBuild(
+      enrichWeapon(allWeapons.find((x) => x.id === "skana")!),
+      mods.map((m, i) => ({ modId: m, rank: modsMap.get(m)!.maxRank, slotIndex: i })),
+      modsMap,
+      undefined,
+      { ...DEFAULT_SIM_PARAMS, meleeTargetsHit: n },
+    );
+  it("Skana FT 0.6, 3 targets: 1 + 0.6 + 0.36 = 1.96× burst", () => {
+    const one = withTargets(1);
+    const three = withTargets(3);
+    expect(one.baseFollowThrough).toBe(0.6);
+    expect(three.followThroughTargetFactor).toBeCloseTo(1.96, 9);
+    expect(three.burstDps).toBeCloseTo(one.burstDps * 1.96, 6);
+  });
+  it("default (1 target) unchanged", () => {
+    expect(withTargets(1).followThroughTargetFactor).toBe(1);
   });
 });

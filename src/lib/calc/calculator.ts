@@ -2026,6 +2026,16 @@ export function calculateWeaponBuild(
     weaponId: baseWeapon.id,
   });
 
+  // wiki Melee § Follow Through: n targets in one strike take Σ FT^(k−1) of the damage
+  // (not slams, projectiles or AoE — radial attacks are added separately below).
+  if (isMelee) {
+    const baseFt = MELEE_ATTACK_DATA[baseWeapon.id]?.followThrough;
+    if (baseFt != null) stats.baseFollowThrough = baseFt;
+    const ft = Math.min(1, Math.max(0, (baseFt ?? 0) + (stats.followThrough ?? 0)));
+    const n = Math.max(1, Math.floor(sim.meleeTargetsHit ?? 1));
+    stats.followThroughTargetFactor = n <= 1 ? 1 : ft >= 1 ? n : (1 - ft ** n) / (1 - ft);
+  }
+
   // DPS (direct hits) — includes optional faction / headshot / stance
   stats.burstDps = calculateBurstDps(stats);
   stats.sustainedDps = calculateSustainedDps(stats, baseWeapon);
@@ -2501,7 +2511,9 @@ function calculateBurstDps(stats: CalculatedStats): number {
   const frac = stats.extraHitDamageFraction ?? 0;
   const instances = Math.max(1, stats.extraHitInstances ?? 1);
   const extraHitMult = 1 + frac * factionHit * instances;
-  return totalDamage * dpsFireRate(stats) * avgCrit * extraHitMult;
+  return (
+    totalDamage * dpsFireRate(stats) * avgCrit * extraHitMult * (stats.followThroughTargetFactor ?? 1)
+  );
 }
 
 function calculateSustainedDps(stats: CalculatedStats, baseWeapon?: Weapon): number {
