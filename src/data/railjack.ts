@@ -92,11 +92,13 @@ export const plating: RailjackComponent[] = [
 
 // ── Turrets ────────────────────────────────────────────────────────
 export const turrets: RailjackArmament[] = [
-  { id: "sigma_apoc", name: "Sigma Apoc", type: "turret", house: "sigma", damage: 200, critChance: 0.14, critMultiplier: 1.6, statusChance: 0.05, fireRate: 6.7, description: "Rapid-fire ballistic turret" },
+  // Sigma = unhoused wiki "Apoc Mk III" (as for the other Sigma turrets).
+  { id: "sigma_apoc", name: "Sigma Apoc", type: "turret", house: "sigma", damage: 618, critChance: 0.20, critMultiplier: 2.0, statusChance: 0.10, fireRate: 8.33, description: "Rapid-fire ballistic turret" },
   { id: "vidar_apoc", name: "Vidar Apoc", type: "turret", house: "vidar", tier: "mk3", damage: 618, critChance: 0.28, critMultiplier: 2.0, statusChance: 0.10, fireRate: 8.33, description: "Enhanced Vidar ballistic turret (Mk III)" },
   { id: "zetki_apoc", name: "Zetki Apoc", type: "turret", house: "zetki", tier: "mk3", damage: 748, critChance: 0.30, critMultiplier: 2.0, statusChance: 0.10, fireRate: 8.33, description: "High-damage Zetki ballistic turret (Mk III)" },
   { id: "lavan_apoc", name: "Lavan Apoc", type: "turret", house: "lavan", tier: "mk3", damage: 662, critChance: 0.20, critMultiplier: 2.0, statusChance: 0.14, fireRate: 8.33, description: "Status-focused Lavan ballistic turret (Mk III)" },
-  { id: "sigma_carcinnox", name: "Sigma Carcinnox", type: "turret", house: "sigma", damage: 90, critChance: 0.10, critMultiplier: 1.4, statusChance: 0.25, fireRate: 12, description: "Rapid-fire status turret" },
+  // Sigma = unhoused wiki "Carcinnox Mk III".
+  { id: "sigma_carcinnox", name: "Sigma Carcinnox", type: "turret", house: "sigma", damage: 392, critChance: 0.13, critMultiplier: 2.0, statusChance: 0.24, fireRate: 15, description: "Rapid-fire status turret" },
   { id: "vidar_carcinnox", name: "Vidar Carcinnox", type: "turret", house: "vidar", tier: "mk3", damage: 392, critChance: 0.19, critMultiplier: 2.0, statusChance: 0.24, fireRate: 15, description: "Enhanced Vidar rapid turret (Mk III)" },
   { id: "zetki_carcinnox", name: "Zetki Carcinnox", type: "turret", house: "zetki", tier: "mk3", damage: 510, critChance: 0.13, critMultiplier: 2.0, statusChance: 0.36, fireRate: 15, description: "High-damage Zetki rapid turret (Mk III)" },
   { id: "lavan_carcinnox", name: "Lavan Carcinnox", type: "turret", house: "lavan", tier: "mk3", damage: 420, critChance: 0.13, critMultiplier: 2.0, statusChance: 0.34, fireRate: 15, description: "High-status Lavan rapid turret (Mk III)" },
@@ -135,15 +137,53 @@ export const turrets: RailjackArmament[] = [
   { id: "zetki_vort", name: "Zetki Vort", type: "turret", house: "zetki", tier: "mk3", damage: 1592, critChance: 0.26, critMultiplier: 2.0, statusChance: 0.10, fireRate: 5, description: "High-damage Zetki electricity turret (Mk III)" },
 ];
 
-/** Hotfix 43.0.5: Steel Path Mk IV turrets are ~50% stronger than Mk III (wiki Mk III + patch notes). */
+/**
+ * Mk IV (Steel Path) turret stats from wiki Module:Weapons/data/railjack "<House> <Turret> Mk IV".
+ * damage = total per shot × multishot (Photor ×2 beams, Laith ×8 pellets), matching Mk III entries.
+ * Crit multiplier and fire rate are unchanged from Mk III.
+ */
+const MK4_TURRET_STATS: Record<string, Pick<RailjackArmament, "damage" | "critChance" | "statusChance">> = {
+  lavan_apoc: { damage: 993, critChance: 0.22, statusChance: 0.18 },
+  lavan_carcinnox: { damage: 630, critChance: 0.15, statusChance: 0.38 },
+  lavan_photor: { damage: 436, critChance: 0.14, statusChance: 0.105 },
+  lavan_pulsar: { damage: 946, critChance: 0.19, statusChance: 0.31 },
+  lavan_talyn: { damage: 474, critChance: 0.15, statusChance: 0.32 },
+  lavan_cryophon: { damage: 7640, critChance: 0.22, statusChance: 0.45 },
+  lavan_glazio: { damage: 3476, critChance: 0.35, statusChance: 0.32 },
+  lavan_laith: { damage: 4184, critChance: 0.31, statusChance: 0.16875 },
+  lavan_vort: { damage: 1965, critChance: 0.19, statusChance: 0.32 },
+  vidar_apoc: { damage: 927, critChance: 0.32, statusChance: 0.12 },
+  vidar_carcinnox: { damage: 588, critChance: 0.23, statusChance: 0.26 },
+  vidar_photor: { damage: 406, critChance: 0.21, statusChance: 0.07 },
+  vidar_pulsar: { damage: 883, critChance: 0.28, statusChance: 0.21 },
+  vidar_talyn: { damage: 442, critChance: 0.22, statusChance: 0.22 },
+  vidar_cryophon: { damage: 7140, critChance: 0.32, statusChance: 0.32 },
+  vidar_glazio: { damage: 3476, critChance: 0.51, statusChance: 0.22 },
+  vidar_laith: { damage: 3864, critChance: 0.48, statusChance: 0.10375 },
+  vidar_vort: { damage: 1836, critChance: 0.28, statusChance: 0.22 },
+  zetki_apoc: { damage: 1122, critChance: 0.33, statusChance: 0.13 },
+  zetki_carcinnox: { damage: 764, critChance: 0.16, statusChance: 0.39 },
+  zetki_photor: { damage: 486, critChance: 0.21, statusChance: 0.105 },
+  zetki_pulsar: { damage: 1149, critChance: 0.2, statusChance: 0.32 },
+  zetki_talyn: { damage: 576, critChance: 0.16, statusChance: 0.33 },
+  zetki_cryophon: { damage: 9282, critChance: 0.23, statusChance: 0.48 },
+  zetki_glazio: { damage: 3476, critChance: 0.53, statusChance: 0.23 },
+  zetki_laith: { damage: 5280, critChance: 0.24, statusChance: 0.18875 },
+  zetki_vort: { damage: 2388, critChance: 0.29, statusChance: 0.13 },
+};
+
 function toMk4Turret(turret: RailjackArmament): RailjackArmament {
+  const wiki = MK4_TURRET_STATS[turret.id];
   return {
     ...turret,
     id: `${turret.id}_mk4`,
     name: `${turret.name.replace(/ \(Mk III\)$/, "")} Mk IV`,
     tier: "mk4",
-    damage: Math.round(turret.damage * 1.5),
-    description: `${turret.description.replace(/ \(Mk III\)$/, "")}. Mk IV Steel Path variant (~50% stronger than Mk III).`,
+    // Fallback (no wiki row): Hotfix 43.0.5 "~50% stronger than Mk III".
+    damage: wiki?.damage ?? Math.round(turret.damage * 1.5),
+    critChance: wiki?.critChance ?? turret.critChance,
+    statusChance: wiki?.statusChance ?? turret.statusChance,
+    description: `${turret.description.replace(/ \(Mk III\)$/, "")}. Mk IV Steel Path variant.`,
   };
 }
 
