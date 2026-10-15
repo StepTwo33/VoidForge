@@ -65,7 +65,7 @@ describe("Heat: one consolidated pool, every proc refreshes all stacks (wiki Hea
 
 describe("Heat armor strip: proc-rate landing, 0.5 s ramp, Status Duration (wiki Heat Damage)", () => {
   it("low per-shot Heat chance still strips once a proc lands (old >0.05/shot gate removed): Braton Prime + Hellfire vs heavy_gunner L100 265.2 → 99.9 s (89.9 s with Puncture crit, R6-6)", () => {
-    expect(calculateTTK(build("braton_prime", ["hellfire_r3"]), gunner, 100).ttk).toBeCloseTo(86.93, 1); // 89.91 before BaseLevel 8 (R7-4)
+    expect(calculateTTK(build("braton_prime", ["hellfire_r3"]), gunner, 100).ttk).toBeCloseTo(91.9, 1); // 89.91 → 86.93 BaseLevel 8 (R7-4) → 91.90 stack expiry (R7-5)
   });
   it("Ignis Wraith unmodded vs heavy_gunner L100: 271.4 → 67.4 s", () => {
     expect(calculateTTK(build("ignis_wraith"), gunner, 100).ttk).toBeCloseTo(65.4, 1); // 67.4 before BaseLevel 8 (R7-4)
@@ -99,7 +99,7 @@ describe("Cold / Puncture crit received in the TTK sim (wiki Cold, Puncture; bot
     expect(simulateDiscreteTTK(s, enemyHp(624 * m), 1).shotsToKill).toBe(3);
     expect(simulateDiscreteTTK(s, enemyHp(626 * m), 1).shotsToKill).toBe(4);
   });
-  it("Hek (Puncture-heavy) vs lancer L100: 112.8 → 93.2 s", () => {
-    expect(calculateTTK(build("hek"), lancer, 100).ttk).toBeCloseTo(93.16, 1);
+  it("Hek (Puncture-heavy) vs lancer L100: 112.8 → 93.2 s (100.8 s with 6 s Puncture expiry, R7-5)", () => {
+    expect(calculateTTK(build("hek"), lancer, 100).ttk).toBeCloseTo(100.85, 1);
   });
 });

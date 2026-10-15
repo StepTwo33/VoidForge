@@ -79,6 +79,30 @@ describe("R7-3: Eximus Overguard (wiki Enemy Level Scaling § Overguard, wiki Ov
     const t = calculateTTK(build("braton_prime"), ex, 30);
     expect(t.scaledOverguard).toBeCloseTo(12743.06, 1);
     expect(t.effectiveHealth).toBeCloseTo(t.scaledHealth + t.scaledShield + 12743.06, 1);
-    expect(t.ttk).toBeCloseTo(72.46, 1); // 46.39 s without Overguard
+    expect(t.ttk).toBeCloseTo(74.97, 1); // 46.39 s without Overguard (72.46 before R7-5 expiry)
+  });
+});
+
+describe("R7-5: status stacks expire on their own timers (wiki Status Effect, both wikis)", () => {
+  it("StackTimers: per-stack expiry and oldest-first replacement at the cap", async () => {
+    const { StackTimers } = await import("@/lib/calc/ttk");
+    const v = new StackTimers(6, 10);
+    expect(v.add(4, 0)).toBe(4);
+    expect(v.add(3, 2)).toBe(7);
+    expect(v.count(5.99)).toBe(7);
+    expect(v.count(6)).toBe(3); // first 4 expired at t = 6
+    expect(v.count(8)).toBe(0);
+    const c = new StackTimers(8, 10);
+    c.add(8, 0);
+    expect(c.add(5, 1)).toBe(10); // 3 of the oldest replaced
+    expect(c.count(8)).toBe(5); // remaining 5 of the oldest expired at 8
+    expect(c.count(9)).toBe(0);
+  });
+  it("Viral 6 s × Status Duration: +100% duration doubles the window", async () => {
+    const { StackTimers } = await import("@/lib/calc/ttk");
+    const v = new StackTimers(6 * 2, 10);
+    v.add(1, 0);
+    expect(v.count(11.9)).toBe(1);
+    expect(v.count(12)).toBe(0);
   });
 });

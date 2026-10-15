@@ -340,6 +340,46 @@ function shotsPerSecond(stats: CalculatedStats): number {
   return Math.max(0, stats.fireRate);
 }
 
+/**
+ * Per-stack status timers (wiki Status Effect: every stack keeps its own duration; at the
+ * cap a new proc replaces the oldest stack). Amounts are expected (fractional) stacks.
+ */
+export class StackTimers {
+  private stacks: { expire: number; amt: number }[] = [];
+  constructor(
+    private readonly duration: number,
+    private cap: number,
+  ) {}
+  setCap(cap: number): void {
+    this.cap = cap;
+  }
+  /** Live stack count at time `t` (expired stacks pruned). */
+  count(t: number): number {
+    this.stacks = this.stacks.filter((st) => st.expire > t + 1e-9);
+    return this.stacks.reduce((a, st) => a + st.amt, 0);
+  }
+  add(amt: number, t: number): number {
+    if (amt > 0) this.stacks.push({ expire: t + this.duration, amt });
+    let total = this.count(t);
+    // Over the cap: drop the oldest stacks first.
+    while (total > this.cap + 1e-12 && this.stacks.length) {
+      const excess = total - this.cap;
+      const first = this.stacks[0];
+      if (first.amt <= excess + 1e-12) {
+        this.stacks.shift();
+        total -= first.amt;
+      } else {
+        first.amt -= excess;
+        total = this.cap;
+      }
+    }
+    return total;
+  }
+  reset(amt: number, t: number): void {
+    this.stacks = amt > 0 ? [{ expire: t + this.duration, amt }] : [];
+  }
+}
+
 /** wiki Magnetic: shield/Overguard damage multiplier at `stacks` (expected, may be fractional). */
 export function magneticShieldMultiplier(stacks: number): number {
   if (stacks <= 0) return 1;
@@ -620,6 +660,14 @@ export function simulateDiscreteTTK(
   // Status Duration mods lengthen DoTs (more ticks), matching calculateStatusProcs.
   const durScale = Math.max(0, 1 + (stats.statusDurationBonus ?? 0));
   const dotDuration = DOT_BASE_DURATION * durScale;
+  // wiki Status Effect durations (both wikis), × Status Duration: Viral / Cold / Puncture /
+  // Magnetic 6 s, Corrosive 8 s; each stack expires on its own timer.
+  const viralT = new StackTimers(6 * durScale, 10);
+  const corrosiveT = new StackTimers(8 * durScale, 10);
+  const magneticT = new StackTimers(6 * durScale, 10);
+  const coldT = new StackTimers(6 * durScale, 10);
+  const punctureCritT = new StackTimers(6 * durScale, 5);
+  const punctureStripT = new StackTimers(6 * durScale, Math.max(punctureStackCap, 0));
 
   const heatStripIdx = (t: number): number => {
     if (!heatEver || t < heatRampStart) return 0;
@@ -692,8 +740,15 @@ export function simulateDiscreteTTK(
 
     if (frozenUntil > 0 && time >= frozenUntil) {
       frozenUntil = 0;
-      coldStacks = 3;
+      coldT.reset(3, time);
     }
+    // Expire stacks whose own timers ran out before this shot.
+    viralStacks = viralT.count(time);
+    corrosiveStacks = corrosiveT.count(time);
+    magneticStacks = magneticT.count(time);
+    punctureCritStacks = punctureCritT.count(time);
+    if (punctureStackCap > 0) punctureStacks = punctureStripT.count(time);
+    if (frozenUntil <= 0) coldStacks = coldT.count(time);
     const acmShot = acmAt();
     critScale = acm > 0 ? acmShot / acm : 1;
 
@@ -821,22 +876,22 @@ export function simulateDiscreteTTK(
     }
 
     // Status stack gains (expected)
-    magneticStacks = Math.min(10, magneticStacks + expectedProcs("magnetic"));
+    magneticStacks = magneticT.add(expectedProcs("magnetic"), time);
     const viralGain = expectedProcs("viral");
     const corrGain = expectedProcs("corrosive");
     const heatGain = expectedProcs("heat");
     const punctureGain = punctureStrip > 0 ? expectedProcs("puncture") : 0;
-    viralStacks = Math.min(10, viralStacks + viralGain);
-    corrosiveStacks = Math.min(10, corrosiveStacks + corrGain);
+    viralStacks = viralT.add(viralGain, time);
+    corrosiveStacks = corrosiveT.add(corrGain, time);
     if (punctureStackCap > 0) {
-      punctureStacks = Math.min(punctureStackCap, punctureStacks + punctureGain);
+      punctureStacks = punctureStripT.add(punctureGain, time);
     }
     peakViral = Math.max(peakViral, viralStacks);
-    punctureCritStacks = Math.min(5, punctureCritStacks + expectedProcs("puncture"));
+    punctureCritStacks = punctureCritT.add(expectedProcs("puncture"), time);
     if (frozenUntil <= 0) {
-      coldStacks += expectedProcs("cold");
       // wiki Overguard: at most 4 Cold stacks while Overguard is up (no freeze).
-      if (overguard > 0) coldStacks = Math.min(4, coldStacks);
+      coldT.setCap(overguard > 0 ? 4 : 10);
+      coldStacks = coldT.add(expectedProcs("cold"), time);
       if (coldStacks >= 10 - 1e-9) {
         coldStacks = 10;
         frozenUntil = time + 3;
