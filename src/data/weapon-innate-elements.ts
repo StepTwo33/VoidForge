@@ -187,6 +187,11 @@ export const WEAPON_FIRE_TIMING: Record<string, WeaponInnateFill> = {
   perigale_prime: { burstCount: 4, burstDelay: 0.04 }, // wiki.warframe.com only
   thornbak: { burstCount: 4, burstDelay: 0.066 }, // wiki.warframe.com only
   // Tigris family is Duplex on both wikis (no BurstCount); kept as the prior 2-shot approximation.
+  // Simultaneous bursts (BurstDelay 0, both wikis): every pull fires all rounds at once,
+  // so shots/s = BurstCount x FR. (Akjagara / Prime: modelled as full-auto per owner, not burst.)
+  quartakk: { burstCount: 4, burstDelay: 0 },
+  sepulcrum: { burstCount: 2, burstDelay: 0 },
+  morgha: { burstCount: 2, burstDelay: 0 },
   tigris: { burstCount: 2, burstDelay: 0.15 },
   tigris_prime: { burstCount: 2, burstDelay: 0.15 },
   sancti_tigris: { burstCount: 2, burstDelay: 0.15 },

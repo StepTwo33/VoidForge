@@ -156,6 +156,9 @@ export interface WeaponAlternateModeStats {
   chargeTime?: number;
   chargeMode?: "standard" | "bow" | "lanka";
   triggerType?: string;
+  /** Burst timing while this mode is active (wiki BurstCount / BurstDelay). */
+  burstCount?: number;
+  burstDelay?: number;
   /** Melee form swap (e.g. Dual Swords → Heavy Blade). */
   stanceType?: string;
   /** Replace default radial profiles while alternate mode is on. */

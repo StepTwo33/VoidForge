@@ -7074,6 +7074,33 @@ export const allWeapons: Weapon[] = [
     "reloadTime": 4.5,
     "multishot": 7,
     "triggerType": "Shotgun",
+    "radialAttacks": [],
+    "alternateModeStats": {
+      "label": "Alt-Fire Burst",
+      "damage": 9,
+      "impact": 9,
+      "puncture": 0,
+      "slash": 0,
+      "toxin": 0,
+      "fireRate": 5,
+      "criticalChance": 0.03,
+      "criticalMultiplier": 3.5,
+      "statusChance": 0.57,
+      "multishot": 1,
+      "ammoCost": 3,
+      "triggerType": "Burst",
+      "burstCount": 3,
+      "burstDelay": 0.23,
+      "radialAttacks": [
+        {
+          "name": "Radial Attack",
+          "viral": 143.0,
+          "totalDamage": 143.0,
+          "radius": 7.0,
+          "falloffReduction": 0.5
+        }
+      ]
+    },
     "modSlots": 8,
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
@@ -7097,6 +7124,33 @@ export const allWeapons: Weapon[] = [
     "reloadTime": 5.5,
     "multishot": 7,
     "triggerType": "Shotgun",
+    "radialAttacks": [],
+    "alternateModeStats": {
+      "label": "Alt-Fire Burst",
+      "damage": 9,
+      "impact": 9,
+      "puncture": 0,
+      "slash": 0,
+      "toxin": 0,
+      "fireRate": 7,
+      "criticalChance": 0.05,
+      "criticalMultiplier": 3.5,
+      "statusChance": 0.61,
+      "multishot": 1,
+      "ammoCost": 3,
+      "triggerType": "Burst",
+      "burstCount": 3,
+      "burstDelay": 0.23,
+      "radialAttacks": [
+        {
+          "name": "Radial Attack",
+          "viral": 143.0,
+          "totalDamage": 143.0,
+          "radius": 7.0,
+          "falloffReduction": 0.5
+        }
+      ]
+    },
     "modSlots": 8,
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
@@ -7873,6 +7927,20 @@ export const allWeapons: Weapon[] = [
     "reloadTime": 2.3,
     "multishot": 1,
     "triggerType": "Burst",
+    "alternateModeStats": {
+      "label": "Burst",
+      "damage": 30,
+      "impact": 7.5,
+      "puncture": 7.5,
+      "slash": 15,
+      "fireRate": 5,
+      "criticalChance": 0.25,
+      "criticalMultiplier": 2.1,
+      "statusChance": 0.33,
+      "triggerType": "Burst",
+      "burstCount": 5,
+      "burstDelay": 0.07
+    },
     "modSlots": 8,
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
@@ -7939,6 +8007,16 @@ export const allWeapons: Weapon[] = [
     "reloadTime": 1.7,
     "multishot": 1,
     "triggerType": "Auto",
+    "alternateModeStats": {
+      "label": "Aimed Burst",
+      "fireRate": 1.58,
+      "criticalChance": 0.31,
+      "criticalMultiplier": 2.3,
+      "statusChance": 0.27,
+      "triggerType": "Burst",
+      "burstCount": 4,
+      "burstDelay": 0
+    },
     "modSlots": 8,
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
@@ -8096,6 +8174,16 @@ export const allWeapons: Weapon[] = [
     "reloadTime": 2,
     "multishot": 1,
     "triggerType": "Burst",
+    "alternateModeStats": {
+      "label": "Burst",
+      "fireRate": 5,
+      "criticalChance": 0.28,
+      "criticalMultiplier": 3,
+      "statusChance": 0.2,
+      "triggerType": "Burst",
+      "burstCount": 3,
+      "burstDelay": 0.08
+    },
     "modSlots": 8,
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
@@ -9789,6 +9877,16 @@ export const allWeapons: Weapon[] = [
     "reloadTime": 2.7,
     "multishot": 1,
     "triggerType": "Pistol",
+    "alternateModeStats": {
+      "label": "Burst",
+      "fireRate": 2.5,
+      "criticalChance": 0.27,
+      "criticalMultiplier": 2.5,
+      "statusChance": 0.19,
+      "triggerType": "Burst",
+      "burstCount": 4,
+      "burstDelay": 0
+    },
     "modSlots": 8,
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
@@ -15261,7 +15359,7 @@ export const allWeapons: Weapon[] = [
         }
       ]
     },
-    "triggerType": "Auto",
+    "triggerType": "Auto-Burst",
     "modSlots": 8,
     "hasPrimaryArcaneSlot": true,
     "hasSecondaryArcaneSlot": true,
