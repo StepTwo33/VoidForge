@@ -176,6 +176,19 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     attackSpeedBuff: { scale: "strength" },
     armorBuff: { scale: "strength" },
   },
+  // Round 6 Batch C — Helminth subsumes verified against wiki.gg + fandom (2026-10-15)
+  // wiki: Desiccation — DoT 2/4/6/8 True/s × STR (Helminth unaltered)
+  "helminth::Desiccation": {
+    damagePerSecond: { scale: "strength" },
+  },
+  // wiki: Larva — mutation stack chance 50% × STR (cap 100%); Helminth radius 8 m at max
+  "helminth::Larva": {
+    mutationStackChance: { scale: "strength", cap: 1 },
+  },
+  // wiki: Pyrotechnics — pillar count 3/3/4/5 × STR; 20 m reticle radius is fixed (misc)
+  "helminth::Pyrotechnics": {
+    pillars: { scale: "strength" },
+  },
   "helminth::Warcry": {
     attackSpeedBuff: { scale: "strength" },
     armorBuff: { scale: "strength" },
@@ -408,7 +421,11 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     altFireEnergy: { scale: "efficiency", formula: "cast_cost" },
   },
 
-  // wiki: Pyrotechnics — IPS via damage; pillars Misc-fixed; Helminth unaltered damage
+  // wiki: Pyrotechnics — IPS via damage; pillars 3/3/4/5 × STR (wiki.gg info row carries the
+  // Ability Strength icon); 20 m reticle radius Misc-fixed; Helminth unaltered damage
+  "temple::Pyrotechnics": {
+    pillars: { scale: "strength" },
+  },
   // wiki: Overdrive — Heat via damage; crit vuln × STR
   "temple::Overdrive": {
     criticalChanceVulnerability: { scale: "strength" },
