@@ -2,7 +2,8 @@
  * Enemy catalog for TTK / Damage Simulator.
  * Auto-generated from wiki Module:Enemies/data (scripts/generate_enemies_catalog.py).
  * Base Health/Armor/Shield are wiki BaseLevel stats.
- * Health/armor/shield *types* are pre-U36 class approximations for elemental matchups.
+ * Health/armor/shield *types* are pre-U36 class labels kept for reference only; TTK uses
+ * Update 36 faction modifiers (src/data/faction-damage-modifiers.ts).
  * Boss / eidolon / eximus entries are paper targets — phases & gates not modeled.
  *
  * Do not hand-edit bulk rows; re-run the generator after refreshing scripts/wiki-enemies/.
@@ -17,8 +18,11 @@ export interface EnemyType {
   baseHealth: number;
   baseArmor: number;
   baseShield: number;
+  /** @deprecated Pre-Update 36 health class; not used by calculations (faction modifiers replace it). */
   healthType: string;
+  /** @deprecated Pre-Update 36 armor class; not used by calculations (plain armor since U36). */
   armorType: string;
+  /** @deprecated Pre-Update 36 shield class; not used by calculations (plain shields since U36). */
   shieldType: string;
   /** UI / filter bucket */
   kind?: EnemyKind;

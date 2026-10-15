@@ -317,9 +317,6 @@ export default function DamageSimulatorPage() {
                         <span>HP {e.baseHealth}</span>
                         {e.baseShield > 0 && <span>SH {e.baseShield}</span>}
                         {e.baseArmor > 0 && <span>AR {e.baseArmor}</span>}
-                        <span className="text-muted-foreground/50">
-                          {e.healthType} / {e.armorType !== "none" ? e.armorType : "–"}
-                        </span>
                       </div>
                     </button>
                   ))

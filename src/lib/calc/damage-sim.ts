@@ -12,16 +12,13 @@ import {
   headshotMultiplier,
 } from "@/lib/calc/combat-multipliers";
 import {
-  ARMOR_MODIFIERS,
   calculateTTK,
   corrosiveArmorRemaining,
   enemyArmorDamageReduction,
-  getMod,
-  HEALTH_MODIFIERS,
+  enemyDamageTypeMultiplier,
   heatArmorRemaining,
   punctureArmorRemaining,
   scaleEnemyPools,
-  SHIELD_MODIFIERS,
   viralHealthMultiplier,
   type EnemyType,
   type TTKResult,
@@ -155,18 +152,14 @@ function typeVsLayer(
   viralMult: number,
   layer: "shield" | "health",
 ): number {
+  // Update 36: faction damage type modifier on every layer; plain armor DR.
+  const fm = enemyDamageTypeMultiplier(enemy, type);
   if (layer === "shield") {
     if (type === "toxin") return 0;
-    if (enemy.shieldType === "none") return raw;
-    return raw * (1 + getMod(SHIELD_MODIFIERS, enemy.shieldType, type));
+    return raw * fm;
   }
-  const hm = getMod(HEALTH_MODIFIERS, enemy.healthType, type);
-  let dmg = raw * (1 + hm) * viralMult;
-  if (currentArmor > 0 && enemy.armorType !== "none") {
-    const am = getMod(ARMOR_MODIFIERS, enemy.armorType, type);
-    const effArmor = currentArmor * Math.max(0, 1 - am);
-    dmg *= 1 - enemyArmorDamageReduction(effArmor);
-  }
+  let dmg = raw * fm * viralMult;
+  if (currentArmor > 0) dmg *= 1 - enemyArmorDamageReduction(currentArmor);
   return dmg;
 }
 
@@ -227,7 +220,7 @@ export function runDamageSim(
   const typeBreakdown: DamageSimTypeRow[] = types.map(([type, raw]) => {
     const weight = raw / totalRaw;
     const vsShield =
-      shield > 0 && enemy.shieldType !== "none"
+      shield > 0
         ? typeVsLayer(type, raw, enemy, armor, 1, "shield")
         : raw;
     const vsHealth = typeVsLayer(type, raw, enemy, armor, viralMult, "health");
@@ -268,7 +261,7 @@ export function runDamageSim(
   if (slashRaw > 0 && procsPerSec > 0) {
     const pps = procsPerSec * (slashRaw / totalRaw);
     const tickDmg = totalRaw * 0.35 * acm * dotMult;
-    const hm = getMod(HEALTH_MODIFIERS, enemy.healthType, "slash");
+    const hm = enemyDamageTypeMultiplier(enemy, "slash") - 1;
     // Slash DoT is cinematic (ignores armor); 7 ticks / 6s → duty factor 7/6
     slashDotDps = pps * tickDmg * (7 / 6) * (1 + hm) * viralMult;
   }
@@ -278,7 +271,7 @@ export function runDamageSim(
   if (heatRaw > 0 && procsPerSec > 0) {
     const pps = procsPerSec * (heatRaw / totalRaw);
     const tickDmg = totalRaw * 0.5 * acm * dotMult;
-    const hm = getMod(HEALTH_MODIFIERS, enemy.healthType, "heat");
+    const hm = enemyDamageTypeMultiplier(enemy, "heat") - 1;
     heatDotDps = pps * tickDmg * (1 + hm) * (1 - armorDR);
   }
 
@@ -287,7 +280,7 @@ export function runDamageSim(
   if (toxinRaw > 0 && procsPerSec > 0) {
     const pps = procsPerSec * (toxinRaw / totalRaw);
     const tickDmg = totalRaw * 0.5 * acm * dotMult;
-    const hm = getMod(HEALTH_MODIFIERS, enemy.healthType, "toxin");
+    const hm = enemyDamageTypeMultiplier(enemy, "toxin") - 1;
     toxinDotDps = pps * tickDmg * (1 + hm) * (1 - armorDR);
   }
 

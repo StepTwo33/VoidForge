@@ -121,8 +121,8 @@ describe("damage sim Warframe math alignment", () => {
     expect(sim.peakCorrosiveStacks).toBe(ttk.peakCorrosiveStacks);
   });
 
-  it("300 enemy armor is 10% DR (not 50% Tenno)", () => {
-    expect(enemyArmorDamageReduction(300)).toBeCloseTo(0.1, 10);
+  it("300 enemy armor is 30% DR (0.9 × sqrt(300/2700), not 50% Tenno)", () => {
+    expect(enemyArmorDamageReduction(300)).toBeCloseTo(0.3, 10);
     expect(300 / (300 + 300)).toBeCloseTo(0.5, 10);
   });
 });

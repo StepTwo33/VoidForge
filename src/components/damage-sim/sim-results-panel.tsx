@@ -3,12 +3,7 @@
 import { Crosshair, Flame, Heart, Shield, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EnemyType } from "@/lib/calc/ttk";
-import {
-  HEALTH_MODIFIERS,
-  ARMOR_MODIFIERS,
-  SHIELD_MODIFIERS,
-  getMod,
-} from "@/lib/calc/ttk";
+import { damageFactionForEnemy, enemyDamageTypeMultiplier } from "@/data/faction-damage-modifiers";
 import type { DamageSimResult } from "@/lib/calc/damage-sim";
 import {
   SimSection,
@@ -133,9 +128,9 @@ export function SimResultsPanel({
         )}
         <SimResultRow label="Effective HP" value={fmtSimNum(sim.effectiveHP)} bold color="text-primary" />
         <div className="mt-1 text-[9px] text-muted-foreground/60">
-          {selectedEnemy.healthType} health ·{" "}
-          {selectedEnemy.armorType !== "none" ? `${selectedEnemy.armorType} armor` : "no armor"} ·{" "}
-          {selectedEnemy.shieldType !== "none" ? `${selectedEnemy.shieldType} shields` : "no shields"}
+          {damageFactionForEnemy(selectedEnemy) ?? "No faction"} modifiers ·{" "}
+          {selectedEnemy.baseArmor > 0 ? "armor" : "no armor"} ·{" "}
+          {selectedEnemy.baseShield > 0 ? "shields" : "no shields"}
         </div>
       </SimSection>
 
@@ -256,15 +251,8 @@ export function SimResultsPanel({
           {Object.entries(dmgTypes)
             .filter(([, v]) => v > 0)
             .map(([type]) => {
-              const hm = getMod(HEALTH_MODIFIERS, selectedEnemy.healthType, type);
-              const am =
-                selectedEnemy.armorType !== "none"
-                  ? getMod(ARMOR_MODIFIERS, selectedEnemy.armorType, type)
-                  : 0;
-              const sm =
-                selectedEnemy.shieldType !== "none"
-                  ? getMod(SHIELD_MODIFIERS, selectedEnemy.shieldType, type)
-                  : 0;
+              // Update 36: one faction modifier per damage type (x1.5 vulnerable / x0.5 resistant).
+              const fm = enemyDamageTypeMultiplier(selectedEnemy, type) - 1;
               return (
                 <div key={type} className="flex min-w-0 flex-wrap items-center gap-1 text-[10px]">
                   <span
@@ -273,46 +261,20 @@ export function SimResultsPanel({
                   >
                     {type}
                   </span>
-                  {hm !== 0 && (
+                  {fm !== 0 && (
                     <span
                       className={cn(
                         "rounded px-1",
-                        hm > 0
+                        fm > 0
                           ? "bg-green-500/10 text-green-700 dark:text-green-400"
                           : "bg-red-500/10 text-red-700 dark:text-red-400",
                       )}
                     >
-                      HP {hm > 0 ? "+" : ""}
-                      {(hm * 100).toFixed(0)}%
+                      {fm > 0 ? "+" : ""}
+                      {(fm * 100).toFixed(0)}%
                     </span>
                   )}
-                  {am !== 0 && (
-                    <span
-                      className={cn(
-                        "rounded px-1",
-                        am > 0
-                          ? "bg-green-500/10 text-green-700 dark:text-green-400"
-                          : "bg-red-500/10 text-red-700 dark:text-red-400",
-                      )}
-                    >
-                      AR {am > 0 ? "+" : ""}
-                      {(am * 100).toFixed(0)}%
-                    </span>
-                  )}
-                  {sm !== 0 && (
-                    <span
-                      className={cn(
-                        "rounded px-1",
-                        sm > 0
-                          ? "bg-green-500/10 text-green-700 dark:text-green-400"
-                          : "bg-red-500/10 text-red-700 dark:text-red-400",
-                      )}
-                    >
-                      SH {sm > 0 ? "+" : ""}
-                      {(sm * 100).toFixed(0)}%
-                    </span>
-                  )}
-                  {hm === 0 && am === 0 && sm === 0 && (
+                  {fm === 0 && (
                     <span className="text-muted-foreground/40">neutral</span>
                   )}
                 </div>

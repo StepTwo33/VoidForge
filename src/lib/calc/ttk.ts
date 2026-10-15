@@ -23,63 +23,43 @@ export {
   isCommonTtkEnemyId,
 } from "@/data/enemies";
 import type { EnemyType } from "@/data/enemies";
+import { enemyDamageTypeMultiplier } from "@/data/faction-damage-modifiers";
 
-// ── Type modifier tables ──────────────────────────────────────────────
-export const HEALTH_MODIFIERS: Record<string, Record<string, number>> = {
-  flesh:        { impact: -0.25, slash: 0.25, heat: 0.25, toxin: 0.5, viral: 0.5, gas: 0.5 },
-  cloned_flesh: { impact: -0.25, slash: 0.25, heat: 0.25, viral: 0.75, gas: -0.50 },
-  fossilized:   { slash: 0.15, cold: -0.25, toxin: -0.5, blast: 0.5, corrosive: 0.75, radiation: -0.25 },
-  infested:     { slash: 0.25, heat: 0.25, gas: 0.75, radiation: -0.5 },
-  infested_flesh: { slash: 0.5, heat: 0.5, gas: 0.5, corrosive: 0.75, viral: -0.5 },
-  machinery:    { impact: 0.25, electricity: 0.5, toxin: -0.25, blast: 0.75, viral: -0.25 },
-  robotic:      { puncture: 0.25, slash: -0.25, electricity: 0.5, toxin: -0.25, radiation: 0.25 },
-  sinew:        { puncture: 0.25, slash: 0.25, blast: 0.5, gas: 0.25, corrosive: -0.25, viral: -0.5 },
-};
+// ── Damage type modifiers (Update 36) ─────────────────────────────────
+// Health / armor / shield classes were removed in Update 36; vulnerabilities and
+// resistances come only from the enemy's faction (wiki Damage, Damage/Overview Table).
+export { enemyDamageTypeMultiplier } from "@/data/faction-damage-modifiers";
 
-export const ARMOR_MODIFIERS: Record<string, Record<string, number>> = {
-  ferrite: { puncture: 0.5, slash: -0.15, toxin: 0.25, corrosive: 0.75, blast: -0.25 },
-  alloy:   { puncture: 0.15, slash: -0.5, cold: 0.25, magnetic: -0.5, radiation: 0.75 },
-};
-
-export const SHIELD_MODIFIERS: Record<string, Record<string, number>> = {
-  shield:       { impact: 0.5, puncture: -0.2, cold: 0.5, magnetic: 0.75, radiation: -0.25 },
-  proto_shield: { impact: -0.15, puncture: -0.5, heat: -0.5, toxin: 0.25, magnetic: 0.75, corrosive: -0.5 },
-};
-
-export function getMod(table: Record<string, Record<string, number>>, key: string, dmgType: string): number {
-  return table[key]?.[dmgType] ?? 0;
-}
-
-// ── Post-Update 32 S-curve scaling ────────────────────────────────────
-export function scaleArmor(base: number, level: number): number {
-  if (base <= 0) return 0;
-  const d = level - 1;
-  if (d <= 0) return Math.min(base, 2700);
-  let s: number;
-  if (d < 70) {
-    s = base * (1 + 0.005 * Math.pow(d, 1.75));
-  } else if (d > 80) {
-    const a80 = base * (1 + 0.005 * Math.pow(80, 1.75));
-    s = a80 + (d - 80) * 0.5;
-  } else {
-    const t = (d - 70) / 10;
-    const sm = t * t * (3 - 2 * t);
-    const lo = base * (1 + 0.005 * Math.pow(d, 1.75));
-    const a80 = base * (1 + 0.005 * Math.pow(80, 1.75));
-    const hi = a80 + (d - 80) * 0.5;
-    s = lo * (1 - sm) + hi * sm;
-  }
-  return Math.max(base, Math.min(s, 2700));
+// ── Level scaling (wiki Enemy Level Scaling) ──────────────────────────
+/** Smoothstep weight between the lower (L) and upper (U) level-difference bounds. */
+function smoothstepWeight(d: number, lo: number, hi: number): number {
+  const t = Math.min(1, Math.max(0, (d - lo) / (hi - lo)));
+  return t * t * (3 - 2 * t);
 }
 
 /**
- * Enemy armor damage reduction (wiki Armor § Enemy Damage Reduction).
- * DR = 0.9 × NetArmor / 2700  (max 90% at the 2700 armor soft-cap).
+ * Enemy armor at level (wiki Enemy Level Scaling § Armor; base level 1):
+ *   f1 = 1 + 0.005·d^1.75, f2 = 1 + 0.4·d^0.75, mult = f1 + (f2 − f1)·s  (s: smoothstep 70→80)
+ * Initial armor is clamped to [200, 2700] (wiki Armor); removal can still go below 200.
+ */
+export function scaleArmor(base: number, level: number): number {
+  if (base <= 0) return 0;
+  const d = Math.max(0, level - 1);
+  const f1 = 1 + 0.005 * Math.pow(d, 1.75);
+  const f2 = 1 + 0.4 * Math.pow(d, 0.75);
+  const mult = f1 + (f2 - f1) * smoothstepWeight(d, 70, 80);
+  return Math.min(2700, Math.max(200, base * mult));
+}
+
+/**
+ * Enemy armor damage reduction (wiki Armor § Enemy Damage Reduction Formula):
+ *   DR = 0.9 × √(NetArmor / 2700) for NetArmor ≤ 2700; above that, NetArmor / (NetArmor + 300).
  * Tenno armor still uses armor/(armor+300) — see calculator warframe EHP.
  */
 export function enemyArmorDamageReduction(armor: number): number {
   if (armor <= 0) return 0;
-  return Math.min(0.9, (0.9 * armor) / 2700);
+  if (armor > 2700) return armor / (armor + 300);
+  return 0.9 * Math.sqrt(armor / 2700);
 }
 
 /**
@@ -276,24 +256,15 @@ function typeHitDamage(
   viralMult: number,
   layer: "shield" | "health",
 ): number {
+  const fm = enemyDamageTypeMultiplier(enemy, type);
   if (layer === "shield") {
     if (type === "toxin") return 0; // toxin bypasses — applied to health separately
-    const sm = getMod(SHIELD_MODIFIERS, enemy.shieldType, type);
-    return value * (1 + sm);
+    return value * fm;
   }
-  // health
-  const hm = getMod(HEALTH_MODIFIERS, enemy.healthType, type);
-  let dmg = value * (1 + hm) * viralMult;
-  if (currentArmor > 0 && enemy.armorType !== "none" && type !== "slash") {
-    // slash direct hits still hit armor; only slash DoT is cinematic
-    const am = getMod(ARMOR_MODIFIERS, enemy.armorType, type);
-    const effArmor = currentArmor * Math.max(0, 1 - am);
-    dmg *= 1 - enemyArmorDamageReduction(effArmor);
-  } else if (currentArmor > 0 && enemy.armorType !== "none" && type === "slash") {
-    const am = getMod(ARMOR_MODIFIERS, enemy.armorType, type);
-    const effArmor = currentArmor * Math.max(0, 1 - am);
-    dmg *= 1 - enemyArmorDamageReduction(effArmor);
-  }
+  // health: faction modifier × viral, then armor DR (direct Slash hits still hit armor;
+  // only the Slash bleed DoT bypasses it)
+  let dmg = value * fm * viralMult;
+  if (currentArmor > 0) dmg *= 1 - enemyArmorDamageReduction(currentArmor);
   return dmg;
 }
 
@@ -443,7 +414,7 @@ export function simulateDiscreteTTK(
         );
         const viralMult = d.useViral ? viralHealthMultiplier(viralStacks) : 1;
         let dmg = d.damagePerTick * viralMult;
-        if (!d.ignoreArmor && armorNow > 0 && enemy.armorType !== "none") {
+        if (!d.ignoreArmor && armorNow > 0) {
           dmg *= 1 - enemyArmorDamageReduction(armorNow);
         }
         // DoTs apply to health (toxin always; others after shields or through)
@@ -471,7 +442,8 @@ export function simulateDiscreteTTK(
     optsDot: { ignoreArmor: boolean; ignoreShields: boolean; useViral: boolean; typeMult: number },
   ) => {
     if (expectedCount <= 0 || frac <= 0) return;
-    const perTick = frac * dotBase * optsDot.typeMult;
+    // DoT ticks keep their damage type, so the faction modifier applies (wiki Damage).
+    const perTick = frac * dotBase * optsDot.typeMult * enemyDamageTypeMultiplier(enemy, type);
     if (perTick <= 0) return;
     // Spawn floor(expected) full procs + fractional expected as partial damage
     const full = Math.floor(expectedCount);
@@ -521,7 +493,7 @@ export function simulateDiscreteTTK(
     let shieldHit = 0;
     let healthHit = 0;
     let toxinBypass = 0;
-    const hasShields = shield > 0 && enemy.shieldType !== "none";
+    const hasShields = shield > 0;
     for (const d of dmgTypes) {
       const base = d.value * multishot * acm * factionHit;
       if (d.type === "toxin") {
@@ -563,11 +535,12 @@ export function simulateDiscreteTTK(
       if (stats.extraHitGuaranteedToxin) {
         health -= typeHitDamage("toxin", extraBase, enemy, armorNow, viralMult, "health");
       } else if (hasShields) {
+        // Non-Toxin Extra Hit is Xata's Whisper Void damage (Zariman vulnerable after shields).
         const absorbedEx = Math.min(shield, extraBase);
         shield -= absorbedEx;
         if (shield <= 0 && extraBase > absorbedEx) {
           health -= typeHitDamage(
-            "impact",
+            "void",
             extraBase - absorbedEx,
             enemy,
             armorNow,
@@ -576,7 +549,7 @@ export function simulateDiscreteTTK(
           );
         }
       } else {
-        health -= typeHitDamage("impact", extraBase, enemy, armorNow, viralMult, "health");
+        health -= typeHitDamage("void", extraBase, enemy, armorNow, viralMult, "health");
       }
     }
 
@@ -644,7 +617,8 @@ export function simulateDiscreteTTK(
         statusDmg *
         fTriple *
         head *
-        stance;
+        stance *
+        enemyDamageTypeMultiplier(enemy, "toxin");
       if (tlTick > 0) {
         const full = Math.floor(multishot);
         const fracPart = multishot - full;
@@ -705,12 +679,8 @@ export function simulateDiscreteTTK(
   const endArmorDR = enemyArmorDamageReduction(endArmor);
   let endHealthRatio = 0;
   for (const d of dmgTypes) {
-    const hm = getMod(HEALTH_MODIFIERS, enemy.healthType, d.type);
-    let typeDmg = (d.value / totalRaw) * (1 + hm);
-    if (endArmor > 0 && enemy.armorType !== "none") {
-      const am = getMod(ARMOR_MODIFIERS, enemy.armorType, d.type);
-      typeDmg *= 1 - enemyArmorDamageReduction(endArmor * Math.max(0, 1 - am));
-    }
+    let typeDmg = (d.value / totalRaw) * enemyDamageTypeMultiplier(enemy, d.type);
+    if (endArmor > 0) typeDmg *= 1 - enemyArmorDamageReduction(endArmor);
     endHealthRatio += typeDmg;
   }
   endHealthRatio *= endViral;

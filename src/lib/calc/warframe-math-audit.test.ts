@@ -233,8 +233,9 @@ describe("average procs per shot (wiki Status Effect § Multishot)", () => {
 });
 
 describe("enemy armor DR (wiki Armor § Enemy)", () => {
-  it("uses 0.9 × AR / 2700, not Tenno AR/(AR+300)", () => {
-    expect(enemyArmorDamageReduction(300)).toBeCloseTo(0.1, 10);
+  it("uses 0.9 × sqrt(AR / 2700), not Tenno AR/(AR+300)", () => {
+    // 0.9 × sqrt(300/2700) = 0.9 × 1/3 = 0.3
+    expect(enemyArmorDamageReduction(300)).toBeCloseTo(0.3, 10);
     expect(enemyArmorDamageReduction(2700)).toBeCloseTo(0.9, 10);
     expect(enemyArmorDamageReduction(0)).toBe(0);
     // Classic Tenno formula would give 50% at 300 armor — must differ
