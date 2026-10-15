@@ -200,7 +200,7 @@ export function eximusLevelFactor(level: number): number {
 /**
  * Eximus base health/shields before faction level scaling (wiki Enemy Level Scaling § Eximus).
  * Health: max(1.1·base, c·(base + 900)·k), c = 0.25 with shields or armor, 0.375 without.
- * Shields: max(1.1·base, base·k). Overguard is not modelled.
+ * Shields: max(1.1·base, base·k). Overguard: see eximusOverguard.
  */
 export function eximusBasePools(
   enemy: Pick<EnemyType, "baseHealth" | "baseShield" | "baseArmor">,
@@ -213,12 +213,24 @@ export function eximusBasePools(
   return { health, shield };
 }
 
+/**
+ * Eximus Overguard (wiki Enemy Level Scaling § Overguard): base 12 ×
+ *   f1 = 1 + 0.0015·q^4, f2 = 1 + 260·q^0.9, smoothstep 45→50, q = level − 1
+ * (ignores the unit's BaseLevel). No Steel Path multiplier is documented.
+ */
+export function eximusOverguard(level: number): number {
+  const q = Math.max(0, level - 1);
+  const f1 = 1 + 0.0015 * Math.pow(q, 4);
+  const f2 = 1 + 260 * Math.pow(q, 0.9);
+  return 12 * (f1 + (f2 - f1) * smoothstepWeight(level, 45, 50));
+}
+
 /** Level-scaled pools with optional Steel Path HP/Shield multipliers. */
 export function scaleEnemyPools(
   enemy: EnemyType,
   level: number,
   opts?: EnemyScaleOpts,
-): { health: number; armor: number; shield: number; steelPath: boolean } {
+): { health: number; armor: number; shield: number; overguard: number; steelPath: boolean } {
   const steelPath = !!opts?.steelPath;
   const eximus = enemy.kind === "eximus" ? eximusBasePools(enemy, level) : null;
   const baseHealth = eximus ? eximus.health : enemy.baseHealth;
@@ -232,7 +244,10 @@ export function scaleEnemyPools(
   const shield =
     scaleShield(baseShield, scaleLevel, enemy.faction) * (steelPath ? STEEL_PATH_SHIELD_MULT : 1);
   const armor = scaleArmor(enemy.baseArmor, scaleLevel);
-  return { health, armor, shield, steelPath };
+  // wiki Overguard: every Eximus has Overguard (Archwing/Warden/Prosecutor eximus excepted;
+  // none of those are in the catalog's eximus bucket).
+  const overguard = enemy.kind === "eximus" ? eximusOverguard(level) : 0;
+  return { health, armor, shield, overguard, steelPath };
 }
 
 // ── Crit averaging — single source of truth in crit-utils ─────────────
@@ -276,6 +291,8 @@ export interface TTKResult {
   scaledArmor: number;
   scaledShield: number;
   scaledHealth: number;
+  /** Eximus Overguard at level (0 when none). */
+  scaledOverguard?: number;
   armorDR: number;
   burstDps: number;
   sustainedDps: number;
@@ -389,6 +406,7 @@ export function simulateDiscreteTTK(
   const scaledHp = pools.health;
   const baseArmor = pools.armor;
   const scaledShield = pools.shield;
+  const scaledOverguard = pools.overguard;
 
   const dmgTypes = collectDamageTypes(stats);
   const totalRaw = dmgTypes.reduce((s, d) => s + d.value, 0);
@@ -396,10 +414,11 @@ export function simulateDiscreteTTK(
     enemy,
     level,
     steelPath,
-    effectiveHealth: scaledHp + scaledShield,
+    effectiveHealth: scaledHp + scaledShield + scaledOverguard,
     scaledArmor: baseArmor,
     scaledShield,
     scaledHealth: scaledHp,
+    scaledOverguard,
     armorDR: enemyArmorDamageReduction(baseArmor) * 100,
     burstDps: 0,
     sustainedDps: 0,
@@ -500,6 +519,19 @@ export function simulateDiscreteTTK(
   // Electricity plus a forced Electricity proc.
   let magneticStacks = 0;
   let shieldBreakHandled = scaledShield <= 0;
+  // wiki Overguard: neutral to every damage type except +50% Void; no armor, no Viral;
+  // Magnetic amplifies it like shields and its break triggers the same burst.
+  let overguard = scaledOverguard;
+  let overguardBreakHandled = scaledOverguard <= 0;
+  /** Absorb `raw` (faction-neutral) damage of `type` into Overguard; return pass-through fraction. */
+  const hitOverguard = (raw: number, voidRaw = 0): number => {
+    if (overguard <= 0) return 1;
+    const og = (raw + 0.5 * voidRaw) * magneticShieldMult();
+    if (og <= 0) return 1;
+    const absorbed = Math.min(overguard, og);
+    overguard -= absorbed;
+    return (og - absorbed) / og;
+  };
   const magneticShieldMult = (): number => magneticShieldMultiplier(magneticStacks);
   let punctureStacks = 0;
   // wiki Heat Damage: one consolidated Heat pool — each proc adds a stack and refreshes
@@ -534,11 +566,16 @@ export function simulateDiscreteTTK(
         // wiki Damage over Time / Shield (both wikis): only Toxin ticks bypass shields; other
         // ticks hit shields first (no armor, no Viral; Magnetic amplifies), overflow to health.
         let toHealthFrac = 1;
-        if (!d.ignoreShields && shield > 0) {
-          const shieldDmg = d.damagePerTick * magneticShieldMult();
+        if (overguard > 0) {
+          const fm = enemyDamageTypeMultiplier(enemy, d.type);
+          const raw = fm > 0 ? d.damagePerTick / fm : 0;
+          toHealthFrac = hitOverguard(raw, d.type === "void" ? raw : 0);
+        }
+        if (!d.ignoreShields && shield > 0 && toHealthFrac > 0) {
+          const shieldDmg = d.damagePerTick * toHealthFrac * magneticShieldMult();
           const absorbed = Math.min(shield, shieldDmg);
           shield -= absorbed;
-          toHealthFrac = shieldDmg > 0 ? (shieldDmg - absorbed) / shieldDmg : 0;
+          toHealthFrac *= shieldDmg > 0 ? (shieldDmg - absorbed) / shieldDmg : 0;
         }
         let dmg = d.damagePerTick * viralMult * toHealthFrac;
         if (!d.ignoreArmor && armorNow > 0) {
@@ -562,7 +599,12 @@ export function simulateDiscreteTTK(
         punctureStacks,
         punctureStrip,
       );
-      let dmg = heatPool * viralHealthMultiplier(viralStacks);
+      let heatFrac = 1;
+      if (overguard > 0) {
+        const fm = enemyDamageTypeMultiplier(enemy, "heat");
+        heatFrac = hitOverguard(fm > 0 ? heatPool / fm : 0);
+      }
+      let dmg = heatPool * heatFrac * viralHealthMultiplier(viralStacks);
       if (armorNow > 0) dmg *= 1 - enemyArmorDamageReduction(armorNow);
       health -= dmg;
       heatNextTick += 1;
@@ -655,13 +697,26 @@ export function simulateDiscreteTTK(
     const acmShot = acmAt();
     critScale = acm > 0 ? acmShot / acm : 1;
 
+    // Overguard layer first (all types incl. Toxin; faction-neutral; Void +50%).
+    let ogPass = 1;
+    if (overguard > 0) {
+      let raw = 0;
+      let voidRaw = 0;
+      for (const d of dmgTypes) {
+        const v = d.value * multishot * acmShot * factionHit;
+        raw += v;
+        if (d.type === "void") voidRaw += v;
+      }
+      ogPass = hitOverguard(raw, voidRaw);
+    }
+
     // Direct hit (expected damage per shot)
     let shieldHit = 0;
     let healthHit = 0;
     let toxinBypass = 0;
     const hasShields = shield > 0;
     for (const d of dmgTypes) {
-      const base = d.value * multishot * acmShot * factionHit;
+      const base = d.value * multishot * acmShot * factionHit * ogPass;
       if (d.type === "toxin") {
         // toxin bypasses shields → health
         toxinBypass += typeHitDamage(d.type, base, enemy, armorNow, viralMult, "health");
@@ -682,7 +737,7 @@ export function simulateDiscreteTTK(
         let overflowHealth = 0;
         for (const d of dmgTypes) {
           if (d.type === "toxin") continue;
-          const base = d.value * multishot * acmShot * factionHit;
+          const base = d.value * multishot * acmShot * factionHit * ogPass;
           overflowHealth +=
             typeHitDamage(d.type, base, enemy, armorNow, viralMult, "health") * overflowFrac;
         }
@@ -697,8 +752,10 @@ export function simulateDiscreteTTK(
     const extraInstances = Math.max(1, stats.extraHitInstances ?? 1);
     if (extraFrac > 0 && totalRaw > 0) {
       const fHit = factionHitMultiplier(factionBonus);
-      const extraBase =
+      const extraRaw =
         totalRaw * extraFrac * multishot * acmShot * factionHit * fHit * extraInstances;
+      const extraBase =
+        extraRaw * hitOverguard(extraRaw, stats.extraHitGuaranteedToxin ? 0 : extraRaw);
       if (stats.extraHitGuaranteedToxin) {
         health -= typeHitDamage("toxin", extraBase, enemy, armorNow, viralMult, "health");
       } else if (hasShields) {
@@ -718,6 +775,26 @@ export function simulateDiscreteTTK(
         }
       } else {
         health -= typeHitDamage("void", extraBase, enemy, armorNow, viralMult, "health");
+      }
+    }
+
+    // Magnetic Overguard-break burst (wiki Overguard): 3%/stack of max Overguard as
+    // Electricity + forced Electricity proc.
+    if (!overguardBreakHandled && overguard <= 0) {
+      overguardBreakHandled = true;
+      if (magneticStacks > 0) {
+        const burst = 0.03 * Math.min(magneticStacks, 10) * scaledOverguard;
+        if (shield > 0) {
+          shield = Math.max(0, shield - burst * enemyDamageTypeMultiplier(enemy, "electricity") * magneticShieldMult());
+        } else {
+          health -= typeHitDamage("electricity", burst, enemy, armorNow, viralMult, "health");
+        }
+        spawnDot("electricity", 1, 0.5, {
+          ignoreArmor: false,
+          ignoreShields: false,
+          useViral: true,
+          typeMult: 1 + typeBonus("electricity"),
+        });
       }
     }
 
@@ -758,6 +835,8 @@ export function simulateDiscreteTTK(
     punctureCritStacks = Math.min(5, punctureCritStacks + expectedProcs("puncture"));
     if (frozenUntil <= 0) {
       coldStacks += expectedProcs("cold");
+      // wiki Overguard: at most 4 Cold stacks while Overguard is up (no freeze).
+      if (overguard > 0) coldStacks = Math.min(4, coldStacks);
       if (coldStacks >= 10 - 1e-9) {
         coldStacks = 10;
         frozenUntil = time + 3;
@@ -922,7 +1001,8 @@ export function simulateDiscreteTTK(
   const healthPerShot = rawPerShot * endHealthRatio;
   const burstDps = healthPerShot * efr + (killed && ttk > 0 ? (scaledHp + scaledShield) / ttk * 0 : 0);
   // Prefer sim-derived average DPS when killed
-  const avgDps = killed && ttk > 0 ? (scaledHp + scaledShield) / ttk : healthPerShot * efr;
+  const avgDps =
+    killed && ttk > 0 ? (scaledHp + scaledShield + scaledOverguard) / ttk : healthPerShot * efr;
   const ammoCost = Math.max(0.01, stats.ammoCost ?? 1);
   const shotsPerMag = stats.magazine / ammoCost;
   const sustainFactor =
@@ -934,10 +1014,11 @@ export function simulateDiscreteTTK(
     enemy,
     level,
     steelPath,
-    effectiveHealth: scaledHp + scaledShield,
+    effectiveHealth: scaledHp + scaledShield + scaledOverguard,
     scaledArmor: endArmor,
     scaledShield,
     scaledHealth: scaledHp,
+    scaledOverguard,
     armorDR: endArmorDR * 100,
     burstDps: Math.max(avgDps, healthPerShot * efr),
     sustainedDps: Math.max(avgDps * sustainFactor, healthPerShot * efr * sustainFactor),

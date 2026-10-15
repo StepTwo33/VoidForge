@@ -61,3 +61,24 @@ describe("R7-4: level scaling starts at the enemy's wiki BaseLevel (both wikis)"
     expect(lancer.baseLevel).toBeUndefined();
   });
 });
+
+describe("R7-3: Eximus Overguard (wiki Enemy Level Scaling § Overguard, wiki Overguard)", () => {
+  it("12 × curve: L1 = 12, L30 = 12·(1+0.0015·29⁴) = 12,743.1, L100 ≈ 195,098", async () => {
+    const { eximusOverguard } = await import("@/lib/calc/ttk");
+    expect(eximusOverguard(1)).toBe(12);
+    expect(eximusOverguard(30)).toBeCloseTo(12 * (1 + 0.0015 * 29 ** 4), 6);
+    expect(eximusOverguard(30)).toBeCloseTo(12743.06, 1);
+    expect(eximusOverguard(100)).toBeCloseTo(12 * (1 + 260 * 99 ** 0.9), 6);
+    expect(Math.round(eximusOverguard(100) / 100)).toBe(Math.round(195098 / 100));
+  });
+  it("only Eximus get Overguard; it adds to effective health in TTK", async () => {
+    const { scaleEnemyPools, calculateTTK, ENEMY_TYPES } = await import("@/lib/calc/ttk");
+    const ex = ENEMY_TYPES.find((e) => e.id === "eximus_heavy_gunner")!;
+    const hg = ENEMY_TYPES.find((e) => e.id === "heavy_gunner")!;
+    expect(scaleEnemyPools(hg, 30).overguard).toBe(0);
+    const t = calculateTTK(build("braton_prime"), ex, 30);
+    expect(t.scaledOverguard).toBeCloseTo(12743.06, 1);
+    expect(t.effectiveHealth).toBeCloseTo(t.scaledHealth + t.scaledShield + 12743.06, 1);
+    expect(t.ttk).toBeCloseTo(72.46, 1); // 46.39 s without Overguard
+  });
+});
