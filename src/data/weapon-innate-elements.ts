@@ -169,4 +169,11 @@ export const WEAPON_FIRE_TIMING: Record<string, WeaponInnateFill> = {
   tigris: { burstCount: 2, burstDelay: 0.15 },
   tigris_prime: { burstCount: 2, burstDelay: 0.15 },
   sancti_tigris: { burstCount: 2, burstDelay: 0.15 },
+  // Companion / sentinel burst weapons — BurstCount / BurstDelay from Module:Weapons/data/companion
+  // (wiki.warframe.com and warframe.fandom.com agree).
+  burst_laser: { burstCount: 3, burstDelay: 0.4 },
+  burst_laser_prime: { burstCount: 5, burstDelay: 0.2 },
+  prisma_burst_laser: { burstCount: 4, burstDelay: 0.3 },
+  helstrum: { burstCount: 4, burstDelay: 0.1 },
+  multron: { burstCount: 3, burstDelay: 0.4 },
 };

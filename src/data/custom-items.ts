@@ -152,7 +152,7 @@ export const customWeapons: Weapon[] = [
     criticalChance: 0.15,
     criticalMultiplier: 2.0,
     statusChance: 0.10,
-    magazine: 5,
+    magazine: 15, // rounds (wiki Magazine 15 = 5 bursts); burst timing in WEAPON_FIRE_TIMING
     reloadTime: 0.01,
     multishot: 1,
     triggerType: "Burst",
@@ -199,7 +199,7 @@ export const customWeapons: Weapon[] = [
     criticalChance: 0.18,
     criticalMultiplier: 2.15,
     statusChance: 0.10,
-    magazine: 5,
+    magazine: 15, // rounds (wiki Magazine 15 = 5 bursts); burst timing in WEAPON_FIRE_TIMING
     reloadTime: 0.01,
     multishot: 1,
     triggerType: "Burst",
@@ -289,13 +289,15 @@ export const customWeapons: Weapon[] = [
     hasRivenSlot: true,
   },
   // Source: https://wiki.warframe.com/w/Vulcax - charges single Impact shot
-  // Vulcax (post robotic-weapon rebalance): 500 Impact, CC 20%/2.5x, SC 10%
+  // Vulcax (post robotic-weapon rebalance): 500 Heat, CC 20%/2.5x, SC 10%
   {
     id: "vulcax",
     name: "Vulcax",
     category: "sentinel_weapon",
+    // Wiki (both modules + Vulcax page): 500 Heat hitscan + 100 Blast radial (5m, 50% falloff).
     damage: 500,
-    impact: 500,
+    heat: 500,
+    impact: 0,
     puncture: 0,
     slash: 0,
     fireRate: 1.0,
@@ -303,6 +305,7 @@ export const customWeapons: Weapon[] = [
     criticalMultiplier: 2.5,
     statusChance: 0.10,
     magazine: 1,
+    radialAttacks: [{ name: "Radial Attack", blast: 100, totalDamage: 100, radius: 5, falloffReduction: 0.5 }],
     reloadTime: 3.0,
     multishot: 1,
     triggerType: "Charge",
