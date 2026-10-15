@@ -416,10 +416,27 @@ export function simulateDiscreteTTK(
   const sim = stats.simParams;
   const targetFaction = sim?.targetFaction ?? enemy.faction;
   // Critical headshots: 2 × total crit multiplier on headcrit-able factions (wiki Critical Hit).
-  const acm = avgCritMultiplier(
-    stats.criticalChance,
-    stats.criticalMultiplier * headCritFactor(sim?.applyHeadshots, targetFaction),
-  );
+  const headCrit = headCritFactor(sim?.applyHeadshots, targetFaction);
+  const acm = avgCritMultiplier(stats.criticalChance, stats.criticalMultiplier * headCrit);
+  // wiki Cold / Puncture (both wikis): Cold adds +0.1 crit damage at 1 stack, +0.05 per
+  // further stack (+0.5 at 9), +1.0 while frozen (10 stacks, 3 s, then 3 stacks remain);
+  // additive with crit-damage mods, before tiers. Puncture adds flat +5% crit chance per
+  // stack (max 5). Neither applies to AoE (no AoE in this sim).
+  let coldStacks = 0;
+  let frozenUntil = 0;
+  let punctureCritStacks = 0;
+  const coldCritBonus = (): number => {
+    if (frozenUntil > 0) return 1;
+    if (coldStacks <= 0) return 0;
+    if (coldStacks < 1) return 0.1 * coldStacks;
+    return 0.1 + 0.05 * (Math.min(coldStacks, 9) - 1);
+  };
+  let critScale = 1; // acmNow / acm for the current shot (DoTs inherit the hit's crit)
+  const acmAt = (): number =>
+    avgCritMultiplier(
+      stats.criticalChance + 0.05 * punctureCritStacks,
+      (stats.criticalMultiplier + coldCritBonus()) * headCrit,
+    );
   const factionBonus = factionBonusFromStats(stats.factionBonuses, targetFaction);
   const factionHit = combatDamageMultiplier({
     factionBonus,
@@ -562,7 +579,12 @@ export function simulateDiscreteTTK(
     // DoT ticks keep their damage type, so the faction modifier applies (wiki Damage).
     // wiki Multishot: beam ticks merge multishot, so damaging status scales twice.
     const perTick =
-      frac * dotBase * beamDotFactor * optsDot.typeMult * enemyDamageTypeMultiplier(enemy, type);
+      frac *
+      dotBase *
+      critScale *
+      beamDotFactor *
+      optsDot.typeMult *
+      enemyDamageTypeMultiplier(enemy, type);
     if (perTick <= 0) return;
     // Spawn floor(expected) full procs + fractional expected as partial damage
     const full = Math.floor(expectedCount);
@@ -607,13 +629,20 @@ export function simulateDiscreteTTK(
     );
     const viralMult = viralHealthMultiplier(viralStacks);
 
+    if (frozenUntil > 0 && time >= frozenUntil) {
+      frozenUntil = 0;
+      coldStacks = 3;
+    }
+    const acmShot = acmAt();
+    critScale = acm > 0 ? acmShot / acm : 1;
+
     // Direct hit (expected damage per shot)
     let shieldHit = 0;
     let healthHit = 0;
     let toxinBypass = 0;
     const hasShields = shield > 0;
     for (const d of dmgTypes) {
-      const base = d.value * multishot * acm * factionHit;
+      const base = d.value * multishot * acmShot * factionHit;
       if (d.type === "toxin") {
         // toxin bypasses shields → health
         toxinBypass += typeHitDamage(d.type, base, enemy, armorNow, viralMult, "health");
@@ -633,7 +662,7 @@ export function simulateDiscreteTTK(
         let overflowHealth = 0;
         for (const d of dmgTypes) {
           if (d.type === "toxin") continue;
-          const base = d.value * multishot * acm * factionHit;
+          const base = d.value * multishot * acmShot * factionHit;
           overflowHealth +=
             typeHitDamage(d.type, base, enemy, armorNow, viralMult, "health") * overflowFrac;
         }
@@ -649,7 +678,7 @@ export function simulateDiscreteTTK(
     if (extraFrac > 0 && totalRaw > 0) {
       const fHit = factionHitMultiplier(factionBonus);
       const extraBase =
-        totalRaw * extraFrac * multishot * acm * factionHit * fHit * extraInstances;
+        totalRaw * extraFrac * multishot * acmShot * factionHit * fHit * extraInstances;
       if (stats.extraHitGuaranteedToxin) {
         health -= typeHitDamage("toxin", extraBase, enemy, armorNow, viralMult, "health");
       } else if (hasShields) {
@@ -682,12 +711,21 @@ export function simulateDiscreteTTK(
       punctureStacks = Math.min(punctureStackCap, punctureStacks + punctureGain);
     }
     peakViral = Math.max(peakViral, viralStacks);
+    punctureCritStacks = Math.min(5, punctureCritStacks + expectedProcs("puncture"));
+    if (frozenUntil <= 0) {
+      coldStacks += expectedProcs("cold");
+      if (coldStacks >= 10 - 1e-9) {
+        coldStacks = 10;
+        frozenUntil = time + 3;
+      }
+    }
     peakCorrosive = Math.max(peakCorrosive, corrosiveStacks);
     if (heatGain > 0) {
       heatPending +=
         heatGain *
         0.5 *
         dotBase *
+        critScale *
         beamDotFactor *
         (1 + typeBonus("heat")) *
         enemyDamageTypeMultiplier(enemy, "heat");
@@ -740,7 +778,7 @@ export function simulateDiscreteTTK(
     // (wiki Damage/Blast). No Heat/Cold type bonus; armor and Viral apply.
     const blastProcs = expectedProcs("blast");
     if (blastProcs > 0) {
-      const perHit = 0.3 * dotBase * enemyDamageTypeMultiplier(enemy, "blast") * blastProcs;
+      const perHit = 0.3 * dotBase * critScale * enemyDamageTypeMultiplier(enemy, "blast") * blastProcs;
       if (perHit > 0) {
         dots.push({
           nextTick: time + BLAST_FUSE_SECONDS * durScale,
@@ -764,7 +802,7 @@ export function simulateDiscreteTTK(
         0.5 *
         totalRaw *
         extraFrac *
-        acm *
+        acmShot *
         toxinMult *
         statusDmg *
         fTriple *
