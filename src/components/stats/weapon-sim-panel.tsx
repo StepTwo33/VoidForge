@@ -1,5 +1,6 @@
 "use client";
 
+import { SNIPER_DATA, sniperComboMultiplier } from "@/data/sniper-zoom";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ExternalLink, SlidersHorizontal } from "lucide-react";
@@ -19,8 +20,17 @@ import { WeaponSimControls } from "./weapon-sim-controls";
 function simSummaryChips(
   simParams: SimulationParams,
   isMelee?: boolean,
+  weaponId?: string,
 ): string[] {
   const chips: string[] = [];
+  const sniper = weaponId ? SNIPER_DATA[weaponId] : undefined;
+  if (sniper) {
+    const zoom = sniper.zooms[(simParams.sniperZoomLevel ?? 0) - 1];
+    if (zoom) chips.push(`${zoom.label} zoom`);
+    if ((simParams.sniperComboTier ?? 0) > 0) {
+      chips.push(`${sniperComboMultiplier(simParams.sniperComboTier ?? 0)}× shot combo`);
+    }
+  }
   if (isMelee && simParams.comboCount > 0) chips.push(`${simParams.comboCount} combo`);
   if (simParams.killStacks > 0) chips.push(`${simParams.killStacks} kills`);
   if (simParams.statusTypesOnTarget > 0) chips.push(`${simParams.statusTypesOnTarget} status`);
@@ -53,8 +63,8 @@ export function WeaponSimPanel({
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const chips = useMemo(
-    () => simSummaryChips(simParams, isMelee),
-    [simParams, isMelee],
+    () => simSummaryChips(simParams, isMelee, weapon?.id),
+    [simParams, isMelee, weapon?.id],
   );
 
   const openInDamageSim = () => {

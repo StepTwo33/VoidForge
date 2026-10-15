@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  SNIPER_DATA,
+  SNIPER_MAX_COMBO_TIER,
+  sniperComboHitsRequired,
+  sniperComboMultiplier,
+  type SniperZoomLevel,
+} from "@/data/sniper-zoom";
 import type { CalculatedStats, SimulationParams, Weapon } from "@/lib/types";
 import {
   weaponSupportsPrimaryStyleSets,
@@ -190,6 +197,52 @@ export function WeaponSimControls({
                   <option value="charge">Full-charge Heat blast</option>
                 </select>
               </label>
+            )}
+            {weapon && SNIPER_DATA[weapon.id] && (
+              <div className="grid grid-cols-2 gap-1.5">
+                {SNIPER_DATA[weapon.id].zooms.length > 0 && (
+                  <label
+                    className="block text-[10px] text-muted-foreground"
+                    title="Wiki Sniper Rifle zoom buffs (crit chance, crit multiplier or headshot damage)"
+                  >
+                    Sniper zoom
+                    <select
+                      value={simParams.sniperZoomLevel ?? 0}
+                      onChange={(e) =>
+                        onSimParamsChange({ ...simParams, sniperZoomLevel: Number(e.target.value) })
+                      }
+                      className="mt-0.5 h-7 w-full rounded border border-border bg-background px-1.5 text-[11px]"
+                    >
+                      <option value={0}>Unscoped</option>
+                      {SNIPER_DATA[weapon.id].zooms.map((z, i) => (
+                        <option key={z.label} value={i + 1}>
+                          {z.label} ({sniperZoomBuffLabel(z)})
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                <label
+                  className="block text-[10px] text-muted-foreground"
+                  title={`Wiki Shot Combo Counter — min combo ${SNIPER_DATA[weapon.id].minCombo}, ${SNIPER_DATA[weapon.id].comboDuration}s decay`}
+                >
+                  Shot combo
+                  <select
+                    value={simParams.sniperComboTier ?? 0}
+                    onChange={(e) =>
+                      onSimParamsChange({ ...simParams, sniperComboTier: Number(e.target.value) })
+                    }
+                    className="mt-0.5 h-7 w-full rounded border border-border bg-background px-1.5 text-[11px]"
+                  >
+                    <option value={0}>Off</option>
+                    {Array.from({ length: SNIPER_MAX_COMBO_TIER }, (_, i) => i + 1).map((t) => (
+                      <option key={t} value={t}>
+                        {sniperComboMultiplier(t)}× ({sniperComboHitsRequired(SNIPER_DATA[weapon.id].minCombo, t)}+ hits)
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
             )}
             {weapon?.id === "arbucep" && (
               <label
@@ -649,3 +702,9 @@ export function WeaponSimControls({
   );
 }
 
+function sniperZoomBuffLabel(z: SniperZoomLevel): string {
+  if (z.critChanceFlat) return `+${Math.round(z.critChanceFlat * 100)}% CC`;
+  if (z.critMultBonus) return `+${Math.round(z.critMultBonus * 100)}% CD`;
+  if (z.headshotDamageBonus) return `+${Math.round(z.headshotDamageBonus * 100)}% HS`;
+  return "";
+}
