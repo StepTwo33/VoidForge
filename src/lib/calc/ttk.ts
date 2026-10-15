@@ -320,6 +320,13 @@ function shotsPerSecond(stats: CalculatedStats): number {
   return Math.max(0, stats.fireRate);
 }
 
+/** wiki Magnetic: shield/Overguard damage multiplier at `stacks` (expected, may be fractional). */
+export function magneticShieldMultiplier(stacks: number): number {
+  if (stacks <= 0) return 1;
+  if (stacks < 1) return 1 + stacks;
+  return 2 + 0.25 * (Math.min(stacks, 10) - 1);
+}
+
 /**
  * Direct-hit damage through current armor/viral for one damage type value
  * against a given health/shield layer.
@@ -485,6 +492,12 @@ export function simulateDiscreteTTK(
   let shield = scaledShield;
   let viralStacks = 0;
   let corrosiveStacks = 0;
+  // wiki Magnetic (both wikis): +100% damage to shields (and Overguard) at 1 stack, +25% per
+  // further stack (+325% at 10). When shields break: 3% of max shields per stack as
+  // Electricity plus a forced Electricity proc.
+  let magneticStacks = 0;
+  let shieldBreakHandled = scaledShield <= 0;
+  const magneticShieldMult = (): number => magneticShieldMultiplier(magneticStacks);
   let punctureStacks = 0;
   // wiki Heat Damage: one consolidated Heat pool — each proc adds a stack and refreshes
   // every stack's duration; one tick per second while the pool is alive.
@@ -515,17 +528,20 @@ export function simulateDiscreteTTK(
           punctureStrip,
         );
         const viralMult = d.useViral ? viralHealthMultiplier(viralStacks) : 1;
-        let dmg = d.damagePerTick * viralMult;
+        // wiki Damage over Time / Shield (both wikis): only Toxin ticks bypass shields; other
+        // ticks hit shields first (no armor, no Viral; Magnetic amplifies), overflow to health.
+        let toHealthFrac = 1;
+        if (!d.ignoreShields && shield > 0) {
+          const shieldDmg = d.damagePerTick * magneticShieldMult();
+          const absorbed = Math.min(shield, shieldDmg);
+          shield -= absorbed;
+          toHealthFrac = shieldDmg > 0 ? (shieldDmg - absorbed) / shieldDmg : 0;
+        }
+        let dmg = d.damagePerTick * viralMult * toHealthFrac;
         if (!d.ignoreArmor && armorNow > 0) {
           dmg *= 1 - enemyArmorDamageReduction(armorNow);
         }
-        // DoTs apply to health (toxin always; others after shields or through)
-        if (d.ignoreShields || shield <= 0) {
-          health -= dmg;
-        } else {
-          // non-toxin DoTs typically don't apply to shields in our model — apply to health
-          health -= dmg;
-        }
+        health -= dmg;
         d.remainingTicks -= 1;
         d.nextTick += 1; // 1s tick interval
         if (health <= 0) return;
@@ -647,7 +663,7 @@ export function simulateDiscreteTTK(
         // toxin bypasses shields → health
         toxinBypass += typeHitDamage(d.type, base, enemy, armorNow, viralMult, "health");
       } else if (hasShields) {
-        shieldHit += typeHitDamage(d.type, base, enemy, armorNow, 1, "shield");
+        shieldHit += typeHitDamage(d.type, base, enemy, armorNow, 1, "shield") * magneticShieldMult();
       } else {
         healthHit += typeHitDamage(d.type, base, enemy, armorNow, viralMult, "health");
       }
@@ -658,6 +674,7 @@ export function simulateDiscreteTTK(
       shield -= absorbed;
       // Overkill past shields: re-apply the overflow fraction with health/armor mods.
       if (shield <= 0 && shieldHit > absorbed) {
+        // Overflow fraction is measured in amplified shield damage; health takes the unamplified share.
         const overflowFrac = (shieldHit - absorbed) / Math.max(shieldHit, 1e-9);
         let overflowHealth = 0;
         for (const d of dmgTypes) {
@@ -683,12 +700,13 @@ export function simulateDiscreteTTK(
         health -= typeHitDamage("toxin", extraBase, enemy, armorNow, viralMult, "health");
       } else if (hasShields) {
         // Non-Toxin Extra Hit is Xata's Whisper Void damage (Zariman vulnerable after shields).
-        const absorbedEx = Math.min(shield, extraBase);
+        const exShield = extraBase * magneticShieldMult();
+        const absorbedEx = Math.min(shield, exShield);
         shield -= absorbedEx;
-        if (shield <= 0 && extraBase > absorbedEx) {
+        if (shield <= 0 && exShield > absorbedEx) {
           health -= typeHitDamage(
             "void",
-            extraBase - absorbedEx,
+            (extraBase * (exShield - absorbedEx)) / exShield,
             enemy,
             armorNow,
             viralMult,
@@ -700,7 +718,30 @@ export function simulateDiscreteTTK(
       }
     }
 
+    // Magnetic shield-break burst (wiki Magnetic): 3%/stack of max shields as Electricity
+    // + one forced Electricity proc.
+    if (!shieldBreakHandled && shield <= 0) {
+      shieldBreakHandled = true;
+      if (magneticStacks > 0) {
+        health -= typeHitDamage(
+          "electricity",
+          0.03 * Math.min(magneticStacks, 10) * scaledShield,
+          enemy,
+          armorNow,
+          viralMult,
+          "health",
+        );
+        spawnDot("electricity", 1, 0.5, {
+          ignoreArmor: false,
+          ignoreShields: false,
+          useViral: true,
+          typeMult: 1 + typeBonus("electricity"),
+        });
+      }
+    }
+
     // Status stack gains (expected)
+    magneticStacks = Math.min(10, magneticStacks + expectedProcs("magnetic"));
     const viralGain = expectedProcs("viral");
     const corrGain = expectedProcs("corrosive");
     const heatGain = expectedProcs("heat");

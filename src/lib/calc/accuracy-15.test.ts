@@ -23,3 +23,19 @@ describe("R7-1: Galvanized / CO per-status bonus is direct-hit only (both wikis)
     expect(g.totalDamage / plain.totalDamage).toBeCloseTo(4.2, 2);
   });
 });
+
+describe("R7-2 + R7-7: DoTs hit shields; Magnetic amplifies shields (wiki Magnetic, both wikis)", () => {
+  it("Magnetic multiplier: 1 stack ×2, +0.25/stack, 10 stacks ×4.25 (+325%), capped", async () => {
+    const { magneticShieldMultiplier: m } = await import("@/lib/calc/ttk");
+    expect(m(0)).toBe(1);
+    expect(m(1)).toBe(2);
+    expect(m(5)).toBe(3);
+    expect(m(10)).toBe(4.25);
+    expect(m(14)).toBe(4.25);
+  });
+  it("Simulor (Magnetic) kills a shielded Crewman L30 faster than before (6.0 s → 2.67 s)", async () => {
+    const { calculateTTK, ENEMY_TYPES } = await import("@/lib/calc/ttk");
+    const crew = ENEMY_TYPES.find((e) => e.id === "crewman")!;
+    expect(calculateTTK(build("simulor"), crew, 30).ttk).toBeCloseTo(2.6667, 3);
+  });
+});
