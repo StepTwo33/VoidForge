@@ -22,6 +22,8 @@ export interface KitgunChamber {
   triggerSecondary: string;
   baseCritChance: number;
   baseCritMultiplier: number;
+  /** Primary-grip base CM when it differs from the secondary (wiki loader tables). */
+  baseCritMultiplierPrimary?: number;
   baseStatusChance: number;
   magazineTiers: number[];
 }
@@ -63,6 +65,8 @@ export const kitgunChambers: KitgunChamber[] = [
     damageRatios: { impact: 21 / 90, toxin: 69 / 90 },
     triggerPrimary: "Auto", triggerSecondary: "Semi-Auto",
     baseCritChance: 0.21, baseCritMultiplier: 3.0, baseStatusChance: 0.21,
+    // Wiki Sporelacer primary loader table: base CM 2.0x (secondary 3.0x).
+    baseCritMultiplierPrimary: 2.0,
     magazineTiers: [5, 7, 9, 11, 13, 17, 23, 39],
   },
   {
@@ -81,7 +85,8 @@ export const kitgunChambers: KitgunChamber[] = [
     damageRatios: { impact: 2 / 33, puncture: 10 / 33, slash: 8 / 33, radiation: 13 / 33 },
     triggerPrimary: "Auto", triggerSecondary: "Auto",
     baseCritChance: 0.19, baseCritMultiplier: 2.0, baseStatusChance: 0.19,
-    magazineTiers: [29, 45, 57, 67, 83, 75, 111, 153],
+    // Wiki Rattleguts loader table: tier 3 (Bashrack/Deepbreath/Ramflare/Sparkfire/Splat) = 64.
+    magazineTiers: [29, 45, 57, 64, 83, 75, 111, 153],
   },
   {
     id: "gaze_chamber", name: "Gaze",
@@ -211,6 +216,93 @@ export const kitgunGrips: KitgunGrip[] = [
   },
 ];
 
+export interface KitgunGripRow {
+  damage: number;
+  types: Partial<Record<"impact" | "puncture" | "slash" | "heat" | "toxin" | "radiation" | "viral", number>>;
+  /** Absent for beam chambers (grip changes beam range, not fire rate). */
+  fireRate?: number;
+}
+
+/**
+ * Per-chamber grip tables (wiki Module:Modular getKitgunTable / getKitgunPrimaryTable, "Grips" view).
+ * damage = total base damage; types = per-type split; fireRate absent for beam chambers
+ * (wiki: beam grips change range, not fire rate).
+ */
+export const KITGUN_GRIP_TABLE: Record<string, Record<string, KitgunGripRow>> = {
+  catchmoon_chamber: {
+    grip_gibber: { damage: 160, types: { impact: 41, heat: 119 }, fireRate: 3.17 },
+    grip_ramble: { damage: 208, types: { impact: 65, heat: 143 }, fireRate: 2.5 },
+    grip_lovetap: { damage: 358, types: { impact: 140, heat: 218 }, fireRate: 1.5 },
+    grip_haymaker: { damage: 460, types: { impact: 191, heat: 269 }, fireRate: 1.17 },
+    grip_ulnaris: { damage: 290, types: { impact: 106, heat: 184 }, fireRate: 1.83 },
+    grip_brash: { damage: 110, types: { impact: 37, heat: 73 }, fireRate: 5.67 },
+    grip_shrewd: { damage: 122, types: { impact: 43, heat: 79 }, fireRate: 4.67 },
+    grip_steadyslam: { damage: 175, types: { impact: 69.5, heat: 105.5 }, fireRate: 3.33 },
+    grip_tremor: { damage: 216, types: { impact: 90, heat: 126 }, fireRate: 3 },
+    grip_palmaris: { damage: 116, types: { impact: 40, heat: 76 }, fireRate: 5.17 },
+  },
+  sporelacer_chamber: {
+    grip_gibber: { damage: 103, types: { impact: 0, toxin: 103 }, fireRate: 3.17 },
+    grip_ramble: { damage: 160, types: { impact: 9, toxin: 151 }, fireRate: 2.5 },
+    grip_lovetap: { damage: 460, types: { impact: 159, toxin: 301 }, fireRate: 1.5 },
+    grip_haymaker: { damage: 664, types: { impact: 261, toxin: 403 }, fireRate: 1.17 },
+    grip_ulnaris: { damage: 324, types: { impact: 91, toxin: 233 }, fireRate: 1.83 },
+    grip_brash: { damage: 90, types: { impact: 21, toxin: 69 }, fireRate: 5.67 },
+    grip_shrewd: { damage: 114, types: { impact: 33, toxin: 81 }, fireRate: 4.67 },
+    grip_steadyslam: { damage: 220, types: { impact: 86, toxin: 134 }, fireRate: 3.33 },
+    grip_tremor: { damage: 302, types: { impact: 127, toxin: 175 }, fireRate: 3 },
+    grip_palmaris: { damage: 102, types: { impact: 27, toxin: 75 }, fireRate: 5.17 },
+  },
+  tombfinger_chamber: {
+    grip_gibber: { damage: 36, types: { impact: 8, puncture: 1, radiation: 27 }, fireRate: 4.5 },
+    grip_ramble: { damage: 60, types: { impact: 12, puncture: 5, radiation: 43 }, fireRate: 3.67 },
+    grip_lovetap: { damage: 132, types: { impact: 24, puncture: 17, radiation: 91 }, fireRate: 2.5 },
+    grip_haymaker: { damage: 180, types: { impact: 32, puncture: 25, radiation: 123 }, fireRate: 2.17 },
+    grip_ulnaris: { damage: 100.01, types: { impact: 18.67, puncture: 11.67, radiation: 69.67 }, fireRate: 2.83 },
+    grip_brash: { damage: 38, types: { impact: 30, radiation: 8 }, fireRate: 3.77 },
+    grip_shrewd: { damage: 48, types: { impact: 35, radiation: 13 }, fireRate: 3.13 },
+    grip_steadyslam: { damage: 87, types: { impact: 54.5, radiation: 32.5 }, fireRate: 2.32 },
+    grip_tremor: { damage: 116, types: { impact: 69, radiation: 47 }, fireRate: 2.13 },
+    grip_palmaris: { damage: 43, types: { impact: 32.5, radiation: 10.5 }, fireRate: 3.45 },
+  },
+  rattleguts_chamber: {
+    grip_gibber: { damage: 22, types: { impact: 0, puncture: 7, slash: 5, radiation: 10 }, fireRate: 11 },
+    grip_ramble: { damage: 27, types: { impact: 0.5, puncture: 8.5, slash: 6.5, radiation: 11.5 }, fireRate: 8.83 },
+    grip_lovetap: { damage: 52, types: { impact: 6.75, puncture: 14.75, slash: 12.75, radiation: 17.75 }, fireRate: 5.17 },
+    grip_haymaker: { damage: 71, types: { impact: 11.5, puncture: 19.5, slash: 17.5, radiation: 22.5 }, fireRate: 3.67 },
+    grip_ulnaris: { damage: 39, types: { impact: 3.5, puncture: 11.5, slash: 9.5, radiation: 14.5 }, fireRate: 6.67 },
+    grip_brash: { damage: 17, types: { impact: 1.5, puncture: 4.5, slash: 2.5, radiation: 8.5 }, fireRate: 17 },
+    grip_shrewd: { damage: 18.2, types: { impact: 1.8, puncture: 4.8, slash: 2.8, radiation: 8.8 }, fireRate: 14 },
+    grip_steadyslam: { damage: 28.2, types: { impact: 4.3, puncture: 7.3, slash: 5.3, radiation: 11.3 }, fireRate: 10 },
+    grip_tremor: { damage: 37, types: { impact: 6.5, puncture: 9.5, slash: 7.5, radiation: 13.5 }, fireRate: 9 },
+    grip_palmaris: { damage: 18.1, types: { impact: 1.7, puncture: 4.8, slash: 2.7, radiation: 8.9 }, fireRate: 15.5 },
+  },
+  gaze_chamber: {
+    grip_gibber: { damage: 16, types: { puncture: 6, radiation: 10 } },
+    grip_ramble: { damage: 17, types: { puncture: 6.5, radiation: 10.5 } },
+    grip_lovetap: { damage: 19, types: { puncture: 7.5, radiation: 11.5 } },
+    grip_haymaker: { damage: 20, types: { puncture: 8, radiation: 12 } },
+    grip_ulnaris: { damage: 18, types: { puncture: 7, radiation: 11 } },
+    grip_brash: { damage: 29, types: { radiation: 29 } },
+    grip_shrewd: { damage: 31, types: { radiation: 31 } },
+    grip_steadyslam: { damage: 35, types: { radiation: 35 } },
+    grip_tremor: { damage: 37, types: { radiation: 37 } },
+    grip_palmaris: { damage: 30, types: { radiation: 30 } },
+  },
+  vermisplicer_chamber: {
+    grip_gibber: { damage: 14, types: { impact: 1.5, puncture: 3.5, slash: 4.5, toxin: 4.5 } },
+    grip_ramble: { damage: 15, types: { impact: 1.75, puncture: 3.75, slash: 4.75, toxin: 4.75 } },
+    grip_lovetap: { damage: 17, types: { impact: 2.25, puncture: 4.25, slash: 5.25, toxin: 5.25 } },
+    grip_haymaker: { damage: 18, types: { impact: 2.5, puncture: 4.5, slash: 5.5, toxin: 5.5 } },
+    grip_ulnaris: { damage: 16, types: { impact: 2, puncture: 4, slash: 5, toxin: 5 } },
+    grip_brash: { damage: 33, types: { impact: 5, puncture: 6, slash: 10, toxin: 12 } },
+    grip_shrewd: { damage: 35, types: { impact: 5.5, puncture: 6.5, slash: 10.5, toxin: 12.5 } },
+    grip_steadyslam: { damage: 33, types: { impact: 5, puncture: 6, slash: 10, toxin: 12 } },
+    grip_tremor: { damage: 39, types: { impact: 6.5, puncture: 7.5, slash: 11.5, toxin: 13.5 } },
+    grip_palmaris: { damage: 34.2, types: { impact: 5.3, puncture: 6.3, slash: 10.3, toxin: 12.3 } },
+  },
+};
+
 // ── KITGUN LOADERS ───────────────────────────────────────────────────────
 // CC/CM/SC bonuses are universal (additive to chamber base).
 // Magazine tier indexes into the chamber's magazineTiers array.
@@ -241,13 +333,23 @@ export const kitgunLoaders: KitgunLoader[] = [
 // ── BUILD KITGUN ─────────────────────────────────────────────────────────
 export function buildKitgun(chamber: KitgunChamber, grip: KitgunGrip, loader: KitgunLoader): Weapon {
   const gripStats = grip.bonuses[chamber.category];
-  const totalDamage = Math.round(chamber.baseDamage + gripStats.damage);
+  const row = KITGUN_GRIP_TABLE[chamber.id]?.[grip.id];
+  const totalDamage = row ? row.damage : Math.round(chamber.baseDamage + gripStats.damage);
   const trigger = grip.type === "primary" ? chamber.triggerPrimary : chamber.triggerSecondary;
 
   const dmgBreakdown: Record<string, number> = {};
-  for (const [type, ratio] of Object.entries(chamber.damageRatios)) {
-    dmgBreakdown[type] = Math.round(totalDamage * ratio);
+  if (row) {
+    for (const [type, value] of Object.entries(row.types)) dmgBreakdown[type] = value;
+  } else {
+    for (const [type, ratio] of Object.entries(chamber.damageRatios)) {
+      dmgBreakdown[type] = Math.round(totalDamage * ratio);
+    }
   }
+  const fireRate = row?.fireRate ?? gripStats.fireRate;
+  const baseCritMultiplier =
+    grip.type === "primary" && chamber.baseCritMultiplierPrimary != null
+      ? chamber.baseCritMultiplierPrimary
+      : chamber.baseCritMultiplier;
 
   return {
     id: `kitgun_${chamber.id}_${grip.id}_${loader.id}`,
@@ -261,9 +363,9 @@ export function buildKitgun(chamber: KitgunChamber, grip: KitgunGrip, loader: Ki
     toxin: dmgBreakdown.toxin,
     radiation: dmgBreakdown.radiation,
     viral: dmgBreakdown.viral,
-    fireRate: +gripStats.fireRate.toFixed(2),
+    fireRate: +fireRate.toFixed(2),
     criticalChance: +(chamber.baseCritChance + loader.critChanceBonus).toFixed(4),
-    criticalMultiplier: +(chamber.baseCritMultiplier + loader.critMultiplierBonus).toFixed(3),
+    criticalMultiplier: +(baseCritMultiplier + loader.critMultiplierBonus).toFixed(3),
     statusChance: +(chamber.baseStatusChance + loader.statusChanceBonus).toFixed(4),
     magazine: chamber.magazineTiers[loader.magazineTier] || 10,
     reloadTime: loader.reloadTime,
