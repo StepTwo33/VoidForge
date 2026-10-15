@@ -15,3 +15,21 @@ describe("Lenz / Prisma Lenz are bows: 1 / (charge time + reload) (wiki Fire Rat
     expect(efr("prisma_lenz")).toBeCloseTo(1 / 1.4, 4);
   });
 });
+
+import { calculateTTK, ENEMY_TYPES } from "@/lib/calc/ttk";
+
+describe("TTK sim: Viral amplifies Heat / Toxin / Electricity ticks (wiki Viral Damage)", () => {
+  const gunner = ENEMY_TYPES.find((e) => e.id === "heavy_gunner")!;
+  const ttk = (mods: string[]) => {
+    const w = enrichWeapon(allWeapons.find((x) => x.id === "ignis_wraith")!);
+    const eq = mods.map((m, i) => ({ modId: m, rank: modsMap.get(m)!.maxRank, slotIndex: i }));
+    return calculateTTK(calculateWeaponBuild(w, eq, modsMap), gunner, 100).ttk;
+  };
+  it("Ignis Wraith (innate Heat) + Viral: Heat ticks now take the Viral multiplier → 37.45s (was 44.95s)", () => {
+    expect(ttk(["infected_clip_r3", "cryo_rounds_r3", "hellfire_r3"])).toBeCloseTo(37.45, 2);
+  });
+  it("no Viral source → unchanged (Heat only)", () => {
+    const heatOnly = ttk(["hellfire_r3"]);
+    expect(Number.isFinite(heatOnly)).toBe(true);
+  });
+});

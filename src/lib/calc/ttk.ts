@@ -653,19 +653,19 @@ export function simulateDiscreteTTK(
     spawnDot("heat", expectedProcs("heat"), 0.5, {
       ignoreArmor: false,
       ignoreShields: false,
-      useViral: false,
+      useViral: true, // wiki Viral: amplifies every DoT tick dealt to health,
       typeMult: 1 + typeBonus("heat"),
     });
     spawnDot("toxin", expectedProcs("toxin"), 0.5, {
       ignoreArmor: false,
       ignoreShields: true,
-      useViral: false,
+      useViral: true, // wiki Viral: amplifies every DoT tick dealt to health,
       typeMult: 1 + typeBonus("toxin"),
     });
     spawnDot("electricity", expectedProcs("electricity"), 0.5, {
       ignoreArmor: false,
       ignoreShields: false,
-      useViral: false,
+      useViral: true, // wiki Viral: amplifies every DoT tick dealt to health,
       typeMult: 1 + typeBonus("electricity"),
     });
     spawnDot("gas", expectedProcs("gas"), 0.5, {
@@ -722,7 +722,7 @@ export function simulateDiscreteTTK(
             type: "toxin",
             ignoreArmor: false,
             ignoreShields: true,
-            useViral: false,
+            useViral: true,
           });
         };
         for (let i = 0; i < full; i++) addTl(1);
