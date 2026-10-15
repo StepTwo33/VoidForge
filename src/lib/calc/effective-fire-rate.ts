@@ -5,7 +5,7 @@
  * Charge:             1 / (ModdedChargeTime + 1/ModdedFireRate)
  * Bow:                1 / (ModdedChargeTime + ModdedReload)
  * Lanka:              1 / ModdedChargeTime
- * Burst:              BurstCount / (1/ModdedFR + (BurstCount−1)×BurstDelay)
+ * Burst:              BurstCount / (1/ModdedFR + (BurstCount−1)×BurstDelay/(1+max(0,b)))
  *
  * Fire-rate % mods: ChargeTime /= (1+b), FireRate ×= (1+b), cap charge slow at 10× base CT.
  */
@@ -97,8 +97,10 @@ export function resolveEffectiveFireRate(input: FireTimingInput): number {
   // —— Burst ——
   if (burstCount != null && burstCount > 1 && isBurstTrigger(triggerType)) {
     const fr = Math.max(1e-6, moddedFireRate);
-    const delay = Math.max(0, burstDelay ?? 0);
-    // Burst delay is animation-linked; fire-rate mods mainly affect the gap between bursts (1/FR).
+    // Wiki Fire Rate (both wikis): the Fire Rate bonus "affects both the speed of the burst
+    // as well as the time between bursts", but "Burst Delay is not affected by net negative
+    // Fire Rate bonuses" — so only a net positive bonus shortens the in-burst delay.
+    const delay = Math.max(0, burstDelay ?? 0) / (1 + Math.max(0, bonus));
     const burstDuration = 1 / fr + (burstCount - 1) * delay;
     return burstDuration > 0 ? burstCount / burstDuration : moddedFireRate;
   }
