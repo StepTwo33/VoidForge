@@ -254,6 +254,15 @@ export function heatArmorRemaining(heatActive: boolean): number {
   return heatActive ? 0.5 : 1;
 }
 
+/**
+ * wiki Heat Damage (both wikis): armor strip ramps 15 / 30 / 40 / 50% every 0.5 s after the
+ * proc (Status Duration stretches the steps), then after expiry recovers 50 → 40 → 30 → 15 → 0%
+ * every 1.5 s.
+ */
+export const HEAT_STRIP_STEPS = [0, 0.15, 0.3, 0.4, 0.5] as const;
+export const HEAT_STRIP_RAMP_STEP = 0.5;
+export const HEAT_STRIP_DECAY_STEP = 1.5;
+
 // ── Main TTK interface & calculator ───────────────────────────────────
 export interface TTKResult {
   enemy: EnemyType;
@@ -338,14 +347,14 @@ function typeHitDamage(
 function currentArmorFromStrips(
   baseArmor: number,
   corrosiveStacks: number,
-  heatActive: boolean,
+  heatRemaining: number,
   punctureStacks = 0,
   punctureStripPerStack = 0,
 ): number {
   return (
     baseArmor *
     corrosiveArmorRemaining(corrosiveStacks) *
-    heatArmorRemaining(heatActive) *
+    heatRemaining *
     punctureArmorRemaining(punctureStacks, punctureStripPerStack)
   );
 }
@@ -460,8 +469,15 @@ export function simulateDiscreteTTK(
   let viralStacks = 0;
   let corrosiveStacks = 0;
   let punctureStacks = 0;
-  let heatActive = false;
+  // wiki Heat Damage: one consolidated Heat pool — each proc adds a stack and refreshes
+  // every stack's duration; one tick per second while the pool is alive.
+  let heatEver = false;
   let heatExpire = 0;
+  let heatRampStart = 0;
+  let heatPool = 0; // tick damage of all live stacks
+  let heatPending = 0; // expected tick damage from procs not yet landed
+  let heatAcc = 0; // expected Heat procs since the last landed proc
+  let heatNextTick = 0;
   let peakViral = 0;
   let peakCorrosive = 0;
   let time = 0;
@@ -477,7 +493,7 @@ export function simulateDiscreteTTK(
         const armorNow = currentArmorFromStrips(
           baseArmor,
           corrosiveStacks,
-          heatActive && heatExpire > d.nextTick,
+          heatRemainingAt(d.nextTick),
           punctureStacks,
           punctureStrip,
         );
@@ -498,6 +514,25 @@ export function simulateDiscreteTTK(
         if (health <= 0) return;
       }
     }
+    while (heatPool > 0 && heatNextTick <= t + 1e-12) {
+      if (heatNextTick > heatExpire + 1e-9) {
+        heatPool = 0;
+        break;
+      }
+      const armorNow = currentArmorFromStrips(
+        baseArmor,
+        corrosiveStacks,
+        heatRemainingAt(heatNextTick),
+        punctureStacks,
+        punctureStrip,
+      );
+      let dmg = heatPool * viralHealthMultiplier(viralStacks);
+      if (armorNow > 0) dmg *= 1 - enemyArmorDamageReduction(armorNow);
+      health -= dmg;
+      heatNextTick += 1;
+      if (health <= 0) return;
+    }
+    if (heatPool > 0 && heatNextTick > heatExpire + 1e-9) heatPool = 0;
     // prune finished
     for (let i = dots.length - 1; i >= 0; i--) {
       if (dots[i].remainingTicks <= 0) dots.splice(i, 1);
@@ -507,6 +542,15 @@ export function simulateDiscreteTTK(
   // Status Duration mods lengthen DoTs (more ticks), matching calculateStatusProcs.
   const durScale = Math.max(0, 1 + (stats.statusDurationBonus ?? 0));
   const dotDuration = DOT_BASE_DURATION * durScale;
+
+  const heatStripIdx = (t: number): number => {
+    if (!heatEver || t < heatRampStart) return 0;
+    const ramp = (u: number) =>
+      Math.min(4, Math.floor((u - heatRampStart) / (HEAT_STRIP_RAMP_STEP * durScale) + 1e-9));
+    if (t < heatExpire) return ramp(t);
+    return Math.max(0, ramp(heatExpire) - Math.floor((t - heatExpire) / HEAT_STRIP_DECAY_STEP + 1e-9));
+  };
+  const heatRemainingAt = (t: number): number => 1 - HEAT_STRIP_STEPS[heatStripIdx(t)];
 
   const spawnDot = (
     type: string,
@@ -554,13 +598,10 @@ export function simulateDiscreteTTK(
     tickDot(time);
     if (health <= 0) break;
 
-    // Expire heat strip
-    if (heatActive && time >= heatExpire) heatActive = false;
-
     const armorNow = currentArmorFromStrips(
       baseArmor,
       corrosiveStacks,
-      heatActive,
+      heatRemainingAt(time),
       punctureStacks,
       punctureStrip,
     );
@@ -642,9 +683,30 @@ export function simulateDiscreteTTK(
     }
     peakViral = Math.max(peakViral, viralStacks);
     peakCorrosive = Math.max(peakCorrosive, corrosiveStacks);
-    if (heatGain > 0.05) {
-      heatActive = true;
-      heatExpire = time + 6; // heat proc duration
+    if (heatGain > 0) {
+      heatPending +=
+        heatGain *
+        0.5 *
+        dotBase *
+        beamDotFactor *
+        (1 + typeBonus("heat")) *
+        enemyDamageTypeMultiplier(enemy, "heat");
+      heatAcc += heatGain;
+      // A Heat proc lands once the expected count reaches 1 (no per-shot threshold).
+      if (heatAcc >= 1 - 1e-9) {
+        heatAcc -= Math.floor(heatAcc + 1e-9);
+        if (!heatEver || time >= heatExpire) {
+          // Pool had expired: stacks gone; strip ramps up from its current recovery level.
+          heatPool = 0;
+          const idx = heatEver ? heatStripIdx(time) : 0;
+          heatRampStart = time - idx * HEAT_STRIP_RAMP_STEP * durScale;
+          heatNextTick = time + dotFirstTickDelay("heat");
+          heatEver = true;
+        }
+        heatPool += heatPending;
+        heatPending = 0;
+        heatExpire = time + dotDuration;
+      }
     }
 
     // DoT procs from this shot
@@ -654,12 +716,7 @@ export function simulateDiscreteTTK(
       useViral: true,
       typeMult: 1,
     });
-    spawnDot("heat", expectedProcs("heat"), 0.5, {
-      ignoreArmor: false,
-      ignoreShields: false,
-      useViral: true, // wiki Viral: amplifies every DoT tick dealt to health,
-      typeMult: 1 + typeBonus("heat"),
-    });
+    // Heat DoT: consolidated pool above (wiki Heat Damage), not independent stacks.
     spawnDot("toxin", expectedProcs("toxin"), 0.5, {
       ignoreArmor: false,
       ignoreShields: true,
@@ -766,7 +823,7 @@ export function simulateDiscreteTTK(
   const endArmor = currentArmorFromStrips(
     baseArmor,
     corrosiveStacks,
-    heatActive,
+    heatRemainingAt(time),
     punctureStacks,
     punctureStrip,
   );
