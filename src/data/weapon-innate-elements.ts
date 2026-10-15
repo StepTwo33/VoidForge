@@ -168,7 +168,11 @@ export const WEAPON_FIRE_TIMING: Record<string, WeaponInnateFill> = {
   epitaph: { chargeTime: 0.36, chargeMode: "bow" },
   epitaph_prime: { chargeTime: 0.36, chargeMode: "bow" },
   drakgoon: { chargeTime: 0.3, chargeMode: "standard" },
-  lenz: { chargeTime: 1.2, chargeMode: "standard" },
+  // wiki Module:Weapons (both wikis): Class "Bow" → bow cycle 1 / (CT + reload) per Fire Rate.
+  lenz: { chargeTime: 1.2, chargeMode: "bow" },
+  // Fire Rate charge list 0.8s, "faster Charge Time" than Lenz (page); confirmed in game.
+  // Module:Weapons still says 1.2s (stale).
+  prisma_lenz: { chargeTime: 0.8, chargeMode: "bow" },
   balefire: { chargeTime: 2.0, chargeMode: "standard" },
   balefire_prime: { chargeTime: 2.0, chargeMode: "standard" },
   // Burst weapons — BurstCount / BurstDelay from Module:Weapons/data/{primary,secondary,archwing}
