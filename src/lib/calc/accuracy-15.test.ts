@@ -169,3 +169,21 @@ describe("R7-8: Emerald / Violet shard weapon effects (wiki Archon Shard, both w
     expect(corrosiveArmorRemaining(13)).toBeCloseTo(0.2, 9); // default cap 10
   });
 });
+
+describe("R7-9: Exalted Blade wave + missing heavy data (wiki Exalted Blade (Weapon), both wikis)", () => {
+  it("wave hits once per swing with the swing's damage: radial DPS = direct DPS (unmodded)", () => {
+    for (const id of ["exalted_blade", "exalted_blade_prime", "exalted_blade_umbra"]) {
+      const s = build(id);
+      expect(s.radialBurstDps!).toBeCloseTo(s.burstDps / 2, 6);
+      // 250 × 0.833/s × avg crit (1 + 0.15 × 1) = 239.50
+      expect(s.radialBurstDps!).toBeCloseTo(250 * 0.833 * 1.15, 1);
+    }
+  });
+  it("heavy data: Exalted Prime/Umbra 1250, Dark Split-Sword (dual) 464", async () => {
+    const { MELEE_ATTACK_DATA } = await import("@/data/melee-attack-data");
+    expect(MELEE_ATTACK_DATA.exalted_blade_prime.heavyAttack).toBe(1250);
+    expect(MELEE_ATTACK_DATA.exalted_blade_umbra.slideAttack).toBe(536);
+    expect(MELEE_ATTACK_DATA.dark_split_sword.heavyAttack).toBe(464);
+    expect(MELEE_ATTACK_DATA.dark_split_sword.slam!.damage).toBe(232);
+  });
+});

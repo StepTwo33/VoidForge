@@ -201,6 +201,11 @@ export interface WeaponRadialAttack {
   /** Damage reduction at max radius (0.5 = 50% falloff from center to edge). */
   falloffReduction?: number;
   explosionDelay?: number;
+  /**
+   * Fires once per melee swing alongside the hit (Exalted Blade wave, wiki): counted in DPS at
+   * attack rate; not affected by the melee combo multiplier.
+   */
+  perSwing?: boolean;
   /** Populated by build calculator for innate radial profiles. */
   burstDps?: number;
   avgDamage?: number;

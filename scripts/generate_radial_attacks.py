@@ -21,6 +21,20 @@ DAMAGE_KEYS = (
 
 # Innate explosions not modeled as AoE child attacks in Module:Weapons/data.
 MANUAL_RADIAL_ATTACKS: dict[str, list[dict]] = {
+    # wiki Exalted Blade (both wikis): every swing also fires a 40 m wave with the swing's
+    # base damage (Module "Normal Attack" Range 40, ShotSpeed 15); hits separately.
+    "exalted_blade": [
+        {"name": "Exalted Wave", "impact": 37.5, "puncture": 37.5, "slash": 175.0,
+         "totalDamage": 250.0, "radius": 0.0, "perSwing": True},
+    ],
+    "exalted_blade_prime": [
+        {"name": "Exalted Wave", "impact": 37.5, "puncture": 37.5, "slash": 175.0,
+         "totalDamage": 250.0, "radius": 0.0, "perSwing": True},
+    ],
+    "exalted_blade_umbra": [
+        {"name": "Exalted Wave", "impact": 37.5, "puncture": 37.5, "slash": 175.0,
+         "totalDamage": 250.0, "radius": 0.0, "perSwing": True},
+    ],
     "ignis": [
         {
             "name": "Spherical Blast",

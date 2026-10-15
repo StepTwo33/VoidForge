@@ -9,6 +9,39 @@ import type { WeaponRadialAttack } from "@/lib/types";
 
 export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> = 
 {
+  "exalted_blade": [
+    {
+      "name": "Exalted Wave",
+      "impact": 37.5,
+      "puncture": 37.5,
+      "slash": 175.0,
+      "totalDamage": 250.0,
+      "radius": 0.0,
+      "perSwing": true
+    }
+  ],
+  "exalted_blade_prime": [
+    {
+      "name": "Exalted Wave",
+      "impact": 37.5,
+      "puncture": 37.5,
+      "slash": 175.0,
+      "totalDamage": 250.0,
+      "radius": 0.0,
+      "perSwing": true
+    }
+  ],
+  "exalted_blade_umbra": [
+    {
+      "name": "Exalted Wave",
+      "impact": 37.5,
+      "puncture": 37.5,
+      "slash": 175.0,
+      "totalDamage": 250.0,
+      "radius": 0.0,
+      "perSwing": true
+    }
+  ],
   "acceltra_prime": [
     {
       "name": "Rocket Explosion",

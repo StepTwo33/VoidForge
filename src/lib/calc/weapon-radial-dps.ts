@@ -58,6 +58,9 @@ export function radialAttacksPerSecond(
   chargeIsPrimary = false,
 ): number {
   if (isManualSlam(attack.name)) return 0;
+  // Exalted Blade wave: one per swing (wiki), point-blank single target (no 40%/s or
+  // 20%/enemy decay applied).
+  if (attack.perSwing) return Math.max(0, stats.effectiveFireRate ?? stats.fireRate);
   // Melee radials (glaive throws, slam shockwaves) are manual actions —
   // never fire at attack-speed rate, so keep them out of sustained DPS.
   if (isMelee) return 0;
@@ -147,6 +150,7 @@ export function scaleRadialAttacksWithDps(
       radius: attack.radius,
       totalDamage,
     };
+    if (attack.perSwing) scaledAttack.perSwing = true;
     if (attack.falloffReduction != null) {
       scaledAttack.falloffReduction = attack.falloffReduction;
     }
