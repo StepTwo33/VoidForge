@@ -14,9 +14,12 @@ describe("simultaneous bursts", () => {
   it("Quartakk: 4 rounds per pull x 1.58 = 6.32 shots/s", () => {
     expect(calc(w("quartakk")).effectiveFireRate).toBeCloseTo(6.32, 6);
   });
-  it("Akjagara / Prime stay full-auto at FR 5 (no burst timing)", () => {
-    expect(calc(w("akjagara")).effectiveFireRate).toBeCloseTo(5, 6);
-    expect(calc(w("akjagara_prime")).effectiveFireRate).toBeCloseTo(5, 6);
+  it("Akjagara / Prime: 2 rounds together per pull x 5 = 10 shots/s", () => {
+    expect(calc(w("akjagara")).effectiveFireRate).toBeCloseTo(10, 6);
+    expect(calc(w("akjagara_prime")).effectiveFireRate).toBeCloseTo(10, 6);
+  });
+  it("Akjagara burst DPS = 36 x 10 x avgCrit(6%, 2x) (hand-worked, unmodded)", () => {
+    expect(calc(w("akjagara")).burstDps).toBeCloseTo(36 * 10 * avgCrit(0.06, 2), 0); // 381.6
   });
   it("Sepulcrum: 2 x 1.83 = 3.66; each round's 46 Heat explosion counted per round", () => {
     const s = calc(w("sepulcrum"));
