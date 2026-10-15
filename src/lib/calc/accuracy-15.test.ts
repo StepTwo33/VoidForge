@@ -187,3 +187,16 @@ describe("R7-9: Exalted Blade wave + missing heavy data (wiki Exalted Blade (Wea
     expect(MELEE_ATTACK_DATA.dark_split_sword.slam!.damage).toBe(232);
   });
 });
+
+describe("R7-10: bosses take at most 4 Cold stacks (wiki Cold Damage, both wikis)", () => {
+  it("Glaxion vs Captain Vor: boss is slower than the same stats as a regular unit", async () => {
+    const { calculateTTK, ENEMY_TYPES } = await import("@/lib/calc/ttk");
+    const vor = ENEMY_TYPES.find((e) => e.id === "captain_vor")!;
+    expect(vor.kind).toBe("boss");
+    const s = build("glaxion", ["cryo_rounds_r3"]);
+    const boss = calculateTTK(s, vor, 20).ttk;
+    const unit = calculateTTK(s, { ...vor, kind: "unit" }, 20).ttk;
+    expect(boss).toBeGreaterThan(unit);
+    expect(boss).toBeCloseTo(31.93, 1); // 31.10 s before (10-stack Cold crit + freeze)
+  });
+});

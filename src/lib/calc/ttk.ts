@@ -893,8 +893,9 @@ export function simulateDiscreteTTK(
     peakViral = Math.max(peakViral, viralStacks);
     punctureCritStacks = punctureCritT.add(expectedProcs("puncture"), time);
     if (frozenUntil <= 0) {
-      // wiki Overguard: at most 4 Cold stacks while Overguard is up (no freeze).
-      coldT.setCap(overguard > 0 ? 4 : 10);
+      // wiki Overguard / Cold: at most 4 Cold stacks while Overguard is up and on bosses
+      // (no freeze).
+      coldT.setCap(overguard > 0 || enemy.kind === "boss" ? 4 : 10);
       coldStacks = coldT.add(expectedProcs("cold"), time);
       if (coldStacks >= 10 - 1e-9) {
         coldStacks = 10;
