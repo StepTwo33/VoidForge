@@ -42,6 +42,7 @@ import {
 } from './set-bonuses';
 import { WARFRAME_ENERGY_RANK30 } from '@/data/warframe-energy-rank30';
 import { WARFRAME_HEALTH_RANK30, WARFRAME_SHIELD_RANK30 } from '@/data/warframe-health-shield-rank30';
+import { WARFRAME_ARMOR_RANK30 } from '@/data/warframe-armor-rank30';
 import {
   applyCrossSlotMeleeWeaponBuffs,
   applyVerifiedModStatToWarframe,
@@ -72,6 +73,9 @@ export function getWarframeHealthModBase(warframe: Warframe): number {
 }
 export function getWarframeShieldModBase(warframe: Warframe): number {
   return WARFRAME_SHIELD_RANK30[warframe.id] ?? warframe.shield;
+}
+export function getWarframeArmorModBase(warframe: Warframe): number {
+  return WARFRAME_ARMOR_RANK30[warframe.id] ?? warframe.armor;
 }
 
 /** Unmodded rank-30 energy capacity — the pool Flow and +% max energy mods scale (wiki Energy Capacity). */
@@ -1988,7 +1992,7 @@ export function calculateWarframeBuild(
   const stats: WarframeCalculatedStats = {
     baseHealth: getWarframeHealthModBase(warframe),
     baseShield: getWarframeShieldModBase(warframe),
-    baseArmor: warframe.armor,
+    baseArmor: getWarframeArmorModBase(warframe),
     baseEnergy: getWarframeEnergyModBase(warframe),
     baseSprint: warframe.sprintSpeed,
     healthBonus: 0,
@@ -2008,7 +2012,7 @@ export function calculateWarframeBuild(
     abilityRange: 1.0,
     totalHealth: getWarframeHealthModBase(warframe),
     totalShield: getWarframeShieldModBase(warframe),
-    totalArmor: warframe.armor,
+    totalArmor: getWarframeArmorModBase(warframe),
     totalEnergy: getWarframeEnergyModBase(warframe),
     totalSprint: warframe.sprintSpeed,
     effectiveHealth: 0,

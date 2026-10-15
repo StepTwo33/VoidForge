@@ -413,7 +413,7 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("projectileSpeed", "mod_panel", "multiplicative_percent", "Terminal Velocity: projectileSpeed \u2014 +60% Projectile Speed"),
   ]),
   thunderbolt: mod("thunderbolt", [
-    line("explosionChance", "mod_panel", "multiplicative_percent", "Thunderbolt: explosionChance \u2014 +45% Chance to Explode (Use with Caution)"),
+    line("explosionChance", "mod_panel", "multiplicative_percent", "Thunderbolt: explosionChance \u2014 +30% Chance to Explode (Use with Caution)"),
   ]),
   thundermiter: mod("thundermiter", [
     line("magazine", "weapon_dps", "multiplicative_percent", "Thundermiter: magazine \u2014 +100% chance charged Projectiles explode, -60% Magazine Capacity"),

@@ -3043,7 +3043,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "excalibur",
     "abilityName": "Exalted Blade",
     "isExalted": true
@@ -3069,7 +3069,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "excalibur_umbra",
     "abilityName": "Exalted Blade",
     "isExalted": true
@@ -3095,7 +3095,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "excalibur_prime",
     "abilityName": "Exalted Blade",
     "isExalted": true
@@ -3120,7 +3120,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "mesa",
     "abilityName": "Peacemaker",
     "isExalted": true
@@ -3145,7 +3145,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "mesa_prime",
     "abilityName": "Peacemaker",
     "isExalted": true
@@ -3170,7 +3170,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "ivara",
     "abilityName": "Artemis Bow",
     "isExalted": true
@@ -3195,7 +3195,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "ivara_prime",
     "abilityName": "Artemis Bow",
     "isExalted": true
@@ -3221,7 +3221,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "valkyr",
     "abilityName": "Hysteria",
     "isExalted": true
@@ -3247,7 +3247,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "valkyr_prime",
     "abilityName": "Hysteria",
     "isExalted": true
@@ -3273,7 +3273,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "wukong",
     "abilityName": "Primal Fury",
     "isExalted": true
@@ -3299,7 +3299,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "wukong_prime",
     "abilityName": "Primal Fury",
     "isExalted": true
@@ -3325,7 +3325,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "titania",
     "abilityName": "Razorwing",
     "isExalted": true
@@ -3351,7 +3351,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "titania_prime",
     "abilityName": "Razorwing",
     "isExalted": true
@@ -3377,7 +3377,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "hildryn",
     "abilityName": "Balefire",
     "isExalted": true
@@ -3403,7 +3403,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "hildryn_prime",
     "abilityName": "Balefire",
     "isExalted": true
@@ -3429,7 +3429,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "baruuk",
     "abilityName": "Serene Storm",
     "isExalted": true
@@ -3455,7 +3455,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "baruuk_prime",
     "abilityName": "Serene Storm",
     "isExalted": true
@@ -3481,7 +3481,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "sevagoth",
     "abilityName": "Exalted Shadow",
     "isExalted": true
@@ -3507,7 +3507,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "sevagoth_prime",
     "abilityName": "Exalted Shadow",
     "isExalted": true
@@ -3532,7 +3532,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "titania",
     "abilityName": "Razorwing",
     "isExalted": true
@@ -3557,7 +3557,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "titania_prime",
     "abilityName": "Razorwing",
     "isExalted": true
@@ -3608,7 +3608,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "cyte_09",
     "abilityName": "Neutralize",
     "isExalted": true
@@ -3633,7 +3633,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "dante",
     "abilityName": "Noctua",
     "isExalted": true
@@ -3659,7 +3659,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "jade",
     "abilityName": "Glory On High",
     "isExalted": true
@@ -3685,7 +3685,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "temple",
     "abilityName": "Exalted Solo",
     "isExalted": true
@@ -3711,7 +3711,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "atlas",
     "abilityName": "Landslide",
     "isExalted": true
@@ -3737,7 +3737,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "atlas_prime",
     "abilityName": "Landslide",
     "isExalted": true
@@ -3763,7 +3763,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "gara",
     "abilityName": "Shattered Lash",
     "isExalted": true
@@ -3789,7 +3789,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "gara_prime",
     "abilityName": "Shattered Lash",
     "isExalted": true
@@ -3815,7 +3815,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "khora",
     "abilityName": "Whipclaw",
     "isExalted": true
@@ -3841,7 +3841,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "khora_prime",
     "abilityName": "Whipclaw",
     "isExalted": true
@@ -3867,7 +3867,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "ash",
     "abilityName": "Blade Storm",
     "isExalted": true
@@ -3893,7 +3893,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "ash_prime",
     "abilityName": "Blade Storm",
     "isExalted": true
@@ -4390,50 +4390,6 @@ export const allWeapons: Weapon[] = [
     "hasRivenSlot": true
   },
   {
-    "id": "zaw_ruhang",
-    "name": "Ruhang",
-    "category": "zaw_strike",
-    "damage": 332,
-    "impact": 83,
-    "puncture": 166,
-    "slash": 83,
-    "fireRate": 0.767,
-    "criticalChance": 0.18,
-    "criticalMultiplier": 2,
-    "statusChance": 0.18,
-    "magazine": 0,
-    "reloadTime": 0,
-    "multishot": 1,
-    "triggerType": "Melee",
-    "modSlots": 8,
-    "hasPrimaryArcaneSlot": false,
-    "hasSecondaryArcaneSlot": false,
-    "isIncarnon": false,
-    "hasRivenSlot": true
-  },
-  {
-    "id": "zaw_ruhang_2",
-    "name": "Ruhang II",
-    "category": "zaw_strike",
-    "damage": 344,
-    "impact": 86,
-    "puncture": 172,
-    "slash": 86,
-    "fireRate": 0.717,
-    "criticalChance": 0.18,
-    "criticalMultiplier": 2,
-    "statusChance": 0.18,
-    "magazine": 0,
-    "reloadTime": 0,
-    "multishot": 1,
-    "triggerType": "Melee",
-    "modSlots": 8,
-    "hasPrimaryArcaneSlot": false,
-    "hasSecondaryArcaneSlot": false,
-    "isIncarnon": false,
-    "hasRivenSlot": true
-  },
-  {
     "id": "zaw_ooltha",
     "name": "Ooltha",
     "category": "zaw_strike",
@@ -4588,39 +4544,17 @@ export const allWeapons: Weapon[] = [
     "hasRivenSlot": true
   },
   {
-    "id": "zaw_korb",
-    "name": "Korb",
+    "id": "zaw_rabvee",
+    "name": "Rabvee",
     "category": "zaw_strike",
-    "damage": 330,
-    "impact": 165,
-    "puncture": 132,
-    "slash": 33,
-    "fireRate": 0.833,
-    "criticalChance": 0.2,
+    "damage": 234,
+    "impact": 140.4,
+    "puncture": 11.7,
+    "slash": 81.9,
+    "fireRate": 0.85,
+    "criticalChance": 0.18,
     "criticalMultiplier": 2,
-    "statusChance": 0.2,
-    "magazine": 0,
-    "reloadTime": 0,
-    "multishot": 1,
-    "triggerType": "Melee",
-    "modSlots": 8,
-    "hasPrimaryArcaneSlot": false,
-    "hasSecondaryArcaneSlot": false,
-    "isIncarnon": false,
-    "hasRivenSlot": true
-  },
-  {
-    "id": "zaw_clapkrang",
-    "name": "Clapkra",
-    "category": "zaw_strike",
-    "damage": 292,
-    "impact": 73,
-    "puncture": 146,
-    "slash": 73,
-    "fireRate": 0.917,
-    "criticalChance": 0.16,
-    "criticalMultiplier": 2,
-    "statusChance": 0.22,
+    "statusChance": 0.18,
     "magazine": 0,
     "reloadTime": 0,
     "multishot": 1,
@@ -4651,7 +4585,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "amp_shwaak",
@@ -4673,7 +4607,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "amp_granmu",
@@ -4695,7 +4629,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "amp_rahn",
@@ -4717,7 +4651,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "amp_cantic",
@@ -4739,7 +4673,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "amp_lega",
@@ -4761,7 +4695,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "amp_klamora",
@@ -4783,7 +4717,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "amp_exard",
@@ -4805,7 +4739,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "amp_dissic",
@@ -4827,7 +4761,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "amp_propa",
@@ -4849,7 +4783,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "cinta",
@@ -5286,7 +5220,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "acceltra",
@@ -15439,7 +15373,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "veritux",
@@ -15461,7 +15395,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "agkuza",
@@ -15483,7 +15417,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "centaur",
@@ -15505,7 +15439,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "kaszas",
@@ -15527,7 +15461,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "knux",
@@ -15549,7 +15483,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "onorix",
@@ -15571,7 +15505,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "rathbone",
@@ -15593,7 +15527,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true
+    "hasRivenSlot": false
   },
   {
     "id": "lorak", "name": "Lorak", "category": "tektolyst",

@@ -63,7 +63,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Anticipation: duration \u2014 Immune to Knockdown for an additional +4s after being knocked down., Immune to S\u2026"),
   ]),
   antitoxin: mod("antitoxin", [
-    line("toxin", "mod_panel", "multiplicative_percent", "Antitoxin: toxin \u2014 +82.5% <DT_POISON_COLOR>Toxin Resistance"),
+    line("toxin", "mod_panel", "multiplicative_percent", "Antitoxin: toxin \u2014 +45% <DT_POISON_COLOR>Toxin Resistance"),
   ]),
   archon_continuity: mod("archon_continuity", [
     line("abilityDuration", "warframe_totals", "multiplicative_percent", "Archon Continuity: abilityDuration \u2014 +55% Ability Duration, Abilities that inflict a <DT_POISON_COLOR>Toxin status ef\u2026"),
@@ -111,13 +111,13 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("shield", "warframe_totals", "multiplicative_percent", "wiki: Augur Accord — +70% Shield Capacity at max"),
   ]),
   augur_message: mod("augur_message", [
-    line("abilityDuration", "warframe_totals", "multiplicative_percent", "Augur Message: abilityDuration \u2014 +6% Ability Duration per rank"),
+    line("abilityDuration", "warframe_totals", "multiplicative_percent", "Augur Message: abilityDuration \u2014 +4% Ability Duration per rank"),
   ]),
   augur_reach: mod("augur_reach", [
-    line("abilityRange", "warframe_totals", "multiplicative_percent", "Augur Reach: abilityRange \u2014 +6% Ability Range per rank"),
+    line("abilityRange", "warframe_totals", "multiplicative_percent", "Augur Reach: abilityRange \u2014 +5% Ability Range per rank"),
   ]),
   augur_secrets: mod("augur_secrets", [
-    line("abilityStrength", "warframe_totals", "multiplicative_percent", "Augur Secrets: abilityStrength \u2014 +6% Ability Strength per rank"),
+    line("abilityStrength", "warframe_totals", "multiplicative_percent", "Augur Secrets: abilityStrength \u2014 +4% Ability Strength per rank"),
   ]),
   // Enemy armor strip — not player armor. Keep both lines panel until TTK enemy-aura wiring.
   aura_corrosive_projection: mod("aura_corrosive_projection", [
@@ -183,7 +183,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("toxinResistance", "mod_panel", "multiplicative_percent", "Toxin Resistance: toxinResistance \u2014 +15% Toxin Resistance per rank"),
   ]),
   aviator: mod("aviator", [
-    line("damageReduction", "mod_panel", "multiplicative_percent", "Aviator: damageReduction \u2014 Reduced damage by 60% while airborne"),
+    line("damageReduction", "mod_panel", "multiplicative_percent", "Aviator: damageReduction \u2014 Reduced damage by 40% while airborne"),
   ]),
   boreals_anguish: mod("boreals_anguish", [
     line("gravityReduction", "mod_panel", "multiplicative_percent", "Boreal's Anguish: gravityReduction \u2014 -75% Gravity while Aim Gliding\\n+60% Aim Glide/Wall Latch Duration"),
@@ -243,7 +243,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("damage", "weapon_dps", "multiplicative_percent", "Dead Eye: damage \u2014 Squad receives +52.5% Sniper Rifle Damage"),
   ]),
   diamond_skin: mod("diamond_skin", [
-    line("radiation", "mod_panel", "multiplicative_percent", "Diamond Skin: radiation \u2014 +82.5% <DT_RADIATION_COLOR>Radiation Resistance"),
+    line("radiation", "mod_panel", "multiplicative_percent", "Diamond Skin: radiation \u2014 +45% <DT_RADIATION_COLOR>Radiation Resistance"),
   ]),
   dreamers_bond: mod("dreamers_bond", [
     line("energyRegen", "mod_panel", "multiplicative_percent", "wiki: Dreamer's Bond — Squad +0.3 Energy Regen/s at max rank"),
@@ -285,7 +285,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("heat", "mod_panel", "multiplicative_percent", "Firewalker: heat \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_FIRE\u2026"),
   ]),
   flame_repellent_r3: mod("flame_repellent_r3", [
-    line("heat", "mod_panel", "multiplicative_percent", "Flame Repellent: heat \u2014 +100% <DT_FIRE_COLOR>Heat Resistance"),
+    line("heat", "mod_panel", "multiplicative_percent", "Flame Repellent: heat \u2014 +60% <DT_FIRE_COLOR>Heat Resistance"),
   ]),
   fleeting_expertise_r5: mod("fleeting_expertise_r5", [
     line("abilityDuration", "warframe_totals", "multiplicative_percent", "Fleeting Expertise: abilityDuration \u2014 +60% Ability Efficiency, -60% Ability Duration"),
@@ -306,7 +306,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "Gale Kick: damage \u2014 +100% of Melee Damage converted to <DT_IMPACT_COLOR>Impact Damage on Jump Kick, \u2026"),
   ]),
   gladiator_aegis: mod("gladiator_aegis", [
-    line("armor", "warframe_totals", "multiplicative_percent", "Gladiator Aegis: armor \u2014 +7.5% Armor per rank (Set)"),
+    line("armor", "warframe_totals", "multiplicative_percent", "Gladiator Aegis: armor \u2014 +40% Armor at max rank (Set)"),
   ]),
   gladiator_finesse: mod("gladiator_finesse", [
     line("abilityEfficiency", "mod_panel", "multiplicative_percent", "wiki: Gladiator Finesse — lethal-damage energy drain (not efficiency pool)"),
@@ -318,7 +318,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Growing Power: duration \u2014 On Status Effect with Weapon: Squad increases personal Ability Strength by 25% f\u2026"),
   ]),
   handspring_r10: mod("handspring_r10", [
-    line("knockdownRecovery", "mod_panel", "multiplicative_percent", "Handspring: knockdownRecovery \u2014 +240% Faster Knockdown Recovery"),
+    line("knockdownRecovery", "mod_panel", "multiplicative_percent", "Handspring: knockdownRecovery \u2014 +160% Faster Knockdown Recovery"),
   ]),
   hastened_steps: mod("hastened_steps", [
     line("shield", "warframe_totals", "multiplicative_percent", "Hastened Steps: shield \u2014 +20% Sprint Speed, -20% Shield Capacity"),
@@ -348,7 +348,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("cold", "mod_panel", "multiplicative_percent", "Ice Spring: cold \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_FREE\u2026"),
   ]),
   insulation_r3: mod("insulation_r3", [
-    line("cold", "mod_panel", "multiplicative_percent", "Insulation: cold \u2014 +100% <DT_FREEZE_COLOR>Cold Resistance"),
+    line("cold", "mod_panel", "multiplicative_percent", "Insulation: cold \u2014 +60% <DT_FREEZE_COLOR>Cold Resistance"),
   ]),
   intensify_r3: mod("intensify_r3", [
     line("abilityStrength", "warframe_totals", "multiplicative_percent", "Intensify: abilityStrength \u2014 +55% Ability Strength"),
@@ -372,7 +372,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("electricity", "mod_panel", "multiplicative_percent", "Lightning Dash: electricity \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_ELEC\u2026"),
   ]),
   lightning_rod_r3: mod("lightning_rod_r3", [
-    line("electricity", "mod_panel", "multiplicative_percent", "Lightning Rod: electricity \u2014 +100% <DT_ELECTRICITY_COLOR>Electricity Resistance"),
+    line("electricity", "mod_panel", "multiplicative_percent", "Lightning Rod: electricity \u2014 +60% <DT_ELECTRICITY_COLOR>Electricity Resistance"),
   ]),
   lingering_transmutation: mod("lingering_transmutation", [
     line("duration", "mod_panel", "multiplicative_percent", "Lingering Transmutation: duration \u2014 Transmutation Probe Augment: Probe returns to cast position after reaching max r\u2026"),
@@ -388,7 +388,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("slideSpeed", "mod_panel", "multiplicative_percent", "Maglev: slideSpeed \u2014 +20% Slide, -20% Friction"),
   ]),
   master_thief: mod("master_thief", [
-    line("lockerUnlockChance", "mod_panel", "multiplicative_percent", "Master Thief: lockerUnlockChance \u2014 +60% chance to unlock locked lockers."),
+    line("lockerUnlockChance", "mod_panel", "multiplicative_percent", "Master Thief: lockerUnlockChance \u2014 +40% chance to unlock locked lockers."),
   ]),
   mecha_pulse_r3: mod("mecha_pulse_r3", [
     line("armor", "mod_panel", "multiplicative_percent", "wiki: Mecha Pulse — conditional mark-kill armor (not always-on)"),
@@ -493,7 +493,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("abilityEfficiency", "mod_panel", "multiplicative_percent", "wiki: Quick Thinking — lethal-damage energy drain (not efficiency pool)"),
   ]),
   rage: mod("rage", [
-    line("damage", "mod_panel", "multiplicative_percent", "Rage: damage \u2014 Convert +60% of Damage on Health to Energy. Without Shields, ally Overguard imit\u2026"),
+    line("damage", "mod_panel", "multiplicative_percent", "Rage: damage \u2014 Convert +40% of Damage on Health to Energy. Without Shields, ally Overguard imit\u2026"),
   ]),
   rapid_resilience: mod("rapid_resilience", [
     line("statusDuration", "mod_panel", "multiplicative_percent", "Rapid Resilience: statusDuration \u2014 -75% Status Duration on Self"),
@@ -525,7 +525,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "Resilient Focus: damage \u2014 +20% Damage Resistance on Stun"),
   ]),
   retribution: mod("retribution", [
-    line("damage", "mod_panel", "multiplicative_percent", "Retribution: damage \u2014 +90% Chance to deal Electrical Damage when shield struck by melee enemies., +120\u2026"),
+    line("damage", "mod_panel", "multiplicative_percent", "Retribution: damage \u2014 +60% Chance to deal Electrical Damage when shield struck by melee enemies., +120\u2026"),
   ]),
   reverse_rotorswell: mod("reverse_rotorswell", [
     line("damage", "mod_panel", "multiplicative_percent", "Reverse Rotorswell: damage \u2014 Rotorswell Augment: 35% of damage received is redirected toward the instigator a\u2026"),
@@ -550,7 +550,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   searing_leap: mod("searing_leap", [], "wiki: Searing Leap \u2014 Fire FX on Bullet Jump"),
   shepherd: mod("shepherd", [], "wiki: Shepherd \u2014 Squad's Companions receive +300 Health and +180 Armor"),
   shock_absorbers: mod("shock_absorbers", [
-    line("damage", "mod_panel", "multiplicative_percent", "Shock Absorbers: damage \u2014 +30% Physical Damage Resistance"),
+    line("damage", "mod_panel", "multiplicative_percent", "Shock Absorbers: damage \u2014 +20% Physical Damage Resistance"),
   ]),
   shotgun_scavenger: mod("shotgun_scavenger", [], "wiki: Shotgun Scavenger \u2014 Squad receives +150% Shotgun Ammo Recovery"),
   sniper_scavenger: mod("sniper_scavenger", [], "wiki: Sniper Scavenger \u2014 Squad receives +150% Sniper Rifle Ammo Recovery"),
@@ -585,7 +585,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "Summoner's Wrath: damage \u2014 Squad receives 75% Companion and Summon Damage"),
   ]),
   sure_footed_r5: mod("sure_footed_r5", [
-    line("knockdownResistance", "mod_panel", "multiplicative_percent", "Sure Footed: knockdownResistance \u2014 +90% Chance to Resist Knockdown"),
+    line("knockdownResistance", "mod_panel", "multiplicative_percent", "Sure Footed: knockdownResistance \u2014 +60% Chance to Resist Knockdown"),
   ]),
   primed_sure_footed: mod("primed_sure_footed", [
     line("knockdownResistance", "mod_panel", "multiplicative_percent", "Primed Sure Footed: knockdownResistance \u2014 +100% Chance to Resist Knockdown"),

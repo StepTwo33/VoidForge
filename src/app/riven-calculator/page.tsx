@@ -14,18 +14,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Search, Plus, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
 
 const weaponTypes = ["Rifle", "Shotgun", "Pistol", "Melee", "Archgun"];
-
-function getWeaponTypeFromCategory(cat: string): string {
-  const c = cat.toLowerCase();
-  if (["rifle", "primary", "bow", "launcher"].includes(c)) return "Rifle";
-  if (c === "shotgun") return "Shotgun";
-  if (["pistol", "secondary"].includes(c)) return "Pistol";
-  if (c === "melee") return "Melee";
-  if (c === "archgun") return "Archgun";
-  return "Rifle";
-}
 
 function formatRangeHint(stat: RivenStat | undefined): string {
   if (!stat) return "";
@@ -48,11 +39,10 @@ export default function RivenCalculatorPage() {
   const graderRerolls = 0;
 
   const filteredWeapons = useMemo(() => {
-    let weapons = allWeapons.filter((w) => w.hasRivenSlot !== false);
+    // Riven-capable only; skip the legacy Rabvee "Zaw Component" stub (zaw_rabvee is the strike).
+    let weapons = allWeapons.filter((w) => getRivenWeaponType(w) !== null && w.triggerType !== "Zaw Component");
     if (selectedWeaponType) {
-      weapons = weapons.filter(
-        (w) => getWeaponTypeFromCategory(w.category) === selectedWeaponType
-      );
+      weapons = weapons.filter((w) => getRivenWeaponType(w) === selectedWeaponType);
     }
     if (weaponSearch.trim()) {
       const q = weaponSearch.toLowerCase();

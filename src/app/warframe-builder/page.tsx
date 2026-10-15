@@ -15,7 +15,7 @@ import { ModSlotCard } from "@/components/mod-slot";
 import { WarframeStatsPanel } from "@/components/stats-panel";
 import { ModPicker, buildSlotNav, SlotType } from "@/components/mod-picker";
 import { useWeapons, useWarframes, useMods, useArchonShards } from "@/lib/weapons/use-data";
-import { calculateWarframeBuild, getWarframeEnergyModBase, getWarframeHealthModBase, getWarframeShieldModBase, calculateWeaponBuild, calculateWeaponBuildWithArcanes, applyWarframeShardsAndArcanes } from "@/lib/calc/calculator";
+import { calculateWarframeBuild, getWarframeArmorModBase, getWarframeEnergyModBase, getWarframeHealthModBase, getWarframeShieldModBase, calculateWeaponBuild, calculateWeaponBuildWithArcanes, applyWarframeShardsAndArcanes } from "@/lib/calc/calculator";
 import {
   computeUsedCapacity,
   warframeBaseCapacity,
@@ -844,7 +844,7 @@ export default function WarframeBuilderPage() {
             icon={Shield}
             accent="purple"
             title="Warframe Builder"
-            description="Choose a warframe to configure mods, archon shards, Helminth abilities, and arcanes. HP, shield and energy are shown at rank 30."
+            description="Choose a warframe to configure mods, archon shards, Helminth abilities, and arcanes. HP, shield, armor and energy are shown at rank 30."
             count={filteredWarframes.length}
             search={warframeSearch}
             onSearchChange={setWarframeSearch}
@@ -902,11 +902,11 @@ export default function WarframeBuilderPage() {
                 meta={
                   <div
                     className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground"
-                    title="Health, shields and energy at rank 30 (what mods scale). Armor is the listed base value."
+                    title="Health, shields, armor and energy at rank 30 (what mods scale)."
                   >
                     <span>HP {getWarframeHealthModBase(wf)}</span>
                     <span>SH {getWarframeShieldModBase(wf)}</span>
-                    <span>AR {wf.armor}</span>
+                    <span>AR {getWarframeArmorModBase(wf)}</span>
                     <span>EN {getWarframeEnergyModBase(wf)}</span>
                     <span>SPD {Number(wf.sprintSpeed).toFixed(2)}</span>
                   </div>

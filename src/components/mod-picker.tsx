@@ -63,7 +63,7 @@ interface ModPickerProps {
   onSelectRiven?: (mod: Mod, stats: Record<string, number>) => void;
   weaponCategory?: string; // for riven stat pool filtering
   /** When set, filters mods by beam / AoE / projectile wiki compatibility tags. */
-  weapon?: Pick<Weapon, "id" | "name" | "category" | "triggerType">;
+  weapon?: Pick<Weapon, "id" | "name" | "category" | "triggerType"> & { hasRivenSlot?: boolean };
   warframeId?: string; // When set, augment mods are filtered to this warframe + universal
   /** When set, unlocks the Helminth ability's matching "{Ability} Augment" mod. */
   helminthAbility?: HelminthAugmentContext | null;
@@ -146,6 +146,8 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
     ) {
       categoryMods = mods.filter((m) => {
         if (m.subCategory === "riven") {
+          // Exalted weapons, amps, arch-melee etc. cannot equip rivens.
+          if (weapon?.hasRivenSlot === false) return false;
           const wc = weaponCategory.toLowerCase();
           if (m.id === "riven_rifle") return ["rifle", "bow", "primary", "launcher"].includes(wc);
           if (m.id === "riven_shotgun") return wc === "shotgun";
@@ -164,7 +166,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
         if (category !== "archgun" && m.category === "archgun") return false;
         // Riven mods: only show the riven matching the specific weapon category
         if (m.subCategory === "riven") {
-          if (!weaponCategory) return false;
+          if (!weaponCategory || weapon?.hasRivenSlot === false) return false;
           const wc = weaponCategory.toLowerCase();
           if (m.id === "riven_rifle") return ["rifle", "bow", "primary", "launcher"].includes(wc);
           if (m.id === "riven_shotgun") return wc === "shotgun";
@@ -238,7 +240,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
         m.name.toLowerCase().includes(q) ||
         m.description.toLowerCase().includes(q)
     );
-  }, [mods, category, slotType, search, warframeId, helminthAbility, archwingId, weaponCategory, weaponModProfile, weapon?.id]);
+  }, [mods, category, slotType, search, warframeId, helminthAbility, archwingId, weaponCategory, weaponModProfile, weapon?.id, weapon?.hasRivenSlot]);
 
   const displayedMods = useMemo(() => {
     let list = filteredMods;

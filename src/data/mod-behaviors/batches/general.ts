@@ -199,10 +199,10 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   ]),
   flowing_strikes: mod("flowing_strikes", [], "wiki: Flowing Strikes \u2014 Increase the range of spectral melee attacks to 26m."),
   form_up: mod("form_up", [
-    line("cooldown", "mod_panel", "multiplicative_percent", "Form Up: cooldown \u2014 Recall all Crew Members to the Railjack and Heal them for 100%\\\\nCooldown: 240s"),
+    line("cooldown", "mod_panel", "multiplicative_percent", "Form Up: cooldown \u2014 Recall all Crew Members to the Railjack and Heal them for 75%\\\\nCooldown: 240s"),
   ]),
   fortifying_fire: mod("fortifying_fire", [
-    line("shield", "warframe_totals", "multiplicative_percent", "Fortifying Fire: shield \u2014 ON CRITICAL HIT:\\\\nReplenish 4.5% of Shields"),
+    line("shield", "warframe_totals", "multiplicative_percent", "Fortifying Fire: shield \u2014 ON CRITICAL HIT:\\\\nReplenish 3% of Shields"),
   ]),
   forward_artillery: mod("forward_artillery", [
     line("artilleryDamage", "mod_panel", "multiplicative_percent", "Forward Artillery: artilleryDamage \u2014 +100% Forward Artillery Damage"),
@@ -543,7 +543,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   spidersetmod: mod("spidersetmod", [], "wiki: Spidersetmod \u2014 catalog entry (stats in ability logic)"),
   squad_regen: mod("squad_regen", [], "wiki: Squad Regen \u2014 When Void Regen reaches its maximum, it is applied to squad members within Affinity Range for 60s."),
   squad_renew: mod("squad_renew", [
-    line("cooldown", "mod_panel", "multiplicative_percent", "Squad Renew: cooldown \u2014 Heal all Railjack squad members by 100%.\\\\nCooldown: 300s"),
+    line("cooldown", "mod_panel", "multiplicative_percent", "Squad Renew: cooldown \u2014 Heal all Railjack squad members by 75%.\\\\nCooldown: 300s"),
   ]),
   star_divide: mod("star_divide", [], "wiki: Star Divide \u2014 Fighting form devised for Conclave."),
   strainsetmod: mod("strainsetmod", [], "wiki: Strainsetmod \u2014 catalog entry (stats in ability logic)"),

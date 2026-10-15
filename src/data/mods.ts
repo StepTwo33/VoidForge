@@ -789,7 +789,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "attackSpeed": 5
     },
-    "description": "+7.5% Attack Speed per rank (Primed)",
+    "description": "+5% Attack Speed per rank (Primed)",
     "rarity": "legendary"
   },
   {
@@ -817,7 +817,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "attackSpeed": 5
     },
-    "description": "+7.5% Attack Speed per rank (Set)",
+    "description": "+5% Attack Speed per rank (Set)",
     "rarity": "rare"
   },
   {
@@ -831,7 +831,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "range": 0.272727
     },
-    "description": "+17% Range per rank (Primed)",
+    "description": "+3m Range at max rank (Primed)",
     "rarity": "legendary"
   },
   {
@@ -1147,7 +1147,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "infestedSpeedReduction": 5
+      "infestedSpeedReduction": 3
     },
     "description": "Enemy Infested lose -18% Speed",
     "rarity": "uncommon"
@@ -1324,7 +1324,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "armor": 6.6667
     },
-    "description": "+7.5% Armor per rank (Set)",
+    "description": "+40% Armor at max rank (Set)",
     "rarity": "common"
   },
   {
@@ -4841,7 +4841,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "abilityDuration": 4
     },
-    "description": "+6% Ability Duration per rank",
+    "description": "+4% Ability Duration per rank",
     "rarity": "common"
   },
   {
@@ -4869,7 +4869,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "abilityRange": 5
     },
-    "description": "+6% Ability Range per rank",
+    "description": "+5% Ability Range per rank",
     "rarity": "uncommon"
   },
   {
@@ -4897,7 +4897,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "abilityStrength": 4
     },
-    "description": "+6% Ability Strength per rank",
+    "description": "+4% Ability Strength per rank",
     "rarity": "rare"
   },
   {
@@ -6367,7 +6367,7 @@ const RAW_MODS: Mod[] = [
     "category": "primary",
     "subCategory": "",
     "stats": {
-      "zoom": 10
+      "zoom": 6.666667
     },
     "description": "+40% Zoom",
     "rarity": "uncommon"
@@ -7664,7 +7664,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "explosionChance": 7.5
     },
-    "description": "+45% Chance to Explode (Use with Caution)",
+    "description": "+30% Chance to Explode (Use with Caution)",
     "rarity": "rare"
   },
   {
@@ -8460,7 +8460,7 @@ const RAW_MODS: Mod[] = [
     "category": "secondary",
     "subCategory": "",
     "stats": {
-      "zoom": 20
+      "zoom": 13.333333
     },
     "description": "+80% Zoom",
     "rarity": "uncommon"
@@ -11702,7 +11702,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "toxin": 7.5
     },
-    "description": "+82.5% <DT_POISON_COLOR>Toxin Resistance",
+    "description": "+45% <DT_POISON_COLOR>Toxin Resistance",
     "rarity": "uncommon"
   },
   {
@@ -11853,7 +11853,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "damageReduction": 10.0
     },
-    "description": "Reduced damage by 60% while airborne",
+    "description": "Reduced damage by 40% while airborne",
     "rarity": "common"
   },
   {
@@ -12190,7 +12190,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "radiation": 7.5
     },
-    "description": "+82.5% <DT_RADIATION_COLOR>Radiation Resistance",
+    "description": "+45% <DT_RADIATION_COLOR>Radiation Resistance",
     "rarity": "uncommon"
   },
   {
@@ -12891,7 +12891,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "lockerUnlockChance": 10.0
     },
-    "description": "+60% chance to unlock locked lockers.",
+    "description": "+40% chance to unlock locked lockers.",
     "rarity": "rare"
   },
   {
@@ -13357,7 +13357,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "damage": 6.666667
     },
-    "description": "Convert +60% of Damage on Health to Energy. Without Shields, ally Overguard imitates Health.",
+    "description": "Convert +40% of Damage on Health to Energy. Without Shields, ally Overguard imitates Health.",
     "rarity": "rare"
   },
   {
@@ -13503,7 +13503,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "damage": 15.0
     },
-    "description": "+90% Chance to deal Electrical Damage when shield struck by melee enemies., +120 <DT_ELECTRICITY_COLOR>Electricity",
+    "description": "+60% Chance to deal Electrical Damage when shield struck by melee enemies., +80 <DT_ELECTRICITY_COLOR>Electricity",
     "rarity": "rare"
   },
   {
@@ -13712,7 +13712,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "damage": 5.0
     },
-    "description": "+30% Physical Damage Resistance",
+    "description": "+20% Physical Damage Resistance",
     "rarity": "rare"
   },
   {
@@ -14336,7 +14336,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "shield": 3
     },
-    "description": "+18% Shield Resistance to Environmental Ice Hazards",
+    "description": "+12% Shield Resistance to Environmental Ice Hazards",
     "rarity": "common"
   },
   {
@@ -14348,7 +14348,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "abilityStrength": 3.75
+      "abilityStrength": 2.5
     },
     "description": "Passive Augment: Umbra's Ability Strength increases by +15% but he no longer fights independently alongside his Operator.",
     "rarity": "rare"
@@ -14449,7 +14449,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "heat": 10.0
     },
-    "description": "+100% <DT_FIRE_COLOR>Heat Resistance",
+    "description": "+60% <DT_FIRE_COLOR>Heat Resistance",
     "rarity": "common"
   },
   {
@@ -14492,7 +14492,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "knockdownRecovery": 40.0
     },
-    "description": "+240% Faster Knockdown Recovery",
+    "description": "+160% Faster Knockdown Recovery",
     "rarity": "rare"
   },
   {
@@ -14506,7 +14506,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "cold": 10.0
     },
-    "description": "+100% <DT_FREEZE_COLOR>Cold Resistance",
+    "description": "+60% <DT_FREEZE_COLOR>Cold Resistance",
     "rarity": "common"
   },
   {
@@ -14534,7 +14534,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "electricity": 10.0
     },
-    "description": "+100% <DT_ELECTRICITY_COLOR>Electricity Resistance",
+    "description": "+60% <DT_ELECTRICITY_COLOR>Electricity Resistance",
     "rarity": "common"
   },
   {
@@ -14719,7 +14719,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "knockdownResistance": 10.0
     },
-    "description": "+90% Chance to Resist Knockdown",
+    "description": "+60% Chance to Resist Knockdown",
     "rarity": "rare"
   },
   {
@@ -17796,7 +17796,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "cooldown": 40.0
     },
-    "description": "Recall all Crew Members to the Railjack and Heal them for 100%\\nCooldown: 240s",
+    "description": "Recall all Crew Members to the Railjack and Heal them for 75%\\nCooldown: 240s",
     "rarity": "uncommon"
   },
   {
@@ -17810,7 +17810,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "shield": 0.5
     },
-    "description": "ON CRITICAL HIT:\\nReplenish 4.5% of Shields",
+    "description": "ON CRITICAL HIT:\\nReplenish 3% of Shields",
     "rarity": "rare"
   },
   {
@@ -20423,7 +20423,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "reloadSpeed": -7.0
     },
-    "description": "-63% Ordnance Reload Time",
+    "description": "-42% Ordnance Reload Time",
     "rarity": "common"
   },
   {
@@ -20542,7 +20542,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "shield": 8.5
     },
-    "description": "+76.5% chance for Ordnance to ignore enemy Shields",
+    "description": "+51% chance for Ordnance to ignore enemy Shields",
     "rarity": "uncommon"
   },
   {
@@ -20991,7 +20991,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "cooldown": 50.0
     },
-    "description": "Heal all Railjack squad members by 100%.\\nCooldown: 300s",
+    "description": "Heal all Railjack squad members by 75%.\\nCooldown: 300s",
     "rarity": "rare"
   },
   {
@@ -21750,7 +21750,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "shield": 8.5
     },
-    "description": "+76.5% chance for Turret Critical Hits to ignore enemy Shields",
+    "description": "+51% chance for Turret Critical Hits to ignore enemy Shields",
     "rarity": "uncommon"
   },
   {

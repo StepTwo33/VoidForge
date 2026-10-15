@@ -162,7 +162,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Gladiator Rush: duration \u2014 +1.5s Combo Duration per rank (Set)"),
   ]),
   gladiator_vice: mod("gladiator_vice", [
-    line("attackSpeed", "weapon_dps", "multiplicative_percent", "Gladiator Vice: attackSpeed \u2014 +7.5% Attack Speed per rank (Set)"),
+    line("attackSpeed", "weapon_dps", "multiplicative_percent", "Gladiator Vice: attackSpeed \u2014 +5% Attack Speed per rank (Set)"),
   ]),
   guardian_derision: mod("guardian_derision", [
     line("comboCountChance", "mod_panel", "multiplicative_percent", "Guardian Derision: comboCountChance \u2014 Blocking taunts enemies within 15 meters to target you instead of allies., +30% \u2026"),
@@ -266,7 +266,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("toxin", "weapon_dps", "elemental_from_base_damage", "Primed Fever Strike: toxin \u2014 +15% Toxin per rank (Primed)"),
   ]),
   primed_fury: mod("primed_fury", [
-    line("attackSpeed", "weapon_dps", "multiplicative_percent", "Primed Fury: attackSpeed \u2014 +7.5% Attack Speed per rank (Primed)"),
+    line("attackSpeed", "weapon_dps", "multiplicative_percent", "Primed Fury: attackSpeed \u2014 +5% Attack Speed per rank (Primed)"),
   ]),
   primed_heavy_trauma: mod("primed_heavy_trauma", [
     line("impact", "weapon_dps", "multiplicative_percent", "Primed Heavy Trauma: impact \u2014 +165% <DT_IMPACT_COLOR>Impact"),
@@ -275,7 +275,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("damage", "weapon_dps", "multiplicative_percent", "Primed Pressure Point: damage \u2014 +20% Damage per rank (Primed)"),
   ]),
   primed_reach: mod("primed_reach", [
-    line("range", "mod_panel", "multiplicative_percent", "Primed Reach: range \u2014 +17% Range per rank (Primed) (arsenal display only)"),
+    line("range", "mod_panel", "multiplicative_percent", "Primed Reach: range \u2014 +3m Range at max rank (Primed) (arsenal display only)"),
   ]),
   primed_smite_corpus: mod("primed_smite_corpus", [
     line("factionCorpus", "mod_panel", "multiplicative_percent", "Primed Smite Corpus: factionCorpus \u2014 x1.55 Damage to Corpus"),
