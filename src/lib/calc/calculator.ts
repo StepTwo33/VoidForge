@@ -1,4 +1,5 @@
 // Advanced Build Calculator - ported from Dart with elemental combos, status procs, heavy attacks
+import { SNIPER_DATA, sniperComboMultiplier } from "@/data/sniper-zoom";
 import { CONTINUOUS_WEAPON_IDS } from "@/data/continuous-weapons";
 import { MELEE_ATTACK_DATA } from "@/data/melee-attack-data";
 import { Mod, Weapon, Warframe, ModSlot, CalculatedStats, WarframeCalculatedStats, ElementalDamage, StatusProc, SimulationParams, DEFAULT_SIM_PARAMS, WeaponCalculationOptions, SetBonusLinkage, EquippedArchonShard, WeaponExternalBuff } from '../types';
@@ -1234,6 +1235,21 @@ export function calculateWeaponBuild(
   if (critChanceFlatBonus.chance !== 0) {
     stats.criticalChance += critChanceFlatBonus.chance;
   }
+  // Sniper zoom buffs (wiki Sniper Rifle § Zoom Buffs; both wikis). Applied after mod sums
+  // below: Lanka CC is a flat add after mods; crit-multiplier and headshot buffs are additive
+  // with their mod counterparts.
+  const sniperData = SNIPER_DATA[baseWeapon.id];
+  const sniperZoom =
+    sniperData && (sim.sniperZoomLevel ?? 0) > 0
+      ? sniperData.zooms[(sim.sniperZoomLevel ?? 0) - 1]
+      : undefined;
+  if (sniperZoom) {
+    if (sniperZoom.critChanceFlat) stats.criticalChance += sniperZoom.critChanceFlat;
+    if (sniperZoom.critMultBonus) critMultBonus += sniperZoom.critMultBonus;
+    if (sniperZoom.headshotDamageBonus) {
+      stats.headshotDamageBonus = (stats.headshotDamageBonus ?? 0) + sniperZoom.headshotDamageBonus;
+    }
+  }
   // King's Gambit: ×0 CC on bodyshots (paper when headshot sim is off)
   const bodyCritMult = incarnonStatChanges?.bodyshotCritChanceMult;
   if (bodyCritMult != null && !sim.applyHeadshots) {
@@ -1940,6 +1956,21 @@ export function calculateWeaponBuild(
   const moddedBaseDamage = baseWeapon.damage * damageMultTotal;
   stats.moddedBaseDamage = moddedBaseDamage;
   quantizeStatsDamage(stats, moddedBaseDamage);
+
+  // Sniper Shot Combo Counter: total damage × (1.5 + 0.5·(tier−1)) while scoped (wiki, both wikis).
+  // Final multiplier on quantized hits (like Tek/faction it is outside the 1/32 grid).
+  const sniperComboTier = SNIPER_DATA[baseWeapon.id] ? (sim.sniperComboTier ?? 0) : 0;
+  if (sniperComboTier > 0) {
+    const sm = sniperComboMultiplier(sniperComboTier);
+    stats.sniperComboMultiplier = sm;
+    stats.impact *= sm;
+    stats.puncture *= sm;
+    stats.slash *= sm;
+    for (const e of stats.elements) e.value *= sm;
+    for (const e of stats.rawElements) e.value *= sm;
+    stats.totalDamage = stats.impact + stats.puncture + stats.slash +
+      stats.elements.reduce((sum, e) => sum + e.value, 0);
+  }
 
   // wiki Melee § Heavy Attack (Module:Weapons HeavyAttack): heavies use a per-weapon base
   // (e.g. Skana 600 vs 120 normal); Killing Blow adds to base-damage mods for heavies.

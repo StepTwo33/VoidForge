@@ -420,6 +420,13 @@ export interface StatusProc {
 }
 
 export interface SimulationParams {
+  /**
+   * Sniper zoom level (1-based index into SNIPER_DATA zooms). 0/unset = unscoped (no zoom buff).
+   * Only snipers listed in src/data/sniper-zoom.ts honour this.
+   */
+  sniperZoomLevel?: number;
+  /** Sniper Shot Combo Counter tier: 0/unset = off, 1 = 1.5×, 2 = 2×, … 5 = 3.5×. */
+  sniperComboTier?: number;
   comboCount: number;         // melee combo hit count (default 0)
   killStacks: number;         // Galvanized / Berserker on-kill stacks (0-5)
   statusTypesOnTarget: number; // Condition Overload / Galvanized Aptitude (0-5)
@@ -825,6 +832,8 @@ export interface CalculatedStats {
   /** Synth 4-set: +0.15 reload speed bonus applied to secondaries when complete. */
   synthSetReloadBonusApplied?: number;
   /** Tek 4-set: damage multiplier vs marked when sim + set complete (primary only). */
+  /** Sniper Shot Combo Counter damage multiplier applied (1 = off). */
+  sniperComboMultiplier?: number;
   tekSetVsMarkedDamageMultiplier?: number;
   /** Hunter set: companion weapon damage multiplier vs Slash-status when sim toggle on. */
   hunterSetVsSlashDamageMultiplier?: number;
