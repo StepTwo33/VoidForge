@@ -5047,7 +5047,9 @@ describe("Phase 8 — ability scaling registry + sets", () => {
     const helminth = allHelminthAbilities.find((h) => h.id === "subsume_temple")!;
     expect(helminth.name).toBe("Pyrotechnics");
     expect(helminth.damage).toBe(1000);
-    expect(helminth.radius).toBe(20);
+    // accuracy-13: 20 m reticle radius is Misc-fixed (not Ability Range) → miscStats.reticleRadius
+    expect(helminth.radius).toBeUndefined();
+    expect(helminth.miscStats?.reticleRadius).toBe(20);
   });
 
   it("Koumei Kumihimo 25×dice/30m/12s; Omamori 75e heal×STR; Bunraku 500 Puncture/20s; Helminth Omamori 10–20", () => {

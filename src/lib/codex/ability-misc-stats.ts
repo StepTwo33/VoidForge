@@ -421,6 +421,7 @@ const LABELS: Record<string, string> = {
   arrowCount: "Arrow Count",
   shurikenCount: "Shuriken Count",
   autoTargetRadius: "Auto-Target Radius",
+  reticleRadius: "Reticle Radius",
   homingAngle: "Homing Angle",
   finisherDamageBonus: "Finisher Damage Bonus",
   energyRefund: "Energy Refund",
