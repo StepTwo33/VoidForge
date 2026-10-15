@@ -82,6 +82,7 @@ function emptyWeaponAcc(): WeaponModAccumulators {
     slashBonus: 0,
     statusDamageBonus: 0,
     headshotDamageBonus: 0,
+    weakPointDamageBonus: 0,
     statusDurationBonus: 0,
     factionBonuses: {},
     hasBloodRush: false,

@@ -296,8 +296,8 @@ describe("Acuity mods (wiki: weak point damage/crit, multishot locked)", () => {
     expect(stats.multishotLocked).toBe(true);
     // +350% weak point crit chance, applied only when headshots are simulated
     expect(stats.criticalChance).toBeCloseTo(weapon.criticalChance * (1 + 3.5), 3);
-    // +350% weak point damage routes to headshot damage bonus
-    expect(stats.headshotDamageBonus).toBeCloseTo(3.5, 3);
+    // +350% weak point damage routes to the weak point bonus (adds ×1.5 on heads)
+    expect(stats.weakPointDamageBonus).toBeCloseTo(3.5, 3);
 
     const noHead = calculateWeaponBuild(
       weapon,

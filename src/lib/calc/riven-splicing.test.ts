@@ -63,11 +63,11 @@ describe("spliced status / weak point / faction / utility", () => {
     expect(calc("lato", { statusDamage: 0.9 }).statusDamageBonus).toBeCloseTo(0.9, 9);
   });
 
-  it("Weak Point Damage +225% → head multi 2×(1+2.25)=6.5 vs 2 (×3.25 burst with headshots)", () => {
+  it("Weak Point Damage +225% → head multi 3+1.5×2.25=6.375 vs 3 (×2.125 burst with headshots)", () => {
     const base = calc("lato", undefined, { applyHeadshots: true });
     const wp = calc("lato", { weakPointDamage: 2.25 }, { applyHeadshots: true });
-    expect(wp.headshotDamageBonus).toBeCloseTo(2.25, 9);
-    expect(wp.burstDps / base.burstDps).toBeCloseTo(3.25, 6);
+    expect(wp.weakPointDamageBonus).toBeCloseTo(2.25, 9);
+    expect(wp.burstDps / base.burstDps).toBeCloseTo(2.125, 6);
     // No effect without headshots.
     expect(calc("lato", { weakPointDamage: 2.25 }).burstDps).toBeCloseTo(calc("lato").burstDps, 9);
   });

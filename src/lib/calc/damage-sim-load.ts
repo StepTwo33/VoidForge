@@ -14,6 +14,7 @@ export function calculatedStatsToSimInputs(stats: CalculatedStats): {
   reloadTime: number;
   statusDamageBonus: number;
   headshotDamageBonus: number;
+  weakPointDamageBonus: number;
   factionBonuses: Record<string, number>;
   punctureArmorStripPerStack?: number;
 } {
@@ -39,6 +40,7 @@ export function calculatedStatsToSimInputs(stats: CalculatedStats): {
     reloadTime: stats.reloadTime,
     statusDamageBonus: stats.statusDamageBonus ?? 0,
     headshotDamageBonus: stats.headshotDamageBonus ?? 0,
+    weakPointDamageBonus: stats.weakPointDamageBonus ?? 0,
     factionBonuses: { ...(stats.factionBonuses ?? {}) },
     ...(stats.punctureArmorStripPerStack
       ? { punctureArmorStripPerStack: stats.punctureArmorStripPerStack }

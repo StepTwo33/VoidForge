@@ -275,7 +275,7 @@ describe("on-kill / trigger conditionals (wiki max rank, Phase M16)", () => {
   it("Pistol Acuity: +350% weak-point damage always; WP CC only with applyHeadshots", () => {
     const weapon = requireWeapon("lex");
     const paper = build("lex", "pistol_acuity", {});
-    expect(paper.headshotDamageBonus).toBeCloseTo(3.5, 4);
+    expect(paper.weakPointDamageBonus).toBeCloseTo(3.5, 4);
     expect(paper.criticalChance).toBeCloseTo(weapon.criticalChance, 5);
     const hs = build("lex", "pistol_acuity", { applyHeadshots: true });
     expect(hs.criticalChance).toBeCloseTo(weapon.criticalChance * 4.5, 4);
@@ -570,9 +570,9 @@ describe("Sim3 AE + max-stack exclusives (wiki max rank)", () => {
   });
 
   it("Pain Points: paper WP bonus 0; trigger → +600% weak-point damage", () => {
-    expect(build("lex", "pain_points", {}).headshotDamageBonus ?? 0).toBeCloseTo(0, 5);
+    expect(build("lex", "pain_points", {}).weakPointDamageBonus ?? 0).toBeCloseTo(0, 5);
     expect(
-      build("lex", "pain_points", { applyTriggerBuffs: true }).headshotDamageBonus,
+      build("lex", "pain_points", { applyTriggerBuffs: true }).weakPointDamageBonus,
     ).toBeCloseTo(6, 5);
   });
 

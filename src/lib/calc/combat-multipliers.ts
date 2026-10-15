@@ -83,16 +83,57 @@ export function factionTripleDotMultiplier(factionBonus: number): number {
 }
 
 /**
- * Headshot / weak-point multiplier.
- * Base head multi is typically 2×; weak-point / Acuity bonuses add to that.
+ * Wiki Enemy Body Parts: typical head weak-point multiplier is 3.0x for Grineer,
+ * Corpus, Infested, Sentient, Anarchs, Narmer and Corrupted; about 1.5x for the
+ * Murmur (and Techrot, which this app maps to the Corpus faction id).
+ */
+export const DEFAULT_HEAD_MULTIPLIER = 3;
+const LOW_HEAD_MULTIPLIER_FACTIONS = new Set(["murmur"]);
+
+/**
+ * Wiki Enemy Body Parts § Critical Headshots: the headcrit bonus fires reliably on
+ * Grineer (incl. Scaldra / Kuva, mapped to grineer), Anarchs, and most Infested and
+ * Sentient heads; not on Corpus humanoids, the Murmur or most Techrot.
+ * Corrupted / Narmer mix Grineer and Corpus units, so they are left out.
+ */
+const HEADCRIT_FACTIONS = new Set(["grineer", "anarchs", "infested", "sentient"]);
+
+export function baseHeadMultiplier(targetFaction?: string | null): number {
+  const id = normalizeFactionName(targetFaction);
+  return LOW_HEAD_MULTIPLIER_FACTIONS.has(id) ? 1.5 : DEFAULT_HEAD_MULTIPLIER;
+}
+
+/**
+ * Headshot damage multiplier (wiki Enemy Body Parts):
+ *   (head multi + 1.5 × weak point damage bonus) × (1 + headshot multiplier bonus)
+ * Weak point damage bonuses (Acuity, Pain Points, spliced WP) add to the body-part
+ * multiplier at 1.5× rate on heads; headshot multiplier bonuses (Target Acquired,
+ * Meticulous Aim, Deadhead, Incarnon perks) are additive with each other and multiply on top.
  */
 export function headshotMultiplier(
   applyHeadshots: boolean | undefined,
   headshotDamageBonus = 0,
-  baseHeadMulti = 2,
+  weakPointDamageBonus = 0,
+  targetFaction?: string | null,
 ): number {
   if (!applyHeadshots) return 1;
-  return baseHeadMulti * (1 + Math.max(0, headshotDamageBonus));
+  return (
+    (baseHeadMultiplier(targetFaction) + 1.5 * Math.max(0, weakPointDamageBonus)) *
+    (1 + Math.max(0, headshotDamageBonus))
+  );
+}
+
+/**
+ * Critical headshot factor on the total critical damage multiplier (wiki Critical Hit
+ * § Critical Headshots): tier multi = 1 + tier × (2 × CM − 1). Returns 2 when headshots
+ * are on and the target faction can be headcrit, else 1. Unknown faction → 1.
+ */
+export function headCritFactor(
+  applyHeadshots: boolean | undefined,
+  targetFaction?: string | null,
+): number {
+  if (!applyHeadshots) return 1;
+  return HEADCRIT_FACTIONS.has(normalizeFactionName(targetFaction)) ? 2 : 1;
 }
 
 /**
@@ -315,10 +356,17 @@ export function combatDamageMultiplier(opts: {
   factionBonus?: number;
   applyHeadshots?: boolean;
   headshotDamageBonus?: number;
+  weakPointDamageBonus?: number;
+  targetFaction?: string | null;
   stanceMultiplier?: number;
 }): number {
   const faction = factionHitMultiplier(opts.factionBonus ?? 0);
-  const head = headshotMultiplier(opts.applyHeadshots, opts.headshotDamageBonus ?? 0);
+  const head = headshotMultiplier(
+    opts.applyHeadshots,
+    opts.headshotDamageBonus ?? 0,
+    opts.weakPointDamageBonus ?? 0,
+    opts.targetFaction,
+  );
   const stance = opts.stanceMultiplier && opts.stanceMultiplier > 0 ? opts.stanceMultiplier : 1;
   return faction * head * stance;
 }

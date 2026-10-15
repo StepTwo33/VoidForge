@@ -41,6 +41,7 @@ export default function DamageSimulatorPage() {
   const [addingType, setAddingType] = useState("");
   const [statusDamageBonus, setStatusDamageBonus] = useState(0);
   const [headshotDamageBonus, setHeadshotDamageBonus] = useState(0);
+  const [weakPointDamageBonus, setWeakPointDamageBonus] = useState(0);
   const [factionBonuses, setFactionBonuses] = useState<Record<string, number>>({});
   const [applyHeadshots, setApplyHeadshots] = useState(false);
   const [punctureArmorStripPerStack, setPunctureArmorStripPerStack] = useState(0);
@@ -64,6 +65,7 @@ export default function DamageSimulatorPage() {
     setReloadTime(applied.reloadTime);
     setStatusDamageBonus(applied.statusDamageBonus);
     setHeadshotDamageBonus(applied.headshotDamageBonus);
+    setWeakPointDamageBonus(applied.weakPointDamageBonus);
     setFactionBonuses(applied.factionBonuses);
     setPunctureArmorStripPerStack(applied.punctureArmorStripPerStack ?? 0);
     setLoadedBuildLabel(applied.buildLabel);
@@ -104,6 +106,7 @@ export default function DamageSimulatorPage() {
         reloadTime,
         statusDamageBonus,
         headshotDamageBonus,
+    weakPointDamageBonus,
         factionBonuses,
         applyHeadshots,
         punctureArmorStripPerStack:
@@ -128,6 +131,7 @@ export default function DamageSimulatorPage() {
     reloadTime,
     statusDamageBonus,
     headshotDamageBonus,
+    weakPointDamageBonus,
     factionBonuses,
     applyHeadshots,
     punctureArmorStripPerStack,

@@ -58,6 +58,8 @@ import {
   FACTION_STAT_TO_ID,
   factionBonusFromStats,
   factionDotMultiplier,
+  headCritFactor,
+  headshotMultiplier,
   factionHitMultiplier,
   factionTripleDotMultiplier,
   resolveStanceDamageMultiplier,
@@ -210,17 +212,22 @@ const DOT_TICK_FRACTION: Record<string, number> = {
 function statusDotTickBase(stats: CalculatedStats, moddedBaseDamage: number, sim?: SimulationParams): number {
   // Vigilante crit-tier enhance also applies to the proccing hit (linear in CC).
   const effCC = stats.criticalChance + (stats.vigilanteCritBonus ?? 0);
-  let avgCrit = avgCritMultiplier(effCC, stats.criticalMultiplier);
+  // Critical headshots double the total crit multiplier of the proccing hit (wiki Critical Hit).
+  const cm = stats.criticalMultiplier * headCritFactor(sim?.applyHeadshots, sim?.targetFaction);
+  let avgCrit = avgCritMultiplier(effCC, cm);
   // Devouring Attrition double-dips into DoTs on non-crit proccing hits.
   avgCrit += Math.max(0, 1 - effCC) * (stats.devouringAttritionBonus ?? 0);
   const statusDmg = 1 + (stats.statusDamageBonus ?? 0);
   const factionBonus = targetFactionBonus(stats, sim?.targetFaction);
   const factionDot = factionDotMultiplier(factionBonus);
-  // Headshot multi applies to the proccing hit (and thus DoT) when enabled
-  const head =
-    sim?.applyHeadshots
-      ? 2 * (1 + (stats.headshotDamageBonus ?? 0))
-      : 1;
+  // Wiki Status Effect: damaging statuses benefit from headshot and crit modifiers,
+  // so the proccing hit's full headshot multiplier carries into the DoT.
+  const head = headshotMultiplier(
+    sim?.applyHeadshots,
+    stats.headshotDamageBonus ?? 0,
+    stats.weakPointDamageBonus ?? 0,
+    sim?.targetFaction,
+  );
   return moddedBaseDamage * avgCrit * statusDmg * factionDot * head;
 }
 
@@ -362,15 +369,18 @@ function calculateStatusProcs(
   const tlFrac = stats.extraHitDamageFraction ?? 0;
   if (stats.extraHitGuaranteedToxin && tlFrac > 0 && stats.totalDamage > 0) {
     const effCC = stats.criticalChance + (stats.vigilanteCritBonus ?? 0);
-    let avgCrit = avgCritMultiplier(effCC, stats.criticalMultiplier);
+    const cm = stats.criticalMultiplier * headCritFactor(sim?.applyHeadshots, sim?.targetFaction);
+    let avgCrit = avgCritMultiplier(effCC, cm);
     avgCrit += Math.max(0, 1 - effCC) * (stats.devouringAttritionBonus ?? 0);
     const statusDmg = 1 + (stats.statusDamageBonus ?? 0);
     const factionBonus = targetFactionBonus(stats, sim?.targetFaction);
     const factionTriple = factionTripleDotMultiplier(factionBonus);
-    const head =
-      sim?.applyHeadshots
-        ? 2 * (1 + (stats.headshotDamageBonus ?? 0))
-        : 1;
+    const head = headshotMultiplier(
+      sim?.applyHeadshots,
+      stats.headshotDamageBonus ?? 0,
+      stats.weakPointDamageBonus ?? 0,
+      sim?.targetFaction,
+    );
     const toxinMult = 1 + (stats.toxinModBonusFraction ?? 0);
     const extraHit = stats.totalDamage * tlFrac;
     const dpt = 0.5 * extraHit * avgCrit * toxinMult * statusDmg * factionTriple * head;
@@ -846,6 +856,7 @@ export function calculateWeaponBuild(
     slashBonus: 0,
     statusDamageBonus: 0,
     headshotDamageBonus: 0,
+    weakPointDamageBonus: 0,
     statusDurationBonus: 0,
     statusChanceFlatBonus: 0,
     factionBonuses: {},
@@ -1011,6 +1022,7 @@ export function calculateWeaponBuild(
   galvDamagePerStatusPerStack = weaponModAcc.galvDamagePerStatusPerStack;
   stats.statusDamageBonus = weaponModAcc.statusDamageBonus;
   stats.headshotDamageBonus = weaponModAcc.headshotDamageBonus;
+  stats.weakPointDamageBonus = weaponModAcc.weakPointDamageBonus;
   stats.statusDurationBonus = weaponModAcc.statusDurationBonus;
   stats.factionBonuses = { ...weaponModAcc.factionBonuses };
 
@@ -1092,7 +1104,7 @@ export function calculateWeaponBuild(
       stats.ammoEfficiency = (stats.ammoEfficiency ?? 0) + pool.ammoEfficiency;
     }
     if (pool.weakPointDamage) {
-      stats.headshotDamageBonus = (stats.headshotDamageBonus ?? 0) + pool.weakPointDamage;
+      stats.weakPointDamageBonus = (stats.weakPointDamageBonus ?? 0) + pool.weakPointDamage;
     }
     // Elemental fractions (e.g. Proton Snap toxin) — folded into elementalMods below dmgMult scale.
     for (const elem of triggerElementalTypes) {
@@ -1478,7 +1490,7 @@ export function calculateWeaponBuild(
         // Spliced Weak Point Damage: adds to the weak point multiplier like Primary Acuity.
         case 'weakPointDamage':
           if (!relativeCritStatus) break; // riven-only key
-          stats.headshotDamageBonus = (stats.headshotDamageBonus ?? 0) + value;
+          stats.weakPointDamageBonus = (stats.weakPointDamageBonus ?? 0) + value;
           break;
         // Spliced Weak Point Crit Chance: applied after this loop (additive on base CC, headshot sim only).
         case 'weakPointCritChance':
@@ -2396,17 +2408,21 @@ function calculateBurstDps(stats: CalculatedStats): number {
   // Vigilante set: chance per hit to upgrade the crit tier by one. Average
   // damage is linear in crit chance across tiers, so this is exactly +v CC.
   const effectiveCritChance = stats.criticalChance + (stats.vigilanteCritBonus ?? 0);
-  let avgCrit = avgCritMultiplier(effectiveCritChance, stats.criticalMultiplier);
+  const sim = stats.simParams ?? DEFAULT_SIM_PARAMS;
+  // Critical headshots: 2 × total crit multiplier on headcrit-able factions (wiki Critical Hit).
+  const critMult = stats.criticalMultiplier * headCritFactor(sim.applyHeadshots, sim.targetFaction);
+  let avgCrit = avgCritMultiplier(effectiveCritChance, critMult);
   // Devouring/Devastating Attrition: non-crit hits average +bonus damage.
   // Only the non-crit fraction of hits benefits; at ≥100% CC there are none.
   const nonCritFraction = Math.max(0, 1 - effectiveCritChance);
   avgCrit += nonCritFraction * (stats.devouringAttritionBonus ?? 0);
-  const sim = stats.simParams ?? DEFAULT_SIM_PARAMS;
   const factionBonus = targetFactionBonus(stats, sim.targetFaction);
   const combatMult = combatDamageMultiplier({
     factionBonus,
     applyHeadshots: sim.applyHeadshots,
     headshotDamageBonus: stats.headshotDamageBonus ?? 0,
+    weakPointDamageBonus: stats.weakPointDamageBonus ?? 0,
+    targetFaction: sim.targetFaction,
     stanceMultiplier:
       sim.applyStanceMultiplier === false ? 1 : (stats.stanceDamageMultiplier ?? 1),
   });

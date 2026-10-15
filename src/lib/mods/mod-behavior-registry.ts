@@ -21,8 +21,10 @@ export type WeaponModAccumulators = {
   slashBonus: number;
   /** Status Effect damage (Elementalist mods) — multiplies DoT ticks. */
   statusDamageBonus: number;
-  /** Headshot / weak-point damage bonus (Acuity, etc.). */
+  /** Headshot multiplier bonus (Target Acquired, Meticulous Aim, Deadhead…) — multiplies on top. */
   headshotDamageBonus: number;
+  /** Weak point damage bonus (Acuity, Pain Points, spliced WP) — adds to the body-part multiplier (×1.5 on heads). */
+  weakPointDamageBonus: number;
   /** Status duration bonus (Continuous Misery, etc.) — extends DoT ticks. */
   statusDurationBonus: number;
   /** Normalized faction id → bonus fraction (Bane / Expel / Smite / Cleanse). */
@@ -158,8 +160,10 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
           return true;
         case "headshotDamage":
         case "headshotMultiplier":
-        case "weakPointDamage":
           acc.headshotDamageBonus += modValue;
+          return true;
+        case "weakPointDamage":
+          acc.weakPointDamageBonus += modValue;
           return true;
         case "statusDuration":
           acc.statusDurationBonus += modValue;

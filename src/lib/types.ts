@@ -847,8 +847,10 @@ export interface CalculatedStats {
   parkourVelocityBonus?: number;
   /** Elementalist-style status effect damage bonus (fraction). */
   statusDamageBonus?: number;
-  /** Acuity / headshot damage bonus (fraction on top of base head multi). */
+  /** Headshot multiplier bonus (fraction; Target Acquired, Deadhead, Incarnon perks) — multiplies the head multiplier. */
   headshotDamageBonus?: number;
+  /** Weak point damage bonus (fraction; Acuity, Pain Points, spliced WP) — adds to the weak point multiplier, ×1.5 on heads. */
+  weakPointDamageBonus?: number;
   /** Status duration bonus (fraction) — extends DoT proc duration/ticks. */
   statusDurationBonus?: number;
   /** Acuity equipped: multishot cannot be modified by any source. */

@@ -9,6 +9,8 @@ import {
   factionDotMultiplier,
   factionHitMultiplier,
   factionTripleDotMultiplier,
+  headCritFactor,
+  headshotMultiplier,
 } from "./combat-multipliers";
 
 export type { EnemyType, EnemyKind } from "@/data/enemies";
@@ -360,27 +362,36 @@ export function simulateDiscreteTTK(
   const procsPerShot = averageProcsPerShot(statusChance, multishot);
   const shotInterval = 1 / efr;
 
-  const acm = avgCritMultiplier(stats.criticalChance, stats.criticalMultiplier);
   const moddedBase =
     stats.moddedBaseDamage != null && stats.moddedBaseDamage > 0
       ? stats.moddedBaseDamage
       : totalRaw;
   const sim = stats.simParams;
-  const factionBonus = factionBonusFromStats(
-    stats.factionBonuses,
-    sim?.targetFaction ?? enemy.faction,
+  const targetFaction = sim?.targetFaction ?? enemy.faction;
+  // Critical headshots: 2 × total crit multiplier on headcrit-able factions (wiki Critical Hit).
+  const acm = avgCritMultiplier(
+    stats.criticalChance,
+    stats.criticalMultiplier * headCritFactor(sim?.applyHeadshots, targetFaction),
   );
+  const factionBonus = factionBonusFromStats(stats.factionBonuses, targetFaction);
   const factionHit = combatDamageMultiplier({
     factionBonus,
     applyHeadshots: sim?.applyHeadshots,
     headshotDamageBonus: stats.headshotDamageBonus ?? 0,
+    weakPointDamageBonus: stats.weakPointDamageBonus ?? 0,
+    targetFaction,
     stanceMultiplier:
       sim?.applyStanceMultiplier === false ? 1 : (stats.stanceDamageMultiplier ?? 1),
   });
   // factionHit already includes faction once; DoT needs faction²
   const factionDot = factionDotMultiplier(factionBonus);
   const statusDmg = 1 + (stats.statusDamageBonus ?? 0);
-  const head = sim?.applyHeadshots ? 2 * (1 + (stats.headshotDamageBonus ?? 0)) : 1;
+  const head = headshotMultiplier(
+    sim?.applyHeadshots,
+    stats.headshotDamageBonus ?? 0,
+    stats.weakPointDamageBonus ?? 0,
+    targetFaction,
+  );
   // combatMult for hits uses factionHit; for DoT tick base rebuild without double head/stance
   const dotBase =
     moddedBase *

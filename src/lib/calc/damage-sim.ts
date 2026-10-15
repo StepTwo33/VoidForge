@@ -8,6 +8,8 @@ import {
   combatDamageMultiplier,
   factionBonusFromStats,
   factionDotMultiplier,
+  headCritFactor,
+  headshotMultiplier,
 } from "@/lib/calc/combat-multipliers";
 import {
   ARMOR_MODIFIERS,
@@ -37,6 +39,8 @@ export interface DamageSimInputs {
   reloadTime: number;
   statusDamageBonus: number;
   headshotDamageBonus: number;
+  /** Weak point damage bonus (Acuity etc.) — adds to the head multiplier at 1.5× rate. */
+  weakPointDamageBonus?: number;
   factionBonuses: Record<string, number>;
   applyHeadshots: boolean;
   /** Latron Flensing Spikes — passed through to discrete TTK. */
@@ -137,6 +141,7 @@ export function simInputsToCalculatedStats(input: DamageSimInputs, enemyFaction:
     moddedBaseDamage: totalDamage,
     statusDamageBonus: input.statusDamageBonus,
     headshotDamageBonus: input.headshotDamageBonus,
+    weakPointDamageBonus: input.weakPointDamageBonus ?? 0,
     factionBonuses: { ...input.factionBonuses },
     punctureArmorStripPerStack: input.punctureArmorStripPerStack,
   };
@@ -229,7 +234,10 @@ export function runDamageSim(
     return { type, raw, vsShield, vsHealth, weight };
   });
 
-  const acm = avgCritMultiplier(input.critChance, input.critMulti);
+  const acm = avgCritMultiplier(
+    input.critChance,
+    input.critMulti * headCritFactor(input.applyHeadshots, enemy.faction),
+  );
   const shieldSum = typeBreakdown.reduce((s, t) => s + t.vsShield, 0);
   const healthSum = typeBreakdown.reduce((s, t) => s + t.vsHealth, 0);
   const factionBonus = factionBonusFromStats(input.factionBonuses, enemy.faction);
@@ -237,10 +245,17 @@ export function runDamageSim(
     factionBonus,
     applyHeadshots: input.applyHeadshots,
     headshotDamageBonus: input.headshotDamageBonus,
+    weakPointDamageBonus: input.weakPointDamageBonus ?? 0,
+    targetFaction: enemy.faction,
   });
   const factionDot = factionDotMultiplier(factionBonus);
   const statusDmg = 1 + input.statusDamageBonus;
-  const head = input.applyHeadshots ? 2 * (1 + input.headshotDamageBonus) : 1;
+  const head = headshotMultiplier(
+    input.applyHeadshots,
+    input.headshotDamageBonus,
+    input.weakPointDamageBonus ?? 0,
+    enemy.faction,
+  );
   const dotMult = statusDmg * factionDot * head;
 
   const rawPerShot = totalRaw * input.multishot * acm * combatMult;
