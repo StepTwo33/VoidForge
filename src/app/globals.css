@@ -776,6 +776,15 @@ html:not(.dark) [data-sonner-toaster] [data-sonner-toast][data-type="warning"] {
 
 /* Shared section heading (builders, compare): title case in source, uppercase visually only. */
 @layer components {
+  /* Codex chip rows: hint that the row scrolls (phones/tablets only). */
+  @media (width < 64rem) {
+    .codex-chip-row {
+      padding-right: 2rem;
+      -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+      mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+      scrollbar-width: none;
+    }
+  }
   .section-title {
     @apply text-sm font-semibold uppercase tracking-wider text-muted-foreground;
   }

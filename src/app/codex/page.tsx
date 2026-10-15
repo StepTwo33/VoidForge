@@ -1,7 +1,7 @@
 "use client";
 
 import { ListSkeleton } from "@/components/list-skeleton";
-import { Suspense, useCallback, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, Library } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -73,6 +73,8 @@ import { accentTone } from "@/lib/display/accent-tones";
 
 const POLARITIES = ["All", "madurai", "vazarin", "naramon", "zenurik", "unairu", "penjaga", "umbra"] as const;
 const RARITIES = ["All", "Common", "Uncommon", "Rare", "Legendary"] as const;
+
+const CODEX_PAGE_SIZE = 60;
 
 function CodexPageContent() {
   const router = useRouter();
@@ -311,6 +313,63 @@ function CodexPageContent() {
                   ? filteredArchwings.length
                   : filteredNecramechs.length;
 
+  // Display-only paging: slice the already filtered + sorted list for rendering.
+  // Filter/sort memos above are untouched; listCount stays the full count.
+  const activeList: readonly { id: string }[] =
+    section === "mods"
+      ? filteredMods
+      : section === "arcanes"
+        ? filteredArcanes
+        : section === "shards"
+          ? filteredShards
+          : section === "weapons"
+            ? filteredWeapons
+            : section === "warframes"
+              ? filteredWarframes
+              : section === "companions"
+                ? filteredCompanions
+                : section === "archwings"
+                  ? filteredArchwings
+                  : filteredNecramechs;
+  const pageResetKey = [section, categoryParam, polarityFilter, rarityFilter, arcaneTrigger, arcaneSlot, weaponAoeOnly ? "1" : "0", searchQuery].join("|");
+  const [visibleCount, setVisibleCount] = useState(CODEX_PAGE_SIZE);
+  const [visibleKey, setVisibleKey] = useState(pageResetKey);
+  let baseLimit = visibleCount;
+  if (pageResetKey !== visibleKey) {
+    setVisibleKey(pageResetKey);
+    setVisibleCount(CODEX_PAGE_SIZE);
+    baseLimit = CODEX_PAGE_SIZE;
+  }
+  const selectedIndex = selectedId ? activeList.findIndex((e) => e.id === selectedId) : -1;
+  const limit =
+    selectedIndex >= baseLimit ? Math.ceil((selectedIndex + 1) / CODEX_PAGE_SIZE) * CODEX_PAGE_SIZE : baseLimit;
+  const shownCount = Math.min(limit, listCount);
+  const listGridRef = useRef<HTMLDivElement>(null);
+  const showMore = () => {
+    const start = limit;
+    setVisibleCount(limit + CODEX_PAGE_SIZE);
+    requestAnimationFrame(() => {
+      const row = listGridRef.current?.children[start] as HTMLElement | undefined;
+      const target = row?.matches("button, a, [tabindex]") ? row : row?.querySelector<HTMLElement>("button, a, [tabindex]");
+      target?.focus();
+    });
+  };
+
+  // Phone/tablet chip rows scroll horizontally; keep the active chip in view.
+  useEffect(() => {
+    if (window.matchMedia("(min-width: 1024px)").matches) return;
+    document
+      .querySelectorAll<HTMLElement>('nav.codex-chip-row [aria-current="true"]')
+      .forEach((el) => {
+        const nav = el.parentElement;
+        if (!nav) return;
+        const left = el.offsetLeft - nav.offsetLeft;
+        if (left < nav.scrollLeft || left + el.offsetWidth > nav.scrollLeft + nav.clientWidth) {
+          nav.scrollLeft = Math.max(0, left - 16);
+        }
+      });
+  }, [section, categoryParam, arcaneSlot, weaponAoeOnly]);
+
   const hasSelection = Boolean(
     selectedMod ||
     selectedArcane ||
@@ -355,7 +414,7 @@ function CodexPageContent() {
         <aside className={cn("flex shrink-0 flex-col gap-3 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:w-52 lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pb-4", hasSelection && "hidden lg:flex")}>
           <ContentPanel className="shrink-0 overflow-visible p-2">
             <PanelHeading>Sections</PanelHeading>
-            <nav className="mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
+            <nav className="codex-chip-row mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
               {CODEX_SECTIONS.map((s) => {
                 const Icon = s.icon;
                 const active = section === s.id;
@@ -363,6 +422,7 @@ function CodexPageContent() {
                   <button
                     key={s.id}
                     type="button"
+                    aria-current={active ? "true" : undefined}
                     onClick={() => selectSection(s.id)}
                     className={cn(
                       "flex min-h-11 shrink-0 whitespace-nowrap items-center lg:w-full lg:whitespace-normal lg:pointer-fine:min-h-0 gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors",
@@ -382,11 +442,12 @@ function CodexPageContent() {
           {section === "mods" && (
             <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Mod type</PanelHeading>
-              <nav className="mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
+              <nav className="codex-chip-row mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
                 {CODEX_MOD_CATEGORIES.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
+                    aria-current={modCategory === cat.id ? "true" : undefined}
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
                       "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
@@ -405,11 +466,12 @@ function CodexPageContent() {
           {section === "weapons" && (
             <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Weapon type</PanelHeading>
-              <nav className="mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
+              <nav className="codex-chip-row mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
                 {CODEX_WEAPON_CATEGORY_FILTERS.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
+                    aria-current={weaponCategory === cat.id ? "true" : undefined}
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
                       "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
@@ -424,9 +486,10 @@ function CodexPageContent() {
               </nav>
               <div className="mt-3 border-t border-border pt-2">
                 <PanelHeading>AoE filter</PanelHeading>
-                <nav className="mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
+                <nav className="codex-chip-row mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
                   <button
                     type="button"
+                    aria-current={!weaponAoeOnly ? "true" : undefined}
                     onClick={() => setParams({ aoe: null, id: null })}
                     className={cn(
                       "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
@@ -439,6 +502,7 @@ function CodexPageContent() {
                   </button>
                   <button
                     type="button"
+                    aria-current={weaponAoeOnly ? "true" : undefined}
                     onClick={() => setParams({ aoe: "1", id: null })}
                     className={cn(
                       "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
@@ -457,11 +521,12 @@ function CodexPageContent() {
           {section === "companions" && (
             <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Companion type</PanelHeading>
-              <nav className="mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
+              <nav className="codex-chip-row mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
                 {CODEX_COMPANION_TYPE_FILTERS.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
+                    aria-current={companionType === cat.id ? "true" : undefined}
                     onClick={() => setParams({ category: cat.id, id: null })}
                     className={cn(
                       "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
@@ -480,9 +545,10 @@ function CodexPageContent() {
           {section === "arcanes" && (
             <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Slot</PanelHeading>
-              <nav className="mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
+              <nav className="codex-chip-row mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
                 <button
                   type="button"
+                  aria-current={arcaneSlot === "all" ? "true" : undefined}
                   onClick={() => setParams({ slot: "all", id: null })}
                   className={cn(
                     "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
@@ -497,6 +563,7 @@ function CodexPageContent() {
                   <button
                     key={f.id}
                     type="button"
+                    aria-current={arcaneSlot === f.id ? "true" : undefined}
                     onClick={() => setParams({ slot: f.id, id: null })}
                     className={cn(
                       "block shrink-0 whitespace-nowrap lg:w-full lg:whitespace-normal rounded-md px-2.5 py-2.5 text-left text-xs transition-colors min-h-11 lg:pointer-fine:min-h-0 lg:py-1.5",
@@ -514,9 +581,9 @@ function CodexPageContent() {
         </aside>
 
         {/* Entry list — page scrolls; detail card floats in viewport */}
-        <ContentPanel padding={false} className="min-w-0 flex-1">
-          <div className="border-b border-border px-3 py-2">
-            <div className="flex flex-wrap items-center gap-2">
+        <ContentPanel padding={false} className="min-w-0 flex-1 overflow-visible">
+          <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-40 rounded-t-xl border-b border-border bg-card px-3 py-2 lg:static [@media(max-height:480px)]:static">
+            <div className="codex-chip-row flex flex-nowrap items-center gap-2 overflow-x-auto overscroll-x-contain lg:flex-wrap lg:overflow-visible [&>*]:shrink-0">
               <span className="text-xs text-muted-foreground">
                 <span className="font-mono font-medium text-foreground">{listCount}</span> entries
               </span>
@@ -568,9 +635,9 @@ function CodexPageContent() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-1 p-2 [&>*]:[content-visibility:auto] [&>*]:[contain-intrinsic-size:auto_5.125rem] sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          <div ref={listGridRef} className="grid grid-cols-1 gap-1 p-2 [&>*]:[content-visibility:auto] [&>*]:[contain-intrinsic-size:auto_5.125rem] sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {section === "mods" &&
-              filteredMods.map((mod) => (
+              filteredMods.slice(0, limit).map((mod) => (
                 <CodexModRow
                   key={mod.id}
                   mod={mod}
@@ -582,7 +649,7 @@ function CodexPageContent() {
                 />
               ))}
             {section === "arcanes" &&
-              filteredArcanes.map((arcane) => {
+              filteredArcanes.slice(0, limit).map((arcane) => {
                 const coverage = arcaneCoverageById.get(arcane.id);
                 return (
                   <CodexArcaneRow
@@ -598,7 +665,7 @@ function CodexPageContent() {
                 );
               })}
             {section === "shards" &&
-              filteredShards.map((shard) => (
+              filteredShards.slice(0, limit).map((shard) => (
                 <CodexShardRow
                   key={shard.id}
                   shard={shard}
@@ -607,7 +674,7 @@ function CodexPageContent() {
                 />
               ))}
             {section === "weapons" &&
-              filteredWeapons.map((weapon) => (
+              filteredWeapons.slice(0, limit).map((weapon) => (
                 <CodexWeaponRow
                   key={weapon.id}
                   weapon={weapon}
@@ -616,7 +683,7 @@ function CodexPageContent() {
                 />
               ))}
             {section === "warframes" &&
-              filteredWarframes.map((warframe) => (
+              filteredWarframes.slice(0, limit).map((warframe) => (
                 <CodexWarframeRow
                   key={warframe.id}
                   warframe={warframe}
@@ -625,7 +692,7 @@ function CodexPageContent() {
                 />
               ))}
             {section === "companions" &&
-              filteredCompanions.map((companion) => (
+              filteredCompanions.slice(0, limit).map((companion) => (
                 <CodexCompanionRow
                   key={companion.id}
                   companion={companion}
@@ -634,7 +701,7 @@ function CodexPageContent() {
                 />
               ))}
             {section === "archwings" &&
-              filteredArchwings.map((archwing) => (
+              filteredArchwings.slice(0, limit).map((archwing) => (
                 <CodexArchwingRow
                   key={archwing.id}
                   archwing={archwing}
@@ -643,7 +710,7 @@ function CodexPageContent() {
                 />
               ))}
             {section === "necramechs" &&
-              filteredNecramechs.map((necramech) => (
+              filteredNecramechs.slice(0, limit).map((necramech) => (
                 <CodexNecramechRow
                   key={necramech.id}
                   necramech={necramech}
@@ -652,6 +719,23 @@ function CodexPageContent() {
                 />
               ))}
           </div>
+          {listCount > 0 && (
+            <div className="flex flex-col items-center gap-2 border-t border-border px-3 py-3">
+              <p className="text-xs text-muted-foreground" aria-live="polite">
+                Showing <span className="font-mono text-foreground">{shownCount}</span> of{" "}
+                <span className="font-mono text-foreground">{listCount}</span>
+              </p>
+              {listCount > limit && (
+                <button
+                  type="button"
+                  onClick={showMore}
+                  className="inline-flex min-h-11 items-center rounded-lg border border-border px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted/50 lg:pointer-fine:min-h-9"
+                >
+                  Show {Math.min(CODEX_PAGE_SIZE, listCount - limit)} more
+                </button>
+              )}
+            </div>
+          )}
         </ContentPanel>
       </div>
 
