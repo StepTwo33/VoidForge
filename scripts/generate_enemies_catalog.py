@@ -289,6 +289,7 @@ def extract_entries(text: str) -> list[dict]:
         if health is None or health <= 0:
             continue
         armor = num("Armor") or 0
+        base_level = num("BaseLevel") or 1
         shield = num("Shield") or 0
         if armor < 0:
             armor = 0
@@ -304,6 +305,7 @@ def extract_entries(text: str) -> list[dict]:
                 "health": health,
                 "armor": armor,
                 "shield": shield,
+                "base_level": max(1, base_level),
             }
         )
     return entries
@@ -377,6 +379,7 @@ def build_catalog() -> list[dict]:
             "baseHealth": health,
             "baseArmor": armor,
             "baseShield": shield,
+            "baseLevel": e.get("base_level", 1),
             "healthType": ht,
             "armorType": at,
             "shieldType": st,
@@ -439,6 +442,8 @@ def emit_ts(items: list[dict]) -> str:
         "  baseHealth: number;",
         "  baseArmor: number;",
         "  baseShield: number;",
+        "  /** Wiki BaseLevel: level at which base stats apply (scaling uses level − baseLevel). Default 1. */",
+        "  baseLevel?: number;",
         "  healthType: string;",
         "  armorType: string;",
         "  shieldType: string;",
@@ -462,6 +467,8 @@ def emit_ts(items: list[dict]) -> str:
             f' baseHealth: {it["baseHealth"]},'
             f' baseArmor: {it["baseArmor"]},'
             f' baseShield: {it["baseShield"]},'
+            + (f' baseLevel: {it["baseLevel"]},' if it.get("baseLevel", 1) > 1 else "")
+            +
             f' healthType: "{it["healthType"]}",'
             f' armorType: "{it["armorType"]}",'
             f' shieldType: "{it["shieldType"]}",'

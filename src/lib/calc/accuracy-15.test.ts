@@ -39,3 +39,25 @@ describe("R7-2 + R7-7: DoTs hit shields; Magnetic amplifies shields (wiki Magnet
     expect(calculateTTK(build("simulor"), crew, 30).ttk).toBeCloseTo(2.6667, 3);
   });
 });
+
+describe("R7-4: level scaling starts at the enemy's wiki BaseLevel (both wikis)", () => {
+  it("Corpus Tech (BL 15) at L15 has exactly base stats; L30 scales by q = 15, not 29", async () => {
+    const { scaleEnemyPools, scaleHealth, scaleShield, ENEMY_TYPES } = await import("@/lib/calc/ttk");
+    const tech = ENEMY_TYPES.find((e) => e.id === "corpus_tech")!;
+    expect(tech.baseLevel).toBe(15);
+    const p15 = scaleEnemyPools(tech, 15);
+    expect(p15.health).toBe(700);
+    expect(p15.shield).toBe(250);
+    const p30 = scaleEnemyPools(tech, 30);
+    expect(p30.health).toBeCloseTo(scaleHealth(700, 16, "Corpus"), 9);
+    expect(p30.shield).toBeCloseTo(scaleShield(250, 16, "Corpus"), 9);
+    expect(p30.health).toBeCloseTo(3969.66, 1); // was 13927.36 with q = 29
+  });
+  it("Heavy Gunner (BL 8) L30 health 5968.9 → 3456.1; BL-1 units unchanged", async () => {
+    const { scaleEnemyPools, ENEMY_TYPES } = await import("@/lib/calc/ttk");
+    const hg = ENEMY_TYPES.find((e) => e.id === "heavy_gunner")!;
+    expect(scaleEnemyPools(hg, 30).health).toBeCloseTo(3456.08, 1);
+    const lancer = ENEMY_TYPES.find((e) => e.id === "lancer")!;
+    expect(lancer.baseLevel).toBeUndefined();
+  });
+});

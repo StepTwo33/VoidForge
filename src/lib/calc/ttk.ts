@@ -223,12 +223,15 @@ export function scaleEnemyPools(
   const eximus = enemy.kind === "eximus" ? eximusBasePools(enemy, level) : null;
   const baseHealth = eximus ? eximus.health : enemy.baseHealth;
   const baseShield = eximus ? eximus.shield : enemy.baseShield;
+  // wiki Enemy Level Scaling: curves take (level − BaseLevel); catalog stats are at BaseLevel.
+  // The scale* helpers use (lvl − 1), so shift by BaseLevel − 1 (no down-scaling below it).
+  const scaleLevel = Math.max(1, level - Math.max(0, (enemy.baseLevel ?? 1) - 1));
   const health =
-    scaleHealth(baseHealth, level, enemy.faction) *
+    scaleHealth(baseHealth, scaleLevel, enemy.faction) *
     (steelPath ? STEEL_PATH_HEALTH_MULT : 1);
   const shield =
-    scaleShield(baseShield, level, enemy.faction) * (steelPath ? STEEL_PATH_SHIELD_MULT : 1);
-  const armor = scaleArmor(enemy.baseArmor, level);
+    scaleShield(baseShield, scaleLevel, enemy.faction) * (steelPath ? STEEL_PATH_SHIELD_MULT : 1);
+  const armor = scaleArmor(enemy.baseArmor, scaleLevel);
   return { health, armor, shield, steelPath };
 }
 

@@ -25,7 +25,7 @@ describe("Beam multishot: status DoT scales with the per-beam multishot factor (
   });
   it("Amprex Split + Vigilante vs heavy_gunner L100: TTK 547.0 → 295.5 s (Electricity DoT ×2.05)", () => {
     expect(calculateTTK(build("amprex", ["split_chamber_r3", "vigilante_armaments"]), gunner, 100).ttk)
-      .toBeCloseTo(295.53, 1);
+      .toBeCloseTo(280.17, 1); // 295.53 before Heavy Gunner BaseLevel 8 (accuracy-15 R7-4)
   });
   it("unmodded beam (factor 1) unchanged: Amprex vs lancer L30", () => {
     const s = build("amprex");
@@ -65,10 +65,10 @@ describe("Heat: one consolidated pool, every proc refreshes all stacks (wiki Hea
 
 describe("Heat armor strip: proc-rate landing, 0.5 s ramp, Status Duration (wiki Heat Damage)", () => {
   it("low per-shot Heat chance still strips once a proc lands (old >0.05/shot gate removed): Braton Prime + Hellfire vs heavy_gunner L100 265.2 → 99.9 s (89.9 s with Puncture crit, R6-6)", () => {
-    expect(calculateTTK(build("braton_prime", ["hellfire_r3"]), gunner, 100).ttk).toBeCloseTo(89.91, 1);
+    expect(calculateTTK(build("braton_prime", ["hellfire_r3"]), gunner, 100).ttk).toBeCloseTo(86.93, 1); // 89.91 before BaseLevel 8 (R7-4)
   });
   it("Ignis Wraith unmodded vs heavy_gunner L100: 271.4 → 67.4 s", () => {
-    expect(calculateTTK(build("ignis_wraith"), gunner, 100).ttk).toBeCloseTo(67.4, 1);
+    expect(calculateTTK(build("ignis_wraith"), gunner, 100).ttk).toBeCloseTo(65.4, 1); // 67.4 before BaseLevel 8 (R7-4)
   });
 });
 
