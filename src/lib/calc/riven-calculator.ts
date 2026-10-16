@@ -49,129 +49,112 @@ export function rivenRankMultiplier(rank: number): number {
 }
 
 /**
- * Buff-count scaling vs a 2+neg baseline (wiki Riven Mods).
- * Approximate community tables used for range display.
+ * Wiki Riven Mods § Attribute Value Formula: positive attributes are multiplied by
+ * 2+0 → 0.99, 2+1 → 1.2375, 3+0 → 0.75, 3+1 → 0.9375.
  */
 export function rivenBuffCountMultiplier(positiveCount: number, hasNegative: boolean): number {
   const n = Math.max(1, Math.min(3, positiveCount));
-  if (n <= 2 && hasNegative) return 1.0;
-  if (n <= 2) return 0.9;
-  if (hasNegative) return 0.75;
-  return 0.66;
+  if (n <= 2) return hasNegative ? 1.2375 : 0.99;
+  return hasNegative ? 0.9375 : 0.75;
+}
+
+/** Curse factor (wiki): 2+1 → 0.495, 3+1 → 0.75 of the attribute's base value. */
+export function rivenCurseMultiplier(positiveCount: number): number {
+  return Math.max(1, Math.min(3, positiveCount)) >= 3 ? 0.75 : 0.495;
+}
+
+/** Each roll is 90–110% of base (wiki). */
+const ROLL_MIN = 0.9;
+const ROLL_MAX = 1.1;
+
+type RivenPoolKey = "rifle" | "shotgun" | "pistol" | "archgun" | "melee";
+interface RivenAttr {
+  name: string;
+  type: RivenStat["type"];
+  /** Wiki base value per weapon class (Riven Mods § Base Values; ExportUpgrades). */
+  base: Partial<Record<RivenPoolKey, number>>;
+  /** Never rolls as a curse (wiki footnote 1). */
+  positiveOnly?: boolean;
+  /** Lower is better (Recoil): positive roll is negative %. */
+  inverted?: boolean;
+}
+
+// Wiki Riven Mods base-value table (wiki.warframe.com, 2026-10).
+const RIVEN_ATTRS: RivenAttr[] = [
+  { name: "Damage", type: "percent", base: { rifle: 165, shotgun: 164.7, pistol: 219.6, archgun: 99.9, melee: 164.7 } },
+  { name: "Multishot", type: "percent", base: { rifle: 90, shotgun: 119.7, pistol: 119.7, archgun: 60.3 } },
+  { name: "Critical Chance", type: "percent", base: { rifle: 149.99, shotgun: 90, pistol: 149.99, archgun: 99.9, melee: 180 } },
+  { name: "Critical Damage", type: "percent", base: { rifle: 119.997, shotgun: 90, pistol: 90, archgun: 80.1, melee: 90 } },
+  { name: "Status Chance", type: "percent", base: { rifle: 90, shotgun: 90, pistol: 90, archgun: 60.3, melee: 90 } },
+  { name: "Fire Rate", type: "percent", base: { rifle: 60.03, shotgun: 90, pistol: 74.7, archgun: 60.03 } },
+  { name: "Attack Speed", type: "percent", base: { melee: 54.9 } },
+  { name: "Range", type: "integer", base: { melee: 1.94 } },
+  { name: "Slide Attack", type: "percent", base: { melee: 120 } },
+  { name: "Finisher Damage", type: "percent", base: { melee: 119.7 } },
+  { name: "Combo Duration", type: "seconds", base: { melee: 8.1 } },
+  { name: "Magazine Capacity", type: "percent", base: { rifle: 49.995, shotgun: 49.995, pistol: 49.995, archgun: 60.3 } },
+  { name: "Reload Speed", type: "percent", base: { rifle: 49.995, shotgun: 49.995, pistol: 49.995, archgun: 99.9 } },
+  { name: "Ammo Maximum", type: "percent", base: { rifle: 49.95, shotgun: 90, pistol: 90, archgun: 99.9 } },
+  { name: "Zoom", type: "percent", base: { rifle: 59.99, pistol: 80.1, archgun: 59.99 } },
+  { name: "Projectile Speed", type: "percent", base: { rifle: 90, shotgun: 90, pistol: 90 } },
+  { name: "Punch Through", type: "integer", base: { rifle: 2.7, shotgun: 2.7, pistol: 2.7, archgun: 2.7 }, positiveOnly: true },
+  { name: "Recoil", type: "percent", base: { rifle: 90, shotgun: 90, pistol: 90, archgun: 90 }, inverted: true },
+  { name: "Impact", type: "percent", base: { rifle: 119.97, shotgun: 119.97, pistol: 119.97, archgun: 90, melee: 119.7 } },
+  { name: "Puncture", type: "percent", base: { rifle: 119.997, shotgun: 119.997, pistol: 119.997, archgun: 90, melee: 119.997 } },
+  { name: "Slash", type: "percent", base: { rifle: 119.97, shotgun: 119.97, pistol: 119.97, archgun: 90, melee: 119.7 } },
+  { name: "Heat Damage", type: "percent", base: { rifle: 90, shotgun: 90, pistol: 90, archgun: 119.7, melee: 90 }, positiveOnly: true },
+  { name: "Cold Damage", type: "percent", base: { rifle: 90, shotgun: 90, pistol: 90, archgun: 119.7, melee: 90 }, positiveOnly: true },
+  { name: "Toxin Damage", type: "percent", base: { rifle: 90, shotgun: 90, pistol: 90, archgun: 119.7, melee: 90 }, positiveOnly: true },
+  { name: "Electricity Damage", type: "percent", base: { rifle: 90, shotgun: 90, pistol: 90, archgun: 119.7, melee: 90 }, positiveOnly: true },
+];
+
+function poolKey(category: string): RivenPoolKey {
+  const cat = category.toLowerCase();
+  if (cat === "melee") return "melee";
+  if (cat === "shotgun") return "shotgun";
+  if (cat === "pistol" || cat === "secondary") return "pistol";
+  if (cat === "archgun") return "archgun";
+  return "rifle";
+}
+
+function round1(v: number): number {
+  return Math.round(v * 10) / 10;
+}
+
+/** Unscaled pool (disposition 1, factor 1): base and the ±10% roll band. */
+function poolFor(key: RivenPoolKey): RivenStat[] {
+  return RIVEN_ATTRS.filter((a) => a.base[key] != null).map((a) => {
+    const b = a.base[key]!;
+    const sign = a.inverted ? -1 : 1;
+    const lo = sign * b * ROLL_MIN;
+    const hi = sign * b * ROLL_MAX;
+    return {
+      name: a.name,
+      type: a.type,
+      baseValue: sign * b,
+      minValue: Math.min(lo, hi),
+      maxValue: Math.max(lo, hi),
+    };
+  });
 }
 
 // ============================================================
 // STAT POOLS (by weapon type) — labels aligned with builder
 // ============================================================
 export function getRifleStats(): RivenStat[] {
-  return [
-    { name: "Damage", type: "percent", baseValue: 165.0, minValue: 99.9, maxValue: 219.8 },
-    { name: "Multishot", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Critical Chance", type: "percent", baseValue: 150.0, minValue: 90.9, maxValue: 200.0 },
-    { name: "Critical Damage", type: "percent", baseValue: 120.0, minValue: 72.7, maxValue: 160.0 },
-    { name: "Status Chance", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Fire Rate", type: "percent", baseValue: 60.0, minValue: 36.3, maxValue: 79.9 },
-    { name: "Magazine Capacity", type: "percent", baseValue: 50.0, minValue: 30.3, maxValue: 66.6 },
-    { name: "Reload Speed", type: "percent", baseValue: 50.0, minValue: 30.3, maxValue: 66.6 },
-    { name: "Ammo Maximum", type: "percent", baseValue: 50.0, minValue: 30.3, maxValue: 66.6 },
-    { name: "Zoom", type: "percent", baseValue: 60.0, minValue: 36.3, maxValue: 79.9 },
-    { name: "Projectile Speed", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Punch Through", type: "integer", baseValue: 2.7, minValue: 1.6, maxValue: 3.6 },
-    { name: "Recoil", type: "percent", baseValue: -90.0, minValue: -119.9, maxValue: -54.5 },
-    { name: "Impact", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Puncture", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Slash", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Heat Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Cold Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Toxin Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Electricity Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-  ];
+  return poolFor("rifle");
 }
-
 export function getMeleeStats(): RivenStat[] {
-  return [
-    { name: "Damage", type: "percent", baseValue: 165.0, minValue: 99.9, maxValue: 219.8 },
-    { name: "Critical Chance", type: "percent", baseValue: 180.0, minValue: 109.0, maxValue: 239.8 },
-    { name: "Critical Damage", type: "percent", baseValue: 120.0, minValue: 72.7, maxValue: 160.0 },
-    { name: "Status Chance", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Attack Speed", type: "percent", baseValue: 55.0, minValue: 33.3, maxValue: 73.3 },
-    { name: "Range", type: "percent", baseValue: 120.0, minValue: 72.7, maxValue: 160.0 },
-    { name: "Slide Attack", type: "percent", baseValue: 120.0, minValue: 72.7, maxValue: 160.0 },
-    { name: "Finisher Damage", type: "percent", baseValue: 120.0, minValue: 72.7, maxValue: 160.0 },
-    { name: "Combo Duration", type: "seconds", baseValue: 10.0, minValue: 6.1, maxValue: 13.3 },
-    { name: "Impact", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Puncture", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Slash", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Heat Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Cold Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Toxin Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Electricity Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-  ];
+  return poolFor("melee");
 }
-
 export function getShotgunStats(): RivenStat[] {
-  return [
-    { name: "Damage", type: "percent", baseValue: 165.0, minValue: 99.9, maxValue: 219.8 },
-    { name: "Multishot", type: "percent", baseValue: 120.0, minValue: 72.7, maxValue: 160.0 },
-    { name: "Critical Chance", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Critical Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Status Chance", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Fire Rate", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Magazine Capacity", type: "percent", baseValue: 50.0, minValue: 30.3, maxValue: 66.6 },
-    { name: "Reload Speed", type: "percent", baseValue: 50.0, minValue: 30.3, maxValue: 66.6 },
-    { name: "Ammo Maximum", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Projectile Speed", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Impact", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Puncture", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Slash", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Heat Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Cold Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Toxin Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Electricity Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-  ];
+  return poolFor("shotgun");
 }
-
 export function getPistolStats(): RivenStat[] {
-  return [
-    { name: "Damage", type: "percent", baseValue: 165.0, minValue: 99.9, maxValue: 219.8 },
-    { name: "Multishot", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Critical Chance", type: "percent", baseValue: 150.0, minValue: 90.9, maxValue: 200.0 },
-    { name: "Critical Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Status Chance", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Fire Rate", type: "percent", baseValue: 75.0, minValue: 45.4, maxValue: 99.9 },
-    { name: "Magazine Capacity", type: "percent", baseValue: 50.0, minValue: 30.3, maxValue: 66.6 },
-    { name: "Reload Speed", type: "percent", baseValue: 50.0, minValue: 30.3, maxValue: 66.6 },
-    { name: "Ammo Maximum", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Projectile Speed", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Zoom", type: "percent", baseValue: 80.0, minValue: 48.5, maxValue: 106.6 },
-    { name: "Recoil", type: "percent", baseValue: -90.0, minValue: -119.9, maxValue: -54.5 },
-    { name: "Impact", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Puncture", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Slash", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Heat Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Cold Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Toxin Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Electricity Damage", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-  ];
+  return poolFor("pistol");
 }
-
 export function getArchgunStats(): RivenStat[] {
-  return [
-    { name: "Damage", type: "percent", baseValue: 100.0, minValue: 60.6, maxValue: 133.3 },
-    { name: "Multishot", type: "percent", baseValue: 60.0, minValue: 36.3, maxValue: 79.9 },
-    { name: "Critical Chance", type: "percent", baseValue: 100.0, minValue: 60.6, maxValue: 133.3 },
-    { name: "Critical Damage", type: "percent", baseValue: 80.0, minValue: 48.5, maxValue: 106.6 },
-    { name: "Status Chance", type: "percent", baseValue: 60.0, minValue: 36.3, maxValue: 79.9 },
-    { name: "Fire Rate", type: "percent", baseValue: 60.0, minValue: 36.3, maxValue: 79.9 },
-    { name: "Magazine Capacity", type: "percent", baseValue: 60.0, minValue: 36.3, maxValue: 79.9 },
-    { name: "Reload Speed", type: "percent", baseValue: 100.0, minValue: 60.6, maxValue: 133.3 },
-    { name: "Ammo Maximum", type: "percent", baseValue: 100.0, minValue: 60.6, maxValue: 133.3 },
-    { name: "Projectile Speed", type: "percent", baseValue: 100.0, minValue: 60.6, maxValue: 133.3 },
-    { name: "Heat Damage", type: "percent", baseValue: 120.0, minValue: 72.7, maxValue: 160.0 },
-    { name: "Cold Damage", type: "percent", baseValue: 120.0, minValue: 72.7, maxValue: 160.0 },
-    { name: "Toxin Damage", type: "percent", baseValue: 120.0, minValue: 72.7, maxValue: 160.0 },
-    { name: "Electricity Damage", type: "percent", baseValue: 120.0, minValue: 72.7, maxValue: 160.0 },
-  ];
+  return poolFor("archgun");
 }
 
 export function getStatsForCategory(category: string): RivenStat[] {
@@ -186,10 +169,10 @@ export function getStatsForCategory(category: string): RivenStat[] {
 // ============================================================
 // SPLICED TRAITS (Riven Splicer, Update 44.1)
 // Base values: wiki Riven Mods "Spliced Values" (from DE Public Export).
-// Roll band uses the same ratio as the regular pools above (90 → 54.5–119.9).
+// Roll band: 90–110% of base, like the regular pools.
 // ============================================================
-const SPLICED_MIN_RATIO = 54.5 / 90;
-const SPLICED_MAX_RATIO = 119.9 / 90;
+const SPLICED_MIN_RATIO = ROLL_MIN;
+const SPLICED_MAX_RATIO = ROLL_MAX;
 
 function spliced(name: string, baseValue: number): RivenStat {
   return {
@@ -257,44 +240,34 @@ export function getStatsWithDisposition(
   }));
 }
 
-export function getNegativeStats(): RivenStat[] {
-  return [
-    { name: "Damage", type: "percent", baseValue: -90.0, minValue: -119.9, maxValue: -54.5 },
-    { name: "Multishot", type: "percent", baseValue: -60.0, minValue: -79.9, maxValue: -36.3 },
-    { name: "Critical Chance", type: "percent", baseValue: -60.0, minValue: -79.9, maxValue: -36.3 },
-    { name: "Critical Damage", type: "percent", baseValue: -60.0, minValue: -79.9, maxValue: -36.3 },
-    { name: "Status Chance", type: "percent", baseValue: -60.0, minValue: -79.9, maxValue: -36.3 },
-    { name: "Fire Rate", type: "percent", baseValue: -60.0, minValue: -79.9, maxValue: -36.3 },
-    { name: "Attack Speed", type: "percent", baseValue: -55.0, minValue: -73.3, maxValue: -33.3 },
-    { name: "Magazine Capacity", type: "percent", baseValue: -50.0, minValue: -66.6, maxValue: -30.3 },
-    { name: "Reload Speed", type: "percent", baseValue: -50.0, minValue: -66.6, maxValue: -30.3 },
-    { name: "Ammo Maximum", type: "percent", baseValue: -50.0, minValue: -66.6, maxValue: -30.3 },
-    { name: "Projectile Speed", type: "percent", baseValue: -90.0, minValue: -119.9, maxValue: -54.5 },
-    { name: "Recoil", type: "percent", baseValue: 90.0, minValue: 54.5, maxValue: 119.9 },
-    { name: "Zoom", type: "percent", baseValue: -60.0, minValue: -79.9, maxValue: -36.3 },
-    { name: "Range", type: "percent", baseValue: -60.0, minValue: -79.9, maxValue: -36.3 },
-    { name: "Slide Attack", type: "percent", baseValue: -60.0, minValue: -79.9, maxValue: -36.3 },
-    { name: "Finisher Damage", type: "percent", baseValue: -60.0, minValue: -79.9, maxValue: -36.3 },
-    { name: "Impact", type: "percent", baseValue: -90.0, minValue: -119.9, maxValue: -54.5 },
-    { name: "Puncture", type: "percent", baseValue: -90.0, minValue: -119.9, maxValue: -54.5 },
-    { name: "Slash", type: "percent", baseValue: -90.0, minValue: -119.9, maxValue: -54.5 },
-  ];
+/**
+ * Curse pool (wiki): same base value as the positive attribute, sign flipped; elements
+ * and Punch Through never roll negative. Unscaled (disposition 1, factor 1).
+ */
+export function getNegativeStats(category = "rifle"): RivenStat[] {
+  const key = poolKey(category);
+  return RIVEN_ATTRS.filter((a) => a.base[key] != null && !a.positiveOnly).map((a) => {
+    const b = a.base[key]!;
+    const sign = a.inverted ? 1 : -1;
+    const lo = sign * b * ROLL_MIN;
+    const hi = sign * b * ROLL_MAX;
+    return { name: a.name, type: a.type, baseValue: sign * b, minValue: Math.min(lo, hi), maxValue: Math.max(lo, hi) };
+  });
 }
 
 export function getNegativeStatsWithDisposition(
   disposition: number,
-  options: RivenRangeOptions = {},
+  options: RivenRangeOptions & { category?: string } = {},
 ): RivenStat[] {
   const rank = options.rank ?? 8;
   const positiveCount = options.positiveCount ?? 2;
-  const hasNegative = true;
-  const scale = disposition * rivenRankMultiplier(rank) * rivenBuffCountMultiplier(positiveCount, hasNegative);
+  const scale = disposition * rivenRankMultiplier(rank) * rivenCurseMultiplier(positiveCount);
 
-  return getNegativeStats().map((stat) => ({
+  return getNegativeStats(options.category ?? "rifle").map((stat) => ({
     ...stat,
-    minValue: Math.round(stat.minValue * scale * 10) / 10,
-    maxValue: Math.round(stat.maxValue * scale * 10) / 10,
-    baseValue: Math.round(stat.baseValue * scale * 10) / 10,
+    minValue: round1(stat.minValue * scale),
+    maxValue: round1(stat.maxValue * scale),
+    baseValue: round1(stat.baseValue * scale),
   }));
 }
 
@@ -303,6 +276,7 @@ function scoringMagnitude(stat: RivenStat): number {
   const abs = Math.abs(stat.baseValue);
   if (stat.type === "percent") return abs / 100;
   if (stat.type === "seconds") return abs / 10; // combo duration ~10s baseline
+  if (stat.name === "Range") return abs / 1.94; // melee range metres (wiki base 1.94 m)
   if (stat.type === "integer") return abs / 2.7; // punch through ~2.7m baseline
   return abs / 100;
 }

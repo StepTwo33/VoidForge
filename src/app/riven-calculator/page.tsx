@@ -24,6 +24,7 @@ function formatRangeHint(stat: RivenStat | undefined): string {
   const hi = Math.max(Math.abs(stat.minValue), Math.abs(stat.maxValue));
   if (stat.type === "percent") return `${lo.toFixed(0)}–${hi.toFixed(0)}%`;
   if (stat.type === "seconds") return `${lo.toFixed(1)}–${hi.toFixed(1)}s`;
+  if (stat.type === "integer") return `${lo.toFixed(1)}–${hi.toFixed(1)}m`;
   return `${lo.toFixed(1)}–${hi.toFixed(1)}`;
 }
 
@@ -72,8 +73,8 @@ export default function RivenCalculatorPage() {
   }, [selectedWeaponType, disposition, rangeOptions]);
 
   const scaledNegativePool = useMemo(
-    () => getNegativeStatsWithDisposition(disposition, rangeOptions),
-    [disposition, rangeOptions],
+    () => getNegativeStatsWithDisposition(disposition, { ...rangeOptions, category: (selectedWeaponType ?? "rifle").toLowerCase() }),
+    [disposition, rangeOptions, selectedWeaponType],
   );
 
   const handleGrade = useCallback((): { score: number; grade: string; color: string } | null => {

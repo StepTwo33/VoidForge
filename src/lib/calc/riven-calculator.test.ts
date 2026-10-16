@@ -14,8 +14,8 @@ describe("riven rank / buff multipliers", () => {
     expect(rivenRankMultiplier(0)).toBeCloseTo(1 / 9, 5);
   });
 
-  it("2+neg is baseline; 3+0 is lowest", () => {
-    expect(rivenBuffCountMultiplier(2, true)).toBe(1);
+  it("wiki factors: 2+1 highest, 3+0 lowest", () => {
+    expect(rivenBuffCountMultiplier(2, true)).toBe(1.2375);
     expect(rivenBuffCountMultiplier(3, false)).toBeLessThan(rivenBuffCountMultiplier(2, true));
   });
 });
