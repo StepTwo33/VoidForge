@@ -33,3 +33,16 @@ describe("R9-C2 Sacrificial set (wiki.gg + fandom: both mods +25% when paired)",
     expect(one.criticalChance).toBeCloseTo(0.05 * 3.2, 6);
   });
 });
+
+describe("R9-B Vinquibus melee mode (wiki Weapons/data/melee 'Vinquibus (Melee)')", async () => {
+  const { allWeapons } = await import("@/data/weapons");
+  const { MELEE_ATTACK_DATA } = await import("@/data/melee-attack-data");
+  it("base stats 182 Puncture / 78 Slash, 40% / 3.2x / 20%, 1.0 attack speed", () => {
+    const w = allWeapons.find((x) => x.id === "vinquibus_melee")!;
+    expect([w.category, w.damage, w.puncture, w.slash, w.criticalChance, w.criticalMultiplier, w.statusChance, w.fireRate]).toEqual(["melee", 260, 182, 78, 0.4, 3.2, 0.2, 1]);
+  });
+  it("heavy 2600, slide 520, slam 440 r7, heavy slam 660 r8", () => {
+    const d = (MELEE_ATTACK_DATA as Record<string, any>).vinquibus_melee;
+    expect([d.heavyAttack, d.slideAttack, d.slam.damage, d.slam.radius, d.heavySlam.damage, d.heavySlam.radius]).toEqual([2600, 520, 440, 7, 660, 8]);
+  });
+});

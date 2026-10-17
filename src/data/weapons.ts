@@ -6998,6 +6998,28 @@ export const allWeapons: Weapon[] = [
     "hasRivenSlot": true
   },
   {
+    "id": "vinquibus_melee",
+    "name": "Vinquibus (Melee)",
+    "category": "melee",
+    "damage": 260,
+    "impact": 0,
+    "puncture": 182,
+    "slash": 78,
+    "fireRate": 1,
+    "criticalChance": 0.4,
+    "criticalMultiplier": 3.2,
+    "statusChance": 0.2,
+    "magazine": 0,
+    "reloadTime": 0,
+    "multishot": 1,
+    "triggerType": "Melee",
+    "modSlots": 8,
+    "hasPrimaryArcaneSlot": false,
+    "hasSecondaryArcaneSlot": false,
+    "isIncarnon": false,
+    "hasRivenSlot": true
+  },
+  {
     "id": "zenith",
     "name": "Zenith",
     "category": "primary",

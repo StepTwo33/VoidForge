@@ -368,6 +368,7 @@ const WIKI_PASSIVES: Record<string, string> = {
   verdilac: "[Block Combo] Performs up to three strikes, hurling 2m wide Toxin energy projectiles with 30% Crit Chance and 2.5 Crit Multiplier.",
   vesper_77: "While aiming: Highlights weak points and grants +40% Critical Damage.",
   vinquibus: "[Primary Form (Headshot)] Headshots grant 2 stacks (max 16) of Vinquibus Precision, increasing melee damage by 250% (expended on connect). [Melee Form (On Kill)] Kills grant 4 stacks (max 16) of Vinquibus Ferocity, increasing primary Ammo Efficiency by 100% (expended on shot).",
+  vinquibus_melee: "Bayonet melee form of the Vinquibus (no stances). [Melee Form (On Kill)] Kills grant 4 stacks (max 16) of Vinquibus Ferocity, increasing primary Ammo Efficiency by 100% (expended on shot). Heavy attack 2600, slide 520, slam 440 Impact (7m), heavy slam 660 Blast.",
   vulkar: "Shots stagger most enemies with every hit. Innate 1m punch through.",
   vulkar_wraith: "Shots stagger most enemies with every hit. Innate 1m punch through.",
   war: "Every hit on enemies that are not ragdolled procs an Impact status effect.",
