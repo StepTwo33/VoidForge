@@ -904,10 +904,10 @@ const RAW_MODS: Mod[] = [
     "category": "melee",
     "subCategory": "",
     "stats": {
-      "comboCount": 15,
-      "attackSpeed": -10
+      "comboCount": 7.5,
+      "comboDuration": -12.5
     },
-    "description": "Start with +15 Combo, -10% Attack Speed per rank",
+    "description": "+30 Initial Combo\\n-50% Combo Duration",
     "rarity": "rare"
   },
   {

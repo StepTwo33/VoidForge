@@ -35,9 +35,9 @@ describe("melee combo tiers", () => {
       [{ modId: "corrupt_charge", rank: 3, slotIndex: 0 }],
       modsMap,
     );
-    // Corrupt Charge max = +15 combo → 215 hits → still 11× (12× starts at 220)
-    expect(withCorrupt).toBe(215);
-    expect(getHeavyAttackComboMultiplier(withCorrupt)).toBe(11);
+    // Corrupt Charge max = +30 combo (wiki) → 230 hits → 12× (12× starts at 220)
+    expect(withCorrupt).toBe(230);
+    expect(getHeavyAttackComboMultiplier(withCorrupt)).toBe(12);
     expect(getHeavyAttackComboMultiplier(220)).toBe(12);
   });
 });

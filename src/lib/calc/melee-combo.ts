@@ -97,7 +97,8 @@ export function sumInitialComboFromMods(
     const mod = allMods.get(modSlot.modId);
     if (!mod?.stats.comboCount) continue;
     const rank = Math.min(Math.max(modSlot.rank ?? 0, 0), mod.maxRank);
-    total += (mod.stats.comboCount * (rank + 1)) / (mod.maxRank + 1);
+    // Catalog comboCount is per rank (Corrupt Charge 7.5 → 8/15/23/30, wiki table).
+    total += mod.stats.comboCount * (rank + 1);
   }
   return Math.round(total);
 }

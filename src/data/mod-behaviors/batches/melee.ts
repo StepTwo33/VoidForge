@@ -82,8 +82,8 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("statusChance", "mod_panel", "multiplicative_percent", "wiki: Condition's Perfection — Tennokai-only status"),
   ]),
   corrupt_charge: mod("corrupt_charge", [
-    line("attackSpeed", "weapon_dps", "multiplicative_percent", "Corrupt Charge: attackSpeed \u2014 Start with +15 Combo, -10% Attack Speed per rank"),
-    line("comboCount", "mod_panel", "multiplicative_percent", "Corrupt Charge: comboCount \u2014 Start with +15 Combo, -10% Attack Speed per rank"),
+    line("comboCount", "mod_panel", "multiplicative_percent", "wiki: Corrupt Charge — +7.5 Initial Combo per rank (8/15/23/30); no attack speed penalty"),
+    line("comboDuration", "mod_panel", "multiplicative_percent", "wiki: Corrupt Charge — -12.5% Combo Duration per rank (percent of base; panel until duration mult model)"),
   ]),
   counterweight: mod("counterweight", [
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Counterweight — IPS convert (not always-on damage)"),

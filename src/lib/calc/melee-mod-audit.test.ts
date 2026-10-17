@@ -457,9 +457,9 @@ describe("contempt + charge cores (wiki max rank, Phase M10)", () => {
     expect(stats.statusChance).toBeCloseTo(weapon.statusChance * 1.6, 8);
   });
 
-  it("Corrupt Charge R3: −40% attack speed (initial combo panel-only)", () => {
+  it("Corrupt Charge R3: no attack speed penalty (wiki: +30 initial combo, -50% combo duration)", () => {
     const weapon = requireWeapon("skana");
-    expect(withMod("corrupt_charge").fireRate).toBeCloseTo(weapon.fireRate * 0.6, 5);
+    expect(withMod("corrupt_charge").fireRate).toBeCloseTo(weapon.fireRate, 5);
   });
 });
 
