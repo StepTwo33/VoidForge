@@ -74,7 +74,7 @@ export const SET_BONUS_DEFINITIONS: Record<
   set_bonus_sacrificial: {
     label: "Sacrificial Set Bonus",
     pieces: 2,
-    description: "2-piece: Enhances Sacrificial mods in the set (+55% / +75% ability strength).",
+    description: "2-piece: Sacrificial Steel and Sacrificial Pressure effects +25% when both are equipped.",
   },
   set_bonus_saxum: {
     label: "Saxum Set Bonus",

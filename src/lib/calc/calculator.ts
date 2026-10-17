@@ -467,10 +467,10 @@ function quantizeStatsDamage(stats: CalculatedStats, moddedBaseDamage: number): 
 // Mecha mark-kill status-spread DoT is sim-gated via applyMechaSpreadDps (not in TTK).
 const SACRIFICIAL_MOD_IDS = ['sacrificial_pressure', 'sacrificial_steel'];
 
-// Sacrificial full set bonus: +75% when both mods equipped
+// wiki (both): Sacrificial Set "Increases the effects of both mods by 25% when both are equipped together."
 function getSacrificialSetBonus(sacCount: number): number {
   if (sacCount < 2) return 0;
-  return 0.75;
+  return 0.25;
 }
 
 // Gladiator set: +10% CC per combo multiplier per set mod equipped

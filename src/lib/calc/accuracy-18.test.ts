@@ -14,3 +14,22 @@ describe("R9-C1 Corrupt Charge (wiki.gg + fandom table: +7.5/15/22.5/30 combo, -
     expect(m.stats.comboDuration! * 4).toBe(-50);
   });
 });
+
+describe("R9-C2 Sacrificial set (wiki.gg + fandom: both mods +25% when paired)", async () => {
+  const { allWeapons } = await import("@/data/weapons");
+  const { calculateWeaponBuild } = await import("@/lib/calc/calculator");
+  const skana = allWeapons.find((w) => w.id === "skana")!;
+  const both = calculateWeaponBuild(skana, [
+    { modId: "sacrificial_steel", rank: 10, slotIndex: 0 },
+    { modId: "sacrificial_pressure", rank: 10, slotIndex: 1 },
+  ], modsMap);
+  it("Steel 220% → 275% CC, Pressure 110% → 137.5% damage", () => {
+    // skana base CC 0.05, damage 120: 0.05 × (1 + 2.75) = 0.1875; 120 × 2.375 = 285
+    expect(both.criticalChance).toBeCloseTo(0.05 * 3.75, 6);
+    expect(both.moddedBaseDamage).toBeCloseTo(120 * 2.375, 6);
+  });
+  it("single mod unchanged", () => {
+    const one = calculateWeaponBuild(skana, [{ modId: "sacrificial_steel", rank: 10, slotIndex: 0 }], modsMap);
+    expect(one.criticalChance).toBeCloseTo(0.05 * 3.2, 6);
+  });
+});
