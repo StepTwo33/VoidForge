@@ -4691,9 +4691,8 @@ describe("Phase 8 — ability scaling registry + sets", () => {
     expect(getVerifiedMiscScaling("mesa", "Peacemaker", "damageBonus")).toEqual({
       scale: "strength",
     });
-    expect(getVerifiedMiscScaling("mesa", "Peacemaker", "rampUpDamageBonus")).toEqual({
-      scale: "strength",
-    });
+    // wiki: ramp-up +150% is a fixed Misc value (R8-10)
+    expect(getVerifiedMiscScaling("mesa", "Peacemaker", "rampUpDamageBonus")).toBeNull();
     expect(getVerifiedMiscScaling("mesa", "Peacemaker", "energyDrain")).toEqual({
       scale: "efficiency",
       formula: "channeled_drain",

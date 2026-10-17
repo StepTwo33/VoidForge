@@ -94,3 +94,18 @@ describe("R8-4 companion mods (wiki Module:Mods/data)", async () => {
     expect(pol("martyr_symbiosis")).toBe("penjaga");
   });
 });
+
+describe("R8-10 Peacemaker ramp-up is fixed (wiki Peacemaker Misc)", async () => {
+  const { scaleAbilityMiscStats } = await import("@/lib/codex/ability-misc-stats");
+  const { allWarframes } = await import("@/data/warframes");
+  for (const id of ["mesa", "mesa_prime"]) {
+    it(`${id}: 200% STR → damage bonus 300%, ramp stays 150%`, () => {
+      const wf = allWarframes.find((w) => w.id === id) as never as { abilities: { name: string; miscStats: Record<string, unknown> }[] };
+      const pm = wf.abilities.find((a) => a.name === "Peacemaker")!;
+      const lines = scaleAbilityMiscStats(pm.miscStats, { strength: 2, duration: 1, range: 1, efficiency: 1 } as never, { warframeId: id, abilityName: "Peacemaker" } as never);
+      const get = (l: string) => lines.find((x) => x.label === l)!.scaled;
+      expect(get("Damage Bonus")).toBe("300%");
+      expect(get("Ramp-Up Damage Bonus")).toBe("150%");
+    });
+  }
+});

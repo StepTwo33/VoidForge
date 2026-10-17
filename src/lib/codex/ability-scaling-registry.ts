@@ -123,11 +123,11 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     maxDamagePerInstance: { scale: "strength" },
     maxStoredDamage: { scale: "strength" },
   },
-  // wiki: Peacemaker — innate damage bonus scales STR; FoV/max distance Misc;
+  // wiki: Peacemaker — innate damage bonus scales STR; ramp-up +150% (×2.5) is a fixed
+  // Misc value (not STR); FoV/max distance Misc;
   // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
   "mesa::Peacemaker": {
     damageBonus: { scale: "strength" },
-    rampUpDamageBonus: { scale: "strength" },
     energyDrain: { scale: "efficiency", formula: "channeled_drain" },
   },
 
