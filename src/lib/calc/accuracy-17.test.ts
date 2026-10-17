@@ -158,3 +158,19 @@ describe("R8-3 Railjack Gunnery intrinsics on Archwing / Necramech", async () =>
     expect(b.totalDamage / a.totalDamage).toBeCloseTo(2.25 / 2, 2);
   });
 });
+
+describe("R8-5 Necramech capacity above rank 30 + mod polarities", async () => {
+  const { archwingFrameCapacity } = await import("@/data/archwing");
+  const { allMods } = await import("@/data/mods");
+  it("Necramech: +2 ranks per Forma to 40 → 80 with Reactor; Archwing stays 60", () => {
+    expect(archwingFrameCapacity("necramech", 0, true)).toBe(60);
+    expect(archwingFrameCapacity("necramech", 3, true)).toBe(72);
+    expect(archwingFrameCapacity("necramech", 5, true)).toBe(80);
+    expect(archwingFrameCapacity("necramech", 9, false)).toBe(40);
+    expect(archwingFrameCapacity("archwing", 5, true)).toBe(60);
+  });
+  it("Necramech Fury Vazarin, Necramech Hydraulics Madurai", () => {
+    expect(allMods.find((m) => m.id === "necramech_fury")?.polarity).toBe("vazarin");
+    expect(allMods.find((m) => m.id === "necramech_hydraulics")?.polarity).toBe("madurai");
+  });
+});

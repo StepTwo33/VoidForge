@@ -19152,7 +19152,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "necramech_fury",
     "name": "Necramech Fury",
-    "polarity": "madurai",
+    "polarity": "vazarin",
     "drain": 4,
     "maxRank": 3,
     "category": "necramech",
@@ -19166,7 +19166,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "necramech_hydraulics",
     "name": "Necramech Hydraulics",
-    "polarity": "naramon",
+    "polarity": "madurai",
     "drain": 6,
     "maxRank": 3,
     "category": "necramech",

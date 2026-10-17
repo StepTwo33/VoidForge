@@ -54,3 +54,17 @@ export const NECRAMECH_IDS = new Set(necramechs.map((n) => n.id));
 export function isNecramechId(id: string): boolean {
   return NECRAMECH_IDS.has(id);
 }
+
+/**
+ * Frame mod capacity. Archwings: rank 30 → 30 (60 with Reactor).
+ * Necramechs (wiki Necramech): each polarization adds +2 ranks, up to rank 40 after
+ * 5 Forma → 40 (80 with Reactor).
+ */
+export function archwingFrameCapacity(
+  mode: string,
+  polarizedSlots: number,
+  hasReactor: boolean,
+): number {
+  const rank = mode === "necramech" ? 30 + 2 * Math.min(5, Math.max(0, polarizedSlots)) : 30;
+  return rank * (hasReactor ? 2 : 1);
+}

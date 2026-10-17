@@ -10,7 +10,7 @@ import { enrichWeapon } from "@/lib/weapons/weapon-enrich";
 import { filterArchmeleeMods } from "@/lib/mods/archmelee-mods";
 import { archgunModsForBuilder } from "@/lib/mods/archgun-weapon-augment-mods";
 import { isArchwingAugment, normalizeArchwingId } from "@/lib/mods/archwing-augment-mods";
-import { Archwing, Necramech } from "@/data/archwing";
+import { Archwing, Necramech, archwingFrameCapacity } from "@/data/archwing";
 import { calculateWeaponBuild } from "@/lib/calc/calculator";
 import { buildWeaponContributionContext } from "@/lib/calc/dps-contributions";
 import { calculateArchwingBuild, calculateNecramechBuild } from "@/lib/calc/archwing-calculator";
@@ -224,7 +224,11 @@ export default function ArchwingBuilderPage() {
     return null;
   }, [mode, selectedArchwing, selectedNecramech, archwingMods, necramechMods, railjackGunnery]);
 
-  const frameCapacity = hasReactor ? 60 : 30;
+  const frameCapacity = archwingFrameCapacity(
+    mode,
+    mode === "necramech" ? Object.keys(necramechPolarities).length : 0,
+    hasReactor,
+  );
   const weaponCapacity = hasCatalyst ? 60 : 30;
 
   const frameModsUsed = useMemo(() => {
