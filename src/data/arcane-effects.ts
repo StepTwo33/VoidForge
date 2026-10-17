@@ -2729,7 +2729,8 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
         "stat": "criticalMultiplier",
         "maxValue": 20.0,
         "stacking": true,
-        "baseValue": 3.333333
+        "baseValue": 5,
+        "valuesByRank": [5, 7, 9, 12, 16, 20]
       }
     ]
   },

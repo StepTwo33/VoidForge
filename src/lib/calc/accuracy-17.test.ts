@@ -196,3 +196,12 @@ describe("R8-6 Plexus / Archwing mod values (wiki Mods/data + fandom Overloader 
     expect(desc("raider_matrix")).toContain("+15% Archwing Speed and Damage");
   });
 });
+
+describe("R8-8 Secondary Outburst rank table (wiki 5/7/9/12/16/20 per combo)", async () => {
+  const { ARCANE_EFFECTS } = await import("@/data/arcane-effects");
+  const { scaleArcaneEffectLine } = await import("@/lib/calc/arcane-utils");
+  it("per-rank values", () => {
+    const line = ARCANE_EFFECTS.secondary_outburst!.effects[0]!;
+    expect([0, 1, 2, 3, 4, 5].map((r) => scaleArcaneEffectLine(line, r, 5))).toEqual([5, 7, 9, 12, 16, 20]);
+  });
+});
