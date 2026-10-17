@@ -300,4 +300,6 @@ export interface ArchwingBuildData {
   isMR30: boolean;
   framePolarities: Record<number, string>;
   weaponPolarities: Record<number, string>;
+  /** Railjack Gunnery intrinsic rank (0–10) for Archwing/Necramech buffs. */
+  railjackGunnery?: number;
 }

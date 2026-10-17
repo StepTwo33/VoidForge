@@ -179,3 +179,30 @@ export function intrinsicPaperEffects(
     panelNotes,
   };
 }
+
+/**
+ * Railjack Gunnery intrinsics that buff Archwing / Necramech gear
+ * (wiki Railjack/Intrinsics/Gunnery):
+ * - Rank 3: Archwing melee +20% damage (+0.75 m range, not modelled).
+ * - Rank 4: Necramech gun damage +20%.
+ * - Rank 8: Archwing +25% damage (additive with Rubedo-Lined Barrel),
+ *   +20% Ability Strength / Range / Efficiency.
+ * Rank-8 damage is applied to Archwing-mode arch-guns and arch-melee (wiki "Archwing power").
+ */
+export function gunneryArchWeaponDamageBonus(
+  gunnery: number | undefined,
+  weaponCategory: string | undefined,
+  mode: "archwing" | "necramech",
+): number {
+  const g = clampIntrinsicRank(gunnery ?? 0);
+  if (mode === "necramech") return weaponCategory === "archgun" && g >= 4 ? 0.2 : 0;
+  let bonus = 0;
+  if (weaponCategory === "archmelee" && g >= 3) bonus += 0.2;
+  if ((weaponCategory === "archgun" || weaponCategory === "archmelee") && g >= 8) bonus += 0.25;
+  return bonus;
+}
+
+/** Gunnery 8: +20% Archwing Ability Strength, Range and Efficiency (additive with mods). */
+export function gunneryArchwingAbilityBonus(gunnery: number | undefined): number {
+  return clampIntrinsicRank(gunnery ?? 0) >= 8 ? 0.2 : 0;
+}

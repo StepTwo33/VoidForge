@@ -1,6 +1,7 @@
 import { getEffectiveModsMap } from "@/lib/weapons/effective-data";
 import type { Archwing, Necramech } from "@/data/archwing";
 import { ARCHWING_RANK30_BONUS, NECRAMECH_RANK30_BONUS } from "@/data/archwing";
+import { gunneryArchwingAbilityBonus } from "@/data/railjack-intrinsics";
 import {
   applyVerifiedModStatToArchwing,
   applyVerifiedModStatToNecramech,
@@ -58,8 +59,14 @@ export function calculateArchwingBuild(
   archwing: Archwing,
   equippedMods: EquippedArchwingMod[],
   allMods: Map<string, Mod> = getEffectiveModsMap(),
+  /** Railjack Gunnery intrinsic rank (0–10); rank 8 adds +20% STR/Range/Efficiency. */
+  railjackGunnery = 0,
 ): ArchwingCalculatedStats {
   const { acc, panel } = applyArchwingMods(equippedMods, allMods);
+  const gunneryAbility = gunneryArchwingAbilityBonus(railjackGunnery);
+  acc.abilityStrength += gunneryAbility;
+  acc.abilityRange += gunneryAbility;
+  acc.abilityEfficiency += gunneryAbility;
   // Mods scale the max-rank (rank 30) stat.
   const baseHealthR30 = archwing.health + ARCHWING_RANK30_BONUS.health;
   const baseShieldR30 = archwing.shield + ARCHWING_RANK30_BONUS.shield;

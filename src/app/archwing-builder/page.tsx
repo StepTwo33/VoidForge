@@ -14,6 +14,7 @@ import { Archwing, Necramech } from "@/data/archwing";
 import { calculateWeaponBuild } from "@/lib/calc/calculator";
 import { buildWeaponContributionContext } from "@/lib/calc/dps-contributions";
 import { calculateArchwingBuild, calculateNecramechBuild } from "@/lib/calc/archwing-calculator";
+import { gunneryArchWeaponDamageBonus, MAX_INTRINSIC_RANK } from "@/data/railjack-intrinsics";
 import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
 import { WeaponStatsPanel, ArchwingStatsPanel } from "@/components/stats-panel";
 import { Weapon, EquippedMod, CalculatedStats, ArchwingCalculatedStats } from "@/lib/types";
@@ -60,6 +61,7 @@ export default function ArchwingBuilderPage() {
   // Shared
   const [hasReactor, setHasReactor] = useState(false);
   const [hasCatalyst, setHasCatalyst] = useState(false);
+  const [railjackGunnery, setRailjackGunnery] = useState(0);
   const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>([]);
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
@@ -82,6 +84,7 @@ export default function ArchwingBuilderPage() {
       isMR30: false,
       framePolarities: mode === "archwing" ? archwingPolarities : necramechPolarities,
       weaponPolarities,
+      railjackGunnery,
     };
     const build: SavedBuild = {
       id: currentBuildId || generateBuildId(),
@@ -133,6 +136,7 @@ export default function ArchwingBuilderPage() {
     }
     setHasReactor(d.hasReactor);
     setHasCatalyst(d.hasCatalyst);
+    setRailjackGunnery(d.railjackGunnery ?? 0);
     setWeaponPolarities(d.weaponPolarities || {});
     setCurrentBuildId(build.id);
     setBuildName(build.name);
@@ -160,8 +164,12 @@ export default function ArchwingBuilderPage() {
   // Weapon stats
   const weaponStats = useMemo<CalculatedStats | null>(() => {
     if (!selectedWeapon) return null;
-    return calculateWeaponBuild(selectedWeapon, weaponMods, modsMap);
-  }, [selectedWeapon, weaponMods]);
+    const gunneryDmg = gunneryArchWeaponDamageBonus(railjackGunnery, selectedWeapon.category, mode);
+    const calcOptions = gunneryDmg > 0
+      ? { externalBuffs: [{ id: "railjack_gunnery", label: "Railjack Gunnery intrinsic", category: "other" as const, damageBonus: gunneryDmg }] }
+      : undefined;
+    return calculateWeaponBuild(selectedWeapon, weaponMods, modsMap, undefined, undefined, calcOptions);
+  }, [selectedWeapon, weaponMods, railjackGunnery, mode]);
 
   const weaponContributionContext = useMemo(() => {
     if (!selectedWeapon) return null;
@@ -187,6 +195,7 @@ export default function ArchwingBuilderPage() {
       isMR30: false,
       framePolarities: mode === "archwing" ? archwingPolarities : necramechPolarities,
       weaponPolarities,
+      railjackGunnery,
     };
     return snapshotFromBuild("archwing", buildName || selectedFrame.name, data);
   }, [
@@ -201,18 +210,19 @@ export default function ArchwingBuilderPage() {
     archwingPolarities,
     necramechPolarities,
     weaponPolarities,
+    railjackGunnery,
     buildName,
   ]);
 
   const frameStats = useMemo<ArchwingCalculatedStats | null>(() => {
     if (mode === "archwing" && selectedArchwing) {
-      return calculateArchwingBuild(selectedArchwing, archwingMods);
+      return calculateArchwingBuild(selectedArchwing, archwingMods, undefined, railjackGunnery);
     }
     if (mode === "necramech" && selectedNecramech) {
       return calculateNecramechBuild(selectedNecramech, necramechMods);
     }
     return null;
-  }, [mode, selectedArchwing, selectedNecramech, archwingMods, necramechMods]);
+  }, [mode, selectedArchwing, selectedNecramech, archwingMods, necramechMods, railjackGunnery]);
 
   const frameCapacity = hasReactor ? 60 : 30;
   const weaponCapacity = hasCatalyst ? 60 : 30;
@@ -383,6 +393,22 @@ export default function ArchwingBuilderPage() {
                     >
                       <Zap className="h-3.5 w-3.5" /> Reactor
                     </button>
+                    <label
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground lg:pointer-fine:min-h-9 sm:py-1.5"
+                      title="Railjack Gunnery intrinsic: R3 arch-melee +20% dmg, R4 Necramech gun +20% dmg, R8 Archwing +25% dmg and +20% Strength/Range/Efficiency"
+                    >
+                      Gunnery
+                      <select
+                        aria-label="Railjack Gunnery intrinsic rank"
+                        value={railjackGunnery}
+                        onChange={(e) => setRailjackGunnery(Number(e.target.value))}
+                        className="bg-transparent font-mono tabular-nums text-foreground outline-none"
+                      >
+                        {Array.from({ length: MAX_INTRINSIC_RANK + 1 }, (_, r) => (
+                          <option key={r} value={r}>{r}</option>
+                        ))}
+                      </select>
+                    </label>
                     <span className={cn(
                       "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
                       frameModsUsed > frameCapacity ? "text-red-700 dark:text-red-400" : "text-muted-foreground"

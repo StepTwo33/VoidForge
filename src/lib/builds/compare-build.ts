@@ -1,3 +1,4 @@
+import { gunneryArchWeaponDamageBonus } from "@/data/railjack-intrinsics";
 import type {
   ArchwingCalculatedStats,
   CalculatedStats,
@@ -149,7 +150,12 @@ function moddedWeaponStats(
   mods: ModSlot[],
   arcaneIds?: (string | null)[],
   linkage?: SetBonusLinkage,
+  /** Additive base-damage bonus (Railjack Gunnery intrinsic on arch weapons). */
+  intrinsicDamageBonus = 0,
 ): CalculatedStats | null {
+  const calcOptions = intrinsicDamageBonus > 0
+    ? { externalBuffs: [{ id: "railjack_gunnery", label: "Railjack Gunnery intrinsic", category: "other" as const, damageBonus: intrinsicDamageBonus }] }
+    : undefined;
   const weapon = typeof weaponIdOrWeapon === "string"
     ? getEffectiveWeaponsMap().get(weaponIdOrWeapon)
     : weaponIdOrWeapon;
@@ -158,9 +164,9 @@ function moddedWeaponStats(
   const sim = scenarioSimParams("midFight");
   const arcanes = resolveSavedArcaneSlots(arcaneIds, arcaneIds?.length ?? 0).filter((a): a is NonNullable<typeof a> => a != null);
   if (arcanes.length > 0) {
-    return calculateWeaponBuildWithArcanes(weapon, mods, modsMap, arcanes, undefined, sim, undefined, linkage);
+    return calculateWeaponBuildWithArcanes(weapon, mods, modsMap, arcanes, undefined, sim, calcOptions, linkage);
   }
-  return calculateWeaponBuild(enrichWeapon(weapon), mods, modsMap, undefined, sim, undefined, linkage);
+  return calculateWeaponBuild(enrichWeapon(weapon), mods, modsMap, undefined, sim, calcOptions, linkage);
 }
 
 function companionSnapshot(label: string, data: CompanionBuildData): CompareSnapshot | null {
@@ -213,11 +219,19 @@ function archwingSnapshot(label: string, data: ArchwingBuildData): CompareSnapsh
       })()
     : (() => {
         const wing = findArchwing(frameId);
-        return wing ? calculateArchwingBuild(wing, mods) : null;
+        return wing ? calculateArchwingBuild(wing, mods, undefined, data.railjackGunnery ?? 0) : null;
       })();
   if (!frame) return null;
-  const weapon = data.weaponId ? moddedWeaponStats(data.weaponId, data.weaponMods ?? []) : null;
-  const weaponName = data.weaponId ? getEffectiveWeaponsMap().get(data.weaponId)?.name ?? null : null;
+  const archWeapon = data.weaponId ? getEffectiveWeaponsMap().get(data.weaponId) : undefined;
+  const gunneryDmg = gunneryArchWeaponDamageBonus(
+    data.railjackGunnery,
+    archWeapon?.category,
+    data.mode === "necramech" ? "necramech" : "archwing",
+  );
+  const weapon = data.weaponId
+    ? moddedWeaponStats(data.weaponId, data.weaponMods ?? [], undefined, undefined, gunneryDmg)
+    : null;
+  const weaponName = archWeapon?.name ?? null;
   return { kind: "archwing", label, frame, weapon, weaponName, equipment: archwingEquipment(data) };
 }
 

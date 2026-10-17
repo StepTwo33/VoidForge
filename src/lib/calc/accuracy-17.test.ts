@@ -123,3 +123,38 @@ describe("R8-2 Railjack Tactical cooldown intrinsics multiply", async () => {
     expect(b.tacticalAbilities[0].cooldownSec).toBe(192);
   });
 });
+
+describe("R8-3 Railjack Gunnery intrinsics on Archwing / Necramech", async () => {
+  const { gunneryArchWeaponDamageBonus, gunneryArchwingAbilityBonus } = await import("@/data/railjack-intrinsics");
+  const { calculateArchwingBuild } = await import("@/lib/calc/archwing-calculator");
+  const { archwings } = await import("@/data/archwing");
+  const { calculateWeaponBuild } = await import("@/lib/calc/calculator");
+  const { allWeapons } = await import("@/data/weapons");
+  const { getEffectiveModsMap } = await import("@/lib/weapons/effective-data");
+  it("damage bonus by rank / weapon / mode", () => {
+    expect(gunneryArchWeaponDamageBonus(2, "archmelee", "archwing")).toBe(0);
+    expect(gunneryArchWeaponDamageBonus(3, "archmelee", "archwing")).toBe(0.2);
+    expect(gunneryArchWeaponDamageBonus(7, "archgun", "archwing")).toBe(0);
+    expect(gunneryArchWeaponDamageBonus(8, "archgun", "archwing")).toBe(0.25);
+    expect(gunneryArchWeaponDamageBonus(10, "archmelee", "archwing")).toBeCloseTo(0.45, 10);
+    expect(gunneryArchWeaponDamageBonus(3, "archgun", "necramech")).toBe(0);
+    expect(gunneryArchWeaponDamageBonus(4, "archgun", "necramech")).toBe(0.2);
+    expect(gunneryArchwingAbilityBonus(8)).toBe(0.2);
+  });
+  it("Gunnery 8: Elytron STR/Range/Eff 1.2", () => {
+    const s = calculateArchwingBuild(archwings.find((a) => a.id === "elytron")!, [], undefined, 8);
+    expect([s.abilityStrength, s.abilityRange, s.abilityEfficiency, s.abilityDuration]).toEqual([1.2, 1.2, 1.2, 1]);
+  });
+  it("Gunnery 8 +25% is additive with Rubedo-Lined Barrel", () => {
+    const w = allWeapons.find((x) => x.category === "archgun" && x.id === "imperator")!;
+    const M = getEffectiveModsMap();
+    const rubedo = [...M.values()].find((m) => m.name === "Rubedo-Lined Barrel")!;
+    const mods = [{ modId: rubedo.id, rank: rubedo.maxRank, slotIndex: 0 }] as never;
+    const a = calculateWeaponBuild(w, mods, M);
+    const b = calculateWeaponBuild(w, mods, M, undefined, undefined, {
+      externalBuffs: [{ id: "railjack_gunnery", label: "g", category: "other", damageBonus: 0.25 }],
+    });
+    // Rubedo max +100%: (1 + 1 + 0.25) / (1 + 1)
+    expect(b.totalDamage / a.totalDamage).toBeCloseTo(2.25 / 2, 2);
+  });
+});
