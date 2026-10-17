@@ -115,7 +115,7 @@ export interface RailjackIntrinsicPaperEffects {
   dorsalVentralTurretDamageBonus: number;
   /** Tactical ≥6: multiply Battle Mod energy costs. */
   battleEnergyCostMult: number;
-  /** Tactical ≥7 / ≥9: additive cooldown reduction (0–0.4). */
+  /** Tactical ≥7 / ≥9: −20% each, multiplicative → total reduction 0 / 0.2 / 0.36. */
   tacticalCooldownReduction: number;
   /** Engineering ≥4: Dome Charge forge unlocked (display). */
   domeChargeForge: boolean;
@@ -168,7 +168,9 @@ export function intrinsicPaperEffects(
   return {
     dorsalVentralTurretDamageBonus: i.gunnery >= 1 ? 0.5 : 0,
     battleEnergyCostMult: i.tactical >= 6 ? 0.75 : 1,
-    tacticalCooldownReduction: (i.tactical >= 7 ? 0.2 : 0) + (i.tactical >= 9 ? 0.2 : 0),
+    // wiki Railjack/Intrinsics/Tactical: R7 and R9 −20% each, multiplicative (combined 36%).
+    tacticalCooldownReduction:
+      1 - (i.tactical >= 7 ? 0.8 : 1) * (i.tactical >= 9 ? 0.8 : 1),
     domeChargeForge: i.engineering >= 4,
     ordnanceForge: i.engineering >= 3,
     eliteCrewUnlocked: i.command >= 10,

@@ -109,3 +109,17 @@ describe("R8-10 Peacemaker ramp-up is fixed (wiki Peacemaker Misc)", async () =>
     });
   }
 });
+
+describe("R8-2 Railjack Tactical cooldown intrinsics multiply", async () => {
+  const { intrinsicPaperEffects } = await import("@/data/railjack-intrinsics");
+  const { calculateRailjackBuild } = await import("@/lib/calc/railjack-calculator");
+  it("R7 20%, R9 1 − 0.8² = 36% (was 40%)", () => {
+    expect(intrinsicPaperEffects({ tactical: 6 }).tacticalCooldownReduction).toBe(0);
+    expect(intrinsicPaperEffects({ tactical: 7 }).tacticalCooldownReduction).toBeCloseTo(0.2, 10);
+    expect(intrinsicPaperEffects({ tactical: 10 }).tacticalCooldownReduction).toBeCloseTo(0.36, 10);
+  });
+  it("Squad Renew 300 s → 192 s at Tactical 10", () => {
+    const b = calculateRailjackBuild({ tacticalMods: [{ modId: "squad_renew", rank: 0 } as never], intrinsics: { tactical: 10 } });
+    expect(b.tacticalAbilities[0].cooldownSec).toBe(192);
+  });
+});

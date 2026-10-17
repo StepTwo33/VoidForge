@@ -33,7 +33,7 @@ describe("calculateRailjackBuild", () => {
       Math.round((base.battleAbilities![0]!.energyCost ?? 0) * 0.75),
     );
     expect(scaled.tacticalAbilities![0]!.cooldownSec).toBe(
-      Math.round((base.tacticalAbilities![0]!.cooldownSec ?? 0) * 0.6),
+      Math.round((base.tacticalAbilities![0]!.cooldownSec ?? 0) * 0.64), // 0.8 × 0.8 (wiki: multiplicative)
     );
   });
 
