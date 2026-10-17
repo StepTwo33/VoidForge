@@ -57,3 +57,40 @@ describe("R8-1 dispositions (wiki.gg Module:Weapons/data)", () => {
       .toEqual([0.5, 0.5, 1.3, 1.1, 0.75, 0.8, 0.55]);
   });
 });
+
+describe("R8-4 companion mods (wiki Module:Mods/data)", async () => {
+  const { calculateCompanionBuild } = await import("@/lib/calc/companion-calculator");
+  const { allCompanions } = await import("@/data/companions");
+  const { allMods } = await import("@/data/mods");
+  const smeeta = allCompanions.find((c) => c.id === "smeeta")!;
+  const run = (id: string, rank: number) => calculateCompanionBuild(smeeta, [{ modId: id, rank }]);
+  it("Loyal Companion: conditional 75% DR, not added to armor DR (was 410%)", () => {
+    const s = run("loyal_companion", 5);
+    expect(s.damageReduction).toBeCloseTo(s.armorDamageReduction, 6);
+    expect(s.modBonuses?.["loyal_companion::conditionalDamageReduction"]).toBeCloseTo(75, 4);
+  });
+  it("Repair Kit +18/s, Medi-Pet Kit +12/s and -15s", () => {
+    expect(run("repair_kit", 5).healthRegenBonus).toBeCloseTo(18, 6);
+    const m = run("medi_pet_kit", 5);
+    expect(m.healthRegenBonus).toBeCloseTo(12, 6);
+    expect(m.modBonuses?.["medi_pet_kit::recoveryTime"]).toBeCloseTo(-15, 6);
+  });
+  it("panel values match wiki text", () => {
+    expect(run("accelerated_deflection", 5).modBonuses).toMatchObject({
+      "accelerated_deflection::shieldRecharge": 90,
+      "accelerated_deflection::shieldRechargeDelay": -45,
+    });
+    expect(run("sanctuary", 10).modBonuses?.["sanctuary::bubbleHealth"]).toBeCloseTo(1800, 2);
+    expect(run("self_destruct", 5).modBonuses).toMatchObject({ "self_destruct::blastDamage": 600, "self_destruct::radius": 18 });
+    expect(run("reinforced_bond", 5).modBonuses).toMatchObject({ "reinforced_bond::fireRateBonus": 60, "reinforced_bond::reviveOverguard": 150 });
+    const bite = run("bite", 10).modBonuses ?? {};
+    expect(Object.keys(bite).sort()).toEqual(["bite::criticalChance", "bite::criticalMultiplier"]);
+    expect(Object.keys(run("link_vitality", 10).modBonuses ?? {})).toEqual(["link_vitality::health"]);
+  });
+  it("polarities", () => {
+    const pol = (id: string) => allMods.find((m) => m.id === id)?.polarity;
+    expect(pol("bloodthirst")).toBe("madurai");
+    expect(pol("tek_enhance")).toBe("madurai");
+    expect(pol("martyr_symbiosis")).toBe("penjaga");
+  });
+});

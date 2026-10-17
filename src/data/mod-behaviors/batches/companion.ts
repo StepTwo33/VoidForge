@@ -15,8 +15,8 @@ function mod(modId: string, stats: VerifiedItemStatLine[], descriptionOnly?: str
 
 export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   accelerated_deflection: mod("accelerated_deflection", [
-    line("shield", "mod_panel", "multiplicative_percent", "wiki: Accelerated Deflection — recharge delay (not capacity)"),
-    line("shieldRecharge", "mod_panel", "multiplicative_percent", "Accelerated Deflection: shieldRecharge \u2014 +90% Shield Recharge\\\\n-45% Shield Recharge Delay"),
+    line("shieldRecharge", "mod_panel", "multiplicative_percent", "wiki: Accelerated Deflection — +90% Shield Recharge"),
+    line("shieldRechargeDelay", "mod_panel", "multiplicative_percent", "wiki: Accelerated Deflection — -45% Shield Recharge Delay"),
   ]),
   acidic_spittle: mod("acidic_spittle", [
     line("duration", "mod_panel", "multiplicative_percent", "Acidic Spittle: duration \u2014 Every <LOWER_IS_BETTER>5s spit acidic tar at an enemy within 30m, blinding them \u2026"),
@@ -66,8 +66,6 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("impactStatusStacks", "mod_panel", "flat", "wiki: Bell Ringer — precept knockdown/Impact stacks (AI)"),
   ]),
   bite: mod("bite", [
-    line("critChance", "mod_panel", "multiplicative_percent", "wiki: Bite — duplicate critChance key"),
-    line("critDamage", "mod_panel", "multiplicative_percent", "wiki: Bite — duplicate critDamage key (CM via criticalMultiplier)"),
     line("criticalChance", "weapon_dps", "multiplicative_percent", "wiki: Bite — +330% CC at max"),
     line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "wiki: Bite — +220% CM at max"),
   ]),
@@ -268,27 +266,21 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   ]),
   link_fiber: mod("link_fiber", [
     line("armor", "mod_panel", "multiplicative_percent", "wiki: Link Fiber — +125% of Warframe armor (not companion base %)"),
-    line("armorLink", "mod_panel", "multiplicative_percent", "Link Fiber: armorLink \u2014 Increase Max Armor by +125% of Warframe's Armor"),
   ]),
   link_redirection: mod("link_redirection", [
     line("shield", "mod_panel", "multiplicative_percent", "wiki: Link Redirection — +125% of Warframe shields (not companion base %)"),
-    line("shieldLink", "mod_panel", "multiplicative_percent", "Link Redirection: shieldLink \u2014 Increase Shield by +125% of Warframe's Max Shield"),
   ]),
   link_shields: mod("link_shields", [
     line("linkShields", "mod_panel", "multiplicative_percent", "Link Shields: linkShields \u2014 +10% Link Shields per rank"),
   ]),
   link_vitality: mod("link_vitality", [
     line("health", "mod_panel", "multiplicative_percent", "wiki: Link Vitality — +125% of Warframe health (not companion base %)"),
-    line("healthLink", "mod_panel", "multiplicative_percent", "Link Vitality: healthLink \u2014 Increase Health by +125% of Warframe's Max Health"),
   ]),
   looter: mod("looter", [
     line("range", "mod_panel", "multiplicative_percent", "Looter: range \u2014 Emits a pulse wave to break open Loot Crates within 22m. (arsenal display only)"),
   ]),
   loyal_companion: mod("loyal_companion", [
-    line("cooldown", "mod_panel", "multiplicative_percent", "Loyal Companion: cooldown \u2014 When your Health falls below 35%, gain 75% Damage Reduction for 10s while your C\u2026"),
-    line("damageReduction", "mod_panel", "multiplicative_percent", "Loyal Companion: damageReduction \u2014 When your Health falls below 35%, gain 75% Damage Reduction for 10s while your C\u2026"),
-    line("duration", "mod_panel", "multiplicative_percent", "Loyal Companion: duration \u2014 When your Health falls below 35%, gain 75% Damage Reduction for 10s while your C\u2026"),
-    line("heat", "mod_panel", "multiplicative_percent", "Loyal Companion: heat \u2014 When your Health falls below 35%, gain 75% Damage Reduction for 10s while your C\u2026"),
+    line("conditionalDamageReduction", "mod_panel", "multiplicative_percent", "wiki: Loyal Companion — 75% DR for 10s below 35% Health (conditional; 60s cooldown)"),
   ]),
   loyal_retriever: mod("loyal_retriever", [
     line("pickupDoubleChance", "companion_totals", "multiplicative_percent", "Loyal Retriever: pickupDoubleChance \u2014 13% chance to double Credit and Resource pickups"),
@@ -321,9 +313,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("shieldRechargeLink", "mod_panel", "multiplicative_percent", "Mecha Recharge: shieldRechargeLink \u2014 +15% Shield Recharge when Kubrow attacks per rank"),
   ]),
   medi_pet_kit: mod("medi_pet_kit", [
-    line("duration", "mod_panel", "multiplicative_percent", "Medi-Pet Kit: duration \u2014 +12 Companion Health Regen/s\\\\n-15s Companion Recovery Time"),
-    line("healthRegen", "mod_panel", "multiplicative_percent", "Medi-Pet Kit: healthRegen \u2014 +12 Companion Health Regen/s\\\\n-15s Companion Recovery Time"),
-    line("recoveryTime", "mod_panel", "multiplicative_percent", "Medi-Pet Kit: recoveryTime \u2014 +12 Companion Health Regen/s\\\\n-15s Companion Recovery Time"),
+    line("healthRegen", "mod_panel", "flat", "wiki: Medi-Pet Kit — +12 Companion Health Regen/s"),
+    line("recoveryTime", "mod_panel", "multiplicative_percent", "wiki: Medi-Pet Kit — -15s Companion Recovery Time"),
   ]),
   medi_ray: mod("medi_ray", [
     line("duration", "mod_panel", "multiplicative_percent", "Medi-Ray: duration \u2014 Sentinel will occasionally heal its owner, restoring 12% Health over 4s."),
@@ -430,12 +421,11 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("regenCharges", "mod_panel", "multiplicative_percent", "Regen: regenCharges \u2014 Sentinel recovery time reduced by 20s. Revives with 10s of invulnerability."),
   ]),
   reinforced_bond: mod("reinforced_bond", [
-    line("overguard", "mod_panel", "multiplicative_percent", "wiki: Reinforced Bond — overguard on revive"),
-    line("reviveOverguard", "mod_panel", "multiplicative_percent", "wiki: Reinforced Bond — overguard on revive"),
-    line("shield", "mod_panel", "multiplicative_percent", "wiki: Reinforced Bond — companion shield threshold for fire rate (not WF shields)"),
+    line("fireRateBonus", "mod_panel", "multiplicative_percent", "wiki: Reinforced Bond — +60% Fire Rate while Companion has >1200 Shields/Overshields"),
+    line("reviveOverguard", "mod_panel", "multiplicative_percent", "wiki: Reinforced Bond — reloading restores 150 Overshields to the Companion"),
   ]),
   repair_kit: mod("repair_kit", [
-    line("healthRegen", "mod_panel", "multiplicative_percent", "Repair Kit: healthRegen \u2014 +18 Companion Health Regen/s"),
+    line("healthRegen", "mod_panel", "flat", "wiki: Repair Kit — +18 Companion Health Regen/s"),
   ]),
   repo_audit: mod("repo_audit", [
     line("damage", "mod_panel", "multiplicative_percent", "Repo Audit: damage \u2014 Magnetic pulse damage"),
@@ -460,8 +450,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("revive", "mod_panel", "multiplicative_percent", "Sacrifice: revive \u2014 Sentinel incapacitates itself to revive its downed owner to 100% health and shie\u2026"),
   ]),
   sanctuary: mod("sanctuary", [
-    line("bubbleHealth", "mod_panel", "multiplicative_percent", "Sanctuary: bubbleHealth \u2014 Creates a shield with 1800 Health around the player when they are reviving falle\u2026"),
-    line("rechargeDelay", "mod_panel", "multiplicative_percent", "Sanctuary: rechargeDelay \u2014 Creates a shield with 1800 Health around the player when they are reviving falle\u2026"),
+    line("bubbleHealth", "mod_panel", "multiplicative_percent", "wiki: Sanctuary — 1800 Health revive shield"),
   ]),
   savagery: mod("savagery", [
     line("finisherDamage", "mod_panel", "multiplicative_percent", "Savagery: finisherDamage \u2014 The Kubrow rushes at 8 enemies within 10m, dealing damage and knocking them over\u2026"),
@@ -490,9 +479,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Seismic Bond: range \u2014 While a channeled Ability is active, Companion melee attacks create a 4m shockwa\u2026 (arsenal display only)"),
   ]),
   self_destruct: mod("self_destruct", [
-    line("blastDamage", "mod_panel", "multiplicative_percent", "Self Destruct: blastDamage \u2014 Explodes when incapacitated, dealing 600 Blast Damage in a 18m radius and knocki\u2026"),
-    line("radius", "mod_panel", "multiplicative_percent", "Self Destruct: radius \u2014 Explodes when incapacitated, dealing 600 Blast Damage in a 18m radius and knocki\u2026"),
-    line("range", "mod_panel", "multiplicative_percent", "Self Destruct: range \u2014 Explodes when incapacitated, dealing 600 Blast Damage in a 18m radius and knocki\u2026 (arsenal display only)"),
+    line("blastDamage", "mod_panel", "multiplicative_percent", "wiki: Self Destruct — 600 Blast Damage"),
+    line("radius", "mod_panel", "multiplicative_percent", "wiki: Self Destruct — 18m radius"),
   ]),
   sepsis_claws: mod("sepsis_claws", [
     line("statusChance", "weapon_dps", "multiplicative_percent", "Sepsis Claws: statusChance \u2014 +330% <DT_POISON_COLOR>Toxin, +330% Status Chance, Converts all elemental damage\u2026"),

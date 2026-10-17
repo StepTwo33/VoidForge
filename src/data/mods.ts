@@ -1591,7 +1591,6 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "armorLink": 110,
       "armor": 11.363636
     },
     "description": "Increase Max Armor by +125% of Warframe's Armor",
@@ -1606,7 +1605,6 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "shieldLink": 275,
       "shield": 11.363636
     },
     "description": "Increase Shield by +125% of Warframe's Max Shield",
@@ -1621,7 +1619,6 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "healthLink": 275,
       "health": 11.363636
     },
     "description": "Increase Health by +125% of Warframe's Max Health",
@@ -1636,10 +1633,7 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "damageReduction": 60,
-      "heat": 5.833333,
-      "cooldown": 10.0,
-      "duration": 1.666667
+      "conditionalDamageReduction": 12.5
     },
     "description": "When your Health falls below 35%, gain 75% Damage Reduction for 10s while your Companion becomes invincible and draws fire to itself for 10s. 60s cooldown.",
     "rarity": "common"
@@ -1653,9 +1647,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "healthRegen": 12,
-      "recoveryTime": 90,
-      "duration": 2.5
+      "healthRegen": 2,
+      "recoveryTime": -2.5
     },
     "description": "+12 Companion Health Regen/s\\n-15s Companion Recovery Time",
     "rarity": "rare"
@@ -1852,9 +1845,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "overguard": 1200,
-      "reviveOverguard": 2400,
-      "shield": 10.0
+      "fireRateBonus": 10,
+      "reviveOverguard": 25
     },
     "description": "If the Companion exceeds 1200 Max Shields or Overshields then your fire rate is increased 60%. Reloading restores 150 Overshields to your companion.",
     "rarity": "rare"
@@ -1951,8 +1943,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "robotic",
     "stats": {
-      "shieldRecharge": 90,
-      "shield": -7.5
+      "shieldRecharge": 15,
+      "shieldRechargeDelay": -7.5
     },
     "description": "+90% Shield Recharge\\n-45% Shield Recharge Delay",
     "rarity": "uncommon"
@@ -2044,8 +2036,7 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "robotic",
     "stats": {
-      "bubbleHealth": 600,
-      "rechargeDelay": 15
+      "bubbleHealth": 163.636364
     },
     "description": "Creates a shield with 1800 Health around the player when they are reviving fallen allies.",
     "rarity": "rare"
@@ -2152,7 +2143,7 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "robotic",
     "stats": {
-      "healthRegen": 6
+      "healthRegen": 3
     },
     "description": "+18 Companion Health Regen/s",
     "rarity": "common"
@@ -2182,9 +2173,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "robotic",
     "stats": {
-      "blastDamage": 600,
-      "radius": 6,
-      "range": 3.0
+      "blastDamage": 100,
+      "radius": 3
     },
     "description": "Explodes when incapacitated, dealing 600 Blast Damage in a 18m radius and knocking down nearby enemies.",
     "rarity": "rare"
@@ -2243,8 +2233,6 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "beast",
     "stats": {
-      "critChance": 30,
-      "critDamage": 60,
       "criticalChance": 30.0,
       "criticalMultiplier": 20.0
     },
@@ -2635,7 +2623,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "bloodthirst",
     "name": "Bloodthirst",
-    "polarity": "vazarin",
+    "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
     "category": "companion_weapon",
@@ -15400,7 +15388,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "martyr_symbiosis",
     "name": "Martyr Symbiosis",
-    "polarity": "madurai",
+    "polarity": "penjaga",
     "drain": 0,
     "maxRank": 3,
     "category": "companion",
@@ -15930,7 +15918,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "tek_enhance",
     "name": "Tek Enhance",
-    "polarity": "naramon",
+    "polarity": "madurai",
     "drain": 6,
     "maxRank": 5,
     "category": "companion",
