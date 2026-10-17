@@ -174,3 +174,25 @@ describe("R8-5 Necramech capacity above rank 30 + mod polarities", async () => {
     expect(allMods.find((m) => m.id === "necramech_hydraulics")?.polarity).toBe("madurai");
   });
 });
+
+describe("R8-6 Plexus / Archwing mod values (wiki Mods/data + fandom Overloader table)", async () => {
+  const { calculateRailjackBuild } = await import("@/lib/calc/railjack-calculator");
+  const { allMods } = await import("@/data/mods");
+  const desc = (id: string) => allMods.find((m) => m.id === id)!.description;
+  it("Overloader +50% munitions (was +87%)", () => {
+    const b = calculateRailjackBuild({ integratedMods: [{ modId: "overloader", rank: 3 } as never] });
+    expect(b.munitionsCapacityBonus).toBeCloseTo(0.5, 10);
+  });
+  it("Ironclad calc unchanged (22.5% / 25.5%) and description matches", () => {
+    const b = calculateRailjackBuild({ integratedMods: [{ modId: "ironclad_matrix", rank: 5 } as never] });
+    expect(b.hull).toBe(Math.round(1050 * 1.225));
+    expect(b.shield).toBe(Math.round(1000 * 1.255));
+    expect(desc("ironclad_matrix")).toContain("+22.5% Hull and Armor");
+  });
+  it("descriptions", () => {
+    expect(desc("sentient_scalpel")).toBe("x1.27 Turret Damage vs Sentients");
+    expect(desc("defensive_fire")).toContain("+9% Maximum Shields");
+    expect(desc("onslaught_matrix")).toContain("+15% Turret Damage");
+    expect(desc("raider_matrix")).toContain("+15% Archwing Speed and Damage");
+  });
+});

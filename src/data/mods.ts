@@ -16155,10 +16155,10 @@ const RAW_MODS: Mod[] = [
     "category": "archwing",
     "subCategory": "",
     "stats": {
-      "shieldRecharge": 33.3333,
-      "shieldRechargeDelay": -16.6667
+      "shieldRecharge": 25,
+      "shieldRechargeDelay": -12.5
     },
-    "description": "+100% Shield Recharge, -50% Shield Recharge Delay",
+    "description": "+100% Shield Recharge\\n-50% Shield Recharge Delay",
     "rarity": "uncommon"
   },
   {
@@ -17310,7 +17310,7 @@ const RAW_MODS: Mod[] = [
       "shield": 1.5,
       "duration": 1.666667
     },
-    "description": "+13.5% Maximum Shields per enemy killed for 10s (Maximum 10 stacks)",
+    "description": "+9% Maximum Shields per enemy killed for 10s (Maximum 10 stacks)",
     "rarity": "rare"
   },
   {
@@ -18204,7 +18204,7 @@ const RAW_MODS: Mod[] = [
       "shield": 2.5,
       "armor": 5.0
     },
-    "description": "<LOWER_IS_BETTER>-18% Breach Chance\\n+22% Shield Recharge during Breach\\n+30% Armor when below 53% Hull",
+    "description": "-12% Breach Chance\\n+15% Shield Regen during Breach\\n+30% Armor when below 36% Hull",
     "rarity": "uncommon"
   },
   {
@@ -18326,7 +18326,7 @@ const RAW_MODS: Mod[] = [
       "armor": 3.75,
       "shield": 4.25
     },
-    "description": "+33.75% Hull and Armor, +38.25% Max Shields and Shield Recharge",
+    "description": "+22.5% Hull and Armor\\n+25.5% Max Shields and Shield Regen",
     "rarity": "uncommon"
   },
   {
@@ -19475,9 +19475,9 @@ const RAW_MODS: Mod[] = [
     "category": "railjack",
     "subCategory": "",
     "stats": {
-      "damage": 3.333333
+      "damage": 2.5
     },
-    "description": "+22% Turret Damage while 100% Hull\\n20% chance to Reflect 38% Damage while over 80% Shields\\n+9% Battle Mod Efficiency",
+    "description": "+15% Turret Damage while 100% Hull\\n20% chance to Reflect 25% Damage while over 80% Shields\\n+6% Battle Mod Efficiency",
     "rarity": "uncommon"
   },
   {
@@ -19529,7 +19529,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "heat": 3.0
     },
-    "description": "+33.75% Forge Capacity, <LOWER_IS_BETTER>-22.5% Forge Cooldown, +22.5% Elemental Resistance, +27% Turret Heat Capacity ",
+    "description": "+22.5% Forge Capacity\\n-15% Forge Cooldown\\n+15% Elemental Resistance\\n+18% Turret Heat Capacity",
     "rarity": "uncommon"
   },
   {
@@ -19567,9 +19567,9 @@ const RAW_MODS: Mod[] = [
     "category": "railjack",
     "subCategory": "",
     "stats": {
-      "magazine": 21.75
+      "magazine": 12.5
     },
-    "description": "+87% Maximum Ordnance Munitions",
+    "description": "+50% Maximum Ordnance Munitions",
     "rarity": "common"
   },
   {
@@ -20245,10 +20245,10 @@ const RAW_MODS: Mod[] = [
     "category": "railjack",
     "subCategory": "",
     "stats": {
-      "damage": 7.5,
+      "damage": 2.5,
       "shield": 4.0
     },
-    "description": "+22% Archwing Speed and Damage\\n+36% Archwing Shield and Armor\\n+67% Captured Crewship Speed and Damage",
+    "description": "+15% Archwing Speed and Damage\\n+24% Archwing Shield and Armor\\n+45% Captured Crewship Speed and Damage",
     "rarity": "uncommon"
   },
   {
@@ -20611,7 +20611,7 @@ const RAW_MODS: Mod[] = [
     "category": "railjack",
     "subCategory": "",
     "stats": {},
-    "description": "x1.41 Turret Damage vs Sentients",
+    "description": "x1.27 Turret Damage vs Sentients",
     "rarity": "rare"
   },
   {

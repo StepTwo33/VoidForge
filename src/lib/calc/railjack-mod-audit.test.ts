@@ -89,11 +89,11 @@ describe("railjack remainder cores (wiki max rank, Phase M14)", () => {
     expect(stats.ordnanceSpeedBonus).toBeCloseTo(0.6, 5);
   });
 
-  it("Overloader R3: +87% munitions capacity", () => {
+  it("Overloader R3: +50% munitions capacity (wiki 12/25/37/50)", () => {
     const stats = calculateRailjackBuild({
       integratedMods: [{ modId: "overloader", rank: 3, slotIndex: 0 }],
     });
-    expect(stats.munitionsCapacityBonus).toBeCloseTo(0.87, 5);
+    expect(stats.munitionsCapacityBonus).toBeCloseTo(0.5, 5);
   });
 
   it("Turret Velocity R10: +25.3% range, +55% turret projectile speed (not ordnance)", () => {
