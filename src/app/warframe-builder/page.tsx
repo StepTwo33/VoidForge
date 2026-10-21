@@ -1,5 +1,6 @@
 "use client";
 
+import { dropUnknownMods } from "@/lib/mods/known-mods";
 import {
   applyPolarityOverride,
   effectiveSlotPolarities,
@@ -200,7 +201,7 @@ export default function WarframeBuilderPage() {
   }, [selectedWarframe?.id, frostColdEnemies]);
 
   const modSlotsToEquipped = useCallback((mods: { modId: string; rank: number; slotIndex: number }[]): EquippedMod[] => {
-    return mods.map((m) => {
+    return dropUnknownMods(mods, modsMap).map((m) => {
       const mod = modsMap.get(m.modId);
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
     });
@@ -218,9 +219,9 @@ export default function WarframeBuilderPage() {
         if (!wf) return;
         setSelectedWarframe(wf);
         setShowWarframeList(false);
-        setEquippedMods(shared.mods.map((m, i) => {
-          const mod = modsMap.get(m.id);
-          return { modId: m.id, modName: mod?.name ?? "", rank: m.rank, slotIndex: m.slotIndex ?? i, polarity: mod?.polarity, drain: mod?.drain };
+        setEquippedMods(dropUnknownMods(shared.mods.map((m, i) => ({ modId: m.id, rank: m.rank, slotIndex: m.slotIndex ?? i })), modsMap).map((m) => {
+          const mod = modsMap.get(m.modId);
+          return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
         }));
         if (shared.arcanes) {
           setEquippedArcanes(resolveSavedArcaneSlots(shared.arcanes.map((id) => id || null), 2));
@@ -366,13 +367,13 @@ export default function WarframeBuilderPage() {
     setEquippedShards(d.shards?.length === 5 ? d.shards : [...EMPTY_SHARDS]);
     setSelectedWarframe(wf);
     setHasOrokinReactor(d.hasOrokinReactor);
-    setExaltedMods((d.exaltedMods || []).map((m) => {
+    setExaltedMods(dropUnknownMods(d.exaltedMods, modsMap).map((m) => {
       const mod = modsMap.get(m.modId);
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
     }));
     setExaltedSlotPolarities(d.exaltedSlotPolarities || {});
     setExaltedArcanes(resolveSavedArcaneSlots(d.exaltedArcaneIds, 2));
-    setExaltedMeleeMods((d.exaltedMeleeMods || []).map((m) => {
+    setExaltedMeleeMods(dropUnknownMods(d.exaltedMeleeMods, modsMap).map((m) => {
       const mod = modsMap.get(m.modId);
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
     }));

@@ -11817,20 +11817,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "uncommon"
   },
   {
-    "id": "augmented_sonar",
-    "name": "Augmented Sonar",
-    "polarity": "zenurik",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "warframe",
-    "subCategory": "",
-    "stats": {
-      "duration": 2.5
-    },
-    "description": "Sonar Augment: Affected enemies also become visible through walls for 10s.",
-    "rarity": "rare"
-  },
-  {
     "id": "aviator",
     "name": "Aviator",
     "polarity": "vazarin",

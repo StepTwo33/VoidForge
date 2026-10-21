@@ -104,9 +104,6 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("slideSpeed", "mod_panel", "multiplicative_percent", "Armored Recovery: slideSpeed \u2014 +50% Damage Resistance when knocked down, -20% Slide"),
     line("sprintSpeed", "mod_panel", "multiplicative_percent", "wiki: Armored Recovery — slide/mobility penalty (not always-on sprint)"),
   ]),
-  augmented_sonar: mod("augmented_sonar", [
-    line("duration", "mod_panel", "multiplicative_percent", "Augmented Sonar: duration \u2014 Sonar Augment: Affected enemies also become visible through walls for 10s."),
-  ]),
   augur_accord: mod("augur_accord", [
     line("shield", "warframe_totals", "multiplicative_percent", "wiki: Augur Accord — +70% Shield Capacity at max"),
   ]),
