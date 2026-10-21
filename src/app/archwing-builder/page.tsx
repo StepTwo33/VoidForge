@@ -25,6 +25,7 @@ import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity"
 import { WeaponStatsPanel, ArchwingStatsPanel } from "@/components/stats-panel";
 import { Weapon, EquippedMod, CalculatedStats, ArchwingCalculatedStats } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { Zap, Save, FolderOpen, ArrowLeftRight } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, ArchwingBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
 import { toast } from "sonner";
@@ -78,20 +79,28 @@ export default function ArchwingBuilderPage() {
 
   useEffect(() => { setSavedBuilds(getSavedBuilds("archwing")); }, []);
 
+  const buildArchwingData = useCallback((): ArchwingBuildData => ({
+    mode,
+    frameId: mode === "archwing" ? selectedArchwing?.name : selectedNecramech?.name,
+    frameMods: (mode === "archwing" ? archwingMods : necramechMods).map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+    weaponId: selectedWeapon?.id,
+    weaponMods: weaponMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+    hasReactor,
+    hasCatalyst,
+    isMR30: false,
+    framePolarities: mode === "archwing" ? archwingPolarities : necramechPolarities,
+    weaponPolarities,
+    railjackGunnery,
+  }), [mode, selectedArchwing, selectedNecramech, archwingMods, necramechMods, selectedWeapon, weaponMods, hasReactor, hasCatalyst, archwingPolarities, necramechPolarities, weaponPolarities, railjackGunnery]);
+
+  // Same unsaved-changes tracking as the other builders; nothing picked yet = clean.
+  const hasSelection = !!(mode === "archwing" ? selectedArchwing : selectedNecramech) || !!selectedWeapon;
+  const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(
+    useMemo(() => (hasSelection ? stableBuildSnapshot(buildArchwingData()) : null), [hasSelection, buildArchwingData]),
+  );
+
   const handleSaveBuildConfirm = async ({ name, isPublic }: SaveBuildDialogValues) => {
-    const data: ArchwingBuildData = {
-      mode,
-      frameId: mode === "archwing" ? selectedArchwing?.name : selectedNecramech?.name,
-      frameMods: (mode === "archwing" ? archwingMods : necramechMods).map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
-      weaponId: selectedWeapon?.id,
-      weaponMods: weaponMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
-      hasReactor,
-      hasCatalyst,
-      isMR30: false,
-      framePolarities: mode === "archwing" ? archwingPolarities : necramechPolarities,
-      weaponPolarities,
-      railjackGunnery,
-    };
+    const data = buildArchwingData();
     const build: SavedBuild = {
       id: currentBuildId || generateBuildId(),
       name,
@@ -106,6 +115,7 @@ export default function ArchwingBuilderPage() {
     setBuildName(name);
     setBuildIsPublic(result.isPublic);
     setSavedBuilds(result.builds);
+    markClean();
     if (result.synced) {
       toast.success("Build saved", { description: `${name} saved to your account` });
     } else {
@@ -115,6 +125,7 @@ export default function ArchwingBuilderPage() {
 
   const handleLoadBuild = useCallback((build: SavedBuild) => {
     const d = build.data as ArchwingBuildData;
+    markClean();
     setMode(d.mode as BuilderMode);
     const restoreMods = (slots: { modId: string; rank: number; slotIndex: number }[]) =>
       slots.map((m) => { const mod = modsMap.get(m.modId); return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain }; });
@@ -149,7 +160,7 @@ export default function ArchwingBuilderPage() {
     setBuildIsPublic(build.isPublic ?? false);
     setShowSavedBuilds(false);
     toast.info("Build loaded", { description: build.name });
-  }, []);
+  }, [markClean]);
 
   useCloudBuildFromUrl("archwing", handleLoadBuild);
 
@@ -311,8 +322,9 @@ export default function ArchwingBuilderPage() {
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <h1 className="text-xl sm:text-3xl font-bold">Archwing & Necramech Builder</h1>
           <div className="flex items-center gap-2">
-            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:py-1.5" title="Save Build">
+            <button onClick={() => setSaveDialogOpen(true)} className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:py-1.5", hasUnsavedChanges && SAVE_DIRTY_CLASS)} title={hasUnsavedChanges ? "Save Build (unsaved changes)" : "Save Build"} data-dirty={hasUnsavedChanges ? "true" : undefined}>
               <Save className="h-3.5 w-3.5" /> <span>Save</span>
+              {hasUnsavedChanges && <span className={SAVE_DIRTY_DOT_CLASS} aria-hidden />}
             </button>
             <button onClick={() => { setSavedBuilds(getSavedBuilds("archwing")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-9 sm:py-1.5" title="Load Build">
               <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
