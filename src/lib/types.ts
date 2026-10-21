@@ -817,7 +817,23 @@ export interface CalculatedStats {
   heavyAttackWindUp: number;
   comboCount: number;
   comboDuration: number;
-  heavyAttackEfficiency: number; // from mods like Killing Blow
+  /** Heavy Attack Efficiency (fraction of combo kept after a heavy; Reflex Coil, Focus Energy…). */
+  heavyAttackEfficiency: number;
+  /** Heavy Attack Efficiency after the wiki 90% cap (floor 0). */
+  heavyAttackEfficiencyEffective?: number;
+  /** Combo points left after a heavy attack at the simulated combo (combo × efficiency). */
+  heavyAttackComboRetained?: number;
+  /** Initial Combo (mods + innate + incarnon) that regenerates at 40/s after a heavy. */
+  heavyAttackInitialCombo?: number;
+  /** Combo built by attacks on top of Initial Combo (sim slider). */
+  heavyAttackSimCombo?: number;
+  /**
+   * Seconds per heavy attack in an Initial Combo heavy rotation: wind-up + time to
+   * regenerate the spent combo at 40/s. Undefined when the combo comes from light attacks.
+   */
+  heavyAttackCycleTime?: number;
+  /** heavyAttackDamage / heavyAttackCycleTime (Initial Combo heavy rotation only). */
+  heavyAttackRotationDps?: number;
   /**
    * Combo multiplier for Blood Rush / Weeping Wounds / Gladiator and heavy attacks
    * (1× below first tier, then 2×…12× on standard weapons).

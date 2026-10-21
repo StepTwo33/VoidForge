@@ -733,6 +733,27 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           />
           <StatRow label="Combo Duration" value={`${stats.comboDuration.toFixed(0)}s`} />
           <StatRow label="Heavy Attack" value={stats.heavyAttackDamage.toFixed(0)} highlighted changed={flash.has("heavyAttack")} />
+          {stats.heavyAttackWindUp > 0 && (
+            <StatRow
+              label="Heavy wind-up"
+              value={`${stats.heavyAttackWindUp.toFixed(2)}s`}
+              tooltip="Heavy attack wind-up time after Heavy Attack Wind Up Speed mods."
+            />
+          )}
+          {(stats.heavyAttackEfficiencyEffective ?? 0) > 0 && (
+            <StatRow
+              label="Heavy Attack Efficiency"
+              value={`${((stats.heavyAttackEfficiencyEffective ?? 0) * 100).toFixed(0)}%`}
+              tooltip={`Share of combo kept after a heavy attack (capped at 90%): ${stats.comboCount} combo → ${stats.heavyAttackComboRetained ?? 0} left.`}
+            />
+          )}
+          {stats.heavyAttackRotationDps != null && stats.heavyAttackCycleTime != null && (
+            <StatRow
+              label="Heavy rotation DPS"
+              value={stats.heavyAttackRotationDps.toFixed(0)}
+              tooltip={`Initial Combo heavy loop: one heavy every ${stats.heavyAttackCycleTime.toFixed(2)}s (wind-up + spent combo regenerating at 40/s). Not counted in light-attack DPS.`}
+            />
+          )}
           {stats.slamAttackDamage != null && stats.slamAttackDamage > 0 && (
             <StatRow label="Slam" value={stats.slamAttackDamage.toFixed(0)} />
           )}

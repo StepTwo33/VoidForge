@@ -12,6 +12,7 @@ import { evolutionExtraRadials, scaleRadialAttacksWithDps } from './weapon-radia
 import {
   applyMeleeComboToStats,
   resolveEffectiveComboCount,
+  applyHeavyAttackEfficiency,
 } from './melee-combo';
 import { dotTickCount } from './dot-ticks';
 import { enrichWeapon } from '../weapons/weapon-enrich';
@@ -1006,6 +1007,12 @@ export function calculateWeaponBuild(
       }
       // wiki Killing Blow: +120% heavy damage (additive with Pressure Point) and +60%
       // wind-up speed (stored as heavyAttackEfficiency in mod data; it is not efficiency).
+      // wiki Amalgam Organ Shatter: "+60% Heavy Attack Wind Up Speed" (also stored as
+      // heavyAttackEfficiency in mod data; the heavyWindUp line is panel-only).
+      if (modSlot.modId === "amalgam_organ_shatter" && statName === "heavyAttackEfficiency") {
+        weaponModAcc.heavyAttackWindUpBonus += modValue;
+        continue;
+      }
       if (modSlot.modId === "killing_blow") {
         if (statName === "heavyAttackDamage") {
           heavyDamageBonus += modValue;
@@ -2120,6 +2127,9 @@ export function calculateWeaponBuild(
       evolvedBaseCC,
       evolvedBaseSC,
     );
+    stats.heavyAttackSimCombo = sim.comboCount;
+    stats.heavyAttackInitialCombo = Math.max(0, effectiveCombo - sim.comboCount);
+    applyHeavyAttackEfficiency(stats);
   }
 
   // Vigilante: +5% per equipped set mod to upgrade primary crit tier (not secondaries / melee)
@@ -2636,6 +2646,7 @@ export function calculateWeaponBuildWithArcanes(
       stats.heavyAttackDamage *= arcaneHeavyFactor;
     }
   }
+  if (isMelee && stats.heavyAttackEfficiencyEffective != null) applyHeavyAttackEfficiency(stats);
   setStatusChancePerShot(stats, baseWeapon);
   stats.effectiveFireRate = resolveEffectiveFireRate({
     triggerType: baseWeapon.triggerType,
