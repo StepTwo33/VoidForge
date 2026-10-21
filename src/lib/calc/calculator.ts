@@ -1,4 +1,5 @@
 // Advanced Build Calculator - ported from Dart with elemental combos, status procs, heavy attacks
+import { moddedAmmoReserve } from "@/lib/calc/ammo-reserve";
 import { playerEffectiveHealth } from './player-ehp';
 export { PLAYER_SHIELD_DAMAGE_TAKEN, playerEffectiveHealth } from './player-ehp';
 import { SNIPER_DATA, sniperComboMultiplier } from "@/data/sniper-zoom";
@@ -1813,7 +1814,7 @@ export function calculateWeaponBuild(
         case 'parkourVelocity':
           stats.parkourVelocityBonus = (stats.parkourVelocityBonus ?? 0) + value;
           break;
-        case 'ammoMax': /* riven % of ammo max — no base ammoMax on Weapon yet */ break;
+        case 'ammoMax': /* riven % Ammo Maximum: applied with the reserve (ammo-reserve.ts) */ break;
         case 'flatAmmoMax':
           stats.ammoMax = (stats.ammoMax ?? 0) + value;
           break;
@@ -2200,6 +2201,22 @@ export function calculateWeaponBuild(
     calcOptions?.incarnonFormActive === true,
     moddedBaseDamage,
   );
+
+  // wiki Ammo: modded reserve (base × (1 + Ammo Maximum mods + riven)). Incarnon Form
+  // fires from its own charges, so no reserve is modelled there.
+  if (calcOptions?.incarnonFormActive !== true && stats.magazine > 0) {
+    const reserve = moddedAmmoReserve({
+      weaponId: baseWeapon.id,
+      equippedMods,
+      allMods,
+      incarnonStatChanges,
+      rivenStatChanges,
+    });
+    if (reserve != null) {
+      stats.ammoMax = reserve;
+      stats.ammoReserveModelled = true;
+    }
+  }
 
   return stats;
 }

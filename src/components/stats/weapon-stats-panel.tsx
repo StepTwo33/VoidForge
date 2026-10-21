@@ -431,7 +431,15 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow label="Range" value={`+${stats.range.toFixed(1)}m`} tooltip="Incarnon / reach bonus (display)." />
         )}
         {stats.ammoMax != null && stats.ammoMax > 0 && (
-          <StatRow label="Ammo Max" value={stats.ammoMax.toString()} tooltip="Incarnon ammo capacity perk (display)." />
+          <StatRow
+            label="Ammo Max"
+            value={stats.ammoMax.toString()}
+            tooltip={
+              stats.ammoReserveModelled
+                ? "Reserve ammo, not counting the magazine: base × (1 + Ammo Maximum mods + riven). Ammo pickups and Ammo Mutation mods are not modelled."
+                : "Incarnon ammo capacity perk (display)."
+            }
+          />
         )}
         {stats.punchThrough != null && stats.punchThrough !== 0 && (
           <StatRow

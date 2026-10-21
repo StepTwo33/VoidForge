@@ -702,8 +702,13 @@ export interface CalculatedStats {
   multishot: number;
   /** Melee reach / falloff meters added by incarnon (and similar) — display only. */
   range?: number;
-  /** Ammo reserve after incarnon set/add perks — display only (base ammo not always in weapon data). */
+  /**
+   * Reserve ammo (excludes the magazine). With ammoReserveModelled it is the modded
+   * reserve (wiki AmmoMax × Ammo Maximum mods/riven); otherwise an incarnon display value.
+   */
   ammoMax?: number;
+  /** True when ammoMax is a real modelled reserve the TTK sim can run dry on. */
+  ammoReserveModelled?: boolean;
   /** Punch Through meters from incarnon/rivens — display only (no DPS model). */
   punchThrough?: number;
   /** Projectile speed bonus fraction from incarnon/rivens — display only. */

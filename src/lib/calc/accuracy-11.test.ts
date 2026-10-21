@@ -24,8 +24,11 @@ describe("Beam multishot: status DoT scales with the per-beam multishot factor (
     expect(build("phage").continuousMultishotFactor).toBeUndefined();
   });
   it("Amprex Split + Vigilante vs heavy_gunner L100: TTK 547.0 → 295.5 s (Electricity DoT ×2.05)", () => {
-    expect(calculateTTK(build("amprex", ["split_chamber_r3", "vigilante_armaments"]), gunner, 100).ttk)
+    // Unlimited ammo for the DoT check; with the R14-7 reserve (Amprex 100 mag + 700) it runs dry first.
+    const s = build("amprex", ["split_chamber_r3", "vigilante_armaments"]);
+    expect(calculateTTK({ ...s, ammoReserveModelled: false }, gunner, 100).ttk)
       .toBeCloseTo(280.17, 1); // 295.53 before Heavy Gunner BaseLevel 8 (accuracy-15 R7-4)
+    expect(calculateTTK(s, gunner, 100).outOfAmmo).toBe(true);
   });
   it("unmodded beam (factor 1) unchanged: Amprex vs lancer L30", () => {
     const s = build("amprex");
@@ -68,7 +71,10 @@ describe("Heat armor strip: proc-rate landing, 0.5 s ramp, Status Duration (wiki
     expect(calculateTTK(build("braton_prime", ["hellfire_r3"]), gunner, 100).ttk).toBeCloseTo(91.9, 1); // 89.91 → 86.93 BaseLevel 8 (R7-4) → 91.90 stack expiry (R7-5)
   });
   it("Ignis Wraith unmodded vs heavy_gunner L100: 271.4 → 67.4 s", () => {
-    expect(calculateTTK(build("ignis_wraith"), gunner, 100).ttk).toBeCloseTo(65.4, 1); // 67.4 before BaseLevel 8 (R7-4)
+    const s = build("ignis_wraith");
+    expect(calculateTTK({ ...s, ammoReserveModelled: false }, gunner, 100).ttk).toBeCloseTo(65.4, 1); // 67.4 before BaseLevel 8 (R7-4)
+    // R14-7: 200 mag + 200 reserve (wiki) runs dry before the 65 s kill.
+    expect(calculateTTK(s, gunner, 100).outOfAmmo).toBe(true);
   });
 });
 

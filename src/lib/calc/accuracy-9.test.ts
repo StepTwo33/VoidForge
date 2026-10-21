@@ -23,7 +23,8 @@ describe("TTK sim: Viral amplifies Heat / Toxin / Electricity ticks (wiki Viral 
   const ttk = (mods: string[]) => {
     const w = enrichWeapon(allWeapons.find((x) => x.id === "ignis_wraith")!);
     const eq = mods.map((m, i) => ({ modId: m, rank: modsMap.get(m)!.maxRank, slotIndex: i }));
-    return calculateTTK(calculateWeaponBuild(w, eq, modsMap), gunner, 100).ttk;
+    // Mechanics check with unlimited ammo (R14-7: the modelled reserve would run dry here).
+    return calculateTTK({ ...calculateWeaponBuild(w, eq, modsMap), ammoReserveModelled: false }, gunner, 100).ttk;
   };
   it("Ignis Wraith (innate Heat) + Viral: Heat ticks now take the Viral multiplier → 27.83s with the Heat pool (37.45s before accuracy-11)", () => {
     expect(ttk(["infected_clip_r3", "cryo_rounds_r3", "hellfire_r3"])).toBeCloseTo(30.825, 2); // 27.825 → 26.825 BaseLevel 8 (R7-4) → 30.825 Viral 6 s expiry (R7-5)

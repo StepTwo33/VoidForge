@@ -21,6 +21,7 @@ export function SimResultsPanel({
   multishot,
   magazine,
   reloadTime,
+  ammoMax = 0,
   dmgTypes,
 }: {
   selectedEnemy: EnemyType | null;
@@ -31,6 +32,8 @@ export function SimResultsPanel({
   multishot: number;
   magazine: number;
   reloadTime: number;
+  /** Reserve ammo (0 = unlimited). */
+  ammoMax?: number;
   dmgTypes: Record<string, number>;
 }) {
   if (!selectedEnemy || !sim) {
@@ -45,8 +48,13 @@ export function SimResultsPanel({
     );
   }
 
-  const ttkLabel =
-    sim.ttk === Infinity ? "∞" : sim.ttk < 0.01 ? "<0.01s" : `${sim.ttk.toFixed(2)}s`;
+  const ttkLabel = sim.outOfAmmo
+    ? "Out of ammo"
+    : sim.ttk === Infinity
+      ? "∞"
+      : sim.ttk < 0.01
+        ? "<0.01s"
+        : `${sim.ttk.toFixed(2)}s`;
   const ttkColor =
     sim.ttk < 1
       ? "text-green-700 dark:text-green-400"
@@ -100,6 +108,11 @@ export function SimResultsPanel({
         <p className="mt-2 text-[9px] leading-relaxed text-muted-foreground/70">
           Discrete TTK (same engine as Arsenal). Enemy armor DR = 0.9×AR/2700 (cap 90%). Viral/Corrosive
           stacking, Elementalist, Bane, optional headshots.
+        </p>
+        <p className="mt-1 text-[9px] leading-relaxed text-muted-foreground">
+          {ammoMax > 0 && magazine > 0
+            ? `Ammo: a full magazine plus ${ammoMax.toLocaleString()} reserve (${Number.isFinite(sim.ammoShotBudget) ? `${sim.ammoShotBudget.toLocaleString()} shots` : "unlimited"}). Ammo pickups are not modelled, so the fight stops when both run out.`
+            : "Ammo: unlimited reserve (set Reserve ammo to model running dry). Ammo pickups are not modelled."}
         </p>
       </div>
 

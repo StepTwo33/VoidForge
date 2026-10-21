@@ -118,11 +118,13 @@ describe("R7-6: Hunter Munitions / Internal Bleeding (wiki, both wikis)", () => 
     const { calculateTTK, ENEMY_TYPES } = await import("@/lib/calc/ttk");
     const hel = ENEMY_TYPES.find((e) => e.id === "hellion")!;
     const crew = ENEMY_TYPES.find((e) => e.id === "crewman")!;
-    const plain = calculateTTK(build("rubico_prime"), hel, 100).ttk;
-    const hm = calculateTTK(build("rubico_prime", ["hunter_munitions"]), hel, 100).ttk;
+    // Unlimited ammo for the Slash check (R14-7 reserve would run dry on the long Rubico fight).
+    const inf = <T extends object>(s: T) => ({ ...s, ammoReserveModelled: false });
+    const plain = calculateTTK(inf(build("rubico_prime")), hel, 100).ttk;
+    const hm = calculateTTK(inf(build("rubico_prime", ["hunter_munitions"])), hel, 100).ttk;
     expect(hm).toBeLessThan(plain);
     expect(hm).toBeCloseTo(64.45, 1); // 114.64 s before
-    expect(calculateTTK(build("braton_prime", ["hunter_munitions", "internal_bleeding"]), crew, 100).ttk)
+    expect(calculateTTK(inf(build("braton_prime", ["hunter_munitions", "internal_bleeding"])), crew, 100).ttk)
       .toBeCloseTo(37.45, 1); // 44.93 s before
   });
 });
