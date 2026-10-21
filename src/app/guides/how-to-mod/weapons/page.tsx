@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 import Link from "next/link";
 import { ContentPanel } from "@/components/page-shell";
 import {
@@ -8,7 +9,12 @@ import {
 } from "@/components/guides/how-to-mod-ui";
 
 // Metadata only (tab title).
-export const metadata: Metadata = { title: "How to Mod: Weapons" };
+export const metadata: Metadata = pageMetadata({
+  path: "/guides/how-to-mod/weapons",
+  title: "How to Mod: Weapons",
+  description:
+    "How to mod Warframe weapons: damage, multishot, crit, status and elements.",
+});
 
 export default function HowToModWeaponsPage() {
   return (

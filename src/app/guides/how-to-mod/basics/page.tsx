@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 import Link from "next/link";
 import { ContentPanel } from "@/components/page-shell";
 import {
@@ -8,7 +9,12 @@ import {
 } from "@/components/guides/how-to-mod-ui";
 
 // Metadata only (tab title).
-export const metadata: Metadata = { title: "How to Mod: Basics" };
+export const metadata: Metadata = pageMetadata({
+  path: "/guides/how-to-mod/basics",
+  title: "How to Mod: Basics",
+  description:
+    "Warframe modding basics: mod capacity, drain, polarities, Forma, Orokin Reactors and Catalysts.",
+});
 
 export default function HowToModBasicsPage() {
   return (

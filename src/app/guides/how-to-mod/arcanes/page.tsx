@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 import { ContentPanel } from "@/components/page-shell";
 import {
   GuideCtaLink,
@@ -7,7 +8,12 @@ import {
 } from "@/components/guides/how-to-mod-ui";
 
 // Metadata only (tab title).
-export const metadata: Metadata = { title: "How to Mod: Arcanes" };
+export const metadata: Metadata = pageMetadata({
+  path: "/guides/how-to-mod/arcanes",
+  title: "How to Mod: Arcanes",
+  description:
+    "How Warframe arcanes work: slots, ranks, stacking and which arcanes suit which builds.",
+});
 
 export default function HowToModArcanesPage() {
   return (

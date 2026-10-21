@@ -1,13 +1,15 @@
+import { pageMetadata } from "@/lib/site/page-metadata";
 import Link from "next/link";
 import { PageShell, PageMain, PageHero, ContentPanel } from "@/components/page-shell";
 import { fetchPublishedSiteUpdates } from "@/lib/site/site-updates-server";
 import { formatSiteUpdateTime } from "@/lib/site/site-updates";
 import { cn } from "@/lib/utils";
 
-export const metadata = {
+export const metadata = pageMetadata({
+  path: "/updates",
   title: "What's New",
   description: "Updates and announcements from the Voidforge team.",
-};
+});
 
 export default async function UpdatesPage() {
   const updates = await fetchPublishedSiteUpdates(50);

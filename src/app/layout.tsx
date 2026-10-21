@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { headers } from "next/headers";
 import { getSiteUrl, SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from "@/lib/site/site-metadata";
+import { OG_IMAGE_URL, RSS_ALTERNATE_TYPES } from "@/lib/site/page-metadata";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { OverridesProvider } from "@/components/overrides-provider";
@@ -24,9 +25,7 @@ const geistMono = Geist_Mono({
 
 const siteUrl = getSiteUrl();
 const defaultTitle = `${SITE_NAME} - ${SITE_TAGLINE}`;
-/** Bump when replacing the social preview image so Discord/Twitter re-scrape. */
-const OG_IMAGE_VERSION = "7";
-const ogImageUrl = `/og-embed.png?v=${OG_IMAGE_VERSION}`;
+const ogImageUrl = OG_IMAGE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -50,7 +49,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "/",
+    // No url/canonical here: they would be inherited by every route. Routes set
+    // their own via pageMetadata(); the home page sets "/".
     siteName: SITE_NAME,
     title: defaultTitle,
     description: SITE_DESCRIPTION,
@@ -74,15 +74,7 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Voidforge",
   },
-  alternates: {
-    types: {
-      "application/rss+xml": [
-        { url: "/feeds/updates.xml", title: `${SITE_NAME} What's New` },
-        { url: "/feeds/builds-recent.xml", title: `${SITE_NAME} Latest Builds` },
-        { url: "/feeds/builds.xml", title: `${SITE_NAME} Top Builds` },
-      ],
-    },
-  },
+  alternates: { types: RSS_ALTERNATE_TYPES },
   icons: {
     icon: [
       { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },

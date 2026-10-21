@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 import { ContentPanel } from "@/components/page-shell";
 import {
   GuideCtaLink,
@@ -7,7 +8,12 @@ import {
 } from "@/components/guides/how-to-mod-ui";
 
 // Metadata only (tab title).
-export const metadata: Metadata = { title: "How to Mod: Railjack" };
+export const metadata: Metadata = pageMetadata({
+  path: "/guides/how-to-mod/railjack",
+  title: "How to Mod: Railjack",
+  description:
+    "How to mod your Railjack: components, armaments and Plexus mods.",
+});
 
 export default function HowToModRailjackPage() {
   return (

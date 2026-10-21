@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 import { ContentPanel } from "@/components/page-shell";
 import {
   GuideCtaLink,
@@ -7,7 +8,12 @@ import {
 } from "@/components/guides/how-to-mod-ui";
 
 // Metadata only (tab title).
-export const metadata: Metadata = { title: "How to Mod: Rivens" };
+export const metadata: Metadata = pageMetadata({
+  path: "/guides/how-to-mod/rivens",
+  title: "How to Mod: Rivens",
+  description:
+    "How Warframe riven mods work: dispositions, stat ranges, rerolls and grading.",
+});
 
 export default function HowToModRivensPage() {
   return (

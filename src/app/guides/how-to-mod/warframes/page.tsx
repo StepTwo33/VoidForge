@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 import { ContentPanel } from "@/components/page-shell";
 import {
   GuideCtaLink,
@@ -7,7 +8,12 @@ import {
 } from "@/components/guides/how-to-mod-ui";
 
 // Metadata only (tab title).
-export const metadata: Metadata = { title: "How to Mod: Warframes" };
+export const metadata: Metadata = pageMetadata({
+  path: "/guides/how-to-mod/warframes",
+  title: "How to Mod: Warframes",
+  description:
+    "How to mod Warframes: ability stats, survivability, auras, exilus, Helminth and archon shards.",
+});
 
 export default function HowToModWarframesPage() {
   return (

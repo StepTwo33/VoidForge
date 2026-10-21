@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 import { ContentPanel } from "@/components/page-shell";
 import {
   GuideCtaLink,
@@ -7,7 +8,12 @@ import {
 } from "@/components/guides/how-to-mod-ui";
 
 // Metadata only (tab title).
-export const metadata: Metadata = { title: "How to Mod: Modular" };
+export const metadata: Metadata = pageMetadata({
+  path: "/guides/how-to-mod/modular",
+  title: "How to Mod: Modular",
+  description:
+    "How to build and mod Kitguns, Zaws and Amps.",
+});
 
 export default function HowToModModularPage() {
   return (
