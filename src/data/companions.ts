@@ -261,6 +261,29 @@ export const allCompanions: Companion[] = [
     "description": "Vampire kavat that drains life",
     "precept": "Draining Bite - Life steal and Transfusion - Revive owner"
   },
+  // Khora's kavat (manually added). Health/shield/armor agree across WFCD @wfcd/items,
+  // fandom Module:Companions/data and wiki.warframe.com/w/Khora/Abilities (Venari infobox).
+  // In game she is summoned by Khora's Venari ability rather than equipped in the companion slot.
+  {
+    "id": "venari",
+    "name": "Venari",
+    "type": "kavat",
+    "health": 900,
+    "shield": 0,
+    "armor": 350,
+    "description": "Khora's loyal Kavat. Her constant companion and protector.",
+    "precept": "No precepts of her own - Khora's Venari ability sets her posture (Attack / Protect / Heal) and revives her"
+  },
+  {
+    "id": "venari_prime",
+    "name": "Venari Prime",
+    "type": "kavat",
+    "health": 1050,
+    "shield": 0,
+    "armor": 450,
+    "description": "Khora's will, Venari's fangs and claws.",
+    "precept": "No precepts of her own - Khora's Venari ability sets her posture (Attack / Protect / Heal) and revives her"
+  },
   {
     "id": "lambeo",
     "name": "Lambeo Moa",

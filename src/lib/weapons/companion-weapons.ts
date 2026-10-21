@@ -82,6 +82,8 @@ export const COMPANION_CLAW_BY_ID: Record<string, string> = {
   sly_vulpaphyla: "sly_claws",
   crescent_vulpaphyla: "crescent_claws",
   panzer_vulpaphyla: "panzer_claws",
+  venari: "venari_claws",
+  venari_prime: "venari_prime_claws",
 };
 
 /** Legacy name map for companions not keyed by id (e.g. Venari). */
