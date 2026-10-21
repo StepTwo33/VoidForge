@@ -217,7 +217,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innateP
 
   return (
     <div className={cn(
-      "group relative flex w-full flex-col rounded-xl border bg-card/90 transition-all hover:ring-2 hover:ring-primary/20",
+      "@container/modslot group relative flex w-full flex-col rounded-xl border bg-card/90 transition-all hover:ring-2 hover:ring-primary/20",
       compact ? "min-h-[6.5rem] p-2.5" : "min-h-[7rem] p-3",
       borderColor,
     )}>
@@ -228,7 +228,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innateP
       >
         <X className="h-3.5 w-3.5" />
       </button>
-      <div className="flex min-h-0 flex-1 items-start gap-2.5 pr-10 max-sm:flex-col max-sm:gap-1.5 max-sm:pr-0 sm:pr-8">
+      <div className="flex min-h-0 flex-1 items-start gap-2.5 pr-10 max-sm:flex-col max-sm:gap-1.5 max-sm:pr-0 sm:pr-8 @max-[12rem]/modslot:flex-col @max-[12rem]/modslot:gap-1.5 @max-[12rem]/modslot:pr-0">
         <GameAssetImage
           src={getModImage(mod.name)}
           alt=""
@@ -244,7 +244,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innateP
         <div className="min-w-0 flex-1 max-sm:w-full">
           <div className="mb-0.5 flex items-start gap-1.5">
             <PolarityIcon polarity={mod.polarity} size={14} className="mt-0.5 shrink-0" />
-            <span className={cn("break-words font-semibold leading-snug max-sm:line-clamp-2 max-sm:text-[13px]", compact ? "text-xs" : "text-[13px] sm:line-clamp-2")}>
+            <span className={cn("min-w-0 font-semibold leading-snug line-clamp-2 max-sm:text-[13px]", compact ? "text-xs" : "text-[13px]")}>
               {mod.name}
             </span>
           </div>
