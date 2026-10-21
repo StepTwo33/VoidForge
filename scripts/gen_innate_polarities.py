@@ -108,6 +108,12 @@ add("archwing", vf["archwings"], load("Archwing"), set())
 for key in ambiguous:
     entries.pop(key, None)
 
+# Necramechs live in WFCD Warframes.json; key them by the necramech builder's kind.
+for n in vf.get("necramechs", []):
+    rec = entries.pop(f"warframe:{n['id']}", None)
+    if rec and rec.get("slots"):
+        entries[f"necramech:{n['id']}"] = {"slots": rec["slots"]}
+
 # Maintainer-curated items (src/data/custom-items.ts) only get defaults the wiki confirms.
 custom_ids = set(re.findall(r'^\s+id: "([^"]+)"', open("src/data/custom-items.ts", encoding="utf-8").read(), re.M))
 custom_skipped = []
