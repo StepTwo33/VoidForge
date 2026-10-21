@@ -6,7 +6,7 @@ This folder mixes **ops tools** (safe to run) with **data-pipeline / audit** scr
 
 | Script | Purpose |
 |--------|---------|
-| `deploy.sh` | Server: reset to `origin/<branch>`, `npm ci`, build, restart `framehub`. From your PC: `bash scripts/deploy.sh ship` (fast-forward `design/ui-pass` onto `dev`, push, deploy on .50) |
+| `deploy.sh` | Server: reset to `origin/<branch>`, `npm ci`, build, restart `framehub`. From your PC: `bash scripts/deploy.sh ship` (merge `design/ui-pass` into `dev`, push, deploy on .50) |
 | `set-admin.ts` | **Local dev only** — promote emails to admin (`CONFIRM_SET_ADMIN=1`) |
 | `repair-db.mjs` | SQLite repair helper if the DB is corrupted |
 | `generate-pwa-icons.py` | Regenerates PWA icons (`npm run icons`) |

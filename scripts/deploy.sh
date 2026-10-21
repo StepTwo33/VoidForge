@@ -7,7 +7,7 @@
 #   bash scripts/deploy.sh main         # deploy origin/main and restart
 #
 # Usage (on your PC, from repo root — Git Bash or any bash with ssh):
-#   bash scripts/deploy.sh ship         # ff design/ui-pass → origin/dev, push, deploy on .50
+#   bash scripts/deploy.sh ship         # merge design/ui-pass into dev, push, deploy on .50
 #
 # Do NOT run `npm install` on the server by hand — it rewrites package-lock.json
 # and blocks the next `git pull`. This script uses `npm ci` from the committed lockfile.
@@ -68,23 +68,21 @@ if [ "${1:-}" = "ship" ]; then
   echo "==> Fetching origin/dev and origin/design/ui-pass"
   git fetch origin dev design/ui-pass
 
-  if git merge-base --is-ancestor origin/dev origin/design/ui-pass; then
-    if [ "$(git rev-parse origin/dev)" = "$(git rev-parse origin/design/ui-pass)" ]; then
-      echo "==> origin/dev already matches design/ui-pass"
-    else
-      echo "==> Fast-forwarding origin/dev to design/ui-pass"
-      git push origin "origin/design/ui-pass:dev"
-    fi
-  elif git merge-base --is-ancestor origin/design/ui-pass origin/dev; then
-    echo "==> origin/dev already includes design/ui-pass"
+  if [ "$(git rev-parse --abbrev-ref HEAD)" != "dev" ]; then
+    git checkout dev
+  fi
+  git merge --ff-only origin/dev
+
+  if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/design/ui-pass)" ]; then
+    echo "==> dev already matches design/ui-pass"
+  elif git merge-base --is-ancestor origin/design/ui-pass HEAD; then
+    echo "==> dev already includes design/ui-pass"
   else
-    echo "ERROR: design/ui-pass and dev have diverged. Not merging or deploying."
-    exit 1
+    echo "==> Merging design/ui-pass into dev"
+    git merge --no-edit origin/design/ui-pass
   fi
 
-  if [ "$(git rev-parse --abbrev-ref HEAD)" = "dev" ]; then
-    git merge --ff-only origin/dev || echo "WARN: local dev was not fast-forwarded; origin/dev is still what will deploy"
-  fi
+  git push origin HEAD:dev
 
   echo "==> Deploying on $HOST"
   ssh -o BatchMode=yes -o ConnectTimeout=15 "$HOST" "cd '$REPO' && bash scripts/deploy.sh dev"
