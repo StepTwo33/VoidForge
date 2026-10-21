@@ -1,4 +1,4 @@
-import { find } from "@wfcd/items/utilities";
+import { find } from "@/lib/warframe-arsenal/wfcd-item-index";
 import { archwings, necramechs } from "@/data/archwing";
 import {
   houndBrackets,

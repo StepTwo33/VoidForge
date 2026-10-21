@@ -1,4 +1,5 @@
-import ArsenalData, { type BaseArsenalData } from "@wfcd/arsenal-parser";
+import type { BaseArsenalData } from "@wfcd/arsenal-parser";
+import ArsenalData from "@/lib/warframe-arsenal/vendor/arsenal-parser";
 
 const EMPTY_LOADOUT_SECTION = Object.freeze({});
 
