@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  applyPolarityOverride,
+  effectiveSlotPolarities,
+  innateSlotPolarities,
+  isInnatePolarity,
+} from "@/lib/builds/innate-polarities";
 import { useState, useMemo, useCallback } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
@@ -185,6 +191,22 @@ export default function CompanionBuilderPage() {
   const [activeWeaponSlotIndex, setActiveWeaponSlotIndex] = useState(0);
   const [hasCatalyst, setHasCatalyst] = useState(false);
   const [weaponSlotPolarities, setWeaponSlotPolarities] = useState<Record<number, string>>({});
+  const innatePolarities = useMemo(
+    () => innateSlotPolarities("companion", selectedCompanion?.id),
+    [selectedCompanion?.id],
+  );
+  const effectivePolarities = useMemo(
+    () => effectiveSlotPolarities(innatePolarities, slotPolarities),
+    [innatePolarities, slotPolarities],
+  );
+  const innateWeaponPolarities = useMemo(
+    () => innateSlotPolarities("weapon", selectedWeapon?.id),
+    [selectedWeapon?.id],
+  );
+  const effectiveWeaponPolarities = useMemo(
+    () => effectiveSlotPolarities(innateWeaponPolarities, weaponSlotPolarities),
+    [innateWeaponPolarities, weaponSlotPolarities],
+  );
   const [modPickerTarget, setModPickerTarget] = useState<"companion" | "weapon">("companion");
   const [weaponRivenStatsMap, setWeaponRivenStatsMap] = useState<Record<number, Record<string, number>>>();
   const [applyHunterVsSlash, setApplyHunterVsSlash] = useState(false);
@@ -355,10 +377,10 @@ export default function CompanionBuilderPage() {
       const mod = modsMap.get(m.modId);
       if (!mod) return sum;
       const baseDrain = modCapacityAtRank(mod.drain, m.rank);
-      const slotPol = slotPolarities[m.slotIndex];
+      const slotPol = effectivePolarities[m.slotIndex];
       return sum + modSlotCapacityCost(baseDrain, slotPol, mod.polarity);
     }, 0);
-  }, [equippedMods, slotPolarities]);
+  }, [equippedMods, effectivePolarities]);
 
   const companionPreceptMods = useMemo(() => {
     if (!selectedCompanion) return [];
@@ -434,10 +456,10 @@ export default function CompanionBuilderPage() {
       const mod = modsMap.get(m.modId);
       if (!mod) return sum;
       const baseDrain = modCapacityAtRank(mod.drain, m.rank);
-      const slotPol = weaponSlotPolarities[m.slotIndex];
+      const slotPol = effectiveWeaponPolarities[m.slotIndex];
       return sum + modSlotCapacityCost(baseDrain, slotPol, mod.polarity);
     }, 0);
-  }, [weaponMods, weaponSlotPolarities]);
+  }, [weaponMods, effectiveWeaponPolarities]);
 
   /** Kavat/Kubrow/Predasite/Vulpaphyla: claws are part of the animal (no swap) + a Posture slot. */
   const hasFixedWeapon = companionHasFixedWeapon(selectedCompanion);
@@ -860,10 +882,11 @@ export default function CompanionBuilderPage() {
                         rank={equipped?.rank ?? 0}
                         slotIndex={i}
                         label={isPrecept ? "Precept" : undefined}
-                        slotPolarity={slotPolarities[i]}
+                        slotPolarity={effectivePolarities[i]}
+                        innatePolarity={isInnatePolarity(innatePolarities, slotPolarities, i)}
                         onAdd={() => handleOpenModPicker(i)}
                         onRemove={() => handleRemoveMod(i)}
-                        onPolarize={(p) => setSlotPolarities((prev) => { const next = { ...prev }; if (p) next[i] = p; else delete next[i]; return next; })}
+                        onPolarize={(p) => setSlotPolarities((prev) => applyPolarityOverride(prev, innatePolarities, i, p))}
                       />
                     );
                   })}
@@ -1010,10 +1033,11 @@ export default function CompanionBuilderPage() {
                                 mod={mod}
                                 rank={equipped?.rank ?? 0}
                                 slotIndex={i}
-                                slotPolarity={weaponSlotPolarities[i]}
+                                slotPolarity={effectiveWeaponPolarities[i]}
+                        innatePolarity={isInnatePolarity(innateWeaponPolarities, weaponSlotPolarities, i)}
                                 onAdd={() => handleOpenWeaponModPicker(i)}
                                 onRemove={() => handleRemoveWeaponMod(i)}
-                                onPolarize={(p) => setWeaponSlotPolarities((prev) => { const next = { ...prev }; if (p) next[i] = p; else delete next[i]; return next; })}
+                                onPolarize={(p) => setWeaponSlotPolarities((prev) => applyPolarityOverride(prev, innateWeaponPolarities, i, p))}
                               />
                             );
                           })}
@@ -1034,10 +1058,11 @@ export default function CompanionBuilderPage() {
                                   rank={equipped?.rank ?? 0}
                                   slotIndex={i}
                                   label="Posture"
-                                  slotPolarity={weaponSlotPolarities[i]}
+                                  slotPolarity={effectiveWeaponPolarities[i]}
+                        innatePolarity={isInnatePolarity(innateWeaponPolarities, weaponSlotPolarities, i)}
                                   onAdd={() => handleOpenWeaponModPicker(i)}
                                   onRemove={() => handleRemoveWeaponMod(i)}
-                                  onPolarize={(p) => setWeaponSlotPolarities((prev) => { const next = { ...prev }; if (p) next[i] = p; else delete next[i]; return next; })}
+                                  onPolarize={(p) => setWeaponSlotPolarities((prev) => applyPolarityOverride(prev, innateWeaponPolarities, i, p))}
                                 />
                               </div>
                             </div>

@@ -18,7 +18,8 @@ export function getPolarityCapacityEffect(
   slotPolarity: string | undefined | null,
   modPolarity: string,
 ): PolarityCapacityEffect {
-  if (!slotPolarity || !modHasPolarity(modPolarity)) return "neutral";
+  // "none" = innate polarity cleared by the user (see lib/builds/innate-polarities).
+  if (!slotPolarity || slotPolarity === "none" || !modHasPolarity(modPolarity)) return "neutral";
   // Umbral mods in an Omni slot: no bonus, no penalty.
   if (slotPolarity === "universal" && modPolarity === "umbra") return "neutral";
   if (slotPolarity === "universal" || modPolarity === slotPolarity) return "match";

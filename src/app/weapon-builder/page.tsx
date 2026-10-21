@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  applyPolarityOverride,
+  effectiveSlotPolarities,
+  innateSlotPolarities,
+  isInnatePolarity,
+} from "@/lib/builds/innate-polarities";
 import { cleanModDescription } from "@/lib/display/mod-display";
 import { BuilderSectionNav } from "@/components/builder-section-nav";
 import { useState, useMemo, useCallback, useEffect } from "react";
@@ -97,6 +103,14 @@ export default function WeaponBuilderPage() {
   const [stanceMod, setStanceMod] = useState<Mod | null>(null);
   const [stancePickerOpen, setStancePickerOpen] = useState(false);
   const [slotPolarities, setSlotPolarities] = useState<Record<number, string>>({});
+  const innatePolarities = useMemo(
+    () => innateSlotPolarities("weapon", selectedWeapon?.id),
+    [selectedWeapon?.id],
+  );
+  const effectivePolarities = useMemo(
+    () => effectiveSlotPolarities(innatePolarities, slotPolarities),
+    [innatePolarities, slotPolarities],
+  );
   const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>(() => getSavedBuilds("weapon"));
   const [buildName, setBuildName] = useState("");
   const [buildDescription, setBuildDescription] = useState("");
@@ -917,11 +931,11 @@ export default function WeaponBuilderPage() {
                   </h2>
                   <span className={cn(
                     "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
-                    computeUsedCapacity(equippedMods, modsMap, slotPolarities) > modCapacity
+                    computeUsedCapacity(equippedMods, modsMap, effectivePolarities) > modCapacity
                       ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
                   )}>
                     <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
-                    {computeUsedCapacity(equippedMods, modsMap, slotPolarities)} / {modCapacity}
+                    {computeUsedCapacity(equippedMods, modsMap, effectivePolarities)} / {modCapacity}
                   </span>
                 </div>
                 {showImporter && (
@@ -954,12 +968,13 @@ export default function WeaponBuilderPage() {
                         mod={mod}
                         rank={equipped?.rank ?? 0}
                         slotIndex={i}
-                        slotPolarity={slotPolarities[i]}
+                        slotPolarity={effectivePolarities[i]}
+                        innatePolarity={isInnatePolarity(innatePolarities, slotPolarities, i)}
                         rivenStats={rivenStatsMap[i]}
                         weaponCategory={selectedWeapon.category}
                         onAdd={() => handleOpenModPicker(i)}
                         onRemove={() => handleRemoveMod(i)}
-                        onPolarize={(p) => setSlotPolarities((prev) => { const next = { ...prev }; if (p) next[i] = p; else delete next[i]; return next; })}
+                        onPolarize={(p) => setSlotPolarities((prev) => applyPolarityOverride(prev, innatePolarities, i, p))}
                         onEditRiven={() => handleOpenModPicker(i)}
                       />
                     );
@@ -982,12 +997,13 @@ export default function WeaponBuilderPage() {
                           rank={equipped?.rank ?? 0}
                           slotIndex={i}
                           label={exilusLabel}
-                          slotPolarity={slotPolarities[i]}
+                          slotPolarity={effectivePolarities[i]}
+                        innatePolarity={isInnatePolarity(innatePolarities, slotPolarities, i)}
                           rivenStats={rivenStatsMap[i]}
                           weaponCategory={selectedWeapon.category}
                           onAdd={() => handleOpenModPicker(i)}
                           onRemove={() => handleRemoveMod(i)}
-                          onPolarize={(p) => setSlotPolarities((prev) => { const next = { ...prev }; if (p) next[i] = p; else delete next[i]; return next; })}
+                          onPolarize={(p) => setSlotPolarities((prev) => applyPolarityOverride(prev, innatePolarities, i, p))}
                           onEditRiven={() => handleOpenModPicker(i)}
                         />
                       </div>

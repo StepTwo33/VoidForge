@@ -31,6 +31,8 @@ interface ModSlotProps {
   slotIndex: number;
   label?: string;
   slotPolarity?: string;
+  /** True when slotPolarity is the item's innate default (no forma applied by the user/import). */
+  innatePolarity?: boolean;
   rivenStats?: Record<string, number>;
   weaponCategory?: string;
   onAdd: () => void;
@@ -48,11 +50,13 @@ interface ModSlotProps {
 function FormaPolarizeButton({
   active,
   slotPolarity,
+  innate = false,
   onClick,
   inline = false,
 }: {
   active: boolean;
   slotPolarity?: string;
+  innate?: boolean;
   onClick: (e: MouseEvent) => void;
   inline?: boolean;
 }) {
@@ -69,6 +73,7 @@ function FormaPolarizeButton({
         polarized
           ? cn(
               "h-11 w-11 p-1.5 sm:h-8 sm:w-8",
+              innate && "border-dashed",
               active
                 ? "border-primary/50 bg-primary/10 ring-1 ring-primary/30"
                 : "border-border/60 bg-card/80 text-muted-foreground hover:border-primary/35 hover:bg-secondary/70 hover:text-foreground"
@@ -80,14 +85,20 @@ function FormaPolarizeButton({
                 : "border-border/70 bg-muted/30 hover:border-amber-600/40 hover:bg-amber-500/10 hover:text-amber-900 dark:hover:border-amber-500/40 dark:hover:text-amber-300"
             )
       )}
+      data-innate-polarity={innate && polarized ? "true" : undefined}
       title={
         polarized
-          ? `Slot polarized as ${polarityLabel} — click to change`
+          ? innate
+            ? `Innate ${polarityLabel} polarity (default) — click to forma`
+            : `Slot polarized as ${polarityLabel} — click to change`
           : "Forma — polarize this slot to match a mod and halve its drain"
       }
     >
       {polarized && slotPolarity ? (
-        <PolarityIcon polarity={slotPolarity} size={18} />
+        <>
+          <PolarityIcon polarity={slotPolarity} size={18} />
+          {innate && <span className="sr-only">innate polarity</span>}
+        </>
       ) : (
         <>
           <span className="text-[11px] leading-none" aria-hidden>⬡</span>
@@ -141,7 +152,7 @@ function PolarityPicker({
   );
 }
 
-export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenStats, weaponCategory, onAdd, onRemove, onPolarize, onEditRiven, equippedModIds, compact, inlineForma = true }: ModSlotProps) {
+export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innatePolarity = false, rivenStats, weaponCategory, onAdd, onRemove, onPolarize, onEditRiven, equippedModIds, compact, inlineForma = true }: ModSlotProps) {
   const [showPolarityPicker, setShowPolarityPicker] = useState(false);
 
   if (!mod) {
@@ -163,6 +174,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
               inline
               active={showPolarityPicker}
               slotPolarity={slotPolarity}
+              innate={innatePolarity}
               onClick={(e) => { e.stopPropagation(); setShowPolarityPicker(!showPolarityPicker); }}
             />
           </div>
@@ -173,6 +185,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
               inline
               active={showPolarityPicker}
               slotPolarity={slotPolarity}
+              innate={innatePolarity}
               onClick={(e) => { e.stopPropagation(); setShowPolarityPicker(!showPolarityPicker); }}
             />
           </div>
@@ -285,6 +298,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, rivenSt
             inline
             active={showPolarityPicker}
             slotPolarity={slotPolarity}
+            innate={innatePolarity}
             onClick={(e) => { e.stopPropagation(); setShowPolarityPicker(!showPolarityPicker); }}
           />
         )}

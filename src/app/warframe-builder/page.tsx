@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  applyPolarityOverride,
+  effectiveSlotPolarities,
+  innateSlotPolarities,
+  isInnatePolarity,
+} from "@/lib/builds/innate-polarities";
 import { BuilderSectionNav } from "@/components/builder-section-nav";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -702,17 +708,26 @@ export default function WarframeBuilderPage() {
     [selectedWarframe?.id],
   );
 
+  const innatePolarities = useMemo(
+    () => innateSlotPolarities("warframe", selectedWarframe?.id),
+    [selectedWarframe?.id],
+  );
+  const effectivePolarities = useMemo(
+    () => effectiveSlotPolarities(innatePolarities, slotPolarities),
+    [innatePolarities, slotPolarities],
+  );
+
   const baseCapacity = warframeBaseCapacity(hasOrokinReactor);
   const auraBonus = useMemo(
-    () => computeWarframeAuraBonus(equippedMods, modsMap, slotPolarities, auraSlotIndices),
-    [equippedMods, modsMap, slotPolarities, auraSlotIndices],
+    () => computeWarframeAuraBonus(equippedMods, modsMap, effectivePolarities, auraSlotIndices),
+    [equippedMods, modsMap, effectivePolarities, auraSlotIndices],
   );
 
   const totalCapacity = baseCapacity + auraBonus;
 
   const capacityUsed = useMemo(
-    () => computeWarframeCapacityUsed(equippedMods, modsMap, slotPolarities, auraSlotIndices),
-    [equippedMods, modsMap, slotPolarities, auraSlotIndices],
+    () => computeWarframeCapacityUsed(equippedMods, modsMap, effectivePolarities, auraSlotIndices),
+    [equippedMods, modsMap, effectivePolarities, auraSlotIndices],
   );
 
   const handleSelectWarframe = useCallback((warframe: Warframe) => {
@@ -1102,17 +1117,13 @@ export default function WarframeBuilderPage() {
                             rank={equipped?.rank ?? 0}
                             slotIndex={slotIndex}
                             label={label}
-                            slotPolarity={slotPolarities[slotIndex]}
+                            slotPolarity={effectivePolarities[slotIndex]}
+                            innatePolarity={isInnatePolarity(innatePolarities, slotPolarities, slotIndex)}
                             equippedModIds={equippedModIds}
                             onAdd={() => handleOpenModPicker(slotIndex)}
                             onRemove={() => handleRemoveMod(slotIndex)}
                             onPolarize={(p) =>
-                              setSlotPolarities((prev) => {
-                                const next = { ...prev };
-                                if (p) next[slotIndex] = p;
-                                else delete next[slotIndex];
-                                return next;
-                              })
+                              setSlotPolarities((prev) => applyPolarityOverride(prev, innatePolarities, slotIndex, p))
                             }
                           />
                         </div>
@@ -1132,11 +1143,12 @@ export default function WarframeBuilderPage() {
                             rank={equipped?.rank ?? 0}
                             slotIndex={EXILUS_SLOT}
                             label="Exilus"
-                            slotPolarity={slotPolarities[EXILUS_SLOT]}
+                            slotPolarity={effectivePolarities[EXILUS_SLOT]}
+                            innatePolarity={isInnatePolarity(innatePolarities, slotPolarities, EXILUS_SLOT)}
                             equippedModIds={equippedModIds}
                             onAdd={() => handleOpenModPicker(EXILUS_SLOT)}
                             onRemove={() => handleRemoveMod(EXILUS_SLOT)}
-                            onPolarize={(p) => setSlotPolarities((prev) => { const next = { ...prev }; if (p) next[EXILUS_SLOT] = p; else delete next[EXILUS_SLOT]; return next; })}
+                            onPolarize={(p) => setSlotPolarities((prev) => applyPolarityOverride(prev, innatePolarities, EXILUS_SLOT, p))}
                           />
                         );
                       })()}
@@ -1170,11 +1182,12 @@ export default function WarframeBuilderPage() {
                           mod={mod}
                           rank={equipped?.rank ?? 0}
                           slotIndex={slotIdx}
-                          slotPolarity={slotPolarities[slotIdx]}
+                          slotPolarity={effectivePolarities[slotIdx]}
+                            innatePolarity={isInnatePolarity(innatePolarities, slotPolarities, slotIdx)}
                           equippedModIds={equippedModIds}
                           onAdd={() => handleOpenModPicker(slotIdx)}
                           onRemove={() => handleRemoveMod(slotIdx)}
-                          onPolarize={(p) => setSlotPolarities((prev) => { const next = { ...prev }; if (p) next[slotIdx] = p; else delete next[slotIdx]; return next; })}
+                          onPolarize={(p) => setSlotPolarities((prev) => applyPolarityOverride(prev, innatePolarities, slotIdx, p))}
                         />
                       );
                     })}

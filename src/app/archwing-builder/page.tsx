@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  applyPolarityOverride,
+  effectiveSlotPolarities,
+  innateSlotPolarities,
+  isInnatePolarity,
+} from "@/lib/builds/innate-polarities";
 import { BuilderSectionNav } from "@/components/builder-section-nav";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { PageShell } from "@/components/page-shell";
@@ -224,8 +230,33 @@ export default function ArchwingBuilderPage() {
     return null;
   }, [mode, selectedArchwing, selectedNecramech, archwingMods, necramechMods, railjackGunnery]);
 
+  const innateFramePolarities = useMemo(
+    () =>
+      mode === "archwing"
+        ? innateSlotPolarities("archwing", selectedArchwing?.id)
+        : innateSlotPolarities("necramech", selectedNecramech?.id),
+    [mode, selectedArchwing?.id, selectedNecramech?.id],
+  );
+  const effectiveFramePolarities = useMemo(
+    () =>
+      effectiveSlotPolarities(
+        innateFramePolarities,
+        mode === "archwing" ? archwingPolarities : necramechPolarities,
+      ),
+    [innateFramePolarities, mode, archwingPolarities, necramechPolarities],
+  );
+  const innateWeaponPolarities = useMemo(
+    () => innateSlotPolarities("weapon", selectedWeapon?.id),
+    [selectedWeapon?.id],
+  );
+  const effectiveWeaponPolarities = useMemo(
+    () => effectiveSlotPolarities(innateWeaponPolarities, weaponPolarities),
+    [innateWeaponPolarities, weaponPolarities],
+  );
+
   const frameCapacity = archwingFrameCapacity(
     mode,
+    // Forma count = user/imported overrides (innate defaults are free; "none" still took a forma).
     mode === "necramech" ? Object.keys(necramechPolarities).length : 0,
     hasReactor,
   );
@@ -233,25 +264,24 @@ export default function ArchwingBuilderPage() {
 
   const frameModsUsed = useMemo(() => {
     const mods = mode === "archwing" ? archwingMods : necramechMods;
-    const pols = mode === "archwing" ? archwingPolarities : necramechPolarities;
     return mods.reduce((sum, m) => {
       const mod = modsMap.get(m.modId);
       if (!mod) return sum;
       const baseDrain = modCapacityAtRank(mod.drain, m.rank);
-      const slotPol = pols[m.slotIndex];
+      const slotPol = effectiveFramePolarities[m.slotIndex];
       return sum + modSlotCapacityCost(baseDrain, slotPol, mod.polarity);
     }, 0);
-  }, [mode, archwingMods, necramechMods, archwingPolarities, necramechPolarities]);
+  }, [mode, archwingMods, necramechMods, effectiveFramePolarities]);
 
   const weaponModsUsed = useMemo(() => {
     return weaponMods.reduce((sum, m) => {
       const mod = modsMap.get(m.modId);
       if (!mod) return sum;
       const baseDrain = modCapacityAtRank(mod.drain, m.rank);
-      const slotPol = weaponPolarities[m.slotIndex];
+      const slotPol = effectiveWeaponPolarities[m.slotIndex];
       return sum + modSlotCapacityCost(baseDrain, slotPol, mod.polarity);
     }, 0);
-  }, [weaponMods, weaponPolarities]);
+  }, [weaponMods, effectiveWeaponPolarities]);
 
   // Archwing / necramech mod pools
   const filteredFrameMods = useMemo(() => {
@@ -434,7 +464,8 @@ export default function ArchwingBuilderPage() {
                         mod={mod}
                         rank={equipped?.rank ?? 0}
                         slotIndex={i}
-                        slotPolarity={pols[i]}
+                        slotPolarity={effectiveFramePolarities[i]}
+                        innatePolarity={isInnatePolarity(innateFramePolarities, pols, i)}
                         onAdd={() => {
                           if (mode === "archwing") { setArchwingActiveSlot(i); setArchwingModPickerOpen(true); }
                           else { setNecramechActiveSlot(i); setNecramechModPickerOpen(true); }
@@ -445,7 +476,7 @@ export default function ArchwingBuilderPage() {
                         }}
                         onPolarize={(p) => {
                           const setter = mode === "archwing" ? setArchwingPolarities : setNecramechPolarities;
-                          setter((prev) => { const next = { ...prev }; if (p) next[i] = p; else delete next[i]; return next; });
+                          setter((prev) => applyPolarityOverride(prev, innateFramePolarities, i, p));
                         }}
                       />
                     );
@@ -537,10 +568,11 @@ export default function ArchwingBuilderPage() {
                         mod={mod}
                         rank={equipped?.rank ?? 0}
                         slotIndex={i}
-                        slotPolarity={weaponPolarities[i]}
+                        slotPolarity={effectiveWeaponPolarities[i]}
+                        innatePolarity={isInnatePolarity(innateWeaponPolarities, weaponPolarities, i)}
                         onAdd={() => { setWeaponActiveSlot(i); setWeaponModPickerOpen(true); }}
                         onRemove={() => setWeaponMods((prev) => prev.filter((m) => m.slotIndex !== i))}
-                        onPolarize={(p) => setWeaponPolarities((prev) => { const next = { ...prev }; if (p) next[i] = p; else delete next[i]; return next; })}
+                        onPolarize={(p) => setWeaponPolarities((prev) => applyPolarityOverride(prev, innateWeaponPolarities, i, p))}
                       />
                     );
                   })}
