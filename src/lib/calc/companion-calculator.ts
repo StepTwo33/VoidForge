@@ -122,11 +122,6 @@ export const COMPANION_LINK_MODS: Record<string, { statKey: string; target: "hea
   link_vitality: { statKey: "health", target: "health" },
   link_redirection: { statKey: "shield", target: "shield" },
   link_fiber: { statKey: "armor", target: "armor" },
-  // Pre-Update 34 names of Link Fiber / Link Redirection (wiki trivia: "Prior to Update 34.0 this
-  // mod was named Link Armor / Link Shields"). Still in the catalog for old builds; they copy the
-  // Warframe's stat the same way, at the card's own value (+10% per rank, 60% at R5).
-  link_armor: { statKey: "linkArmor", target: "armor" },
-  link_shields: { statKey: "linkShields", target: "shield" },
 };
 
 export function calculateCompanionBuild(

@@ -261,17 +261,11 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Investigator: duration \u2014 Helios Sentinel will scan objects and enemies within 50m over 2.0s. This consume\u2026"),
     line("range", "mod_panel", "multiplicative_percent", "Investigator: range \u2014 Helios Sentinel will scan objects and enemies within 50m over 2.0s. This consume\u2026 (arsenal display only)"),
   ]),
-  link_armor: mod("link_armor", [
-    line("linkArmor", "mod_panel", "multiplicative_percent", "Link Armor: linkArmor \u2014 +10% Link Armor per rank"),
-  ]),
   link_fiber: mod("link_fiber", [
     line("armor", "mod_panel", "multiplicative_percent", "wiki: Link Fiber — +125% of Warframe armor (not companion base %)"),
   ]),
   link_redirection: mod("link_redirection", [
     line("shield", "mod_panel", "multiplicative_percent", "wiki: Link Redirection — +125% of Warframe shields (not companion base %)"),
-  ]),
-  link_shields: mod("link_shields", [
-    line("linkShields", "mod_panel", "multiplicative_percent", "Link Shields: linkShields \u2014 +10% Link Shields per rank"),
   ]),
   link_vitality: mod("link_vitality", [
     line("health", "mod_panel", "multiplicative_percent", "wiki: Link Vitality — +125% of Warframe health (not companion base %)"),

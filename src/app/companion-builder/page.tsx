@@ -42,6 +42,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Zap, Dog, Bot, Bug, Swords, Crosshair, Flag, Save, FolderOpen, ArrowLeftRight } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, CompanionBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
 import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
+import { dropUnknownMods } from "@/lib/mods/known-mods";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { cn } from "@/lib/utils";
 import { appendReturnTo } from "@/lib/site/nav-return";
@@ -278,7 +279,8 @@ export default function CompanionBuilderPage() {
     setSelectedCompanion(comp);
     const loadedParts = d.parts ?? defaultPartsForCompanion(comp) ?? null;
     setCompanionParts(loadedParts);
-    setEquippedMods(d.mods.map((m) => {
+    // Removed / unknown mod ids (e.g. an old build saved with a mod later taken out) are dropped.
+    setEquippedMods(dropUnknownMods(d.mods, modsMap).map((m) => {
       const mod = modsMap.get(m.modId);
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
     }));
@@ -298,7 +300,7 @@ export default function CompanionBuilderPage() {
     } else {
       setSelectedWeapon(null);
     }
-    setWeaponMods((d.weaponMods || []).map((m) => {
+    setWeaponMods(dropUnknownMods(d.weaponMods, modsMap).map((m) => {
       const mod = modsMap.get(m.modId);
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
     }));

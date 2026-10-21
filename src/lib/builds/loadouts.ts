@@ -3,6 +3,8 @@ import { inferModularLoadoutSlot } from "./modular-resolve";
 import { companionsMap } from "@/data/companions";
 import { migratePostureToPostureSlot } from "@/lib/weapons/companion-weapons";
 import type { SavedBuild } from "./build-storage";
+import { modsMap } from "@/data/mods";
+import { migrateRenamedModsDeep } from "@/lib/mods/known-mods";
 
 const STORAGE_KEY = "overframe_loadouts";
 
@@ -112,7 +114,7 @@ export function loadoutToBuildData(loadout: Loadout): LoadoutBuildData {
 }
 
 export function loadoutFromSavedBuild(build: SavedBuild): Loadout {
-  return migrateCompanionPosture({
+  return migrateRenamedModsDeep(migrateCompanionPosture({
     id: build.id,
     cloudId: build.id,
     name: build.name,
@@ -121,7 +123,7 @@ export function loadoutFromSavedBuild(build: SavedBuild): Loadout {
     createdAt: build.createdAt,
     updatedAt: build.updatedAt,
     ...(build.data as LoadoutBuildData),
-  });
+  }), modsMap).data;
 }
 
 export function mergeCloudLoadout(local: Loadout, cloud: SavedBuild): Loadout {
@@ -227,7 +229,8 @@ function normalizeLoadout(raw: Loadout): Loadout {
   delete out.modularBuild;
   if (Object.keys(modularBuilds).length > 0) out.modularBuilds = modularBuilds;
   else delete out.modularBuilds;
-  return migrateCompanionPosture(out);
+  // Renamed mods (Link Shields → Link Redirection, Link Armor → Link Fiber) in old loadouts.
+  return migrateRenamedModsDeep(migrateCompanionPosture(out), modsMap).data;
 }
 
 /** Older imports: beast posture mod sat in a regular claw slot (see migratePostureToPostureSlot). */

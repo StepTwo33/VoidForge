@@ -5064,34 +5064,6 @@ const RAW_MODS: Mod[] = [
   },
 
 
-  {
-    "id": "link_armor",
-    "name": "Link Armor",
-    "polarity": "vazarin",
-    "drain": 6,
-    "maxRank": 5,
-    "category": "companion",
-    "subCategory": "",
-    "stats": {
-      "linkArmor": 10
-    },
-    "description": "+10% Link Armor per rank",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "link_shields",
-    "name": "Link Shields",
-    "polarity": "vazarin",
-    "drain": 6,
-    "maxRank": 5,
-    "category": "companion",
-    "subCategory": "",
-    "stats": {
-      "linkShields": 10
-    },
-    "description": "+10% Link Shields per rank",
-    "rarity": "uncommon"
-  },
 
 
   {

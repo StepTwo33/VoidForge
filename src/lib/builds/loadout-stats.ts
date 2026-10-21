@@ -540,7 +540,7 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
     const c = companionsMap.get(loadout.companionBuild.companionId);
     if (c) {
       const wfStats = result.warframe?.stats;
-      // Link mods (Vitality / Redirection / Fiber, legacy Link Shields / Armor) copy the loadout Warframe's max stats.
+      // Link Vitality / Redirection / Fiber copy the loadout Warframe's max stats.
       const linkedWarframe = wfStats
         ? { name: result.warframe?.name, health: wfStats.totalHealth, shield: wfStats.totalShield, armor: wfStats.totalArmor }
         : null;

@@ -3,8 +3,8 @@
  * Sources (wiki.warframe.com, checked 2026-10-21; fandom agrees on the Link numbers):
  * - Link Vitality / Link Redirection / Link Fiber: "+125% of Warframe's Max Health / Max Shield /
  *   Armor" at R10 (+11.36% per rank); equippable on Kubrows, Kavats, MOAs and Hounds.
- * - Link Shields / Link Armor: pre-Update 34 names of Link Redirection / Link Fiber. The catalog
- *   still has them at their card value (+10% per rank, 60% at R5).
+ * - Link Shields / Link Armor (pre-Update 34 names of Link Redirection / Link Fiber) were removed in
+ *   Round 14; old builds migrate to the current mods (see src/lib/mods/renamed-mods.test.ts).
  * - Jade: "two Aura Mod Slots", AuraPolarity ["Aura", "Vazarin"]: the first is the built-in
  *   Universal Aura polarity. Jade/Abilities: "+28 from two maxed Auras, or +32 / +36 with
  *   Steel Charge and/or Power Donation".
@@ -29,7 +29,7 @@ const one = (modId: string, rank: number) => [{ modId, rank }];
 describe("R13 Link mods copy the Warframe's stats", () => {
   it("covers every Link mod in the catalog", () => {
     const linkIds = [...modsMap.values()].filter((m) => /^Link /.test(m.name) && m.category === "companion").map((m) => m.id).sort();
-    expect(linkIds).toEqual(["link_armor", "link_fiber", "link_redirection", "link_shields", "link_vitality"]);
+    expect(linkIds).toEqual(["link_fiber", "link_redirection", "link_vitality"]);
     expect(Object.keys(COMPANION_LINK_MODS).sort()).toEqual(linkIds);
   });
 
@@ -39,9 +39,6 @@ describe("R13 Link mods copy the Warframe's stats", () => {
     ["link_redirection", 10, "totalShield", 230, 1110, 1.25, 230 + 1387.5],
     ["link_fiber", 10, "totalArmor", 300, 480, 1.25, 300 + 600],
     ["link_fiber", 4, "totalArmor", 300, 480, 1.25 * (5 / 11), 300 + 480 * 1.25 * (5 / 11)],
-    ["link_shields", 5, "totalShield", 230, 1110, 0.6, 230 + 666],
-    ["link_armor", 5, "totalArmor", 300, 480, 0.6, 300 + 288],
-    ["link_armor", 2, "totalArmor", 300, 480, 0.3, 300 + 144],
   ] as const)("Smeeta + %s R%i: %s = base + fraction × Warframe", (modId, rank, stat, base, wfStat, frac, expected) => {
     const s = calculateCompanionBuild(comp("smeeta"), one(modId, rank), modsMap, null, rhinoTank);
     expect(s[stat]).toBeCloseTo(expected, 3);
@@ -49,7 +46,7 @@ describe("R13 Link mods copy the Warframe's stats", () => {
     expect(s.linkModsNeedWarframe).toBe(false);
   });
 
-  it.each(["link_vitality", "link_redirection", "link_fiber", "link_shields", "link_armor"])(
+  it.each(["link_vitality", "link_redirection", "link_fiber"])(
     "standalone %s: totals stay at the companion's own and the build is flagged",
     (modId) => {
       const s = calculateCompanionBuild(comp("smeeta"), one(modId, modsMap.get(modId)!.maxRank), modsMap);
@@ -58,14 +55,6 @@ describe("R13 Link mods copy the Warframe's stats", () => {
       expect(s.linkModsNeedWarframe).toBe(true);
     },
   );
-
-  it("Smeeta EHP with Link Shields R5 + Link Armor R5: 390 / (1 − 588/888) + 896", () => {
-    const s = calculateCompanionBuild(comp("smeeta"), [{ modId: "link_shields", rank: 5 }, { modId: "link_armor", rank: 5 }], modsMap, null, rhinoTank);
-    expect(s.totalShield).toBeCloseTo(896, 6);
-    expect(s.totalArmor).toBeCloseTo(588, 6);
-    expect(s.damageReduction).toBeCloseTo((588 / 888) * 100, 6);
-    expect(s.effectiveHealth).toBeCloseTo(390 / (1 - 588 / 888) + 896, 3);
-  });
 
   it("works on a MOA and a Hound too (Lambeo 350/350/350, Bhaira 350/450/350)", () => {
     const moa = calculateCompanionBuild(comp("lambeo"), one("link_redirection", 10), modsMap, null, rhinoTank);
@@ -83,9 +72,7 @@ describe("R13 Link mods copy the Warframe's stats", () => {
     expect(run([{ modId: "link_vitality", rank: 10, slotIndex: 0 }]).totalHealth).toBeCloseTo(390 + 1.25 * 370, 3);
     expect(run([{ modId: "link_redirection", rank: 10, slotIndex: 0 }]).totalShield).toBeCloseTo(230 + 1.25 * 555, 3);
     expect(run([{ modId: "link_fiber", rank: 10, slotIndex: 0 }]).totalArmor).toBeCloseTo(300 + 1.25 * 240, 3);
-    expect(run([{ modId: "link_shields", rank: 5, slotIndex: 0 }]).totalShield).toBeCloseTo(230 + 0.6 * 555, 3);
-    expect(run([{ modId: "link_armor", rank: 5, slotIndex: 0 }]).totalArmor).toBeCloseTo(300 + 0.6 * 240, 3);
-    const noFrame = calcLoadoutStats({ ...base, companionBuild: { companionId: "smeeta", mods: [{ modId: "link_armor", rank: 5, slotIndex: 0 }], weaponMods: [], hasReactor: true, hasCatalyst: false } } as unknown as Loadout).companion!.bodyStats;
+    const noFrame = calcLoadoutStats({ ...base, companionBuild: { companionId: "smeeta", mods: [{ modId: "link_fiber", rank: 10, slotIndex: 0 }], weaponMods: [], hasReactor: true, hasCatalyst: false } } as unknown as Loadout).companion!.bodyStats;
     expect(noFrame.totalArmor).toBe(300);
     expect(noFrame.linkModsNeedWarframe).toBe(true);
   });
