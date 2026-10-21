@@ -318,7 +318,6 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Holster Amp: duration \u2014 On Equip:\\\\nSquad gains 60% Weapon Damage for 3s"),
   ]),
   hunter_adrenaline: mod("hunter_adrenaline", [
-    line("damage", "mod_panel", "multiplicative_percent", "Hunter Adrenaline: damage \u2014 Convert +45% of Damage on Health to Energy. Without Shields, ally Overguard imit\u2026"),
     line("energyOnHealthDamage", "mod_panel", "multiplicative_percent", "Hunter Adrenaline: energyOnHealthDamage \u2014 Convert +45% of Damage on Health to Energy. Without Shields, ally Overguard imit\u2026"),
   ]),
   hunter_track: mod("hunter_track", [
@@ -472,7 +471,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("abilityEfficiency", "mod_panel", "multiplicative_percent", "wiki: Quick Thinking — lethal-damage energy drain (not efficiency pool)"),
   ]),
   rage: mod("rage", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Rage \u2014 converts +40% of health damage to energy at infobox Max Rank 5 (6.67%/rank)"),
+    line("energyOnHealthDamage", "mod_panel", "multiplicative_percent", "wiki: Rage \u2014 converts +40% of health damage to energy at infobox Max Rank 5 (6.67%/rank; not damage)"),
   ]),
   rapid_resilience: mod("rapid_resilience", [
     line("statusDuration", "mod_panel", "multiplicative_percent", "Rapid Resilience: statusDuration \u2014 -75% Status Duration on Self"),
@@ -504,10 +503,10 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("stunDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Resilient Focus \u2014 5% damage resistance while stunned per rank (20% R3)"),
   ]),
   retribution: mod("retribution", [
-    line("damage", "mod_panel", "multiplicative_percent", "Retribution: damage \u2014 +60% Chance to deal Electrical Damage when shield struck by melee enemies., +120\u2026"),
+    line("retaliationChance", "mod_panel", "multiplicative_percent", "wiki: Retribution \u2014 15% chance per rank (60% R3) to retaliate with Electricity when shields are struck by melee (not a damage bonus)"),
   ]),
   reverse_rotorswell: mod("reverse_rotorswell", [
-    line("damage", "mod_panel", "multiplicative_percent", "Reverse Rotorswell: damage \u2014 Rotorswell Augment: 35% of damage received is redirected toward the instigator a\u2026"),
+    line("damageRedirected", "mod_panel", "multiplicative_percent", "wiki: Reverse Rotorswell \u2014 20/25/30/35% of damage received is redirected toward the instigator (R0\u2013R3; wiki column 'Damage Reduction'; not damage)"),
   ]),
   rifle_scavenger: mod("rifle_scavenger", [], "wiki: Rifle Scavenger \u2014 Squad receives +150% Rifle Ammo Recovery"),
   rime_vault: mod("rime_vault", [], "wiki: Rime Vault \u2014 Ice FX on Bullet Jump"),

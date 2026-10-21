@@ -18,15 +18,17 @@ const lines = (id: string, rank?: number) => getModStatDisplayLines(mod(id), ran
 describe("ranks: wiki.warframe.com infobox Max Rank and max-rank value, linear per rank", () => {
   // [id, infobox Max Rank, card text at max, base drain, capacity at max]. Every page's stats table
   // is R0–R3, which doesn't match the infobox Max Rank, so the per-rank value is max / (maxRank + 1).
+  // Round 18: Zoom / Recoil / Noise Reduction carry their % (wiki "+40% Zoom", "-60% Weapon Recoil",
+  // "+100% Noise Reduction"), and Rage's stray `damage` key is Energy On Health Damage.
   const cases: [string, number, string, number, number][] = [
     ["sure_footed_r5", 5, "+60% Knockdown Resistance", 6, 11],
-    ["rage", 5, "+40% Damage", 6, 11],
+    ["rage", 5, "+40% Energy On Health Damage", 6, 11],
     ["charged_chamber", 5, "+40% Damage on first shot in magazine", 6, 11],
-    ["eagle_eye", 5, "+40 Zoom", 4, 9],
-    ["stabilizer", 5, "-60 Recoil", 6, 11],
-    ["hawk_eye", 5, "+80 Zoom", 4, 9],
-    ["steady_hands", 5, "-60 Recoil", 6, 11],
-    ["suppress_r3", 5, "+100 Noise Reduction", 2, 7],
+    ["eagle_eye", 5, "+40% Zoom", 4, 9],
+    ["stabilizer", 5, "-60% Recoil", 6, 11],
+    ["hawk_eye", 5, "+80% Zoom", 4, 9],
+    ["steady_hands", 5, "-60% Recoil", 6, 11],
+    ["suppress_r3", 5, "+100% Noise Reduction", 2, 7],
     ["energy_channel_r10", 5, "+200% Damage", 4, 9],
     ["reach_r3", 5, "+1.5m Range", 4, 9],
     ["intruder", 3, "+8s Duration", 0, 3],
@@ -41,7 +43,7 @@ describe("ranks: wiki.warframe.com infobox Max Rank and max-rank value, linear p
   }
   it("Finishing Touch: R5, +10%/rank → +60% Finisher Damage, cost 2 → 7", () => {
     expect(mod("finishing_touch_r10").maxRank).toBe(5);
-    expect([0, 2, 5].map((r) => lines("finishing_touch_r10", r)[1])).toEqual(
+    expect([0, 2, 5].map((r) => lines("finishing_touch_r10", r)[0])).toEqual(
       ["+10%", "+30%", "+60%"].map((v) => `${v} Finisher Damage`),
     );
     expect(modCapacityAtRank(mod("finishing_touch_r10").drain, 5)).toBe(7);
@@ -50,7 +52,7 @@ describe("ranks: wiki.warframe.com infobox Max Rank and max-rank value, linear p
     expect([0, 2, 5].map((r) => lines("sure_footed_r5", r)[0])).toEqual(
       ["+10%", "+30%", "+60%"].map((v) => `${v} Knockdown Resistance`),
     );
-    expect([0, 2, 5].map((r) => lines("rage", r)[0])).toEqual(["+6.7% Damage", "+20% Damage", "+40% Damage"]);
+    expect([0, 2, 5].map((r) => lines("rage", r)[0])).toEqual(["+6.7% Energy On Health Damage", "+20% Energy On Health Damage", "+40% Energy On Health Damage"]);
   });
   it("Reach 0.25 m/rank and Intruder 2 s/rank on every card", () => {
     expect([0, 1, 2, 3, 4, 5].map((r) => lines("reach_r3", r)[0])).toEqual(

@@ -82,7 +82,97 @@ const PERCENT_LIKE_KEYS = new Set([
   "forgeCooldown",
   "elementalResistance",
   "turretHeatCapacity",
+  // Round 18: stats the wiki gives as % that showed a bare number (wiki.warframe.com Eagle Eye /
+  // Hawk Eye "Zoom", Stabilizer / Steady Hands "Weapon Recoil", Suppress / Hush / Silent Battery
+  // "Noise Reduction", the elemental / IPS mods, Magnum Force accuracy, etc.).
+  "zoom",
+  "recoil",
+  "noiseReduction",
+  "accuracy",
+  "spread",
+  "impact",
+  "puncture",
+  "slash",
+  "heat",
+  "cold",
+  "toxin",
+  "electricity",
+  "blast",
+  "radiation",
+  "gas",
+  "magnetic",
+  "viral",
+  "corrosive",
+  "magazine",
+  "ammoMaximum",
+  "ammoConversion",
+  "ammoEfficiency",
+  "ampAmmoEfficiency",
+  "ampEnergy",
+  "ampMultishot",
+  "aimGlideDuration",
+  "armorDebuffOnKill",
+  "shieldDebuffOnKill",
+  "armorReduction",
+  "auraStrengthSelf",
+  "auraStrengthSquad",
+  "blastRange",
+  "bleedoutReduction",
+  "bulletJump",
+  "criticalChancePerCombo",
+  "damagePerStatus",
+  "damageVulnerability",
+  "energyOnAbility",
+  "gravityReduction",
+  "hardLandingReduction",
+  "headshotMultiplier",
+  "heavyAttackEfficiency",
+  "heavyWindUp",
+  "knockdownRecovery",
+  "lifeSteal",
+  "lifestealToOwner",
+  "operatorHealthShields",
+  "operatorJumpHeight",
+  "overshieldConversion",
+  "parkourVelocity",
+  "slashSize",
+  "slideFriction",
+  "statusDuration",
+  "tauronCharge",
+  "transferenceStaticDuration",
+  "turretRange",
+  "voidModeEfficiency",
+  "voidSlingDistance",
+  "voidSlingEfficiency",
+  // Round 18 stray-damage relabels (wiki.warframe.com stat tables).
+  "damageRedirected",
+  "damageBlock",
+  "maxHealthAbsorbed",
+  "sandstormRange",
+  "reckoningRange",
+  "provokeStrength",
+  "pacifySlow",
 ]);
+
+/**
+ * Mods whose stat is a flat number although the key is a % stat elsewhere (wiki.warframe.com):
+ * Stinging Truth "+40 Magazine Capacity", Shattering Impact "reduces enemy Armor by 6".
+ */
+const FLAT_STAT_KEYS_BY_MOD: Record<string, ReadonlySet<string>> = {
+  stinging_truth: new Set(["magazine"]),
+  augment_universal_shattering_impact: new Set(["armorReduction"]),
+};
+
+/**
+ * Mods whose stat is a % although the key is flat elsewhere (wiki.warframe.com): Corrupt Charge /
+ * True Punishment "-50% Combo Duration" (other mods give Combo Duration in seconds), Endurance Drift
+ * "+10% Energy Max".
+ */
+const PERCENT_STAT_KEYS_BY_MOD: Record<string, ReadonlySet<string>> = {
+  corrupt_charge: new Set(["comboDuration"]),
+  true_punishment: new Set(["comboDuration"]),
+  endurance_drift: new Set(["energyMax"]),
+};
 
 /**
  * wiki.warframe.com stat tables for mods whose values aren't linear in rank (index = rank).
@@ -110,6 +200,35 @@ const MOD_RANK_VALUE_TABLES: Record<string, Record<string, readonly number[]>> =
   reach_r3: { range: [0.25, 0.5, 0.75, 1, 1.25, 1.5] },
   // Intruder: +8s to Hacking at the wiki infobox Max Rank 3, linear 2 s/rank (R0–R3).
   intruder: { duration: [2, 4, 6, 8] },
+  // Round 18 (wiki.warframe.com stat tables, index = rank).
+  // Auto Omni: 17/34/51/68/85/100% repair chance (R0–R5).
+  auto_omni: { repairChance: [17, 34, 51, 68, 85, 100] },
+  // Mischief: decoy Evasion Chance 0/5/10/15%, invisible 6/7/8/9 s (R0–R3).
+  mischief: { decoyEvasionChance: [0, 5, 10, 15], duration: [6, 7, 8, 9] },
+  // Reflex Denial: 5–10 s, 2–12 m (R0–R5).
+  reflex_denial: { duration: [5, 6, 7, 8, 9, 10], range: [2, 4, 6, 8, 10, 12] },
+  // Tek Assault: immune 1–4 s (R0–R3).
+  tek_assault_r3: { duration: [1, 2, 3, 4] },
+  // Vicious Bond: spread radius 1.5–9 m (R0–R5).
+  vicious_bond: { range: [1.5, 3, 4.5, 6, 7.5, 9] },
+  // Rumbled: Rock Armor absorbs 200/225/250/300% max health (R0–R3).
+  augment_atlas_rumbled: { maxHealthAbsorbed: [200, 225, 250, 300] },
+  // Elemental Sandstorm: +20/30/40/50% Ability Range (R0–R3).
+  augment_inaros_elemental_sandstorm: { sandstormRange: [20, 30, 40, 50] },
+  // Capacitance: 1.5/2/2.5/3% Damage to Shield Conversion (R0–R3).
+  augment_volt_capacitance: { damageToShieldConversion: [1.5, 2, 2.5, 3] },
+  // Deceptive Bond: 20/30/45/50% Damage Redirected (R0–R3).
+  deceptive_bond: { damageRedirected: [20, 30, 45, 50] },
+  // Hallowed Reckoning: +40% Ability Range at every rank, 1.5–3 m radius (R0–R3).
+  hallowed_reckoning: { reckoningRange: [40, 40, 40, 40], range: [1.5, 2, 2.5, 3] },
+  // Peaceful Provocation: Pacify Slow 20/30/35/40%, Provoke Ability Strength +6/9/12/15% (R0–R3).
+  peaceful_provocation: { pacifySlow: [20, 30, 35, 40], provokeStrength: [6, 9, 12, 15] },
+  // Reverse Rotorswell: 20/25/30/35% of damage received redirected (R0–R3).
+  reverse_rotorswell: { damageRedirected: [20, 25, 30, 35] },
+  // Radiant Finish: blinded enemies take +150/200/250/300% Finisher Damage (R0–R3).
+  augment_excalibur_radiant_finish: { finisherDamage: [150, 200, 250, 300] },
+  // Heartseeker: targeting radius 0.25–1 m (R0–R3).
+  heartseeker: { range: [0.25, 0.5, 0.75, 1] },
 };
 
 /** Card text for a stat that has a wiki rank table or a cap, else null (use the per-rank formula). */
@@ -219,6 +338,14 @@ export function getModStatDisplayLines(mod: Mod, rank: number): ModStatDisplayLi
     if (special !== null) {
       const atMax = formatModStatSpecial(mod.id, statKey, perRank, mod.maxRank)!;
       return { statKey, label: getModStatLabel(statKey), atRank: special, atMax: rank >= mod.maxRank ? special : atMax };
+    }
+    const flatForMod = FLAT_STAT_KEYS_BY_MOD[mod.id]?.has(statKey) === true;
+    if (flatForMod || PERCENT_STAT_KEYS_BY_MOD[mod.id]?.has(statKey)) {
+      const label = getModStatLabel(statKey);
+      const unit = flatForMod ? "" : "%";
+      const flatAt = (r: number) => `${formatStatNumber(modStatTotalAtRank(perRank, r))}${unit} ${label}`;
+      const atRank = flatAt(rank);
+      return { statKey, label, atRank, atMax: rank >= mod.maxRank ? atRank : flatAt(mod.maxRank) };
     }
     const unscaled = FLAT_STAT_KEYS.has(statKey) || RANK_INDEPENDENT_PERCENT_KEYS.has(statKey);
     const atRank = unscaled

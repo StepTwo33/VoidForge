@@ -176,6 +176,24 @@ const STAT_KEY_FILTERS: Record<string, ModStatFilterId[]> = {
   slideAttack: ["damage"],
   weakspotDamage: ["damage"],
   weakPointDamage: ["damage"],
+  // Round 18: keys that replaced stray `damage` keys (wiki.warframe.com stat tables).
+  repairChance: ["utility"],
+  decoyEvasionChance: ["survivability"],
+  reflectChance: ["survivability"],
+  reflectedDamageAmplification: ["survivability"],
+  lethalImmunityChance: ["survivability"],
+  lifestealToOwner: ["survivability"],
+  maxHealthAbsorbed: ["survivability"],
+  sandstormRange: ["range"],
+  damageToShieldConversion: ["survivability"],
+  damageRedirected: ["survivability"],
+  reckoningRange: ["range"],
+  pacifySlow: ["utility"],
+  provokeStrength: ["strength"],
+  energyOnHealthDamage: ["survivability", "utility"],
+  retaliationChance: ["survivability"],
+  comboCountChance: ["utility"],
+  initialCombo: ["utility"],
 };
 
 const WEAPON_CATEGORIES = new Set([

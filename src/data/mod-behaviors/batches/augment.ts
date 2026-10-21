@@ -87,8 +87,8 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("petrifyTrail", "mod_panel", "multiplicative_percent", "Path of Statues: petrifyTrail \u2014 Landslide Augment: Leave a trail for 12s that petrifies enemies for 6s."),
   ]),
   augment_atlas_rumbled: mod("augment_atlas_rumbled", [
-    line("damage", "mod_panel", "multiplicative_percent", "Rumbled: damage \u2014 Rumblers Augment: Atlas becomes a Rumbler with Rock Armor that grants Overguard \u2026"),
     line("rumbleDuration", "mod_panel", "multiplicative_percent", "Rumbled: rumbleDuration \u2014 Rumblers Augment: Atlas becomes a Rumbler with Rock Armor that grants Overguard \u2026"),
+    line("maxHealthAbsorbed", "mod_panel", "multiplicative_percent", "wiki: Rumbled \u2014 Rock Armor absorbs 200/225/250/300% max health (R0\u2013R3; not damage)"),
   ]),
   augment_atlas_tectonic_fracture: mod("augment_atlas_tectonic_fracture", [
     line("extraWalls", "mod_panel", "multiplicative_percent", "Tectonic Fracture: extraWalls \u2014 Tectonics Augment: Create up to 3 walls with 100% Health. Walls can no longer be\u2026"),
@@ -191,9 +191,7 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("meleeDamagePerEnemy", "mod_panel", "multiplicative_percent", "wiki: Furious Javelin — Radial Javelin-gated melee damage mult × enemies × Strength (not always-on)"),
   ]),
   augment_excalibur_radiant_finish: mod("augment_excalibur_radiant_finish", [
-    line("damage", "mod_panel", "multiplicative_percent", "Radiant Finish: damage \u2014 Radial Blind Augment: Blinded enemies take 300% more Finisher Damage."),
-    line("finisherDamage", "mod_panel", "multiplicative_percent", "Radiant Finish: finisherDamage \u2014 Radial Blind Augment: Blinded enemies take 300% more Finisher Damage."),
-    line("finisherDamageBonus", "mod_panel", "multiplicative_percent", "Radiant Finish: finisherDamageBonus \u2014 Radial Blind Augment: Blinded enemies take 300% more Finisher Damage."),
+    line("finisherDamage", "mod_panel", "multiplicative_percent", "wiki: Radiant Finish \u2014 blinded enemies take +150/200/250/300% Finisher Damage (R0\u2013R3)"),
   ]),
   augment_excalibur_surging_dash: mod("augment_excalibur_surging_dash", [
     line("comboPerHit", "mod_panel", "multiplicative_percent", "Surging Dash: comboPerHit \u2014 Slash Dash Augment: Each enemy hit during Slash Dash further increases your Mele\u2026"),
@@ -279,8 +277,8 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("sandShadowChance", "mod_panel", "multiplicative_percent", "Desiccation's Curse: sandShadowChance \u2014 Desiccation Augment: Killing a blinded enemy with a Finisher has a 100% chance t\u2026"),
   ]),
   augment_inaros_elemental_sandstorm: mod("augment_inaros_elemental_sandstorm", [
-    line("damage", "mod_panel", "multiplicative_percent", "Elemental Sandstorm: damage \u2014 Sandstorm Augment: Sandstorm gains 50% Ability Range and has a 100% chance of in\u2026"),
     line("elementalChance", "mod_panel", "multiplicative_percent", "Elemental Sandstorm: elementalChance \u2014 Sandstorm Augment: Sandstorm gains 50% Ability Range and has a 100% chance of in\u2026"),
+    line("sandstormRange", "mod_panel", "multiplicative_percent", "wiki: Elemental Sandstorm \u2014 Sandstorm gains +20/30/40/50% Ability Range (R0\u2013R3; panel only)"),
   ]),
   augment_inaros_negation_swarm: mod("augment_inaros_negation_swarm", [
     line("armor", "mod_panel", "multiplicative_percent", "Negation Swarm: armor \u2014 Scarab Swarm Augment: Scarab Armor protects Inaros from Status Effects, consumin\u2026"),
@@ -529,11 +527,10 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("repelChance", "mod_panel", "multiplicative_percent", "Repelling Bastille: repelChance \u2014 +25% chance to repel enemies per rank"),
   ]),
   augment_volt_capacitance: mod("augment_volt_capacitance", [
-    line("damage", "mod_panel", "multiplicative_percent", "Capacitance: damage \u2014 Discharge Augment: Converts 3% of Damage dealt into Shields split between Volt a\u2026"),
     line("shieldPerTarget", "mod_panel", "multiplicative_percent", "Capacitance: shieldPerTarget \u2014 Discharge Augment: Converts 3% of Damage dealt into Shields split between Volt a\u2026"),
+    line("damageToShieldConversion", "mod_panel", "multiplicative_percent", "wiki: Capacitance \u2014 converts 1.5/2/2.5/3% of Discharge damage dealt into Shields (R0\u2013R3; not a damage bonus)"),
   ]),
   augment_volt_reactive_storm: mod("augment_volt_reactive_storm", [
-    line("damageIncrease", "mod_panel", "multiplicative_percent", "ReactivStorm: damageIncrease \u2014 Serene Storm Augment: Desert Wind is granted +250% Status Chance and changes its\u2026"),
     line("statusChance", "mod_panel", "multiplicative_percent", "ReactivStorm: statusChance \u2014 Serene Storm Augment: Desert Wind is granted +250% Status Chance and changes its\u2026"),
   ]),
   augment_volt_shock_trooper: mod("augment_volt_shock_trooper", [
@@ -631,7 +628,7 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("syndicatePower", "mod_panel", "multiplicative_percent", "Deadly Sequence: syndicatePower \u2014 +1 'Sequence'"),
   ]),
   deceptive_bond: mod("deceptive_bond", [
-    line("damage", "mod_panel", "multiplicative_percent", "Deceptive Bond: damage \u2014 Decoy Augment: 50% of damage Loki takes is transferred to Decoy, and vice versa."),
+    line("damageRedirected", "mod_panel", "multiplicative_percent", "wiki: Deceptive Bond \u2014 20/30/45/50% of damage Loki takes is transferred to Decoy (R0\u2013R3; not damage)"),
   ]),
   defiled_reckoning: mod("defiled_reckoning", [
     line("duration", "mod_panel", "multiplicative_percent", "Defiled Reckoning: duration \u2014 Reckoning Augment: Health Orbs become unusable by enemies for 10s."),
@@ -700,7 +697,7 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
   ]),
   flux_overdrive: mod("flux_overdrive", [
     line("duration", "mod_panel", "multiplicative_percent", "Flux Overdrive: duration \u2014 Status Chance fluctuates between +150% and +250% over 5s while the beam is fired\u2026"),
-    line("heat", "mod_panel", "multiplicative_percent", "Flux Overdrive: heat \u2014 Status Chance fluctuates between +150% and +250% over 5s while the beam is fired\u2026"),
+    line("statusChance", "mod_panel", "multiplicative_percent", "wiki: Flux Overdrive \u2014 +25% Status Chance per rank (+150% R5), oscillating while the beam fires (panel only; not Heat damage)"),
   ]),
   fomorian_accelerant: mod("fomorian_accelerant", [
     line("projectileSpeed", "mod_panel", "multiplicative_percent", "Fomorian Accelerant: projectileSpeed \u2014 Flak now bounces up to 4x and travels 60% faster."),
@@ -726,8 +723,8 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("abilityDuration", "mod_panel", "multiplicative_percent", "Hallowed Eruption: abilityDuration \u2014 Hallowed Ground Augment: Reactivate to deal all Remaining Damage and <DT_RADIATION_COLOR>Radiation Status.\\\\nPassive: +200% Hallowed Ground Duration."),
   ]),
   hallowed_reckoning: mod("hallowed_reckoning", [
-    line("damage", "mod_panel", "multiplicative_percent", "Hallowed Reckoning: damage \u2014 Reckoning Augment: Reckoning gains +40% range. A 3m radius around each affected \u2026"),
-    line("range", "mod_panel", "multiplicative_percent", "Hallowed Reckoning: range \u2014 Reckoning Augment: Reckoning gains +40% range. A 3m radius around each affected \u2026"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Hallowed Reckoning \u2014 armor-bonus radius 1.5/2/2.5/3m (R0\u2013R3) (arsenal display only)"),
+    line("reckoningRange", "mod_panel", "multiplicative_percent", "wiki: Hallowed Reckoning \u2014 Reckoning gains +40% Ability Range at every rank (panel only)"),
   ]),
   hunters_bonesaw: mod("hunters_bonesaw", [
     line("finisherDamage", "mod_panel", "multiplicative_percent", "Hunter's Bonesaw: finisherDamage \u2014 Increase Finisher Damage by 120% against prone enemies."),
@@ -809,7 +806,8 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("cooldown", "mod_panel", "multiplicative_percent", "Omikuji's Fortune: cooldown \u2014 Omikuji Augment: Reduce Omikuji's Cooldown by 4s when you kill an enemy with the\u2026"),
   ]),
   peaceful_provocation: mod("peaceful_provocation", [
-    line("damage", "mod_panel", "multiplicative_percent", "Peaceful Provocation: damage \u2014 Pacify & Provoke Augment: Pacify converts damage done to allies into an aura tha\u2026"),
+    line("pacifySlow", "mod_panel", "multiplicative_percent", "wiki: Peaceful Provocation \u2014 Pacify slows enemies 20/30/35/40% (R0\u2013R3; not damage)"),
+    line("provokeStrength", "mod_panel", "multiplicative_percent", "wiki: Peaceful Provocation \u2014 Provoke gains +6/9/12/15% Ability Strength (R0\u2013R3; panel only)"),
   ]),
   phoenix_renewal: mod("phoenix_renewal", [
     line("duration", "mod_panel", "multiplicative_percent", "Phoenix Renewal: duration \u2014 Renewal Augment: Taking fatal damage while under the effects of Renewal will ins\u2026"),
@@ -909,7 +907,6 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Spring-Loaded Broadhead: range \u2014 Increase damage by +40%, if the target is over 15m away."),
   ]),
   stance_gleaming_talent: mod("stance_gleaming_talent", [
-    line("damageBonus", "mod_panel", "multiplicative_percent", "wiki: Gleaming Blight — spurious catalog damageBonus (not wiki combat)"),
     line("statusChance", "weapon_dps", "multiplicative_percent", "wiki: Gleaming Blight — +100% Status Chance"),
     line("syndicatePower", "mod_panel", "multiplicative_percent", "Gleaming Blight: syndicatePower \u2014 +1 'Blight'"),
   ]),

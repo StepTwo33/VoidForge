@@ -86,9 +86,8 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Counterweight — IPS convert (not always-on damage)"),
   ]),
   covert_lethality: mod("covert_lethality", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Covert Lethality — initial combo / finisher (not light DPS)"),
+    line("initialCombo", "mod_panel", "multiplicative_percent", "wiki: Covert Lethality \u2014 +4 Initial Combo per rank (+16 R3)"),
     line("finisherDamage", "mod_panel", "multiplicative_percent", "Covert Lethality: finisherDamage \u2014 +16 Initial Combo\\\\n+100% Finisher Damage"),
-    line("lethalDamage", "mod_panel", "multiplicative_percent", "Covert Lethality: lethalDamage \u2014 +16 Initial Combo\\\\n+100% Finisher Damage"),
   ]),
   disciplines_merit: mod("disciplines_merit", [], "wiki: Discipline's Merit \u2014 Enables Tennokai. Opportunities occur every 4 melee hits instead of at random."),
   dispatch_overdrive: mod("dispatch_overdrive", [
@@ -119,7 +118,6 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("toxin", "weapon_dps", "elemental_from_base_damage", "Fever Strike: toxin \u2014 +90% <DT_POISON_COLOR>Toxin"),
   ]),
   finishing_touch_r10: mod("finishing_touch_r10", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Finishing Touch — finisher-only (not light DPS)"),
     line("finisherDamage", "mod_panel", "multiplicative_percent", "Finishing Touch: finisherDamage \u2014 +60% Finisher Damage"),
   ]),
   focus_energy_r3: mod("focus_energy_r3", [
@@ -171,8 +169,8 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("healthOnStatus", "mod_panel", "multiplicative_percent", "Healing Return: healthOnStatus \u2014 Restores 11 Health per Status Type affecting the target"),
   ]),
   heartseeker: mod("heartseeker", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Heartseeker — damage block penalty (not melee damage)"),
-    line("range", "mod_panel", "multiplicative_percent", "Heartseeker: range \u2014 Lock onto targets within 1m, but reduces blocking effectiveness., -50% Damage Bl\u2026 (arsenal display only)"),
+    line("damageBlock", "mod_panel", "multiplicative_percent", "wiki: Heartseeker \u2014 -12.5% Damage Blocked per rank (-50% R3; not melee damage)"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Heartseeker \u2014 targeting radius 0.25m per rank (1m R3) (arsenal display only)"),
   ]),
   heavy_trauma: mod("heavy_trauma", [
     line("impact", "weapon_dps", "multiplicative_percent", "Heavy Trauma: impact \u2014 +90% <DT_IMPACT_COLOR>Impact"),
@@ -315,7 +313,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("energyOnKill", "mod_panel", "multiplicative_percent", "Relentless Assault: energyOnKill \u2014 On Kill:\\\\n+2 Energy Rate for 4s"),
   ]),
   relentless_combination_r3: mod("relentless_combination_r3", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Relentless Combination — slash-status combo chance (not damage)"),
+    line("comboCountChance", "mod_panel", "multiplicative_percent", "wiki: Relentless Combination \u2014 Slash status has +25% chance per rank (+100% R3) to add to the combo count (not damage)"),
   ]),
   rending_strike: mod("rending_strike", [
     line("puncture", "weapon_dps", "multiplicative_percent", "Rending Strike: puncture \u2014 +60% <DT_SLASH_COLOR>Slash, +80% <DT_PUNCTURE_COLOR>Puncture"),

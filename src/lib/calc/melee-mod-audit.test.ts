@@ -513,10 +513,10 @@ describe("syndicate melee exclusive paper (wiki max rank, Phase Sim6)", () => {
     );
   });
 
-  it("Gleaming Blight: +100% status chance (damageBonus stays panel)", () => {
+  it("Gleaming Blight: +100% status chance (no damage stat; wiki.warframe.com: Status chance + Blight only)", () => {
     const weapon = requireWeapon("skana");
     const beh = VERIFIED_MOD_BEHAVIORS.stance_gleaming_talent;
-    expect(beh?.stats.find((s) => s.statKey === "damageBonus")?.target).toBe("mod_panel");
+    expect(beh?.stats.find((s) => s.statKey === "damageBonus")).toBeUndefined();
     expect(withMod("stance_gleaming_talent").statusChance).toBeCloseTo(
       weapon.statusChance * 2,
       8,

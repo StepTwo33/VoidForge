@@ -24,7 +24,6 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   ]),
   aerial_bond: mod("aerial_bond", [
     line("airborneCrit", "mod_panel", "multiplicative_percent", "Aerial Bond: airborneCrit \u2014 Airborne kills decrease Companion Recovery Time by 3s and 9s for headshot kills.\u2026"),
-    line("airborneDamage", "mod_panel", "multiplicative_percent", "Aerial Bond: airborneDamage \u2014 Airborne kills decrease Companion Recovery Time by 3s and 9s for headshot kills.\u2026"),
     line("duration", "mod_panel", "multiplicative_percent", "Aerial Bond: duration \u2014 Airborne kills decrease Companion Recovery Time by 3s and 9s for headshot kills.\u2026"),
     line("range", "mod_panel", "multiplicative_percent", "Aerial Bond: range \u2014 Airborne kills decrease Companion Recovery Time by 3s and 9s for headshot kills.\u2026 (arsenal display only)"),
   ]),
@@ -59,8 +58,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("energyOnAbility", "mod_panel", "multiplicative_percent", "Astral Bond: energyOnAbility \u2014 Damage dealt by Operator or Drifter grants 60% damage and 30% Void Damage to you\u2026"),
   ]),
   auto_omni: mod("auto_omni", [
+    line("repairChance", "mod_panel", "multiplicative_percent", "wiki: Auto Omni \u2014 17/34/51/68/85/100% chance to repair hull breaches and extinguish fires (R0\u2013R5; not damage)"),
     line("cooldown", "mod_panel", "multiplicative_percent", "Auto Omni: cooldown \u2014 Nautilus has 100% chance to repair nearby Railjack hull damages and extinguishes\u2026"),
-    line("damage", "mod_panel", "multiplicative_percent", "Auto Omni: damage \u2014 Nautilus has 100% chance to repair nearby Railjack hull damages and extinguishes\u2026"),
   ]),
   bell_ringer: mod("bell_ringer", [
     line("impactStatusStacks", "mod_panel", "flat", "wiki: Bell Ringer — precept knockdown/Impact stacks (AI)"),
@@ -122,7 +121,6 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   ]),
   covert_bond: mod("covert_bond", [
     line("duration", "mod_panel", "multiplicative_percent", "Covert Bond: duration \u2014 Finisher and Mercy Kills grant your Companion 10s of stealth that attacks will n\u2026"),
-    line("stealthDamage", "mod_panel", "multiplicative_percent", "Covert Bond: stealthDamage \u2014 Finisher and Mercy Kills grant your Companion 10s of stealth that attacks will n\u2026"),
   ]),
   crescent_charge: mod("crescent_charge", [
     line("health", "mod_panel", "multiplicative_percent", "wiki: Crescent Charge — precept charge damage (not max health)"),
@@ -153,7 +151,6 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("lifeSteal", "mod_panel", "multiplicative_percent", "Draining Bite: lifeSteal \u2014 Vasca Kavat inflicts 5 stacks of Slash at 150% of its melee damage and restores \u2026"),
   ]),
   duplex_bond: mod("duplex_bond", [
-    line("companionDamage", "mod_panel", "multiplicative_percent", "wiki: Duplex Bond — clone precept"),
     line("duration", "mod_panel", "multiplicative_percent", "wiki: Duplex Bond — clone duration"),
     line("energy", "mod_panel", "multiplicative_percent", "wiki: Duplex Bond — energy spend threshold (not max energy)"),
     line("extraAttack", "mod_panel", "multiplicative_percent", "wiki: Duplex Bond — clone attacks"),
@@ -237,8 +234,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Hunter Command: duration \u2014 Applying a Slash Status to an enemy causes the Companion to attack them for 6s."),
   ]),
   hunter_recovery: mod("hunter_recovery", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Hunter Recovery: damage \u2014 Warframe healed for +30% Companion Damage dealt"),
-    line("lifestealToOwner", "mod_panel", "multiplicative_percent", "Hunter Recovery: lifestealToOwner \u2014 Warframe healed for +30% Companion Damage dealt"),
+    line("lifestealToOwner", "mod_panel", "multiplicative_percent", "wiki: Hunter Recovery \u2014 Warframe healed for 5% of companion damage dealt per rank (+30% R5; life steal, not damage)"),
   ]),
   hunter_synergy: mod("hunter_synergy", [
     line("critLink", "mod_panel", "multiplicative_percent", "wiki: Hunter Synergy — links primary CC to companion (not weapon paper)"),
@@ -280,7 +276,6 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("impact", "mod_panel", "multiplicative_percent", "wiki: Magnetic Strike — Impact→Magnetic on companion melee (not IPS)"),
   ]),
   manifold_bond: mod("manifold_bond", [
-    line("abilityDamage", "mod_panel", "multiplicative_percent", "wiki: Manifold Bond — precept status / cooldown"),
     line("abilityDuration", "mod_panel", "multiplicative_percent", "wiki: Manifold Bond — precept duration (not WF ability duration)"),
     line("cooldown", "mod_panel", "multiplicative_percent", "wiki: Manifold Bond — precept cooldown"),
   ]),
@@ -322,8 +317,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("armor", "warframe_totals", "multiplicative_percent", "wiki: Metal Fiber — +250% Armor at max"),
   ]),
   mischief: mod("mischief", [
-    line("damage", "mod_panel", "multiplicative_percent", "Mischief: damage \u2014 Smeeta Kavat becomes invisible for 9s every <LOWER_IS_BETTER>7s while a decoy ka\u2026"),
-    line("duration", "mod_panel", "multiplicative_percent", "Mischief: duration \u2014 Smeeta Kavat becomes invisible for 9s every <LOWER_IS_BETTER>7s while a decoy ka\u2026"),
+    line("decoyEvasionChance", "mod_panel", "multiplicative_percent", "wiki: Mischief \u2014 decoys have 0/5/10/15% Evasion Chance (R0\u2013R3; not damage)"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Mischief \u2014 invisible for 6/7/8/9s (R0\u2013R3)"),
   ]),
   molecular_conversion: mod("molecular_conversion", [
     line("range", "mod_panel", "multiplicative_percent", "Molecular Conversion: range \u2014 Blast enemies within 10m, converting 200 Damage into Shields for the Warframe. (arsenal display only)"),
@@ -331,7 +326,6 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   momentous_bond: mod("momentous_bond", [
     line("damage", "mod_panel", "multiplicative_percent", "Momentous Bond: damage \u2014 Killing Eximus enemies grants 120% bonus of a random Elemental Damage to your Co\u2026"),
     line("duration", "mod_panel", "multiplicative_percent", "Momentous Bond: duration \u2014 Killing Eximus enemies grants 120% bonus of a random Elemental Damage to your Co\u2026"),
-    line("heavyAttackDamage", "mod_panel", "multiplicative_percent", "Momentous Bond: heavyAttackDamage \u2014 Killing Eximus enemies grants 120% bonus of a random Elemental Damage to your Co\u2026"),
     line("heavyAttackSpeed", "mod_panel", "multiplicative_percent", "Momentous Bond: heavyAttackSpeed \u2014 Killing Eximus enemies grants 120% bonus of a random Elemental Damage to your Co\u2026"),
   ]),
   mystic_bond: mod("mystic_bond", [
@@ -398,13 +392,13 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Reawaken: duration \u2014 Energy Orbs reduce Sentinel Recovery timer by 6s. Djinn recovers with 300 Oversh\u2026"),
   ]),
   reflect: mod("reflect", [
-    line("damage", "mod_panel", "multiplicative_percent", "Reflect: damage \u2014 Adarza Kavat has a 40% chance to reflect damage back to an enemy, amplifying it \u2026"),
-    line("damageReflection", "mod_panel", "multiplicative_percent", "Reflect: damageReflection \u2014 Adarza Kavat has a 40% chance to reflect damage back to an enemy, amplifying it \u2026"),
+    line("reflectedDamageAmplification", "mod_panel", "multiplicative_percent", "wiki: Reflect \u2014 reflected damage amplified 15% per rank (60% R3)"),
+    line("reflectChance", "mod_panel", "multiplicative_percent", "wiki: Reflect \u2014 10% Reflect Chance per rank (40% R3)"),
   ]),
   reflex_denial: mod("reflex_denial", [
-    line("damage", "mod_panel", "multiplicative_percent", "Reflex Denial: damage \u2014 Generates a shield that reflects 90% Damage taken in pulses over 10s as <DT_MAGN\u2026"),
-    line("duration", "mod_panel", "multiplicative_percent", "Reflex Denial: duration \u2014 Generates a shield that reflects 90% Damage taken in pulses over 10s as <DT_MAGN\u2026"),
-    line("range", "mod_panel", "multiplicative_percent", "Reflex Denial: range \u2014 Generates a shield that reflects 90% Damage taken in pulses over 10s as <DT_MAGN\u2026 (arsenal display only)"),
+    line("damageReflected", "mod_panel", "multiplicative_percent", "wiki: Reflex Denial \u2014 shield reflects 15% of damage taken per rank (90% R5; damage reflection, not weapon/ability damage)"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Reflex Denial \u2014 5\u201310s (R0\u2013R5)"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Reflex Denial \u2014 2\u201312m (R0\u2013R5) (arsenal display only)"),
   ]),
   regen: mod("regen", [
     line("duration", "mod_panel", "multiplicative_percent", "Regen: duration \u2014 Sentinel recovery time reduced by 20s. Revives with 10s of invulnerability."),
@@ -552,8 +546,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   ]),
 
   tek_assault_r3: mod("tek_assault_r3", [
-    line("damage", "mod_panel", "multiplicative_percent", "Tek Assault: damage \u2014 Kavat has 60% chance to ignore Lethal Damage and be immune for 4s."),
-    line("duration", "mod_panel", "multiplicative_percent", "Tek Assault: duration \u2014 Kavat has 60% chance to ignore Lethal Damage and be immune for 4s."),
+    line("lethalImmunityChance", "mod_panel", "multiplicative_percent", "wiki: Tek Assault \u2014 15% chance per rank (60% R3) to ignore lethal damage (not damage)"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Tek Assault \u2014 immune for 1s per rank (4s R3)"),
   ]),
   tek_enhance: mod("tek_enhance", [
     line("abilityDuration", "mod_panel", "multiplicative_percent", "wiki: Tek Enhance — +30% Kavat/Vulpaphyla Ability Duration (Tek set piece #4)"),
@@ -604,10 +598,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("toxin", "weapon_dps", "elemental_from_base_damage", "Venom Teeth: toxin \u2014 +60% <DT_POISON_COLOR>Toxin, +60% Status Chance"),
   ]),
   vicious_bond: mod("vicious_bond", [
-    line("damage", "mod_panel", "multiplicative_percent", "Vicious Bond: damage \u2014 Companion melee attacks strip 15% of enemy armor. Enemies recently damaged by Ab\u2026"),
-    line("meleeAttackSpeed", "mod_panel", "multiplicative_percent", "Vicious Bond: meleeAttackSpeed \u2014 Companion melee attacks strip 15% of enemy armor. Enemies recently damaged by Ab\u2026"),
-    line("meleeDamage", "mod_panel", "multiplicative_percent", "wiki: Vicious Bond — armor strip / spread (not always-on melee damage)"),
-    line("range", "mod_panel", "multiplicative_percent", "Vicious Bond: range \u2014 Companion melee attacks strip 15% of enemy armor. Enemies recently damaged by Ab\u2026 (arsenal display only)"),
+    line("armorReduction", "mod_panel", "multiplicative_percent", "wiki: Vicious Bond \u2014 companion melee strips 2.5% armor per rank (15% R5; not damage)"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Vicious Bond \u2014 spread radius 1.5m per rank (9m R5) (arsenal display only)"),
   ]),
   viral_quills: mod("viral_quills", [
     line("cooldown", "mod_panel", "multiplicative_percent", "Viral Quills: cooldown \u2014 Launches 6 quills at enemies within 20m, each dealing 60 <DT_VIRAL_COLOR>Viral D\u2026"),
