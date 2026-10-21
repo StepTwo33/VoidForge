@@ -7,7 +7,9 @@ import { WIKI_INCOMPATIBLE_MOD_PAIRS } from "./mod-incompatibilities";
 
 /**
  * Catalog mods the wiki data module doesn't list (so it has no `Incompatible` entry for them),
- * kept from the earlier hand list: a Primed card can't sit next to its base card.
+ * kept from the earlier hand list: a Primed card can't sit next to its base card. Neither wiki has
+ * these two Primed mods (they look unreleased); kept on the Primed rule. Every pair was checked
+ * against wiki.warframe.com and fandom in Round 14 (voidforge-team/round-14/incompatibility-verification.md).
  */
 export const MOD_EXCLUSION_SUPPLEMENT: readonly (readonly [string, string])[] = [
   ["blunderbuss_r3", "primed_blunderbuss"],
