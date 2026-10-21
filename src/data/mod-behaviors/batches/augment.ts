@@ -743,7 +743,7 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("shield", "mod_panel", "multiplicative_percent", "Hysterical Fixation: shield \u2014 Hysteria Augment: While Hysteria is active, each kill restores 20% Maximum Shiel\u2026"),
   ]),
   immolated_radiance: mod("immolated_radiance", [
-    line("damageReduction", "mod_panel", "multiplicative_percent", "Immolated Radiance: damageReduction \u2014 Immolation Augment: Allies within Affinity range will receive 50% of Immolation's Damage Reduction."),
+    line("sharedDamageReduction", "mod_panel", "multiplicative_percent", "wiki: Immolated Radiance \u2014 shares 20/30/40/50% (R0\u2013R3) of Immolation's damage reduction with allies"),
   ]),
   insatiable: mod("insatiable", [
     line("mutationStackChance", "mod_panel", "multiplicative_percent", "Insatiable: mutationStackChance \u2014 Ravenous Augment: Nidus has a chance for additional Mutation stacks while in the infestation. The base 60% chance increases with power strength, and multiple stacks are possible above 100%."),
@@ -758,7 +758,7 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Iron Vault: range \u2014 Iron Jab Augment: Aiming Iron Jab at the ground launches Wukong into the air. Ex\u2026"),
   ]),
   ironclad_flight: mod("ironclad_flight", [
-    line("damageReduction", "mod_panel", "multiplicative_percent", "Ironclad Flight: damageReduction \u2014 Disable vacuum in Razorwing. Reduced Damage by 40% while Airborne."),
+    line("airborneDamageReduction", "mod_panel", "multiplicative_percent", "wiki: Ironclad Flight \u2014 10% airborne damage reduction per rank (40% R3), applied in the Airborne DR rows"),
   ]),
   jet_stream: mod("jet_stream", [
     line("sprintSpeed", "mod_panel", "multiplicative_percent", "wiki: Jet Stream — Turbulence-gated movement (× Strength; not always-on)"),
@@ -990,7 +990,7 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("abilityEfficiency", "mod_panel", "multiplicative_percent", "Ward Recovery: abilityEfficiency \u2014 Warding Halo Augment: 50% of the casting cost returned based on how much protection is left."),
   ]),
   warding_thurible: mod("warding_thurible", [
-    line("damage", "mod_panel", "multiplicative_percent", "Warding Thurible: damage \u2014 Thurible Augment: Allies in range take 50% less Damage while channeling Thurible\u2026"),
+    line("allyDamageReduction", "mod_panel", "multiplicative_percent", "wiki: Warding Thurible \u2014 allies take 30/35/40/50% less damage (R0\u2013R3) while channeling Thurible"),
   ]),
   wild_frenzy: mod("wild_frenzy", [
     line("fireRate", "mod_panel", "multiplicative_percent", "Wild Frenzy: fireRate \u2014 Secondary Fire will shoot with +400% Fire Rate until the magazine is empty. Kill\u2026"),

@@ -1017,10 +1017,9 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "toxinResistance": 15,
-      "toxin": 2.5
+      "toxinDamageResistance": 2.5
     },
-    "description": "+15% Toxin Resistance per rank",
+    "description": "+15% Toxin Resistance",
     "rarity": "uncommon"
   },
   {
@@ -1221,11 +1220,10 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "shieldRecharge": 15,
       "knockdownResistance": 10.0,
-      "shield": 25.0
+      "shieldRecharge": 25
     },
-    "description": "+15% Shield Recharge, +50% Knockdown Resistance per rank",
+    "description": "+40% Chance to Resist Knockdown, +100% Shield Recharge",
     "rarity": "rare"
   },
   {
@@ -1343,7 +1341,7 @@ const RAW_MODS: Mod[] = [
       "abilityStrength": 4,
       "tauResistance": 1
     },
-    "description": "+4% Strength, +1% Tau Resistance per rank",
+    "description": "+44% Ability Strength, +11% Tau Resistance",
     "rarity": "legendary"
   },
   {
@@ -1435,7 +1433,7 @@ const RAW_MODS: Mod[] = [
       "armor": 9.090909,
       "tauResistance": 1
     },
-    "description": "+55% Armor, +11% Tau Resistance",
+    "description": "+100% Armor, +11% Tau Resistance",
     "rarity": "legendary"
   },
   {
@@ -1451,7 +1449,7 @@ const RAW_MODS: Mod[] = [
       "health": 9.090909,
       "tauResistance": 1
     },
-    "description": "+44% Health, +11% Tau Resistance",
+    "description": "+100% Health, +11% Tau Resistance",
     "rarity": "legendary"
   },
   {
@@ -11322,9 +11320,8 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "damage": 0.909091,
-      "duration": 1.818182,
       "damageResistancePerStack": 0.909091,
+      "duration": 1.818182,
       "damageResistanceCap": 90.0
     },
     "description": "When Damaged:\\n+10% Resistance to that Damage Type for 20s. Stacks up to 90%.",
@@ -11399,7 +11396,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "accuracy": -1.0,
-      "damageReduction": 2.0
+      "airborneDamageReduction": 2.0
     },
     "description": "Reduced damage by 12% while airborne, <LOWER_IS_BETTER>-6% Enemy Accuracy when targeting Warframe",
     "rarity": "rare"
@@ -11604,9 +11601,8 @@ const RAW_MODS: Mod[] = [
     "category": "conclave",
     "subCategory": "",
     "stats": {
-      "armor": 5,
-      "sprintSpeed": -2.5,
-      "damage": 5.0
+      "bulletJumpDamageResistance": 5,
+      "sprintSpeed": -2.5
     },
     "description": "+20% Damage Resistance during Bullet Jump, -10% Mobility",
     "rarity": "uncommon"
@@ -11620,9 +11616,8 @@ const RAW_MODS: Mod[] = [
     "category": "conclave",
     "subCategory": "",
     "stats": {
-      "armor": 10,
-      "sprintSpeed": -2.5,
-      "damage": 10.0
+      "dodgeDamageResistance": 10,
+      "sprintSpeed": -2.5
     },
     "description": "+40% Damage Resistance while Dodging, -10% Mobility",
     "rarity": "uncommon"
@@ -11636,9 +11631,8 @@ const RAW_MODS: Mod[] = [
     "category": "conclave",
     "subCategory": "",
     "stats": {
-      "armor": 12.5,
+      "knockedDownDamageResistance": 12.5,
       "sprintSpeed": -5,
-      "damage": 12.5,
       "slideSpeed": -5.0
     },
     "description": "+50% Damage Resistance when knocked down, -20% Slide",
@@ -11653,7 +11647,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "damageReduction": 10.0
+      "airborneDamageReduction": 10.0
     },
     "description": "Reduced damage by 40% while airborne",
     "rarity": "common"
@@ -11994,7 +11988,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "radiation": 7.5
+      "radiationDamageResistance": 7.5
     },
     "description": "+45% <DT_RADIATION_COLOR>Radiation Resistance",
     "rarity": "uncommon"
@@ -12442,7 +12436,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "damageReduction": 12.5
+      "sharedDamageReduction": 12.5
     },
     "description": "Immolation Augment: Allies within Affinity range will receive 50% of Immolation's Damage Reduction.",
     "rarity": "rare",
@@ -12503,7 +12497,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "damageReduction": 10.0
+      "airborneDamageReduction": 10.0
     },
     "description": "Disable vacuum in Razorwing. Reduced Damage by 40% while Airborne.",
     "rarity": "rare",
@@ -13284,7 +13278,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "damage": 5
+      "stunDamageResistance": 5
     },
     "description": "+20% Damage Resistance on Stun",
     "rarity": "rare"
@@ -14123,7 +14117,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "damage": 12.5
+      "allyDamageReduction": 12.5
     },
     "description": "Thurible Augment: Allies in range take 50% less Damage while channeling Thurible and grant 1.0 additional Energy charge whenever damaged.",
     "rarity": "rare",
@@ -14254,7 +14248,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "heat": 10.0
+      "heatDamageResistance": 10.0
     },
     "description": "+60% <DT_FIRE_COLOR>Heat Resistance",
     "rarity": "common"
@@ -14311,7 +14305,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "cold": 10.0
+      "coldDamageResistance": 10.0
     },
     "description": "+60% <DT_FREEZE_COLOR>Cold Resistance",
     "rarity": "common"
@@ -14339,7 +14333,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "electricity": 10.0
+      "electricityDamageResistance": 10.0
     },
     "description": "+60% <DT_ELECTRICITY_COLOR>Electricity Resistance",
     "rarity": "common"
@@ -18698,7 +18692,7 @@ const RAW_MODS: Mod[] = [
     "category": "necramech",
     "subCategory": "",
     "stats": {
-      "damageReduction": 10.0
+      "airborneDamageReduction": 10.0
     },
     "description": "Reduced damage by 40% while airborne",
     "rarity": "common"

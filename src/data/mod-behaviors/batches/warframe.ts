@@ -15,10 +15,9 @@ function mod(modId: string, stats: VerifiedItemStatLine[], descriptionOnly?: str
 
 export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   adaptation: mod("adaptation", [
-    line("damage", "mod_panel", "multiplicative_percent", "Adaptation: damage \u2014 When Damaged:\\\\n+10% Resistance to that Damage Type for 20s. Stacks up to 90%."),
-    line("damageResistanceCap", "mod_panel", "multiplicative_percent", "Adaptation: damageResistanceCap \u2014 When Damaged:\\\\n+10% Resistance to that Damage Type for 20s. Stacks up to 90%."),
     line("damageResistancePerStack", "mod_panel", "multiplicative_percent", "Adaptation: damageResistancePerStack \u2014 When Damaged:\\\\n+10% Resistance to that Damage Type for 20s. Stacks up to 90%."),
     line("duration", "mod_panel", "multiplicative_percent", "Adaptation: duration \u2014 When Damaged:\\\\n+10% Resistance to that Damage Type for 20s. Stacks up to 90%."),
+    line("damageResistanceCap", "mod_panel", "multiplicative_percent", "Adaptation: damageResistanceCap \u2014 When Damaged:\\\\n+10% Resistance to that Damage Type for 20s. Stacks up to 90%."),
   ]),
   adept_surge: mod("adept_surge", [
     line("health", "mod_panel", "multiplicative_percent", "wiki: Adept Surge — flat −25 Health (not % pool)"),
@@ -46,7 +45,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   ]),
   agility_drift: mod("agility_drift", [
     line("accuracy", "mod_panel", "multiplicative_percent", "Agility Drift: accuracy \u2014 Reduced damage by 12% while airborne, <LOWER_IS_BETTER>-6% Enemy Accuracy when t\u2026 (arsenal display only)"),
-    line("damageReduction", "mod_panel", "multiplicative_percent", "Agility Drift: damageReduction \u2014 Reduced damage by 12% while airborne, <LOWER_IS_BETTER>-6% Enemy Accuracy when t\u2026"),
+    line("airborneDamageReduction", "mod_panel", "multiplicative_percent", "wiki: Agility Drift \u2014 2% airborne damage reduction per rank (12% R5), applied in the Airborne DR rows"),
   ]),
   air_thrusters: mod("air_thrusters", [
     line("slideSpeed", "mod_panel", "multiplicative_percent", "Air Thrusters: slideSpeed \u2014 +100% Slide Boost when Airborne, -20% Mobility"),
@@ -85,8 +84,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("health", "warframe_totals", "multiplicative_percent", "Archon Vitality: health \u2014 +100% Health, Status Effects from abilities that deal <DT_FIRE_COLOR>Heat Damage\u2026"),
   ]),
   armored_acrobatics: mod("armored_acrobatics", [
-    line("armor", "mod_panel", "multiplicative_percent", "wiki: Armored Acrobatics — conditional DR (not armor capacity)"),
-    line("damage", "mod_panel", "multiplicative_percent", "Armored Acrobatics: damage \u2014 +20% Damage Resistance during Bullet Jump, -10% Mobility"),
+    line("bulletJumpDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Armored Acrobatics \u2014 +5% damage resistance during Bullet Jump per rank (20% R3)"),
     line("sprintSpeed", "mod_panel", "multiplicative_percent", "wiki: Armored Acrobatics — mobility penalty (not always-on sprint)"),
   ]),
   armored_agility: mod("armored_agility", [
@@ -94,15 +92,13 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("sprintSpeed", "warframe_totals", "multiplicative_percent", "Armored Agility: sprintSpeed \u2014 +7.5% Armor, +2.5% Sprint Speed per rank"),
   ]),
   armored_evade: mod("armored_evade", [
-    line("armor", "mod_panel", "multiplicative_percent", "wiki: Armored Evade — conditional DR (not armor capacity)"),
-    line("damage", "mod_panel", "multiplicative_percent", "Armored Evade: damage \u2014 +40% Damage Resistance while Dodging, -10% Mobility"),
+    line("dodgeDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Armored Evade \u2014 +10% damage resistance while dodging per rank (40% R3)"),
     line("sprintSpeed", "mod_panel", "multiplicative_percent", "wiki: Armored Evade — mobility penalty (not always-on sprint)"),
   ]),
   armored_recovery: mod("armored_recovery", [
-    line("armor", "mod_panel", "multiplicative_percent", "wiki: Armored Recovery — conditional DR (not armor capacity)"),
-    line("damage", "mod_panel", "multiplicative_percent", "Armored Recovery: damage \u2014 +50% Damage Resistance when knocked down, -20% Slide"),
-    line("slideSpeed", "mod_panel", "multiplicative_percent", "Armored Recovery: slideSpeed \u2014 +50% Damage Resistance when knocked down, -20% Slide"),
+    line("knockedDownDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Armored Recovery \u2014 +12.5% damage resistance when knocked down per rank (50% R3)"),
     line("sprintSpeed", "mod_panel", "multiplicative_percent", "wiki: Armored Recovery — slide/mobility penalty (not always-on sprint)"),
+    line("slideSpeed", "mod_panel", "multiplicative_percent", "Armored Recovery: slideSpeed \u2014 +50% Damage Resistance when knocked down, -20% Slide"),
   ]),
   augur_accord: mod("augur_accord", [
     line("shield", "warframe_totals", "multiplicative_percent", "wiki: Augur Accord — +70% Shield Capacity at max"),
@@ -167,11 +163,10 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("meleeDamage", "mod_panel", "multiplicative_percent", "Steel Charge: meleeDamage \u2014 Squad receives +60% Melee Damage (display key; damage line is paper)"),
   ]),
   aura_toxin_resistance: mod("aura_toxin_resistance", [
-    line("toxin", "mod_panel", "multiplicative_percent", "Toxin Resistance: toxin \u2014 +15% Toxin Resistance per rank"),
-    line("toxinResistance", "mod_panel", "multiplicative_percent", "Toxin Resistance: toxinResistance \u2014 +15% Toxin Resistance per rank"),
+    line("toxinDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Toxin Resistance \u2014 2.5% Toxin damage resistance per rank (15% R5), applied in the Toxin resistance row"),
   ]),
   aviator: mod("aviator", [
-    line("damageReduction", "mod_panel", "multiplicative_percent", "Aviator: damageReduction \u2014 Reduced damage by 40% while airborne"),
+    line("airborneDamageReduction", "mod_panel", "multiplicative_percent", "wiki: Aviator \u2014 10% airborne damage reduction per rank (40% R3), applied in the Airborne DR rows"),
   ]),
   boreals_anguish: mod("boreals_anguish", [
     line("gravityReduction", "mod_panel", "multiplicative_percent", "Boreal's Anguish: gravityReduction \u2014 -75% Gravity while Aim Gliding\\n+60% Aim Glide/Wall Latch Duration"),
@@ -231,7 +226,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("damage", "weapon_dps", "multiplicative_percent", "Dead Eye: damage \u2014 Squad receives +52.5% Sniper Rifle Damage"),
   ]),
   diamond_skin: mod("diamond_skin", [
-    line("radiation", "mod_panel", "multiplicative_percent", "Diamond Skin: radiation \u2014 +45% <DT_RADIATION_COLOR>Radiation Resistance"),
+    line("radiationDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Diamond Skin \u2014 7.5% Radiation damage resistance per rank (45% R5), applied in the Radiation resistance row"),
   ]),
   dreamers_bond: mod("dreamers_bond", [
     line("energyRegen", "mod_panel", "multiplicative_percent", "wiki: Dreamer's Bond — Squad +0.3 Energy Regen/s at max rank"),
@@ -274,7 +269,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("heat", "mod_panel", "multiplicative_percent", "Firewalker: heat \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_FIRE\u2026"),
   ]),
   flame_repellent_r3: mod("flame_repellent_r3", [
-    line("heat", "mod_panel", "multiplicative_percent", "Flame Repellent: heat \u2014 +60% <DT_FIRE_COLOR>Heat Resistance"),
+    line("heatDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Flame Repellent \u2014 10% Heat damage resistance per rank (60% R5), applied in the Heat resistance row"),
   ]),
   fleeting_expertise_r5: mod("fleeting_expertise_r5", [
     line("abilityDuration", "warframe_totals", "multiplicative_percent", "Fleeting Expertise: abilityDuration \u2014 +60% Ability Efficiency, -60% Ability Duration"),
@@ -287,9 +282,8 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("energyOnKill", "mod_panel", "multiplicative_percent", "Follow Through: energyOnKill \u2014 On Respawn:\\\\n+10 Energy"),
   ]),
   fortitude: mod("fortitude", [
-    line("knockdownResistance", "mod_panel", "multiplicative_percent", "Fortitude: knockdownResistance \u2014 +15% Shield Recharge, +50% Knockdown Resistance per rank"),
-    line("shield", "mod_panel", "multiplicative_percent", "wiki: Fortitude — shield recharge (not capacity)"),
-    line("shieldRecharge", "mod_panel", "multiplicative_percent", "Fortitude: shieldRecharge \u2014 +15% Shield Recharge, +50% Knockdown Resistance per rank"),
+    line("knockdownResistance", "mod_panel", "multiplicative_percent", "wiki: Fortitude \u2014 +10% chance to resist knockdown per rank (40% R3)"),
+    line("shieldRecharge", "mod_panel", "multiplicative_percent", "wiki: Fortitude \u2014 +25% shield recharge per rank (100% R3)"),
   ]),
   gale_kick: mod("gale_kick", [
     line("damage", "mod_panel", "multiplicative_percent", "Gale Kick: damage \u2014 +100% of Melee Damage converted to <DT_IMPACT_COLOR>Impact Damage on Jump Kick, \u2026"),
@@ -337,7 +331,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("cold", "mod_panel", "multiplicative_percent", "Ice Spring: cold \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_FREE\u2026"),
   ]),
   insulation_r3: mod("insulation_r3", [
-    line("cold", "mod_panel", "multiplicative_percent", "Insulation: cold \u2014 +60% <DT_FREEZE_COLOR>Cold Resistance"),
+    line("coldDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Insulation \u2014 10% Cold damage resistance per rank (60% R5), applied in the Cold resistance row"),
   ]),
   intensify_r3: mod("intensify_r3", [
     line("abilityStrength", "warframe_totals", "multiplicative_percent", "Intensify: abilityStrength \u2014 +55% Ability Strength"),
@@ -361,7 +355,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("electricity", "mod_panel", "multiplicative_percent", "Lightning Dash: electricity \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_ELEC\u2026"),
   ]),
   lightning_rod_r3: mod("lightning_rod_r3", [
-    line("electricity", "mod_panel", "multiplicative_percent", "Lightning Rod: electricity \u2014 +60% <DT_ELECTRICITY_COLOR>Electricity Resistance"),
+    line("electricityDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Lightning Rod \u2014 10% Electricity damage resistance per rank (60% R5), applied in the Electricity resistance row"),
   ]),
   lingering_transmutation: mod("lingering_transmutation", [
     line("duration", "mod_panel", "multiplicative_percent", "Lingering Transmutation: duration \u2014 Transmutation Probe Augment: Probe returns to cast position after reaching max r\u2026"),
@@ -508,7 +502,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("slash", "mod_panel", "multiplicative_percent", "Rending Turn: slash \u2014 +18% to Parkour Velocity, +18% Aim Glide/Wall Latch Duration, +60% <DT_SLASH_COL\u2026"),
   ]),
   resilient_focus: mod("resilient_focus", [
-    line("damage", "mod_panel", "multiplicative_percent", "Resilient Focus: damage \u2014 +20% Damage Resistance on Stun"),
+    line("stunDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Resilient Focus \u2014 5% damage resistance while stunned per rank (20% R3)"),
   ]),
   retribution: mod("retribution", [
     line("damage", "mod_panel", "multiplicative_percent", "Retribution: damage \u2014 +60% Chance to deal Electrical Damage when shield struck by melee enemies., +120\u2026"),

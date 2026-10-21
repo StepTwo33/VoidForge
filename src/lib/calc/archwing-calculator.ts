@@ -148,7 +148,7 @@ export function calculateNecramechBuild(
   const airborne = necramechAirborneDamageReduction(equippedMods, allMods);
   const modBonuses = panel.modBonuses ? { ...panel.modBonuses } : undefined;
   // Necramech Aviator is shown as the airborne rows instead of a raw mod-bonus line.
-  if (modBonuses) delete modBonuses[`${NECRAMECH_AVIATOR_ID}::damageReduction`];
+  if (modBonuses) delete modBonuses[`${NECRAMECH_AVIATOR_ID}::airborneDamageReduction`];
 
   return {
     baseHealth: baseHealthR30,

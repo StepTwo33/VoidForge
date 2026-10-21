@@ -93,7 +93,7 @@ describe("Necramech Aviator (wiki: 10/20/30/40% airborne DR, R0–R3)", () => {
     expect(s.airborneDamageReduction).toBeCloseTo(40, 10);
     expect(s.damageReduction).toBeCloseTo(base.damageReduction, 10);
     expect(s.effectiveHealth).toBeCloseTo(base.effectiveHealth, 8);
-    expect(s.modBonuses?.["necramech_aviator::damageReduction"]).toBeUndefined();
+    expect(s.modBonuses?.["necramech_aviator::airborneDamageReduction"]).toBeUndefined();
     // Hand-worked: health ÷ ((1 − armorDR) × 0.6) + shield ÷ (0.5 × 0.6)
     const h = voidrig.health + NECRAMECH_RANK30_BONUS.health;
     const sh = voidrig.shield + NECRAMECH_RANK30_BONUS.shield;

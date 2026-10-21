@@ -18,7 +18,7 @@ export const MOD_BEHAVIORS_NECRAMECH: Record<string, VerifiedModBehavior> = {
     line("shield", "mod_panel", "multiplicative_percent", "wiki: Necramech Augur — energy spent converted to Shields (not max shield)"),
   ]),
   necramech_aviator: mod("necramech_aviator", [
-    line("damageReduction", "mod_panel", "multiplicative_percent", "Necramech Aviator: damageReduction \u2014 Reduced damage by 40% while airborne"),
+    line("airborneDamageReduction", "mod_panel", "multiplicative_percent", "wiki: Necramech Aviator \u2014 10% airborne damage reduction per rank (40% R3), shown as the Necramech Airborne DR rows"),
   ]),
   necramech_blitz: mod("necramech_blitz", [
     line("damage", "mod_panel", "multiplicative_percent", "Necramech Blitz: damage \u2014 +80% Slide Attack Damage"),
