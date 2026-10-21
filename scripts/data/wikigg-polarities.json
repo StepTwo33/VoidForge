@@ -1,0 +1,189 @@
+{
+ "Lavos": {
+  "aura": [
+   "naramon"
+  ],
+  "exilus": [
+   null
+  ],
+  "slots": [
+   "vazarin",
+   "naramon"
+  ]
+ },
+ "Voruna": {
+  "aura": [
+   "vazarin"
+  ],
+  "exilus": [
+   null
+  ],
+  "slots": [
+   "madurai",
+   "vazarin"
+  ]
+ },
+ "Jade": {
+  "aura": [
+   "vazarin"
+  ],
+  "exilus": [
+   null
+  ],
+  "slots": [
+   "naramon"
+  ]
+ },
+ "Dark Dagger": {
+  "slots": [
+   null
+  ],
+  "stance": [
+   "madurai"
+  ]
+ },
+ "Dorrclave": {
+  "slots": [
+   "naramon"
+  ],
+  "stance": [
+   "madurai"
+  ]
+ },
+ "Venari Prime": {
+  "slots": [
+   "penjaga",
+   "madurai",
+   "vazarin",
+   "naramon"
+  ]
+ },
+ "Valkyr Talons": {
+  "slots": [
+   "madurai",
+   "naramon",
+   "naramon"
+  ],
+  "stance": [
+   "zenurik"
+  ]
+ },
+ "Akaten": {
+  "slots": [
+   null
+  ]
+ },
+ "Batoten": {
+  "slots": [
+   null
+  ]
+ },
+ "Lacerten": {
+  "slots": [
+   null
+  ]
+ },
+ "Deth Machine Rifle": {
+  "slots": [
+   null
+  ]
+ },
+ "Deth Machine Rifle Prime": {
+  "slots": [
+   null
+  ]
+ },
+ "Burst Laser": {
+  "slots": [
+   null
+  ]
+ },
+ "Burst Laser Prime": {
+  "slots": [
+   null
+  ]
+ },
+ "Prisma Burst Laser": {
+  "slots": [
+   null
+  ]
+ },
+ "Helstrum": {
+  "slots": [
+   "madurai"
+  ]
+ },
+ "Multron": {
+  "slots": [
+   "madurai"
+  ]
+ },
+ "Verglas Prime": {
+  "slots": [
+   "naramon"
+  ]
+ },
+ "Vulcax": {
+  "slots": [
+   null
+  ]
+ },
+ "Smeeta Claws": {
+  "slots": [
+   null
+  ]
+ },
+ "Afentis Prime": {
+  "exilus": [
+   "madurai"
+  ],
+  "slots": [
+   "naramon",
+   "madurai",
+   "madurai"
+  ]
+ },
+ "Athodai Prime": {
+  "exilus": [
+   "naramon"
+  ],
+  "slots": [
+   "madurai",
+   "madurai",
+   "madurai"
+  ]
+ },
+ "Pride": {
+  "slots": [
+   "madurai"
+  ],
+  "stance": [
+   "madurai"
+  ]
+ },
+ "Wrath": {
+  "slots": [
+   "madurai"
+  ],
+  "stance": [
+   "madurai"
+  ]
+ },
+ "War Prime": {
+  "slots": [
+   "naramon"
+  ],
+  "stance": [
+   "vazarin"
+  ]
+ },
+ "Haalvu": {
+  "exilus": [
+   null
+  ],
+  "slots": [
+   "madurai",
+   "madurai"
+  ]
+ }
+}
