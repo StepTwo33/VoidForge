@@ -4,6 +4,7 @@
  * data modules (fields where the two disagree are left out). Do not edit by hand.
  * Keys are `<kind>:<voidforge id>`; `slots` are the regular-slot polarities in WFCD order
  * (WFCD does not record slot positions), `aura` / `exilus` / `stance` are the special slots.
+ * WFCD's aura polarity "aura" is the built-in Universal Aura polarity and is written as "universal".
  */
 export interface InnatePolarityEntry {
   slots?: readonly string[];
@@ -72,7 +73,7 @@ export const INNATE_POLARITIES: Readonly<Record<string, InnatePolarityEntry>> = 
   "warframe:citrine_prime": {"slots": ["vazarin", "madurai", "naramon"], "aura": "naramon"},
   "warframe:cyte_09": {"slots": ["madurai", "vazarin"], "aura": "madurai"},
   "warframe:dagath": {"slots": ["madurai", "vazarin"], "aura": "zenurik"},
-  "warframe:dante": {"slots": ["madurai", "naramon"]},
+  "warframe:dante": {"slots": ["madurai", "naramon"], "aura": "universal"},
   "warframe:ember": {"slots": ["naramon", "naramon"], "aura": "madurai"},
   "warframe:ember_prime": {"slots": ["madurai", "vazarin"], "aura": "madurai"},
   "warframe:equinox": {"slots": ["vazarin", "madurai"], "aura": "naramon"},
@@ -103,7 +104,7 @@ export const INNATE_POLARITIES: Readonly<Record<string, InnatePolarityEntry>> = 
   "warframe:inaros_prime": {"slots": ["madurai", "vazarin", "vazarin"], "aura": "naramon", "exilus": "naramon"},
   "warframe:ivara": {"slots": ["vazarin", "naramon"], "aura": "naramon"},
   "warframe:ivara_prime": {"slots": ["madurai", "vazarin", "naramon"], "aura": "naramon"},
-  "warframe:jade": {"slots": ["naramon"], "aura2": "vazarin"},
+  "warframe:jade": {"slots": ["naramon"], "aura": "universal", "aura2": "vazarin"},
   "warframe:khora": {"slots": ["madurai", "naramon"], "aura": "vazarin", "exilus": "naramon"},
   "warframe:khora_prime": {"slots": ["madurai", "vazarin", "naramon"], "aura": "vazarin", "exilus": "naramon"},
   "warframe:koumei": {"slots": ["madurai", "naramon"], "aura": "madurai"},
@@ -137,8 +138,8 @@ export const INNATE_POLARITIES: Readonly<Record<string, InnatePolarityEntry>> = 
   "warframe:octavia": {"slots": ["naramon", "naramon"], "aura": "naramon"},
   "warframe:octavia_prime": {"slots": ["vazarin", "naramon", "naramon"], "aura": "naramon"},
   "warframe:oraxia": {"slots": ["madurai", "naramon"], "aura": "madurai"},
-  "warframe:protea": {"slots": ["madurai", "naramon"]},
-  "warframe:protea_prime": {"slots": ["madurai", "naramon", "naramon"]},
+  "warframe:protea": {"slots": ["madurai", "naramon"], "aura": "universal"},
+  "warframe:protea_prime": {"slots": ["madurai", "naramon", "naramon"], "aura": "universal"},
   "warframe:qorvex": {"slots": ["naramon", "vazarin"], "aura": "vazarin"},
   "warframe:revenant": {"slots": ["madurai", "vazarin"], "aura": "naramon"},
   "warframe:revenant_prime": {"slots": ["naramon", "madurai", "vazarin"], "aura": "naramon"},
