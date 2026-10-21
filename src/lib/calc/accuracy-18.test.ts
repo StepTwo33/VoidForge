@@ -130,3 +130,17 @@ describe("R9-E mod panel values", async () => {
     expect(Object.keys(lines("tenacious_bond"))).toEqual(["duration"]);
   });
 });
+
+describe("R9-E melee Incarnon forms[] rows mirror weapons.ts base", async () => {
+  const { incarnonWeaponData } = await import("@/data/incarnon");
+  const { allWeapons } = await import("@/data/weapons");
+  it("base row = weapons.ts; Innodem form +40% AS, Skana Genesis ×2 damage", () => {
+    const innodem = incarnonWeaponData.find((d) => d.weaponId === "innodem")!;
+    expect(innodem.forms[0]).toMatchObject({ damage: 360, fireRate: 0.75, criticalChance: 0.22, criticalMultiplier: 2, statusChance: 0.22 });
+    expect(innodem.forms[1].fireRate).toBeCloseTo(1.05, 3);
+    const skana = incarnonWeaponData.find((d) => d.weaponId === "skana_incarnon")!;
+    const base = allWeapons.find((w) => w.id === "skana")!;
+    expect(skana.forms[0].damage).toBe(base.damage);
+    expect(skana.forms[1].damage).toBe(base.damage * 2);
+  });
+});

@@ -365,6 +365,11 @@ export const INCARNON_WEAPON_IDS = new Set([
   "zylok_prime",
 ]);
 
+/**
+ * Melee `forms[]` rows are informational (the calc uses weapons.ts base + evolutions):
+ * base row = weapons.ts base stats; Incarnon row = base with the form effect applied
+ * (Innodem/Praedos/Thalys +40% attack speed, Ruvox -35% attack speed, Genesis melee +100% damage).
+ */
 export const incarnonWeaponData: IncarnonWeaponData[] = [
   // Felarx (native) - wiki-verified evolutions
   {
@@ -414,8 +419,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     challenge: "Kill 100 enemies with Slide Attacks",
     category: "native",
     forms: [
-      { name: "Innodem", damage: 230.0, fireRate: 1.0, criticalChance: 0.24, criticalMultiplier: 2.2, statusChance: 0.18, triggerType: "Melee" },
-      { name: "Innodem Incarnon", damage: 460.0, fireRate: 1.0, criticalChance: 0.34, criticalMultiplier: 2.8, statusChance: 0.28, triggerType: "Melee", specialMechanics: { evolutionMode: "Heavy attacks fire void energy wave", modeSwitch: "Heavy attack or Slide attack kills" } },
+      { name: "Innodem", damage: 360, fireRate: 0.75, criticalChance: 0.22, criticalMultiplier: 2, statusChance: 0.22, triggerType: "Melee" },
+      { name: "Innodem Incarnon", damage: 360, fireRate: 1.05, criticalChance: 0.22, criticalMultiplier: 2, statusChance: 0.22, triggerType: "Melee", specialMechanics: { evolutionMode: "Heavy attacks fire void energy wave", modeSwitch: "Heavy attack or Slide attack kills" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -511,8 +516,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     challenge: "Kill 100 enemies with Slide Attacks",
     category: "native",
     forms: [
-      { name: "Praedos", damage: 260.0, fireRate: 1.0, criticalChance: 0.26, criticalMultiplier: 2.2, statusChance: 0.18, triggerType: "Melee" },
-      { name: "Praedos Incarnon", damage: 520.0, fireRate: 1.0, criticalChance: 0.36, criticalMultiplier: 2.8, statusChance: 0.28, triggerType: "Melee", specialMechanics: { evolutionMode: "Extended combos with void explosions", modeSwitch: "Heavy or Slide attack kills" } },
+      { name: "Praedos", damage: 200, fireRate: 1.167, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.2, triggerType: "Melee" },
+      { name: "Praedos Incarnon", damage: 200, fireRate: 1.633, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.2, triggerType: "Melee", specialMechanics: { evolutionMode: "Extended combos with void explosions", modeSwitch: "Heavy or Slide attack kills" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -568,8 +573,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     challenge: "Kill 100 enemies with Slide Attacks",
     category: "native",
     forms: [
-      { name: "Ruvox", damage: 280.0, fireRate: 1.0, criticalChance: 0.28, criticalMultiplier: 2.2, statusChance: 0.16, triggerType: "Melee" },
-      { name: "Ruvox Incarnon", damage: 560.0, fireRate: 1.0, criticalChance: 0.38, criticalMultiplier: 2.8, statusChance: 0.26, triggerType: "Melee", specialMechanics: { evolutionMode: "Heavy attacks create void vortex", modeSwitch: "Heavy or Slide kills" } },
+      { name: "Ruvox", damage: 170, fireRate: 1, criticalChance: 0.26, criticalMultiplier: 2.2, statusChance: 0.2, triggerType: "Melee" },
+      { name: "Ruvox Incarnon", damage: 170, fireRate: 0.65, criticalChance: 0.26, criticalMultiplier: 2.2, statusChance: 0.2, triggerType: "Melee", specialMechanics: { evolutionMode: "Heavy attacks create void vortex", modeSwitch: "Heavy or Slide kills" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -591,7 +596,7 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "native",
     forms: [
       { name: "Thalys", damage: 300, fireRate: 0.917, criticalChance: 0.3, criticalMultiplier: 2.2, statusChance: 0.24, triggerType: "Melee" },
-      { name: "Thalys Incarnon", damage: 300, fireRate: 0.917, criticalChance: 0.3, criticalMultiplier: 2.2, statusChance: 0.24, triggerType: "Melee", specialMechanics: { evolutionMode: "Void shards; +3 Range +40% AS", modeSwitch: "6x Combo + Heavy Attack" } },
+      { name: "Thalys Incarnon", damage: 300, fireRate: 1.283, criticalChance: 0.3, criticalMultiplier: 2.2, statusChance: 0.24, triggerType: "Melee", specialMechanics: { evolutionMode: "Void shards; +3 Range +40% AS", modeSwitch: "6x Combo + Heavy Attack" } },
     ],
     evolutions: [],
   },
@@ -1674,8 +1679,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["bo", "bo_prime", "mk1_bo"],
     forms: [
-      { name: "Bo", damage: 200.0, fireRate: 1.0, criticalChance: 0.25, criticalMultiplier: 2.0, statusChance: 0.2, triggerType: "Melee" },
-      { name: "Bo Incarnon", damage: 400.0, fireRate: 0.8, criticalChance: 0.35, criticalMultiplier: 2.5, statusChance: 0.3, triggerType: "Melee", specialMechanics: { evolutionMode: "Heavy slam creates shockwave", evolutionBonus: "Heavy attacks fire energy wave" } },
+      { name: "Bo", damage: 140, fireRate: 1, criticalChance: 0.125, criticalMultiplier: 2, statusChance: 0.2, triggerType: "Melee" },
+      { name: "Bo Incarnon", damage: 280, fireRate: 1, criticalChance: 0.125, criticalMultiplier: 2, statusChance: 0.2, triggerType: "Melee", specialMechanics: { evolutionMode: "Heavy slam creates shockwave", evolutionBonus: "Heavy attacks fire energy wave" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1697,8 +1702,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["skana", "skana_prime", "prisma_skana"],
     forms: [
-      { name: "Skana", damage: 120.0, fireRate: 1.0, criticalChance: 0.15, criticalMultiplier: 1.8, statusChance: 0.1, triggerType: "Melee" },
-      { name: "Skana Incarnon", damage: 240.0, fireRate: 1.0, criticalChance: 0.25, criticalMultiplier: 2.3, statusChance: 0.22, triggerType: "Melee", specialMechanics: { evolutionMode: "Void blade extensions on heavy attack", modeSwitch: "Slide or Heavy attack kills" } },
+      { name: "Skana", damage: 120, fireRate: 0.833, criticalChance: 0.05, criticalMultiplier: 1.5, statusChance: 0.16, triggerType: "Melee" },
+      { name: "Skana Incarnon", damage: 240, fireRate: 0.833, criticalChance: 0.05, criticalMultiplier: 1.5, statusChance: 0.16, triggerType: "Melee", specialMechanics: { evolutionMode: "Void blade extensions on heavy attack", modeSwitch: "Slide or Heavy attack kills" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1720,8 +1725,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["ack_&_brunt"],
     forms: [
-      { name: "Ack & Brunt", damage: 230.0, fireRate: 0.833, criticalChance: 0.1, criticalMultiplier: 2.0, statusChance: 0.25, triggerType: "Melee" },
-      { name: "Ack & Brunt Incarnon", damage: 460.0, fireRate: 0.833, criticalChance: 0.22, criticalMultiplier: 2.5, statusChance: 0.4, triggerType: "Melee", specialMechanics: { evolutionMode: "Shield throw with void explosion on return", modeSwitch: "Block damage builds evolution" } },
+      { name: "Ack & Brunt", damage: 149, fireRate: 0.833, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.1, triggerType: "Melee" },
+      { name: "Ack & Brunt Incarnon", damage: 298, fireRate: 0.833, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.1, triggerType: "Melee", specialMechanics: { evolutionMode: "Shield throw with void explosion on return", modeSwitch: "Block damage builds evolution" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1743,8 +1748,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["anku"],
     forms: [
-      { name: "Anku", damage: 195.0, fireRate: 1.08, criticalChance: 0.2, criticalMultiplier: 2.0, statusChance: 0.25, triggerType: "Melee" },
-      { name: "Anku Incarnon", damage: 390.0, fireRate: 1.08, criticalChance: 0.32, criticalMultiplier: 2.5, statusChance: 0.4, triggerType: "Melee", specialMechanics: { evolutionMode: "Void scythe waves on heavy attack", modeSwitch: "Slide attack kills" } },
+      { name: "Anku", damage: 170, fireRate: 1.083, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.1, triggerType: "Melee" },
+      { name: "Anku Incarnon", damage: 340, fireRate: 1.083, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.1, triggerType: "Melee", specialMechanics: { evolutionMode: "Void scythe waves on heavy attack", modeSwitch: "Slide attack kills" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1766,8 +1771,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["ceramic_dagger"],
     forms: [
-      { name: "Ceramic Dagger", damage: 110.0, fireRate: 1.0, criticalChance: 0.05, criticalMultiplier: 1.5, statusChance: 0.1, triggerType: "Melee" },
-      { name: "Ceramic Dagger Incarnon", damage: 220.0, fireRate: 1.0, criticalChance: 0.18, criticalMultiplier: 2.2, statusChance: 0.25, triggerType: "Melee", specialMechanics: { evolutionMode: "Finisher attacks create void implosion", modeSwitch: "Finisher kills build evolution" } },
+      { name: "Ceramic Dagger", damage: 140, fireRate: 1, criticalChance: 0.1, criticalMultiplier: 1.5, statusChance: 0.2, triggerType: "Melee" },
+      { name: "Ceramic Dagger Incarnon", damage: 280, fireRate: 1, criticalChance: 0.1, criticalMultiplier: 1.5, statusChance: 0.2, triggerType: "Melee", specialMechanics: { evolutionMode: "Finisher attacks create void implosion", modeSwitch: "Finisher kills build evolution" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1789,8 +1794,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["dual_ichor"],
     forms: [
-      { name: "Dual Ichor", damage: 175.0, fireRate: 1.0, criticalChance: 0.15, criticalMultiplier: 3.0, statusChance: 0.15, triggerType: "Melee" },
-      { name: "Dual Ichor Incarnon", damage: 350.0, fireRate: 1.0, criticalChance: 0.28, criticalMultiplier: 3.5, statusChance: 0.3, triggerType: "Melee", specialMechanics: { evolutionMode: "Toxic void slashes with spreading corrosion", modeSwitch: "Slide attack kills" } },
+      { name: "Dual Ichor", damage: 122, fireRate: 1.083, criticalChance: 0.25, criticalMultiplier: 3, statusChance: 0.15, triggerType: "Melee" },
+      { name: "Dual Ichor Incarnon", damage: 244, fireRate: 1.083, criticalChance: 0.25, criticalMultiplier: 3, statusChance: 0.15, triggerType: "Melee", specialMechanics: { evolutionMode: "Toxic void slashes with spreading corrosion", modeSwitch: "Slide attack kills" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1812,8 +1817,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["furax", "mk1_furax", "furax_wraith"],
     forms: [
-      { name: "Furax", damage: 130.0, fireRate: 1.0, criticalChance: 0.2, criticalMultiplier: 2.0, statusChance: 0.1, triggerType: "Melee" },
-      { name: "Furax Incarnon", damage: 260.0, fireRate: 1.0, criticalChance: 0.32, criticalMultiplier: 2.5, statusChance: 0.22, triggerType: "Melee", specialMechanics: { evolutionMode: "Void-charged uppercut with knockback wave", modeSwitch: "Ground finisher kills" } },
+      { name: "Furax", damage: 135, fireRate: 1, criticalChance: 0.25, criticalMultiplier: 2.3, statusChance: 0.11, triggerType: "Melee" },
+      { name: "Furax Incarnon", damage: 270, fireRate: 1, criticalChance: 0.25, criticalMultiplier: 2.3, statusChance: 0.11, triggerType: "Melee", specialMechanics: { evolutionMode: "Void-charged uppercut with knockback wave", modeSwitch: "Ground finisher kills" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1835,8 +1840,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["hate"],
     forms: [
-      { name: "Hate", damage: 250.0, fireRate: 1.08, criticalChance: 0.3, criticalMultiplier: 2.5, statusChance: 0.2, triggerType: "Melee" },
-      { name: "Hate Incarnon", damage: 500.0, fireRate: 1.08, criticalChance: 0.42, criticalMultiplier: 3.0, statusChance: 0.35, triggerType: "Melee", specialMechanics: { evolutionMode: "Void reaping arc on heavy attack", modeSwitch: "Slide attack kills" } },
+      { name: "Hate", damage: 230, fireRate: 0.917, criticalChance: 0.3, criticalMultiplier: 2.5, statusChance: 0.2, triggerType: "Melee" },
+      { name: "Hate Incarnon", damage: 460, fireRate: 0.917, criticalChance: 0.3, criticalMultiplier: 2.5, statusChance: 0.2, triggerType: "Melee", specialMechanics: { evolutionMode: "Void reaping arc on heavy attack", modeSwitch: "Slide attack kills" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1858,8 +1863,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["magistar", "sancti_magistar"],
     forms: [
-      { name: "Magistar", damage: 240.0, fireRate: 0.833, criticalChance: 0.2, criticalMultiplier: 2.0, statusChance: 0.15, triggerType: "Melee" },
-      { name: "Magistar Incarnon", damage: 480.0, fireRate: 0.833, criticalChance: 0.32, criticalMultiplier: 2.5, statusChance: 0.3, triggerType: "Melee", specialMechanics: { evolutionMode: "Void slam creates sanctifying ground", modeSwitch: "Heavy attack kills" } },
+      { name: "Magistar", damage: 210, fireRate: 0.833, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.1, triggerType: "Melee" },
+      { name: "Magistar Incarnon", damage: 420, fireRate: 0.833, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.1, triggerType: "Melee", specialMechanics: { evolutionMode: "Void slam creates sanctifying ground", modeSwitch: "Heavy attack kills" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1881,8 +1886,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["nami_solo"],
     forms: [
-      { name: "Nami Solo", damage: 145.0, fireRate: 0.917, criticalChance: 0.1, criticalMultiplier: 1.5, statusChance: 0.2, triggerType: "Melee" },
-      { name: "Nami Solo Incarnon", damage: 290.0, fireRate: 0.917, criticalChance: 0.22, criticalMultiplier: 2.2, statusChance: 0.35, triggerType: "Melee", specialMechanics: { evolutionMode: "Void cutlass combos with water slash waves", modeSwitch: "Slide attack kills" } },
+      { name: "Nami Solo", damage: 172, fireRate: 1, criticalChance: 0.15, criticalMultiplier: 2, statusChance: 0.25, triggerType: "Melee" },
+      { name: "Nami Solo Incarnon", damage: 344, fireRate: 1, criticalChance: 0.15, criticalMultiplier: 2, statusChance: 0.25, triggerType: "Melee", specialMechanics: { evolutionMode: "Void cutlass combos with water slash waves", modeSwitch: "Slide attack kills" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1904,8 +1909,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["okina", "okina_prime"],
     forms: [
-      { name: "Okina", damage: 160.0, fireRate: 1.17, criticalChance: 0.1, criticalMultiplier: 2.0, statusChance: 0.25, triggerType: "Melee" },
-      { name: "Okina Incarnon", damage: 320.0, fireRate: 1.17, criticalChance: 0.22, criticalMultiplier: 2.5, statusChance: 0.4, triggerType: "Melee", specialMechanics: { evolutionMode: "Rapid void stabs with bleeding procs", modeSwitch: "Slide attack kills" } },
+      { name: "Okina", damage: 140, fireRate: 1.083, criticalChance: 0.16, criticalMultiplier: 2, statusChance: 0.2, triggerType: "Melee" },
+      { name: "Okina Incarnon", damage: 280, fireRate: 1.083, criticalChance: 0.16, criticalMultiplier: 2, statusChance: 0.2, triggerType: "Melee", specialMechanics: { evolutionMode: "Rapid void stabs with bleeding procs", modeSwitch: "Slide attack kills" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -1927,8 +1932,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["sibear"],
     forms: [
-      { name: "Sibear", damage: 260.0, fireRate: 0.917, criticalChance: 0.15, criticalMultiplier: 2.0, statusChance: 0.1, triggerType: "Melee" },
-      { name: "Sibear Incarnon", damage: 520.0, fireRate: 0.917, criticalChance: 0.28, criticalMultiplier: 2.5, statusChance: 0.25, triggerType: "Melee", specialMechanics: { evolutionMode: "Void frost slam creates ice field", modeSwitch: "Heavy attack kills" } },
+      { name: "Sibear", damage: 270, fireRate: 1, criticalChance: 0.15, criticalMultiplier: 2, statusChance: 0.3, triggerType: "Melee" },
+      { name: "Sibear Incarnon", damage: 540, fireRate: 1, criticalChance: 0.15, criticalMultiplier: 2, statusChance: 0.3, triggerType: "Melee", specialMechanics: { evolutionMode: "Void frost slam creates ice field", modeSwitch: "Heavy attack kills" } },
     ],
     evolutions: [
       { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire to transform.", statChanges: {} },
@@ -2030,8 +2035,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["destreza", "destreza_prime"],
     forms: [
-      { name: "Destreza", damage: 158.0, fireRate: 1.0, criticalChance: 0.28, criticalMultiplier: 2.0, statusChance: 0.14, triggerType: "Melee" },
-      { name: "Destreza Incarnon", damage: 316.0, fireRate: 1.0, criticalChance: 0.38, criticalMultiplier: 2.5, statusChance: 0.28, triggerType: "Melee", specialMechanics: { evolutionMode: "Ghostly rapiers fly forth on Heavy Attacks; Heavy kills grant Puncture Damage", modeSwitch: "Build 6x combo then Heavy Attack; lasts 180s" } },
+      { name: "Destreza", damage: 158, fireRate: 1, criticalChance: 0.28, criticalMultiplier: 2, statusChance: 0.14, triggerType: "Melee" },
+      { name: "Destreza Incarnon", damage: 316, fireRate: 1, criticalChance: 0.28, criticalMultiplier: 2, statusChance: 0.14, triggerType: "Melee", specialMechanics: { evolutionMode: "Ghostly rapiers fly forth on Heavy Attacks; Heavy kills grant Puncture Damage", modeSwitch: "Build 6x combo then Heavy Attack; lasts 180s" } },
     ],
     evolutions: getDestrezaIncarnonEvolutions(),
   },
@@ -2043,8 +2048,8 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     category: "genesis_melee",
     variants: ["obex", "prisma_obex"],
     forms: [
-      { name: "Obex", damage: 120.0, fireRate: 1.0, criticalChance: 0.25, criticalMultiplier: 2.0, statusChance: 0.1, triggerType: "Melee" },
-      { name: "Obex Incarnon", damage: 240.0, fireRate: 1.0, criticalChance: 0.35, criticalMultiplier: 2.5, statusChance: 0.22, triggerType: "Melee", specialMechanics: { evolutionMode: "Large radial attack for each Finisher strike", modeSwitch: "Build 6x combo then Heavy Attack; lasts 180s" } },
+      { name: "Obex", damage: 120, fireRate: 1, criticalChance: 0.25, criticalMultiplier: 2, statusChance: 0.1, triggerType: "Melee" },
+      { name: "Obex Incarnon", damage: 240, fireRate: 1, criticalChance: 0.25, criticalMultiplier: 2, statusChance: 0.1, triggerType: "Melee", specialMechanics: { evolutionMode: "Large radial attack for each Finisher strike", modeSwitch: "Build 6x combo then Heavy Attack; lasts 180s" } },
     ],
     evolutions: getObexIncarnonEvolutions(),
   },
