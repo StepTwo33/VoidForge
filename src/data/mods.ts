@@ -11882,7 +11882,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "Augment",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "criticalChance": 50,
@@ -12001,13 +12001,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "duration": 7.5
     },
     "description": "Blessing Augment: Gain Primary and Secondary Critical Chance for 30s for each percent you heal on allies up to 350%.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "trinity"
   },
   {
     "id": "coaction_drift",
@@ -12101,13 +12102,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "damage": 87.5
     },
     "description": "Decoy Augment: Decoy can be cast on enemies. Enemies who attack that decoy receive 5 random Status Effects, and the reflected damage is increased by 350%.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "loki"
   },
   {
     "id": "dark_propagation",
@@ -12246,13 +12248,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "abilityDuration": 12.5
     },
     "description": "Lull Augment: Performing a finisher on or killing a sleeping enemy will retrigger Lull for 100% of the remaining duration.\\nPassive: +50% Lull Duration.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "baruuk"
   },
   {
     "id": "endurance_drift",
@@ -12846,13 +12849,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "cooldown": 0.5
     },
     "description": "Merulina Augment: Yareli no longer rides Merulina. Instead, Merulina follows her and casts Sea Snare on nearby enemies. 2s cooldown.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "yareli"
   },
   {
     "id": "maglev",
@@ -13033,13 +13037,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "health": 1.0
     },
     "description": "Parasitic Link Augment: Nidus and any ally he's bound to gain 4% Max Health per Mutation during Parasitic Link.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "nidus"
   },
   {
     "id": "peaceful_provocation",
@@ -14062,13 +14067,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "abilityStrength": 8.75
     },
     "description": "The Lost Augment: The Lost gains 35% Ability Strength and 15% Ability Efficiency when cast. The effect stacks up to 3x. Casting the same ability back-to-back resets the effect.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "xaku"
   },
   {
     "id": "thrall_pact",
@@ -14180,13 +14186,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "duration": 5.0
     },
     "description": "Passive Augment: Casting an Ability imbued with extra Elemental Damage applies that Element as a 200% bonus to your weapons with guaranteed Status for 20s.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "lavos"
   },
   {
     "id": "vampiric_grasp",
@@ -14194,13 +14201,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "healthRegen": 6.25
     },
     "description": "Grasp of Lohk Augment: When a stolen weapon deals damage to an enemy affected by The Lost: Gaze or The Vast Untime, Xaku heals by 25.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "xaku"
   },
   {
     "id": "venomous_rise",
@@ -14363,13 +14371,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "duration": 1.5
     },
     "description": "Storm of Ukko Augment: Wrathful Advance moves the storm of daggers to the teleportation location and increases its duration by 6s.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "kullervo"
   },
   {
     "id": "wrecking_wall",
@@ -14733,14 +14742,15 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "abilityRange": 7.5,
       "cooldown": 1.0
     },
     "description": "Ophidian Bite Augment: Reduce Ability Cooldowns by 4s when at least 4 enemies are hit. Ophidian Bite is granted 30% additional Ability Range.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "lavos"
   },
   {
     "id": "synth_reflex_r3",
