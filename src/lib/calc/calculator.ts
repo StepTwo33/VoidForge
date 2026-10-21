@@ -1,6 +1,12 @@
 // Advanced Build Calculator - ported from Dart with elemental combos, status procs, heavy attacks
 import { moddedAmmoReserve } from "@/lib/calc/ammo-reserve";
 import { playerEffectiveHealth } from './player-ehp';
+import {
+  airborneDrSources,
+  combineDamageReduction,
+  typedResistSources,
+  warframeEffectiveHealth,
+} from './damage-reduction';
 export { PLAYER_SHIELD_DAMAGE_TAKEN, playerEffectiveHealth } from './player-ehp';
 import { SNIPER_DATA, sniperComboMultiplier } from "@/data/sniper-zoom";
 import { CONTINUOUS_WEAPON_IDS } from "@/data/continuous-weapons";
@@ -2350,6 +2356,7 @@ export function calculateWarframeBuild(
   const aug = stats.setBonusSummary.find((s) => s.setId === "augur");
   const hun = stats.setBonusSummary.find((s) => s.setId === "hunter");
   const mecha = stats.setBonusSummary.find((s) => s.setId === "mecha");
+  const boreal = stats.setBonusSummary.find((s) => s.setId === "boreal");
   // wiki Augur Set: +40% energy→shields per piece; Hunter Set: +25% companion dmg per piece
   stats.augurEnergyToShieldsPercent = (aug?.pieces ?? 0) * 40;
   stats.hunterCompanionVsStatusDamagePercent = (hun?.pieces ?? 0) * 25;
@@ -2361,7 +2368,58 @@ export function calculateWarframeBuild(
     stats.adaptationDrPerStack = adaptationDrPerStack(adaptationSlot.rank ?? 0);
   }
 
+  // Conditional (airborne) DR and damage-type resistances: shown separately, never in generic EHP.
+  const maxRankOf = (id: string) => allMods.get(id)?.maxRank ?? 0;
+  const air = airborneDrSources(equippedMods, maxRankOf, boreal?.pieces ?? 0);
+  if (air.length) stats.airborneDamageReductionSources = air;
+  const typed = typedResistSources(equippedMods, maxRankOf);
+  if (typed.size) {
+    stats.typedResistances = [...typed.entries()].map(([type, sources]) => ({
+      type,
+      percent: 0,
+      sources,
+      effectiveHealth: 0,
+    }));
+  }
+  finalizeWarframeSurvivability(stats);
+
   return stats;
+}
+
+/**
+ * Recompute DR / EHP from totals (wiki.warframe.com Damage Reduction: every source multiplies).
+ * Armor DR protects health only; pure DR (arcanes, airborne mods) protects health and shields;
+ * typed resistances only count against their own damage type. No blanket 90% cap
+ * (removed in Update 30.5).
+ */
+export function finalizeWarframeSurvivability(stats: WarframeCalculatedStats): void {
+  const armorDR = stats.totalArmor / (stats.totalArmor + 300);
+  const pure = combineDamageReduction((stats.pureDamageReductionSources ?? []).map((s) => s.value));
+  stats.damageReduction = (1 - (1 - armorDR) * (1 - pure)) * 100;
+  stats.effectiveHealth = warframeEffectiveHealth(stats.totalHealth, stats.totalShield, armorDR, pure);
+
+  const air = stats.airborneDamageReductionSources ?? [];
+  if (air.length) {
+    const a = combineDamageReduction(air.map((s) => s.value));
+    stats.airborneDamageReduction = a * 100;
+    stats.airborneTotalDamageReduction = (1 - (1 - armorDR) * (1 - pure) * (1 - a)) * 100;
+    stats.airborneEffectiveHealth = warframeEffectiveHealth(
+      stats.totalHealth,
+      stats.totalShield,
+      armorDR,
+      combineDamageReduction([pure, a]),
+    );
+  }
+
+  for (const t of stats.typedResistances ?? []) {
+    const r = combineDamageReduction(t.sources.map((s) => s.value));
+    t.percent = r * 100;
+    // wiki Toxin: bypasses shields, so EHP vs Toxin is health only.
+    t.effectiveHealth = warframeEffectiveHealth(stats.totalHealth, stats.totalShield, armorDR, pure, {
+      typedResist: r,
+      bypassesShields: t.type === "toxin",
+    });
+  }
 }
 
 /** Adaptation at max rank (R10): +10% typed resistance per stack when hit, max 9 stacks (90%). */
@@ -2563,10 +2621,19 @@ export function applyWarframeShardsAndArcanes(
   }
 
   const arcaneList = arcanes ?? [];
+  const pureSources: { name: string; value: number }[] = [];
   for (let i = 0; i < arcaneList.length; i++) {
     const arcane = arcaneList[i];
-    if (arcane) applyArcaneToWarframe(stats, arcane, 1, arcaneRanks?.[i] ?? arcane.maxRank);
+    if (!arcane) continue;
+    const drBefore = stats.arcaneBonuses?.damageReduction ?? 0;
+    applyArcaneToWarframe(stats, arcane, 1, arcaneRanks?.[i] ?? arcane.maxRank);
+    // Each arcane is its own DR source; sources multiply (stacks within one arcane stay additive,
+    // e.g. Arcane Double Back 3 × 25% = 75%).
+    const drDelta = (stats.arcaneBonuses?.damageReduction ?? 0) - drBefore;
+    if (drDelta > 0) pureSources.push({ name: arcane.name, value: drDelta / 100 });
   }
+  if (pureSources.length) stats.pureDamageReductionSources = pureSources;
+  else delete stats.pureDamageReductionSources;
 
   // Recalculate derived stats after shard + arcane bonuses (flat shards add after percentage scaling)
   stats.totalHealth = stats.baseHealth * (1 + stats.healthBonus) + stats.flatHealthBonus;
@@ -2580,17 +2647,9 @@ export function applyWarframeShardsAndArcanes(
   if (stats.persistenceDamageCapPerSecond != null) {
     stats.persistenceActive = stats.totalArmor >= 700;
   }
-  const armorDR = stats.totalArmor / (stats.totalArmor + 300);
-  const arcaneDrPct = stats.arcaneBonuses?.damageReduction ?? 0;
-  if (arcaneDrPct > 0) {
-    const arcFrac = Math.min(0.9, Math.max(0, arcaneDrPct / 100));
-    stats.damageReduction = (1 - (1 - armorDR) * (1 - arcFrac)) * 100;
-  } else {
-    stats.damageReduction = armorDR * 100;
-  }
-  // wiki Armor: Tenno DR = armor / (armor + 300) with no 90% cap (2700 is the enemy clamp),
-  // so EHP uses the same DR the panel shows.
-  stats.effectiveHealth = playerEffectiveHealth(stats.totalHealth, stats.damageReduction / 100, stats.totalShield);
+  // wiki Armor: Tenno DR = armor / (armor + 300) with no 90% cap (2700 is the enemy clamp).
+  // Arcane DR multiplies with armor and protects shields too (pure DR).
+  finalizeWarframeSurvivability(stats);
 
   return stats;
 }

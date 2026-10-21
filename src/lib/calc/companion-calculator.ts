@@ -171,6 +171,7 @@ export function calculateCompanionBuild(
   const totalShield = body.shield * (1 + acc.shieldBonus) + linkShield;
   const totalArmor = body.armor * (1 + acc.armorBonus) + linkArmor;
   const armorDR = totalArmor > 0 ? totalArmor / (totalArmor + 300) : 0;
+  const modDR = Math.min(Math.max(acc.damageReductionBonus, 0), 0.999999);
 
   return {
     baseHealth: body.health,
@@ -187,8 +188,10 @@ export function calculateCompanionBuild(
     critChanceBonus: acc.critChanceBonus,
     critDamageBonus: acc.critDamageBonus,
     armorDamageReduction: armorDR * 100,
-    damageReduction: armorDR * 100 + acc.damageReductionBonus * 100,
-    effectiveHealth: totalHealth * (1 + totalArmor / 300) + totalShield,
+    // wiki.warframe.com Damage Reduction: armor DR and other DR multiply (they don't add).
+    damageReduction: (1 - (1 - armorDR) * (1 - modDR)) * 100,
+    // Companion shields take full damage; armor protects health only; pure DR protects both.
+    effectiveHealth: (totalHealth * (1 + totalArmor / 300) + totalShield) / (1 - modDR),
     weakspotDamageBonus: acc.weakspotDamageBonus,
     finisherDamageBonus: acc.finisherDamageBonus,
     pickupDoubleChance: acc.pickupDoubleChance,

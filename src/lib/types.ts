@@ -1042,7 +1042,28 @@ export interface WarframeCalculatedStats {
   totalEnergy: number;
   totalSprint: number;
   effectiveHealth: number;
+  /**
+   * Always-on DR vs health, percent: armor ÷ (armor + 300) combined multiplicatively with
+   * always-on pure DR (e.g. arcanes). Conditional sources (airborne mods) are separate fields.
+   */
   damageReduction: number;
+  /** Always-on pure DR sources (arcanes), fractions; they also protect shields. */
+  pureDamageReductionSources?: { name: string; value: number }[];
+  /** Airborne-only DR sources (Aviator, Agility Drift, Aerodynamic, Ironclad Flight, Boreal set). */
+  airborneDamageReductionSources?: { name: string; value: number }[];
+  /** Airborne mod DR combined multiplicatively, percent (mods only). */
+  airborneDamageReduction?: number;
+  /** Total DR vs health while airborne (armor × pure × airborne), percent. */
+  airborneTotalDamageReduction?: number;
+  /** EHP while airborne. */
+  airborneEffectiveHealth?: number;
+  /** Damage-type resistances (Antitoxin, Flame Repellent, …): per type, never in generic EHP. */
+  typedResistances?: {
+    type: string;
+    percent: number;
+    sources: { name: string; value: number }[];
+    effectiveHealth: number;
+  }[];
   // Shard-specific display stats
   castingSpeedBonus: number;
   parkourVelocityBonus: number;
