@@ -6,8 +6,9 @@
 #   bash scripts/deploy.sh              # deploy origin/dev (default) and restart
 #   bash scripts/deploy.sh main         # deploy origin/main and restart
 #
-# Usage (on your PC, from repo root — Git Bash or any bash with ssh):
-#   bash scripts/deploy.sh ship         # merge design/ui-pass into dev, push, deploy on .50
+# Usage (on your PC, from repo root):
+#   .\scripts\ship.ps1                  # PowerShell: merge design/ui-pass into dev, push, deploy on .50
+#   bash scripts/deploy.sh ship         # Git Bash (not WSL bash — that one has no GitHub login)
 #
 # Do NOT run `npm install` on the server by hand — it rewrites package-lock.json
 # and blocks the next `git pull`. This script uses `npm ci` from the committed lockfile.
