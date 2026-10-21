@@ -16,9 +16,9 @@ export type AbilityScaleAttribute = "strength" | "duration" | "range" | "efficie
 export type VerifiedStatFormula =
   /** Pacify: 1 − (baseDR ÷ AbilityStrengthMultiplier). */
   | "one_minus_base_over_attr"
-  /** Channeled drain: base × max((2 − EFF) ÷ DUR, 0.25). */
+  /** Channeled drain: base × clamp((2 − EFF) ÷ DUR, 0.25, 1.75); EFF uncapped. */
   | "channeled_drain"
-  /** Cast/activation cost: base × max(2 − min(EFF, 1.75), 0.25). */
+  /** Cast/activation cost: base × clamp(2 − EFF, 0.25, 1.75). */
   | "cast_cost"
   /**
    * Nourish energy: 1 + ((storedMultiplier − 1) × attr).
@@ -110,7 +110,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     blindDuration: { scale: "duration" },
   },
   // wiki: Prism — laser count Misc-fixed; blind duration × DUR; seeking via ability.range;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75)
   "mirage::Prism": {
     blindDuration: { scale: "duration" },
     damageBonusPerHit: { scale: "strength" },
@@ -125,7 +125,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
   },
   // wiki: Peacemaker — innate damage bonus scales STR; ramp-up +150% (×2.5) is a fixed
   // Misc value (not STR); FoV/max distance Misc;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75)
   "mesa::Peacemaker": {
     damageBonus: { scale: "strength" },
     energyDrain: { scale: "efficiency", formula: "channeled_drain" },
@@ -199,7 +199,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     meleeDamageVulnerability: { scale: "strength" },
   },
   // wiki: Hysteria — claw damage via ability.damage; heal/hit × STR;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75)
   "valkyr::Hysteria": {
     healthPerHit: { scale: "strength" },
     energyDrain: { scale: "efficiency", formula: "channeled_drain" },
@@ -243,7 +243,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     energyMultiplier: { scale: "strength", formula: "one_plus_bonus_times_attr" },
   },
   // wiki: Pulverize — heal/toxin DPS/strip × STR; collision enemy-count formula unmodeled;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75)
   "grendel::Pulverize": {
     healPerSecond: { scale: "strength" },
     armorStrip: { scale: "strength", cap: 1 },
@@ -281,7 +281,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
   // wiki: Tribute — Impact via ability.damage; aura duration/radius Misc-fixed
   // wiki: Lantern — DPS/explode via ability; attract radius via ability.radius
   // wiki: Razorwing — Dex Pixia via ability.damage; Diwata/drone Misc;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75)
   "titania::Razorwing": {
     energyDrain: { scale: "efficiency", formula: "channeled_drain" },
   },
@@ -319,7 +319,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     coldReflectMult: { scale: "strength" },
   },
   // wiki: Spectral Scream — elemental DPS via ability.damagePerSecond;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75)
   "chroma::Spectral Scream": {
     energyDrain: { scale: "efficiency", formula: "channeled_drain" },
   },
@@ -330,7 +330,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     furyMax: { scale: "strength" },
   },
   // wiki: Effigy — sentry damage/HP via ability; stun/credits Misc-fixed;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75)
   "chroma::Effigy": {
     energyDrain: { scale: "efficiency", formula: "channeled_drain" },
   },
@@ -466,7 +466,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     scuttlerDuration: { scale: "duration" },
   },
   // wiki: Silken Stride — health mult / toxin weapon / explosion × STR;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75)
   "oraxia::Silken Stride": {
     healthMultiplier: { scale: "strength" },
     toxinWeaponDamage: { scale: "strength" },
@@ -527,7 +527,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     charges: { scale: "duration" },
   },
   // wiki: Guard Mode — Blast/Heat via damage; Arquebex exalted;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75)
   "voidrig::Guard Mode": {
     energyDrain: { scale: "efficiency", formula: "channeled_drain" },
   },
@@ -546,7 +546,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
   },
   // wiki: Firing Line — Lifted vulnerability Misc-fixed 1.5×; range via ability
   // wiki: Exalted Ironbride — Blast/Heat via damage; Ironbride weapon;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75)
   "bonewidow::Exalted Ironbride": {
     energyDrain: { scale: "efficiency", formula: "channeled_drain" },
   },
@@ -601,7 +601,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     armorMultiplier: { scale: "strength" },
   },
   // wiki: Primal Fury — staff damage via ability.damage / Iron Staff;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75)
   "wukong::Primal Fury": {
     energyDrain: { scale: "efficiency", formula: "channeled_drain" },
   },
@@ -809,7 +809,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
   },
 
   // wiki: Glory on High — alt explosion × RNG; Judgment chance / +100% move Misc-fixed;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25); alt-fire cast × EFF (cast_cost)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75); alt-fire cast × EFF (cast_cost)
   "jade::Glory On High": {
     altFireExplosion: { scale: "range" },
     energyDrain: { scale: "efficiency", formula: "channeled_drain" },
@@ -1056,7 +1056,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
   },
 
   // wiki: Elude — evasion angle × RNG; restraint Misc-fixed;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75)
   "baruuk::Elude": {
     evasionAngle: { scale: "range" },
     energyDrain: { scale: "efficiency", formula: "channeled_drain" },
@@ -1482,7 +1482,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
   // wiki: Hallowed Ground — Radiation tick via damage; tick interval / ground cap Misc-fixed
 
   // wiki: Renewal — armor / heal / HPS × STR; bleedout slow × DUR;
-  // channeled energyDrain × max((2−EFF)÷DUR, 0.25)
+  // channeled energyDrain × clamp((2−EFF)÷DUR, 0.25, 1.75)
   "oberon::Renewal": {
     armorBuff: { scale: "strength", cap: 1 },
     initialHeal: { scale: "strength" },
