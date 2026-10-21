@@ -12086,13 +12086,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 2,
     "maxRank": 5,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "abilityStrength": 2.5
     },
     "description": "Disable Nezha's passive ability. Increase Ability Strength by 15%.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "nezha"
   },
   {
     "id": "damage_decoy",
@@ -14333,13 +14334,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 2,
     "maxRank": 5,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "abilityStrength": 2.5
     },
     "description": "Passive Augment: Umbra's Ability Strength increases by +15% but he no longer fights independently alongside his Operator.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "excalibur_umbra"
   },
   {
     "id": "worthy_comradery",

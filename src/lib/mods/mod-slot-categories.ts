@@ -45,11 +45,14 @@ export const WARFRAME_EXILUS_MOD_IDS = new Set([
   "augment_wisp_fused_reservoir",
   // Augment / Exilus mods (wiki.warframe.com + fandom mod pages and Exilus Warframe Adapter
   // list). Still limited to their own frame by warframeAugmentEligibleInBuilder.
-  // Held: Controlled Slide (VF has no Nezha restriction on it) and Warrior's Rest (one wiki only).
+  // Controlled Slide (Nezha) and Warrior's Rest (Excalibur Umbra): both wikis call them
+  // "Warframe Augment / Exilus Mod".
   "augment_saryn_revealing_spores",
   "augment_grendel_catapult",
   "augment_nova_escape_velocity",
   "ironclad_flight",
+  "controlled_slide",
+  "warriors_rest",
   "augment_mesa_mess_waltz",
   "hysterical_assault",
   "rush_r3",

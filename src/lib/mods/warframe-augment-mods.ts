@@ -33,6 +33,11 @@ export function isWarframeSpecificAugment(
   return isWarframeAugment(mod) && mod.warframeId !== "universal";
 }
 
+/** Augment target ids that name an Umbra variant are tied to that variant, not the base frame. */
+function isUmbraOnlyAugmentTarget(warframeId: string): boolean {
+  return /_umbra$/i.test(warframeId);
+}
+
 export function augmentMatchesWarframe(
   mod: Pick<Mod, "warframeId" | "category" | "subCategory" | "id">,
   selectedWarframeId: string,
@@ -40,6 +45,11 @@ export function augmentMatchesWarframe(
   if (!isWarframeAugment(mod)) return false;
   const mid = mod.warframeId;
   if (!mid || mid === "universal") return mid === "universal";
+  // Umbra-only augments (Warrior's Rest) must not match the base frame:
+  // excalibur_umbra (and a future excalibur_umbra_prime) only.
+  if (isUmbraOnlyAugmentTarget(mid)) {
+    return selectedWarframeId.replace(/_prime$/i, "") === mid;
+  }
   const candidates = new Set([
     selectedWarframeId,
     normalizeWarframeId(selectedWarframeId),
@@ -103,9 +113,14 @@ function buildWarframeToAugmentsIndex(): Map<string, string[]> {
   return index;
 }
 
-/** Ability augments for this warframe (prime/umbra variants included). */
+/** Ability augments for this warframe (prime/umbra variants included; Umbra-only augments only on Umbra). */
 export function getAugmentModIdsForWarframe(warframeId: string): readonly string[] {
-  return buildWarframeToAugmentsIndex().get(normalizeWarframeId(warframeId)) ?? [];
+  const list = buildWarframeToAugmentsIndex().get(normalizeWarframeId(warframeId)) ?? [];
+  const modsMap = getEffectiveModsMap();
+  return list.filter((id) => {
+    const mod = modsMap.get(id);
+    return !mod || augmentMatchesWarframe(mod, warframeId);
+  });
 }
 
 export function getAugmentWarframeEntry(
