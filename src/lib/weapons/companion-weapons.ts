@@ -155,3 +155,22 @@ export function resolveDefaultCompanionWeapon(companion: Companion, weaponList: 
   const candidates = getCompanionWeapons(companion, weaponList);
   return candidates[0] ?? null;
 }
+
+/**
+ * Beast companions (Kubrow, Kavat, Predasite, Vulpaphyla) have their claws built into the
+ * animal: the weapon is fixed per breed and cannot be swapped in the arsenal.
+ */
+export const BEAST_COMPANION_TYPES: ReadonlySet<string> = new Set(["kubrow", "kavat", "predasite", "vulpaphyla"]);
+
+export function companionHasFixedWeapon(companion: Pick<Companion, "type"> | null | undefined): boolean {
+  return !!companion && BEAST_COMPANION_TYPES.has(companion.type);
+}
+
+/** Beast claws: 8 regular slots + the Posture slot (index 8, Exilus-like). */
+export const COMPANION_WEAPON_REGULAR_SLOT_COUNT = 8;
+export const COMPANION_WEAPON_POSTURE_SLOT_INDEX = 8;
+
+/** Posture mods (Elusive, Assassin, Balanced, Frenzied, Persistent, Protector). */
+export function isCompanionPostureMod(mod: { id: string; name?: string }): boolean {
+  return /_posture$/.test(mod.id) || /\bPosture$/.test(mod.name ?? "");
+}

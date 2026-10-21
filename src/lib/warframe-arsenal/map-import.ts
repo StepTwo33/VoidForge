@@ -1,7 +1,12 @@
 import type ArsenalData from "@wfcd/arsenal-parser";
 import type { ModUnion } from "@wfcd/items";
 import type { Companion, Loadout, Mod, ModSlot, ModularBuildData } from "@/lib/types";
-import { resolveCompanionClawId, resolveHoundWeaponId } from "@/lib/weapons/companion-weapons";
+import {
+  BEAST_COMPANION_TYPES,
+  COMPANION_WEAPON_POSTURE_SLOT_INDEX,
+  resolveCompanionClawId,
+  resolveHoundWeaponId,
+} from "@/lib/weapons/companion-weapons";
 import { isAuraMod } from "@/lib/mods/aura-mods";
 import { isWarframeExilusMod } from "@/lib/mods/mod-slot-categories";
 import {
@@ -28,7 +33,7 @@ import {
   resolveHelminthOverride,
 } from "@/lib/warframe-arsenal/lotus-resolve";
 import { resolveCompanionParts } from "@/lib/companions/companion-parts-resolve";
-import { resolveRivenUpgrade } from "@/lib/warframe-arsenal/riven-resolve";
+import { isRivenUpgrade, resolveRivenUpgrade } from "@/lib/warframe-arsenal/riven-resolve";
 
 import {
   getWarframeAuraSlotIndices,
@@ -86,9 +91,13 @@ type RawLoadouts = {
     heavy?: unknown;
   };
   SENTINEL?: RawSentinelSlot;
+  ARCHWING?: { archwing?: unknown; primary?: unknown; melee?: unknown };
+  MECH?: { mech?: unknown; heavy?: unknown };
 };
 
-const BEAST_COMPANION_TYPES = new Set(["kubrow", "kavat", "predasite", "vulpaphyla"]);
+/** Weapon Exilus slot index in the weapon builder (9th slot). */
+const WEAPON_IMPORT_EXILUS_SLOT = 8;
+
 
 function rawUpgradesToModUnion(upgrades: unknown): ModUnion[] {
   if (!Array.isArray(upgrades)) return [];
@@ -137,9 +146,19 @@ function mapCompanionWeaponMods(
   rawWeapon: unknown,
   parsedRoboticWeapon: ArsenalWeapon | undefined,
   warnings: ArsenalImportWarning[],
+  isBeast = false,
 ): ModSlot[] {
   const raw = readRawWeaponFields(rawWeapon);
   if (!raw.uniqueName && !raw.upgrades) return [];
+
+  const rawSlots = rawUpgradeSlots(raw.upgrades);
+  if (rawSlots) {
+    // Beast claws: [posture, r1..r8]. Robotic / hound weapons have no prefix slot.
+    return mapPositionalWeaponMods(rawSlots, warnings, {
+      keepStances: true,
+      prefixSlotIndex: isBeast ? COMPANION_WEAPON_POSTURE_SLOT_INDEX : null,
+    }).mods;
+  }
 
   const parsedUnique = parsedWeaponUniqueName(parsedRoboticWeapon);
   if (
@@ -182,6 +201,50 @@ type ResolvedUpgradeMod = {
   rivenStats?: Record<string, number>;
 };
 
+type ResolvedEntryResult =
+  | { kind: "mod"; entry: ResolvedUpgradeMod }
+  | { kind: "stance"; modId: string; entry: ResolvedUpgradeMod }
+  | { kind: "skip" };
+
+function resolveUpgradeEntry(
+  entry: ModUnion,
+  warnings: ArsenalImportWarning[],
+  options?: { keepStances?: boolean },
+): ResolvedEntryResult {
+  const riven = resolveRivenUpgrade(entry);
+  if (riven) {
+    if (riven.unmappedTags.length > 0) {
+      warnings.push({
+        kind: "mod",
+        label: `Riven unmapped tag(s): ${riven.unmappedTags.join(", ")}`,
+      });
+    }
+    return {
+      kind: "mod",
+      entry: {
+        modId: riven.modId,
+        rank: riven.rank,
+        ...(Object.keys(riven.rivenStats).length > 0 ? { rivenStats: riven.rivenStats } : {}),
+      },
+    };
+  }
+
+  const name = labelFromUnknown(entry);
+  if (!name) return { kind: "skip" };
+
+  const fhMod = findModByName(name);
+  if (!fhMod) {
+    warnings.push({ kind: "mod", label: name });
+    return { kind: "skip" };
+  }
+
+  const resolved: ResolvedUpgradeMod = { modId: fhMod.id, rank: Math.min(modRank(entry), fhMod.maxRank), fhMod };
+  if (fhMod.category === "stance" && !options?.keepStances) {
+    return { kind: "stance", modId: fhMod.id, entry: resolved };
+  }
+  return { kind: "mod", entry: resolved };
+}
+
 function resolveUpgradeEntries(
   mods: ModUnion[],
   warnings: ArsenalImportWarning[],
@@ -191,44 +254,216 @@ function resolveUpgradeEntries(
   let stanceModId: string | undefined;
 
   for (const entry of mods) {
-    const riven = resolveRivenUpgrade(entry);
-    if (riven) {
-      entries.push({
-        modId: riven.modId,
-        rank: riven.rank,
-        ...(Object.keys(riven.rivenStats).length > 0 ? { rivenStats: riven.rivenStats } : {}),
-      });
-      if (riven.unmappedTags.length > 0) {
-        warnings.push({
-          kind: "mod",
-          label: `Riven unmapped tag(s): ${riven.unmappedTags.join(", ")}`,
-        });
-      }
-      continue;
+    const res = resolveUpgradeEntry(entry, warnings, options);
+    if (res.kind === "mod") entries.push(res.entry);
+    else if (res.kind === "stance") {
+      // First stance → stance slot; any further stance stays in the mod list (previous behaviour).
+      if (!stanceModId) stanceModId = res.modId;
+      else entries.push(res.entry);
     }
-
-    const name = labelFromUnknown(entry);
-    if (!name) continue;
-
-    const fhMod = findModByName(name);
-    if (!fhMod) {
-      warnings.push({ kind: "mod", label: name });
-      continue;
-    }
-
-    if (fhMod.category === "stance" && !options?.keepStances && !stanceModId) {
-      stanceModId = fhMod.id;
-      continue;
-    }
-
-    entries.push({
-      modId: fhMod.id,
-      rank: Math.min(modRank(entry), fhMod.maxRank),
-      fhMod,
-    });
   }
 
   return { entries, stanceModId };
+}
+
+/**
+ * DE's raw arsenal `upgrades` arrays are positional ("" = empty slot) and the
+ * parser's `loadMods` drops the empties and splits arcanes out, so the parsed
+ * list cannot tell an Exilus/Posture/Aura slot from slot 1. Observed layouts
+ * (WFCD arsenal-parser fixtures + user Kuva Sobek report):
+ *   gun:       [arcane?, exilus?, r1..r8]
+ *   melee:     [arcane?, exilus?, stance, r1..r8]
+ *   warframe:  [arcane, arcane, exilus, aura, r1..r8]   (old: [aura, r1..r8])
+ *   beast claws: [posture, r1..r8]
+ * i.e. the regular slots are always the LAST N entries, in in-game order.
+ */
+export type RawUpgradeSlot = ModUnion | null;
+
+export function rawUpgradeSlots(upgrades: unknown): RawUpgradeSlot[] | undefined {
+  if (!Array.isArray(upgrades) || upgrades.length === 0) return undefined;
+  return upgrades.map((entry) => {
+    if (!entry || typeof entry !== "object") return null;
+    const rec = entry as { uniqueName?: string; rank?: number };
+    if (!rec.uniqueName) return null;
+    const rank = typeof rec.rank === "number" ? rec.rank : 0;
+    if (isRivenUpgrade(rec)) return { ...rec, rank } as unknown as ModUnion;
+    const name = lotusItemName(rec.uniqueName) ?? labelFromUnknown({ uniqueName: rec.uniqueName });
+    return { name, uniqueName: rec.uniqueName, rank } as unknown as ModUnion;
+  });
+}
+
+function isArcaneSlot(entry: ModUnion): boolean {
+  const uniqueName = (entry as { uniqueName?: string }).uniqueName ?? "";
+  if (uniqueName.includes("/CosmeticEnhancers/")) return true;
+  const name = labelFromUnknown(entry);
+  return !!name && !!findArcaneByName(name) && !findModByName(name);
+}
+
+function slotFromEntry(entry: ResolvedUpgradeMod, slotIndex: number): ModSlot {
+  return {
+    modId: entry.modId,
+    rank: entry.rank,
+    slotIndex,
+    ...(entry.rivenStats ? { rivenStats: entry.rivenStats } : {}),
+  };
+}
+
+function modLabel(entry: ResolvedUpgradeMod): string {
+  return entry.fhMod?.name ?? entry.modId;
+}
+
+/**
+ * Weapon-style positional mapping: last `regularSlotCount` raw entries → slots
+ * 0..N-1 by position; leading entries are arcanes (skipped), the stance, and the
+ * Exilus / Posture mod (→ `prefixSlotIndex`). Prefix mods without a home fall
+ * into the first free regular slot rather than being dropped.
+ */
+export function mapPositionalWeaponMods(
+  slots: RawUpgradeSlot[],
+  warnings: ArsenalImportWarning[],
+  opts: { regularSlotCount?: number; prefixSlotIndex?: number | null; keepStances?: boolean } = {},
+): { mods: ModSlot[]; stanceModId?: string } {
+  const regularCount = opts.regularSlotCount ?? 8;
+  const prefixLen = Math.max(0, slots.length - regularCount);
+  const out: ModSlot[] = [];
+  const used = new Set<number>();
+  const extras: ResolvedUpgradeMod[] = [];
+  let stanceModId: string | undefined;
+
+  const take = (entry: ModUnion | null) => {
+    if (!entry || isArcaneSlot(entry)) return undefined;
+    return resolveUpgradeEntry(entry, warnings, { keepStances: opts.keepStances });
+  };
+
+  slots.slice(prefixLen).forEach((raw, i) => {
+    const res = take(raw);
+    if (!res || res.kind === "skip") return;
+    if (res.kind === "stance" && !stanceModId) {
+      stanceModId = res.modId;
+      return;
+    }
+    out.push(slotFromEntry(res.entry, i));
+    used.add(i);
+  });
+
+  let prefixTaken = false;
+  for (const raw of slots.slice(0, prefixLen)) {
+    const res = take(raw);
+    if (!res || res.kind === "skip") continue;
+    if (res.kind === "stance" && !stanceModId) {
+      stanceModId = res.modId;
+      continue;
+    }
+    if (opts.prefixSlotIndex != null && !prefixTaken) {
+      out.push(slotFromEntry(res.entry, opts.prefixSlotIndex));
+      prefixTaken = true;
+      continue;
+    }
+    extras.push(res.entry);
+  }
+
+  for (const entry of extras) {
+    let free = -1;
+    for (let i = 0; i < regularCount; i += 1) {
+      if (!used.has(i)) {
+        free = i;
+        break;
+      }
+    }
+    if (free < 0) {
+      warnings.push({ kind: "mod", label: `${modLabel(entry)} (no free slot)` });
+      continue;
+    }
+    out.push(slotFromEntry(entry, free));
+    used.add(free);
+  }
+
+  out.sort((a, b) => a.slotIndex - b.slotIndex);
+  return { mods: out, stanceModId };
+}
+
+/** Warframe positional mapping: last 8 → slots 1–8; prefix aura → 0 (Jade second → 10), exilus → 9. */
+export function mapPositionalWarframeMods(
+  slots: RawUpgradeSlot[],
+  warnings: ArsenalImportWarning[],
+  warframeId?: string | null,
+): { mods: ModSlot[] } {
+  const allowSecondAura = getWarframeAuraSlotIndices(warframeId).length > 1;
+  const regularCount = WARFRAME_IMPORT_REGULAR_SLOTS.length;
+  const prefixLen = Math.max(0, slots.length - regularCount);
+  const out: ModSlot[] = [];
+  const usedRegular = new Set<number>();
+  const extras: ResolvedUpgradeMod[] = [];
+  let hasAura = false;
+  let hasSecondAura = false;
+  let hasExilus = false;
+
+  const take = (entry: ModUnion | null) => {
+    if (!entry || isArcaneSlot(entry)) return undefined;
+    const res = resolveUpgradeEntry(entry, warnings, { keepStances: true });
+    return res.kind === "skip" ? undefined : res.entry;
+  };
+
+  slots.slice(prefixLen).forEach((raw, i) => {
+    const entry = take(raw);
+    if (!entry) return;
+    out.push(slotFromEntry(entry, WARFRAME_IMPORT_REGULAR_SLOTS[i]));
+    usedRegular.add(i);
+  });
+
+  for (const raw of slots.slice(0, prefixLen)) {
+    const entry = take(raw);
+    if (!entry) continue;
+    const mod = entry.fhMod;
+    if (mod && isAuraMod(mod)) {
+      if (!hasAura) {
+        out.push(slotFromEntry(entry, WARFRAME_IMPORT_AURA_SLOT));
+        hasAura = true;
+      } else if (allowSecondAura && !hasSecondAura) {
+        out.push(slotFromEntry(entry, WARFRAME_IMPORT_SECOND_AURA_SLOT));
+        hasSecondAura = true;
+      } else {
+        warnings.push({ kind: "mod", label: `${modLabel(entry)} (extra aura skipped)` });
+      }
+      continue;
+    }
+    if (!hasExilus) {
+      out.push(slotFromEntry(entry, WARFRAME_IMPORT_EXILUS_SLOT));
+      hasExilus = true;
+      continue;
+    }
+    extras.push(entry);
+  }
+
+  for (const entry of extras) {
+    const free = WARFRAME_IMPORT_REGULAR_SLOTS.findIndex((_, i) => !usedRegular.has(i));
+    if (free < 0) {
+      warnings.push({ kind: "mod", label: `${modLabel(entry)} (no free regular slot)` });
+      continue;
+    }
+    out.push(slotFromEntry(entry, WARFRAME_IMPORT_REGULAR_SLOTS[free]));
+    usedRegular.add(free);
+  }
+
+  out.sort((a, b) => a.slotIndex - b.slotIndex);
+  return { mods: out };
+}
+
+/** Plain positional mapping (companion body, Archwing, Necramech): arcanes skipped, slot = position. */
+export function mapPositionalSequentialMods(
+  slots: RawUpgradeSlot[],
+  warnings: ArsenalImportWarning[],
+): { mods: ModSlot[] } {
+  let start = 0;
+  while (start < slots.length && slots[start] && isArcaneSlot(slots[start] as ModUnion)) start += 1;
+  const out: ModSlot[] = [];
+  slots.slice(start).forEach((raw, i) => {
+    if (!raw || isArcaneSlot(raw)) return;
+    const res = resolveUpgradeEntry(raw, warnings, { keepStances: true });
+    if (res.kind === "skip") return;
+    out.push(slotFromEntry(res.entry, i));
+  });
+  return { mods: out };
 }
 
 function mapUpgradeMods(
@@ -374,16 +609,25 @@ function weaponBuildFromArsenal(
   weapon: ArsenalWeapon | undefined,
   rawWeapon: unknown,
   warnings: ArsenalImportWarning[],
+  opts: { hasExilusSlot?: boolean } = {},
 ) {
   if (!weapon) return undefined;
 
   const raw = readRawWeaponFields(rawWeapon);
+  const rawSlots = rawUpgradeSlots(raw.upgrades);
+  const mapMods = (prefixSlotIndex: number | null) =>
+    rawSlots
+      ? mapPositionalWeaponMods(rawSlots, warnings, { prefixSlotIndex })
+      : mapUpgradeMods(weapon.upgrades.mods, warnings);
   const modularFromParts =
     mapModularPartsFromArsenal(weapon.parts) ??
     mapModularPartsFromArsenal(raw.modularParts);
 
   if (modularFromParts) {
-    const { mods, stanceModId } = mapUpgradeMods(weapon.upgrades.mods, warnings);
+    // Voidforge only models the Exilus slot on secondary kitguns.
+    const modularExilus =
+      modularFromParts.slot === "secondary" && modularFromParts.data.modularType === "kitgun";
+    const { mods, stanceModId } = mapMods(modularExilus ? WEAPON_IMPORT_EXILUS_SLOT : null);
     const { arcaneIds } = mapArcaneIds(weapon.upgrades.arcanes, warnings);
     const customName = raw.itemName ? parseCustomItemName(raw.itemName) : weapon.name;
     const build: ModularBuildData & { slot: "primary" | "secondary" | "melee" } = {
@@ -406,7 +650,7 @@ function weaponBuildFromArsenal(
     return undefined;
   }
 
-  const { mods, stanceModId } = mapUpgradeMods(weapon.upgrades.mods, warnings);
+  const { mods, stanceModId } = mapMods(opts.hasExilusSlot === false ? null : WEAPON_IMPORT_EXILUS_SLOT);
   const { arcaneIds } = mapArcaneIds(weapon.upgrades.arcanes, warnings);
   const progenitor = parseProgenitorFromRawWeapon(raw);
 
@@ -425,9 +669,21 @@ function weaponBuildFromArsenal(
   };
 }
 
+function mapFrameModsPositional(
+  rawFrame: unknown,
+  parsedMods: ModUnion[],
+  warnings: ArsenalImportWarning[],
+): ModSlot[] {
+  const rawSlots = rawUpgradeSlots(readRawWeaponFields(rawFrame).upgrades);
+  return rawSlots
+    ? mapPositionalSequentialMods(rawSlots, warnings).mods
+    : mapUpgradeMods(parsedMods, warnings).mods;
+}
+
 function mapArchwingBuild(
   arsenal: ArsenalData,
   warnings: ArsenalImportWarning[],
+  rawLoadOuts?: RawLoadouts,
 ): Loadout["archwingBuild"] {
   const vehicles = arsenal.loadout.vechiles;
   if (!vehicles) return undefined;
@@ -440,8 +696,10 @@ function mapArchwingBuild(
       return undefined;
     }
 
-    const frameMods = mapUpgradeMods(mech.upgrades.mods, warnings).mods;
-    const heavy = weaponBuildFromArsenal(vehicles.necramech.heavy, undefined, warnings);
+    const frameMods = mapFrameModsPositional(rawLoadOuts?.MECH?.mech, mech.upgrades.mods, warnings);
+    const heavy = weaponBuildFromArsenal(vehicles.necramech.heavy, rawLoadOuts?.MECH?.heavy, warnings, {
+      hasExilusSlot: false,
+    });
 
     return {
       mode: "necramech",
@@ -462,10 +720,10 @@ function mapArchwingBuild(
       return undefined;
     }
 
-    const frameMods = mapUpgradeMods(aw.upgrades.mods, warnings).mods;
+    const frameMods = mapFrameModsPositional(rawLoadOuts?.ARCHWING?.archwing, aw.upgrades.mods, warnings);
     const gun =
-      weaponBuildFromArsenal(vehicles.primary, undefined, warnings) ??
-      weaponBuildFromArsenal(vehicles.melee, undefined, warnings);
+      weaponBuildFromArsenal(vehicles.primary, rawLoadOuts?.ARCHWING?.primary, warnings, { hasExilusSlot: false }) ??
+      weaponBuildFromArsenal(vehicles.melee, rawLoadOuts?.ARCHWING?.melee, warnings, { hasExilusSlot: false });
 
     return {
       mode: "archwing",
@@ -520,11 +778,10 @@ export function mapArsenalToImportPayload(
     warnings.push({ kind: "warframe", label: wfLabel });
   }
 
-  const wfMapped = mapWarframeUpgradeMods(
-    loadout.warframe.upgrades.mods,
-    warnings,
-    fhWarframe?.id,
-  );
+  const rawWarframeSlots = rawUpgradeSlots(readRawWeaponFields(rawNormal?.warframe).upgrades);
+  const wfMapped = rawWarframeSlots
+    ? mapPositionalWarframeMods(rawWarframeSlots, warnings, fhWarframe?.id)
+    : mapWarframeUpgradeMods(loadout.warframe.upgrades.mods, warnings, fhWarframe?.id);
   const wfArcanes = mapArcaneIds(loadout.warframe.upgrades.arcanes, warnings);
 
   const helminthOverride = readAbilityOverride(rawNormal?.warframe);
@@ -573,13 +830,14 @@ export function mapArsenalToImportPayload(
         label: petCustomName || labelFromUnknown(loadout.companion.companion) || "Companion",
       });
     } else {
-      const body = mapUpgradeMods(loadout.companion.upgrades.mods, warnings);
+      const body = { mods: mapFrameModsPositional(rawCompanion, loadout.companion.upgrades.mods, warnings) };
       const rawCompanionWeapon = pickRawCompanionWeapon(sentinelRaw, fhCompanion.type);
       const rawCompanionWeaponFields = readRawWeaponFields(rawCompanionWeapon);
       const weaponMods = mapCompanionWeaponMods(
         rawCompanionWeapon,
         loadout.roboticweapon,
         warnings,
+        BEAST_COMPANION_TYPES.has(fhCompanion.type),
       );
       const weaponId =
         resolveCompanionWeaponId(fhCompanion, rawCompanionWeaponFields.uniqueName) ??
@@ -654,13 +912,13 @@ export function mapArsenalToImportPayload(
     !resultLoadout.modularBuild?.slot &&
     loadout.heavy
   ) {
-    const heavyMapped = weaponBuildFromArsenal(loadout.heavy, rawNormal?.heavy, warnings);
+    const heavyMapped = weaponBuildFromArsenal(loadout.heavy, rawNormal?.heavy, warnings, { hasExilusSlot: false });
     if (heavyMapped?.kind === "weapon") {
       resultLoadout.primaryBuild = heavyMapped.build;
     }
   }
 
-  const archwingBuild = mapArchwingBuild(arsenal, warnings);
+  const archwingBuild = mapArchwingBuild(arsenal, warnings, rawPayload?.loadOuts);
   if (archwingBuild) {
     resultLoadout.archwingBuild = archwingBuild;
   }
