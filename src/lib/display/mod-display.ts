@@ -69,6 +69,9 @@ const PERCENT_LIKE_KEYS = new Set([
   "wallLatch",
 ]);
 
+/** Flat seconds stored per rank (× (rank+1)), e.g. Aerodynamic +1s Aim Glide / +2s Wall Latch. */
+const SECONDS_PER_RANK_KEYS = new Set(["aimGlideTime", "wallLatchTime"]);
+
 /** Percent stats stored as the live value (not per-rank × (rank+1)). */
 const RANK_INDEPENDENT_PERCENT_KEYS = new Set([
   "extraElectricProcChance",
@@ -132,7 +135,7 @@ export function formatModStatValue(
   if (statKey === "range" || statKey === "attractionRange" || statKey === "allyRadius" || statKey === "blastStaggerRadius") {
     return `${formatStatNumber(total)}m ${label}`;
   }
-  if (statKey === "duration" || statKey === "cooldown") {
+  if (statKey === "duration" || statKey === "cooldown" || SECONDS_PER_RANK_KEYS.has(statKey)) {
     return `${formatStatNumber(total)}s ${label}`;
   }
   return `${formatStatNumber(total)} ${label}`;

@@ -61,7 +61,7 @@ export const AIRBORNE_DR_MODS: Record<string, { name: string; perRank: number }>
 export const BOREAL_AIRBORNE_DR_PER_PIECE = 0.2;
 
 export type ResistDamageType =
-  | "impact" | "puncture" | "slash" | "heat" | "cold" | "electricity" | "toxin" | "radiation";
+  | "impact" | "puncture" | "slash" | "heat" | "cold" | "electricity" | "toxin" | "radiation" | "tau";
 
 /** Damage type resistance mods: fraction per rank (× (rank + 1)), wiki.warframe.com mod pages. */
 export const TYPED_RESIST_MODS: Record<string, { name: string; types: ResistDamageType[]; perRank: number }> = {
@@ -72,6 +72,11 @@ export const TYPED_RESIST_MODS: Record<string, { name: string; types: ResistDama
   insulation_r3: { name: "Insulation", types: ["cold"], perRank: 0.1 }, // 60% R5
   lightning_rod_r3: { name: "Lightning Rod", types: ["electricity"], perRank: 0.1 }, // 60% R5
   shock_absorbers: { name: "Shock Absorbers", types: ["impact", "puncture", "slash"], perRank: 0.05 }, // 20% R3
+  // Umbral mods: +1% Tau resistance per rank (11% R10), wiki.warframe.com Umbra Vitality / Fiber /
+  // Intensify. The Umbral set bonus scales it (wiki Umbral Set), see `setMultiplierOf`.
+  umbra_vitality: { name: "Umbral Vitality", types: ["tau"], perRank: 0.01 },
+  umbra_fiber: { name: "Umbral Fiber", types: ["tau"], perRank: 0.01 },
+  umbra_intensify: { name: "Umbral Intensify", types: ["tau"], perRank: 0.01 },
 };
 
 export interface DrSource {
@@ -111,16 +116,20 @@ export function airborneDrSources(
   return out;
 }
 
-/** Per-type resistance sources from equipped Warframe mods. */
+/**
+ * Per-type resistance sources from equipped Warframe mods.
+ * `setMultiplierOf` scales a mod's value (Umbral set bonus: ×1.3/×1.8, Intensify ×1.25/×1.75).
+ */
 export function typedResistSources(
   equippedMods: readonly Pick<ModSlot, "modId" | "rank">[],
   maxRankOf: (modId: string) => number,
+  setMultiplierOf: (modId: string) => number = () => 1,
 ): Map<ResistDamageType, DrSource[]> {
   const out = new Map<ResistDamageType, DrSource[]>();
   for (const slot of equippedMods) {
     const def = TYPED_RESIST_MODS[slot.modId];
     if (!def) continue;
-    const value = def.perRank * (clampedRank(slot, maxRankOf(slot.modId)) + 1);
+    const value = def.perRank * (clampedRank(slot, maxRankOf(slot.modId)) + 1) * setMultiplierOf(slot.modId);
     for (const t of def.types) {
       const list = out.get(t) ?? [];
       list.push({ name: def.name, value });

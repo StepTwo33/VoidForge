@@ -1385,9 +1385,9 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "airborneDamageReduction": 5,
-      "damage": 4.0,
-      "duration": 2.0
+      "airborneDamageReduction": 4,
+      "aimGlideTime": 1,
+      "wallLatchTime": 2
     },
     "description": "Squad takes 24% reduced damage while airborne, gains +6s Aim Glide and +12s Wall Latch",
     "rarity": "rare"
@@ -11516,7 +11516,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "toxin": 7.5
+      "toxinDamageResistance": 7.5
     },
     "description": "+45% <DT_POISON_COLOR>Toxin Resistance",
     "rarity": "uncommon"
@@ -13508,7 +13508,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "damage": 5.0
+      "physicalDamageResistance": 5.0
     },
     "description": "+20% Physical Damage Resistance",
     "rarity": "rare"

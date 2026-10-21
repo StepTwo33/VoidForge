@@ -40,9 +40,9 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("abilityStrength", "warframe_totals", "multiplicative_percent", "Amar's Hatred: abilityStrength \u2014 +25% Armor\\n+15% Ability Strength"),
   ]),
   aerodynamic: mod("aerodynamic", [
-    line("airborneDamageReduction", "mod_panel", "multiplicative_percent", "Aerodynamic: airborneDamageReduction \u2014 Squad takes 24% reduced damage while airborne, gains +6s Aim Glide and +12s Wall\u2026"),
-    line("damage", "mod_panel", "multiplicative_percent", "Aerodynamic: damage \u2014 Squad takes 24% reduced damage while airborne, gains +6s Aim Glide and +12s Wall\u2026"),
-    line("duration", "mod_panel", "multiplicative_percent", "Aerodynamic: duration \u2014 Squad takes 24% reduced damage while airborne, gains +6s Aim Glide and +12s Wall\u2026"),
+    line("airborneDamageReduction", "mod_panel", "multiplicative_percent", "wiki: Aerodynamic \u2014 4% airborne damage reduction per rank (24% R5), applied in the Airborne DR rows"),
+    line("aimGlideTime", "mod_panel", "flat", "wiki: Aerodynamic \u2014 +1s Aim Glide per rank (+6s R5)"),
+    line("wallLatchTime", "mod_panel", "flat", "wiki: Aerodynamic \u2014 +2s Wall Latch per rank (+12s R5)"),
   ]),
   agility_drift: mod("agility_drift", [
     line("accuracy", "mod_panel", "multiplicative_percent", "Agility Drift: accuracy \u2014 Reduced damage by 12% while airborne, <LOWER_IS_BETTER>-6% Enemy Accuracy when t\u2026 (arsenal display only)"),
@@ -63,7 +63,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Anticipation: duration \u2014 Immune to Knockdown for an additional +4s after being knocked down., Immune to S\u2026"),
   ]),
   antitoxin: mod("antitoxin", [
-    line("toxin", "mod_panel", "multiplicative_percent", "Antitoxin: toxin \u2014 +45% <DT_POISON_COLOR>Toxin Resistance"),
+    line("toxinDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Antitoxin \u2014 7.5% Toxin damage resistance per rank (45% R5), applied in the Toxin resistance row"),
   ]),
   archon_continuity: mod("archon_continuity", [
     line("abilityDuration", "warframe_totals", "multiplicative_percent", "Archon Continuity: abilityDuration \u2014 +55% Ability Duration, Abilities that inflict a <DT_POISON_COLOR>Toxin status ef\u2026"),
@@ -536,7 +536,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   searing_leap: mod("searing_leap", [], "wiki: Searing Leap \u2014 Fire FX on Bullet Jump"),
   shepherd: mod("shepherd", [], "wiki: Shepherd \u2014 Squad's Companions receive +300 Health and +180 Armor"),
   shock_absorbers: mod("shock_absorbers", [
-    line("damage", "mod_panel", "multiplicative_percent", "Shock Absorbers: damage \u2014 +20% Physical Damage Resistance"),
+    line("physicalDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Shock Absorbers \u2014 5% Impact/Puncture/Slash damage resistance per rank (20% R3), applied in the per-type resistance rows"),
   ]),
   shotgun_scavenger: mod("shotgun_scavenger", [], "wiki: Shotgun Scavenger \u2014 Squad receives +150% Shotgun Ammo Recovery"),
   sniper_scavenger: mod("sniper_scavenger", [], "wiki: Sniper Scavenger \u2014 Squad receives +150% Sniper Rifle Ammo Recovery"),

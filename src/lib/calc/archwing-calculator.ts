@@ -3,6 +3,7 @@ import type { Archwing, Necramech } from "@/data/archwing";
 import { ARCHWING_RANK30_BONUS, NECRAMECH_RANK30_BONUS } from "@/data/archwing";
 import { gunneryArchwingAbilityBonus } from "@/data/railjack-intrinsics";
 import { playerEffectiveHealth } from "@/lib/calc/player-ehp";
+import { warframeEffectiveHealth } from "@/lib/calc/damage-reduction";
 import {
   applyVerifiedModStatToArchwing,
   applyVerifiedModStatToNecramech,
@@ -144,6 +145,10 @@ export function calculateNecramechBuild(
   const totalArmor = necramech.armor * (1 + acc.armorBonus);
   const totalEnergy = baseEnergyR30 * (1 + acc.energyBonus);
   const armorDR = totalArmor > 0 ? totalArmor / (totalArmor + 300) : 0;
+  const airborne = necramechAirborneDamageReduction(equippedMods, allMods);
+  const modBonuses = panel.modBonuses ? { ...panel.modBonuses } : undefined;
+  // Necramech Aviator is shown as the airborne rows instead of a raw mod-bonus line.
+  if (modBonuses) delete modBonuses[`${NECRAMECH_AVIATOR_ID}::damageReduction`];
 
   return {
     baseHealth: baseHealthR30,
@@ -168,6 +173,32 @@ export function calculateNecramechBuild(
     effectiveHealth: playerEffectiveHealth(totalHealth, armorDR, totalShield),
     damageReduction: armorDR * 100,
     kineticDiversionPercent: 0,
-    modBonuses: panel.modBonuses,
+    modBonuses: modBonuses && Object.keys(modBonuses).length ? modBonuses : undefined,
+    ...(airborne > 0
+      ? {
+          airborneDamageReduction: airborne * 100,
+          airborneTotalDamageReduction: (1 - (1 - armorDR) * (1 - airborne)) * 100,
+          airborneEffectiveHealth: warframeEffectiveHealth(totalHealth, totalShield, armorDR, airborne),
+        }
+      : {}),
   };
+}
+
+const NECRAMECH_AVIATOR_ID = "necramech_aviator";
+/** wiki.warframe.com Necramech Aviator: 10/20/30/40% less damage while airborne (R0–R3). */
+export const NECRAMECH_AVIATOR_DR_PER_RANK = 0.1;
+
+/** Airborne-only DR from Necramech mods (fraction). Protects health and shields; not in generic EHP. */
+export function necramechAirborneDamageReduction(
+  equippedMods: EquippedArchwingMod[],
+  allMods: Map<string, Mod>,
+): number {
+  let taken = 1;
+  for (const em of equippedMods) {
+    if (em.modId !== NECRAMECH_AVIATOR_ID) continue;
+    const maxRank = allMods.get(em.modId)?.maxRank ?? 3;
+    const rank = Math.min(Math.max(em.rank ?? 0, 0), maxRank);
+    taken *= 1 - NECRAMECH_AVIATOR_DR_PER_RANK * (rank + 1);
+  }
+  return 1 - taken;
 }

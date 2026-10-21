@@ -2331,7 +2331,7 @@ export function WarframeStatsPanel({
               label="Airborne DR (mods)"
               value={`${(stats.airborneDamageReduction ?? 0).toFixed(1)}%`}
               color="text-sky-700 dark:text-sky-400"
-              tooltip={`Only while airborne (jumping, aim gliding, wall latching, Razorwing, etc.). ${stats.airborneDamageReductionSources.map((x) => `${x.name} ${(x.value * 100).toFixed(0)}%`).join(" × ")}, multiplied: 1 − Π(1 − DR).`}
+              tooltip={`Only while airborne (jumping, aim gliding, wall latching, Razorwing, etc.). ${stats.airborneDamageReductionSources.map((x) => `${x.name} ${Number((x.value * 100).toFixed(2))}%`).join(" × ")}, multiplied: 1 − Π(1 − DR).`}
             />
             <StatRow
               label="Airborne DR (total)"
@@ -2355,7 +2355,7 @@ export function WarframeStatsPanel({
                 key={t.type}
                 label={`${t.type.charAt(0).toUpperCase()}${t.type.slice(1)}`}
                 value={`${t.percent.toFixed(1)}% · EHP ${t.effectiveHealth.toFixed(0)}`}
-                tooltip={`${t.sources.map((x) => `${x.name} ${(x.value * 100).toFixed(0)}%`).join(" × ")}. Only against ${t.type} damage; multiplies with armor and other DR.${t.type === "toxin" ? " Toxin bypasses shields, so this EHP is health only." : ""} Not included in the Effective Health above.`}
+                tooltip={`${t.sources.map((x) => `${x.name} ${Number((x.value * 100).toFixed(2))}%`).join(" × ")}. Only against ${t.type} damage; multiplies with armor and other DR.${t.type === "toxin" ? " Toxin bypasses shields, so this EHP is health only." : ""} Not included in the Effective Health above.`}
               />
             ))}
           </div>

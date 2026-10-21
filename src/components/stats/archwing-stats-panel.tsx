@@ -99,6 +99,22 @@ export function ArchwingStatsPanel({
         tooltip="Health ÷ (1 − armor DR) + Shields × 2. Archwing and Necramech shields take 50% less damage; armor does not apply to shields."
       />
       <StatRow label="Damage Reduction" value={`${stats.damageReduction.toFixed(1)}%`} highlighted />
+      {stats.airborneDamageReduction != null && stats.airborneEffectiveHealth != null && (
+        <>
+          <StatRow
+            label="Airborne DR"
+            value={`${stats.airborneDamageReduction.toFixed(1)}% · total ${(stats.airborneTotalDamageReduction ?? 0).toFixed(1)}%`}
+            color="text-sky-700 dark:text-sky-400"
+            tooltip="Necramech Aviator: 10/20/30/40% less damage taken while airborne (R0–R3), multiplied with armor DR. Also protects shields. Not part of the Effective Health above."
+          />
+          <StatRow
+            label="Airborne Effective Health"
+            value={stats.airborneEffectiveHealth.toFixed(0)}
+            color="text-sky-700 dark:text-sky-400"
+            tooltip="Effective Health while airborne. Not part of the Effective Health above."
+          />
+        </>
+      )}
     </div>
   );
 }

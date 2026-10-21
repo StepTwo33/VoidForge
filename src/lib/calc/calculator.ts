@@ -2371,7 +2371,8 @@ export function calculateWarframeBuild(
   const maxRankOf = (id: string) => allMods.get(id)?.maxRank ?? 0;
   const air = airborneDrSources(equippedMods, maxRankOf, boreal?.pieces ?? 0);
   if (air.length) stats.airborneDamageReductionSources = air;
-  const typed = typedResistSources(equippedMods, maxRankOf);
+  // Umbral Tau resistance is scaled by the set bonus (wiki.warframe.com Umbral Set).
+  const typed = typedResistSources(equippedMods, maxRankOf, (id) => getUmbralSetBonusMultiplier(id, umbralCount));
   if (typed.size) {
     stats.typedResistances = [...typed.entries()].map(([type, sources]) => ({
       type,

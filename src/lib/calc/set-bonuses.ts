@@ -86,6 +86,8 @@ const TEK_SET = new Set<string>(TEK_SET_MOD_IDS);
 const UMBRAL_SET = new Set<string>(UMBRAL_MOD_IDS);
 const AMAR_SET = new Set<string>(AMAR_SET_MOD_IDS);
 const BOREAL_SET = new Set<string>(BOREAL_SET_MOD_IDS);
+/** Mirrors BOREAL_AIRBORNE_DR_PER_PIECE (damage-reduction.ts) as a percent. */
+const BOREAL_AIRBORNE_DR_PERCENT_PER_PIECE = 20;
 const NIRA_SET = new Set<string>(NIRA_SET_MOD_IDS);
 
 /** Umbral set bonus multiplier for a mod's primary stat (1 = no bonus). Tau Resistance is excluded by caller. */
@@ -524,12 +526,11 @@ export function buildWarframeSetBonusSummary(
       pieces: boreal,
       required: 3,
       active: boreal >= 1,
+      // wiki.warframe.com Archon mods: 20% airborne DR per Boreal piece (1/2/3 = 20/40/60%).
       description:
-        boreal >= 3
-          ? "Reduces damage taken by 20% while airborne"
-          : boreal >= 1
-            ? `${boreal}/3 equipped — need ${3 - boreal} more for airborne damage reduction`
-            : "3-piece: Reduces damage taken by 20% while airborne",
+        boreal >= 1
+          ? `${boreal}/3 equipped: ${BOREAL_AIRBORNE_DR_PERCENT_PER_PIECE * Math.min(boreal, 3)}% less damage taken while airborne (20% per piece, 60% at 3/3)`
+          : "20% less damage taken while airborne per piece (1/2/3 = 20/40/60%)",
     },
     {
       setId: "nira",

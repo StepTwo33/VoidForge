@@ -1208,6 +1208,12 @@ export interface ArchwingCalculatedStats {
   /** Kinetic Diversion: % of health damage converted to energy (max 40). */
   kineticDiversionPercent: number;
   modBonuses?: Record<string, number>;
+  /** Necramech Aviator: airborne-only DR (percent). Not part of effectiveHealth. */
+  airborneDamageReduction?: number;
+  /** Armor DR combined with airborne DR (percent, health). */
+  airborneTotalDamageReduction?: number;
+  /** EHP while airborne. */
+  airborneEffectiveHealth?: number;
 }
 
 export interface RailjackArmamentComputed {
