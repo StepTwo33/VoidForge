@@ -659,6 +659,9 @@ export const customWeapons: Weapon[] = [
       damage: 250,
       blast: 250,
       statusChance: 0.1,
+      // Both wikis (Module:Weapons/data/secondary): ForcedProcs = { "Puncture", "Ragdoll" }.
+      // Ragdoll is crowd control, not a status, so only Puncture counts as a proc (no damage).
+      forcedProcs: ["puncture", "ragdoll"],
       radialAttacks: [
         { name: "Embedded Detonation", blast: 250, totalDamage: 250, radius: 4, falloffReduction: 0.5 },
       ],

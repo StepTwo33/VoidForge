@@ -383,6 +383,35 @@ function calculateStatusProcs(
     });
   }
 
+  // Weapon forced procs (wiki ForcedProcs, e.g. Talons Embedded Detonation → Puncture):
+  // one guaranteed proc of that type per hit, separate from status chance. Damage only
+  // for types that deal damage as a status (DoTs, Blast detonation); others add 0.
+  for (const forced of stats.forcedProcs ?? []) {
+    const t = forced.toLowerCase();
+    const info = STATUS_INFO[t];
+    if (!info) continue; // ragdoll / knockdown etc. are not status effects
+    const frac = DOT_TICK_FRACTION[t];
+    const duration = info.duration * durMult;
+    const ticks = frac != null ? dotTickCount(t, duration) : info.ticks;
+    let dpt = 0;
+    if (frac != null) {
+      const typeMult = t === "slash" ? 1 : 1 + elementalTypeBonus(stats, t, moddedBaseDamage);
+      dpt = frac * dotBase * typeMult;
+      if (t === "toxin") dpt *= toxinStatusFactor(stats);
+    } else if (t === "blast") {
+      dpt = BLAST_DETONATE_FRACTION * dotBase;
+    }
+    procs.push({
+      type: t,
+      chance: 1,
+      damagePerTick: dpt,
+      duration,
+      ticks,
+      totalDamage: dpt * ticks,
+      description: `Forced ${t[0].toUpperCase()}${t.slice(1)} on hit (weapon)`,
+    });
+  }
+
   // Prototype Shock Coils: extra Electric proc on hit, independent of modded damage types.
   const extraElec = stats.extraElectricProcChance ?? 0;
   if (extraElec > 0) {
@@ -825,6 +854,7 @@ export function calculateWeaponBuild(
     burstDps: 0,
     sustainedDps: 0,
     statusProcs: [],
+    ...(baseWeapon.forcedProcs?.length ? { forcedProcs: baseWeapon.forcedProcs } : {}),
     heavyAttackDamage: 0,
     heavyAttackWindUp: 0.6,
     comboCount: 0,

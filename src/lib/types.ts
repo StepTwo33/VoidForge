@@ -75,6 +75,12 @@ export interface Weapon {
   /** AoE / radial attacks (merged from data/weapon-radial-attacks when present). */
   radialAttacks?: WeaponRadialAttack[];
   /**
+   * Forced procs on every hit of this attack (wiki Module:Weapons `ForcedProcs`), lower-case
+   * status names. Each adds one guaranteed proc of that type per hit on top of status chance.
+   * Non-status effects (e.g. "ragdoll") are kept for reference and ignored by the calc.
+   */
+  forcedProcs?: string[];
+  /**
    * Base charge time in seconds (unmodded). Used for charge / bow effective fire rate.
    * Populated by weapon-enrich from WEAPON_FIRE_TIMING when known.
    */
@@ -176,6 +182,8 @@ export interface WeaponAlternateModeStats {
   stanceType?: string;
   /** Replace default radial profiles while alternate mode is on. */
   radialAttacks?: WeaponRadialAttack[];
+  /** Forced procs while this mode is active (overrides the default list when set). */
+  forcedProcs?: string[];
 }
 
 /** Secondary AoE profile (explosion, slam radial, cube blast, etc.). */
@@ -935,6 +943,8 @@ export interface CalculatedStats {
   extraHitGuaranteedToxin?: boolean;
   /** Forced status element on every hit (Valence Formation). */
   guaranteedStatusElement?: string;
+  /** Weapon / attack forced procs (copied from `Weapon.forcedProcs`). */
+  forcedProcs?: string[];
   /**
    * How many Extra Hit damage instances per weapon hit (1, or 2 with Spores synergy).
    * Does not multiply the guaranteed Toxin DoT stack count.
