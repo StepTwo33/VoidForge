@@ -62,6 +62,26 @@ export const RIVEN_TAG_TO_STAT: Record<string, string> = {
   WeaponMeleeFactionDamageGrineer: "factionGrineer",
   WeaponMeleeFactionDamageCorpus: "factionCorpus",
   WeaponMeleeFactionDamageInfested: "factionInfested",
+  WeaponFactionDamageOrokin: "factionOrokin",
+
+  // Riven Splicer traits (Update 44.1) — keys match getRivenStatsForCategory spliced defs.
+  WeaponViralDamageMod: "viral",
+  WeaponCorrosiveDamageMod: "corrosive",
+  WeaponGasDamageMod: "gas",
+  WeaponRadiationDamageMod: "radiation",
+  WeaponBlastDamageMod: "blast",
+  WeaponMagneticDamageMod: "magnetic",
+  WeaponStatusDamage: "statusDamage",
+  WeaponFactionDamageScaldra: "factionScaldra",
+  WeaponFactionDamageTechrot: "factionTechrot",
+  WeaponWeakpointDamage: "weakPointDamage",
+  WeaponWeakpointCriticalChance: "weakPointCritChance",
+  WeaponAmmoEfficiency: "ammoEfficiency",
+  WeaponMagazineReloadHolstered: "reloadWhileHolstered",
+  WeaponMeleeHeavyAttackChargeMod: "heavyAttackWindUp",
+  WeaponMeleeHeavyAttackDamageMod: "heavyAttackDamageBonus",
+  WeaponMeleeSlamDamageMod: "slamDamage",
+  WeaponMeleeParryAngleMod: "parryAngle",
 };
 
 const RIVEN_PATH_PATTERNS: Array<{ pattern: RegExp; modId: string }> = [
