@@ -87,7 +87,6 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("petrifyTrail", "mod_panel", "multiplicative_percent", "Path of Statues: petrifyTrail \u2014 Landslide Augment: Leave a trail for 12s that petrifies enemies for 6s."),
   ]),
   augment_atlas_rumbled: mod("augment_atlas_rumbled", [
-    line("rumbleDuration", "mod_panel", "multiplicative_percent", "Rumbled: rumbleDuration \u2014 Rumblers Augment: Atlas becomes a Rumbler with Rock Armor that grants Overguard \u2026"),
     line("maxHealthAbsorbed", "mod_panel", "multiplicative_percent", "wiki: Rumbled \u2014 Rock Armor absorbs 200/225/250/300% max health (R0\u2013R3; not damage)"),
   ]),
   augment_atlas_tectonic_fracture: mod("augment_atlas_tectonic_fracture", [
@@ -696,8 +695,8 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "Fatal Teleport: damage \u2014 Teleport Augment: Teleport will perform a Finisher on the target, dealing 200% E\u2026"),
   ]),
   flux_overdrive: mod("flux_overdrive", [
-    line("duration", "mod_panel", "multiplicative_percent", "Flux Overdrive: duration \u2014 Status Chance fluctuates between +150% and +250% over 5s while the beam is fired\u2026"),
     line("statusChance", "mod_panel", "multiplicative_percent", "wiki: Flux Overdrive \u2014 +25% Status Chance per rank (+150% R5), oscillating while the beam fires (panel only; not Heat damage)"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Flux Overdrive \u2014 status chance oscillates over 5s while the beam fires (every rank)"),
   ]),
   fomorian_accelerant: mod("fomorian_accelerant", [
     line("projectileSpeed", "mod_panel", "multiplicative_percent", "Fomorian Accelerant: projectileSpeed \u2014 Flak now bounces up to 4x and travels 60% faster."),

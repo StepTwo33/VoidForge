@@ -28,7 +28,7 @@ const damageLines = (id: string) =>
 // [id, card at R0, card at max rank] — wiki.warframe.com stat table, index = rank.
 const STRAY: [string, string[], string[]][] = [
   // Auto Omni: Effect 17/34/51/68/85/100% (repair hull breaches, extinguish fires).
-  ["auto_omni", ["+17% Repair Chance", "+3.3s Cooldown"], ["+100% Repair Chance", "+3.3s Cooldown"]],
+  ["auto_omni", ["+17% Repair Chance", "+20s Cooldown"], ["+100% Repair Chance", "+20s Cooldown"]],
   // Mischief: Decoy Evasion Chance 0/5/10/15%, Duration 6–9s.
   ["mischief", ["0% Decoy Evasion Chance", "+6s Duration"], ["+15% Decoy Evasion Chance", "+9s Duration"]],
   // Reflect: Reflect Chance 10–40%, Damage Amplification 15–60%.
@@ -42,7 +42,7 @@ const STRAY: [string, string[], string[]][] = [
   // Hunter Recovery: Life Steal +5…+30%.
   ["hunter_recovery", ["+5% Life Steal"], ["+30% Life Steal"]],
   // Rumbled: % max health absorbed 200/225/250/300.
-  ["augment_atlas_rumbled", ["+5 Rumble Duration", "+200% Max Health Absorbed"], ["+20 Rumble Duration", "+300% Max Health Absorbed"]],
+  ["augment_atlas_rumbled", ["+200% Max Health Absorbed"], ["+300% Max Health Absorbed"]],
   // Elemental Sandstorm: Ability Range +20/30/40/50%, Status Chance 25–100%.
   ["augment_inaros_elemental_sandstorm", ["+25% Elemental Chance", "+20% Sandstorm Range"], ["+100% Elemental Chance", "+50% Sandstorm Range"]],
   // Capacitance: Damage to Shield Conversion 1.5/2/2.5/3%.
@@ -69,7 +69,7 @@ const STRAY: [string, string[], string[]][] = [
   // Relentless Combination: +25…100% combo count chance.
   ["relentless_combination_r3", ["+25% Combo Count Chance"], ["+100% Combo Count Chance"]],
   // Flux Overdrive: Status Chance +25…+150% (the stray Heat key; not Heat damage).
-  ["flux_overdrive", ["+25% Status chance", "+0.8s Duration"], ["+150% Status chance", "+0.8s Duration"]],
+  ["flux_overdrive", ["+25% Status chance", "+5s Duration"], ["+150% Status chance", "+5s Duration"]],
   // Gleaming Blight: Status chance 25–100% and +1 Blight only.
   ["stance_gleaming_talent", ["+25% Status chance", "+1 syndicate power"], ["+100% Status chance", "+1 syndicate power"]],
 ];

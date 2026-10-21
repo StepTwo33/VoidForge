@@ -23,9 +23,11 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Acidic Spittle: range \u2014 Every <LOWER_IS_BETTER>5s spit acidic tar at an enemy within 30m, blinding them \u2026 (arsenal display only)"),
   ]),
   aerial_bond: mod("aerial_bond", [
-    line("airborneCrit", "mod_panel", "multiplicative_percent", "Aerial Bond: airborneCrit \u2014 Airborne kills decrease Companion Recovery Time by 3s and 9s for headshot kills.\u2026"),
-    line("duration", "mod_panel", "multiplicative_percent", "Aerial Bond: duration \u2014 Airborne kills decrease Companion Recovery Time by 3s and 9s for headshot kills.\u2026"),
-    line("range", "mod_panel", "multiplicative_percent", "Aerial Bond: range \u2014 Airborne kills decrease Companion Recovery Time by 3s and 9s for headshot kills.\u2026 (arsenal display only)"),
+    line("recoveryTimeReduction", "mod_panel", "multiplicative_percent", "wiki: Aerial Bond \u2014 airborne kills reduce Companion Recovery Time 0.5s per rank (-3s R5)"),
+    line("headshotRecoveryTimeReduction", "mod_panel", "multiplicative_percent", "wiki: Aerial Bond \u2014 airborne headshot kills reduce Companion Recovery Time 1.5s per rank (-9s R5)"),
+    line("coldStatusChance", "mod_panel", "multiplicative_percent", "wiki: Aerial Bond \u2014 cold field Cold Status Chance 10/15/20/25/30/35% (R0\u2013R5)"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Aerial Bond \u2014 cold field radius 2.5/4/5.5/7/8.5/10m (R0\u2013R5) (arsenal display only)"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Aerial Bond \u2014 cold field lasts 3s after returning to ground (every rank)"),
   ]),
   aerial_prospectus: mod("aerial_prospectus", [
     line("range", "mod_panel", "multiplicative_percent", "Aerial Prospectus: range \u2014 Launches a beacon at an enemy within 27m that calls down an Orbital Strike deali\u2026 (arsenal display only)"),
@@ -59,7 +61,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   ]),
   auto_omni: mod("auto_omni", [
     line("repairChance", "mod_panel", "multiplicative_percent", "wiki: Auto Omni \u2014 17/34/51/68/85/100% chance to repair hull breaches and extinguish fires (R0\u2013R5; not damage)"),
-    line("cooldown", "mod_panel", "multiplicative_percent", "Auto Omni: cooldown \u2014 Nautilus has 100% chance to repair nearby Railjack hull damages and extinguishes\u2026"),
+    line("cooldown", "mod_panel", "multiplicative_percent", "wiki: Auto Omni \u2014 Cooldown: 20s at every rank (WFCD levelStats R0\u2013R5 same)"),
   ]),
   bell_ringer: mod("bell_ringer", [
     line("impactStatusStacks", "mod_panel", "flat", "wiki: Bell Ringer — precept knockdown/Impact stacks (AI)"),
@@ -120,7 +122,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Cordon: range \u2014 Nautilus forces enemies within 30m of the target into clusters for easier target\u2026 (arsenal display only)"),
   ]),
   covert_bond: mod("covert_bond", [
-    line("duration", "mod_panel", "multiplicative_percent", "Covert Bond: duration \u2014 Finisher and Mercy Kills grant your Companion 10s of stealth that attacks will n\u2026"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Covert Bond \u2014 each finisher / mercy kill grants 1/3/5/6/8/10s of companion stealth (R0\u2013R5)"),
+    line("stealthDurationCap", "mod_panel", "multiplicative_percent", "wiki: Covert Bond \u2014 stealth stacks to Max 60s (every rank)"),
   ]),
   crescent_charge: mod("crescent_charge", [
     line("health", "mod_panel", "multiplicative_percent", "wiki: Crescent Charge — precept charge damage (not max health)"),
@@ -151,9 +154,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("lifeSteal", "mod_panel", "multiplicative_percent", "Draining Bite: lifeSteal \u2014 Vasca Kavat inflicts 5 stacks of Slash at 150% of its melee damage and restores \u2026"),
   ]),
   duplex_bond: mod("duplex_bond", [
-    line("duration", "mod_panel", "multiplicative_percent", "wiki: Duplex Bond — clone duration"),
-    line("energy", "mod_panel", "multiplicative_percent", "wiki: Duplex Bond — energy spend threshold (not max energy)"),
-    line("extraAttack", "mod_panel", "multiplicative_percent", "wiki: Duplex Bond — clone attacks"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Duplex Bond \u2014 clones live 5/10/15/20/25/30s (R0\u2013R5)"),
+    line("energyOrbDropChance", "mod_panel", "multiplicative_percent", "wiki: Duplex Bond \u2014 clone kills drop Energy Orbs 8/17/25/33/42/50% (R0\u2013R5)"),
   ]),
   electro_pulse: mod("electro_pulse", [
     line("duration", "mod_panel", "multiplicative_percent", "Electro Pulse: duration \u2014 Every 5s, Sentinel will continually zap an enemy within 15m, trapping them in a \u2026"),
@@ -325,8 +327,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   ]),
   momentous_bond: mod("momentous_bond", [
     line("damage", "mod_panel", "multiplicative_percent", "Momentous Bond: damage \u2014 Killing Eximus enemies grants 120% bonus of a random Elemental Damage to your Co\u2026"),
-    line("duration", "mod_panel", "multiplicative_percent", "Momentous Bond: duration \u2014 Killing Eximus enemies grants 120% bonus of a random Elemental Damage to your Co\u2026"),
-    line("heavyAttackSpeed", "mod_panel", "multiplicative_percent", "Momentous Bond: heavyAttackSpeed \u2014 Killing Eximus enemies grants 120% bonus of a random Elemental Damage to your Co\u2026"),
+    line("recoveryTimeReduction", "mod_panel", "multiplicative_percent", "wiki: Momentous Bond \u2014 Eximus kills reduce Companion Recovery Time 3s per rank (-18s R5)"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Momentous Bond \u2014 the elemental bonus lasts 30s (every rank)"),
   ]),
   mystic_bond: mod("mystic_bond", [
     line("energyLeech", "mod_panel", "multiplicative_percent", "Mystic Bond: energyLeech \u2014 After your Companion uses Abilities with cooldowns 5 times, you may cast a Warfr\u2026"),

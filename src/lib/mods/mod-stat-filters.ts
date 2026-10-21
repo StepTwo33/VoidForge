@@ -194,6 +194,8 @@ const STAT_KEY_FILTERS: Record<string, ModStatFilterId[]> = {
   retaliationChance: ["survivability"],
   comboCountChance: ["utility"],
   initialCombo: ["utility"],
+  // Round 19: Duplex Bond's Energy Orb drop chance (replaced its stray `energy` key).
+  energyOrbDropChance: ["utility"],
 };
 
 const WEAPON_CATEGORIES = new Set([

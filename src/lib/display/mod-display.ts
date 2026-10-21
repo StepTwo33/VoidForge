@@ -31,6 +31,8 @@ const FLAT_STAT_KEYS = new Set([
   "ampSchoolDamage",
   "ampEnergyRegen",
   "killsRequired",
+  // Covert Bond "Max 60s" stealth cap (wiki.warframe.com; same at every rank).
+  "stealthDurationCap",
 ]);
 
 const PERCENT_LIKE_KEYS = new Set([
@@ -202,8 +204,8 @@ const MOD_RANK_VALUE_TABLES: Record<string, Record<string, readonly number[]>> =
   // Intruder: +8s to Hacking at the wiki infobox Max Rank 3, linear 2 s/rank (R0–R3).
   intruder: { duration: [2, 4, 6, 8] },
   // Round 18 (wiki.warframe.com stat tables, index = rank).
-  // Auto Omni: 17/34/51/68/85/100% repair chance (R0–R5).
-  auto_omni: { repairChance: [17, 34, 51, 68, 85, 100] },
+  // Auto Omni: 17/34/51/68/85/100% repair chance (R0–R5); Cooldown 20 s at every rank (Round 19).
+  auto_omni: { repairChance: [17, 34, 51, 68, 85, 100], cooldown: [20, 20, 20, 20, 20, 20] },
   // Mischief: decoy Evasion Chance 0/5/10/15%, invisible 6/7/8/9 s (R0–R3).
   mischief: { decoyEvasionChance: [0, 5, 10, 15], duration: [6, 7, 8, 9] },
   // Reflex Denial: 5–10 s, 2–12 m (R0–R5).
@@ -230,6 +232,22 @@ const MOD_RANK_VALUE_TABLES: Record<string, Record<string, readonly number[]>> =
   augment_excalibur_radiant_finish: { finisherDamage: [150, 200, 250, 300] },
   // Heartseeker: targeting radius 0.25–1 m (R0–R3).
   heartseeker: { range: [0.25, 0.5, 0.75, 1] },
+  // Round 19 (wiki.warframe.com stat tables, index = rank).
+  // Covert Bond: 1/3/5/6/8/10 s of stealth per finisher / mercy kill (R0–R5).
+  covert_bond: { duration: [1, 3, 5, 6, 8, 10] },
+  // Aerial Bond: cold field Cold Status Chance 10–35 %, radius 2.5–10 m (R0–R5); it lingers 3 s at every rank.
+  aerial_bond: {
+    coldStatusChance: [10, 15, 20, 25, 30, 35],
+    range: [2.5, 4, 5.5, 7, 8.5, 10],
+    duration: [3, 3, 3, 3, 3, 3],
+  },
+  // Duplex Bond: clones live 5–30 s, Energy Orb drop chance 8/17/25/33/42/50 % (R0–R5).
+  duplex_bond: { duration: [5, 10, 15, 20, 25, 30], energyOrbDropChance: [8, 17, 25, 33, 42, 50] },
+  // Same value at every rank (wiki), tabled so the builder card doesn't scale it by rank+1
+  // (Auto Omni Cooldown 20 s is in its entry above):
+  // Flux Overdrive oscillation 5 s, Momentous Bond buff 30 s.
+  flux_overdrive: { duration: [5, 5, 5, 5, 5, 5] },
+  momentous_bond: { duration: [30, 30, 30, 30, 30, 30] },
 };
 
 /** Card text for a stat that has a wiki rank table or a cap, else null (use the per-rank formula). */
@@ -238,17 +256,25 @@ export function formatModStatSpecial(modId: string, statKey: string, perRank: nu
   if (table) {
     const value = table[Math.min(Math.max(Math.round(rank), 0), table.length - 1)];
     const label = getModStatLabel(statKey);
-    if (statKey === "duration") return `${formatStatNumber(value)}s ${label}`;
+    if (statKey === "duration" || statKey === "cooldown") return `${formatStatNumber(value)}s ${label}`;
     if (statKey === "range") return `${formatStatNumber(value)}m ${label}`;
     return `${formatStatNumber(value)}% ${label}`;
   }
   // Adaptation: "Stacks up to 90%" (wiki); the cap doesn't scale with rank.
   if (statKey === "damageResistanceCap") return `Stacks up to ${perRank}%`;
+  // Covert Bond: "Max 60s" (wiki); the cap doesn't scale with rank.
+  if (statKey === "stealthDurationCap") return `Max ${perRank}s stealth`;
   return null;
 }
 
 /** Flat seconds stored per rank (× (rank+1)), e.g. Aerodynamic +1s Aim Glide / +2s Wall Latch. */
-const SECONDS_PER_RANK_KEYS = new Set(["aimGlideTime", "wallLatchTime"]);
+const SECONDS_PER_RANK_KEYS = new Set([
+  "aimGlideTime",
+  "wallLatchTime",
+  // Aerial / Momentous Bond: Companion Recovery Time -0.5 / -1.5 / -3 s per rank (wiki.warframe.com).
+  "recoveryTimeReduction",
+  "headshotRecoveryTimeReduction",
+]);
 
 /** Percent stats stored as the live value (not per-rank × (rank+1)). */
 const RANK_INDEPENDENT_PERCENT_KEYS = new Set([

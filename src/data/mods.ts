@@ -1661,9 +1661,11 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "airborneCrit": 150,
-      "duration": 0.5,
-      "range": 1.666667
+      "recoveryTimeReduction": -0.5,
+      "headshotRecoveryTimeReduction": -1.5,
+      "coldStatusChance": 5.833333,
+      "range": 1.666667,
+      "duration": 3
     },
     "description": "Airborne kills decrease Companion Recovery Time by 3s and 9s for headshot kills. Companion creates a field of cold that increases up to 35% and 10m radius while Warframe is airborne, lasting for 3s after returning to ground.",
     "rarity": "rare"
@@ -1708,7 +1710,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "duration": 10.0
+      "duration": 10,
+      "stealthDurationCap": 60
     },
     "description": "Finisher and Mercy Kills grant your Companion 10s of stealth that attacks will not disrupt. Max 60s.",
     "rarity": "rare"
@@ -1722,9 +1725,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "extraAttack": 30,
-      "energy": 8.333333,
-      "duration": 5.0
+      "duration": 5,
+      "energyOrbDropChance": 8.333333
     },
     "description": "Companion will clone itself each time you expend 100 energy, up to 3 clones. Clones live 30s and cannot use Abilities. Their kills have a 50% chance of dropping Energy Orbs.",
     "rarity": "rare"
@@ -1738,9 +1740,9 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "heavyAttackSpeed": 30,
-      "damage": 20.0,
-      "duration": 3.0
+      "damage": 20,
+      "recoveryTimeReduction": -3,
+      "duration": 30
     },
     "description": "Killing Eximus enemies grants 120% bonus of a random Elemental Damage to your Companion for 30s and reduces Companion Recovery Time by 18s.",
     "rarity": "rare"
@@ -4128,7 +4130,6 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "rumbleDuration": 5,
       "maxHealthAbsorbed": 75
     },
     "description": "Rumblers Augment: Atlas becomes a Rumbler with Rock Armor that grants Overguard and absorbs up to 300% of damage to Max Health.",
@@ -6241,7 +6242,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "weapon",
     "stats": {
       "statusChance": 25.0,
-      "duration": 0.833333
+      "duration": 5
     },
     "description": "Status Chance fluctuates between +150% and +250% over 5s while the beam is fired.",
     "rarity": "rare"
@@ -14609,7 +14610,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "repairChance": 16.666667,
-      "cooldown": 3.333333
+      "cooldown": 20
     },
     "description": "Nautilus has 100% chance to repair nearby Railjack hull damages and extinguishes fires on Railjack. Cooldown: 20s.",
     "rarity": "common"
