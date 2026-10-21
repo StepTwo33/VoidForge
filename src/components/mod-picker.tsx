@@ -469,7 +469,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                       >
                         <option value="">Select stat...</option>
                         {rivenPool.filter((s) => !s.spliced && !(s.key in rivenStats)).map((s) => (
-                          <option key={s.key} value={s.key}>{s.label}</option>
+                          <option key={s.key} value={s.key}>{s.label}{s.displayOnly ? " (info only)" : ""}</option>
                         ))}
                         {!rivenPool.some((s) => s.spliced && s.key in rivenStats) && rivenPool.some((s) => s.spliced) && (
                           <optgroup label="Spliced traits (Riven Splicer, max 1)">

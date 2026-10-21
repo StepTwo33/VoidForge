@@ -77,6 +77,8 @@ interface RivenAttr {
   positiveOnly?: boolean;
   /** Lower is better (Recoil): positive roll is negative %. */
   inverted?: boolean;
+  /** Only ever rolls as a curse (wiki footnote 3). */
+  negativeOnly?: boolean;
 }
 
 // Wiki Riven Mods base-value table (wiki.warframe.com, 2026-10).
@@ -92,6 +94,9 @@ const RIVEN_ATTRS: RivenAttr[] = [
   { name: "Slide Attack", type: "percent", base: { melee: 120 } },
   { name: "Finisher Damage", type: "percent", base: { melee: 119.7 } },
   { name: "Combo Duration", type: "seconds", base: { melee: 8.1 } },
+  { name: "Critical Chance for Slide Attack", type: "percent", base: { melee: 120 } },
+  { name: "Additional Combo Count Chance", type: "percent", base: { melee: 58.77 }, positiveOnly: true },
+  { name: "Chance to Gain Combo Count", type: "percent", base: { melee: 104.85 }, negativeOnly: true },
   { name: "Magazine Capacity", type: "percent", base: { rifle: 49.995, shotgun: 49.995, pistol: 49.995, archgun: 60.3 } },
   { name: "Reload Speed", type: "percent", base: { rifle: 49.995, shotgun: 49.995, pistol: 49.995, archgun: 99.9 } },
   { name: "Ammo Maximum", type: "percent", base: { rifle: 49.95, shotgun: 90, pistol: 90, archgun: 99.9 } },
@@ -123,7 +128,7 @@ function round1(v: number): number {
 
 /** Unscaled pool (disposition 1, factor 1): base and the ±10% roll band. */
 function poolFor(key: RivenPoolKey): RivenStat[] {
-  return RIVEN_ATTRS.filter((a) => a.base[key] != null).map((a) => {
+  return RIVEN_ATTRS.filter((a) => a.base[key] != null && !a.negativeOnly).map((a) => {
     const b = a.base[key]!;
     const sign = a.inverted ? -1 : 1;
     const lo = sign * b * ROLL_MIN;

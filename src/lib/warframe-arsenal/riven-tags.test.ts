@@ -30,12 +30,30 @@ describe("riven tag mapping", () => {
     for (const key of new Set(Object.values(RIVEN_TAG_TO_STAT))) if (key !== "factionMurmur") expect(known.has(key), key).toBe(true);
   });
 
-  it("covers every riven upgradeEntries tag in @wfcd/items except 3 melee combo/slide-crit stats VF does not model", () => {
+  it("covers every riven upgradeEntries tag in @wfcd/items", () => {
     const data = JSON.parse(readFileSync(join(process.cwd(), "node_modules/@wfcd/items/data/json/Mods.json"), "utf8")) as Array<{
       upgradeEntries?: Array<{ tag: string }>;
     }>;
     const tags = new Set(data.flatMap((m) => (m.upgradeEntries ?? []).map((e) => e.tag)));
     const missing = [...tags].filter((t) => !RIVEN_TAG_TO_STAT[t] && !t.startsWith("Innate")).sort();
-    expect(missing).toEqual(["SlideAttackCritChanceMod", "WeaponMeleeComboBonusOnHitMod", "WeaponMeleeComboPointsOnHitMod"]);
+    expect(missing).toEqual([]);
+  });
+
+  it("melee slide crit / combo count rivens map; curse-only Chance to Gain Combo Count is negative either way DE signs it", () => {
+    for (const curseVal of [0.612, -0.612]) {
+      const r = resolveRivenUpgrade({
+        uniqueName: "/Lotus/Upgrades/Mods/Randomized/PlayerMeleeWeaponRandomModRare",
+        rank: 8,
+        buffs: [
+          { tag: "SlideAttackCritChanceMod", val: 1.32 },
+          { tag: "WeaponMeleeComboBonusOnHitMod", val: 0.647 },
+        ],
+        curses: [{ tag: "WeaponMeleeComboPointsOnHitMod", val: curseVal }],
+      })!;
+      expect(r.unmappedTags).toEqual([]);
+      expect(r.rivenStats.slideAttackCritChance).toBeCloseTo(1.32, 9);
+      expect(r.rivenStats.comboCountChance).toBeCloseTo(0.647, 9);
+      expect(r.rivenStats.comboGainChance).toBeCloseTo(-0.612, 9);
+    }
   });
 });

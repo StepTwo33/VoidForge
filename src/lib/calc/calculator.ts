@@ -1620,6 +1620,10 @@ export function calculateWeaponBuild(
         case 'heavyAttackDamageBonus':
         case 'slamDamage':
         case 'parryAngle':
+        // Melee riven rolls with no Voidforge model (slide-attack crit, combo count chances).
+        case 'slideAttackCritChance':
+        case 'comboCountChance':
+        case 'comboGainChance':
           break;
         // Physical damage type bonuses (from rivens)
         case 'impact': stats.impact *= (1 + value); break;

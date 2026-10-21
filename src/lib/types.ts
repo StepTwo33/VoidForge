@@ -1354,7 +1354,7 @@ export interface RivenStatDef {
   isPercent: boolean; // whether value is entered as %
   /** Riven Splicer trait (Update 44.1). Always positive, max one per riven. */
   spliced?: boolean;
-  /** Spliced trait has no DPS model in Voidforge (shown on the riven only). */
+  /** No DPS model in Voidforge (shown on the riven only). */
   displayOnly?: boolean;
 }
 
@@ -1425,6 +1425,10 @@ const RIVEN_MELEE: RivenStatDef[] = [
   { key: "comboDuration", label: "Combo Duration", isPercent: false },
   { key: "initialCombo", label: "Initial Combo", isPercent: false },
   { key: "heavyAttackEfficiency", label: "Heavy Attack Efficiency", isPercent: true },
+  // Wiki Riven Mods: slide crit (+/-), extra combo count (buff only), combo gain (curse only).
+  { key: "slideAttackCritChance", label: "Critical Chance for Slide Attack", isPercent: true, displayOnly: true },
+  { key: "comboCountChance", label: "Additional Combo Count Chance", isPercent: true, displayOnly: true },
+  { key: "comboGainChance", label: "Chance to Gain Combo Count", isPercent: true, displayOnly: true },
   { key: "factionGrineer", label: "Damage to Grineer", isPercent: true },
   { key: "factionCorpus", label: "Damage to Corpus", isPercent: true },
   { key: "factionInfested", label: "Damage to Infested", isPercent: true },

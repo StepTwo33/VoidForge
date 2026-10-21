@@ -52,6 +52,11 @@ export const RIVEN_TAG_TO_STAT: Record<string, string> = {
   WeaponMeleeFinisherDamageMod: "finisherDamage",
   WeaponMeleeComboInitialBonusMod: "initialCombo",
   WeaponMeleeComboEfficiencyMod: "heavyAttackEfficiency",
+  SlideAttackCritChanceMod: "slideAttackCritChance",
+  WeaponMeleeComboBonusOnHitMod: "comboCountChance",
+  // Curse-only stat; DE stores it negative and shows it as −100·v % (wiki Riven Mods), so
+  // the value is taken as a magnitude and signed by buff/curse (see RIVEN_TAG_ABS).
+  WeaponMeleeComboPointsOnHitMod: "comboGainChance",
 
   // Faction (gun + melee tags)
   WeaponFactionDamageGrineer: "factionGrineer",
@@ -111,6 +116,9 @@ export function rivenModIdFromUniqueName(uniqueName: string): string | undefined
  */
 const RIVEN_TAG_VALUE_FLIP = new Set(["WeaponRecoilReductionMod"]);
 
+/** Tags whose stored sign varies by source; use |val| and sign it by buff (+) / curse (−). */
+const RIVEN_TAG_ABS = new Set(["WeaponMeleeComboPointsOnHitMod"]);
+
 export function parseRivenStatsFromUpgrade(entry: RawRivenUpgrade): Record<string, number> {
   const stats: Record<string, number> = {};
 
@@ -118,7 +126,12 @@ export function parseRivenStatsFromUpgrade(entry: RawRivenUpgrade): Record<strin
     for (const buff of buffs ?? []) {
       const key = buff.tag ? RIVEN_TAG_TO_STAT[buff.tag] : undefined;
       if (!key || typeof buff.val !== "number") continue;
-      const flipped = buff.tag && RIVEN_TAG_VALUE_FLIP.has(buff.tag) ? -buff.val : buff.val;
+      const flipped =
+        buff.tag && RIVEN_TAG_ABS.has(buff.tag)
+          ? Math.abs(buff.val)
+          : buff.tag && RIVEN_TAG_VALUE_FLIP.has(buff.tag)
+            ? -buff.val
+            : buff.val;
       stats[key] = (stats[key] ?? 0) + sign * flipped;
     }
   };
