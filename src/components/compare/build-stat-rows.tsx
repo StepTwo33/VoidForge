@@ -99,6 +99,11 @@ export function CompanionCompareRows({
       <CompareRow label="Shield" a={aBody.totalShield} b={bBody.totalShield} />
       <CompareRow label="Armor" a={aBody.totalArmor} b={bBody.totalArmor} />
       <CompareRow label="EHP" a={aBody.effectiveHealth} b={bBody.effectiveHealth} />
+      {(aBody.linkModsNeedWarframe || bBody.linkModsNeedWarframe) && (
+        <p className="pt-1 text-[11px] text-amber-800 dark:text-amber-400" data-testid="compare-link-standalone">
+          Link mods add up to 125% of the Warframe&apos;s health, shields or armor. These builds are compared on their own, so Link mods aren&apos;t in the totals. Compare loadouts to include them.
+        </p>
+      )}
       <CompareRow label="DR %" a={aBody.damageReduction} b={bBody.damageReduction} format={(v) => `${v.toFixed(1)}%`} />
       {bonusRow("Melee Dmg", aBody.meleeDamageBonus, bBody.meleeDamageBonus, { always: true })}
       {bonusRow("Atk Speed", aBody.attackSpeedBonus, bBody.attackSpeedBonus, { always: true })}

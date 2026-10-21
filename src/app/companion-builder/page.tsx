@@ -926,7 +926,7 @@ export default function CompanionBuilderPage() {
                       )}
                       {calculatedStats.linkModsNeedWarframe && (
                         <p className="pt-1 text-xs text-amber-800 dark:text-amber-400" data-testid="companion-link-standalone">
-                          Link mods add 125% of your Warframe&apos;s health, shields or armor. This companion is built on its own, so they aren&apos;t in these totals. Open it from a loadout to include them.
+                          Link mods add up to 125% of your Warframe&apos;s health, shields or armor. This companion is built on its own, so they aren&apos;t in these totals. Open it from a loadout to include them.
                         </p>
                       )}
                       <div className="border-t border-border my-2" />
