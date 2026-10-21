@@ -76,7 +76,17 @@ function getCompanionModSubCategory(companionType: string): string[] {
   }
 }
 
-import { getCompanionWeapons, resolveDefaultCompanionWeapon, resolveHoundWeaponId, modFitsCompanionWeapon } from "@/lib/weapons/companion-weapons";
+import {
+  COMPANION_WEAPON_POSTURE_SLOT_INDEX,
+  COMPANION_WEAPON_REGULAR_SLOT_COUNT,
+  companionHasFixedWeapon,
+  getCompanionWeapons,
+  isCompanionPostureMod,
+  modFitsCompanionWeapon,
+  resolveCompanionClawId,
+  resolveDefaultCompanionWeapon,
+  resolveHoundWeaponId,
+} from "@/lib/weapons/companion-weapons";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
@@ -246,10 +256,14 @@ export default function CompanionBuilderPage() {
     const resolvedWeaponId =
       d.weaponId ??
       (loadedParts ? resolveCompanionParts(loadedParts)?.weaponId : undefined) ??
-      resolveHoundWeaponId(comp);
+      resolveHoundWeaponId(comp) ??
+      (companionHasFixedWeapon(comp) ? resolveCompanionClawId(comp) : undefined);
     if (resolvedWeaponId) {
-      setSelectedWeapon(weaponCandidates.find((w) => w.id === resolvedWeaponId) ?? null);
-    } else if ((d.weaponMods || []).length > 0) {
+      setSelectedWeapon(
+        weaponCandidates.find((w) => w.id === resolvedWeaponId) ??
+          (companionHasFixedWeapon(comp) ? resolveDefaultCompanionWeapon(comp, allWeapons) : null),
+      );
+    } else if ((d.weaponMods || []).length > 0 || companionHasFixedWeapon(comp)) {
       setSelectedWeapon(resolveDefaultCompanionWeapon(comp, allWeapons));
     } else {
       setSelectedWeapon(null);
@@ -418,10 +432,14 @@ export default function CompanionBuilderPage() {
     }, 0);
   }, [weaponMods, weaponSlotPolarities]);
 
+  /** Kavat/Kubrow/Predasite/Vulpaphyla: claws are part of the animal (no swap) + a Posture slot. */
+  const hasFixedWeapon = companionHasFixedWeapon(selectedCompanion);
+  const pickingPosture = hasFixedWeapon && activeWeaponSlotIndex === COMPANION_WEAPON_POSTURE_SLOT_INDEX;
   const weaponModPool = useMemo(() => {
     if (!selectedWeapon) return [];
-    return allMods.filter((m) => modFitsCompanionWeapon(m, selectedWeapon));
-  }, [allMods, selectedWeapon]);
+    if (pickingPosture) return allMods.filter((m) => isCompanionPostureMod(m));
+    return allMods.filter((m) => modFitsCompanionWeapon(m, selectedWeapon) && !isCompanionPostureMod(m));
+  }, [allMods, selectedWeapon, pickingPosture]);
 
   const handleSelectCompanion = useCallback((companion: Companion) => {
     setSelectedCompanion(companion);
@@ -430,9 +448,19 @@ export default function CompanionBuilderPage() {
     const parts = defaultPartsForCompanion(companion) ?? null;
     setCompanionParts(parts);
     const resolved = parts ? resolveCompanionParts(parts) : null;
-    const weaponId = resolved?.weaponId ?? resolveHoundWeaponId(companion);
+    const weaponId =
+      resolved?.weaponId ??
+      resolveHoundWeaponId(companion) ??
+      (companionHasFixedWeapon(companion) ? resolveCompanionClawId(companion) : undefined);
     const weaponCandidates = getCompanionWeapons(companion, allWeapons);
-    setSelectedWeapon(weaponId ? weaponCandidates.find((w) => w.id === weaponId) ?? null : null);
+    setSelectedWeapon(
+      weaponId
+        ? weaponCandidates.find((w) => w.id === weaponId) ??
+            (companionHasFixedWeapon(companion) ? resolveDefaultCompanionWeapon(companion, allWeapons) : null)
+        : companionHasFixedWeapon(companion)
+          ? resolveDefaultCompanionWeapon(companion, allWeapons)
+          : null,
+    );
     setWeaponMods([]);
     setHasCatalyst(false);
     setWeaponSlotPolarities({});
@@ -935,7 +963,13 @@ export default function CompanionBuilderPage() {
                       <Crosshair className="h-4 w-4 shrink-0 text-orange-700 dark:text-orange-400" />
                       <span className="min-w-0 truncate font-medium text-sm">{selectedWeapon.name}</span>
                       <span className="text-[10px] capitalize text-muted-foreground">{selectedWeapon.category.replace('_', ' ')}</span>
-                      <button onClick={() => { setSelectedWeapon(null); setWeaponMods([]); setWeaponSlotPolarities({}); }} className="ml-auto inline-flex min-h-11 items-center rounded-md px-3 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground sm:min-h-9">Change</button>
+                      {hasFixedWeapon ? (
+                        <span className="ml-auto text-[10px] text-muted-foreground" data-testid="companion-claws-fixed">
+                          Built into {selectedCompanion?.name ?? "this companion"}
+                        </span>
+                      ) : (
+                        <button onClick={() => { setSelectedWeapon(null); setWeaponMods([]); setWeaponSlotPolarities({}); }} className="ml-auto inline-flex min-h-11 items-center rounded-md px-3 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground sm:min-h-9">Change</button>
+                      )}
                     </div>
 
                     <div className="space-y-6">
@@ -951,7 +985,7 @@ export default function CompanionBuilderPage() {
                           </span>
                         </div>
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                          {Array.from({ length: 8 }, (_, i) => {
+                          {Array.from({ length: COMPANION_WEAPON_REGULAR_SLOT_COUNT }, (_, i) => {
                             const equipped = weaponMods.find((m) => m.slotIndex === i);
                             const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
                             return (
@@ -968,6 +1002,31 @@ export default function CompanionBuilderPage() {
                             );
                           })}
                         </div>
+                        {hasFixedWeapon && (() => {
+                          const i = COMPANION_WEAPON_POSTURE_SLOT_INDEX;
+                          const equipped = weaponMods.find((m) => m.slotIndex === i);
+                          const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
+                          return (
+                            <div className="mt-2.5" data-testid="companion-posture-slot">
+                              <span className="mb-1 block text-[10px] font-semibold tracking-wider text-cyan-700 dark:text-cyan-400">
+                                POSTURE
+                              </span>
+                              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                                <ModSlotCard
+                                  key={`w${i}`}
+                                  mod={mod}
+                                  rank={equipped?.rank ?? 0}
+                                  slotIndex={i}
+                                  label="Posture"
+                                  slotPolarity={weaponSlotPolarities[i]}
+                                  onAdd={() => handleOpenWeaponModPicker(i)}
+                                  onRemove={() => handleRemoveWeaponMod(i)}
+                                  onPolarize={(p) => setWeaponSlotPolarities((prev) => { const next = { ...prev }; if (p) next[i] = p; else delete next[i]; return next; })}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
 
                       <div className="border border-border rounded-xl p-6 bg-card">
