@@ -20,6 +20,14 @@ const CASES: Array<[modId: string, frame: string, variant: string, other: string
   ["vampiric_grasp", "xaku", "xaku_prime", "nekros"],
   ["wrath_of_ukko", "kullervo", "kullervo", "excalibur"],
   ["swift_bite_r3", "lavos", "lavos_prime", "saryn"],
+  // Newer augments with no fandom page: frame per wiki.warframe.com and WFCD compatName.
+  ["cataclysmic_gate", "wisp", "wisp_prime", "nova"],
+  ["lingering_transmutation", "lavos", "lavos_prime", "excalibur"],
+  ["razor_mortar", "caliban", "caliban_prime", "gyre"],
+  ["reverse_rotorswell", "gyre", "gyre_prime", "caliban"],
+  ["tharros_lethality", "styanax", "styanax_prime", "excalibur"],
+  ["untime_rift", "xaku", "xaku_prime", "nekros"],
+  ["volatile_recompense", "kullervo", "kullervo", "excalibur"],
 ];
 
 describe("previously unrestricted augments are tied to their frame", () => {

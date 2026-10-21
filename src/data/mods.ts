@@ -11958,13 +11958,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "duration": 2.5
     },
     "description": "Sol Gate Augment : Wisp and 2 spectral images cast a single blast of Sol Gate, leaving an area with 500 <DT_FIRE_COLOR>Heat Damage / Second with guaranteed Heat and Radiation Status Effects for 10s. ",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "wisp"
   },
   {
     "id": "catalyzing_shields",
@@ -12821,13 +12822,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "duration": 3.75
     },
     "description": "Transmutation Probe Augment: Probe returns to cast position after reaching max range, and remains nearby for 15s. Recall Probe by recasting. Recast again to end.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "lavos"
   },
   {
     "id": "loot_detector",
@@ -13374,7 +13376,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "electricity": 17.5,
@@ -13382,7 +13384,8 @@ const RAW_MODS: Mod[] = [
       "duration": 1.5
     },
     "description": "Razor Gyre Augment: Groups enemies together, while Lethal Progeny's Ortholysts focus fire on those enemies with +70% <DT_ELECTRICITY_COLOR>Electricity Damage and Fire Rate for 6s.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "caliban"
   },
   {
     "id": "ready_steel",
@@ -13506,13 +13509,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "damage": 8.75
     },
     "description": "Rotorswell Augment: 35% of damage received is redirected toward the instigator as <DT_ELECTRICITY_COLOR> Electricity Damage.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "gyre"
   },
   {
     "id": "rifle_scavenger",
@@ -14053,13 +14057,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "criticalMultiplier": 25.0
     },
     "description": "Tharros Strike Augment: Increases Critical Damage by 100% on enemies you hit. Critical Damage bonus is doubled for Spearguns.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "styanax"
   },
   {
     "id": "the_relentless_lost",
@@ -14172,13 +14177,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "range": 3.75
     },
     "description": "The Vast Untime Augment: Creates a Rift that connects to enemies suffering from <DT_RADIANT_COLOR> Void Status Effect within 15m, doubling debuffs applied by The Vast Untime and maintaining <DT_RADIANT_COLOR> Void Status.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "xaku"
   },
   {
     "id": "valence_formation",
@@ -14272,13 +14278,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "duration": 6.25
     },
     "description": "Recompense Augment: Daggers whirl in a ring around Kullervo for 25s, slashing nearby foes and dealing <DT_EXPLOSION_COLOR>Blast Damage and Status Effect before returning to the ring.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "kullervo"
   },
   {
     "id": "voltaic_lance",
