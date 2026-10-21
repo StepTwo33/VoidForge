@@ -603,6 +603,8 @@ export default function WeaponBuilderPage() {
         <LoadoutEditBanner context={loadoutCtx} onDetach={clearLoadoutCtx} />
         {showWeaponList || !selectedWeapon ? (
           <ItemPickerScreen
+            onBack={selectedWeapon ? () => setShowWeaponList(false) : undefined}
+            backLabel={selectedWeapon?.name}
             icon={Crosshair}
             accent="blue"
             title="Weapon Builder"

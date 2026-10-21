@@ -841,6 +841,8 @@ export default function WarframeBuilderPage() {
         <LoadoutEditBanner context={loadoutCtx} onDetach={clearLoadoutCtx} />
         {showWarframeList || !selectedWarframe ? (
           <ItemPickerScreen
+            onBack={selectedWarframe ? () => setShowWarframeList(false) : undefined}
+            backLabel={selectedWarframe?.name}
             icon={Shield}
             accent="purple"
             title="Warframe Builder"

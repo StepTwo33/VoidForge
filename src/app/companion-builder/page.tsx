@@ -568,6 +568,8 @@ export default function CompanionBuilderPage() {
         <LoadoutEditBanner context={loadoutCtx} onDetach={clearLoadoutCtx} />
         {showCompanionList || !selectedCompanion ? (
           <ItemPickerScreen
+            onBack={selectedCompanion ? () => setShowCompanionList(false) : undefined}
+            backLabel={selectedCompanion?.name}
             icon={Dog}
             accent="cyan"
             title="Companion Builder"

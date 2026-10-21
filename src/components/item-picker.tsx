@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Search } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -104,6 +104,8 @@ export function ItemPickerScreen({
   pickerTab = "catalog",
   onPickerTabChange,
   savedPanel,
+  onBack,
+  backLabel,
 }: {
   icon: LucideIcon;
   accent: AccentColor;
@@ -120,6 +122,13 @@ export function ItemPickerScreen({
   pickerTab?: "catalog" | "saved";
   onPickerTabChange?: (tab: "catalog" | "saved") => void;
   savedPanel?: React.ReactNode;
+  /**
+   * Set when the picker was opened from an existing build (← Change): shows a back button that
+   * returns to the current configuration without picking anything.
+   */
+  onBack?: () => void;
+  /** Name of the item currently being configured, e.g. "Grendel" → "Back to Grendel". */
+  backLabel?: string;
 }) {
   const showTabs = savedPanel != null && onPickerTabChange != null;
   const onSaved = showTabs && pickerTab === "saved";
@@ -145,6 +154,17 @@ export function ItemPickerScreen({
 
   return (
     <div className={cn("mx-auto max-w-3xl", className)}>
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          data-testid="picker-back"
+          className="mb-3 inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border/70 bg-background/50 px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+          {backLabel ? `Back to ${backLabel}` : "Back"}
+        </button>
+      )}
       <PageHero icon={icon} accent={accent} title={title} description={description} />
 
       {showTabs && (
