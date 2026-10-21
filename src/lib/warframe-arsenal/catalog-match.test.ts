@@ -41,13 +41,14 @@ describe("warframe arsenal catalog match", () => {
 });
 
 describe("warframe arsenal lotus resolve", () => {
+  // abilityOverride.index is 0-based (0 = 1st ability); out-of-range values clamp to 0–3.
   it("resolves helminth empower from DE ability path", () => {
     const result = resolveHelminthOverride({
       ability: "/Lotus/Powersuits/PowersuitAbilities/HelminthStrengthAbility",
       index: 3,
     });
     expect(result?.helminthAbilityId).toBe("helminth_empower");
-    expect(result?.helminthSlot).toBe(2);
+    expect(result?.helminthSlot).toBe(3);
   });
 
   it("resolves Infested Mobility from wiki HelminthSpeedAbility suffix", () => {
@@ -56,7 +57,7 @@ describe("warframe arsenal lotus resolve", () => {
       index: 1,
     });
     expect(result?.helminthAbilityId).toBe("helminth_infested_mobility");
-    expect(result?.helminthSlot).toBe(0);
+    expect(result?.helminthSlot).toBe(1);
   });
 
   it("resolves subsumed Roar from ability path", () => {
@@ -65,7 +66,7 @@ describe("warframe arsenal lotus resolve", () => {
       index: 2,
     });
     expect(result?.helminthAbilityId).toBe("subsume_rhino");
-    expect(result?.helminthSlot).toBe(1);
+    expect(result?.helminthSlot).toBe(2);
   });
 
   it("resolves Ophanim Eyes from ChoirEyesAbility codename", () => {
@@ -83,7 +84,7 @@ describe("warframe arsenal lotus resolve", () => {
       index: 2,
     });
     expect(result?.helminthAbilityId).toBe("subsume_equinox");
-    expect(result?.helminthSlot).toBe(1);
+    expect(result?.helminthSlot).toBe(2);
   });
 
   it("resolves weapons by lotus uniqueName", () => {

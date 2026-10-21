@@ -241,11 +241,12 @@ export function resolveHelminthOverride(override?: {
   return undefined;
 }
 
-function normalizeAbilitySlot(index: number): number {
-  // DE uses 1–4 in the Twitch payload; Voidforge uses 0–3.
-  if (index >= 1 && index <= 4) return index - 1;
-  if (index >= 0 && index <= 3) return index;
-  return Math.max(0, Math.min(3, index));
+export function normalizeAbilitySlot(index: number): number {
+  // DE's abilityOverride.index is the 0-based ability slot (0 = 1st ability … 3 = 4th),
+  // the same convention Voidforge uses. Treating 1–4 as 1-based shifted every subsume
+  // one slot left (user report: Roar over Grendel's 3rd ability imported over his 2nd).
+  if (!Number.isFinite(index)) return 0;
+  return Math.max(0, Math.min(3, Math.trunc(index)));
 }
 
 type RawUpgrade = {
