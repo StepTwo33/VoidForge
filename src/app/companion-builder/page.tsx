@@ -41,6 +41,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Zap, Dog, Bot, Bug, Swords, Crosshair, Flag, Save, FolderOpen, ArrowLeftRight } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, CompanionBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
+import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { cn } from "@/lib/utils";
 import { appendReturnTo } from "@/lib/site/nav-return";
@@ -268,7 +269,8 @@ export default function CompanionBuilderPage() {
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildCompanionData()), [buildCompanionData]));
 
-  const handleLoadBuild = useCallback((build: SavedBuild) => {
+  const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
+    const build = cleanLoadedBuild(rawBuild);
     const d = build.data as CompanionBuildData;
     const comp = allCompanions.find((c) => c.id === d.companionId);
     if (!comp) { toast.error("Companion not found"); return; }

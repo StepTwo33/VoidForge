@@ -49,6 +49,7 @@ import { cn } from "@/lib/utils";
 import { appendReturnTo } from "@/lib/site/nav-return";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, WeaponBuildData, persistSavedBuild, resolveSavedArcaneSlots, resolveArcaneById } from "@/lib/builds/build-storage";
 import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
+import { cleanLoadedBuild, cleanLoadedMods } from "@/lib/builds/incompatible-mod-warnings";
 import { extractBuildFromUrlAsync, ShareableBuild } from "@/lib/builds/build-url";
 import { shareBuilderBuild } from "@/lib/builds/share-build";
 import { toast } from "sonner";
@@ -210,7 +211,7 @@ export default function WeaponBuilderPage() {
           const mod = modsMap.get(m.id);
           return { modId: m.id, modName: mod?.name ?? "", rank: m.rank, slotIndex: i, polarity: mod?.polarity, drain: mod?.drain };
         });
-        setEquippedMods(mods);
+        setEquippedMods(cleanLoadedMods(mods));
         if (shared.arcanes) {
           setEquippedArcanes(shared.arcanes.map((id) => (id ? resolveArcaneById(id) : null)));
         }
@@ -263,7 +264,8 @@ export default function WeaponBuilderPage() {
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildWeaponData()), [buildWeaponData]));
 
-  const applyLoadedBuild = useCallback((build: SavedBuild, options?: { silent?: boolean }) => {
+  const applyLoadedBuild = useCallback((rawBuild: SavedBuild, options?: { silent?: boolean }) => {
+    const build = cleanLoadedBuild(rawBuild);
     const d = build.data as WeaponBuildData;
     const weapon = allWeapons.find((w) => w.id === d.weaponId);
     if (!weapon) { toast.error("Weapon not found"); return; }
@@ -951,7 +953,7 @@ export default function WeaponBuilderPage() {
                       modCategory={modCategory}
                       numSlots={totalModSlots}
                       onImport={(mods) => {
-                        setEquippedMods(mods);
+                        setEquippedMods(cleanLoadedMods(mods));
                         setShowImporter(false);
                       }}
                       onClose={() => setShowImporter(false)}

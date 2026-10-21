@@ -26,6 +26,7 @@ import {
 } from "@/data/modular-weapons";
 import { cn } from "@/lib/utils";
 import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
+import { cleanLoadedBuild, cleanLoadedMods } from "@/lib/builds/incompatible-mod-warnings";
 import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
 import { resolveArcaneById } from "@/lib/builds/build-storage";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
@@ -192,7 +193,7 @@ export default function ModularBuilderPage() {
           setAmpBrace(ampBraces.find((b) => b.id === shared.parts!.brace) ?? null);
         }
         setEquippedMods(
-          shared.mods.map((m, idx) => {
+          cleanLoadedMods(shared.mods.map((m, idx) => {
             const mod = modsMap.get(m.id);
             return {
               modId: m.id,
@@ -202,7 +203,7 @@ export default function ModularBuilderPage() {
               polarity: mod?.polarity,
               drain: mod?.drain,
             };
-          })
+          }))
         );
         setHasOrokinCatalyst(shared.hasOrokinCatalyst ?? false);
         if (shared.arcanes?.length) {
@@ -299,8 +300,9 @@ export default function ModularBuilderPage() {
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(assembledWeapon ? stableBuildSnapshot(buildModularData()) : null);
 
-  const handleLoadBuild = useCallback((build: SavedBuild) => {
+  const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
     markClean();
+    const build = cleanLoadedBuild(rawBuild);
     const d = build.data as ModularBuildData;
     setModularType(d.modularType as ModularType);
     if (d.modularType === "kitgun") {

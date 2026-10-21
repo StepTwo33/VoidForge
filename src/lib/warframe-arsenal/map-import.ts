@@ -8,6 +8,8 @@ import {
   resolveHoundWeaponId,
 } from "@/lib/weapons/companion-weapons";
 import { isAuraMod } from "@/lib/mods/aura-mods";
+import { dropIncompatibleModsDeep } from "@/lib/mods/mod-incompatibility";
+import { modsMap } from "@/data/mods";
 import { isWarframeExilusMod } from "@/lib/mods/mod-slot-categories";
 import {
   findArcaneByName,
@@ -384,7 +386,12 @@ export function mapPositionalWeaponMods(
   return { mods: out, stanceModId };
 }
 
-/** Warframe positional mapping: last 8 → slots 1–8; prefix aura → 0 (Jade second → 10), exilus → 9. */
+/**
+ * Warframe positional mapping: last 8 → slots 1–8; prefix aura → 0 (Jade second → 10), exilus → 9.
+ * Jade: her second Aura can sit in the prefix next to the first one, or after the regular slots
+ * (a list one entry longer than the usual [arcane, arcane, exilus, aura, r1..r8] that ends in an
+ * Aura mod). Either way it lands in Aura 2 (slot 10), and an Aura mod is never put in a regular slot.
+ */
 export function mapPositionalWarframeMods(
   slots: RawUpgradeSlot[],
   warnings: ArsenalImportWarning[],
@@ -392,7 +399,6 @@ export function mapPositionalWarframeMods(
 ): { mods: ModSlot[] } {
   const allowSecondAura = getWarframeAuraSlotIndices(warframeId).length > 1;
   const regularCount = WARFRAME_IMPORT_REGULAR_SLOTS.length;
-  const prefixLen = Math.max(0, slots.length - regularCount);
   const out: ModSlot[] = [];
   const usedRegular = new Set<number>();
   const extras: ResolvedUpgradeMod[] = [];
@@ -405,28 +411,52 @@ export function mapPositionalWarframeMods(
     const res = resolveUpgradeEntry(entry, warnings, { keepStances: true });
     return res.kind === "skip" ? undefined : res.entry;
   };
+  const resolved = slots.map((raw) => take(raw));
+  const isAura = (entry: ResolvedUpgradeMod | undefined) => !!entry?.fhMod && isAuraMod(entry.fhMod);
 
-  slots.slice(prefixLen).forEach((raw, i) => {
-    const entry = take(raw);
+  let end = resolved.length;
+  const tailAuras: ResolvedUpgradeMod[] = [];
+  if (allowSecondAura && resolved.length > regularCount + 4) {
+    const last = resolved[end - 1];
+    // With an empty last entry, a regular (non-Aura) mod right after the first Aura means the
+    // extra slot is at the end: in the other layout that position is Aura 2.
+    const firstAfterAura = resolved[end - 1 - regularCount];
+    const tailLayout =
+      isAura(last) || (!last && slots[end - 1] == null && !!firstAfterAura && !isAura(firstAfterAura));
+    if (tailLayout) {
+      if (last) tailAuras.push(last);
+      end -= 1;
+    }
+  }
+  const prefixLen = Math.max(0, end - regularCount);
+
+  const placeAura = (entry: ResolvedUpgradeMod) => {
+    if (!hasAura) {
+      out.push(slotFromEntry(entry, WARFRAME_IMPORT_AURA_SLOT));
+      hasAura = true;
+    } else if (allowSecondAura && !hasSecondAura) {
+      out.push(slotFromEntry(entry, WARFRAME_IMPORT_SECOND_AURA_SLOT));
+      hasSecondAura = true;
+    } else {
+      warnings.push({ kind: "mod", label: `${modLabel(entry)} (extra aura skipped)` });
+    }
+  };
+
+  const regularAuras: ResolvedUpgradeMod[] = [];
+  resolved.slice(prefixLen, end).forEach((entry, i) => {
     if (!entry) return;
+    if (isAura(entry)) {
+      regularAuras.push(entry);
+      return;
+    }
     out.push(slotFromEntry(entry, WARFRAME_IMPORT_REGULAR_SLOTS[i]));
     usedRegular.add(i);
   });
 
-  for (const raw of slots.slice(0, prefixLen)) {
-    const entry = take(raw);
+  for (const entry of resolved.slice(0, prefixLen)) {
     if (!entry) continue;
-    const mod = entry.fhMod;
-    if (mod && isAuraMod(mod)) {
-      if (!hasAura) {
-        out.push(slotFromEntry(entry, WARFRAME_IMPORT_AURA_SLOT));
-        hasAura = true;
-      } else if (allowSecondAura && !hasSecondAura) {
-        out.push(slotFromEntry(entry, WARFRAME_IMPORT_SECOND_AURA_SLOT));
-        hasSecondAura = true;
-      } else {
-        warnings.push({ kind: "mod", label: `${modLabel(entry)} (extra aura skipped)` });
-      }
+    if (isAura(entry)) {
+      placeAura(entry);
       continue;
     }
     if (!hasExilus) {
@@ -436,6 +466,7 @@ export function mapPositionalWarframeMods(
     }
     extras.push(entry);
   }
+  for (const entry of [...tailAuras, ...regularAuras]) placeAura(entry);
 
   for (const entry of extras) {
     const free = WARFRAME_IMPORT_REGULAR_SLOTS.findIndex((_, i) => !usedRegular.has(i));
@@ -976,6 +1007,15 @@ export function mapArsenalToImportPayload(
     resultLoadout.archwingBuild = archwingBuild;
   }
 
+  // The game never lets incompatible mods share an item, but keep the import safe anyway.
+  const cleaned = dropIncompatibleModsDeep(resultLoadout);
+  for (const d of cleaned.dropped) {
+    warnings.push({
+      kind: "mod",
+      label: `${modsMap.get(d.modId)?.name ?? d.modId} (can't be equipped with ${modsMap.get(d.keptModId)?.name ?? d.keptModId}; skipped)`,
+    });
+  }
+
   return {
     account: {
       playerName,
@@ -983,7 +1023,7 @@ export function mapArsenalToImportPayload(
       lastUpdated: toIsoTimestamp(account.lastUpdated),
       focusSchool: account.focusSchool,
     },
-    loadout: resultLoadout,
+    loadout: cleaned.data,
     warnings,
   };
 }

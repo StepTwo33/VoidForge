@@ -54,6 +54,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Save, FolderOpen, Crosshair, Shield, Zap, Gauge, ChevronRight, Users, Lock } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, RailjackBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
+import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
 import { toast } from "sonner";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
@@ -263,7 +264,8 @@ export default function RailjackBuilderPage() {
     }
   }, [selectedReactor, selectedShield, selectedEngine, selectedPlating, reactorTraitId, shieldTraitId, engineTraitId, selectedTurrets, selectedOrdnance, integratedMods, battleMods, tacticalMods, integratedPolarities, battlePolarities, tacticalPolarities, crewSlots, intrinsics, crimsonFugueStacks, cruisingSpeedActive, protectiveShotsActive, shieldsDepleted, activeBattleAbilityId, activeTacticalAbilityId, currentBuildId]);
 
-  const handleLoadBuild = useCallback((build: SavedBuild) => {
+  const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
+    const build = cleanLoadedBuild(rawBuild);
     const d = build.data as RailjackBuildData;
     const restoreMods = (
       slots: { modId: string; rank: number; slotIndex: number }[],

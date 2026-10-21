@@ -61,6 +61,7 @@ import {
 } from "@/lib/weapons/exalted-weapons";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, WarframeBuildData, persistSavedBuild, resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
 import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
+import { cleanLoadedBuild, cleanLoadedMods } from "@/lib/builds/incompatible-mod-warnings";
 import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
 import { shareBuilderBuild } from "@/lib/builds/share-build";
 import { toast } from "sonner";
@@ -228,7 +229,7 @@ export default function WarframeBuilderPage() {
         }
         setSelectedWarframe(wf);
         setShowWarframeList(false);
-        setEquippedMods(dropUnknownMods(shared.mods.map((m, i) => ({ modId: m.id, rank: m.rank, slotIndex: m.slotIndex ?? i })), modsMap).map((m) => {
+        setEquippedMods(cleanLoadedMods(dropUnknownMods(shared.mods.map((m, i) => ({ modId: m.id, rank: m.rank, slotIndex: m.slotIndex ?? i })), modsMap)).map((m) => {
           const mod = modsMap.get(m.modId);
           return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
         }));
@@ -346,7 +347,8 @@ export default function WarframeBuilderPage() {
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildWarframeData()), [buildWarframeData]));
 
-  const applyLoadedBuild = useCallback((build: SavedBuild, options?: { silent?: boolean }) => {
+  const applyLoadedBuild = useCallback((rawBuild: SavedBuild, options?: { silent?: boolean }) => {
+    const build = cleanLoadedBuild(rawBuild);
     const d = build.data as WarframeBuildData;
     const wf = allWarframes.find((w) => w.id === d.warframeId);
     if (!wf) { toast.error("Warframe not found"); return; }
@@ -1196,7 +1198,7 @@ export default function WarframeBuilderPage() {
                         numSlots={8}
                         onImport={(mods) => {
                           const remapped = mods.map((m, i) => ({ ...m, slotIndex: i + 1 }));
-                          setEquippedMods(remapped);
+                          setEquippedMods(cleanLoadedMods(remapped));
                           setShowImporter(false);
                         }}
                         onClose={() => setShowImporter(false)}

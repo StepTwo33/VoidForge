@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { Zap, Save, FolderOpen, ArrowLeftRight } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, ArchwingBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
+import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
 import { toast } from "sonner";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
@@ -123,7 +124,8 @@ export default function ArchwingBuilderPage() {
     }
   };
 
-  const handleLoadBuild = useCallback((build: SavedBuild) => {
+  const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
+    const build = cleanLoadedBuild(rawBuild);
     const d = build.data as ArchwingBuildData;
     markClean();
     setMode(d.mode as BuilderMode);
