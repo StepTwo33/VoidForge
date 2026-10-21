@@ -1270,6 +1270,8 @@ export interface Loadout {
   cloudId?: string;
   /** Local-only: labels Player Sync could not map (shown on the loadout card until dismissed). */
   importWarnings?: string[];
+  /** Local-only: the Player Sync account this loadout was imported from (re-import offers Update). */
+  importSource?: { platform: string; account: string };
   createdAt: number;
   updatedAt: number;
   /** Matches warframe builder / saved build payload so mods, arcanes, helminth, etc. round-trip. */

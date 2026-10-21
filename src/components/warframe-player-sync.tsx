@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AlertCircle, Check, ExternalLink, Loader2, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -11,14 +11,49 @@ import {
   type WarframePlatform,
 } from "@/lib/warframe-arsenal/platforms";
 import type { ArsenalImportPayload, ArsenalImportWarning } from "@/lib/warframe-arsenal/map-import";
-import { generateId, saveLoadout } from "@/lib/builds/loadouts";
+import { applyImportToLoadout, findImportedLoadouts, generateId, saveLoadout } from "@/lib/builds/loadouts";
+import { getSlotLabelName, type LoadoutSlotType } from "@/lib/builds/loadout-slot-helpers";
+import { useWeapons } from "@/lib/weapons/use-data";
+import { allHelminthAbilities } from "@/data/helminth";
+import { archwings, necramechs } from "@/data/archwing";
 import type { Loadout } from "@/lib/types";
 import { toast } from "sonner";
 
 const PLATFORMS: WarframePlatform[] = ["pc", "ps4", "xb1", "swi"];
 
+/** Last Player Sync platform + account (this device only). */
+export const PLAYER_SYNC_PREFS_KEY = "voidforge_player_sync";
+
+function readPrefs(): { platform?: WarframePlatform; account?: string } {
+  try {
+    const raw = localStorage.getItem(PLAYER_SYNC_PREFS_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as { platform?: string; account?: string };
+    return {
+      platform: PLATFORMS.includes(parsed.platform as WarframePlatform) ? (parsed.platform as WarframePlatform) : undefined,
+      account: typeof parsed.account === "string" ? parsed.account : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
+function writePrefs(platform: WarframePlatform, account: string) {
+  try {
+    localStorage.setItem(PLAYER_SYNC_PREFS_KEY, JSON.stringify({ platform, account }));
+  } catch {
+    /* storage full / disabled */
+  }
+}
+
+/** Default name for an import: "<player> — Imported <date>". */
+export function importedLoadoutName(playerName: string, date = new Date()): string {
+  const day = date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return `${playerName} — Imported ${day}`;
+}
+
 type WarframePlayerSyncProps = {
-  onImported?: (loadout: Loadout) => void;
+  onImported?: (loadout: Loadout, info: { updated: boolean }) => void;
   className?: string;
 };
 
@@ -28,6 +63,22 @@ export function WarframePlayerSync({ onImported, className }: WarframePlayerSync
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ArsenalImportPayload | null>(null);
+  const [retrievedFor, setRetrievedFor] = useState<{ platform: WarframePlatform; account: string } | null>(null);
+
+  useEffect(() => {
+    const prefs = readPrefs();
+    queueMicrotask(() => {
+      if (prefs.platform) setPlatform(prefs.platform);
+      if (prefs.account) setAccount(prefs.account);
+    });
+  }, []);
+
+  const previousImport = useMemo(() => {
+    if (!result || !retrievedFor) return null;
+    const matches = findImportedLoadouts(retrievedFor.platform, retrievedFor.account);
+    if (matches.length === 0) return null;
+    return matches.reduce((a, b) => (b.updatedAt > a.updatedAt ? b : a));
+  }, [result, retrievedFor]);
 
   const retrieve = useCallback(async () => {
     const trimmed = account.trim();
@@ -62,6 +113,8 @@ export function WarframePlayerSync({ onImported, className }: WarframePlayerSync
         return;
       }
       setResult(data as ArsenalImportPayload);
+      setRetrievedFor({ platform, account: trimmed });
+      writePrefs(platform, trimmed);
     } catch {
       setError("Could not reach Voidforge. Check your connection and try again.");
     } finally {
@@ -69,20 +122,30 @@ export function WarframePlayerSync({ onImported, className }: WarframePlayerSync
     }
   }, [account, platform]);
 
-  const importLoadout = useCallback(() => {
-    if (!result) return;
-    const now = Date.now();
-    const loadout: Loadout = {
-      ...result.loadout,
-      ...(result.warnings.length > 0 ? { importWarnings: result.warnings.map((w) => w.label) } : {}),
-      id: generateId(),
-      createdAt: now,
-      updatedAt: now,
-    };
-    saveLoadout(loadout);
-    toast.success(`Imported loadout for ${result.account.playerName}`);
-    onImported?.(loadout);
-  }, [onImported, result]);
+  const importLoadout = useCallback(
+    (mode: "new" | "update") => {
+      if (!result) return;
+      const now = Date.now();
+      const imported: Omit<Loadout, "id" | "createdAt" | "updatedAt"> = {
+        ...result.loadout,
+        name: importedLoadoutName(result.account.playerName),
+        ...(result.warnings.length > 0 ? { importWarnings: result.warnings.map((w) => w.label) } : {}),
+        ...(retrievedFor ? { importSource: { platform: retrievedFor.platform, account: retrievedFor.account } } : {}),
+      };
+      if (mode === "update" && previousImport) {
+        const updated = applyImportToLoadout(previousImport, imported);
+        saveLoadout(updated);
+        toast.success(`Updated “${updated.name}”`, { description: `Re-imported from ${result.account.playerName}.` });
+        onImported?.(updated, { updated: true });
+        return;
+      }
+      const loadout: Loadout = { ...imported, id: generateId(), createdAt: now, updatedAt: now };
+      saveLoadout(loadout);
+      toast.success(`Imported loadout for ${result.account.playerName}`);
+      onImported?.(loadout, { updated: false });
+    },
+    [onImported, previousImport, result, retrievedFor],
+  );
 
   return (
     <div className={cn("space-y-5", className)}>
@@ -158,33 +221,47 @@ export function WarframePlayerSync({ onImported, className }: WarframePlayerSync
       </div>
 
       {result && (
-        <ImportPreview result={result} onImport={importLoadout} />
+        <ImportPreview result={result} previousImport={previousImport} onImport={importLoadout} />
       )}
     </div>
   );
 }
 
+const PREVIEW_SLOTS: { slot: LoadoutSlotType; label: string }[] = [
+  { slot: "warframe", label: "Warframe" },
+  { slot: "primary", label: "Primary" },
+  { slot: "secondary", label: "Secondary" },
+  { slot: "melee", label: "Melee" },
+  { slot: "companion", label: "Companion" },
+];
+
 function ImportPreview({
   result,
+  previousImport,
   onImport,
 }: {
   result: ArsenalImportPayload;
-  onImport: () => void;
+  previousImport: Loadout | null;
+  onImport: (mode: "new" | "update") => void;
 }) {
-  const slots = [
-    result.loadout.warframeBuild?.warframeId && "Warframe",
-    result.loadout.warframeBuild?.helminthAbilityId && "Helminth",
-    result.loadout.modularBuilds &&
-      Object.keys(result.loadout.modularBuilds).length > 0 &&
-      `Modular (${Object.keys(result.loadout.modularBuilds).join(", ")})`,
-    result.loadout.modularBuild && `Modular (${result.loadout.modularBuild.slot})`,
-    result.loadout.primaryBuild?.weaponId && "Primary",
-    result.loadout.secondaryBuild?.weaponId && "Secondary",
-    result.loadout.meleeBuild?.weaponId && "Melee",
-    result.loadout.companionBuild?.companionId && "Companion",
-    result.loadout.archwingBuild?.archwingId && "Archwing",
-    result.loadout.archwingBuild?.necramechId && "Necramech",
-  ].filter(Boolean) as string[];
+  const weapons = useWeapons();
+  const weaponsMap = useMemo(() => new Map(weapons.map((w) => [w.id, w])), [weapons]);
+  const items = useMemo(() => {
+    const l = { ...result.loadout, id: "preview", createdAt: 0, updatedAt: 0 } as Loadout;
+    const out: { label: string; name: string }[] = [];
+    for (const { slot, label } of PREVIEW_SLOTS) {
+      const name = getSlotLabelName(l, slot, weaponsMap);
+      if (name) out.push({ label, name });
+      if (slot === "warframe" && l.warframeBuild?.helminthAbilityId) {
+        const id = l.warframeBuild.helminthAbilityId;
+        out.push({ label: "Helminth", name: allHelminthAbilities.find((a) => a.id === id)?.name ?? id });
+      }
+    }
+    const aw = l.archwingBuild;
+    if (aw?.archwingId) out.push({ label: "Archwing", name: archwings.find((a) => a.id === aw.archwingId)?.name ?? aw.archwingId });
+    if (aw?.necramechId) out.push({ label: "Necramech", name: necramechs.find((n) => n.id === aw.necramechId)?.name ?? aw.necramechId });
+    return out;
+  }, [result.loadout, weaponsMap]);
 
   const warnings = result.warnings;
 
@@ -197,24 +274,64 @@ function ImportPreview({
           {result.account.focusSchool ? ` · ${result.account.focusSchool}` : ""}
           {" · "}Updated {new Date(result.account.lastUpdated).toLocaleString()}
         </p>
-        <p className="mt-2 text-sm">
-          Ready to import: {slots.join(", ") || "No mapped slots"}
-        </p>
+        {items.length > 0 ? (
+          <>
+            <p className="mt-2 text-sm">Ready to import:</p>
+            <ul className="mt-1 grid gap-x-4 gap-y-0.5 text-sm sm:grid-cols-2" data-testid="import-preview-items">
+              {items.map((it) => (
+                <li key={it.label} className="flex min-w-0 gap-1.5">
+                  <span className="shrink-0 text-muted-foreground">{it.label}:</span>
+                  <span className="truncate font-medium">{it.name}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : (
+          <p className="mt-2 text-sm">Ready to import: No mapped slots</p>
+        )}
       </div>
 
       {warnings.length > 0 && (
         <WarningList warnings={warnings} />
       )}
 
-      <button
-        type="button"
-        onClick={onImport}
-        disabled={slots.length === 0}
-        className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800 disabled:opacity-50 sm:w-auto"
-      >
-        <Check className="h-4 w-4" />
-        Import into Voidforge loadouts
-      </button>
+      {previousImport ? (
+        <div className="space-y-2">
+          <p className="text-xs text-muted-foreground">
+            You imported this account before as <span className="font-medium text-foreground">“{previousImport.name}”</span>.
+          </p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => onImport("update")}
+              disabled={items.length === 0}
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800 disabled:opacity-50 sm:w-auto"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Update existing loadout
+            </button>
+            <button
+              type="button"
+              onClick={() => onImport("new")}
+              disabled={items.length === 0}
+              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 sm:w-auto"
+            >
+              <Check className="h-4 w-4" />
+              Import as new
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => onImport("new")}
+          disabled={items.length === 0}
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800 disabled:opacity-50 sm:w-auto"
+        >
+          <Check className="h-4 w-4" />
+          Import into Voidforge loadouts
+        </button>
+      )}
     </div>
   );
 }
