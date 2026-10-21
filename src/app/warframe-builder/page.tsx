@@ -245,10 +245,7 @@ export default function WarframeBuilderPage() {
         setCurrentBuildId(null);
         setBuildName(`${wf.name} Build`);
         setBuildDescription("");
-        const url = new URL(window.location.href);
-        url.searchParams.delete("build");
-        const qs = url.searchParams.toString();
-        window.history.replaceState({}, "", qs ? `${url.pathname}?${qs}` : url.pathname);
+        // ?build= stays in the URL (shareable, survives refresh). Runs once on mount.
       })();
     });
     return () => {
