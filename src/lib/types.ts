@@ -313,6 +313,14 @@ export interface EquippedMod {
   drain?: number;
 }
 
+export interface StatusResistanceEntry {
+  /** Status element, e.g. "Heat", "Slash". */
+  element: string;
+  /** Chance (percent) to resist a status of this element; can exceed 100 (102% at R5). */
+  chance: number;
+  sources: string[];
+}
+
 export interface EquippedArchonShard {
   shardId: string;
   shardColor: string;
@@ -1070,7 +1078,12 @@ export interface WarframeCalculatedStats {
   healthRegenPerSec: number;
   /** Additive shield recharge rate fraction (e.g. Arcane Aegis +30% → 0.30). */
   shieldRechargeBonus?: number;
-  elementalResistance: number;
+  /**
+   * Arcane status-effect resistance, one row per element (e.g. Arcane Ice: Heat status).
+   * These are chances to ignore a status proc of that element, not damage reduction,
+   * and they never add across elements.
+   */
+  statusResistances?: StatusResistanceEntry[];
   primaryShardBonus: number;
   secondaryShardBonus: number;
   /** Violet shard: % Primary Electricity damage (incl. +10/15% per Crimson/Azure/Violet shard). */

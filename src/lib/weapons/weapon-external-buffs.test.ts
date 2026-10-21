@@ -83,7 +83,6 @@ const wfStats: WarframeCalculatedStats = {
   castingSpeedBonus: 0,
   parkourVelocityBonus: 0,
   healthRegenPerSec: 0,
-  elementalResistance: 0,
   primaryShardBonus: 0,
   secondaryShardBonus: 0,
   meleeCritDamageBonus: 0,

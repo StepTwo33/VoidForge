@@ -4,6 +4,7 @@ import { getPersistenceDamageCap, scaleArcaneEffectLine } from "@/lib/calc/arcan
 import { avgCritMultiplier } from "@/lib/calc/crit-utils";
 import { getWeaponRadialAttacks } from "@/lib/weapons/weapon-radial-utils";
 import { CalculatedStats, WarframeCalculatedStats, Weapon } from "@/lib/types";
+import { addStatusResistance, ARCANE_STATUS_RESIST } from "@/lib/calc/status-resistance";
 
 export interface WarframeArcaneContext {
   totalHealth: number;
@@ -2056,22 +2057,19 @@ export function applyCustomArcaneToWarframe(
       return true;
     }
 
-    case "arcane_healing": {
-      // wiki R5: 17–102% chance to resist Slash. Panel only (not elemental resist).
-      const resistLine = findEffect(def, "statusResistance");
-      trackBonus(stats, "statusResistance", resistLine ? scaleArcaneEffectLine(resistLine, rank, def.maxRank) : 0);
-      return true;
-    }
-
     case "arcane_ice":
+    case "arcane_warmth":
     case "arcane_nullifier":
     case "arcane_resistance":
     case "arcane_deflection":
-    case "arcane_warmth": {
-      // wiki R5: 17–102% chance to resist Cold / Magnetic / Toxin / Radiation / Heat.
-      const resistLine = findEffect(def, "statusResistance");
+    case "arcane_healing": {
+      // wiki R5: 17–102% chance to resist a status effect of one element (Ice: Heat,
+      // Warmth: Cold, Nullifier: Magnetic, Resistance: Toxin, Deflection: Slash,
+      // Healing: Radiation). Proc resistance, not damage reduction; per element only.
+      const resistLine = findEffect(def, "statusResistance") ?? findEffect(def, "coldResistance");
       const resist = resistLine ? scaleArcaneEffectLine(resistLine, rank, def.maxRank) : 0;
-      if (resist > 0) stats.elementalResistance += resist;
+      const info = ARCANE_STATUS_RESIST[arcaneId];
+      if (info) addStatusResistance(stats, info.element, resist, info.name);
       trackBonus(stats, "statusResistance", resist);
       return true;
     }

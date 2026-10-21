@@ -2269,8 +2269,19 @@ export function WarframeStatsPanel({
         {stats.healthRegenPerSec > 0 && (
           <StatRow label="Health Regen" value={`${stats.healthRegenPerSec.toFixed(1)}/s`} color="text-green-700 dark:text-green-400" />
         )}
-        {stats.elementalResistance > 0 && (
-          <StatRow label="Elemental Resist" value={`${stats.elementalResistance.toFixed(0)}%`} color="text-cyan-700 dark:text-cyan-400" />
+        {stats.statusResistances && stats.statusResistances.length > 0 && (
+          <div className="py-1 space-y-0.5 border-t border-border/50 mt-1">
+            <div className="text-[10px] font-medium text-muted-foreground">Status effect resistance</div>
+            {stats.statusResistances.map((r) => (
+              <StatRow
+                key={r.element}
+                label={`${r.element} status`}
+                value={r.chance >= 100 ? "100% (immune)" : `${r.chance.toFixed(0)}% chance`}
+                color="text-cyan-700 dark:text-cyan-400"
+                tooltip={`${r.sources.join(", ")}: chance to ignore a ${r.element} status effect. Does not reduce ${r.element} damage and does not add to other elements.`}
+              />
+            ))}
+          </div>
         )}
         {stats.persistenceDamageCapPerSecond != null && (
           <p

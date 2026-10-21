@@ -16,6 +16,7 @@ import {
   scaleArcaneEffectForBuild,
 } from "@/lib/calc/arcane-proc-model";
 import { CalculatedStats, Mod, WarframeCalculatedStats, Weapon } from "@/lib/types";
+import { addStatusResistance, ARCANE_STATUS_RESIST } from "@/lib/calc/status-resistance";
 
 /** Effective stack count for arcane effect scaling. */
 export function effectiveArcaneStacks(
@@ -164,6 +165,7 @@ function applyWarframeStatToBuild(
   line: ArcaneEffectLine,
   ctx: WarframeArcaneContext,
   def?: ArcaneEffectDef,
+  arcaneId?: string,
 ): void {
   const pct = rawValue / 100;
   const flat = line.flat ? rawValue : 0;
@@ -219,9 +221,13 @@ function applyWarframeStatToBuild(
       trackBonus(stats, "damageReduction", rawValue);
       break;
     case "statusResistance":
-    case "coldResistance":
-      stats.elementalResistance += rawValue;
+    case "coldResistance": {
+      // Per-element status resist chance (not damage reduction). The six resist
+      // arcanes are handled in arcane-handlers; this covers overrides/new arcanes.
+      const info = arcaneId ? ARCANE_STATUS_RESIST[arcaneId] : undefined;
+      addStatusResistance(stats, info?.element ?? (stat === "coldResistance" ? "Cold" : "Status"), rawValue, info?.name ?? arcaneId ?? "Arcane");
       break;
+    }
     case "healthOrbEffectiveness":
       stats.healingBonus += pct;
       break;
@@ -311,7 +317,7 @@ export function applyArcaneEffectsToWarframe(
 
     const buildValue = resolveEffectValue(def, line, rank, stacks, simStacks, 1, true);
     if (buildValue === 0) continue;
-    applyWarframeStatToBuild(stats, line.stat, buildValue, line, context, def);
+    applyWarframeStatToBuild(stats, line.stat, buildValue, line, context, def, arcaneId);
   }
 }
 
@@ -361,7 +367,7 @@ export function applyArcaneToWarframeFromMod(
     };
     applyWarframeStat(stats, stat, raw, line);
     if (shouldApplyArcaneLineToBuild(arcane.id, stat, "warframe")) {
-      applyWarframeStatToBuild(stats, stat, raw, line, wfCtx);
+      applyWarframeStatToBuild(stats, stat, raw, line, wfCtx, undefined, arcane.id);
     }
   }
 }
