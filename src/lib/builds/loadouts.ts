@@ -1,5 +1,7 @@
 import { Loadout, ModularBuildData, ModSlot } from "../types";
 import { inferModularLoadoutSlot } from "./modular-resolve";
+import { companionsMap } from "@/data/companions";
+import { migratePostureToPostureSlot } from "@/lib/weapons/companion-weapons";
 import type { SavedBuild } from "./build-storage";
 
 const STORAGE_KEY = "overframe_loadouts";
@@ -109,7 +111,7 @@ export function loadoutToBuildData(loadout: Loadout): LoadoutBuildData {
 }
 
 export function loadoutFromSavedBuild(build: SavedBuild): Loadout {
-  return {
+  return migrateCompanionPosture({
     id: build.id,
     cloudId: build.id,
     name: build.name,
@@ -118,7 +120,7 @@ export function loadoutFromSavedBuild(build: SavedBuild): Loadout {
     createdAt: build.createdAt,
     updatedAt: build.updatedAt,
     ...(build.data as LoadoutBuildData),
-  };
+  });
 }
 
 export function mergeCloudLoadout(local: Loadout, cloud: SavedBuild): Loadout {
@@ -224,7 +226,16 @@ function normalizeLoadout(raw: Loadout): Loadout {
   delete out.modularBuild;
   if (Object.keys(modularBuilds).length > 0) out.modularBuilds = modularBuilds;
   else delete out.modularBuilds;
-  return out;
+  return migrateCompanionPosture(out);
+}
+
+/** Older imports: beast posture mod sat in a regular claw slot (see migratePostureToPostureSlot). */
+export function migrateCompanionPosture<T extends Pick<Loadout, "companionBuild">>(loadout: T): T {
+  const cb = loadout.companionBuild;
+  if (!cb?.weaponMods?.length) return loadout;
+  const weaponMods = migratePostureToPostureSlot(cb.weaponMods, companionsMap.get(cb.companionId));
+  if (weaponMods === cb.weaponMods) return loadout;
+  return { ...loadout, companionBuild: { ...cb, weaponMods } };
 }
 
 export function getLoadouts(): Loadout[] {
