@@ -50,6 +50,7 @@ import {
   Save,
   Share2,
   Globe,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GameAssetImage } from "@/components/game-asset-image";
@@ -589,14 +590,17 @@ export default function LoadoutsPage() {
           description="Group a warframe, weapons (including kitguns, zaws, and amps from the Modular tab), and a companion into one kit."
           actions={
             loadouts.length > 0 ? (
-              <button
-                type="button"
-                onClick={handleCreate}
-                className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm text-primary-foreground transition-colors hover:bg-primary/90"
-              >
-                <Plus className="h-4 w-4" />
-                New loadout
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCreate}
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  <Plus className="h-4 w-4" />
+                  New loadout
+                </button>
+                <PlayerSyncButton />
+              </div>
             ) : undefined
           }
         />
@@ -610,10 +614,6 @@ export default function LoadoutsPage() {
                   <span className="font-medium text-foreground/80" title="Kitguns, Zaws, and Amps saved in Modular Builder">Modular</span>
                   {" "}— attach kitgun / zaw / amp presets per weapon slot (primary, secondary, and melee can each have one).
                 </p>
-                <p>
-                  <Link href="/player-sync" className="font-medium text-primary hover:underline" title="Import equipped gear from your Warframe account via the Arsenal Twitch extension">Player Sync</Link>
-                  {" "}— pull your in-game loadout into Frame Hub.
-                </p>
               </div>
             </div>
           </ContentPanel>
@@ -625,7 +625,9 @@ export default function LoadoutsPage() {
             title="No loadouts yet"
             description="Create a kit, then attach saved builds from the Warframe, Weapon, and Companion builders."
             action={{ onClick: handleCreate, label: "New loadout", icon: Plus }}
-          />
+          >
+            <PlayerSyncButton />
+          </EmptyState>
         ) : (
           <div className="space-y-4">
             {loadouts.map((loadout) => (
@@ -1063,5 +1065,20 @@ export default function LoadoutsPage() {
         />
       </LoadoutSectionErrorBoundary>
     </PageShell>
+  );
+}
+
+/** Secondary CTA next to "New loadout": import the equipped in-game loadout. */
+function PlayerSyncButton() {
+  return (
+    <Link
+      href="/player-sync"
+      data-testid="loadouts-player-sync"
+      title="Import your equipped in-game loadout (same data as the Arsenal Twitch extension)"
+      className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm font-medium text-secondary-foreground transition-colors hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <RefreshCw className="h-4 w-4" aria-hidden />
+      Player Sync
+    </Link>
   );
 }
