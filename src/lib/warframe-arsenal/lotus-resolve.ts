@@ -498,5 +498,30 @@ export function readRawWeaponFields(raw?: unknown) {
         : undefined,
     upgrades: record.upgrades,
     xp: typeof record.xp === "number" ? record.xp : undefined,
+    features: typeof record.features === "number" ? record.features : undefined,
+    polarized: typeof record.polarized === "number" ? record.polarized : undefined,
   };
+}
+
+/**
+ * DE equipment `Features` bitfield (Twitch payload `features`). Bit values match the game's
+ * inventory format as implemented by OpenWF SpaceNinjaServer (src/types/equipmentTypes.ts):
+ * DOUBLE_CAPACITY 1 = Orokin Catalyst / Reactor installed, UTILITY_SLOT 2 = Exilus adapter,
+ * GRAVIMAG 4, GILDED 8, ARCANE_SLOT 32, SECOND_ARCANE_SLOT 64, INCARNON_GENESIS 512, VALENCE_SWAP 1024.
+ */
+export const EQUIPMENT_FEATURES = {
+  DOUBLE_CAPACITY: 1,
+  UTILITY_SLOT: 2,
+  GRAVIMAG_INSTALLED: 4,
+  GILDED: 8,
+  ARCANE_SLOT: 32,
+  SECOND_ARCANE_SLOT: 64,
+  INCARNON_GENESIS: 512,
+  VALENCE_SWAP: 1024,
+} as const;
+
+/** True when the raw item has an Orokin Catalyst (weapons) or Reactor (frames/companions/vehicles). */
+export function rawHasDoubleCapacity(raw?: unknown): boolean {
+  const features = readRawWeaponFields(raw).features;
+  return features != null && (features & EQUIPMENT_FEATURES.DOUBLE_CAPACITY) !== 0;
 }

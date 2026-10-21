@@ -30,6 +30,7 @@ import {
   parseProgenitorFromRawWeapon,
   readAbilityOverride,
   normalizeAbilitySlot,
+  rawHasDoubleCapacity,
   readRawWeaponFields,
   resolveHelminthOverride,
 } from "@/lib/warframe-arsenal/lotus-resolve";
@@ -636,6 +637,7 @@ function weaponBuildFromArsenal(
       slot: modularFromParts.slot,
       mods,
       arcaneIds,
+      hasOrokinCatalyst: rawHasDoubleCapacity(rawWeapon),
       customName: customName || undefined,
       isMR30: (weapon.xp ?? raw.xp ?? 0) >= 900_000,
     };
@@ -662,7 +664,7 @@ function weaponBuildFromArsenal(
       mods,
       stanceModId,
       arcaneIds,
-      hasOrokinCatalyst: false,
+      hasOrokinCatalyst: rawHasDoubleCapacity(rawWeapon),
       isMR30: (weapon.xp ?? raw.xp ?? 0) >= 900_000,
       slotPolarities: {},
       ...progenitor,
@@ -708,8 +710,8 @@ function mapArchwingBuild(
       frameMods,
       weaponId: heavy?.kind === "weapon" ? heavy.build.weaponId : undefined,
       weaponMods: heavy?.kind === "weapon" ? heavy.build.mods : [],
-      hasReactor: false,
-      hasCatalyst: false,
+      hasReactor: rawHasDoubleCapacity(rawLoadOuts?.MECH?.mech),
+      hasCatalyst: heavy?.kind === "weapon" ? heavy.build.hasOrokinCatalyst : false,
     };
   }
 
@@ -732,8 +734,8 @@ function mapArchwingBuild(
       frameMods,
       weaponId: gun?.kind === "weapon" ? gun.build.weaponId : undefined,
       weaponMods: gun?.kind === "weapon" ? gun.build.mods : [],
-      hasReactor: false,
-      hasCatalyst: false,
+      hasReactor: rawHasDoubleCapacity(rawLoadOuts?.ARCHWING?.archwing),
+      hasCatalyst: gun?.kind === "weapon" ? gun.build.hasOrokinCatalyst : false,
     };
   }
 
@@ -858,8 +860,8 @@ export function mapArsenalToImportPayload(
         weaponId,
         weaponMods,
         arcaneIds: companionArcanes.arcaneIds,
-        hasReactor: false,
-        hasCatalyst: false,
+        hasReactor: rawHasDoubleCapacity(rawCompanion),
+        hasCatalyst: rawHasDoubleCapacity(rawCompanionWeapon),
         isMR30: (loadout.companion.xp ?? 0) >= 900_000,
         ...(mappedParts ? { parts: mappedParts } : {}),
         ...(partsResolved?.defaultSlotPolarities
@@ -881,7 +883,7 @@ export function mapArsenalToImportPayload(
           shards: [null, null, null, null, null],
           arcaneIds: wfArcanes.arcaneIds,
           arcaneRanks: wfArcanes.arcaneRanks,
-          hasOrokinReactor: false,
+          hasOrokinReactor: rawHasDoubleCapacity(rawNormal?.warframe),
           isMR30: (loadout.warframe.xp ?? 0) >= 900_000,
           slotPolarities: {},
           ...(helminth
