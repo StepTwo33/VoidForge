@@ -258,12 +258,12 @@ export function SimLoadBuildPicker({
         </p>
       )}
 
-      <label className="flex min-h-11 cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+      <label className="flex min-h-11 w-full cursor-pointer items-center gap-3 text-xs text-muted-foreground">
         <input
           type="checkbox"
           checked={applyHeadshots}
           onChange={(e) => onApplyHeadshotsChange(e.target.checked)}
-          className="h-4 w-4 rounded border-border accent-primary"
+          className="h-6 w-6 shrink-0 rounded border-border accent-primary"
         />
         Headshots (2× × Acuity bonuses from build)
       </label>
