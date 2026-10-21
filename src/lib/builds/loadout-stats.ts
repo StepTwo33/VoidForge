@@ -539,7 +539,12 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
   if (loadout.companionBuild) {
     const c = companionsMap.get(loadout.companionBuild.companionId);
     if (c) {
-      const bodyStats = calculateCompanionBuild(c, loadout.companionBuild.mods || [], modsMap);
+      const wfStats = result.warframe?.stats;
+      // Link Vitality / Redirection / Fiber copy the loadout Warframe's max stats.
+      const linkedWarframe = wfStats
+        ? { name: result.warframe?.name, health: wfStats.totalHealth, shield: wfStats.totalShield, armor: wfStats.totalArmor }
+        : null;
+      const bodyStats = calculateCompanionBuild(c, loadout.companionBuild.mods || [], modsMap, undefined, linkedWarframe);
       let weapon: LoadoutWeaponSlotStats | null = null;
       const weaponMods = loadout.companionBuild.weaponMods || [];
       if (weaponMods.length > 0) {

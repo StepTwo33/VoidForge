@@ -1106,7 +1106,21 @@ export interface CompanionCalculatedStats {
   incapacitationTimerReduction: number;
   shieldRechargeBonus: number;
   healthRegenBonus: number;
+  /** Flat health/shield/armor added by Link Vitality / Redirection / Fiber from the linked Warframe. */
+  linkHealth: number;
+  linkShield: number;
+  linkArmor: number;
+  /** A Link mod is equipped but no Warframe is linked, so its bonus is not in the totals. */
+  linkModsNeedWarframe: boolean;
   modBonuses?: Record<string, number>;
+}
+
+/** Warframe max stats the companion's Link mods copy (rank 30 + mods + shards + arcanes). */
+export interface CompanionLinkedWarframe {
+  name?: string;
+  health: number;
+  shield: number;
+  armor: number;
 }
 
 export interface ArchwingCalculatedStats {

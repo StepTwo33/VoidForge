@@ -20,7 +20,7 @@ import {
 import { ModSlotCard } from "@/components/mod-slot";
 import { ModPicker } from "@/components/mod-picker";
 import { useCompanions, useWeapons, useMods } from "@/lib/weapons/use-data";
-import { Companion, Mod, Weapon, EquippedMod, CompanionCalculatedStats, DEFAULT_SIM_PARAMS } from "@/lib/types";
+import { Companion, Mod, Weapon, EquippedMod, CompanionCalculatedStats, CompanionLinkedWarframe, DEFAULT_SIM_PARAMS } from "@/lib/types";
 import { calculateCompanionBuild } from "@/lib/calc/companion-calculator";
 import { calculateWeaponBuild } from "@/lib/calc/calculator";
 import { weaponSupportsHunterCompanionSet } from "@/lib/calc/set-bonuses";
@@ -99,6 +99,8 @@ import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsaved
 import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
+import { getLoadouts } from "@/lib/builds/loadouts";
+import { calcLoadoutStats } from "@/lib/builds/loadout-stats";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
 import {
   houndBrackets,
@@ -366,10 +368,21 @@ export default function CompanionBuilderPage() {
     return comps.sort((a, b) => a.name.localeCompare(b.name));
   }, [allCompanions, companionType, companionSearch]);
 
+  // Link Vitality / Redirection / Fiber copy the Warframe's max stats. Only known when this
+  // companion was opened from a loadout slot; a standalone companion build has no Warframe.
+  const linkedWarframe = useMemo<CompanionLinkedWarframe | null>(() => {
+    if (!loadoutCtx) return null;
+    const loadout = getLoadouts().find((l) => l.id === loadoutCtx.loadoutId);
+    if (!loadout?.warframeBuild) return null;
+    const wf = calcLoadoutStats(loadout).warframe;
+    if (!wf?.stats) return null;
+    return { name: wf.name, health: wf.stats.totalHealth, shield: wf.stats.totalShield, armor: wf.stats.totalArmor };
+  }, [loadoutCtx]);
+
   const calculatedStats = useMemo<CompanionCalculatedStats | null>(() => {
     if (!selectedCompanion) return null;
-    return calculateCompanionBuild(selectedCompanion, equippedMods, modsMap, companionParts);
-  }, [selectedCompanion, equippedMods, modsMap, companionParts]);
+    return calculateCompanionBuild(selectedCompanion, equippedMods, modsMap, companionParts, linkedWarframe);
+  }, [selectedCompanion, equippedMods, modsMap, companionParts, linkedWarframe]);
 
   const baseCapacity = hasReactor ? 60 : 30;
   const capacityUsed = useMemo(() => {
@@ -901,6 +914,19 @@ export default function CompanionBuilderPage() {
                       <StatRow label="Health" value={calculatedStats.totalHealth.toFixed(0)} />
                       <StatRow label="Shield" value={calculatedStats.totalShield.toFixed(0)} />
                       <StatRow label="Armor" value={calculatedStats.totalArmor.toFixed(0)} />
+                      {(calculatedStats.linkHealth > 0 || calculatedStats.linkShield > 0 || calculatedStats.linkArmor > 0) && (
+                        <p className="pt-1 text-xs text-muted-foreground" data-testid="companion-link-included">
+                          Includes Link mods from {linkedWarframe?.name ?? "your Warframe"}:
+                          {calculatedStats.linkHealth > 0 && ` +${calculatedStats.linkHealth.toFixed(0)} health`}
+                          {calculatedStats.linkShield > 0 && ` +${calculatedStats.linkShield.toFixed(0)} shields`}
+                          {calculatedStats.linkArmor > 0 && ` +${calculatedStats.linkArmor.toFixed(0)} armor`}
+                        </p>
+                      )}
+                      {calculatedStats.linkModsNeedWarframe && (
+                        <p className="pt-1 text-xs text-amber-800 dark:text-amber-400" data-testid="companion-link-standalone">
+                          Link mods add 125% of your Warframe&apos;s health, shields or armor. This companion is built on its own, so they aren&apos;t in these totals. Open it from a loadout to include them.
+                        </p>
+                      )}
                       <div className="border-t border-border my-2" />
                       <StatRow label="Melee Dmg" value={`+${(calculatedStats.meleeDamageBonus * 100).toFixed(0)}%`} />
                       <StatRow label="Atk Speed" value={`+${(calculatedStats.attackSpeedBonus * 100).toFixed(0)}%`} />
