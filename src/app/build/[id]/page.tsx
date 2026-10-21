@@ -9,7 +9,8 @@ import { buildOpenUrl } from "@/lib/builds/build-url";
 import { summarizeBuildPreview } from "@/lib/builds/build-preview";
 import { BuildPageVote } from "@/components/build-page-vote";
 import { BuildShareCard } from "@/components/build-share-card";
-import { prisma } from "@/lib/prisma";
+import { getBuildPageRecord } from "@/lib/builds/build-page-record";
+import { buildPageMetadata } from "@/lib/builds/build-page-metadata";
 import { getSession } from "@/lib/auth/auth";
 import { safeParseBuildJson } from "@/lib/builds/build-types";
 import { getSiteUrl } from "@/lib/site/site-metadata";
@@ -34,12 +35,12 @@ interface SharedBuild {
   };
 }
 
-/** Read the build straight from the DB — no self-fetch, so no reliance on client-controlled Host headers. */
+/**
+ * Read the build straight from the DB — no self-fetch, so no reliance on client-controlled Host headers.
+ * `getBuildPageRecord` is request-cached, so generateMetadata and the page share one query.
+ */
 async function getBuild(id: string): Promise<SharedBuild | null> {
-  const build = await prisma.build.findUnique({
-    where: { id },
-    include: { user: { select: { username: true, name: true, image: true, supporterAt: true } } },
-  });
+  const build = await getBuildPageRecord(id);
   if (!build) return null;
 
   if (!build.isPublic) {
@@ -69,36 +70,15 @@ async function getBuild(id: string): Promise<SharedBuild | null> {
   };
 }
 
+/**
+ * Public builds: build-specific title, description, canonical/og:url and a dynamic OG image.
+ * Private or missing builds: generic noindex metadata (no session lookup, nothing about the build).
+ */
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const build = await getBuild(id);
-
-  if (!build) return { title: "Build Not Found - Voidforge" };
-
-  const preview = summarizeBuildPreview(build.type, build.data);
-  const desc =
-    build.description?.trim() ||
-    `${preview.itemName} ${build.type} build by ${build.author.username}` +
-      (preview.modSummary ? ` · ${preview.modSummary}` : "");
-  const title = `${build.name} — ${preview.itemName} | Voidforge`;
-
-  return {
-    title,
-    description: desc.slice(0, 200),
-    openGraph: {
-      title,
-      description: desc.slice(0, 200),
-      type: "article",
-      siteName: "Voidforge",
-      images: [{ url: "/og-embed.png", width: 1200, height: 630, alt: "Voidforge" }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description: desc.slice(0, 200),
-      images: ["/og-embed.png"],
-    },
-  };
+  const record = await getBuildPageRecord(id);
+  const ogImage = record ? `/build/${encodeURIComponent(record.id)}/og-image?v=${record.updatedAt.getTime()}` : undefined;
+  return buildPageMetadata(record, ogImage);
 }
 
 export default async function SharedBuildPage({ params }: { params: Promise<{ id: string }> }) {
