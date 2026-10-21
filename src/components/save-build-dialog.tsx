@@ -38,7 +38,7 @@ interface SaveBuildDialogProps {
   defaultTags?: string[];
   showDescription?: boolean;
   title?: string;
-  onSave: (values: SaveBuildDialogValues) => Promise<void>;
+  onSave: (values: SaveBuildDialogValues) => Promise<unknown>;
   /** When set, the dialog offers "Update loadout slot" (default) or "Save as new build". */
   loadoutTarget?: SaveBuildLoadoutTarget | null;
 }

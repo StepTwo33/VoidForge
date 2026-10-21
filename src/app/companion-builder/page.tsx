@@ -89,6 +89,7 @@ import {
 } from "@/lib/weapons/companion-weapons";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
+import { stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
@@ -241,10 +242,13 @@ export default function CompanionBuilderPage() {
     }
   }, [buildCompanionData, selectedCompanion, currentBuildId]);
 
+  const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildCompanionData()), [buildCompanionData]));
+
   const handleLoadBuild = useCallback((build: SavedBuild) => {
     const d = build.data as CompanionBuildData;
     const comp = allCompanions.find((c) => c.id === d.companionId);
     if (!comp) { toast.error("Companion not found"); return; }
+    markClean();
     setSelectedCompanion(comp);
     const loadedParts = d.parts ?? defaultPartsForCompanion(comp) ?? null;
     setCompanionParts(loadedParts);
@@ -288,7 +292,7 @@ export default function CompanionBuilderPage() {
     setShowSavedBuilds(false);
     setShowCompanionList(false);
     toast.info("Build loaded", { description: build.name });
-  }, [allCompanions, allWeapons]);
+  }, [markClean, allCompanions, allWeapons]);
 
   useCloudBuildFromUrl("companion", handleLoadBuild);
   useLocalBuildFromUrl("companion", handleLoadBuild);
@@ -297,12 +301,12 @@ export default function CompanionBuilderPage() {
   const handleSaveDialog = useCallback(async (values: SaveBuildDialogValues) => {
     if (values.target === "loadout" && loadoutCtx) {
       const data = buildCompanionData();
-      if (!data) return;
+      if (!data) return false;
       const res = await updateLoadoutSlot(loadoutCtx, data);
       if (!res.ok) {
         toast.error("Loadout not found", { description: "It may have been deleted. Use Save as new build instead." });
         clearLoadoutCtx();
-        return;
+        return false;
       }
       if (res.cloud === "failed") {
         toast.warning(`Saved to ${loadoutCtx.loadoutName} on this device`, {
@@ -313,10 +317,13 @@ export default function CompanionBuilderPage() {
           description: `${loadoutSlotLabel(loadoutCtx.slot)} slot updated${res.cloud === "synced" ? " and synced to your account" : ""}.`,
         });
       }
-      return;
+      markClean();
+      return true;
     }
     await handleSaveBuildConfirm(values);
-  }, [loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildCompanionData]);
+    markClean();
+    return true;
+  }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildCompanionData]);
 
   const handleDeleteBuild = useCallback((id: string) => {
     deleteBuild(id);
@@ -565,7 +572,12 @@ export default function CompanionBuilderPage() {
     <PageShell>
 
       <main className="flex-1 container mx-auto px-4 py-6">
-        <LoadoutEditBanner context={loadoutCtx} onDetach={clearLoadoutCtx} />
+        <LoadoutEditBanner
+          context={loadoutCtx}
+          onDetach={clearLoadoutCtx}
+          dirty={hasUnsavedChanges}
+          onSaveToLoadout={() => handleSaveDialog({ name: buildName, description: "", isPublic: false, tags: [], target: "loadout" })}
+        />
         {showCompanionList || !selectedCompanion ? (
           <ItemPickerScreen
             onBack={selectedCompanion ? () => setShowCompanionList(false) : undefined}

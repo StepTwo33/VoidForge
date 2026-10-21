@@ -55,6 +55,7 @@ import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
+import { stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
 import { CommunityBuildsPanel } from "@/components/community-builds-panel";
 import { isCompanionWeaponCategory } from "@/lib/weapons/companion-weapons";
@@ -239,10 +240,13 @@ export default function WeaponBuilderPage() {
     };
   }, [selectedWeapon, equippedMods, stanceMod, equippedArcanes, hasOrokinCatalyst, adversaryFormas, slotPolarities, weaponCalcOptions, selectedEvolutions]);
 
+  const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildWeaponData()), [buildWeaponData]));
+
   const applyLoadedBuild = useCallback((build: SavedBuild, options?: { silent?: boolean }) => {
     const d = build.data as WeaponBuildData;
     const weapon = allWeapons.find((w) => w.id === d.weaponId);
     if (!weapon) { toast.error("Weapon not found"); return; }
+    markClean();
     if (isCompanionWeaponCategory(weapon.category)) {
       toast.error("Companion weapons are built in Companion Builder", {
         description: build.name,
@@ -294,7 +298,7 @@ export default function WeaponBuilderPage() {
     if (!options?.silent) {
       toast.info("Build loaded", { description: build.name });
     }
-  }, [allWeapons]);
+  }, [markClean, allWeapons]);
 
   const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags }: SaveBuildDialogValues) => {
     const data = buildWeaponData();
@@ -349,12 +353,12 @@ export default function WeaponBuilderPage() {
   const handleSaveDialog = useCallback(async (values: SaveBuildDialogValues) => {
     if (values.target === "loadout" && loadoutCtx) {
       const data = buildWeaponData();
-      if (!data) return;
+      if (!data) return false;
       const res = await updateLoadoutSlot(loadoutCtx, data);
       if (!res.ok) {
         toast.error("Loadout not found", { description: "It may have been deleted. Use Save as new build instead." });
         clearLoadoutCtx();
-        return;
+        return false;
       }
       if (res.cloud === "failed") {
         toast.warning(`Saved to ${loadoutCtx.loadoutName} on this device`, {
@@ -365,10 +369,13 @@ export default function WeaponBuilderPage() {
           description: `${loadoutSlotLabel(loadoutCtx.slot)} slot updated${res.cloud === "synced" ? " and synced to your account" : ""}.`,
         });
       }
-      return;
+      markClean();
+      return true;
     }
     await handleSaveBuildConfirm(values);
-  }, [loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildWeaponData]);
+    markClean();
+    return true;
+  }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildWeaponData]);
 
   const handleDeleteBuild = useCallback((id: string) => {
     deleteBuild(id);
@@ -600,7 +607,12 @@ export default function WeaponBuilderPage() {
     <PageShell>
 
       <main className="container mx-auto flex-1 px-3.5 pt-5 pb-24 sm:px-4 sm:pt-6 lg:pb-6">
-        <LoadoutEditBanner context={loadoutCtx} onDetach={clearLoadoutCtx} />
+        <LoadoutEditBanner
+          context={loadoutCtx}
+          onDetach={clearLoadoutCtx}
+          dirty={hasUnsavedChanges}
+          onSaveToLoadout={() => handleSaveDialog({ name: buildName, description: "", isPublic: false, tags: [], target: "loadout" })}
+        />
         {showWeaponList || !selectedWeapon ? (
           <ItemPickerScreen
             onBack={selectedWeapon ? () => setShowWeaponList(false) : undefined}

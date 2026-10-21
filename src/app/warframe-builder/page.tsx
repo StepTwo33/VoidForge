@@ -61,6 +61,7 @@ import { GameAssetImage } from "@/components/game-asset-image";
 import { BuildImporter } from "@/components/build-importer";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
+import { stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
 import { CommunityBuildsPanel } from "@/components/community-builds-panel";
 import { DualFormTabs } from "@/components/dual-form-tabs";
@@ -329,10 +330,13 @@ export default function WarframeBuilderPage() {
     exaltedMeleeArcanes,
   ]);
 
+  const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildWarframeData()), [buildWarframeData]));
+
   const applyLoadedBuild = useCallback((build: SavedBuild, options?: { silent?: boolean }) => {
     const d = build.data as WarframeBuildData;
     const wf = allWarframes.find((w) => w.id === d.warframeId);
     if (!wf) { toast.error("Warframe not found"); return; }
+    markClean();
     const config = getDualFormConfig(d.warframeId);
     if (config) {
       const states = dualFormStatesFromBuild(d)!;
@@ -388,7 +392,7 @@ export default function WarframeBuilderPage() {
     if (!options?.silent) {
       toast.info("Build loaded", { description: build.name });
     }
-  }, [modSlotsToEquipped]);
+  }, [markClean, modSlotsToEquipped]);
 
   const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags }: SaveBuildDialogValues) => {
     const data = buildWarframeData();
@@ -443,12 +447,12 @@ export default function WarframeBuilderPage() {
   const handleSaveDialog = useCallback(async (values: SaveBuildDialogValues) => {
     if (values.target === "loadout" && loadoutCtx) {
       const data = buildWarframeData();
-      if (!data) return;
+      if (!data) return false;
       const res = await updateLoadoutSlot(loadoutCtx, data);
       if (!res.ok) {
         toast.error("Loadout not found", { description: "It may have been deleted. Use Save as new build instead." });
         clearLoadoutCtx();
-        return;
+        return false;
       }
       if (res.cloud === "failed") {
         toast.warning(`Saved to ${loadoutCtx.loadoutName} on this device`, {
@@ -459,10 +463,13 @@ export default function WarframeBuilderPage() {
           description: `${loadoutSlotLabel(loadoutCtx.slot)} slot updated${res.cloud === "synced" ? " and synced to your account" : ""}.`,
         });
       }
-      return;
+      markClean();
+      return true;
     }
     await handleSaveBuildConfirm(values);
-  }, [loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildWarframeData]);
+    markClean();
+    return true;
+  }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildWarframeData]);
 
   const handleDeleteBuild = useCallback((id: string) => {
     deleteBuild(id);
@@ -838,7 +845,12 @@ export default function WarframeBuilderPage() {
     <PageShell>
 
       <main className="container mx-auto flex-1 px-3.5 pt-5 pb-24 sm:px-4 sm:pt-6 lg:pb-6">
-        <LoadoutEditBanner context={loadoutCtx} onDetach={clearLoadoutCtx} />
+        <LoadoutEditBanner
+          context={loadoutCtx}
+          onDetach={clearLoadoutCtx}
+          dirty={hasUnsavedChanges}
+          onSaveToLoadout={() => handleSaveDialog({ name: buildName, description: "", isPublic: false, tags: [], target: "loadout" })}
+        />
         {showWarframeList || !selectedWarframe ? (
           <ItemPickerScreen
             onBack={selectedWarframe ? () => setShowWarframeList(false) : undefined}

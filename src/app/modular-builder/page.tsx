@@ -29,6 +29,7 @@ import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
 import { resolveArcaneById } from "@/lib/builds/build-storage";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
+import { stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
@@ -290,7 +291,10 @@ export default function ModularBuilderPage() {
     }
   };
 
+  const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(assembledWeapon ? stableBuildSnapshot(buildModularData()) : null);
+
   const handleLoadBuild = useCallback((build: SavedBuild) => {
+    markClean();
     const d = build.data as ModularBuildData;
     setModularType(d.modularType as ModularType);
     if (d.modularType === "kitgun") {
@@ -322,7 +326,7 @@ export default function ModularBuilderPage() {
     setBuildIsPublic(build.isPublic ?? false);
     setShowSavedBuilds(false);
     toast.info("Build loaded", { description: build.name });
-  }, []);
+  }, [markClean]);
 
   useCloudBuildFromUrl("modular", handleLoadBuild);
   const { context: loadoutCtx, clearContext: clearLoadoutCtx } = useLoadoutSlotFromUrl("modular", handleLoadBuild);
@@ -330,12 +334,12 @@ export default function ModularBuilderPage() {
   const handleSaveDialog = async (values: SaveBuildDialogValues) => {
     if (values.target === "loadout" && loadoutCtx) {
       const data = buildModularData();
-      if (!data) return;
+      if (!data) return false;
       const res = await updateLoadoutSlot(loadoutCtx, data);
       if (!res.ok) {
         toast.error("Loadout not found", { description: "It may have been deleted. Use Save as new build instead." });
         clearLoadoutCtx();
-        return;
+        return false;
       }
       if (res.cloud === "failed") {
         toast.warning(`Saved to ${loadoutCtx.loadoutName} on this device`, {
@@ -346,9 +350,12 @@ export default function ModularBuilderPage() {
           description: `${loadoutSlotLabel(loadoutCtx.slot)} slot updated${res.cloud === "synced" ? " and synced to your account" : ""}.`,
         });
       }
-      return;
+      markClean();
+      return true;
     }
     await handleSaveBuildConfirm(values);
+    markClean();
+    return true;
   };
 
   const handleDeleteBuild = (id: string) => {
@@ -403,7 +410,12 @@ export default function ModularBuilderPage() {
   return (
     <PageShell>
       <main className="container mx-auto px-4 pt-8 pb-24 lg:pb-8">
-        <LoadoutEditBanner context={loadoutCtx} onDetach={clearLoadoutCtx} />
+        <LoadoutEditBanner
+          context={loadoutCtx}
+          onDetach={clearLoadoutCtx}
+          dirty={hasUnsavedChanges}
+          onSaveToLoadout={() => handleSaveDialog({ name: buildName, description: "", isPublic: false, tags: [], target: "loadout" })}
+        />
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <h1 className="text-xl sm:text-3xl font-bold">Modular Builder</h1>
           <div className="flex items-center gap-2">
