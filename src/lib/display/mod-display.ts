@@ -1,4 +1,5 @@
 import type { Mod } from "@/lib/types";
+import { modCapacityAtRank } from "@/lib/calc/mod-capacity";
 import { getModStatLabel } from "@/lib/overrides/override-stat-catalog";
 
 /** Strip wiki/HTML markup from mod descriptions for UI. */
@@ -363,6 +364,10 @@ export function getModStatDisplayLines(mod: Mod, rank: number): ModStatDisplayLi
   });
 }
 
+/**
+ * Capacity at a rank, same rule as the calculator (modCapacityAtRank): +1 per rank for normal
+ * mods, -1 per rank for negative-drain mods (stances, Orgone Tuning Matrix: -2 R0 → -7 R5).
+ */
 export function modDrainAtRank(baseDrain: number, rank: number): number {
-  return baseDrain + rank;
+  return modCapacityAtRank(baseDrain, rank);
 }

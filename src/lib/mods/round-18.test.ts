@@ -1,14 +1,15 @@
 /**
  * Round 18: stray damage stats removed from mods that don't add weapon or ability damage, the
- * Zoom / Recoil / Noise Reduction (and other) % stats and Finishing Touch's single Finisher Damage
- * line. Expected card text is worked by hand from the wiki.warframe.com stat table quoted in each
- * case (fandom as a cross-check).
+ * Zoom / Recoil / Noise Reduction (and other) % stats, Finishing Touch's single Finisher Damage
+ * line, and the Codex capacity text for negative-drain mods. Expected card text is worked by hand
+ * from the wiki.warframe.com stat table quoted in each case (fandom as a cross-check).
  */
 import { describe, expect, it } from "vitest";
 import { allMods, modsMap } from "@/data/mods";
 import { getVerifiedModBehavior } from "@/lib/mods/mod-behavior-registry";
 import { getModStatFilterTags } from "@/lib/mods/mod-stat-filters";
-import { cleanModDescription, getModStatDisplayLines } from "@/lib/display/mod-display";
+import { modCapacityAtRank } from "@/lib/calc/mod-capacity";
+import { cleanModDescription, getModStatDisplayLines, modDrainAtRank } from "@/lib/display/mod-display";
 import { calculateArchwingBuild } from "@/lib/calc/archwing-calculator";
 import { archwings } from "@/data/archwing";
 import { resolveWeaponExternalBuffs } from "@/lib/weapons/weapon-external-buffs";
@@ -259,5 +260,22 @@ describe("% on Zoom / Recoil / Noise Reduction and other % stats", () => {
     }
     // Amp school / status / crit damage and energy regen are flat on purpose (Round 15b FLAT keys).
     expect(offenders.filter((o) => !/^(omn_evi|ubri_kaneph|sil_tabol|vik_anam):/.test(o))).toEqual([]);
+  });
+});
+
+describe("Codex capacity for negative-drain mods", () => {
+  it("Orgone Tuning Matrix: -2 at R0, -7 at R5 (-1 per rank)", () => {
+    const m = mod("orgone_tuning_matrix");
+    expect([m.drain, m.maxRank]).toEqual([-2, 5]);
+    expect(modDrainAtRank(m.drain, 0)).toBe(-2);
+    expect(modDrainAtRank(m.drain, m.maxRank)).toBe(-7);
+    expect(modDrainAtRank(m.drain, m.maxRank)).toBe(modCapacityAtRank(m.drain, m.maxRank));
+  });
+  it("stances: -2 → -5 at R3; normal mods still +1 per rank", () => {
+    expect(modDrainAtRank(mod("stance_iron_phoenix").drain, 3)).toBe(-5);
+    expect(modDrainAtRank(mod("finishing_touch_r10").drain, 5)).toBe(7);
+  });
+  it("every mod: Codex drain = calculator capacity at every rank", () => {
+    for (const m of allMods) for (let r = 0; r <= m.maxRank; r++) expect(modDrainAtRank(m.drain, r), m.id).toBe(modCapacityAtRank(m.drain, r));
   });
 });
