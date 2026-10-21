@@ -11,7 +11,8 @@
 # deploys that branch only (no UI-pass merge).
 #
 # Do NOT run `npm install` on the server by hand — it rewrites package-lock.json
-# and blocks the next fetch. This script uses `npm ci` from the committed lockfile.
+# and blocks the next fetch. This script uses `npm ci --omit=dev` from the committed lockfile.
+# Dev tools (eslint, shadcn, vitest) stay off the server; they are the braces advisory.
 # Requires FRAMEHUB_MAINTAINER=1 or VOIDFORGE_MAINTAINER=1 in the server .env before build/start.
 
 set -euo pipefail
@@ -102,8 +103,8 @@ else
   git reset --hard "origin/$BRANCH"
 fi
 
-echo "==> Installing dependencies from package-lock.json"
-npm ci
+echo "==> Installing production dependencies from package-lock.json"
+npm ci --omit=dev
 
 echo "==> Building"
 npm run build

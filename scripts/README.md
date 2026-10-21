@@ -6,7 +6,7 @@ This folder mixes **ops tools** (safe to run) with **data-pipeline / audit** scr
 
 | Script | Purpose |
 |--------|---------|
-| `deploy.sh` | On the server (Cockpit): fast-forward `design/ui-pass` onto `dev`, `npm ci`, build, restart `framehub` |
+| `deploy.sh` | On the server (Cockpit): fast-forward `design/ui-pass` onto `dev`, `npm ci --omit=dev`, build, restart `framehub` |
 | `set-admin.ts` | **Local dev only** — promote emails to admin (`CONFIRM_SET_ADMIN=1`) |
 | `repair-db.mjs` | SQLite repair helper if the DB is corrupted |
 | `generate-pwa-icons.py` | Regenerates PWA icons (`npm run icons`) |
