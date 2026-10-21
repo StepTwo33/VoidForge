@@ -762,6 +762,40 @@ function assignWeaponSlot(
   else loadout.meleeBuild = mapped.build;
 }
 
+/** Orion's form item; Sirius (SiriusSuit) is the purchasable suit and the default form. */
+const ORION_SUIT_PATH = /\/SiriusOrion\/OrionSuit$/i;
+
+/**
+ * Find Orion's own config in the raw payload when the equipped suit is Sirius. DE lists
+ * per-form/special items (exalted weapons, Venari) outside the warframe slot, so scan every
+ * loadout entry for the OrionSuit unique name rather than assuming a key.
+ */
+export function findRawOrionEntry(loadOuts: RawLoadouts | undefined): unknown {
+  if (!loadOuts) return undefined;
+  for (const group of Object.values(loadOuts)) {
+    if (!group || typeof group !== "object") continue;
+    for (const entry of Object.values(group as Record<string, unknown>)) {
+      const uniqueName = readRawWeaponFields(entry).uniqueName;
+      if (uniqueName && ORION_SUIT_PATH.test(uniqueName)) return entry;
+    }
+  }
+  return undefined;
+}
+
+function mapRawFormSlice(
+  raw: unknown,
+  warnings: ArsenalImportWarning[],
+  warframeId: string,
+): { mods: ModSlot[]; slotPolarities: Record<number, string>; arcaneIds: (string | null)[]; arcaneRanks: number[] } {
+  const slots = rawUpgradeSlots(readRawWeaponFields(raw).upgrades) ?? [];
+  const { mods } = mapPositionalWarframeMods(slots, warnings, warframeId);
+  const arcanes = slots
+    .filter((entry): entry is ModUnion => !!entry && isArcaneSlot(entry))
+    .map((entry) => ({ name: labelFromUnknown(entry), rank: (entry as { rank?: number }).rank }));
+  const { arcaneIds, arcaneRanks } = mapArcaneIds(arcanes, warnings);
+  return { mods, slotPolarities: {}, arcaneIds, arcaneRanks };
+}
+
 /** Map parsed Twitch arsenal data into a Voidforge loadout import payload. */
 export function mapArsenalToImportPayload(
   arsenal: ArsenalData,
@@ -786,6 +820,19 @@ export function mapArsenalToImportPayload(
     ? mapPositionalWarframeMods(rawWarframeSlots, warnings, fhWarframe?.id)
     : mapWarframeUpgradeMods(loadout.warframe.upgrades.mods, warnings, fhWarframe?.id);
   const wfArcanes = mapArcaneIds(loadout.warframe.upgrades.arcanes, warnings);
+
+  // Sirius & Orion: one Voidforge warframe, Sirius = top-level build, Orion = dualFormBuilds.orion.
+  const mainWarframeUniqueName =
+    loadout.warframe.uniqueName ?? readRawWeaponFields(rawNormal?.warframe).uniqueName;
+  const mainIsOrion = !!mainWarframeUniqueName && ORION_SUIT_PATH.test(mainWarframeUniqueName);
+  const isSiriusOrion = fhWarframe?.id === "sirius_orion";
+  const rawOrion = isSiriusOrion && !mainIsOrion ? findRawOrionEntry(rawPayload?.loadOuts) : undefined;
+  const orionSlice =
+    isSiriusOrion && mainIsOrion
+      ? { mods: wfMapped.mods, slotPolarities: {}, arcaneIds: wfArcanes.arcaneIds, arcaneRanks: wfArcanes.arcaneRanks }
+      : rawOrion
+        ? mapRawFormSlice(rawOrion, warnings, "sirius_orion")
+        : undefined;
 
   const helminthOverride = readAbilityOverride(rawNormal?.warframe);
   const helminth = resolveHelminthOverride(helminthOverride);
@@ -879,10 +926,11 @@ export function mapArsenalToImportPayload(
     warframeBuild: fhWarframe
       ? {
           warframeId: fhWarframe.id,
-          mods: wfMapped.mods,
+          mods: isSiriusOrion && mainIsOrion ? [] : wfMapped.mods,
           shards: [null, null, null, null, null],
-          arcaneIds: wfArcanes.arcaneIds,
-          arcaneRanks: wfArcanes.arcaneRanks,
+          arcaneIds: isSiriusOrion && mainIsOrion ? [null, null] : wfArcanes.arcaneIds,
+          arcaneRanks: isSiriusOrion && mainIsOrion ? [5, 5] : wfArcanes.arcaneRanks,
+          ...(orionSlice ? { dualFormBuilds: { orion: orionSlice } } : {}),
           hasOrokinReactor: rawHasDoubleCapacity(rawNormal?.warframe),
           isMR30: (loadout.warframe.xp ?? 0) >= 900_000,
           slotPolarities: {},

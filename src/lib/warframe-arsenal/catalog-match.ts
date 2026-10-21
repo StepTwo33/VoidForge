@@ -29,6 +29,8 @@ const ARSENAL_NAME_ALIASES: Record<string, string> = {
   duelist: "Narin",
   "prime steflos shotgun": "Steflos Prime",
   "prime corufell scythe weapon": "Corufell Prime",
+  // Orion's form item (/Lotus/Powersuits/SiriusOrion/OrionSuit) is the same Voidforge warframe.
+  "orion & sirius": "Sirius & Orion",
 };
 
 function resolveArsenalName(name: string): string {
