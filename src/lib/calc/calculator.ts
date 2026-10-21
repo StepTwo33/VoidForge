@@ -74,20 +74,24 @@ import {
  * Update 34 (wiki Vitality / Redirection). Frames without a wiki row (Necramechs,
  * Helminth) keep their listed value.
  */
+function rank30Row(table: Record<string, number>, warframe: Warframe): number | undefined {
+  if (warframe.statFormId) return table[`${warframe.id}#${warframe.statFormId}`];
+  return table[warframe.id];
+}
 export function getWarframeHealthModBase(warframe: Warframe): number {
-  return WARFRAME_HEALTH_RANK30[warframe.id] ?? warframe.health;
+  return rank30Row(WARFRAME_HEALTH_RANK30, warframe) ?? warframe.health;
 }
 export function getWarframeShieldModBase(warframe: Warframe): number {
-  return WARFRAME_SHIELD_RANK30[warframe.id] ?? warframe.shield;
+  return rank30Row(WARFRAME_SHIELD_RANK30, warframe) ?? warframe.shield;
 }
 export function getWarframeArmorModBase(warframe: Warframe): number {
-  return WARFRAME_ARMOR_RANK30[warframe.id] ?? warframe.armor;
+  return rank30Row(WARFRAME_ARMOR_RANK30, warframe) ?? warframe.armor;
 }
 
 /** Unmodded rank-30 energy capacity — the pool Flow and +% max energy mods scale (wiki Energy Capacity). */
 export function getWarframeEnergyModBase(warframe: Warframe): number {
   if (warframe.energy <= 0) return 0;
-  const fromTable = WARFRAME_ENERGY_RANK30[warframe.id];
+  const fromTable = rank30Row(WARFRAME_ENERGY_RANK30, warframe);
   if (fromTable != null) return fromTable;
   return warframe.energy + 50;
 }

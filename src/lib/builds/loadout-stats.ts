@@ -7,7 +7,7 @@ import {
 } from "@/lib/weapons/effective-data";
 import { incarnonDataMap } from "@/data/incarnon";
 import type { WarframeBuildData } from "@/lib/builds/build-storage";
-import { allDualFormMods, getDualFormConfig } from "@/lib/builds/dual-form-warframes";
+import { allDualFormMods, getDualFormConfig, warframeForDualForm } from "@/lib/builds/dual-form-warframes";
 import { resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
 import { resolveDefaultCompanionWeapon } from "@/lib/weapons/companion-weapons";
 import { weaponFromModularData } from "@/lib/builds/modular-resolve";
@@ -364,7 +364,7 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
             | undefined;
           const arcaneIds = isDefault ? wb.arcaneIds : sliceWithArcanes?.arcaneIds;
           const arcaneRanks = isDefault ? wb.arcaneRanks : sliceWithArcanes?.arcaneRanks;
-          const stats = calculateWarframeBuild(wf, mods, modsMap, setLinkage);
+          const stats = calculateWarframeBuild(warframeForDualForm(wf, form.id), mods, modsMap, setLinkage);
           return {
             id: form.id,
             label: form.label,

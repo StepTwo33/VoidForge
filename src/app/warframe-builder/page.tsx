@@ -80,6 +80,7 @@ import { getWeaponArcanes } from "@/lib/weapons/weapon-arcane-config";
 import {
   dualFormStatesFromBuild,
   getDualFormConfig,
+  warframeForDualForm,
   buildAbilityDisplayEntries,
   serializeDualFormBuilds,
   EMPTY_ARCANE_IDS,
@@ -522,9 +523,11 @@ export default function WarframeBuilderPage() {
       rank: m.rank,
       slotIndex: m.slotIndex,
     }));
-    const stats = calculateWarframeBuild(selectedWarframe, modSlots, modsMap);
+    // Dual-form frames (Orion) can have their own stat block per form.
+    const statsWarframe = dualFormConfig ? warframeForDualForm(selectedWarframe, activeDualFormId) : selectedWarframe;
+    const stats = calculateWarframeBuild(statsWarframe, modSlots, modsMap);
     return applyWarframeShardsAndArcanes(stats, equippedShards, equippedArcanes, equippedArcaneRanks);
-  }, [selectedWarframe, equippedMods, equippedShards, equippedArcanes, equippedArcaneRanks, modsMap]);
+  }, [selectedWarframe, dualFormConfig, activeDualFormId, equippedMods, equippedShards, equippedArcanes, equippedArcaneRanks, modsMap]);
 
   /** Exalted DPS scales with host Ability Strength (wiki). */
   const exaltedCalcOptions = useMemo<WeaponCalculationOptions>(

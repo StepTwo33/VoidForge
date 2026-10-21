@@ -222,6 +222,11 @@ export interface Warframe {
   abilities: Ability[];
   description: string;
   passive: string;
+  /**
+   * Set by `warframeForDualForm` when a dual-form frame's active form has its own
+   * stat block; the rank-30 tables are then read at `<id>#<statFormId>`.
+   */
+  statFormId?: string;
 }
 
 export interface Ability {
