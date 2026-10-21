@@ -55,7 +55,7 @@ import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
-import { stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
+import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
 import { CommunityBuildsPanel } from "@/components/community-builds-panel";
 import { isCompanionWeaponCategory } from "@/lib/weapons/companion-weapons";
@@ -739,10 +739,12 @@ export default function WeaponBuilderPage() {
                       setSaveDialogDefaultPublic(buildIsPublic);
                       setSaveDialogOpen(true);
                     }}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:pointer-fine:min-h-0 lg:py-1.5 text-muted-foreground hover:text-green-700 dark:hover:text-green-400 hover:bg-green-500/10 transition-all font-medium"
-                    title="Save Build"
+                    className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:pointer-fine:min-h-0 lg:py-1.5 text-muted-foreground hover:text-green-700 dark:hover:text-green-400 hover:bg-green-500/10 transition-all font-medium", hasUnsavedChanges && SAVE_DIRTY_CLASS)}
+                    title={hasUnsavedChanges ? "Save Build (unsaved changes)" : "Save Build"}
+                    data-dirty={hasUnsavedChanges ? "true" : undefined}
                   >
                     <Save className="h-3.5 w-3.5" /> <span className="inline">Save</span>
+                    {hasUnsavedChanges && <span className={SAVE_DIRTY_DOT_CLASS} aria-hidden />}
                   </button>
                   <button
                     onClick={() => { setSavedBuilds(getSavedBuilds("weapon")); setShowSavedBuilds(true); }}
