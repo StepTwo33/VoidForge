@@ -492,7 +492,7 @@ function quantizeStatsDamage(stats: CalculatedStats, moddedBaseDamage: number): 
 
 // ── Set Bonus Detection ─────────────────────────────────────────────────
 // Implemented: Umbral (×stats on Vit/Fiber/Int; Tau unscaled), Sacrificial (1.5× on both mods when 2),
-// Gladiator (+10% crit/(CM−1) per piece + +15%/(CM−1) at 6 total w/ sim.wf pieces), Vigilante (5%/mod, primary only;
+// Gladiator (+10% crit/(CM−1) per piece, incl. sim.wf pieces; 6 pieces = +60%), Vigilante (5%/mod, primary only;
 //   also counts Vigilante on linked Warframe or sim.extraVigilanteModsFromWarframe; folded into avg crit for DPS).
 // Cross-slot: Synth 4pc +15% pistol reload; Tek 4pc optional ×1.6 vs marked (primary); loadout linkage in set-bonuses.ts.
 // Warframe panel: Augur/Hunter/Mecha/Synth/Tek + Augur shields/cast + Mecha mark timing.
