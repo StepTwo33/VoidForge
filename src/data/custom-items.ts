@@ -622,6 +622,50 @@ export const customWeapons: Weapon[] = [
     passive:
       "Alt-fire splits into 8 burst rifles that auto-target up to 4 enemies within 10m (34 Tau, burst x2, 12 fire rate, 1.5 ammo per shot). Ammo regenerates after 0.5s idle at 300/s; fully depleted magazine reloads in 2s.",
   },
+  // ── THROWN SECONDARY ────────────────────────────────────────────────────
+  // Source: https://wiki.warframe.com/w/Talons, fandom Module:Weapons/data/secondary and
+  // WFCD @wfcd/items (all three agree). Internal name
+  // /Lotus/Weapons/Tenno/ThrowingWeapons/U18ThrowingKnives/U18throwingknives (Update 18.0, MR 8).
+  // id is talons_thrown because "talons" is already Valkyr's exalted Talons.
+  // Two fire modes: Mid-Flight Detonation (default) and Embedded Detonation (knife sticks, then detonates).
+  {
+    id: "talons_thrown",
+    name: "Talons",
+    category: "secondary",
+    damage: 120,
+    impact: 0,
+    puncture: 0,
+    slash: 0,
+    blast: 120,
+    fireRate: 3.33,
+    criticalChance: 0.22,
+    criticalMultiplier: 2,
+    statusChance: 0.26,
+    magazine: 4,
+    reloadTime: 1,
+    multishot: 1,
+    triggerType: "Throwing",
+    modSlots: 8,
+    hasPrimaryArcaneSlot: false,
+    hasSecondaryArcaneSlot: false,
+    isIncarnon: false,
+    hasRivenSlot: true,
+    radialAttacks: [
+      { name: "Mid-Flight Detonation", blast: 120, totalDamage: 120, radius: 4, falloffReduction: 0.5 },
+    ],
+    defaultModeLabel: "Mid-Flight Detonation",
+    alternateModeStats: {
+      label: "Embedded Detonation",
+      damage: 250,
+      blast: 250,
+      statusChance: 0.1,
+      radialAttacks: [
+        { name: "Embedded Detonation", blast: 250, totalDamage: 250, radius: 4, falloffReduction: 0.5 },
+      ],
+    },
+    passive:
+      "Thrown explosive knives (4 per magazine, 12 max ammo). A knife detonates in flight on contact (120 Blast, 4m), or embeds and detonates for 250 Blast with forced Puncture and Ragdoll. 0.5 linear falloff over 4m.",
+  },
 ];
 
 // Custom companions go here when needed
