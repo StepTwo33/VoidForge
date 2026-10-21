@@ -70,3 +70,14 @@ describe("R9-I amp scaffold multi-part attacks (wiki Module:Weapons/data/modular
     expect(ampScaffoldProcsPerTrigger(sc("amp_klebrik"))).toBe(0.14);
   });
 });
+
+describe("R9-D2 Nurinarim (wiki: 20s max duration; 2× on marked targets)", async () => {
+  const { allWarframes } = await import("@/data/warframes");
+  const nur = allWarframes.find((f) => f.id === "narin")!.abilities.find((a) => a.name === "Nurinarim")!;
+  it("duration 20s (was 15)", () => expect(nur.duration).toBe(20));
+  it("panel note says the damage values are the marked-target 2× case", () => {
+    expect(String(nur.miscStats?.markedTarget)).toMatch(/2× marked-target/);
+    expect(nur.damage).toBe(2 * 20000);
+    expect(nur.miscStats?.explosionDamage).toBe(2 * 10000);
+  });
+});

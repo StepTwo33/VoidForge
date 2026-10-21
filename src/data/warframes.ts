@@ -4761,12 +4761,13 @@ export const allWarframes: Warframe[] = [
         "damage": 40000,
         "aoeDamage": 500,
         "radius": 8,
-        "duration": 15,
+        "duration": 20,
         "damageType": "Cold",
         "miscStats": {
           "defenseReduction": 0.05,
           "explosionDamage": 20000,
-          "explosionRange": 10
+          "explosionRange": 10,
+          "markedTarget": "Slash 40000 / explosion 20000 are the 2× marked-target values (unmarked 20000 / 10000)"
         }
       }
     ]
