@@ -60,6 +60,7 @@ import {
   getPrimaryExaltedWeapon,
 } from "@/lib/weapons/exalted-weapons";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, WarframeBuildData, persistSavedBuild, resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
+import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
 import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
 import { shareBuilderBuild } from "@/lib/builds/share-build";
 import { toast } from "sonner";
@@ -214,9 +215,17 @@ export default function WarframeBuilderPage() {
       void (async () => {
         const params = new URLSearchParams(window.location.search);
         const shared = await extractBuildFromUrlAsync(params);
-        if (cancelled || !shared || shared.type !== "warframe") return;
+        if (cancelled) return;
+        if (!shared) {
+          reportUnreadableShareLink(params);
+          return;
+        }
+        if (shared.type !== "warframe") return;
         const wf = allWarframes.find((w) => w.id === shared.itemId);
-        if (!wf) return;
+        if (!wf) {
+          toast.error("Warframe not found", { description: "This shared build uses a Warframe that is no longer in the catalog." });
+          return;
+        }
         setSelectedWarframe(wf);
         setShowWarframeList(false);
         setEquippedMods(dropUnknownMods(shared.mods.map((m, i) => ({ modId: m.id, rank: m.rank, slotIndex: m.slotIndex ?? i })), modsMap).map((m) => {

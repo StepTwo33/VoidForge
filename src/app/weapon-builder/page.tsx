@@ -48,6 +48,7 @@ import { incarnonDataMap } from "@/data/incarnon";
 import { cn } from "@/lib/utils";
 import { appendReturnTo } from "@/lib/site/nav-return";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, WeaponBuildData, persistSavedBuild, resolveSavedArcaneSlots, resolveArcaneById } from "@/lib/builds/build-storage";
+import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
 import { extractBuildFromUrlAsync, ShareableBuild } from "@/lib/builds/build-url";
 import { shareBuilderBuild } from "@/lib/builds/share-build";
 import { toast } from "sonner";
@@ -176,7 +177,12 @@ export default function WeaponBuilderPage() {
         const params = new URLSearchParams(window.location.search);
         if (params.get("build") && params.get("build") === appliedShareParamRef.current) return;
         const shared = await extractBuildFromUrlAsync(params);
-        if (cancelled || !shared || shared.type !== "weapon") return;
+        if (cancelled) return;
+        if (!shared) {
+          reportUnreadableShareLink(params);
+          return;
+        }
+        if (shared.type !== "weapon") return;
         const weapon = allWeapons.find((w) => w.id === shared.itemId);
         if (!weapon) {
           toast.error("Weapon not found", { description: "This shared build uses a weapon that is no longer in the catalog." });

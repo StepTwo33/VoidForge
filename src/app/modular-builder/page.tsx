@@ -25,6 +25,7 @@ import {
   KitgunChamber, KitgunGrip, KitgunLoader, ZawStrike, ZawGrip, ZawLink, AmpScaffold, AmpBrace,
 } from "@/data/modular-weapons";
 import { cn } from "@/lib/utils";
+import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
 import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
 import { resolveArcaneById } from "@/lib/builds/build-storage";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
@@ -169,7 +170,12 @@ export default function ModularBuilderPage() {
       void (async () => {
         const params = new URLSearchParams(window.location.search);
         const shared = await extractBuildFromUrlAsync(params);
-        if (cancelled || !shared || shared.type !== "modular" || !shared.modularType || !shared.parts) return;
+        if (cancelled) return;
+        if (!shared) {
+          reportUnreadableShareLink(params);
+          return;
+        }
+        if (shared.type !== "modular" || !shared.modularType || !shared.parts) return;
         const mt = shared.modularType as ModularType;
         setModularType(mt);
         if (mt === "kitgun") {
