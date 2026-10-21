@@ -1,0 +1,463 @@
+{
+ "account": {
+  "playerName": "LiveTenno",
+  "masteryRank": 35,
+  "lastUpdated": "2026-10-21T02:17:20.000Z",
+  "focusSchool": "Vazarin"
+ },
+ "loadout": {
+  "name": "LiveTenno \u2014 Imported Loadout",
+  "warframeBuild": {
+   "warframeId": "gyre_prime",
+   "mods": [
+    {
+     "modId": "aura_corrosive_projection",
+     "rank": 5,
+     "slotIndex": 0
+    },
+    {
+     "modId": "aura_cunning_drift",
+     "rank": 5,
+     "slotIndex": 9
+    },
+    {
+     "modId": "blind_rage",
+     "rank": 10,
+     "slotIndex": 1
+    },
+    {
+     "modId": "primed_continuity",
+     "rank": 10,
+     "slotIndex": 2
+    },
+    {
+     "modId": "umbra_intensify",
+     "rank": 10,
+     "slotIndex": 3
+    },
+    {
+     "modId": "transient_fortitude",
+     "rank": 10,
+     "slotIndex": 4
+    },
+    {
+     "modId": "rolling_guard",
+     "rank": 10,
+     "slotIndex": 5
+    },
+    {
+     "modId": "cathode_current",
+     "rank": 3,
+     "slotIndex": 6
+    },
+    {
+     "modId": "archon_stretch",
+     "rank": 10,
+     "slotIndex": 7
+    },
+    {
+     "modId": "adaptation",
+     "rank": 10,
+     "slotIndex": 8
+    }
+   ],
+   "shards": [
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "arcaneIds": [
+    "molt_efficiency",
+    "molt_augmented"
+   ],
+   "arcaneRanks": [
+    5,
+    5
+   ],
+   "hasOrokinReactor": false,
+   "isMR30": true,
+   "slotPolarities": {}
+  },
+  "companionBuild": {
+   "companionId": "vasca",
+   "mods": [
+    {
+     "modId": "resourceful_retriever",
+     "rank": 5,
+     "slotIndex": 0
+    },
+    {
+     "modId": "primed_pack_leader",
+     "rank": 10,
+     "slotIndex": 1
+    },
+    {
+     "modId": "link_vitality",
+     "rank": 10,
+     "slotIndex": 2
+    },
+    {
+     "modId": "draining_bite",
+     "rank": 3,
+     "slotIndex": 3
+    },
+    {
+     "modId": "duplex_bond",
+     "rank": 5,
+     "slotIndex": 4
+    },
+    {
+     "modId": "transfusion",
+     "rank": 3,
+     "slotIndex": 5
+    },
+    {
+     "modId": "sharpened_claws",
+     "rank": 3,
+     "slotIndex": 6
+    },
+    {
+     "modId": "covert_bond",
+     "rank": 5,
+     "slotIndex": 7
+    },
+    {
+     "modId": "link_redirection",
+     "rank": 10,
+     "slotIndex": 8
+    },
+    {
+     "modId": "fetch",
+     "rank": 5,
+     "slotIndex": 9
+    }
+   ],
+   "weaponId": "vasca_claws",
+   "weaponMods": [
+    {
+     "modId": "balanced_posture",
+     "rank": 3,
+     "slotIndex": 0
+    },
+    {
+     "modId": "maul",
+     "rank": 10,
+     "slotIndex": 1
+    },
+    {
+     "modId": "bite",
+     "rank": 10,
+     "slotIndex": 2
+    },
+    {
+     "modId": "cull_the_weak",
+     "rank": 5,
+     "slotIndex": 3
+    },
+    {
+     "modId": "claw_magnetic",
+     "rank": 3,
+     "slotIndex": 4
+    },
+    {
+     "modId": "precision_conditioning",
+     "rank": 10,
+     "slotIndex": 5
+    },
+    {
+     "modId": "venom_teeth",
+     "rank": 3,
+     "slotIndex": 6
+    },
+    {
+     "modId": "sepsis_claws",
+     "rank": 10,
+     "slotIndex": 7
+    },
+    {
+     "modId": "swipe",
+     "rank": 3,
+     "slotIndex": 8
+    }
+   ],
+   "arcaneIds": [
+    null,
+    null
+   ],
+   "hasReactor": false,
+   "hasCatalyst": false,
+   "isMR30": true
+  },
+  "primaryBuild": {
+   "weaponId": "boar_prime",
+   "mods": [
+    {
+     "modId": "galvanized_acceleration",
+     "rank": 10,
+     "slotIndex": 0
+    },
+    {
+     "modId": "critical_deceleration",
+     "rank": 5,
+     "slotIndex": 1
+    },
+    {
+     "modId": "galvanized_hell",
+     "rank": 10,
+     "slotIndex": 2
+    },
+    {
+     "modId": "scattering_inferno_r3",
+     "rank": 3,
+     "slotIndex": 3
+    },
+    {
+     "modId": "primed_chilling_grasp",
+     "rank": 10,
+     "slotIndex": 4
+    },
+    {
+     "modId": "riven_shotgun",
+     "rank": 0,
+     "slotIndex": 5,
+     "rivenStats": {
+      "multishot": 0.8197764929568176,
+      "damage": 0.9736933381983017,
+      "projectileSpeed": -0.062040012387596086
+     }
+    },
+    {
+     "modId": "primed_ravage",
+     "rank": 10,
+     "slotIndex": 6
+    },
+    {
+     "modId": "atomic_fallout",
+     "rank": 3,
+     "slotIndex": 7
+    },
+    {
+     "modId": "galvanized_savvy",
+     "rank": 10,
+     "slotIndex": 8
+    }
+   ],
+   "arcaneIds": [
+    "arcane_primary_merciless",
+    null
+   ],
+   "hasOrokinCatalyst": false,
+   "isMR30": true,
+   "slotPolarities": {}
+  },
+  "secondaryBuild": {
+   "weaponId": "dual_toxocyst",
+   "mods": [
+    {
+     "modId": "hornet_strike_r3",
+     "rank": 10,
+     "slotIndex": 0
+    },
+    {
+     "modId": "galvanized_diffusion",
+     "rank": 10,
+     "slotIndex": 1
+    },
+    {
+     "modId": "lethal_torrent",
+     "rank": 5,
+     "slotIndex": 2
+    },
+    {
+     "modId": "galvanized_shot",
+     "rank": 10,
+     "slotIndex": 3
+    },
+    {
+     "modId": "primed_convulsion",
+     "rank": 10,
+     "slotIndex": 4
+    },
+    {
+     "modId": "riven_pistol",
+     "rank": 0,
+     "slotIndex": 5,
+     "rivenStats": {
+      "multishot": 0.7553527492614023,
+      "toxin": 0.8556536267098539,
+      "reloadSpeed": -0.5364598888312093
+     }
+    },
+    {
+     "modId": "primed_heated_charge",
+     "rank": 10,
+     "slotIndex": 6
+    },
+    {
+     "modId": "pistol_pestilence_r3",
+     "rank": 3,
+     "slotIndex": 7
+    }
+   ],
+   "arcaneIds": [
+    "secondary_fortifier",
+    null
+   ],
+   "hasOrokinCatalyst": false,
+   "isMR30": true,
+   "slotPolarities": {}
+  },
+  "meleeBuild": {
+   "weaponId": "war_prime",
+   "mods": [
+    {
+     "modId": "primed_pressure_point",
+     "rank": 10,
+     "slotIndex": 0
+    },
+    {
+     "modId": "primed_reach",
+     "rank": 10,
+     "slotIndex": 1
+    },
+    {
+     "modId": "magnetic_rush",
+     "rank": 3,
+     "slotIndex": 2
+    },
+    {
+     "modId": "organ_shatter_r3",
+     "rank": 5,
+     "slotIndex": 3
+    },
+    {
+     "modId": "vicious_frost",
+     "rank": 3,
+     "slotIndex": 4
+    },
+    {
+     "modId": "primed_fever_strike",
+     "rank": 10,
+     "slotIndex": 5
+    },
+    {
+     "modId": "gladiator_might",
+     "rank": 5,
+     "slotIndex": 6
+    },
+    {
+     "modId": "drifting_contact_r3",
+     "rank": 0,
+     "slotIndex": 7
+    }
+   ],
+   "stanceModId": "stance_cleaving_whirlwind",
+   "arcaneIds": [
+    "melee_duplicate",
+    null
+   ],
+   "hasOrokinCatalyst": false,
+   "isMR30": true,
+   "slotPolarities": {}
+  },
+  "archwingBuild": {
+   "mode": "necramech",
+   "necramechId": "voidrig",
+   "frameMods": [
+    {
+     "modId": "necramech_thrusters",
+     "rank": 3,
+     "slotIndex": 0
+    },
+    {
+     "modId": "necramech_continuity",
+     "rank": 5,
+     "slotIndex": 1
+    },
+    {
+     "modId": "necramech_augur",
+     "rank": 5,
+     "slotIndex": 2
+    },
+    {
+     "modId": "necramech_deflection",
+     "rank": 5,
+     "slotIndex": 3
+    },
+    {
+     "modId": "necramech_redirection",
+     "rank": 9,
+     "slotIndex": 4
+    },
+    {
+     "modId": "necramech_rebuke",
+     "rank": 3,
+     "slotIndex": 5
+    },
+    {
+     "modId": "necramech_flow",
+     "rank": 5,
+     "slotIndex": 6
+    },
+    {
+     "modId": "necramech_repair",
+     "rank": 3,
+     "slotIndex": 7
+    },
+    {
+     "modId": "necramech_streamline",
+     "rank": 5,
+     "slotIndex": 8
+    }
+   ],
+   "weaponId": "larkspur_prime",
+   "weaponMods": [
+    {
+     "modId": "containment_breach",
+     "rank": 3,
+     "slotIndex": 0
+    },
+    {
+     "modId": "charged_bullets",
+     "rank": 3,
+     "slotIndex": 1
+    },
+    {
+     "modId": "contamination_casing",
+     "rank": 3,
+     "slotIndex": 2
+    },
+    {
+     "modId": "primed_rubedo_lined_barrel",
+     "rank": 10,
+     "slotIndex": 3
+    },
+    {
+     "modId": "primed_dual_rounds",
+     "rank": 9,
+     "slotIndex": 4
+    },
+    {
+     "modId": "magnetized_cycle",
+     "rank": 3,
+     "slotIndex": 5
+    },
+    {
+     "modId": "parallax_scope",
+     "rank": 3,
+     "slotIndex": 6
+    },
+    {
+     "modId": "hollowed_bullets",
+     "rank": 3,
+     "slotIndex": 7
+    }
+   ],
+   "hasReactor": false,
+   "hasCatalyst": false
+  }
+ },
+ "warnings": []
+}
