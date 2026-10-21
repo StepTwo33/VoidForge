@@ -709,8 +709,13 @@ export default function WarframeBuilderPage() {
   );
 
   const innatePolarities = useMemo(
-    () => innateSlotPolarities("warframe", selectedWarframe?.id),
-    [selectedWarframe?.id],
+    () =>
+      innateSlotPolarities(
+        "warframe",
+        selectedWarframe?.id,
+        dualFormConfig ? activeDualFormId : undefined,
+      ),
+    [selectedWarframe?.id, dualFormConfig, activeDualFormId],
   );
   const effectivePolarities = useMemo(
     () => effectiveSlotPolarities(innatePolarities, slotPolarities),

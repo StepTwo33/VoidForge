@@ -20,11 +20,20 @@ const WARFRAME_SECOND_AURA = 10;
 const WARFRAME_EXILUS = 9;
 const WARFRAME_FIRST_REGULAR = 1;
 
+/**
+ * Dual-form warframes (Sirius & Orion) store one entry per form as `<kind>:<id>#<formId>`;
+ * pass the active form to get its defaults. Falls back to the plain `<kind>:<id>` entry.
+ */
 export function getInnatePolarityEntry(
   kind: InnateKind,
   id: string | null | undefined,
+  formId?: string | null,
 ): InnatePolarityEntry | undefined {
   if (!id) return undefined;
+  if (formId) {
+    const perForm = INNATE_POLARITIES[`${kind}:${id}#${formId}`];
+    if (perForm) return perForm;
+  }
   return INNATE_POLARITIES[`${kind}:${id}`];
 }
 
@@ -32,8 +41,9 @@ export function getInnatePolarityEntry(
 export function innateSlotPolarities(
   kind: InnateKind,
   id: string | null | undefined,
+  formId?: string | null,
 ): Record<number, string> {
-  const entry = getInnatePolarityEntry(kind, id);
+  const entry = getInnatePolarityEntry(kind, id, formId);
   const out: Record<number, string> = {};
   if (!entry) return out;
   const first = kind === "warframe" ? WARFRAME_FIRST_REGULAR : 0;

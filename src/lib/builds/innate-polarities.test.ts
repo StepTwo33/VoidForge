@@ -40,7 +40,7 @@ describe("innate polarity data", () => {
     expect(INNATE_POLARITIES["weapon:dark_dagger"]).toEqual({ stance: "madurai" });
     expect(INNATE_POLARITIES["weapon:dorrclave"]).toEqual({ slots: ["naramon"], stance: "madurai" });
     // Dual-form frame: per-form defaults are not modelled yet.
-    expect(INNATE_POLARITIES["warframe:sirius_orion"]).toBeUndefined();
+    expect(INNATE_POLARITIES["warframe:sirius_orion"]).toBeUndefined(); // per-form keys instead
   });
 
   it("includes custom-items.ts weapons and exalted weapons like any other item", () => {
@@ -130,5 +130,33 @@ describe("capacity with innate defaults", () => {
   it("a user forma overrides the default for capacity", () => {
     const eff = effectiveSlotPolarities(innate, { 3: "vazarin" });
     expect(computeWarframeCapacityUsed(equipped, mods, eff, [0])).toBe(6 + 6);
+  });
+});
+
+describe("dual-form defaults (Sirius & Orion)", () => {
+  it("each form has its own defaults (WFCD + wiki.warframe.com)", () => {
+    expect(innateSlotPolarities("warframe", "sirius_orion", "sirius")).toEqual({ 0: "vazarin", 1: "vazarin", 2: "naramon" });
+    expect(innateSlotPolarities("warframe", "sirius_orion", "orion")).toEqual({ 0: "naramon", 1: "madurai", 2: "naramon" });
+  });
+
+  it("no form or a plain warframe falls back to the single entry", () => {
+    expect(innateSlotPolarities("warframe", "sirius_orion")).toEqual({});
+    expect(innateSlotPolarities("warframe", "wisp_prime", "sirius")).toEqual(innateSlotPolarities("warframe", "wisp_prime"));
+  });
+
+  it("saved builds are unchanged: per-form overrides stay overrides only", async () => {
+    const { serializeDualFormBuilds, dualFormStatesFromBuild } = await import("@/lib/builds/dual-form-warframes");
+    const states = {
+      sirius: { mods: [], slotPolarities: { 3: "madurai" }, arcaneIds: [null, null], arcaneRanks: [5, 5] },
+      orion: { mods: [], slotPolarities: { 1: "none" }, arcaneIds: [null, null], arcaneRanks: [5, 5] },
+    };
+    const saved = serializeDualFormBuilds("sirius_orion", states);
+    expect(saved.slotPolarities).toEqual({ 3: "madurai" });
+    expect(saved.dualFormBuilds?.orion.slotPolarities).toEqual({ 1: "none" });
+    const back = dualFormStatesFromBuild({ warframeId: "sirius_orion", ...saved } as never)!;
+    expect(effectiveSlotPolarities(innateSlotPolarities("warframe", "sirius_orion", "orion"), back.orion.slotPolarities))
+      .toEqual({ 0: "naramon", 2: "naramon" });
+    expect(effectiveSlotPolarities(innateSlotPolarities("warframe", "sirius_orion", "sirius"), back.sirius.slotPolarities))
+      .toEqual({ 0: "vazarin", 1: "vazarin", 2: "naramon", 3: "madurai" });
   });
 });

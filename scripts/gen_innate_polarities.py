@@ -24,7 +24,10 @@ wikigg = json.load(open(sys.argv[4])) if len(sys.argv) > 4 else {}
 checked = {"agree": 0, "unverified": 0, "dropped": 0}
 VALID = {"madurai", "vazarin", "naramon", "zenurik", "unairu", "penjaga", "umbra", "universal"}
 
-ALIASES = {"orion and sirius": "sirius and orion", "valkyr prime talons": "valkyr talons prime"}
+ALIASES = {"valkyr prime talons": "valkyr talons prime"}
+
+# Dual-form warframes: one Voidforge item, one WFCD entry per form -> key "<kind>:<id>#<form>".
+DUAL_FORMS = {"sirius and orion": ("sirius_orion", "sirius"), "orion and sirius": ("sirius_orion", "orion")}
 
 def norm(n):
     k = re.sub(r"[^a-z0-9]+", " ", n.lower().replace("&", "and")).strip()
@@ -105,6 +108,10 @@ def add(group, vf_list, wfcd_items, fields):
         else:
             checked["unverified"] += len(rec)
         if not rec:
+            continue
+        dual = DUAL_FORMS.get(norm(w["name"])) if group == "warframe" else None
+        if dual:
+            entries[f"{group}:{dual[0]}#{dual[1]}"] = rec
             continue
         ids = by_name.get(norm(w["name"]))
         if ids and f is not None:
