@@ -79,7 +79,15 @@ include_ui_pass() {
     git merge --ff-only origin/design/ui-pass
   else
     echo "==> design/ui-pass and dev have diverged; merging"
-    git merge --no-edit origin/design/ui-pass
+    # The box has no git user.name/email. A merge commit needs an identity, and
+    # `git -c` supplies one for this command without writing git config.
+    if ! git -c user.name="${GIT_AUTHOR_NAME:-Voidforge deploy}" \
+            -c user.email="${GIT_AUTHOR_EMAIL:-deploy@void-forge.org}" \
+            merge --no-edit origin/design/ui-pass; then
+      echo "ERROR: merge of design/ui-pass into dev failed. Resolve it on a machine with GitHub login, then run this again."
+      git merge --abort || true
+      exit 1
+    fi
   fi
 
   echo "==> Pushing dev"
