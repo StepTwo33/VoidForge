@@ -48,7 +48,7 @@ function ContributionsList({ contributions }: { contributions?: DpsContribution[
             <div className="min-w-0">
               <div className="text-[10px] truncate">{row.label}</div>
               {row.nominal && (
-                <div className="text-[9px] text-muted-foreground/60 truncate">{row.nominal}</div>
+                <div className="text-[9px] text-muted-foreground/70 truncate">{row.nominal}</div>
               )}
             </div>
             <div className="shrink-0 text-right">
@@ -62,7 +62,7 @@ function ContributionsList({ contributions }: { contributions?: DpsContribution[
           </div>
         ))}
         {contributions.length > 8 && (
-          <p className="text-[9px] text-muted-foreground/60">+{contributions.length - 8} more in weapon builder</p>
+          <p className="text-[9px] text-muted-foreground/70">+{contributions.length - 8} more in weapon builder</p>
         )}
       </div>
     </div>

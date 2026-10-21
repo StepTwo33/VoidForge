@@ -936,7 +936,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                   <div className="min-w-0 flex-1">
                     <div className={`text-xs truncate ${color}`}>{row.label}</div>
                     {row.nominal && (
-                      <div className="text-[9px] text-muted-foreground/60 truncate">{row.nominal}</div>
+                      <div className="text-[9px] text-muted-foreground/70 truncate">{row.nominal}</div>
                     )}
                   </div>
                   <div className="shrink-0 text-right">
@@ -972,7 +972,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                   {proc.damagePerTick.toFixed(0)}/tick × {proc.ticks} = {proc.totalDamage.toFixed(0)} over {proc.duration}s
                 </div>
               )}
-              <div className="text-[10px] text-muted-foreground/60 ml-2">{proc.description}</div>
+              <div className="text-[10px] text-muted-foreground/70 ml-2">{proc.description}</div>
             </div>
           ))}
         </CollapsibleSection>

@@ -411,7 +411,7 @@ export default function ImportExportPage() {
                       </div>
                     ) : (
                       <div className="flex aspect-square w-full max-w-[240px] items-center justify-center rounded-xl bg-muted/20">
-                        <QrCode className="h-12 w-12 text-muted-foreground/30" />
+                        <QrCode className="h-12 w-12 text-muted-foreground/70" />
                       </div>
                     )}
 

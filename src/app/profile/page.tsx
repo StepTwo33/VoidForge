@@ -795,7 +795,7 @@ export default function ProfilePage() {
               </div>
             ) : reports.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/70 surface-panel px-4 py-14 text-center">
-                <Flag className="h-10 w-10 text-muted-foreground/40 mb-4" />
+                <Flag className="h-10 w-10 text-muted-foreground/70 mb-4" />
                 <p className="text-sm text-muted-foreground mb-4">No reports yet, or none tied to this account.</p>
                 <Link
                   href="/report-issue"

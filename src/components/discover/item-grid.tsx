@@ -45,7 +45,7 @@ export function DiscoverItemGrid({
                   hideOnError
                 />
               ) : (
-                <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60">
+                <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/70">
                   {item.name.slice(0, 3)}
                 </span>
               )}

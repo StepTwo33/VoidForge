@@ -1099,7 +1099,7 @@ export default function WeaponBuilderPage() {
                     value={buildDescription}
                     onChange={(e) => setBuildDescription(e.target.value)}
                     placeholder="Write a description for this build... (e.g. mechanics, synergies, how to play)"
-                    className="w-full h-24 p-3 bg-card border border-border rounded-lg text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-muted-foreground/60 shadow-sm"
+                    className="w-full h-24 p-3 bg-card border border-border rounded-lg text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-muted-foreground/70 shadow-sm"
                   />
                 </div>
               </div>

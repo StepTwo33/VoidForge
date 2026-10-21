@@ -1038,7 +1038,7 @@ export default function LoadoutsPage() {
                             onClick={() => handleOpenPicker(loadout.id, slot)}
                             className="group flex min-h-[100px] items-center gap-3 rounded-xl border border-dashed border-border/80 p-4 text-left transition-all hover:border-primary/45 hover:bg-primary/5"
                           >
-                            <span className="text-muted-foreground/60 group-hover:text-primary">{SLOT_ICONS[slot]}</span>
+                            <span className="text-muted-foreground/70 group-hover:text-primary">{SLOT_ICONS[slot]}</span>
                             <div>
                               <span className="block text-xs font-medium text-muted-foreground group-hover:text-foreground">
                                 {cfg.label}

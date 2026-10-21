@@ -162,7 +162,7 @@ export default function RivenCalculatorPage() {
 
           {!selectedWeaponType && (
             <div className="mb-4 rounded-xl border border-border bg-card p-6 text-center">
-              <Sparkles className="mx-auto mb-2 h-7 w-7 text-muted-foreground/40" />
+              <Sparkles className="mx-auto mb-2 h-7 w-7 text-muted-foreground/70" />
               <p className="text-sm font-medium text-foreground">Pick a weapon type to start grading</p>
               <p className="mt-1 text-xs text-muted-foreground">Rifle, Shotgun, Pistol, Melee, or Archgun — then choose a weapon.</p>
             </div>

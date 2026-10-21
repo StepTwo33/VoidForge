@@ -677,7 +677,7 @@ export function WeaponSimControls({
         {/* Active conditional summary */}
         {hasConditionals && (
           <div className="border-t border-border/50 pt-1 mt-1 space-y-0.5">
-            <div className="text-[9px] text-muted-foreground/60 mb-0.5">Active conditional effects:</div>
+            <div className="text-[9px] text-muted-foreground/70 mb-0.5">Active conditional effects:</div>
             {stats.bloodRushStacks > 0 && (
               <div className="text-[10px] text-red-700 dark:text-red-400">Blood Rush: ×{(1 + stats.bloodRushStacks * Math.max(0, stats.comboMultiplier - 1)).toFixed(2)} crit (coef × (CM−1) = {(stats.bloodRushStacks * Math.max(0, stats.comboMultiplier - 1) * 100).toFixed(0)}%)</div>
             )}

@@ -39,7 +39,7 @@ export function SimResultsPanel({
   if (!selectedEnemy || !sim) {
     return (
       <div className="rounded-xl border border-border/60 surface-panel p-8 text-center">
-        <Shield className="mx-auto mb-3 h-8 w-8 text-muted-foreground/30" />
+        <Shield className="mx-auto mb-3 h-8 w-8 text-muted-foreground/70" />
         <p className="text-sm font-medium text-foreground">No enemy selected</p>
         <p className="mx-auto mt-1.5 max-w-xs text-xs text-muted-foreground">
           Pick a faction and enemy on the left to see TTK and DPS.
@@ -140,7 +140,7 @@ export function SimResultsPanel({
           />
         )}
         <SimResultRow label="Effective HP" value={fmtSimNum(sim.effectiveHP)} bold color="text-primary" />
-        <div className="mt-1 text-[9px] text-muted-foreground/60">
+        <div className="mt-1 text-[9px] text-muted-foreground/70">
           {damageFactionForEnemy(selectedEnemy) ?? "No faction"} modifiers ·{" "}
           {selectedEnemy.baseArmor > 0 ? "armor" : "no armor"} ·{" "}
           {selectedEnemy.baseShield > 0 ? "shields" : "no shields"}
@@ -288,7 +288,7 @@ export function SimResultsPanel({
                     </span>
                   )}
                   {fm === 0 && (
-                    <span className="text-muted-foreground/40">neutral</span>
+                    <span className="text-muted-foreground/70">neutral</span>
                   )}
                 </div>
               );
@@ -296,7 +296,7 @@ export function SimResultsPanel({
         </div>
       </SimSection>
 
-      <p className="text-[9px] text-muted-foreground/60">
+      <p className="text-[9px] text-muted-foreground/70">
         Sustained DPS accounts for {reloadTime}s reload every {magazine} shots.
       </p>
     </>
