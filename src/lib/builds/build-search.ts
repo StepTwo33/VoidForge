@@ -78,7 +78,45 @@ function matchScore(item: BuildSearchItem, query: string): number {
     return 300;
   }
 
-  return 0;
+  return typoScore(name, q, qWords);
+}
+
+/** Minimum query length before one-typo matches are allowed (avoids noise on short queries). */
+const TYPO_MIN_LENGTH = 4;
+
+/** True when a and b differ by at most one insertion, deletion, substitution or adjacent swap. */
+export function withinOneEdit(a: string, b: string): boolean {
+  if (a === b) return true;
+  const la = a.length;
+  const lb = b.length;
+  if (Math.abs(la - lb) > 1) return false;
+  let i = 0;
+  while (i < la && i < lb && a[i] === b[i]) i++;
+  if (la === lb) {
+    if (a.slice(i + 1) === b.slice(i + 1)) return true; // substitution
+    return a[i] === b[i + 1] && a[i + 1] === b[i] && a.slice(i + 2) === b.slice(i + 2); // swap
+  }
+  return la > lb ? a.slice(i + 1) === b.slice(i) : a.slice(i) === b.slice(i + 1); // deletion / insertion
+}
+
+/** One-typo fallback, always ranked below exact, prefix and substring matches (≤ 200). */
+function typoScore(name: string, q: string, qWords: string[]): number {
+  if (q.length < TYPO_MIN_LENGTH) return 0;
+  if (withinOneEdit(name, q)) return 200;
+  const nameWords = name.split(" ");
+  const wordHit = (w: string) =>
+    nameWords.some((nw) => nw.startsWith(w) || (w.length >= TYPO_MIN_LENGTH && withinOneEdit(nw, w)));
+  if (qWords.length === 1) {
+    return nameWords.some((nw) => withinOneEdit(nw, q)) ? 150 : 0;
+  }
+  // Multi-word: every word matches a name word, and at most one of them needed a typo fix.
+  let typos = 0;
+  for (const w of qWords) {
+    if (nameWords.some((nw) => nw.startsWith(w))) continue;
+    if (!wordHit(w)) return 0;
+    typos++;
+  }
+  return typos <= 1 ? 120 : 0;
 }
 
 export function searchBuildCatalog(query: string, limit = 8): BuildSearchItem[] {
