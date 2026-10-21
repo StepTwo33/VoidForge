@@ -46,3 +46,27 @@ describe("R9-B Vinquibus melee mode (wiki Weapons/data/melee 'Vinquibus (Melee)'
     expect([d.heavyAttack, d.slideAttack, d.slam.damage, d.slam.radius, d.heavySlam.damage, d.heavySlam.radius]).toEqual([2600, 520, 440, 7, 660, 8]);
   });
 });
+
+describe("R9-I amp scaffold multi-part attacks (wiki Module:Weapons/data/modular)", async () => {
+  const { ampScaffolds, ampScaffoldProcsPerTrigger, ampScaffoldEdgeDamage } = await import("@/data/modular-weapons");
+  const sc = (id: string) => ampScaffolds.find((x) => x.id === id)!;
+  it("parts sum to the stored per-trigger damage", () => {
+    for (const s of ampScaffolds) {
+      if (!s.attacks) continue;
+      expect(s.attacks.reduce((n, a) => n + a.damage * (a.multishot ?? 1), 0)).toBe(s.damage);
+    }
+  });
+  it("Shraksun: 3000 @20% + 4500 @30% explosion, forced Impact each → 2.5 procs/shot; edge 3000 + 4500×0.6 = 5700", () => {
+    const s = sc("amp_shraksun");
+    expect(s.attacks!.map((a) => [a.damage, a.statusChance])).toEqual([[3000, 0.2], [4500, 0.3]]);
+    expect(ampScaffoldProcsPerTrigger(s)).toBeCloseTo(2.5, 10);
+    expect(ampScaffoldEdgeDamage(s)).toBeCloseTo(5700, 10);
+  });
+  it("Dissic: 0.37×(1+1+9) = 4.07 procs; edge 15 + 6600×0.4 + 0 = 2655", () => {
+    expect(ampScaffoldProcsPerTrigger(sc("amp_dissic"))).toBeCloseTo(4.07, 10);
+    expect(ampScaffoldEdgeDamage(sc("amp_dissic"))).toBeCloseTo(2655, 10);
+  });
+  it("single-part scaffolds fall back to their status chance", () => {
+    expect(ampScaffoldProcsPerTrigger(sc("amp_klebrik"))).toBe(0.14);
+  });
+});

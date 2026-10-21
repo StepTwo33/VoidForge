@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import {
   kitgunChambers, kitgunGrips, kitgunLoaders, buildKitgun,
   zawStrikes, zawGrips, zawLinks, buildZaw,
-  ampPrisms, ampScaffolds, ampBraces,
+  ampPrisms, ampScaffolds, ampBraces, ampScaffoldProcsPerTrigger, ampScaffoldEdgeDamage,
   recommendedBuilds,
   KitgunChamber, KitgunGrip, KitgunLoader, ZawStrike, ZawGrip, ZawLink, AmpScaffold, AmpBrace,
 } from "@/data/modular-weapons";
@@ -942,6 +942,30 @@ export default function ModularBuilderPage() {
                     <StatDelta label="Crit Multi" value={ampScaffold.criticalMultiplier} suffix="x" />
                     <StatDelta label="Status" value={+(ampScaffold.statusChance * 100).toFixed(0)} suffix="%" />
                   </div>
+                  {ampScaffold.attacks && ampScaffold.attacks.length > 1 && (
+                    <div className="mt-2 space-y-0.5" data-testid="amp-scaffold-parts">
+                      {ampScaffold.attacks.map((a) => (
+                        <div key={a.name} className="flex justify-between text-xs py-0.5">
+                          <span className="text-muted-foreground">
+                            {a.name}
+                            {a.multishot && a.multishot > 1 ? ` ×${a.multishot}` : ""}
+                            {a.radius ? ` (${a.radius}m)` : ""}
+                          </span>
+                          <span className="text-foreground/80">
+                            {a.damage} {a.damageType} · {+(a.statusChance * 100).toFixed(0)}% SC
+                          </span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between text-xs py-0.5">
+                        <span className="text-muted-foreground">Status procs / shot</span>
+                        <span className="text-foreground/80">{+ampScaffoldProcsPerTrigger(ampScaffold).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between text-xs py-0.5">
+                        <span className="text-muted-foreground">Damage at blast edge</span>
+                        <span className="text-foreground/80">{Math.round(ampScaffoldEdgeDamage(ampScaffold))}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

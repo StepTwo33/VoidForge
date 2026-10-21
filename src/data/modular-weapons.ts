@@ -534,19 +534,71 @@ export interface AmpScaffold {
   /** Shots per burst / in-burst delay (s) for burst scaffolds (wiki BurstCount / BurstDelay). */
   burstCount?: number;
   burstDelay?: number;
+  /**
+   * Per-part attacks for multi-part scaffolds (wiki Module:Weapons/data/modular Attacks[]).
+   * `damage` above stays the per-trigger sum; each part rolls status on its own.
+   */
+  attacks?: AmpScaffoldAttack[];
 }
 
-// Damage is the per-trigger sum of the scaffold's attacks (wiki Module:Weapons/data/modular):
+export interface AmpScaffoldAttack {
+  name: string;
+  damage: number;
+  damageType: "Void" | "Impact";
+  statusChance: number;
+  criticalChance?: number;
+  criticalMultiplier?: number;
+  /** Fragments per trigger (Dissic 9). */
+  multishot?: number;
+  /** AoE radius (m) and fraction of damage lost at the edge (linear falloff). */
+  radius?: number;
+  falloffReduction?: number;
+  /** Guaranteed status procs per hit. */
+  forcedProcs?: string[];
+}
+
+/** Expected status procs per trigger: Σ status chance × multishot + forced procs. */
+export function ampScaffoldProcsPerTrigger(sc: AmpScaffold): number {
+  const parts = sc.attacks;
+  if (!parts?.length) return sc.statusChance;
+  return parts.reduce((n, a) => n + a.statusChance * (a.multishot ?? 1) + (a.forcedProcs?.length ?? 0), 0);
+}
+
+/** Per-trigger damage at the AoE edge (falloff applied to explosion parts). */
+export function ampScaffoldEdgeDamage(sc: AmpScaffold): number {
+  const parts = sc.attacks;
+  if (!parts?.length) return sc.damage;
+  return parts.reduce((n, a) => n + a.damage * (a.multishot ?? 1) * (1 - (a.falloffReduction ?? 0)), 0);
+}
+
+// `damage` is the per-trigger sum of the scaffold's attacks (wiki Module:Weapons/data/modular):
 // Phahd 3000 direct + 1100 explosion; Shraksun 3000 + 4500; Dissic 15 impact + 6600 explosion + 9 × 300 fragments;
 // Exard 200 impact + 2600 explosion per shot, 3-round burst (0.12s) at Fire Rate 1 (fandom's older 5 / 0.111 was
 // corrected to 3 / 0.12 on wiki.warframe.com by the same editor in Feb 2025).
 export const ampScaffolds: AmpScaffold[] = [
   { id: "amp_pencha", name: "Pencha", damage: 9000, fireRate: 2.0, criticalChance: 0.14, criticalMultiplier: 1.6, statusChance: 0.18, description: "Charged beam" },
-  { id: "amp_shraksun", name: "Shraksun", damage: 7500, fireRate: 1.33, criticalChance: 0.20, criticalMultiplier: 2.0, statusChance: 0.20, description: "Explosive short-range" },
+  { id: "amp_shraksun", name: "Shraksun", damage: 7500, fireRate: 1.33, criticalChance: 0.20, criticalMultiplier: 2.0, statusChance: 0.20, description: "Explosive short-range",
+    attacks: [
+      { name: "Direct Hit", damage: 3000, damageType: "Void", statusChance: 0.2, forcedProcs: ["Impact"] },
+      { name: "Explosion", damage: 4500, damageType: "Void", statusChance: 0.3, radius: 5, falloffReduction: 0.4, forcedProcs: ["Impact"] },
+    ] },
   { id: "amp_klebrik", name: "Klebrik", damage: 320, fireRate: 12.0, criticalChance: 0.16, criticalMultiplier: 1.6, statusChance: 0.14, description: "Homing beam" },
-  { id: "amp_phahd", name: "Phahd", damage: 4100, fireRate: 1.67, criticalChance: 0.34, criticalMultiplier: 2.6, statusChance: 0.12, description: "Bouncing glaive" },
-  { id: "amp_exard", name: "Exard", damage: 2800, fireRate: 1.0, criticalChance: 0.17, criticalMultiplier: 1.9, statusChance: 0.33, description: "Full-auto explosive", burstCount: 3, burstDelay: 0.12 },
-  { id: "amp_dissic", name: "Dissic", damage: 9315, fireRate: 1.0, criticalChance: 0.03, criticalMultiplier: 1.5, statusChance: 0.37, description: "Lobbed fragmenting explosive" },
+  { id: "amp_phahd", name: "Phahd", damage: 4100, fireRate: 1.67, criticalChance: 0.34, criticalMultiplier: 2.6, statusChance: 0.12, description: "Bouncing glaive",
+    attacks: [
+      { name: "Direct Hit", damage: 3000, damageType: "Void", statusChance: 0.12 },
+      { name: "Explosion", damage: 1100, damageType: "Void", statusChance: 0.12, radius: 5, falloffReduction: 0.3 },
+    ] },
+  { id: "amp_exard", name: "Exard", damage: 2800, fireRate: 1.0, criticalChance: 0.17, criticalMultiplier: 1.9, statusChance: 0.33, description: "Full-auto explosive", burstCount: 3, burstDelay: 0.12,
+    attacks: [
+      { name: "Direct Hit", damage: 200, damageType: "Impact", statusChance: 0.33 },
+      { name: "Explosion", damage: 2600, damageType: "Void", statusChance: 0.33, radius: 2.5, falloffReduction: 0.3 },
+    ] },
+  { id: "amp_dissic", name: "Dissic", damage: 9315, fireRate: 1.0, criticalChance: 0.03, criticalMultiplier: 1.5, statusChance: 0.37, description: "Lobbed fragmenting explosive",
+    attacks: [
+      { name: "Direct Hit", damage: 15, damageType: "Impact", statusChance: 0.37 },
+      { name: "Explosion", damage: 6600, damageType: "Void", statusChance: 0.37, radius: 7, falloffReduction: 0.6 },
+      { name: "Explosive Fragments", damage: 300, damageType: "Void", statusChance: 0.37, criticalChance: 0.1, criticalMultiplier: 2, multishot: 9, radius: 3, falloffReduction: 1 },
+    ] },
   { id: "amp_propa", name: "Propa", damage: 9000, fireRate: 2.0, criticalChance: 0.30, criticalMultiplier: 2.0, statusChance: 0.0, description: "Deployable mine" },
 ];
 
