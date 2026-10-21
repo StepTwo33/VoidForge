@@ -653,14 +653,32 @@ export default function WarframeBuilderPage() {
     exaltedCalcOptions,
   ]);
 
+  // Exalted weapons have innate polarities like any weapon; the state holds overrides only.
+  const exaltedInnatePolarities = useMemo(
+    () => innateSlotPolarities("weapon", exaltedWeapon?.id),
+    [exaltedWeapon?.id],
+  );
+  const exaltedEffectivePolarities = useMemo(
+    () => effectiveSlotPolarities(exaltedInnatePolarities, exaltedSlotPolarities),
+    [exaltedInnatePolarities, exaltedSlotPolarities],
+  );
+  const exaltedMeleeInnatePolarities = useMemo(
+    () => innateSlotPolarities("weapon", exaltedMeleeWeapon?.id),
+    [exaltedMeleeWeapon?.id],
+  );
+  const exaltedMeleeEffectivePolarities = useMemo(
+    () => effectiveSlotPolarities(exaltedMeleeInnatePolarities, exaltedMeleeSlotPolarities),
+    [exaltedMeleeInnatePolarities, exaltedMeleeSlotPolarities],
+  );
+
   const exaltedCapacity = useMemo(
-    () => computeUsedCapacity(exaltedMods, modsMap, exaltedSlotPolarities),
-    [exaltedMods, exaltedSlotPolarities, modsMap],
+    () => computeUsedCapacity(exaltedMods, modsMap, exaltedEffectivePolarities),
+    [exaltedMods, exaltedEffectivePolarities, modsMap],
   );
 
   const exaltedMeleeCapacity = useMemo(
-    () => computeUsedCapacity(exaltedMeleeMods, modsMap, exaltedMeleeSlotPolarities),
-    [exaltedMeleeMods, exaltedMeleeSlotPolarities, modsMap],
+    () => computeUsedCapacity(exaltedMeleeMods, modsMap, exaltedMeleeEffectivePolarities),
+    [exaltedMeleeMods, exaltedMeleeEffectivePolarities, modsMap],
   );
 
   const filteredWarframes = useMemo(() => {
@@ -1327,7 +1345,9 @@ export default function WarframeBuilderPage() {
                     exaltedCapacity={exaltedCapacity}
                     exaltedMods={exaltedMods}
                     modsMap={modsMap}
-                    exaltedSlotPolarities={exaltedSlotPolarities}
+                    exaltedSlotPolarities={exaltedEffectivePolarities}
+                    exaltedSlotOverrides={exaltedSlotPolarities}
+                    exaltedInnatePolarities={exaltedInnatePolarities}
                     exaltedArcaneConfig={exaltedArcaneConfig}
                     exaltedArcanes={exaltedArcanes}
                     exaltedStats={exaltedStats}
@@ -1343,12 +1363,7 @@ export default function WarframeBuilderPage() {
                       setExaltedMods((prev) => prev.filter((m) => m.slotIndex !== i))
                     }
                     onPolarize={(i, p) =>
-                      setExaltedSlotPolarities((prev) => {
-                        const next = { ...prev };
-                        if (p) next[i] = p;
-                        else delete next[i];
-                        return next;
-                      })
+                      setExaltedSlotPolarities((prev) => applyPolarityOverride(prev, exaltedInnatePolarities, i, p))
                     }
                     onAddArcane={(i) => {
                       setExaltedActiveArcaneSlot(i);
@@ -1371,7 +1386,9 @@ export default function WarframeBuilderPage() {
                     exaltedCapacity={exaltedMeleeCapacity}
                     exaltedMods={exaltedMeleeMods}
                     modsMap={modsMap}
-                    exaltedSlotPolarities={exaltedMeleeSlotPolarities}
+                    exaltedSlotPolarities={exaltedMeleeEffectivePolarities}
+                    exaltedSlotOverrides={exaltedMeleeSlotPolarities}
+                    exaltedInnatePolarities={exaltedMeleeInnatePolarities}
                     exaltedArcaneConfig={exaltedMeleeArcaneConfig}
                     exaltedArcanes={exaltedMeleeArcanes}
                     exaltedStats={exaltedMeleeStats}
@@ -1387,12 +1404,7 @@ export default function WarframeBuilderPage() {
                       setExaltedMeleeMods((prev) => prev.filter((m) => m.slotIndex !== i))
                     }
                     onPolarize={(i, p) =>
-                      setExaltedMeleeSlotPolarities((prev) => {
-                        const next = { ...prev };
-                        if (p) next[i] = p;
-                        else delete next[i];
-                        return next;
-                      })
+                      setExaltedMeleeSlotPolarities((prev) => applyPolarityOverride(prev, exaltedMeleeInnatePolarities, i, p))
                     }
                     onAddArcane={(i) => {
                       setExaltedMeleeActiveArcaneSlot(i);
