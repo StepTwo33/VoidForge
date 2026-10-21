@@ -4,6 +4,7 @@ import { ImageResponse } from "next/og";
 import { getBuildPageRecord } from "@/lib/builds/build-page-record";
 import { publicBuildCard } from "@/lib/builds/build-page-metadata";
 import { OG_IMAGE_URL } from "@/lib/site/page-metadata";
+import { getSiteUrl } from "@/lib/site/site-metadata";
 
 /**
  * Dynamic social image for a public build: build name, item, author and the item's image.
@@ -31,10 +32,11 @@ async function localImageDataUrl(src: string | null): Promise<string | null> {
   }
 }
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const card = publicBuildCard(await getBuildPageRecord(id));
-  if (!card) return Response.redirect(new URL(OG_IMAGE_URL, request.url), 302);
+  // Absolute URL from the configured site origin, not the (proxy-controlled) request Host.
+  if (!card) return Response.redirect(new URL(OG_IMAGE_URL, getSiteUrl()), 302);
 
   const image = await localImageDataUrl(card.itemImage);
   const clip = (s: string, n: number) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
