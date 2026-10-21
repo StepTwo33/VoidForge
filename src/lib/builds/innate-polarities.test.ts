@@ -33,10 +33,20 @@ describe("innate polarity data", () => {
     expect(INNATE_POLARITIES["necramech:voidrig"]).toEqual({ slots: ["madurai", "vazarin", "naramon"] });
   });
 
-  it("leaves out fields where WFCD and the wiki disagree", () => {
-    expect(INNATE_POLARITIES["warframe:lavos"]?.aura).toBeUndefined();
-    expect(INNATE_POLARITIES["warframe:voruna"]?.aura).toBeUndefined();
-    expect(INNATE_POLARITIES["warframe:jade"]?.aura2).toBeUndefined();
+  it("resolves WFCD vs fandom conflicts by 2-of-3 with wiki.warframe.com", () => {
+    expect(INNATE_POLARITIES["warframe:lavos"]?.aura).toBe("naramon");
+    expect(INNATE_POLARITIES["warframe:voruna"]?.aura).toBe("vazarin");
+    expect(INNATE_POLARITIES["warframe:jade"]).toEqual({ slots: ["naramon"], aura2: "vazarin" });
+    expect(INNATE_POLARITIES["weapon:dark_dagger"]).toEqual({ stance: "madurai" });
+    expect(INNATE_POLARITIES["weapon:dorrclave"]).toEqual({ slots: ["naramon"], stance: "madurai" });
+    // Dual-form frame: per-form defaults are not modelled yet.
+    expect(INNATE_POLARITIES["warframe:sirius_orion"]).toBeUndefined();
+  });
+
+  it("includes custom-items.ts weapons and exalted weapons like any other item", () => {
+    expect(INNATE_POLARITIES["weapon:war_prime"]).toEqual({ slots: ["naramon"], stance: "vazarin" });
+    expect(INNATE_POLARITIES["weapon:haalvu"]).toEqual({ slots: ["madurai", "madurai"] });
+    expect(INNATE_POLARITIES["weapon:talons"]).toEqual({ slots: ["madurai", "naramon", "naramon"], stance: "zenurik" });
   });
 });
 

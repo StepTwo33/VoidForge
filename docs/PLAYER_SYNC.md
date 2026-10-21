@@ -42,8 +42,9 @@
 ## Innate (default) polarities
 
 The data comes from WFCD `@wfcd/items` (`scripts/gen_innate_polarities.py`), cross-checked against the
-fandom wiki data modules (`scripts/extract_fandom_polarities.py`). When the two disagree the field is
-left out. Builders show these defaults under any user or imported forma. `"none"` stores a cleared innate
+fandom wiki data modules (`scripts/extract_fandom_polarities.py`). When the two disagree,
+wiki.warframe.com infoboxes (`scripts/data/wikigg-polarities.json`) break the tie (2 of 3 wins);
+otherwise the field is left out. Builders show these defaults under any user or imported forma. `"none"` stores a cleared innate
 slot. Neither source records slot positions, so defaults go on the first regular slots in listed order.
 
 ## Testing

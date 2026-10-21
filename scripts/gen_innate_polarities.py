@@ -2,7 +2,7 @@
 """
 Generate src/data/innate-polarities.ts from WFCD warframe-items (npm @wfcd/items data/json).
 
-Usage: python3 scripts/gen_innate_polarities.py <wfcd-items>/data/json <vf-items.json> [fandom.json]
+Usage: python3 scripts/gen_innate_polarities.py <wfcd-items>/data/json <vf-items.json> [fandom.json] [wikigg.json]
 
 <vf-items.json> is a dump of Voidforge ids/names ({warframes, weapons, companions, archwings,
 necramechs}: [{id, name}]); items are matched by normalized display name. WFCD lists innate
@@ -10,7 +10,9 @@ polarities per item but not their slot positions; Voidforge places them on the f
 slots in listed order (see src/lib/builds/innate-polarities.ts).
 Optional [fandom.json] ({name: {slots, aura, exilus, stance}} extracted from the fandom wiki's
 Module:Warframes/data, Module:Weapons/data/* and Module:Companions/data): any field where the two
-sources disagree is dropped (and reported); fields missing on the wiki are kept from WFCD.
+sources disagree is dropped (and reported) unless the optional [wikigg.json] (same shape, read from
+wiki.warframe.com item infoboxes) sides with one of them: 2 of 3 sources agreeing wins.
+Fields missing on the wiki are kept from WFCD.
 Weapon `exilusPolarity` in WFCD is not used: weapon Exilus slots have no innate polarity in game.
 """
 import json, re, sys
@@ -18,10 +20,11 @@ import json, re, sys
 src, vf_path = sys.argv[1], sys.argv[2]
 vf = json.load(open(vf_path))
 fandom = json.load(open(sys.argv[3])) if len(sys.argv) > 3 else {}
+wikigg = json.load(open(sys.argv[4])) if len(sys.argv) > 4 else {}
 checked = {"agree": 0, "unverified": 0, "dropped": 0}
 VALID = {"madurai", "vazarin", "naramon", "zenurik", "unairu", "penjaga", "umbra", "universal"}
 
-ALIASES = {"orion and sirius": "sirius and orion"}
+ALIASES = {"orion and sirius": "sirius and orion", "valkyr prime talons": "valkyr talons prime"}
 
 def norm(n):
     k = re.sub(r"[^a-z0-9]+", " ", n.lower().replace("&", "and")).strip()
@@ -77,9 +80,28 @@ def add(group, vf_list, wfcd_items, fields):
                 elif other == mine:
                     checked["agree"] += 1
                 else:
-                    checked["dropped"] += 1
-                    conflicts.append(f"{group}:{w['name']} {key}: WFCD {mine} vs wiki {other} (dropped)")
-                    del rec[key]
+                    g = wikigg.get(w["name"], {})
+                    if key == "slots":
+                        gv = sorted(p for p in (g.get("slots") or []) if p) if "slots" in g else "?"
+                    elif key == "aura2":
+                        # wiki.gg's infobox lists only Jade's polarized aura slot.
+                        gv = mine if mine in (g.get("aura") or []) else "?"
+                    else:
+                        gv = (g.get(key) or [None])[0] if key in g else "?"
+                    if gv == mine:
+                        checked["agree"] += 1
+                        conflicts.append(f"{group}:{w['name']} {key}: WFCD {mine} vs fandom {other}; wiki.gg {gv} -> kept WFCD")
+                    elif gv == other and key != "slots":
+                        checked["agree"] += 1
+                        conflicts.append(f"{group}:{w['name']} {key}: WFCD {mine} vs fandom {other}; wiki.gg {gv} -> fandom")
+                        if other is None:
+                            del rec[key]
+                        else:
+                            rec[key] = other
+                    else:
+                        checked["dropped"] += 1
+                        conflicts.append(f"{group}:{w['name']} {key}: WFCD {mine} vs fandom {other}; wiki.gg {gv} (dropped)")
+                        del rec[key]
         else:
             checked["unverified"] += len(rec)
         if not rec:
@@ -100,7 +122,10 @@ def add(group, vf_list, wfcd_items, fields):
             entries[key] = rec
 
 add("warframe", vf["warframes"], load("Warframes"), {"aura", "exilus"})
+# Misc.json holds exalted weapons (Valkyr Talons, Exalted Blade, ...); only name matches are used.
 weapons = load("Primary") + load("Secondary") + load("Melee") + load("Arch-Gun") + load("Arch-Melee") + load("SentinelWeapons")
+_vf_weapon_names = {norm(w["name"]) for w in vf["weapons"]}
+weapons += [w for w in load("Misc") if w.get("name") and norm(w["name"]) in _vf_weapon_names]
 add("weapon", vf["weapons"], weapons, {"stance"})
 add("companion", vf["companions"], load("Sentinels") + load("Pets"), set())
 add("archwing", vf["archwings"], load("Archwing"), set())
@@ -114,14 +139,7 @@ for n in vf.get("necramechs", []):
     if rec and rec.get("slots"):
         entries[f"necramech:{n['id']}"] = {"slots": rec["slots"]}
 
-# Maintainer-curated items (src/data/custom-items.ts) only get defaults the wiki confirms.
-custom_ids = set(re.findall(r'^\s+id: "([^"]+)"', open("src/data/custom-items.ts", encoding="utf-8").read(), re.M))
-custom_skipped = []
-for key in list(entries):
-    group, vid = key.split(":", 1)
-    if vid in custom_ids and key not in wiki_verified:
-        custom_skipped.append(key)
-        entries.pop(key)
+custom_skipped = []  # custom-items.ts entries are real items; sourced like everything else.
 
 lines = [
     "/**",
