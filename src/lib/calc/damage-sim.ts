@@ -46,6 +46,13 @@ export interface DamageSimInputs {
   applyHeadshots: boolean;
   /** Latron Flensing Spikes — passed through to discrete TTK. */
   punctureArmorStripPerStack?: number;
+  /**
+   * Reserve ammo on top of the magazine (wiki Ammo Maximum). 0 / unset = unlimited.
+   * Ammo pickups are not modelled: the discrete TTK stops when magazine + reserve run out.
+   */
+  ammoMax?: number;
+  /** Chance not to consume ammo (0–1); stretches the reserve. */
+  ammoEfficiency?: number;
 }
 
 export interface DamageSimTypeRow {
@@ -88,6 +95,10 @@ export interface DamageSimResult {
   shotsToKill: number;
   peakViralStacks: number;
   peakCorrosiveStacks: number;
+  /** Magazine + reserve ran out before the kill (no ammo pickups modelled). */
+  outOfAmmo: boolean;
+  /** Shots available from a full magazine + reserve (Infinity when unlimited). */
+  ammoShotBudget: number;
   discrete: TTKResult;
 }
 
@@ -145,6 +156,13 @@ export function simInputsToCalculatedStats(input: DamageSimInputs, enemyFaction:
     weakPointDamageBonus: input.weakPointDamageBonus ?? 0,
     factionBonuses: { ...input.factionBonuses },
     punctureArmorStripPerStack: input.punctureArmorStripPerStack,
+    ...(input.ammoMax != null && input.ammoMax > 0 && input.magazine > 0
+      ? {
+          ammoMax: input.ammoMax,
+          ammoReserveModelled: true,
+          ammoEfficiency: input.ammoEfficiency ?? 0,
+        }
+      : {}),
   };
 }
 
@@ -332,6 +350,8 @@ export function runDamageSim(
     shotsToKill: discrete.shotsToKill,
     peakViralStacks: discrete.peakViralStacks ?? 0,
     peakCorrosiveStacks: discrete.peakCorrosiveStacks ?? 0,
+    outOfAmmo: discrete.outOfAmmo === true,
+    ammoShotBudget: discrete.ammoShotBudget ?? Infinity,
     discrete,
   };
 }

@@ -281,9 +281,6 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
   primed_chamber: mod("primed_chamber", [
     line("damageFirstShot", "weapon_dps", "first_shot_damage", "wiki: Primed Chamber \u2014 +100% Damage on first shot in Magazine (averaged over mag for DPS)"),
   ]),
-  primed_charged_chamber: mod("primed_charged_chamber", [
-    line("damageFirstShot", "weapon_dps", "first_shot_damage", "wiki: Primed Charged Chamber \u2014 +110% Damage on first shot in Magazine (averaged over mag for DPS)"),
-  ]),
   primed_firestorm: mod("primed_firestorm", [
     line("blastRange", "mod_panel", "multiplicative_percent", "Primed Firestorm: blastRange \u2014 Improves the Blast Radius of weapons with Radial Attacks.\\\\n+44% Blast Range"),
     line("range", "mod_panel", "multiplicative_percent", "Primed Firestorm: range \u2014 Improves the Blast Radius of weapons with Radial Attacks.\\\\n+44% Blast Range (arsenal display only)"),

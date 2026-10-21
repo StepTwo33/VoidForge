@@ -38,7 +38,7 @@ function DiffRow({ row }: { row: GearDiffRow }) {
       <span
         className={cn(
           "min-w-0 truncate text-right text-[11px]",
-          row.aLabel ? (row.status === "onlyA" || row.status === "changed" ? "cmp-win" : "") : "text-muted-foreground/40",
+          row.aLabel ? (row.status === "onlyA" || row.status === "changed" ? "cmp-win" : "") : "text-muted-foreground/70",
         )}
         title={row.aLabel ?? undefined}
       >
@@ -55,7 +55,7 @@ function DiffRow({ row }: { row: GearDiffRow }) {
       <span
         className={cn(
           "min-w-0 truncate text-[11px]",
-          row.bLabel ? (row.status === "onlyB" || row.status === "changed" ? "cmp-lose" : "") : "text-muted-foreground/40",
+          row.bLabel ? (row.status === "onlyB" || row.status === "changed" ? "cmp-lose" : "") : "text-muted-foreground/70",
         )}
         title={row.bLabel ?? undefined}
       >
@@ -76,7 +76,7 @@ function ModChip({
 }) {
   if (!modId) {
     return (
-      <div className="flex h-9 items-center gap-1.5 rounded border border-dashed border-border/40 bg-muted/10 px-1.5 text-[9px] text-muted-foreground/50">
+      <div className="flex h-9 items-center gap-1.5 rounded border border-dashed border-border/40 bg-muted/10 px-1.5 text-[9px] text-muted-foreground/70">
         Empty
       </div>
     );
@@ -119,7 +119,7 @@ function ArcaneChip({
   const name = resolveArcaneDisplay(id ?? null);
   if (!name) {
     return (
-      <div className="flex h-9 items-center gap-1.5 rounded border border-dashed border-border/40 bg-muted/10 px-1.5 text-[9px] text-muted-foreground/50">
+      <div className="flex h-9 items-center gap-1.5 rounded border border-dashed border-border/40 bg-muted/10 px-1.5 text-[9px] text-muted-foreground/70">
         Empty
       </div>
     );
@@ -157,7 +157,7 @@ function ShardChip({
 }) {
   if (!shard) {
     return (
-      <div className="flex h-9 items-center gap-1.5 rounded border border-dashed border-border/40 bg-muted/10 px-1.5 text-[9px] text-muted-foreground/50">
+      <div className="flex h-9 items-center gap-1.5 rounded border border-dashed border-border/40 bg-muted/10 px-1.5 text-[9px] text-muted-foreground/70">
         Empty
       </div>
     );

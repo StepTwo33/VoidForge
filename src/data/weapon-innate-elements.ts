@@ -171,8 +171,8 @@ export const WEAPON_FIRE_TIMING: Record<string, WeaponInnateFill> = {
   kuva_bramma: { chargeTime: 0.4, chargeMode: "bow" },
   // wiki Module:Weapons (both wikis): Class "Bow" → bow cycle 1 / (CT + reload) per Fire Rate.
   lenz: { chargeTime: 1.2, chargeMode: "bow" },
-  // Fire Rate charge list 0.8s, "faster Charge Time" than Lenz (page); confirmed in game.
-  // Module:Weapons still says 1.2s (stale).
+  // Both wikis (wiki.warframe.com and fandom, checked 2026-10-21) list Charge Time 1.2s.
+  // Kept at 0.8s on purpose: Jason measured 0.8s in game (in-game check beats the wikis).
   prisma_lenz: { chargeTime: 0.8, chargeMode: "bow" },
   balefire: { chargeTime: 2.0, chargeMode: "standard" },
   balefire_prime: { chargeTime: 2.0, chargeMode: "standard" },

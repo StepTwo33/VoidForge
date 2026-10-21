@@ -431,7 +431,15 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <StatRow label="Range" value={`+${stats.range.toFixed(1)}m`} tooltip="Incarnon / reach bonus (display)." />
         )}
         {stats.ammoMax != null && stats.ammoMax > 0 && (
-          <StatRow label="Ammo Max" value={stats.ammoMax.toString()} tooltip="Incarnon ammo capacity perk (display)." />
+          <StatRow
+            label="Ammo Max"
+            value={stats.ammoMax.toString()}
+            tooltip={
+              stats.ammoReserveModelled
+                ? "Reserve ammo, not counting the magazine: base × (1 + Ammo Maximum mods + riven). Ammo pickups and Ammo Mutation mods are not modelled."
+                : "Incarnon ammo capacity perk (display)."
+            }
+          />
         )}
         {stats.punchThrough != null && stats.punchThrough !== 0 && (
           <StatRow
@@ -725,6 +733,27 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           />
           <StatRow label="Combo Duration" value={`${stats.comboDuration.toFixed(0)}s`} />
           <StatRow label="Heavy Attack" value={stats.heavyAttackDamage.toFixed(0)} highlighted changed={flash.has("heavyAttack")} />
+          {stats.heavyAttackWindUp > 0 && (
+            <StatRow
+              label="Heavy wind-up"
+              value={`${stats.heavyAttackWindUp.toFixed(2)}s`}
+              tooltip="Heavy attack wind-up time after Heavy Attack Wind Up Speed mods."
+            />
+          )}
+          {(stats.heavyAttackEfficiencyEffective ?? 0) > 0 && (
+            <StatRow
+              label="Heavy Attack Efficiency"
+              value={`${((stats.heavyAttackEfficiencyEffective ?? 0) * 100).toFixed(0)}%`}
+              tooltip={`Share of combo kept after a heavy attack (capped at 90%): ${stats.comboCount} combo → ${stats.heavyAttackComboRetained ?? 0} left.`}
+            />
+          )}
+          {stats.heavyAttackRotationDps != null && stats.heavyAttackCycleTime != null && (
+            <StatRow
+              label="Heavy rotation DPS"
+              value={stats.heavyAttackRotationDps.toFixed(0)}
+              tooltip={`Initial Combo heavy loop: one heavy every ${stats.heavyAttackCycleTime.toFixed(2)}s (wind-up + spent combo regenerating at 40/s). Not counted in light-attack DPS.`}
+            />
+          )}
           {stats.slamAttackDamage != null && stats.slamAttackDamage > 0 && (
             <StatRow label="Slam" value={stats.slamAttackDamage.toFixed(0)} />
           )}
@@ -907,7 +936,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                   <div className="min-w-0 flex-1">
                     <div className={`text-xs truncate ${color}`}>{row.label}</div>
                     {row.nominal && (
-                      <div className="text-[9px] text-muted-foreground/60 truncate">{row.nominal}</div>
+                      <div className="text-[9px] text-muted-foreground/70 truncate">{row.nominal}</div>
                     )}
                   </div>
                   <div className="shrink-0 text-right">
@@ -943,7 +972,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                   {proc.damagePerTick.toFixed(0)}/tick × {proc.ticks} = {proc.totalDamage.toFixed(0)} over {proc.duration}s
                 </div>
               )}
-              <div className="text-[10px] text-muted-foreground/60 ml-2">{proc.description}</div>
+              <div className="text-[10px] text-muted-foreground/70 ml-2">{proc.description}</div>
             </div>
           ))}
         </CollapsibleSection>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 import { ContentPanel } from "@/components/page-shell";
 import {
   GuideCtaLink,
@@ -7,7 +8,12 @@ import {
 } from "@/components/guides/how-to-mod-ui";
 
 // Metadata only (tab title).
-export const metadata: Metadata = { title: "How to Mod: Companions" };
+export const metadata: Metadata = pageMetadata({
+  path: "/guides/how-to-mod/companions",
+  title: "How to Mod: Companions",
+  description:
+    "How to mod Warframe companions: sentinels, pets, MOAs, Hounds and their weapons.",
+});
 
 export default function HowToModCompanionsPage() {
   return (

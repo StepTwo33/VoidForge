@@ -42,7 +42,7 @@ export const SET_BONUS_DEFINITIONS: Record<
   set_bonus_boreal: {
     label: "Boreal Set Bonus",
     pieces: 3,
-    description: "3-piece: Reduces damage taken by 20% while airborne.",
+    description: "Reduces damage taken by 20% while airborne per piece: 1/2/3 pieces = 20/40/60%.",
   },
   set_bonus_carnis: {
     label: "Carnis Set Bonus",

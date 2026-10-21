@@ -18,9 +18,9 @@ describe("Archwing base stats match wiki", () => {
       expect([a.health, a.shield, a.armor, a.energy, a.speed]).toEqual(exp);
     });
   }
-  it("unmodded Odonata Prime build (rank 30): EHP = 900 / (1 − 100/400) + 840", () => {
+  it("unmodded Odonata Prime build (rank 30): EHP = 900 / (1 − 100/400) + 840 × 2 (shields take 50% damage)", () => {
     const s = calculateArchwingBuild(archwings.find((x) => x.id === "odonata_prime")!, [], new Map());
     expect(s.totalHealth).toBe(900);
-    expect(s.effectiveHealth).toBeCloseTo(900 / 0.75 + 840, 6);
+    expect(s.effectiveHealth).toBeCloseTo(900 / 0.75 + 840 * 2, 6);
   });
 });

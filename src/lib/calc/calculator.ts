@@ -1,4 +1,13 @@
 // Advanced Build Calculator - ported from Dart with elemental combos, status procs, heavy attacks
+import { moddedAmmoReserve } from "@/lib/calc/ammo-reserve";
+import { playerEffectiveHealth } from './player-ehp';
+import {
+  airborneDrSources,
+  combineDamageReduction,
+  typedResistSources,
+  warframeEffectiveHealth,
+} from './damage-reduction';
+export { PLAYER_SHIELD_DAMAGE_TAKEN, playerEffectiveHealth } from './player-ehp';
 import { SNIPER_DATA, sniperComboMultiplier } from "@/data/sniper-zoom";
 import { CONTINUOUS_WEAPON_IDS } from "@/data/continuous-weapons";
 import { MELEE_ATTACK_DATA } from "@/data/melee-attack-data";
@@ -9,6 +18,7 @@ import { evolutionExtraRadials, scaleRadialAttacksWithDps } from './weapon-radia
 import {
   applyMeleeComboToStats,
   resolveEffectiveComboCount,
+  applyHeavyAttackEfficiency,
 } from './melee-combo';
 import { dotTickCount } from './dot-ticks';
 import { enrichWeapon } from '../weapons/weapon-enrich';
@@ -1003,6 +1013,12 @@ export function calculateWeaponBuild(
       }
       // wiki Killing Blow: +120% heavy damage (additive with Pressure Point) and +60%
       // wind-up speed (stored as heavyAttackEfficiency in mod data; it is not efficiency).
+      // wiki Amalgam Organ Shatter: "+60% Heavy Attack Wind Up Speed" (also stored as
+      // heavyAttackEfficiency in mod data; the heavyWindUp line is panel-only).
+      if (modSlot.modId === "amalgam_organ_shatter" && statName === "heavyAttackEfficiency") {
+        weaponModAcc.heavyAttackWindUpBonus += modValue;
+        continue;
+      }
       if (modSlot.modId === "killing_blow") {
         if (statName === "heavyAttackDamage") {
           heavyDamageBonus += modValue;
@@ -1811,7 +1827,7 @@ export function calculateWeaponBuild(
         case 'parkourVelocity':
           stats.parkourVelocityBonus = (stats.parkourVelocityBonus ?? 0) + value;
           break;
-        case 'ammoMax': /* riven % of ammo max — no base ammoMax on Weapon yet */ break;
+        case 'ammoMax': /* riven % Ammo Maximum: applied with the reserve (ammo-reserve.ts) */ break;
         case 'flatAmmoMax':
           stats.ammoMax = (stats.ammoMax ?? 0) + value;
           break;
@@ -2117,6 +2133,9 @@ export function calculateWeaponBuild(
       evolvedBaseCC,
       evolvedBaseSC,
     );
+    stats.heavyAttackSimCombo = sim.comboCount;
+    stats.heavyAttackInitialCombo = Math.max(0, effectiveCombo - sim.comboCount);
+    applyHeavyAttackEfficiency(stats);
   }
 
   // Vigilante: +5% per equipped set mod to upgrade primary crit tier (not secondaries / melee)
@@ -2199,6 +2218,22 @@ export function calculateWeaponBuild(
     moddedBaseDamage,
   );
 
+  // wiki Ammo: modded reserve (base × (1 + Ammo Maximum mods + riven)). Incarnon Form
+  // fires from its own charges, so no reserve is modelled there.
+  if (calcOptions?.incarnonFormActive !== true && stats.magazine > 0) {
+    const reserve = moddedAmmoReserve({
+      weaponId: baseWeapon.id,
+      equippedMods,
+      allMods,
+      incarnonStatChanges,
+      rivenStatChanges,
+    });
+    if (reserve != null) {
+      stats.ammoMax = reserve;
+      stats.ammoReserveModelled = true;
+    }
+  }
+
   return stats;
 }
 
@@ -2240,7 +2275,6 @@ export function calculateWarframeBuild(
     parkourVelocityBonus: 0,
     healthRegenPerSec: 0,
     shieldRechargeBonus: 0,
-    elementalResistance: 0,
     primaryShardBonus: 0,
     secondaryShardBonus: 0,
     meleeCritDamageBonus: 0,
@@ -2312,39 +2346,109 @@ export function calculateWarframeBuild(
   stats.totalEnergy = stats.baseEnergy * (1 + stats.energyBonus + stats.flowBonus);
   stats.totalSprint = stats.baseSprint * (1 + stats.sprintSpeedBonus);
 
-  // EHP = health / (1 - DR) + shields, where DR = armor / (armor + 300)
+  // EHP = health / (1 - DR) + shields / 0.5, where DR = armor / (armor + 300)
   const armorDR = stats.totalArmor / (stats.totalArmor + 300);
-  stats.effectiveHealth = (stats.totalHealth / (1 - armorDR)) + stats.totalShield;
+  stats.effectiveHealth = playerEffectiveHealth(stats.totalHealth, armorDR, stats.totalShield);
   stats.damageReduction = armorDR * 100;
 
   stats.setBonusSummary = buildWarframeSetBonusSummary(equippedMods, linkage);
   const aug = stats.setBonusSummary.find((s) => s.setId === "augur");
   const hun = stats.setBonusSummary.find((s) => s.setId === "hunter");
   const mecha = stats.setBonusSummary.find((s) => s.setId === "mecha");
+  const boreal = stats.setBonusSummary.find((s) => s.setId === "boreal");
   // wiki Augur Set: +40% energy→shields per piece; Hunter Set: +25% companion dmg per piece
   stats.augurEnergyToShieldsPercent = (aug?.pieces ?? 0) * 40;
   stats.hunterCompanionVsStatusDamagePercent = (hun?.pieces ?? 0) * 25;
   stats.mechaSetPieces = mecha?.pieces ?? 0;
 
-  if (equippedMods.some((s) => s.modId === "adaptation")) {
+  const adaptationSlot = equippedMods.find((s) => s.modId === "adaptation");
+  if (adaptationSlot) {
     stats.adaptationNoteMaxTypedDRPercent = 90;
+    stats.adaptationDrPerStack = adaptationDrPerStack(adaptationSlot.rank ?? 0);
   }
+
+  // Conditional (airborne) DR and damage-type resistances: shown separately, never in generic EHP.
+  const maxRankOf = (id: string) => allMods.get(id)?.maxRank ?? 0;
+  const air = airborneDrSources(equippedMods, maxRankOf, boreal?.pieces ?? 0);
+  if (air.length) stats.airborneDamageReductionSources = air;
+  // Umbral Tau resistance is scaled by the set bonus (wiki.warframe.com Umbral Set).
+  const typed = typedResistSources(equippedMods, maxRankOf, (id) => getUmbralSetBonusMultiplier(id, umbralCount));
+  if (typed.size) {
+    stats.typedResistances = [...typed.entries()].map(([type, sources]) => ({
+      type,
+      percent: 0,
+      sources,
+      effectiveHealth: 0,
+    }));
+  }
+  finalizeWarframeSurvivability(stats);
 
   return stats;
 }
 
-/** Adaptation: +10% typed resistance per stack when hit, max 9 stacks (90%). */
+/**
+ * Recompute DR / EHP from totals (wiki.warframe.com Damage Reduction: every source multiplies).
+ * Armor DR protects health only; pure DR (arcanes, airborne mods) protects health and shields;
+ * typed resistances only count against their own damage type. No blanket 90% cap
+ * (removed in Update 30.5).
+ */
+export function finalizeWarframeSurvivability(stats: WarframeCalculatedStats): void {
+  const armorDR = stats.totalArmor / (stats.totalArmor + 300);
+  const pure = combineDamageReduction((stats.pureDamageReductionSources ?? []).map((s) => s.value));
+  stats.damageReduction = (1 - (1 - armorDR) * (1 - pure)) * 100;
+  stats.effectiveHealth = warframeEffectiveHealth(stats.totalHealth, stats.totalShield, armorDR, pure);
+
+  const air = stats.airborneDamageReductionSources ?? [];
+  if (air.length) {
+    const a = combineDamageReduction(air.map((s) => s.value));
+    stats.airborneDamageReduction = a * 100;
+    stats.airborneTotalDamageReduction = (1 - (1 - armorDR) * (1 - pure) * (1 - a)) * 100;
+    stats.airborneEffectiveHealth = warframeEffectiveHealth(
+      stats.totalHealth,
+      stats.totalShield,
+      armorDR,
+      combineDamageReduction([pure, a]),
+    );
+  }
+
+  for (const t of stats.typedResistances ?? []) {
+    const r = combineDamageReduction(t.sources.map((s) => s.value));
+    t.percent = r * 100;
+    // wiki Toxin: bypasses shields, so EHP vs Toxin is health only.
+    t.effectiveHealth = warframeEffectiveHealth(stats.totalHealth, stats.totalShield, armorDR, pure, {
+      typedResist: r,
+      bypassesShields: t.type === "toxin",
+    });
+  }
+}
+
+/** Adaptation at max rank (R10): +10% typed resistance per stack when hit, max 9 stacks (90%). */
 export const ADAPTATION_MAX_STACKS = 9;
 export const ADAPTATION_DR_PER_STACK = 0.1;
+/** wiki Adaptation: resistance cap is 90% at every rank. */
+export const ADAPTATION_MAX_TYPED_DR = 0.9;
+
+/** wiki Adaptation table: +5% per stack at R0, +0.5% per rank, +10% at R10. */
+export function adaptationDrPerStack(rank: number): number {
+  const r = Math.min(Math.max(Math.round(rank), 0), 10);
+  return 0.05 + 0.005 * r;
+}
+
+/** Stacks needed to reach the 90% cap at this per-stack value (R10 → 9, R5 → 12, R0 → 18). */
+export function adaptationMaxStacks(perStack: number = ADAPTATION_DR_PER_STACK): number {
+  if (!(perStack > 0)) return ADAPTATION_MAX_STACKS;
+  return Math.ceil(ADAPTATION_MAX_TYPED_DR / perStack - 1e-9);
+}
 
 /** Multiplicative armor DR + typed Adaptation resistance vs one adapted damage type. */
 export function computeAdaptationSurvivability(
   effectiveHealth: number,
   armorDRFraction: number,
   stacks: number,
+  perStack: number = ADAPTATION_DR_PER_STACK,
 ): { typedDRPercent: number; combinedDRPercent: number; adaptedEHP: number } {
-  const cappedStacks = Math.min(Math.max(Math.round(stacks), 0), ADAPTATION_MAX_STACKS);
-  const typedDR = cappedStacks * ADAPTATION_DR_PER_STACK;
+  const cappedStacks = Math.min(Math.max(Math.round(stacks), 0), adaptationMaxStacks(perStack));
+  const typedDR = Math.min(cappedStacks * perStack, ADAPTATION_MAX_TYPED_DR);
   const armorMult = 1 - Math.min(Math.max(armorDRFraction, 0), 0.99);
   const combinedMult = armorMult * (1 - typedDR);
   const combinedDRPercent = (1 - combinedMult) * 100;
@@ -2409,6 +2513,9 @@ export function applyArcaneToWarframe(
   applyArcaneToWarframeFromMod(stats, arcane, stacks, rank, ctx);
 }
 
+/** wiki Archon Shard (Violet): the melee crit bonus doubles when Max Energy is over 500 (501+). */
+export const VIOLET_MELEE_CRIT_ENERGY_THRESHOLD = 500;
+
 /**
  * Apply archon shards + warframe arcanes on top of `calculateWarframeBuild` output,
  * then recompute derived totals (health/shield/armor/energy/sprint, Persistence,
@@ -2421,6 +2528,7 @@ export function applyWarframeShardsAndArcanes(
   arcanes?: (Mod | null)[],
   arcaneRanks?: number[],
 ): WarframeCalculatedStats {
+  let violetEnergyMeleeCrit = 0;
   for (const shard of shards ?? []) {
     if (!shard) continue;
     const bonusKey = shard.selectedBonus;
@@ -2472,8 +2580,12 @@ export function applyWarframeShardsAndArcanes(
         break;
       // Crimson weapon bonuses (display only on warframe, applied via weapon builder)
       case 'meleeCritDamage':
-      case 'meleeCritDamageEnergy':
         stats.meleeCritDamageBonus += bonusValue;
+        break;
+      // Violet: +25% (+37.5%) melee crit damage, doubled when max energy is over 500
+      // (wiki Archon Shard: 501+). Applied after max energy is recomputed below.
+      case 'meleeCritDamageEnergy':
+        violetEnergyMeleeCrit += bonusValue;
         break;
       case 'primaryStatusChance':
         stats.primaryShardBonus += bonusValue;
@@ -2517,10 +2629,19 @@ export function applyWarframeShardsAndArcanes(
   }
 
   const arcaneList = arcanes ?? [];
+  const pureSources: { name: string; value: number }[] = [];
   for (let i = 0; i < arcaneList.length; i++) {
     const arcane = arcaneList[i];
-    if (arcane) applyArcaneToWarframe(stats, arcane, 1, arcaneRanks?.[i] ?? arcane.maxRank);
+    if (!arcane) continue;
+    const drBefore = stats.arcaneBonuses?.damageReduction ?? 0;
+    applyArcaneToWarframe(stats, arcane, 1, arcaneRanks?.[i] ?? arcane.maxRank);
+    // Each arcane is its own DR source; sources multiply (stacks within one arcane stay additive,
+    // e.g. Arcane Double Back 3 × 25% = 75%).
+    const drDelta = (stats.arcaneBonuses?.damageReduction ?? 0) - drBefore;
+    if (drDelta > 0) pureSources.push({ name: arcane.name, value: drDelta / 100 });
   }
+  if (pureSources.length) stats.pureDamageReductionSources = pureSources;
+  else delete stats.pureDamageReductionSources;
 
   // Recalculate derived stats after shard + arcane bonuses (flat shards add after percentage scaling)
   stats.totalHealth = stats.baseHealth * (1 + stats.healthBonus) + stats.flatHealthBonus;
@@ -2528,21 +2649,22 @@ export function applyWarframeShardsAndArcanes(
   stats.totalArmor = stats.baseArmor * (1 + stats.armorBonus) + stats.flatArmorBonus;
   stats.totalEnergy = stats.baseEnergy * (1 + stats.energyBonus + stats.flowBonus) + stats.flatEnergyBonus;
   stats.totalSprint = stats.baseSprint * (1 + stats.sprintSpeedBonus);
+  if (violetEnergyMeleeCrit > 0) {
+    const doubled = stats.totalEnergy > VIOLET_MELEE_CRIT_ENERGY_THRESHOLD;
+    stats.violetMeleeCritDamage = { base: violetEnergyMeleeCrit, doubled };
+    stats.meleeCritDamageBonus += doubled ? violetEnergyMeleeCrit * 2 : violetEnergyMeleeCrit;
+  } else {
+    delete stats.violetMeleeCritDamage;
+  }
   if (stats.shieldsNullifiedByPersistence) {
     stats.totalShield = 0;
   }
   if (stats.persistenceDamageCapPerSecond != null) {
     stats.persistenceActive = stats.totalArmor >= 700;
   }
-  const armorDR = stats.totalArmor / (stats.totalArmor + 300);
-  const arcaneDrPct = stats.arcaneBonuses?.damageReduction ?? 0;
-  if (arcaneDrPct > 0) {
-    const arcFrac = Math.min(0.9, Math.max(0, arcaneDrPct / 100));
-    stats.damageReduction = (1 - (1 - armorDR) * (1 - arcFrac)) * 100;
-  } else {
-    stats.damageReduction = armorDR * 100;
-  }
-  stats.effectiveHealth = (stats.totalHealth / (1 - Math.min(0.9, stats.damageReduction / 100))) + stats.totalShield;
+  // wiki Armor: Tenno DR = armor / (armor + 300) with no 90% cap (2700 is the enemy clamp).
+  // Arcane DR multiplies with armor and protects shields too (pure DR).
+  finalizeWarframeSurvivability(stats);
 
   return stats;
 }
@@ -2598,6 +2720,7 @@ export function calculateWeaponBuildWithArcanes(
       stats.heavyAttackDamage *= arcaneHeavyFactor;
     }
   }
+  if (isMelee && stats.heavyAttackEfficiencyEffective != null) applyHeavyAttackEfficiency(stats);
   setStatusChancePerShot(stats, baseWeapon);
   stats.effectiveFireRate = resolveEffectiveFireRate({
     triggerType: baseWeapon.triggerType,

@@ -57,8 +57,8 @@ describe("example builds (riven additive with mods)", () => {
     expect(s.burstDps).toBeCloseTo(704, -1);
   });
 
-  it("D: Boar + Point Blank, Shotgun Spazz, Blunderbuss, Ravage, Shotgun Savvy; riven +90% CC/SC/FR", () => {
-    const s = calc("boar", ["Point Blank", "Shotgun Spazz", "Blunderbuss", "Ravage", "Shotgun Savvy", { riven: "riven_shotgun" }], { criticalChance: 0.9, statusChance: 0.9, fireRate: 0.9 });
+  it("D: Boar + Point Blank, Shotgun Barrage, Blunderbuss, Ravage, Shotgun Savvy; riven +90% CC/SC/FR", () => {
+    const s = calc("boar", ["Point Blank", "Shotgun Barrage", "Blunderbuss", "Ravage", "Shotgun Savvy", { riven: "riven_shotgun" }], { criticalChance: 0.9, statusChance: 0.9, fireRate: 0.9 });
     expect(s.criticalChance).toBeCloseTo(0.1 * (1 + 0.9 + 0.9), 9); // 28%
     expect(s.statusChance).toBeCloseTo(0.075 * (1 + 0.9 + 0.9), 9); // 21%
     expect(s.fireRate).toBeCloseTo(4.1667 * (1 + 0.9 + 0.9), 9); // 11.67

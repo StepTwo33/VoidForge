@@ -1,5 +1,5 @@
 import { getEffectiveModsMap } from "@/lib/weapons/effective-data";
-import type { Companion, CompanionCalculatedStats, Mod, ModSlot } from "@/lib/types";
+import type { Companion, CompanionCalculatedStats, CompanionLinkedWarframe, Mod, ModSlot } from "@/lib/types";
 import type { ModularCompanionParts } from "@/data/companion-parts";
 import { companionWithPartStats } from "@/lib/companions/companion-parts-resolve";
 import {
@@ -114,23 +114,42 @@ function applyLegacyCompanionStat(acc: CompanionModAccumulators, statKey: string
   }
 }
 
+/**
+ * wiki Link Vitality / Link Redirection / Link Fiber: the companion gains +125% (max rank)
+ * of the Warframe's max Health / Shields / Armor, added flat after the companion's own % mods.
+ */
+export const COMPANION_LINK_MODS: Record<string, { statKey: string; target: "health" | "shield" | "armor" }> = {
+  link_vitality: { statKey: "health", target: "health" },
+  link_redirection: { statKey: "shield", target: "shield" },
+  link_fiber: { statKey: "armor", target: "armor" },
+};
+
 export function calculateCompanionBuild(
   companion: Companion,
   equippedMods: EquippedCompanionMod[],
   allMods: Map<string, Mod> = getEffectiveModsMap(),
   parts?: ModularCompanionParts | null,
+  /** The Warframe this companion follows (loadout). Without it Link mods stay out of the totals. */
+  linkedWarframe?: CompanionLinkedWarframe | null,
 ): CompanionCalculatedStats {
   const body = companionWithPartStats(companion, parts);
   const acc = emptyAccumulators();
   const panel: { modBonuses?: Record<string, number> } = {};
+  const linkFraction = { health: 0, shield: 0, armor: 0 };
+  let hasLinkMod = false;
 
   for (const em of equippedMods) {
     const mod = allMods.get(em.modId);
     if (!mod?.stats) continue;
     const rank = Math.min(Math.max(em.rank ?? 0, 0), mod.maxRank);
+    const link = COMPANION_LINK_MODS[mod.id];
 
     for (const [statKey, perRank] of Object.entries(mod.stats)) {
       const modValue = modStatValue(perRank, rank, statKey, mod.id);
+      if (link && statKey === link.statKey) {
+        hasLinkMod = true;
+        linkFraction[link.target] += modValue;
+      }
       const handled = applyVerifiedModStatToCompanion(
         panel,
         mod.id,
@@ -145,10 +164,14 @@ export function calculateCompanionBuild(
     }
   }
 
-  const totalHealth = body.health * (1 + acc.healthBonus);
-  const totalShield = body.shield * (1 + acc.shieldBonus);
-  const totalArmor = body.armor * (1 + acc.armorBonus);
+  const linkHealth = linkedWarframe ? linkedWarframe.health * linkFraction.health : 0;
+  const linkShield = linkedWarframe ? linkedWarframe.shield * linkFraction.shield : 0;
+  const linkArmor = linkedWarframe ? linkedWarframe.armor * linkFraction.armor : 0;
+  const totalHealth = body.health * (1 + acc.healthBonus) + linkHealth;
+  const totalShield = body.shield * (1 + acc.shieldBonus) + linkShield;
+  const totalArmor = body.armor * (1 + acc.armorBonus) + linkArmor;
   const armorDR = totalArmor > 0 ? totalArmor / (totalArmor + 300) : 0;
+  const modDR = Math.min(Math.max(acc.damageReductionBonus, 0), 0.999999);
 
   return {
     baseHealth: body.health,
@@ -165,8 +188,10 @@ export function calculateCompanionBuild(
     critChanceBonus: acc.critChanceBonus,
     critDamageBonus: acc.critDamageBonus,
     armorDamageReduction: armorDR * 100,
-    damageReduction: armorDR * 100 + acc.damageReductionBonus * 100,
-    effectiveHealth: totalHealth * (1 + totalArmor / 300) + totalShield,
+    // wiki.warframe.com Damage Reduction: armor DR and other DR multiply (they don't add).
+    damageReduction: (1 - (1 - armorDR) * (1 - modDR)) * 100,
+    // Companion shields take full damage; armor protects health only; pure DR protects both.
+    effectiveHealth: (totalHealth * (1 + totalArmor / 300) + totalShield) / (1 - modDR),
     weakspotDamageBonus: acc.weakspotDamageBonus,
     finisherDamageBonus: acc.finisherDamageBonus,
     pickupDoubleChance: acc.pickupDoubleChance,
@@ -177,6 +202,10 @@ export function calculateCompanionBuild(
     incapacitationTimerReduction: acc.incapacitationTimerReduction,
     shieldRechargeBonus: acc.shieldRechargeBonus,
     healthRegenBonus: acc.healthRegenBonus,
+    linkHealth,
+    linkShield,
+    linkArmor,
+    linkModsNeedWarframe: hasLinkMod && !linkedWarframe,
     modBonuses: panel.modBonuses,
   };
 }

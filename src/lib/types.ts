@@ -313,6 +313,14 @@ export interface EquippedMod {
   drain?: number;
 }
 
+export interface StatusResistanceEntry {
+  /** Status element, e.g. "Heat", "Slash". */
+  element: string;
+  /** Chance (percent) to resist a status of this element; can exceed 100 (102% at R5). */
+  chance: number;
+  sources: string[];
+}
+
 export interface EquippedArchonShard {
   shardId: string;
   shardColor: string;
@@ -702,8 +710,13 @@ export interface CalculatedStats {
   multishot: number;
   /** Melee reach / falloff meters added by incarnon (and similar) — display only. */
   range?: number;
-  /** Ammo reserve after incarnon set/add perks — display only (base ammo not always in weapon data). */
+  /**
+   * Reserve ammo (excludes the magazine). With ammoReserveModelled it is the modded
+   * reserve (wiki AmmoMax × Ammo Maximum mods/riven); otherwise an incarnon display value.
+   */
   ammoMax?: number;
+  /** True when ammoMax is a real modelled reserve the TTK sim can run dry on. */
+  ammoReserveModelled?: boolean;
   /** Punch Through meters from incarnon/rivens — display only (no DPS model). */
   punchThrough?: number;
   /** Projectile speed bonus fraction from incarnon/rivens — display only. */
@@ -812,7 +825,23 @@ export interface CalculatedStats {
   heavyAttackWindUp: number;
   comboCount: number;
   comboDuration: number;
-  heavyAttackEfficiency: number; // from mods like Killing Blow
+  /** Heavy Attack Efficiency (fraction of combo kept after a heavy; Reflex Coil, Focus Energy…). */
+  heavyAttackEfficiency: number;
+  /** Heavy Attack Efficiency after the wiki 90% cap (floor 0). */
+  heavyAttackEfficiencyEffective?: number;
+  /** Combo points left after a heavy attack at the simulated combo (combo × efficiency). */
+  heavyAttackComboRetained?: number;
+  /** Initial Combo (mods + innate + incarnon) that regenerates at 40/s after a heavy. */
+  heavyAttackInitialCombo?: number;
+  /** Combo built by attacks on top of Initial Combo (sim slider). */
+  heavyAttackSimCombo?: number;
+  /**
+   * Seconds per heavy attack in an Initial Combo heavy rotation: wind-up + time to
+   * regenerate the spent combo at 40/s. Undefined when the combo comes from light attacks.
+   */
+  heavyAttackCycleTime?: number;
+  /** heavyAttackDamage / heavyAttackCycleTime (Initial Combo heavy rotation only). */
+  heavyAttackRotationDps?: number;
   /**
    * Combo multiplier for Blood Rush / Weeping Wounds / Gladiator and heavy attacks
    * (1× below first tier, then 2×…12× on standard weapons).
@@ -1021,14 +1050,40 @@ export interface WarframeCalculatedStats {
   totalEnergy: number;
   totalSprint: number;
   effectiveHealth: number;
+  /**
+   * Always-on DR vs health, percent: armor ÷ (armor + 300) combined multiplicatively with
+   * always-on pure DR (e.g. arcanes). Conditional sources (airborne mods) are separate fields.
+   */
   damageReduction: number;
+  /** Always-on pure DR sources (arcanes), fractions; they also protect shields. */
+  pureDamageReductionSources?: { name: string; value: number }[];
+  /** Airborne-only DR sources (Aviator, Agility Drift, Aerodynamic, Ironclad Flight, Boreal set). */
+  airborneDamageReductionSources?: { name: string; value: number }[];
+  /** Airborne mod DR combined multiplicatively, percent (mods only). */
+  airborneDamageReduction?: number;
+  /** Total DR vs health while airborne (armor × pure × airborne), percent. */
+  airborneTotalDamageReduction?: number;
+  /** EHP while airborne. */
+  airborneEffectiveHealth?: number;
+  /** Damage-type resistances (Antitoxin, Flame Repellent, …): per type, never in generic EHP. */
+  typedResistances?: {
+    type: string;
+    percent: number;
+    sources: { name: string; value: number }[];
+    effectiveHealth: number;
+  }[];
   // Shard-specific display stats
   castingSpeedBonus: number;
   parkourVelocityBonus: number;
   healthRegenPerSec: number;
   /** Additive shield recharge rate fraction (e.g. Arcane Aegis +30% → 0.30). */
   shieldRechargeBonus?: number;
-  elementalResistance: number;
+  /**
+   * Arcane status-effect resistance, one row per element (e.g. Arcane Ice: Heat status).
+   * These are chances to ignore a status proc of that element, not damage reduction,
+   * and they never add across elements.
+   */
+  statusResistances?: StatusResistanceEntry[];
   primaryShardBonus: number;
   secondaryShardBonus: number;
   /** Violet shard: % Primary Electricity damage (incl. +10/15% per Crimson/Azure/Violet shard). */
@@ -1038,6 +1093,11 @@ export interface WarframeCalculatedStats {
   /** Emerald shard: + max Corrosion stacks. */
   corrosionMaxStacksShardBonus?: number;
   meleeCritDamageBonus: number;
+  /**
+   * Violet shard "melee crit damage" bonus (sum of its shards' base values) and whether
+   * it is doubled because Max Energy is over 500. Already folded into meleeCritDamageBonus.
+   */
+  violetMeleeCritDamage?: { base: number; doubled: boolean };
   healingBonus: number;
   statusDurationBonus: number;
   energyCostReduction: number;
@@ -1053,6 +1113,8 @@ export interface WarframeCalculatedStats {
    * When Adaptation is equipped: typed DR stacks (see computeAdaptationSurvivability in UI).
    */
   adaptationNoteMaxTypedDRPercent?: number;
+  /** Adaptation typed DR per stack at the equipped rank (0.05 at R0 → 0.10 at R10). */
+  adaptationDrPerStack?: number;
   /** Arcane Persistence: shields stripped while equipped. */
   shieldsNullifiedByPersistence?: boolean;
   /** Arcane Persistence damage/s cap at current arcane rank (inactive below 700 armor). */
@@ -1104,7 +1166,21 @@ export interface CompanionCalculatedStats {
   incapacitationTimerReduction: number;
   shieldRechargeBonus: number;
   healthRegenBonus: number;
+  /** Flat health/shield/armor added by Link Vitality / Redirection / Fiber from the linked Warframe. */
+  linkHealth: number;
+  linkShield: number;
+  linkArmor: number;
+  /** A Link mod is equipped but no Warframe is linked, so its bonus is not in the totals. */
+  linkModsNeedWarframe: boolean;
   modBonuses?: Record<string, number>;
+}
+
+/** Warframe max stats the companion's Link mods copy (rank 30 + mods + shards + arcanes). */
+export interface CompanionLinkedWarframe {
+  name?: string;
+  health: number;
+  shield: number;
+  armor: number;
 }
 
 export interface ArchwingCalculatedStats {
@@ -1132,6 +1208,12 @@ export interface ArchwingCalculatedStats {
   /** Kinetic Diversion: % of health damage converted to energy (max 40). */
   kineticDiversionPercent: number;
   modBonuses?: Record<string, number>;
+  /** Necramech Aviator: airborne-only DR (percent). Not part of effectiveHealth. */
+  airborneDamageReduction?: number;
+  /** Armor DR combined with airborne DR (percent, health). */
+  airborneTotalDamageReduction?: number;
+  /** EHP while airborne. */
+  airborneEffectiveHealth?: number;
 }
 
 export interface RailjackArmamentComputed {

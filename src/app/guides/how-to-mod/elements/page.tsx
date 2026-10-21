@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 import { ContentPanel } from "@/components/page-shell";
 import {
   GuideCtaLink,
@@ -16,7 +17,12 @@ const COMBOS: { a: string; b: string; result: string; note: string }[] = [
 ];
 
 // Metadata only (tab title).
-export const metadata: Metadata = { title: "How to Mod: Elements" };
+export const metadata: Metadata = pageMetadata({
+  path: "/guides/how-to-mod/elements",
+  title: "How to Mod: Elements",
+  description:
+    "How Warframe elemental damage combines, mod order, and which elements work against each faction.",
+});
 
 export default function HowToModElementsPage() {
   return (

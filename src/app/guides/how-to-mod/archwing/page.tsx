@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 import { ContentPanel } from "@/components/page-shell";
 import {
   GuideCtaLink,
@@ -7,7 +8,12 @@ import {
 } from "@/components/guides/how-to-mod-ui";
 
 // Metadata only (tab title).
-export const metadata: Metadata = { title: "How to Mod: Archwing & Mech" };
+export const metadata: Metadata = pageMetadata({
+  path: "/guides/how-to-mod/archwing",
+  title: "How to Mod: Archwing & Mech",
+  description:
+    "How to mod Archwings, archguns, archmelee and Necramechs.",
+});
 
 export default function HowToModArchwingPage() {
   return (

@@ -136,7 +136,7 @@ export function AbilityEnergyChip({
         {modified ? effectiveCost.toFixed(0) : baseCost}
       </span>
       {modified && (
-        <span className="text-[10px] font-mono text-muted-foreground/50 line-through">{baseCost}</span>
+        <span className="text-[10px] font-mono text-muted-foreground/70 line-through">{baseCost}</span>
       )}
     </div>
   );

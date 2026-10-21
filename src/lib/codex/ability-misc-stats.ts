@@ -1460,7 +1460,8 @@ function scaleVerifiedValue(
     if (base == null) return null;
     const eff = ctx.efficiency ?? 1;
     const dur = ctx.duration > 0 ? ctx.duration : 1;
-    const factor = Math.max((2 - eff) / dur, 0.25);
+    // wiki Ability Duration/Efficiency: drain uses uncapped EFF, then clamps to 25%–175% of base.
+    const factor = Math.min(Math.max((2 - eff) / dur, ABILITY_COST_FLOOR), ABILITY_COST_CEILING);
     const scaled = applyBounds(base * factor, cap, floor);
     const fmt =
       Math.abs(scaled - Math.round(scaled)) < 0.05
@@ -1476,7 +1477,7 @@ function scaleVerifiedValue(
     };
   }
 
-  // wiki cast/activation cost (energy or shields): base × max(2 − min(EFF, 1.75), 0.25)
+  // wiki cast/activation cost (energy or shields): base × clamp(2 − EFF, 0.25, 1.75)
   if (rule.formula === "cast_cost") {
     const base = parseNumeric(value);
     if (base == null) return null;
@@ -1978,11 +1979,15 @@ export function scaleAbilityMiscStats(
   return lines;
 }
 
-/** Effective energy cost with 175% efficiency cap (matches in-game builder cards).
- * Negative efficiency (e.g. Overextended without Streamline) pushes costs above 2× base. */
+/** wiki Ability Efficiency: abilities cost no less than 25% and no more than 175% of base. */
+export const ABILITY_COST_FLOOR = 0.25;
+export const ABILITY_COST_CEILING = 1.75;
+
+/** Effective energy cost: base × (2 − EFF), clamped to 25%–175% of base (EFF 175% cap / 25% floor).
+ * Efficiency below 100% (e.g. Blind Rage) raises the cost, up to 1.75× base. */
 export function scaledAbilityEnergyCost(baseCost: number, efficiency: number): number {
-  const clampedEff = Math.min(efficiency, 1.75);
-  return Math.max(baseCost * 0.25, baseCost * (2 - clampedEff));
+  const factor = Math.min(Math.max(2 - efficiency, ABILITY_COST_FLOOR), ABILITY_COST_CEILING);
+  return baseCost * factor;
 }
 
 /** How cast-invuln absorbed damage enters an armor-scaled pool. */

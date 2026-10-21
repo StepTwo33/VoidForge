@@ -305,6 +305,13 @@ export interface TTKResult {
   peakCorrosiveStacks?: number;
   /** Whether discrete shot-by-shot sim was used. */
   discrete?: boolean;
+  /**
+   * True when magazine + reserve ran out before the kill (no ammo pickups are
+   * modelled). Only set for weapons with a modelled reserve.
+   */
+  outOfAmmo?: boolean;
+  /** Shots available from a full magazine + full reserve (Infinity when unlimited). */
+  ammoShotBudget?: number;
 }
 
 export interface DotInstance {
@@ -592,6 +599,19 @@ export function simulateDiscreteTTK(
   let time = 0;
   let shots = 0;
   let ammo = stats.magazine > 0 ? stats.magazine : Infinity;
+  // wiki Ammo: a full magazine plus the modded reserve, no pickups. Ammo Efficiency
+  // stretches the budget (1 / (1 − AE) shots per round); the magazine/reload cycle
+  // below is unchanged, so TTK only moves when this budget runs out.
+  const ammoShotBudget = (() => {
+    if (!stats.ammoReserveModelled || !(stats.magazine > 0)) return Infinity;
+    const reserve = stats.ammoMax ?? 0;
+    if (!Number.isFinite(reserve) || reserve < 0) return Infinity;
+    const ae = Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 1);
+    if (ae >= 0.99) return Infinity;
+    const perShot = Math.max(0.01, stats.ammoCost ?? 1) * (1 - ae);
+    return Math.floor((stats.magazine + reserve) / perShot + 1e-9);
+  })();
+  let outOfAmmo = false;
   const punctureStrip = stats.punctureArmorStripPerStack ?? 0;
   const punctureStackCap = punctureStrip > 0 ? 1 / punctureStrip : 0;
   const dots: DotInstance[] = [];
@@ -722,6 +742,10 @@ export function simulateDiscreteTTK(
   };
 
   while (health > 0 && time < maxTime && shots < maxShots) {
+    if (shots >= ammoShotBudget) {
+      outOfAmmo = true;
+      break;
+    }
     // Reload if needed
     if (ammo <= 0 && stats.magazine > 0 && stats.reloadTime > 0) {
       time += stats.reloadTime;
@@ -1119,6 +1143,9 @@ export function simulateDiscreteTTK(
     peakViralStacks: peakViral,
     peakCorrosiveStacks: peakCorrosive,
     discrete: true,
+    ...(Number.isFinite(ammoShotBudget)
+      ? { ammoShotBudget, outOfAmmo: outOfAmmo && !killed }
+      : {}),
   };
 }
 

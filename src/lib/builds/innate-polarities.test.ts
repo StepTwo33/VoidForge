@@ -36,7 +36,7 @@ describe("innate polarity data", () => {
   it("resolves WFCD vs fandom conflicts by 2-of-3 with wiki.warframe.com", () => {
     expect(INNATE_POLARITIES["warframe:lavos"]?.aura).toBe("naramon");
     expect(INNATE_POLARITIES["warframe:voruna"]?.aura).toBe("vazarin");
-    expect(INNATE_POLARITIES["warframe:jade"]).toEqual({ slots: ["naramon"], aura2: "vazarin" });
+    expect(INNATE_POLARITIES["warframe:jade"]).toEqual({ slots: ["naramon"], aura: "universal", aura2: "vazarin" }); // WFCD "Aura" = built-in Universal Aura polarity
     expect(INNATE_POLARITIES["weapon:dark_dagger"]).toEqual({ stance: "madurai" });
     expect(INNATE_POLARITIES["weapon:dorrclave"]).toEqual({ slots: ["naramon"], stance: "madurai" });
     // Dual-form frame: per-form defaults are not modelled yet.

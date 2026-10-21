@@ -40,7 +40,7 @@ export function CompareRow({ label, a, b, higher = "green", format }: {
     <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 border-b border-border/20 py-1.5 last:border-b-0">
       <span className={cn(
         "min-w-0 text-right font-mono text-xs tabular-nums",
-        a === null ? "text-muted-foreground/50" : aWins ? "cmp-win" : bWins ? "cmp-lose" : ""
+        a === null ? "text-muted-foreground/70" : aWins ? "cmp-win" : bWins ? "cmp-lose" : ""
       )}>
         <span className="mr-1 font-sans text-[9px] font-semibold uppercase text-muted-foreground sm:hidden">A</span>
         {a !== null ? fmtFn(a) : "–"}
@@ -56,7 +56,7 @@ export function CompareRow({ label, a, b, higher = "green", format }: {
       </span>
       <span className={cn(
         "min-w-0 font-mono text-xs tabular-nums",
-        b === null ? "text-muted-foreground/50" : bWins ? "cmp-win" : aWins ? "cmp-lose" : ""
+        b === null ? "text-muted-foreground/70" : bWins ? "cmp-win" : aWins ? "cmp-lose" : ""
       )}>
         <span className="mr-1 font-sans text-[9px] font-semibold uppercase text-muted-foreground sm:hidden">B</span>
         {b !== null ? fmtFn(b) : "–"}

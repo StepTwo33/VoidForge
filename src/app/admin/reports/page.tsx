@@ -303,7 +303,7 @@ export default function AdminReportsPage() {
                         {report.itemType.replace("_", " ")}
                       </span>
                       {report.itemId && (
-                        <code className="text-[10px] text-muted-foreground/60 hidden sm:inline break-all">{report.itemId}</code>
+                        <code className="text-[10px] text-muted-foreground/70 hidden sm:inline break-all">{report.itemId}</code>
                       )}
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3 text-[10px] text-muted-foreground flex-wrap">

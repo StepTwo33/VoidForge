@@ -1,6 +1,7 @@
 // Build storage utilities - localStorage fallback + cloud API when logged in
 import { ModSlot, EquippedArchonShard, Mod, ModularBuildData } from "../types";
 import { resolveEffectiveModOrArcane } from "@/lib/weapons/effective-data";
+import { hasClientSession } from "@/lib/auth/client-session";
 
 /** Arcanes are not in mods.ts; resolve from override-aware catalogs. */
 export function resolveArcaneById(id: string): Mod | null {
@@ -77,6 +78,7 @@ export function generateBuildId(): string {
 
 export async function getCloudBuilds(type?: string): Promise<SavedBuild[]> {
   try {
+    if (!(await hasClientSession())) return [];
     const url = type ? `/api/builds?type=${type}` : "/api/builds";
     const res = await fetch(url);
     if (!res.ok) return [];
@@ -88,6 +90,7 @@ export async function getCloudBuilds(type?: string): Promise<SavedBuild[]> {
 
 export async function saveCloudBuild(build: SavedBuild): Promise<SavedBuild | null> {
   try {
+    if (!(await hasClientSession())) return null;
     const res = await fetch("/api/builds", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -111,6 +114,7 @@ export async function saveCloudBuild(build: SavedBuild): Promise<SavedBuild | nu
 
 export async function deleteCloudBuild(id: string): Promise<boolean> {
   try {
+    if (!(await hasClientSession())) return false;
     const res = await fetch(`/api/builds/${id}`, { method: "DELETE" });
     return res.ok;
   } catch {

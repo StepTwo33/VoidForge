@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 import Link from "next/link";
 import { ContentPanel } from "@/components/page-shell";
 import { GuideCtaLink } from "@/components/guides/how-to-mod-ui";
 import { HOW_TO_MOD_SECTIONS } from "@/lib/guides/how-to-mod-sections";
 
 // Metadata only (tab title).
-export const metadata: Metadata = { title: "How to Mod" };
+export const metadata: Metadata = pageMetadata({
+  path: "/guides/how-to-mod",
+  title: "How to Mod",
+  description:
+    "A practical guide to modding in Warframe: capacity, polarities, elements, rivens, arcanes and more.",
+});
 
 export default function HowToModOverviewPage() {
   return (

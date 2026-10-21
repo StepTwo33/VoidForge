@@ -233,12 +233,23 @@ export async function inflateToUtf8(bytes: Uint8Array): Promise<string | null> {
   }
 }
 
+/**
+ * Node's built-in zlib (server / vitest only). Looked up at runtime through
+ * `process.getBuiltinModule` instead of `require("zlib")`: a static require is resolved by the
+ * client bundler, which then ships the zlib + Buffer + stream polyfills (~69 KB gzipped) on every
+ * page that imports this module. Browsers use CompressionStream via the async helpers above.
+ */
+function nodeZlib(): typeof import("zlib") | null {
+  const proc = (globalThis as { process?: { getBuiltinModule?: (id: string) => unknown } }).process;
+  const mod = proc?.getBuiltinModule?.("node:zlib");
+  return (mod as typeof import("zlib") | undefined) ?? null;
+}
+
 export function inflateToUtf8Sync(bytes: Uint8Array): string | null {
   try {
-    // Node / vitest — keep browser bundle free of zlib by dynamic require.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const zlib = require("zlib") as typeof import("zlib");
-    return zlib.inflateSync(Buffer.from(bytes)).toString("utf8");
+    const zlib = nodeZlib();
+    if (!zlib) return null;
+    return new TextDecoder().decode(zlib.inflateSync(bytes));
   } catch {
     return null;
   }
@@ -246,9 +257,9 @@ export function inflateToUtf8Sync(bytes: Uint8Array): string | null {
 
 export function deflateUtf8Sync(text: string): Uint8Array | null {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const zlib = require("zlib") as typeof import("zlib");
-    return new Uint8Array(zlib.deflateSync(Buffer.from(text, "utf8")));
+    const zlib = nodeZlib();
+    if (!zlib) return null;
+    return new Uint8Array(zlib.deflateSync(new TextEncoder().encode(text)));
   } catch {
     return null;
   }

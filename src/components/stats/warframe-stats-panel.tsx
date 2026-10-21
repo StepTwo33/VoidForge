@@ -6,7 +6,8 @@ import { formatAbilityDescription } from "@/lib/display/ability-text";
 import { cleanModDescription, getModStatDisplayLines } from "@/lib/display/mod-display";
 import { getArcaneDisplayInfo } from "@/lib/display/arcane-display";
 import {
-  ADAPTATION_MAX_STACKS,
+  ADAPTATION_DR_PER_STACK,
+  adaptationMaxStacks,
   computeAdaptationSurvivability,
 } from "@/lib/calc/calculator";
 import {
@@ -2009,13 +2010,18 @@ function UrielLegionPassivePanel() {
 }
 
 function AdaptationSurvivability({ stats }: { stats: WarframeCalculatedStats }) {
-  const [stacks, setStacks] = useState(ADAPTATION_MAX_STACKS);
+  const perStack = stats.adaptationDrPerStack ?? ADAPTATION_DR_PER_STACK;
+  const maxStacks = adaptationMaxStacks(perStack);
+  const [stacksRaw, setStacks] = useState<number | null>(null);
+  const stacks = Math.min(stacksRaw ?? maxStacks, maxStacks);
   const armorDR = stats.damageReduction / 100;
   const { typedDRPercent, combinedDRPercent, adaptedEHP } = computeAdaptationSurvivability(
     stats.effectiveHealth,
     armorDR,
     stacks,
+    perStack,
   );
+  const perStackPct = +(perStack * 100).toFixed(1);
 
   return (
     <div className="py-1 space-y-1 border-t border-violet-500/20 mt-1">
@@ -2024,9 +2030,9 @@ function AdaptationSurvivability({ stats }: { stats: WarframeCalculatedStats }) 
         label="Stacks"
         value={stacks}
         min={0}
-        max={ADAPTATION_MAX_STACKS}
+        max={maxStacks}
         onChange={setStacks}
-        tooltip="+10% resistance per stack to the damage type you're taking (20s)"
+        tooltip={`+${perStackPct}% resistance per stack to the damage type you're taking (90% max)`}
       />
       <StatRow
         label="Typed resist"
@@ -2263,8 +2269,19 @@ export function WarframeStatsPanel({
         {stats.healthRegenPerSec > 0 && (
           <StatRow label="Health Regen" value={`${stats.healthRegenPerSec.toFixed(1)}/s`} color="text-green-700 dark:text-green-400" />
         )}
-        {stats.elementalResistance > 0 && (
-          <StatRow label="Elemental Resist" value={`${stats.elementalResistance.toFixed(0)}%`} color="text-cyan-700 dark:text-cyan-400" />
+        {stats.statusResistances && stats.statusResistances.length > 0 && (
+          <div className="py-1 space-y-0.5 border-t border-border/50 mt-1">
+            <div className="text-[10px] font-medium text-muted-foreground">Status effect resistance</div>
+            {stats.statusResistances.map((r) => (
+              <StatRow
+                key={r.element}
+                label={`${r.element} status`}
+                value={r.chance >= 100 ? "100% (immune)" : `${r.chance.toFixed(0)}% chance`}
+                color="text-cyan-700 dark:text-cyan-400"
+                tooltip={`${r.sources.join(", ")}: chance to ignore a ${r.element} status effect. Does not reduce ${r.element} damage and does not add to other elements.`}
+              />
+            ))}
+          </div>
         )}
         {stats.persistenceDamageCapPerSecond != null && (
           <p
@@ -2292,8 +2309,57 @@ export function WarframeStatsPanel({
       </CollapsibleSection>
 
       <CollapsibleSection title="EFFECTIVE HEALTH" defaultOpen>
-        <StatRow label="Effective Health" value={stats.effectiveHealth.toFixed(0)} highlighted />
-        <StatRow label="Damage Reduction" value={`${stats.damageReduction.toFixed(1)}%`} highlighted />
+        <StatRow
+          label="Effective Health"
+          value={stats.effectiveHealth.toFixed(0)}
+          highlighted
+          tooltip="Health ÷ (1 − Damage Reduction) + Shields × 2. Warframe shields take 50% less damage; armor does not apply to shields."
+        />
+        <StatRow
+          label="Damage Reduction"
+          value={`${stats.damageReduction.toFixed(1)}%`}
+          highlighted
+          tooltip={
+            stats.pureDamageReductionSources?.length
+              ? `Armor ÷ (Armor + 300) multiplied with ${stats.pureDamageReductionSources.map((x) => `${x.name} ${(x.value * 100).toFixed(1)}%`).join(", ")}: every source multiplies (1 − DR₁)(1 − DR₂)…, no 90% cap. Non-armor DR also protects shields.`
+              : "Armor ÷ (Armor + 300). Other sources multiply with it: (1 − DR₁)(1 − DR₂)…. Player armor has no 90% cap."
+          }
+        />
+        {stats.airborneEffectiveHealth != null && stats.airborneDamageReductionSources?.length ? (
+          <>
+            <StatRow
+              label="Airborne DR (mods)"
+              value={`${(stats.airborneDamageReduction ?? 0).toFixed(1)}%`}
+              color="text-sky-700 dark:text-sky-400"
+              tooltip={`Only while airborne (jumping, aim gliding, wall latching, Razorwing, etc.). ${stats.airborneDamageReductionSources.map((x) => `${x.name} ${Number((x.value * 100).toFixed(2))}%`).join(" × ")}, multiplied: 1 − Π(1 − DR).`}
+            />
+            <StatRow
+              label="Airborne DR (total)"
+              value={`${(stats.airborneTotalDamageReduction ?? 0).toFixed(1)}%`}
+              color="text-sky-700 dark:text-sky-400"
+              tooltip="Armor and other DR multiplied with the airborne mods, against health. Only while airborne."
+            />
+            <StatRow
+              label="Airborne EHP"
+              value={stats.airborneEffectiveHealth.toFixed(0)}
+              color="text-sky-700 dark:text-sky-400"
+              tooltip="Effective Health while airborne. The airborne mods also protect shields. Not part of the Effective Health above."
+            />
+          </>
+        ) : null}
+        {stats.typedResistances && stats.typedResistances.length > 0 && (
+          <div className="py-1 space-y-0.5 border-t border-border/50 mt-1">
+            <div className="text-[10px] font-medium text-muted-foreground">Damage type resistance</div>
+            {stats.typedResistances.map((t) => (
+              <StatRow
+                key={t.type}
+                label={`${t.type.charAt(0).toUpperCase()}${t.type.slice(1)}`}
+                value={`${t.percent.toFixed(1)}% · EHP ${t.effectiveHealth.toFixed(0)}`}
+                tooltip={`${t.sources.map((x) => `${x.name} ${Number((x.value * 100).toFixed(2))}%`).join(" × ")}. Only against ${t.type} damage; multiplies with armor and other DR.${t.type === "toxin" ? " Toxin bypasses shields, so this EHP is health only." : ""} Not included in the Effective Health above.`}
+              />
+            ))}
+          </div>
+        )}
         {stats.adaptationNoteMaxTypedDRPercent != null && (
           <AdaptationSurvivability stats={stats} />
         )}

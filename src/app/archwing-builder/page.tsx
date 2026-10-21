@@ -16,7 +16,7 @@ import { enrichWeapon } from "@/lib/weapons/weapon-enrich";
 import { filterArchmeleeMods } from "@/lib/mods/archmelee-mods";
 import { archgunModsForBuilder } from "@/lib/mods/archgun-weapon-augment-mods";
 import { isArchwingAugment, normalizeArchwingId } from "@/lib/mods/archwing-augment-mods";
-import { Archwing, Necramech, archwingFrameCapacity } from "@/data/archwing";
+import { Archwing, Necramech, archwingFrameCapacity, ARCHWING_RANK30_BONUS, NECRAMECH_RANK30_BONUS } from "@/data/archwing";
 import { calculateWeaponBuild } from "@/lib/calc/calculator";
 import { buildWeaponContributionContext } from "@/lib/calc/dps-contributions";
 import { calculateArchwingBuild, calculateNecramechBuild } from "@/lib/calc/archwing-calculator";
@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { Zap, Save, FolderOpen, ArrowLeftRight } from "lucide-react";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, ArchwingBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
+import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
 import { toast } from "sonner";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
@@ -123,7 +124,8 @@ export default function ArchwingBuilderPage() {
     }
   };
 
-  const handleLoadBuild = useCallback((build: SavedBuild) => {
+  const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
+    const build = cleanLoadedBuild(rawBuild);
     const d = build.data as ArchwingBuildData;
     markClean();
     setMode(d.mode as BuilderMode);
@@ -392,8 +394,9 @@ export default function ArchwingBuilderPage() {
                     )}
                   >
                     <span className="font-medium text-sm">{aw.name}</span>
+                    {/* Rank 30 values, the same base the calculator uses. */}
                     <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
-                      HP {aw.health} • SH {aw.shield} • ARM {aw.armor}
+                      Rank 30: HP {aw.health + ARCHWING_RANK30_BONUS.health} • SH {aw.shield + ARCHWING_RANK30_BONUS.shield} • ARM {aw.armor}
                     </div>
                   </button>
                 )) : necramechList.map((nm) => (
@@ -414,8 +417,9 @@ export default function ArchwingBuilderPage() {
                     )}
                   >
                     <span className="font-medium text-sm">{nm.name}</span>
+                    {/* Rank 30 values, the same base the calculator uses. */}
                     <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
-                      HP {nm.health} • ARM {nm.armor} • EN {nm.energy}
+                      Rank 30: HP {nm.health + NECRAMECH_RANK30_BONUS.health} • ARM {nm.armor} • EN {nm.energy + NECRAMECH_RANK30_BONUS.energy}
                     </div>
                   </button>
                 ))}

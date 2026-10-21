@@ -557,7 +557,7 @@ export const rivenDispositions: Record<string, number> = {
   "Tenet Glaxion": 0.65,
   "Tenet Grigori": 0.95,
   "Tenet Livia": 0.95,
-  "Tenet Plinx": 0.8, // wiki.gg 0.8; fandom 0.70 (wikis disagree)
+  "Tenet Plinx": 0.8, // wiki.warframe.com 0.80 (fandom 0.70); wiki.warframe.com wins ties
   "Tenet Quanta": 0.85,
   "Tenet Spirex": 1.05,
   "Tenet Tetra": 1.25,

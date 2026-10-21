@@ -2477,8 +2477,9 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
     expect(full.arcaneBonuses?.overguardStealCap).toBe(10000);
   });
 
-  it("Arcane Deflection/Warmth: +102% status resist", () => {
+  it("Arcane Deflection/Warmth: +102% status resist (Slash / Cold)", () => {
     const excal = allWarframes.find((w) => w.id === "excalibur")!;
+    const element = { arcane_deflection: "Slash", arcane_warmth: "Cold" } as const;
     for (const id of ["arcane_deflection", "arcane_warmth"] as const) {
       const arc = allArcanes.find((a) => a.id === id)!;
       const bare = calculateWarframeBuild(excal, [], new Map());
@@ -2487,7 +2488,9 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
         undefined,
         [arc],
       );
-      expect(full.elementalResistance).toBeCloseTo(bare.elementalResistance + 102, 4);
+      expect(bare.statusResistances).toBeUndefined();
+      // wiki: 102% at R5 = immune to that element's status; shown per element, capped at 100%.
+      expect(full.statusResistances).toEqual([{ element: element[id], chance: 100, sources: [arc.name] }]);
       expect(full.arcaneBonuses?.statusResistance).toBeCloseTo(102, 4);
     }
   });
@@ -3235,8 +3238,9 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
     expect(full.arcaneBonuses?.buffDuration).toBeCloseTo(18, 4);
   });
 
-  it("Arcane Ice/Nullifier/Resistance: +102% status resist", () => {
+  it("Arcane Ice/Nullifier/Resistance: +102% status resist (Heat / Magnetic / Toxin)", () => {
     const excal = allWarframes.find((w) => w.id === "excalibur")!;
+    const element = { arcane_ice: "Heat", arcane_nullifier: "Magnetic", arcane_resistance: "Toxin" } as const;
     for (const id of ["arcane_ice", "arcane_nullifier", "arcane_resistance"] as const) {
       const arc = allArcanes.find((a) => a.id === id)!;
       const bare = calculateWarframeBuild(excal, [], new Map());
@@ -3245,12 +3249,14 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
         undefined,
         [arc],
       );
-      expect(full.elementalResistance).toBeCloseTo(bare.elementalResistance + 102, 4);
+      expect(bare.statusResistances).toBeUndefined();
+      // wiki: 102% at R5 = immune to that element's status; shown per element, capped at 100%.
+      expect(full.statusResistances).toEqual([{ element: element[id], chance: 100, sources: [arc.name] }]);
       expect(full.arcaneBonuses?.statusResistance).toBeCloseTo(102, 4);
     }
   });
 
-  it("Arcane Healing: 102% Slash resist panel (not elemental)", () => {
+  it("Arcane Healing: 102% Radiation status resist (wiki Arcane Healing)", () => {
     const excal = allWarframes.find((w) => w.id === "excalibur")!;
     const healing = allArcanes.find((a) => a.id === "arcane_healing")!;
     const bare = calculateWarframeBuild(excal, [], new Map());
@@ -3259,7 +3265,8 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
       undefined,
       [healing],
     );
-    expect(full.elementalResistance).toBeCloseTo(bare.elementalResistance, 4);
+    expect(bare.statusResistances).toBeUndefined();
+    expect(full.statusResistances).toEqual([{ element: "Radiation", chance: 100, sources: ["Arcane Healing"] }]);
     expect(full.arcaneBonuses?.statusResistance).toBeCloseTo(102, 4);
   });
 

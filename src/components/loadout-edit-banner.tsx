@@ -142,7 +142,7 @@ export function LoadoutEditBanner({
                 <span
                   key={slot}
                   title={`${label} slot is empty — add it from the loadout`}
-                  className="inline-flex min-h-11 items-center rounded-md px-2.5 text-xs text-muted-foreground/50 lg:pointer-fine:min-h-7"
+                  className="inline-flex min-h-11 items-center rounded-md px-2.5 text-xs text-muted-foreground/70 lg:pointer-fine:min-h-7"
                 >
                   {label}
                 </span>

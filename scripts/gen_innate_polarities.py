@@ -56,7 +56,10 @@ def add(group, vf_list, wfcd_items, fields):
         if slots:
             rec["slots"] = slots
         aura = w.get("aura") if "aura" in fields else None
-        auras = [a if a in VALID else None for a in (aura if isinstance(aura, list) else [aura])]
+        # WFCD writes a built-in Universal Aura polarity as "aura" (Protea, Dante, Jade's first
+        # Aura slot; wiki.warframe.com: "built-in Universal Aura polarity").
+        auras = [("universal" if a == "aura" else a) if (a in VALID or a == "aura") else None
+                 for a in (aura if isinstance(aura, list) else [aura])]
         if auras and auras[0]:
             rec["aura"] = auras[0]
         if len(auras) > 1 and auras[1]:
@@ -155,6 +158,7 @@ lines = [
     " * data modules (fields where the two disagree are left out). Do not edit by hand.",
     " * Keys are `<kind>:<voidforge id>`; `slots` are the regular-slot polarities in WFCD order",
     " * (WFCD does not record slot positions), `aura` / `exilus` / `stance` are the special slots.",
+    " * WFCD's aura polarity \"aura\" is the built-in Universal Aura polarity and is written as \"universal\".",
     " */",
     "export interface InnatePolarityEntry {",
     "  slots?: readonly string[];",

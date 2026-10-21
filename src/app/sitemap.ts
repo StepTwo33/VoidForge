@@ -18,9 +18,8 @@ const STATIC_ROUTES: Array<{
   { path: "/modular-builder", changeFrequency: "weekly", priority: 0.8 },
   { path: "/archwing-builder", changeFrequency: "weekly", priority: 0.75 },
   { path: "/railjack-builder", changeFrequency: "weekly", priority: 0.75 },
+  // /mod-browser and /arcane-browser only redirect to /codex sections, so they are not listed.
   { path: "/codex", changeFrequency: "weekly", priority: 0.8 },
-  { path: "/mod-browser", changeFrequency: "weekly", priority: 0.7 },
-  { path: "/arcane-browser", changeFrequency: "weekly", priority: 0.7 },
   { path: "/riven-calculator", changeFrequency: "monthly", priority: 0.65 },
   { path: "/damage-simulator", changeFrequency: "monthly", priority: 0.65 },
   { path: "/compare", changeFrequency: "monthly", priority: 0.6 },

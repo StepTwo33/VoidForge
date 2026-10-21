@@ -60,6 +60,8 @@ import {
   getPrimaryExaltedWeapon,
 } from "@/lib/weapons/exalted-weapons";
 import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, WarframeBuildData, persistSavedBuild, resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
+import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
+import { cleanLoadedBuild, cleanLoadedMods } from "@/lib/builds/incompatible-mod-warnings";
 import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
 import { shareBuilderBuild } from "@/lib/builds/share-build";
 import { toast } from "sonner";
@@ -214,12 +216,20 @@ export default function WarframeBuilderPage() {
       void (async () => {
         const params = new URLSearchParams(window.location.search);
         const shared = await extractBuildFromUrlAsync(params);
-        if (cancelled || !shared || shared.type !== "warframe") return;
+        if (cancelled) return;
+        if (!shared) {
+          reportUnreadableShareLink(params);
+          return;
+        }
+        if (shared.type !== "warframe") return;
         const wf = allWarframes.find((w) => w.id === shared.itemId);
-        if (!wf) return;
+        if (!wf) {
+          toast.error("Warframe not found", { description: "This shared build uses a Warframe that is no longer in the catalog." });
+          return;
+        }
         setSelectedWarframe(wf);
         setShowWarframeList(false);
-        setEquippedMods(dropUnknownMods(shared.mods.map((m, i) => ({ modId: m.id, rank: m.rank, slotIndex: m.slotIndex ?? i })), modsMap).map((m) => {
+        setEquippedMods(dropUnknownMods(cleanLoadedMods(shared.mods.map((m, i) => ({ modId: m.id, rank: m.rank, slotIndex: m.slotIndex ?? i }))), modsMap).map((m) => {
           const mod = modsMap.get(m.modId);
           return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
         }));
@@ -337,7 +347,8 @@ export default function WarframeBuilderPage() {
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildWarframeData()), [buildWarframeData]));
 
-  const applyLoadedBuild = useCallback((build: SavedBuild, options?: { silent?: boolean }) => {
+  const applyLoadedBuild = useCallback((rawBuild: SavedBuild, options?: { silent?: boolean }) => {
+    const build = cleanLoadedBuild(rawBuild);
     const d = build.data as WarframeBuildData;
     const wf = allWarframes.find((w) => w.id === d.warframeId);
     if (!wf) { toast.error("Warframe not found"); return; }
@@ -1187,7 +1198,7 @@ export default function WarframeBuilderPage() {
                         numSlots={8}
                         onImport={(mods) => {
                           const remapped = mods.map((m, i) => ({ ...m, slotIndex: i + 1 }));
-                          setEquippedMods(remapped);
+                          setEquippedMods(cleanLoadedMods(remapped));
                           setShowImporter(false);
                         }}
                         onClose={() => setShowImporter(false)}
@@ -1425,7 +1436,7 @@ export default function WarframeBuilderPage() {
                     value={buildDescription}
                     onChange={(e) => setBuildDescription(e.target.value)}
                     placeholder="Write a description for this build... (e.g. mechanics, synergies, how to play)"
-                    className="w-full h-24 p-3 bg-card border border-border rounded-lg text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-muted-foreground/60 shadow-sm"
+                    className="w-full h-24 p-3 bg-card border border-border rounded-lg text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-muted-foreground/70 shadow-sm"
                   />
                 </div>
               </div>

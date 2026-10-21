@@ -193,3 +193,36 @@ export function applyMeleeComboToStats(
   stats.slideAttackDamage =
     stats.slideBaseMultiplier != null ? stats.totalDamage * stats.slideBaseMultiplier * avg : undefined;
 }
+
+/** wiki Melee Combo § Heavy Attack Efficiency: "This effect is capped at 90%." */
+export const HEAVY_ATTACK_EFFICIENCY_CAP = 0.9;
+/** wiki Melee Combo § Initial Combo: spent initial combo "regenerates at a rate of 40 combo points per second". */
+export const INITIAL_COMBO_REGEN_PER_SEC = 40;
+
+/**
+ * Heavy Attack Efficiency (wiki Melee Combo): a heavy normally spends all combo;
+ * efficiency is the share of current combo kept (40% at 160 → 64 left), capped at 90%.
+ * It does not change wind-up (that is Heavy Attack Wind Up Speed).
+ *
+ * For an Initial Combo heavy build (no combo from light attacks) the spent combo
+ * regenerates at 40/s, so one heavy every wind-up + (combo − kept) / 40 s
+ * (wiki: 0% → 3 s to rebuild 7×, 50% → 1.5 s, 90% → 0.3 s).
+ */
+export function applyHeavyAttackEfficiency(stats: CalculatedStats): void {
+  const eff = Math.min(HEAVY_ATTACK_EFFICIENCY_CAP, Math.max(0, stats.heavyAttackEfficiency ?? 0));
+  stats.heavyAttackEfficiencyEffective = eff;
+  const combo = Math.max(0, stats.comboCount ?? 0);
+  stats.heavyAttackComboRetained = Math.floor(combo * eff + 1e-9);
+  const initial = Math.max(0, stats.heavyAttackInitialCombo ?? 0);
+  const simCombo = stats.heavyAttackSimCombo ?? 0;
+  const windUp = Math.max(0, stats.heavyAttackWindUp ?? 0);
+  if (simCombo > 0 || windUp <= 0 || !(stats.heavyAttackDamage > 0)) {
+    stats.heavyAttackCycleTime = undefined;
+    stats.heavyAttackRotationDps = undefined;
+    return;
+  }
+  const spent = Math.min(combo, initial) - Math.min(stats.heavyAttackComboRetained, initial);
+  const cycle = windUp + Math.max(0, spent) / INITIAL_COMBO_REGEN_PER_SEC;
+  stats.heavyAttackCycleTime = cycle;
+  stats.heavyAttackRotationDps = stats.heavyAttackDamage / cycle;
+}

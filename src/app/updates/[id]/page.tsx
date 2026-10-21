@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Megaphone } from "lucide-react";
@@ -16,10 +17,11 @@ export async function generateMetadata({
   if (!update) return { title: "Update Not Found - Voidforge" };
 
   const excerpt = update.body.slice(0, 160).replace(/\s+/g, " ").trim();
-  return {
+  return pageMetadata({
+    path: `/updates/${encodeURIComponent(id)}`,
     title: update.title,
     description: excerpt || "Voidforge site update",
-  };
+  });
 }
 
 export default async function SiteUpdatePage({

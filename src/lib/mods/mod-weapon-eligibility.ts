@@ -89,7 +89,6 @@ const SHOTGUN_ONLY_MOD_IDS = new Set([
   "magnetized_core",
   "nano_applicator",
   "primed_ammo_stock",
-  "primed_blunderbuss",
   "primed_cleanse_corpus",
   "primed_cleanse_grineer",
   "primed_cleanse_infested",

@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 import { notFound } from "next/navigation";
 import { AvatarImage } from "@/components/game-asset-image";
 import { PageShell, PageMain, ContentPanel } from "@/components/page-shell";
@@ -11,6 +13,16 @@ export const dynamic = "force-dynamic";
 
 interface PublicProfilePageProps {
   params: Promise<{ username: string }>;
+}
+
+export async function generateMetadata({ params }: PublicProfilePageProps): Promise<Metadata> {
+  const { username } = await params;
+  const normalized = username.toLowerCase();
+  return pageMetadata({
+    path: `/u/${encodeURIComponent(normalized)}`,
+    title: `${normalized}'s builds`,
+    description: `Public Warframe builds shared on Voidforge by ${normalized}.`,
+  });
 }
 
 export default async function PublicProfilePage({ params }: PublicProfilePageProps) {

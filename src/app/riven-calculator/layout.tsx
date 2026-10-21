@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site/page-metadata";
 
-// Metadata only: gives this client page its own tab title ("Riven Grader | Voidforge").
-export const metadata: Metadata = { title: "Riven Grader" };
+// Metadata only: gives this client page its own title, description, canonical URL and OG tags.
+export const metadata: Metadata = pageMetadata({
+  path: "/riven-calculator",
+  title: "Riven Grader",
+  description:
+    "Grade Warframe riven rolls against disposition-scaled stat ranges and see how good each stat is.",
+});
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return children;

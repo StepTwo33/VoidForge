@@ -27,6 +27,7 @@ import { isPrimaryWeaponCategory } from "@/lib/mods/mod-weapon-eligibility";
 import { isCompanionWeaponCategory } from "@/lib/weapons/companion-weapons";
 import { getModCategory } from "@/lib/weapons/weapon-categories";
 import { toast } from "sonner";
+import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
 import { CompareRow, CompareSideHeader } from "@/components/compare/stat-diff";
 import { SnapshotCompare, WeaponCompareRows } from "@/components/compare/build-stat-rows";
 import { EquipmentDiff } from "@/components/compare/equipment-diff";
@@ -74,7 +75,8 @@ function BuildCompareTab() {
     setSourceOpen(null);
   };
 
-  const loadSavedOrCommunity = (side: 0 | 1, build: SavedBuild) => {
+  const loadSavedOrCommunity = (side: 0 | 1, rawBuild: SavedBuild) => {
+    const build = cleanLoadedBuild(rawBuild);
     const snap = snapshotFromBuild(kind, build.name, build.data);
     if (!snap) {
       toast.error("That build could not be compared");
@@ -194,7 +196,7 @@ function BuildCompareTab() {
           Archwing
         </FilterChip>
       </div>
-      <div className="grid gap-6 min-[360px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] min-[360px]:gap-2 md:gap-6">
+      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:gap-2 md:gap-6" data-testid="compare-build-columns">
         {([0, 1] as const).map((side) => {
           const build = builds[side];
           const loadedBuild = loaded[side];

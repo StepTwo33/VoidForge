@@ -17,6 +17,9 @@ export function calculatedStatsToSimInputs(stats: CalculatedStats): {
   weakPointDamageBonus: number;
   factionBonuses: Record<string, number>;
   punctureArmorStripPerStack?: number;
+  /** Modded reserve (0 = unlimited / not modelled for this weapon). */
+  ammoMax: number;
+  ammoEfficiency: number;
 } {
   const dmgTypes: Record<string, number> = {};
   if (stats.impact > 0) dmgTypes.impact = stats.impact;
@@ -45,6 +48,8 @@ export function calculatedStatsToSimInputs(stats: CalculatedStats): {
     ...(stats.punctureArmorStripPerStack
       ? { punctureArmorStripPerStack: stats.punctureArmorStripPerStack }
       : {}),
+    ammoMax: stats.ammoReserveModelled ? (stats.ammoMax ?? 0) : 0,
+    ammoEfficiency: Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 1),
   };
 }
 

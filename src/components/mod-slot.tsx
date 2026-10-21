@@ -13,7 +13,7 @@ import {
   modCapacityAtRank,
   modSlotCapacityCost,
 } from "@/lib/calc/mod-capacity";
-import { cleanModDescription, formatModStatValue } from "@/lib/display/mod-display";
+import { cleanModDescription, formatModStatSpecial, formatModStatValue } from "@/lib/display/mod-display";
 import { PointerVerb } from "@/components/pointer-verb";
 
 const rarityBorderColors: Record<string, string> = {
@@ -211,8 +211,11 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innateP
 
   const statEntries = Object.entries(mod.stats).slice(0, compact ? 2 : 3);
   const formatStat = (key: string, perRankVal: number) => {
-    const setMult = key === "tauResistance" ? 1 : umbralSetMult;
-    return formatModStatValue(key, perRankVal, rank, setMult);
+    const special = formatModStatSpecial(mod.id, key, perRankVal, rank);
+    if (special !== null) return special;
+    // wiki.warframe.com Umbral Set: the set bonus scales every stat, Tau resistance included
+    // (Vitality/Fiber 11% → 14.3% / 19.8%, Intensify 11% → 13.75% / 19.25%).
+    return formatModStatValue(key, perRankVal, rank, umbralSetMult);
   };
 
   return (

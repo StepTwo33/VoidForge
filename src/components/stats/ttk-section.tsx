@@ -99,7 +99,13 @@ export function TTKSection({
                           : "text-red-700 dark:text-red-400"
                   }`}
                 >
-                  {r.ttk === Infinity ? "∞" : r.ttk < 0.01 ? "<0.01s" : `${r.ttk.toFixed(2)}s`}
+                  {r.outOfAmmo
+                    ? "Out of ammo"
+                    : r.ttk === Infinity
+                      ? "∞"
+                      : r.ttk < 0.01
+                        ? "<0.01s"
+                        : `${r.ttk.toFixed(2)}s`}
                 </span>
               </button>
               {expandedEnemy === r.enemy.id && (
@@ -108,6 +114,12 @@ export function TTKSection({
                     <span className="text-muted-foreground">Shots to Kill</span>
                     <span className="font-mono">{r.shotsToKill === Infinity ? "∞" : r.shotsToKill}</span>
                   </div>
+                  {r.ammoShotBudget != null && Number.isFinite(r.ammoShotBudget) && (
+                    <div className="flex justify-between text-[9px]">
+                      <span className="text-muted-foreground">Shots in mag + reserve</span>
+                      <span className="font-mono">{r.ammoShotBudget}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-[9px]">
                     <span className="text-muted-foreground">Health</span>
                     <span className="font-mono">{fmt(r.scaledHealth)}</span>
@@ -146,6 +158,12 @@ export function TTKSection({
           ? `${results.length} match${results.length === 1 ? "" : "es"}`
           : `${results.length} common · search for any enemy`}
       </p>
+      {stats.ammoReserveModelled && (
+        <p className="mt-1 text-[9px] text-muted-foreground">
+          Ammo: starts with a full magazine plus {stats.ammoMax ?? 0} reserve. Ammo pickups (and Ammo
+          Mutation mods) are not modelled, so a long fight can run out of ammo.
+        </p>
+      )}
     </CollapsibleSection>
   );
 }

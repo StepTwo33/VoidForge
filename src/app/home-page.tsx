@@ -1,0 +1,195 @@
+"use client";
+
+import {
+  Crosshair,
+  Shield,
+  Dog,
+  FolderOpen,
+  Dice5,
+  BookOpen,
+  Target,
+  GitCompareArrows,
+  Rocket,
+  Hammer,
+  Plane,
+  ExternalLink,
+  Users,
+} from "lucide-react";
+import {
+  PageShell,
+  PageMain,
+  FeatureCard,
+} from "@/components/page-shell";
+import type { CatalogCounts } from "@/lib/site/catalog-counts";
+import { CommunityBuildsSidebar } from "@/components/community-builds-sidebar";
+import { SiteUpdatesSidebar } from "@/components/site-updates-sidebar";
+import {
+  HOME_CENTER_CLASS,
+  HOME_GRID_CLASS,
+  HOME_LEFT_ASIDE_CLASS,
+  HOME_RIGHT_ASIDE_CLASS,
+  HOME_SIDEBAR_ASIDE_CLASS,
+  HOME_SIDEBAR_INLINE_CLASS,
+} from "@/lib/site/home-sidebar-layout";
+import { cn } from "@/lib/utils";
+import { BrandMark } from "@/components/brand-mark";
+
+export default function Home({ counts }: { counts: CatalogCounts }) {
+  return (
+    <PageShell>
+      <PageMain maxWidth="full" className="max-w-none overflow-x-hidden py-6 sm:py-12 lg:py-16 xl:px-5 2xl:px-6">
+        {/* Equal side tracks keep the center grid centered; side panels pin to the outer edges. */}
+        <div className={HOME_GRID_CLASS}>
+          {/* Center: hero + feature grid */}
+          <div className={HOME_CENTER_CLASS}>
+            <div className="mx-auto mb-6 max-w-3xl text-center sm:mb-12">
+              <div className="mb-5 flex justify-center sm:mb-6">
+                <BrandMark
+                  size={64}
+                  priority
+                  className="ring-2 ring-primary/25 shadow-lg shadow-primary/15 sm:h-20 sm:w-20"
+                />
+              </div>
+              <h1 className="mb-3 text-[1.75rem] font-bold leading-tight tracking-tight sm:mb-4 sm:text-5xl">
+                Build. Calculate. <span className="text-primary">Dominate.</span>
+              </h1>
+              <p className="text-sm leading-relaxed text-muted-foreground sm:text-lg">
+                Plan and optimize your Warframe builds with real-time stat calculations, mod stacking, and DPS analysis.
+              </p>
+            </div>
+
+            <div className="grid w-full grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
+              <FeatureCard
+                href="/weapon-builder"
+                title="Weapon Builder"
+                description={`Configure mods for ${counts.weaponPicker} weapons with real-time DPS, crit, and status calculations. Kitgun, Zaw and Amp parts and companion weapons are built in their own builders.`}
+                icon={Crosshair}
+                accent="blue"
+                badges={[`${counts.weaponPicker} Weapons`, "Orokin Catalyst"]}
+              />
+              <FeatureCard
+                href="/warframe-builder"
+                title="Warframe Builder"
+                description={`Mod your Warframe, install Archon Shards, and see ability stats and survivability for ${counts.warframePicker} Warframes. Necramechs are in the Archwing Builder.`}
+                icon={Shield}
+                accent="purple"
+                badges={[`${counts.warframePicker} Warframes`, "Archon Shards"]}
+              />
+              <FeatureCard
+                href="/companion-builder"
+                title="Companion Builder"
+                description="Build sentinels, kubrows, kavats, MOAs, and more with companion-specific mods."
+                icon={Dog}
+                accent="cyan"
+                badges={[`${counts.companions} Companions`, `${counts.companionMods} Mods`]}
+              />
+              <FeatureCard
+                href="/riven-calculator"
+                title="Riven Grader"
+                description="Grade your in-game riven rolls against disposition-scaled ranges and tier rankings."
+                icon={Dice5}
+                accent="amber"
+                badges={[`${counts.rivenDispositions} Dispositions`, "Grade System"]}
+              />
+              <FeatureCard
+                href="/codex?section=mods&category=aura"
+                title="Codex"
+                description="Browse mods, arcanes, and archon shards — verify drain, effects, and data coverage."
+                icon={BookOpen}
+                accent="indigo"
+                badges={["Mods", "Arcanes", "Shards"]}
+              />
+              <FeatureCard
+                href="/archwing-builder"
+                title="Archwing Builder"
+                description="Mod Archwing frames and Necramechs with real-time stat preview and capacity tracking."
+                icon={Plane}
+                accent="yellow"
+                badges={["Archwing", "Necramech"]}
+              />
+              <FeatureCard
+                href="/damage-simulator"
+                title="Damage Simulator"
+                description="Simulate damage against enemies with level scaling, armor, and elemental combos."
+                icon={Target}
+                accent="red"
+                badges={[`${counts.enemies} Enemies`, "Elemental Reference"]}
+              />
+              <FeatureCard
+                href="/loadouts"
+                title="Loadout Manager"
+                description="Assemble and edit complete kits: warframe, weapons, and companion in one place."
+                icon={FolderOpen}
+                accent="green"
+                badges={["Full kits", "Slot editor"]}
+              />
+              <FeatureCard
+                href="/discover"
+                title="Discover Builds"
+                description="Browse community builds shared by other Tenno. Upvote, filter, and load shared loadouts."
+                icon={Users}
+                accent="primary"
+                badges={["Community", "Upvotes"]}
+              />
+              <FeatureCard
+                href="/modular-builder"
+                title="Modular Builder"
+                description="Assemble and mod Kitguns, Zaws, and Amps from individual components with stat preview."
+                icon={Hammer}
+                accent="orange"
+                badges={["Kitguns", "Zaws", "Amps"]}
+              />
+              <FeatureCard
+                href="/railjack-builder"
+                title="Railjack Builder"
+                description="Configure ship components, armaments, and Plexus mods for your Railjack."
+                icon={Rocket}
+                accent="rose"
+                badges={["Components", "Plexus Mods"]}
+              />
+              <FeatureCard
+                href="/compare"
+                title="Build Compare"
+                description="Compare two weapon builds side-by-side or pit full loadouts against each other."
+                icon={GitCompareArrows}
+                accent="teal"
+                badges={["Build vs Build", "Loadout vs Loadout"]}
+              />
+            </div>
+
+            {/* Mobile / tablet: side columns stack below the grid */}
+            <div className={cn(HOME_SIDEBAR_INLINE_CLASS, "mb-0 mt-8")}>
+              <SiteUpdatesSidebar variant="inline" limit={4} />
+              <CommunityBuildsSidebar variant="inline" limit={6} />
+            </div>
+
+            <p className="mt-10 border-t border-border/30 pt-6 text-center text-xs leading-relaxed text-foreground/80">
+              Community shout-out:{" "}
+              <a
+                href="https://buff0000n.github.io/dojocad/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="-my-[13px] inline-flex items-center gap-1 py-[13px] font-medium text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
+              >
+                DojoCAD
+                <ExternalLink className="h-3 w-3 opacity-50" aria-hidden />
+              </a>
+              {" "}by buff0000n — clan dojo layout planning. Thanks for building this for the community.
+            </p>
+          </div>
+
+          {/* Left: site updates — outer edge. After the hero in the DOM so the H1 comes first;
+              row-start-1 keeps it in the left column visually. */}
+          <aside className={cn(HOME_SIDEBAR_ASIDE_CLASS, HOME_LEFT_ASIDE_CLASS, "min-[1400px]:row-start-1")}>
+            <SiteUpdatesSidebar variant="sidebar" limit={10} />
+          </aside>
+
+          {/* Right: community builds — outer edge */}
+          <aside className={cn(HOME_SIDEBAR_ASIDE_CLASS, HOME_RIGHT_ASIDE_CLASS)}>
+            <CommunityBuildsSidebar variant="sidebar" limit={10} />
+          </aside>
+        </div>
+      </PageMain>
+    </PageShell>
+  );
+}

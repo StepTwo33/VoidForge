@@ -21,6 +21,7 @@ export function SimResultsPanel({
   multishot,
   magazine,
   reloadTime,
+  ammoMax = 0,
   dmgTypes,
 }: {
   selectedEnemy: EnemyType | null;
@@ -31,12 +32,14 @@ export function SimResultsPanel({
   multishot: number;
   magazine: number;
   reloadTime: number;
+  /** Reserve ammo (0 = unlimited). */
+  ammoMax?: number;
   dmgTypes: Record<string, number>;
 }) {
   if (!selectedEnemy || !sim) {
     return (
       <div className="rounded-xl border border-border/60 surface-panel p-8 text-center">
-        <Shield className="mx-auto mb-3 h-8 w-8 text-muted-foreground/30" />
+        <Shield className="mx-auto mb-3 h-8 w-8 text-muted-foreground/70" />
         <p className="text-sm font-medium text-foreground">No enemy selected</p>
         <p className="mx-auto mt-1.5 max-w-xs text-xs text-muted-foreground">
           Pick a faction and enemy on the left to see TTK and DPS.
@@ -45,8 +48,13 @@ export function SimResultsPanel({
     );
   }
 
-  const ttkLabel =
-    sim.ttk === Infinity ? "∞" : sim.ttk < 0.01 ? "<0.01s" : `${sim.ttk.toFixed(2)}s`;
+  const ttkLabel = sim.outOfAmmo
+    ? "Out of ammo"
+    : sim.ttk === Infinity
+      ? "∞"
+      : sim.ttk < 0.01
+        ? "<0.01s"
+        : `${sim.ttk.toFixed(2)}s`;
   const ttkColor =
     sim.ttk < 1
       ? "text-green-700 dark:text-green-400"
@@ -101,6 +109,11 @@ export function SimResultsPanel({
           Discrete TTK (same engine as Arsenal). Enemy armor DR = 0.9×AR/2700 (cap 90%). Viral/Corrosive
           stacking, Elementalist, Bane, optional headshots.
         </p>
+        <p className="mt-1 text-[9px] leading-relaxed text-muted-foreground">
+          {ammoMax > 0 && magazine > 0
+            ? `Ammo: a full magazine plus ${ammoMax.toLocaleString()} reserve (${Number.isFinite(sim.ammoShotBudget) ? `${sim.ammoShotBudget.toLocaleString()} shots` : "unlimited"}). Ammo pickups are not modelled, so the fight stops when both run out.`
+            : "Ammo: unlimited reserve (set Reserve ammo to model running dry). Ammo pickups are not modelled."}
+        </p>
       </div>
 
       <SimSection
@@ -127,7 +140,7 @@ export function SimResultsPanel({
           />
         )}
         <SimResultRow label="Effective HP" value={fmtSimNum(sim.effectiveHP)} bold color="text-primary" />
-        <div className="mt-1 text-[9px] text-muted-foreground/60">
+        <div className="mt-1 text-[9px] text-muted-foreground/70">
           {damageFactionForEnemy(selectedEnemy) ?? "No faction"} modifiers ·{" "}
           {selectedEnemy.baseArmor > 0 ? "armor" : "no armor"} ·{" "}
           {selectedEnemy.baseShield > 0 ? "shields" : "no shields"}
@@ -275,7 +288,7 @@ export function SimResultsPanel({
                     </span>
                   )}
                   {fm === 0 && (
-                    <span className="text-muted-foreground/40">neutral</span>
+                    <span className="text-muted-foreground/70">neutral</span>
                   )}
                 </div>
               );
@@ -283,7 +296,7 @@ export function SimResultsPanel({
         </div>
       </SimSection>
 
-      <p className="text-[9px] text-muted-foreground/60">
+      <p className="text-[9px] text-muted-foreground/70">
         Sustained DPS accounts for {reloadTime}s reload every {magazine} shots.
       </p>
     </>

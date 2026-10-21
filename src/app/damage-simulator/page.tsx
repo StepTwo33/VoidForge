@@ -38,6 +38,9 @@ export default function DamageSimulatorPage() {
   const [statusChance, setStatusChance] = useState(0.3);
   const [magazine, setMagazine] = useState(30);
   const [reloadTime, setReloadTime] = useState(2);
+  // 0 = unlimited reserve (the default for hand-entered stats).
+  const [ammoMax, setAmmoMax] = useState(0);
+  const [ammoEfficiency, setAmmoEfficiency] = useState(0);
   const [addingType, setAddingType] = useState("");
   const [statusDamageBonus, setStatusDamageBonus] = useState(0);
   const [headshotDamageBonus, setHeadshotDamageBonus] = useState(0);
@@ -63,6 +66,8 @@ export default function DamageSimulatorPage() {
     setStatusChance(applied.statusChance);
     setMagazine(applied.magazine);
     setReloadTime(applied.reloadTime);
+    setAmmoMax(applied.ammoMax ?? 0);
+    setAmmoEfficiency(applied.ammoEfficiency ?? 0);
     setStatusDamageBonus(applied.statusDamageBonus);
     setHeadshotDamageBonus(applied.headshotDamageBonus);
     setWeakPointDamageBonus(applied.weakPointDamageBonus);
@@ -111,6 +116,8 @@ export default function DamageSimulatorPage() {
         applyHeadshots,
         punctureArmorStripPerStack:
           punctureArmorStripPerStack > 0 ? punctureArmorStripPerStack : undefined,
+        ammoMax: ammoMax > 0 ? ammoMax : undefined,
+        ammoEfficiency,
       },
       selectedEnemy,
       enemyLevel,
@@ -135,6 +142,8 @@ export default function DamageSimulatorPage() {
     factionBonuses,
     applyHeadshots,
     punctureArmorStripPerStack,
+    ammoMax,
+    ammoEfficiency,
   ]);
 
   const setDmg = (type: string, val: number) => setDmgTypes((prev) => ({ ...prev, [type]: val }));
@@ -179,6 +188,13 @@ export default function DamageSimulatorPage() {
                 <SimInputField label="Status Chance" value={statusChance} onChange={setStatusChance} step={0.01} />
                 <SimInputField label="Magazine" value={magazine} onChange={setMagazine} step={1} />
                 <SimInputField label="Reload (s)" value={reloadTime} onChange={setReloadTime} step={0.1} />
+                <SimInputField label="Reserve ammo" value={ammoMax} onChange={setAmmoMax} step={1} />
+                <SimInputField
+                  label="Ammo Efficiency"
+                  value={ammoEfficiency}
+                  onChange={setAmmoEfficiency}
+                  step={0.05}
+                />
                 <div className="min-w-0">
                   <label className="mb-0.5 block text-[10px] text-muted-foreground">Total damage</label>
                   <div className="flex min-h-11 min-w-0 max-w-full items-center rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-2 font-mono text-sm font-bold tabular-nums text-amber-900 dark:text-amber-300 lg:pointer-fine:min-h-9 sm:text-xs">
@@ -349,6 +365,7 @@ export default function DamageSimulatorPage() {
               multishot={multishot}
               magazine={magazine}
               reloadTime={reloadTime}
+              ammoMax={ammoMax}
               dmgTypes={dmgTypes}
             />
           </div>
