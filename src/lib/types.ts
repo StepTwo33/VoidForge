@@ -441,6 +441,21 @@ export interface StatusProc {
   description: string;
 }
 
+/** Groups of on-kill stacking mods that can take their own stack count in the sim. */
+export type KillStackSource =
+  | "galvCondition" // Galvanized Aptitude / Savvy / Shot (damage per status per stack)
+  | "galvMultishot" // Galvanized Chamber / Diffusion / Hell (multishot per stack)
+  | "onKillPerStack" // Galvanized Steel / Elementalist and similar per-stack on-kill bonuses
+  | "galvCrit" // Galvanized Scope / Crosshairs (headshot-kill stacks)
+  | "berserker"; // Berserker Fury
+
+/** A stacking source present on the current build, with its in-game stack cap. */
+export interface StackSourceInfo {
+  id: string;
+  label: string;
+  cap: number;
+}
+
 export interface SimulationParams {
   /**
    * Sniper zoom level (1-based index into SNIPER_DATA zooms). 0/unset = unscoped (no zoom buff).
@@ -451,8 +466,12 @@ export interface SimulationParams {
   sniperComboTier?: number;
   comboCount: number;         // melee combo hit count (default 0)
   killStacks: number;         // Galvanized / Berserker on-kill stacks (0-5)
-  statusTypesOnTarget: number; // Condition Overload / Galvanized Aptitude (0-5)
+  /** Per-source on-kill stacks; each falls back to `killStacks` when unset. */
+  killStacksBySource?: Partial<Record<KillStackSource, number>>;
+  statusTypesOnTarget: number; // Condition Overload / Galvanized Aptitude (no in-game cap; UI 0-14)
   arcaneStacks: number;       // e.g. Merciless (0–12), other arcanes vary
+  /** Per-arcane stack count (arcane id → stacks); each falls back to `arcaneStacks` when unset. */
+  arcaneStacksById?: Record<string, number>;
   extraGladiatorMods: number; // Gladiator mods on warframe (0-3, adds to weapon-side count)
   /** When no SetBonusLinkage: Vigilante mods on Warframe that apply to primary crit tier. */
   extraVigilanteModsFromWarframe?: number;
@@ -827,6 +846,10 @@ export interface CalculatedStats {
   galvanizedDamagePerStatus: number; // per-status bonus from Galvanized Aptitude/Savvy/Shot
   /** In-game stack cap for the equipped galvanized multishot mod (Chamber 5, Hell/Diffusion 4). */
   galvanizedMultishotStackCap?: number;
+  /** On-kill stacking sources on this build (sim UI: per-source stack inputs). Set only when non-empty. */
+  killStackSources?: StackSourceInfo[];
+  /** Stacking arcanes applied to this weapon with their real stack caps. Set only when non-empty. */
+  arcaneStackSources?: StackSourceInfo[];
   /** In-game stack cap for the equipped galvanized condition mod (Aptitude/Savvy 2, Shot 3). */
   galvanizedDamagePerStatusStackCap?: number;
   /** Galvanized Scope/Crosshairs: crit chance while aiming after a headshot (sim-gated). */

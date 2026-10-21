@@ -2349,7 +2349,18 @@ export function WarframeStatsPanel({
             <div key={info.name} className="py-1.5 border-b border-border/30 last:border-0">
               <div className="flex justify-between items-center">
                 <span className="text-xs font-medium text-purple-300">{info.name}</span>
-                <span className="text-[10px] text-muted-foreground font-mono">R{info.rank}/{info.maxRank}</span>
+                <span className="flex items-center gap-1.5">
+                  {info.fullStacks != null && (
+                    <span
+                      className="rounded border border-purple-500/40 px-1 text-[9px] text-purple-700 dark:text-purple-300"
+                      title={`Warframe stats assume this arcane is at full stacks (${info.fullStacks}). There is no stack input for Warframe arcanes.`}
+                      data-testid="arcane-full-stacks"
+                    >
+                      Full stacks ×{info.fullStacks}
+                    </span>
+                  )}
+                  <span className="text-[10px] text-muted-foreground font-mono">R{info.rank}/{info.maxRank}</span>
+                </span>
               </div>
               {info.applied.map((line, i) => (
                 <div key={`a-${i}`} className="py-0.5">

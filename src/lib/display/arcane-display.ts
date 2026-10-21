@@ -16,6 +16,11 @@ export interface ArcaneDisplayInfo {
   description: string;
   applied: ArcaneEffectLine[];
   conditional: ArcaneEffectLine[];
+  /**
+   * Stacking arcanes: the stack cap. Warframe stats always apply these at full stacks
+   * (effectiveArcaneStacks), so the Warframe panel labels them. Unset for non-stacking arcanes.
+   */
+  fullStacks?: number;
 }
 
 const STAT_LABELS: Record<string, string> = {
@@ -398,6 +403,7 @@ export function getArcaneDisplayInfo(
       description: cleanDesc,
       applied,
       conditional,
+      ...(def.trigger === "stacks" ? { fullStacks: def.stackCap ?? 1 } : {}),
     };
   }
 

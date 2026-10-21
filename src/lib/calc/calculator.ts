@@ -2,7 +2,7 @@
 import { SNIPER_DATA, sniperComboMultiplier } from "@/data/sniper-zoom";
 import { CONTINUOUS_WEAPON_IDS } from "@/data/continuous-weapons";
 import { MELEE_ATTACK_DATA } from "@/data/melee-attack-data";
-import { Mod, Weapon, Warframe, ModSlot, CalculatedStats, WarframeCalculatedStats, ElementalDamage, StatusProc, SimulationParams, DEFAULT_SIM_PARAMS, WeaponCalculationOptions, SetBonusLinkage, EquippedArchonShard, WeaponExternalBuff } from '../types';
+import { Mod, Weapon, Warframe, ModSlot, CalculatedStats, WarframeCalculatedStats, ElementalDamage, StatusProc, SimulationParams, KillStackSource, StackSourceInfo, DEFAULT_SIM_PARAMS, WeaponCalculationOptions, SetBonusLinkage, EquippedArchonShard, WeaponExternalBuff } from '../types';
 import { avgCritMultiplier, quantizeBaseCritMultiplier } from './crit-utils';
 import { resolveEffectiveFireRate } from './effective-fire-rate';
 import { evolutionExtraRadials, scaleRadialAttacksWithDps } from './weapon-radial-dps';
@@ -1168,7 +1168,12 @@ export function calculateWeaponBuild(
   critMultFlatBonus.critEventBonus += incarnonStatChanges?.critMultFlat ?? 0;
 
   // Apply Galvanized Condition (Aptitude/Savvy/Shot): damage per status on target per kill stack
-  const galvConditionStacks = Math.min(sim.killStacks, weaponModAcc.galvDamagePerStatusStackCap);
+  const killStacksFor = (src: KillStackSource) => Math.max(0, sim.killStacksBySource?.[src] ?? sim.killStacks);
+  const killStackSources: StackSourceInfo[] = [];
+  const galvConditionStacks = Math.min(killStacksFor("galvCondition"), weaponModAcc.galvDamagePerStatusStackCap);
+  if (galvDamagePerStatusPerStack > 0 && weaponModAcc.galvDamagePerStatusStackCap > 0) {
+    killStackSources.push({ id: "galvCondition", label: "Galvanized dmg/status", cap: weaponModAcc.galvDamagePerStatusStackCap });
+  }
   if (galvDamagePerStatusPerStack > 0 && galvConditionStacks > 0 && sim.statusTypesOnTarget > 0) {
     damageBonus += galvDamagePerStatusPerStack * galvConditionStacks * sim.statusTypesOnTarget;
     directOnlyDamageBonus += galvDamagePerStatusPerStack * galvConditionStacks * sim.statusTypesOnTarget;
@@ -1177,7 +1182,10 @@ export function calculateWeaponBuild(
   stats.galvanizedDamagePerStatusStackCap = weaponModAcc.galvDamagePerStatusStackCap;
 
   // Apply Galvanized Multishot on-kill stacks (Chamber caps at 5, Hell/Diffusion at 4)
-  const galvMultishotStacks = Math.min(sim.killStacks, weaponModAcc.galvMultishotStackCap);
+  const galvMultishotStacks = Math.min(killStacksFor("galvMultishot"), weaponModAcc.galvMultishotStackCap);
+  if (galvMultishotOnKillPerStack > 0 && weaponModAcc.galvMultishotStackCap > 0) {
+    killStackSources.push({ id: "galvMultishot", label: "Galvanized multishot", cap: weaponModAcc.galvMultishotStackCap });
+  }
   if (galvMultishotOnKillPerStack > 0 && galvMultishotStacks > 0) {
     multishotBonus += galvMultishotOnKillPerStack * galvMultishotStacks;
   }
@@ -1241,7 +1249,13 @@ export function calculateWeaponBuild(
     }
   }
   // Galvanized Steel / Elementalist: per-kill-stack bonuses (cap 4).
-  const onKillStacks = Math.min(sim.killStacks, weaponModAcc.onKillPerStackCap);
+  const onKillStacks = Math.min(killStacksFor("onKillPerStack"), weaponModAcc.onKillPerStackCap);
+  if (
+    weaponModAcc.onKillPerStackCap > 0 &&
+    Object.values(weaponModAcc.onKillPerStackBonuses).some((v) => (v ?? 0) !== 0)
+  ) {
+    killStackSources.push({ id: "onKillPerStack", label: "Per-kill stacks", cap: weaponModAcc.onKillPerStackCap });
+  }
   if (onKillStacks > 0) {
     const per = weaponModAcc.onKillPerStackBonuses;
     critMultBonus += (per.criticalMultiplier ?? 0) * onKillStacks;
@@ -1269,17 +1283,22 @@ export function calculateWeaponBuild(
   const galvCritOnHeadshotBase = weaponModAcc.galvCritOnHeadshotBase;
   const galvCritOnHeadshotPerStack = weaponModAcc.galvCritOnHeadshotPerStack;
   if (galvCritOnHeadshotBase > 0 && sim.applyHeadshots) {
-    const galvCritStacks = Math.min(sim.killStacks, 5);
+    const galvCritStacks = Math.min(killStacksFor("galvCrit"), 5);
     critChanceBonus += galvCritOnHeadshotBase + galvCritOnHeadshotPerStack * galvCritStacks;
+  }
+  if (galvCritOnHeadshotBase > 0) {
+    killStackSources.push({ id: "galvCrit", label: "Galvanized headshot", cap: 5 });
   }
   stats.galvanizedCritOnHeadshot = galvCritOnHeadshotBase;
   stats.galvanizedCritOnHeadshotPerStack = galvCritOnHeadshotPerStack;
 
   // Apply Berserker Fury on-kill stacks (max 2 stacks)
-  if (hasBerserkerFury && sim.killStacks > 0) {
-    const bfStacks = Math.min(sim.killStacks, 2);
-    fireRateBonus += berserkerFuryPerStack * bfStacks;
+  if (hasBerserkerFury) {
+    const bfStacks = Math.min(killStacksFor("berserker"), 2);
+    if (bfStacks > 0) fireRateBonus += berserkerFuryPerStack * bfStacks;
+    killStackSources.push({ id: "berserker", label: "Berserker Fury", cap: 2 });
   }
+  if (killStackSources.length > 0) stats.killStackSources = killStackSources;
   stats.berserkerFuryBonus = berserkerFuryPerStack;
 
   // Melee Elementalist / wind-up speed mods: +N% shortens windup time.
@@ -2546,13 +2565,25 @@ export function calculateWeaponBuildWithArcanes(
   const stats = calculateWeaponBuild(baseWeapon, equippedMods, allMods, incarnonStatChanges, sim, calcOptions, linkage, rivenStatChanges);
   const preArcaneHeavy = stats.heavyAttackDamage;
   const preArcaneCombo = stats.comboCount;
+  const arcaneStackSources: StackSourceInfo[] = [];
   for (const arcane of arcanes) {
-    // Pass raw sim.arcaneStacks — applyArcaneEffectsToWeapon computes effective stacks per arcane.
-    applyArcaneToWeapon(stats, arcane, sim.arcaneStacks, baseWeapon, {
+    const arcaneDef = getArcaneEffectDef(arcane.id);
+    if (arcaneDef?.trigger === "stacks") {
+      arcaneStackSources.push({
+        id: arcane.id,
+        label: arcane.name,
+        cap: arcaneDef.stackCap ?? arcaneDef.maxRank + 1,
+      });
+    }
+    // Pass raw sim stacks (per-arcane override, else the shared slider) — applyArcaneEffectsToWeapon
+    // computes effective stacks per arcane.
+    const simArcaneStacks = sim.arcaneStacksById?.[arcane.id] ?? sim.arcaneStacks;
+    applyArcaneToWeapon(stats, arcane, simArcaneStacks, baseWeapon, {
       applyHeadshots: sim.applyHeadshots,
       warframeArmor: sim.warframeArmor,
     });
   }
+  if (arcaneStackSources.length > 0) stats.arcaneStackSources = arcaneStackSources;
   if (isMelee && stats.meleeComboModContext && stats.comboCount !== preArcaneCombo) {
     const arcaneHeavyFactor = preArcaneHeavy > 0 ? stats.heavyAttackDamage / preArcaneHeavy : 1;
     applyMeleeComboToStats(
