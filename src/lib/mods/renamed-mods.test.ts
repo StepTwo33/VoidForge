@@ -37,14 +37,20 @@ describe("legacy Link Shields / Link Armor are gone", () => {
 
 describe("old builds migrate instead of dropping", () => {
   it("maps ids, keeps the rank and the slot", () => {
-    expect(RENAMED_MOD_IDS).toEqual({ link_shields: "link_redirection", link_armor: "link_fiber" });
+    expect(RENAMED_MOD_IDS).toEqual({
+      link_shields: "link_redirection",
+      link_armor: "link_fiber",
+      shotgun_spazz: "shotgun_barrage",
+      aura_speed_holster: "holster_amp",
+      helminth_ferocity: "proboscis",
+    });
     const { mods, migrated } = migrateRenamedMods(
       [{ modId: "link_shields", rank: 5, slotIndex: 2 }, { modId: "link_armor", rank: 3, slotIndex: 3 }, { modId: "bite", rank: 10, slotIndex: 4 }],
       modsMap,
     );
     expect(mods).toEqual([{ modId: "link_redirection", rank: 5, slotIndex: 2 }, { modId: "link_fiber", rank: 3, slotIndex: 3 }, { modId: "bite", rank: 10, slotIndex: 4 }]);
     expect(migrated.map((m) => m.toModId)).toEqual(["link_redirection", "link_fiber"]);
-    expect(describeMigratedMods(migrated)).toEqual(["Link Shields → Link Redirection", "Link Armor → Link Fiber"]);
+    expect(describeMigratedMods(migrated)).toEqual(["Link Shields → Link Redirection (Update 34)", "Link Armor → Link Fiber (Update 34)"]);
   });
 
   it("clamps the rank and drops the old copy when the current mod is already equipped", () => {

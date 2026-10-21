@@ -33,9 +33,6 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
   auger_strike: mod("auger_strike", [
     line("puncture", "weapon_dps", "multiplicative_percent", "Auger Strike: puncture \u2014 +120% <DT_PUNCTURE_COLOR>Puncture"),
   ]),
-  berserker: mod("berserker", [
-    line("attackSpeedOnCrit", "mod_panel", "multiplicative_percent", "Berserker: attackSpeedOnCrit \u2014 Stance: Valkyr is imbued with energy and becomes a ball of vicious rage, capable\u2026"),
-  ]),
   berserker_fury: mod("berserker_fury", [
     line("attackSpeed", "weapon_dps", "conditional_attack_speed_on_kill", "Berserker Fury: attackSpeed \u2014 On Melee Kill:\\\\n+35% Attack Speed for 10s. Stacks up to 2x."),
     line("duration", "mod_panel", "multiplicative_percent", "Berserker Fury: duration \u2014 On Melee Kill:\\\\n+35% Attack Speed for 10s. Stacks up to 2x."),

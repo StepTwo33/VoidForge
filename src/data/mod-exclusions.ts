@@ -6,15 +6,13 @@
 import { WIKI_INCOMPATIBLE_MOD_PAIRS } from "./mod-incompatibilities";
 
 /**
- * Catalog mods the wiki data module doesn't list (so it has no `Incompatible` entry for them),
- * kept from the earlier hand list: a Primed card can't sit next to its base card. Neither wiki has
- * these two Primed mods (they look unreleased); kept on the Primed rule. Every pair was checked
- * against wiki.warframe.com and fandom in Round 14 (voidforge-team/round-14/incompatibility-verification.md).
+ * Catalog mods the wiki data module doesn't list (so it has no `Incompatible` entry for them).
+ * Empty since Round 14b: the only two entries were Primed Blunderbuss / Primed Charged Chamber,
+ * which wiki.warframe.com doesn't list as released, so they left the catalog. Every pair was
+ * checked against wiki.warframe.com and fandom in Round 14
+ * (voidforge-team/round-14/incompatibility-verification.md).
  */
-export const MOD_EXCLUSION_SUPPLEMENT: readonly (readonly [string, string])[] = [
-  ["blunderbuss_r3", "primed_blunderbuss"],
-  ["charged_chamber", "primed_charged_chamber"],
-];
+export const MOD_EXCLUSION_SUPPLEMENT: readonly (readonly [string, string])[] = [];
 
 /** Every incompatible pair (wiki data + supplement), sorted ids. */
 export const MOD_INCOMPATIBLE_PAIRS: readonly (readonly [string, string])[] = [

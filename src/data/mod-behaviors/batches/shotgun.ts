@@ -47,9 +47,6 @@ export const MOD_BEHAVIORS_SHOTGUN: Record<string, VerifiedModBehavior> = {
   ]),
   riven_shotgun: mod("riven_shotgun", [], "wiki: Riven Mod (Shotgun) \u2014 Riven mod with random stats. Configure stats after equipping."),
 
-  shotgun_spazz: mod("shotgun_spazz", [
-    line("fireRate", "weapon_dps", "multiplicative_percent", "Shotgun Spazz: fireRate \u2014 +15% Fire Rate per rank"),
-  ]),
   vicious_spread: mod("vicious_spread", [
     line("accuracy", "mod_panel", "multiplicative_percent", "Vicious Spread: accuracy \u2014 +10% Damage, +10% Spread per rank (arsenal display only)"),
     line("damage", "weapon_dps", "multiplicative_percent", "Vicious Spread: damage \u2014 +10% Damage, +10% Spread per rank"),

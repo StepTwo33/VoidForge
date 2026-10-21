@@ -58,6 +58,8 @@ describe("mod eligibility inventory", () => {
         continue;
       }
 
+      // Conclave-only weapon mods (Round 14b) stay out of every PvE picker; see the test below.
+      if (mod.category === "conclave") continue;
       const slots = slotTypesForExclusiveMod(mod);
       for (const weaponId of weaponIds) {
         const weapon = weaponsById.get(weaponId);
@@ -80,6 +82,25 @@ describe("mod eligibility inventory", () => {
     }
 
     expect(misses).toEqual([]);
+  });
+
+  it("never offers a Conclave-only weapon mod on its PvE weapon", () => {
+    const leaks: string[] = [];
+    for (const [modId, weaponIds] of Object.entries(MOD_EXCLUSIVE_WEAPON_IDS)) {
+      const mod = modsById.get(modId);
+      if (!mod || mod.category !== "conclave") continue;
+      for (const weaponId of weaponIds) {
+        const weapon = weaponsById.get(weaponId);
+        if (!weapon) continue;
+        const profile = getWeaponModProfile(weapon);
+        const builder = builderForWeapon(weapon);
+        const slots: WeaponModSlotType[] = ["regular", "weapon_exilus_primary", "weapon_exilus_secondary", "weapon_exilus_melee"];
+        if (slots.some((slot) => modEligibleForWeaponSlot(mod, builder, weapon.category, slot, profile))) {
+          leaks.push(`${modId} on ${weaponId}`);
+        }
+      }
+    }
+    expect(leaks).toEqual([]);
   });
 
   it("covers known family variants for audited exclusives", () => {

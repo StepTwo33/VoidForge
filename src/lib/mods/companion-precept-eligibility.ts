@@ -47,7 +47,6 @@ export const COMPANION_PRECEPT_COMPANION_IDS: Readonly<Record<string, readonly s
   "ghost": ["prisma_shade", "shade", "shade_prime"],
   "guardian": ["carrier", "carrier_prime", "dethcube", "dethcube_prime", "diriga", "djinn", "helios", "helios_prime", "nautilus", "nautilus_prime", "oxylus", "prisma_shade", "shade", "shade_prime", "taxon", "wyrm", "wyrm_prime"],
   "hard_engage": ["lambeo", "nidus_moa", "olaro", "para"],
-  "helminth_ferocity": ["chesa", "helminth_charger", "huras", "raksa", "sahasa", "sunika"],
   "howl": ["chesa", "helminth_charger", "huras", "raksa", "sahasa", "sunika"],
   "hunt": ["chesa", "helminth_charger", "huras", "raksa", "sahasa", "sunika"],
   "iatric_mycelium": ["medjay_predasite", "pharaoh_predasite", "vizier_predasite"],

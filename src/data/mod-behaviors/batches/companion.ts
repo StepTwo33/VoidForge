@@ -223,9 +223,6 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
   hastened_deflection: mod("hastened_deflection", [
     line("shield", "mod_panel", "multiplicative_percent", "wiki: Hastened Deflection — shield recharge/delay (not capacity)"),
   ]),
-  helminth_ferocity: mod("helminth_ferocity", [
-    line("finisherDamage", "companion_totals", "multiplicative_percent", "Helminth Ferocity: finisherDamage \u2014 +120% Finisher Damage"),
-  ]),
   howl: mod("howl", [
     line("duration", "mod_panel", "multiplicative_percent", "Howl: duration \u2014 The kubrow cries out with a blood-curdling howl that strikes fear into 15 enemie\u2026"),
     line("fearDuration", "mod_panel", "multiplicative_percent", "Howl: fearDuration \u2014 The kubrow cries out with a blood-curdling howl that strikes fear into 15 enemie\u2026"),

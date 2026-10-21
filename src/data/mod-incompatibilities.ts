@@ -261,7 +261,6 @@ export const WIKI_INCOMPATIBLE_MOD_PAIRS: readonly (readonly [string, string])[]
   ["primed_sniper_ammo_mutation", "sniper_ammo_mutation"],
   ["primed_stabilizer", "stabilizer"],
   ["primed_steady_hands", "steady_hands"],
-  ["primed_streamline", "streamline_r3"],
   ["primed_sure_footed", "sure_footed_r5"],
   ["primed_target_cracker", "target_cracker_r3"],
   ["primed_venomous_clip", "venomous_clip"],

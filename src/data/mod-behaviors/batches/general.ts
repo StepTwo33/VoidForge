@@ -387,7 +387,6 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Persistent Posture — impact bias / AI (not always-on base damage)"),
   ]),
   phoenix_blaze: mod("phoenix_blaze", [], "wiki: Phoenix Blaze \u2014 Wreathes the Railjack in fire, increasing Turret Damage and Speed."),
-  phoenix_spirit: mod("phoenix_spirit", [], "wiki: Phoenix Spirit \u2014 Elemental Damage increased by |PERCENT|%."),
   piercing_fury: mod("piercing_fury", [], "wiki: Piercing Fury \u2014 Fighting form devised for Conclave."),
   pistol_riven_mod: mod("pistol_riven_mod", [], "wiki: Pistol Riven Mod \u2014 You will need to prove yourself before I reveal the beauty within this work."),
   point_blank_r3: mod("point_blank_r3", [
@@ -403,9 +402,6 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   ]),
   primed_ammo_stock: mod("primed_ammo_stock", [
     line("magazine", "weapon_dps", "multiplicative_percent", "Primed Ammo Stock: magazine \u2014 +110% Magazine Capacity"),
-  ]),
-  primed_blunderbuss: mod("primed_blunderbuss", [
-    line("criticalChance", "weapon_dps", "multiplicative_percent", "Primed Blunderbuss: criticalChance \u2014 +165% Critical Chance"),
   ]),
   primed_cleanse_corpus: mod("primed_cleanse_corpus", [
     line("factionCorpus", "mod_panel", "multiplicative_percent", "Primed Cleanse Corpus: factionCorpus \u2014 x1.55 Damage to Corpus"),
@@ -592,7 +588,6 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   ]),
   void_hole: mod("void_hole", [], "wiki: Void Hole \u2014 A black hole that draws in enemies, dealing damage."),
   void_levitation: mod("void_levitation", [], "wiki: Void Levitation \u2014 First Ability creates a 6m wide shockwave lasting 4s, that inflicts Lift Status on all enemies it touches."),
-  void_spines: mod("void_spines", [], "wiki: Void Spines \u2014 100% Damage taken is returned to the attacker."),
   void_strike: mod("void_strike", [], "wiki: Void Strike \u2014 First Ability consumes all energy to increase damage for 8s. Deal 10% additional damage for every percentage of energy consumed. 40s cooldown."),
   vome: mod("vome", [], "wiki: Vome \u2014 To cosmic madness laws submit  Though stalwart minds entreat"),
   votive_onslaught: mod("votive_onslaught", [], "wiki: Votive Onslaught \u2014 Precise, focused arcs and cuts not hampered by pity."),

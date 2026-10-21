@@ -631,20 +631,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "legendary"
   },
   {
-    "id": "shotgun_spazz",
-    "name": "Shotgun Spazz",
-    "polarity": "madurai",
-    "drain": 4,
-    "maxRank": 5,
-    "category": "shotgun",
-    "subCategory": "",
-    "stats": {
-      "fireRate": 15
-    },
-    "description": "+15% Fire Rate per rank",
-    "rarity": "common"
-  },
-  {
     "id": "galvanized_hell",
     "name": "Galvanized Hell",
     "polarity": "madurai",
@@ -791,20 +777,6 @@ const RAW_MODS: Mod[] = [
     },
     "description": "+5% Attack Speed per rank (Primed)",
     "rarity": "legendary"
-  },
-  {
-    "id": "berserker",
-    "name": "Berserker",
-    "polarity": "madurai",
-    "drain": 0,
-    "maxRank": 3,
-    "category": "melee",
-    "subCategory": "",
-    "stats": {
-      "attackSpeedOnCrit": 7.5
-    },
-    "description": "Stance: Valkyr is imbued with energy and becomes a ball of vicious rage, capable of unleashing a torrent of deadly claw attacks on unsuspecting foes.",
-    "rarity": "rare"
   },
   {
     "id": "gladiator_vice",
@@ -1037,20 +1009,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
-    "id": "aura_speed_holster",
-    "name": "Speed Holster",
-    "polarity": "naramon",
-    "drain": -7,
-    "maxRank": 3,
-    "category": "warframe",
-    "subCategory": "",
-    "stats": {
-      "holsterSpeed": 20
-    },
-    "description": "+20% Holster Speed per rank",
-    "rarity": "uncommon"
-  },
-  {
     "id": "aura_toxin_resistance",
     "name": "Toxin Resistance",
     "polarity": "vazarin",
@@ -1225,34 +1183,6 @@ const RAW_MODS: Mod[] = [
     },
     "description": "Squad receives +15% Sprint Speed",
     "rarity": "uncommon"
-  },
-  {
-    "id": "aura_sprint_speed",
-    "name": "Sprint Speed",
-    "polarity": "naramon",
-    "drain": -7,
-    "maxRank": 10,
-    "category": "warframe",
-    "subCategory": "",
-    "stats": {
-      "sprintSpeed": 2
-    },
-    "description": "+2% Sprint Speed per rank",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "aura_looters",
-    "name": "Looters",
-    "polarity": "vazarin",
-    "drain": -7,
-    "maxRank": 5,
-    "category": "warframe",
-    "subCategory": "",
-    "stats": {
-      "lootRadar": 10
-    },
-    "description": "+10m Loot Radar per rank",
-    "rarity": "common"
   },
   {
     "id": "aura_enemy_radar",
@@ -3433,36 +3363,6 @@ const RAW_MODS: Mod[] = [
     "warframeId": "ember"
   },
   {
-    "id": "augment_ember_flash_accelerant",
-    "name": "Flash Accelerant",
-    "polarity": "naramon",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "augment",
-    "subCategory": "",
-    "stats": {
-      "castSpeedBonus": 25
-    },
-    "description": "Immolation grants +25% Cast Speed per rank",
-    "rarity": "rare",
-    "warframeId": "ember"
-  },
-  {
-    "id": "augment_ember_fire_fright",
-    "name": "Fire Fright",
-    "polarity": "{{pol|zenurik}}",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "augment",
-    "subCategory": "",
-    "stats": {
-      "panicChance": 25
-    },
-    "description": "+25% chance to panic enemies per rank",
-    "rarity": "rare",
-    "warframeId": "ember"
-  },
-  {
     "id": "augment_ember_healing_flame",
     "name": "Healing Flame",
     "polarity": "zenurik",
@@ -3853,21 +3753,6 @@ const RAW_MODS: Mod[] = [
     "description": "Kumihimo Augment: 6 kills with weapons affected by Koumei's Passive give a loaded die that always rolls 6. Hold to cast empowered Kumihimo and consume all dice.",
     "rarity": "rare",
     "warframeId": "koumei"
-  },
-  {
-    "id": "augment_vauban_tesla_link",
-    "name": "Tesla Link",
-    "polarity": "naramon",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "augment",
-    "subCategory": "",
-    "stats": {
-      "linkDamageReduction": 15
-    },
-    "description": "Tesla chains grant +15% Damage Reduction per rank",
-    "rarity": "rare",
-    "warframeId": "vauban"
   },
   {
     "id": "augment_vauban_photon_repeater",
@@ -4505,21 +4390,6 @@ const RAW_MODS: Mod[] = [
     "description": "Spectrorage Augment: Enemies that die within Spectrorage have a 50% chance to drop an Energy Orb.",
     "rarity": "rare",
     "warframeId": "gara"
-  },
-  {
-    "id": "augment_baruuk_endless_lull",
-    "name": "Endless Lull",
-    "polarity": "naramon",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "augment",
-    "subCategory": "",
-    "stats": {
-      "lullDuration": 3
-    },
-    "description": "+3s Lull duration per rank",
-    "rarity": "rare",
-    "warframeId": "baruuk"
   },
   {
     "id": "augment_baruuk_elusive_retribution",
@@ -5920,7 +5790,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 1.0
@@ -6163,7 +6033,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damage": 5.0
@@ -6235,7 +6105,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 1.0
@@ -6336,7 +6206,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "reloadSpeed": 12.5,
@@ -6409,7 +6279,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "projectileSpeed": 15,
@@ -6424,7 +6294,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {
       "damage": 25,
@@ -6498,7 +6368,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {
       "fireRate": 7.5,
@@ -6600,7 +6470,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "magazine": -2.5,
@@ -6659,7 +6529,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "fireRate": 5,
@@ -6674,7 +6544,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 5,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "reloadSpeed": 5,
@@ -6689,7 +6559,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "projectileSpeed": 10,
@@ -6719,7 +6589,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 5,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "magazine": 5,
@@ -6734,7 +6604,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {
       "fireRate": -15,
@@ -6925,7 +6795,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "fireRate": 5.0,
@@ -6940,7 +6810,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 0,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {
       "accuracy": 100,
@@ -7061,20 +6931,6 @@ const RAW_MODS: Mod[] = [
     },
     "description": "+100% Damage on first shot in Magazine",
     "rarity": "rare"
-  },
-  {
-    "id": "primed_charged_chamber",
-    "name": "Primed Charged Chamber",
-    "polarity": "madurai",
-    "drain": 6,
-    "maxRank": 10,
-    "category": "primary",
-    "subCategory": "",
-    "stats": {
-      "damageFirstShot": 10
-    },
-    "description": "+110% Damage on first shot in Magazine",
-    "rarity": "legendary"
   },
   {
     "id": "primed_firestorm",
@@ -7257,7 +7113,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damage": 5.0
@@ -7344,7 +7200,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damage": 5.0
@@ -7429,7 +7285,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "fireRate": 12.5
@@ -7530,7 +7386,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {
       "fireRate": 7.5,
@@ -7645,7 +7501,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {
       "damage": 10,
@@ -7690,7 +7546,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "shield": -25,
@@ -8093,7 +7949,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 3,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "projectileSpeed": 10,
@@ -8122,7 +7978,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 10,
     "maxRank": 3,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "shield": -25,
@@ -8253,7 +8109,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {
       "magazine": -15,
@@ -8370,7 +8226,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 5,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "magazine": 5,
@@ -8430,7 +8286,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "blastRange": 25,
@@ -8475,7 +8331,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 3,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "magazine": -5,
@@ -8490,7 +8346,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damage": 5.0
@@ -8593,7 +8449,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 5,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "reloadSpeed": 8.3333,
@@ -8652,7 +8508,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damage": 5.0
@@ -8680,7 +8536,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 1.0
@@ -8938,7 +8794,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damage": 5.0
@@ -9039,7 +8895,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 10,
     "maxRank": 3,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "reloadSpeed": 12.5,
@@ -9172,7 +9028,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 3,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {
       "projectileSpeed": 12.5,
@@ -10162,7 +10018,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "melee",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "explosionDamage": 50.0
@@ -10323,7 +10179,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "melee",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damage": -2.5
@@ -10440,7 +10296,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "melee",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "attackSpeed": 5,
@@ -10510,7 +10366,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "melee",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damage": 15,
@@ -10742,7 +10598,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "melee",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 1.0,
@@ -10844,7 +10700,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "melee",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damage": 5.0
@@ -10858,7 +10714,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "melee",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damage": 5.0
@@ -10900,7 +10756,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 5,
-    "category": "melee",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damageReduction": 10.0
@@ -10956,7 +10812,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "melee",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "sprintSpeed": 7.5
@@ -11480,7 +11336,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "parkourVelocity": 2.5,
@@ -11495,7 +11351,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "energy": 12.5,
@@ -11554,7 +11410,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "slideSpeed": 25.0
@@ -11613,7 +11469,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damageReduction": 5.0,
@@ -11642,7 +11498,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "augment",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 1.5
@@ -11745,7 +11601,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "armor": 5,
@@ -11761,7 +11617,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "armor": 10,
@@ -11777,7 +11633,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "armor": 12.5,
@@ -11886,7 +11742,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "health": 6.25,
@@ -12120,7 +11976,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "augment",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 2.5
@@ -12299,7 +12155,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "abilityStrength": 7.5,
@@ -12329,7 +12185,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "energyOnKill": 2.5
@@ -12476,7 +12332,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "sprintSpeed": 5,
@@ -12506,7 +12362,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "abilityEfficiency": -5
@@ -12553,7 +12409,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "augment",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "shield": 5.0
@@ -12720,7 +12576,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "augment",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 1.0
@@ -12925,7 +12781,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "parkourVelocity": 2.5
@@ -12954,7 +12810,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "range": 5.0
@@ -13126,20 +12982,6 @@ const RAW_MODS: Mod[] = [
     "warframeId": "voruna"
   },
   {
-    "id": "primed_streamline",
-    "name": "Primed Streamline",
-    "polarity": "naramon",
-    "drain": 4,
-    "maxRank": 10,
-    "category": "warframe",
-    "subCategory": "",
-    "stats": {
-      "abilityEfficiency": 5
-    },
-    "description": "+55% Ability Efficiency",
-    "rarity": "legendary"
-  },
-  {
     "id": "primed_vigor",
     "name": "Primed Vigor",
     "polarity": "vazarin",
@@ -13263,7 +13105,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "augment",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "range": 1.5
@@ -13278,7 +13120,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "shield": -5
@@ -13494,7 +13336,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 0,
     "maxRank": 0,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {},
     "description": "Ice FX on Bullet Jump",
@@ -13506,7 +13348,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "parkourVelocity": 2.5,
@@ -13564,7 +13406,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "augment",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "energyLeech": 6.25
@@ -13594,7 +13436,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 0,
     "maxRank": 0,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {},
     "description": "Fire FX on Bullet Jump",
@@ -13648,7 +13490,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "augment",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 2.25
@@ -13689,7 +13531,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "augment",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 3.0
@@ -13836,7 +13678,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 5,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "energyOnKill": 1.0
@@ -13880,7 +13722,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 10,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 1.0
@@ -13910,7 +13752,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "augment",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "range": 1.0,
@@ -13957,7 +13799,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "parkourVelocity": -2.5,
@@ -14180,7 +14022,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 0,
     "maxRank": 0,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {},
     "description": "Toxin FX on Bullet Jump",
@@ -14222,7 +14064,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 10,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "shield": 12.5
@@ -14251,7 +14093,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 0,
     "maxRank": 0,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {},
     "description": "Electrical FX on Bullet Jump",
@@ -14263,7 +14105,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "augment",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "abilityEfficiency": 12.5
@@ -15250,20 +15092,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "uncommon"
   },
   {
-    "id": "helminth_ferocity",
-    "name": "Helminth Ferocity",
-    "polarity": "penjaga",
-    "drain": 0,
-    "maxRank": 5,
-    "category": "companion",
-    "subCategory": "",
-    "stats": {
-      "finisherDamage": 20.0
-    },
-    "description": "+120% Finisher Damage",
-    "rarity": "rare"
-  },
-  {
     "id": "iatric_mycelium",
     "name": "Iatric Mycelium",
     "polarity": "penjaga",
@@ -16174,7 +16002,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "melee",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Kills from Melee Attacks grant 45% more Melee Affinity.",
@@ -16353,7 +16181,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "archmelee",
+    "category": "operator",
     "subCategory": "",
     "stats": {
       "slashSize": 20.0
@@ -16469,30 +16297,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
-    "id": "basilisk_gaze",
-    "name": "Basilisk Gaze",
-    "polarity": "unairu",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Increases Void Blast radius by 60%.",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "basilisk_scales",
-    "name": "Basilisk Scales",
-    "polarity": "unairu",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Increases Operator Armor by 200%.",
-    "rarity": "uncommon"
-  },
-  {
     "id": "battle_forge",
     "name": "Battle Forge",
     "polarity": "universal",
@@ -16527,7 +16331,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -16544,18 +16348,6 @@ const RAW_MODS: Mod[] = [
     "stats": {},
     "description": "Electro-Magnetic Pulse that damages enemies and disables them temporarily.",
     "rarity": "rare"
-  },
-  {
-    "id": "blazing_dash",
-    "name": "Blazing Dash",
-    "polarity": "madurai",
-    "drain": 4,
-    "maxRank": 5,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Sling leaves a trail of fire that deals 1000 Damage/s over 14s. Void Sling will now stun enemies instead of displacing them.",
-    "rarity": "uncommon"
   },
   {
     "id": "blazing_steel",
@@ -16810,7 +16602,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -16892,7 +16684,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": 4,
     "maxRank": 3,
-    "category": "tektolyst",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Summon forth Cogron from the Void and brandish the mighty hammer, slamming it into the ground to create a cataclysmic shockwave that ripples 4 times.",
@@ -17080,7 +16872,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -17092,7 +16884,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -17111,18 +16903,6 @@ const RAW_MODS: Mod[] = [
       "duration": 0.727273
     },
     "description": "+27.5% Turret Damage per enemy destroyed, for 8s (Maximum 5 stacks)",
-    "rarity": "rare"
-  },
-  {
-    "id": "crippling_dash",
-    "name": "Crippling Dash",
-    "polarity": "unairu",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Using Void Sling through an enemy will reduce their Damage by 50%.",
     "rarity": "rare"
   },
   {
@@ -17203,7 +16983,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -17293,18 +17073,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
-    "id": "disarming_blast",
-    "name": "Disarming Blast",
-    "polarity": "naramon",
-    "drain": 4,
-    "maxRank": 5,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Enemies hit by Void Blast have a 50% chance to be disarmed.",
-    "rarity": "uncommon"
-  },
-  {
     "id": "disarming_sling",
     "name": "Disarming Sling",
     "polarity": "zenurik",
@@ -17315,18 +17083,6 @@ const RAW_MODS: Mod[] = [
     "stats": {},
     "description": "Slinging through enemies has a 50% chance to disarm them.",
     "rarity": "uncommon"
-  },
-  {
-    "id": "disorienting_blast",
-    "name": "Disorienting Blast",
-    "polarity": "naramon",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Blast has a 50% chance of confusing enemies for 16s, causing them to be unable to distinguish friend from foe.",
-    "rarity": "common"
   },
   {
     "id": "disruptor",
@@ -17360,7 +17116,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -17520,18 +17276,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
-    "id": "executing_dash",
-    "name": "Executing Dash",
-    "polarity": "naramon",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Sling no longer displaces enemies, instead it will open them up to Finishers and increase Finisher Damage taken by 35%.",
-    "rarity": "uncommon"
-  },
-  {
     "id": "extend",
     "name": "Extend",
     "polarity": "madurai",
@@ -17613,7 +17357,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -17685,18 +17429,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "uncommon"
   },
   {
-    "id": "flame_blast",
-    "name": "Flame Blast",
-    "polarity": "madurai",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Blast releases a ball of fire that deals 250% of the Void Blast damage and explodes after 0.6000000238418579s.",
-    "rarity": "rare"
-  },
-  {
     "id": "flechette",
     "name": "Flechette",
     "polarity": "naramon",
@@ -17731,7 +17463,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "melee",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Increase the range of spectral melee attacks to 26m.",
@@ -17973,18 +17705,6 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {},
     "description": "Increase shockwave radius by +40%.",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "guardian_blast",
-    "name": "Guardian Blast",
-    "polarity": "vazarin",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Blast consumes 25 Energy for each ally hit within 8m and grants them 160 Shields.",
     "rarity": "uncommon"
   },
   {
@@ -18377,7 +18097,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "parazon",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "",
@@ -18419,7 +18139,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -18443,7 +18163,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -18551,7 +18271,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "tektolyst",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Summon forth Lorak from the Void and conjure its ruinous spells, calling forth a beam of energy from within. Enemies pierced by the beam have a 100% chance to drop Energy Orbs if killed within 10s.",
@@ -18587,7 +18307,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -18632,18 +18352,6 @@ const RAW_MODS: Mod[] = [
       "statusChance": 15
     },
     "description": "+60% <DT_FIRE_COLOR>Heat, +60% Status Chance",
-    "rarity": "rare"
-  },
-  {
-    "id": "magnetic_blast",
-    "name": "Magnetic Blast",
-    "polarity": "unairu",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Enemies hit by Void Blast are affected by Magnetize for 10s.",
     "rarity": "rare"
   },
   {
@@ -18845,30 +18553,6 @@ const RAW_MODS: Mod[] = [
     },
     "description": "+90% <DT_IMPACT_COLOR>Impact",
     "rarity": "rare"
-  },
-  {
-    "id": "meteoric_dash",
-    "name": "Meteoric Dash",
-    "polarity": "madurai",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Sling deals 400 Extra Damage to enemies.",
-    "rarity": "rare"
-  },
-  {
-    "id": "mind_sprint",
-    "name": "Mind Sprint",
-    "polarity": "naramon",
-    "drain": 4,
-    "maxRank": 5,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Increases Void Sling Speed by 120%.",
-    "rarity": "uncommon"
   },
   {
     "id": "mind_step",
@@ -19392,7 +19076,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 3,
-    "category": "tektolyst",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Summon forth Nidri from the Void and plant the noble staff into the ground, creating a titanic splash of water that becomes a lingering vortex for 20s. 50% of damage dealt to enemies caught in the vortex is also inflicted upon all other enemies within it.",
@@ -19440,7 +19124,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -19558,7 +19242,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "tektolyst",
+    "category": "operator",
     "subCategory": "",
     "stats": {
       "abilityStrength": 1.25
@@ -19683,18 +19367,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "uncommon"
   },
   {
-    "id": "phoenix_spirit",
-    "name": "Phoenix Spirit",
-    "polarity": "madurai",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Elemental Damage increased by |PERCENT|%.",
-    "rarity": "common"
-  },
-  {
     "id": "phoenix_talons",
     "name": "Phoenix Talons",
     "polarity": "madurai",
@@ -19712,7 +19384,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -19814,7 +19486,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "melee",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Melee Combo Counter now decays while out of combat by 5 every few seconds, instead of depleting completely.",
@@ -19873,20 +19545,6 @@ const RAW_MODS: Mod[] = [
       "magazine": 10
     },
     "description": "+110% Magazine Capacity",
-    "rarity": "legendary"
-  },
-  {
-    "id": "primed_blunderbuss",
-    "name": "Primed Blunderbuss",
-    "polarity": "madurai",
-    "drain": 6,
-    "maxRank": 10,
-    "category": "shotgun",
-    "subCategory": "",
-    "stats": {
-      "criticalChance": 15
-    },
-    "description": "+165% Critical Chance",
     "rarity": "legendary"
   },
   {
@@ -20076,7 +19734,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "tektolyst",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Enemies struck by the Tauron Strike fire off smaller beams at other enemies within 20m.",
@@ -20144,7 +19802,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -20309,7 +19967,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -20407,24 +20065,12 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
-    "id": "rising_blast",
-    "name": "Rising Blast",
-    "polarity": "madurai",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Increases Void Blast Damage by 200% and it can now be charged to deal additional damage.",
-    "rarity": "uncommon"
-  },
-  {
     "id": "rising_steel",
     "name": "Rising Steel",
     "polarity": "unairu",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -20493,7 +20139,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -20561,7 +20207,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": 4,
     "maxRank": 3,
-    "category": "tektolyst",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Cogron Tauron Strikes enable their shockwave effect for the next 4 aerial Melee slam attacks.",
@@ -20600,7 +20246,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -20877,18 +20523,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
-    "id": "sonic_dash",
-    "name": "Sonic Dash",
-    "polarity": "vazarin",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Sling no longer displaces enemies, instead it emits a shockwave 14m wide and travels 8m stunning any enemy it hits.",
-    "rarity": "rare"
-  },
-  {
     "id": "sovereign_outcast",
     "name": "Sovereign Outcast",
     "polarity": "naramon",
@@ -20906,7 +20540,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "melee",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Summon 4 spectral swords that are copies of equipped melee weapon. Melee attacks will simultaneously trigger spectral attacks on any enemies within 10m for 30s. Spectral sword hits increase Combo Count and grant extra Tauron Strike Charge. Spectral swords are granted to all players in Affinity Range.",
@@ -20968,7 +20602,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -21030,23 +20664,11 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": 4,
     "maxRank": 3,
-    "category": "tektolyst",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Shockwaves generate 5 pickups, in the form of Universal Orbs or Ammo.",
     "rarity": "uncommon"
-  },
-  {
-    "id": "sundering_dash",
-    "name": "Sundering Dash",
-    "polarity": "unairu",
-    "drain": 4,
-    "maxRank": 5,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Using Void Sling through an enemy will reduce their Armor by 75%.",
-    "rarity": "rare"
   },
   {
     "id": "surging_storm",
@@ -21116,7 +20738,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -21140,7 +20762,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "unairu",
     "drain": 4,
     "maxRank": 3,
-    "category": "tektolyst",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Shockwaves create 5 Armor Motes that grant +450 temporary Armor. Max 5.",
@@ -21178,7 +20800,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 4,
     "maxRank": 3,
-    "category": "tektolyst",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Precision head shot damage increased by 100% on enemies afflicted with Temporal Drag.",
@@ -21202,7 +20824,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "tektolyst",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Summon forth Thara from the Void and fire the great bow into the air, blanketing the area with a rain of explosive arrows for 7s.",
@@ -21407,7 +21029,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "tektolyst",
+    "category": "operator",
     "subCategory": "",
     "stats": {},
     "description": "Summon forth Vexoric from the Void and swing the colossal sword, unleashing a wave of devastating energy. Gain +8 Melee Combo from each enemy hit.",
@@ -21419,7 +21041,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": -2,
     "maxRank": 3,
-    "category": "stance",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {},
     "description": "Fighting form devised for Conclave.",
@@ -21436,30 +21058,6 @@ const RAW_MODS: Mod[] = [
     "stats": {},
     "description": "",
     "rarity": "common"
-  },
-  {
-    "id": "void_aegis",
-    "name": "Void Aegis",
-    "polarity": "vazarin",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Mode creates a shield that grows up to 12m over 5s. This ability costs an additional 2 Energy/s.",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "void_chrysalis",
-    "name": "Void Chrysalis",
-    "polarity": "unairu",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Mode reduces damage taken by invisible allies within 25m by 80%. This ability costs an additional 4 Energy/s.",
-    "rarity": "uncommon"
   },
   {
     "id": "void_cloak",
@@ -21513,18 +21111,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
-    "id": "void_hunter",
-    "name": "Void Hunter",
-    "polarity": "naramon",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Mode reveals enemies within 25m through walls. This range gradually decreases over 5s when the Operator leaves Void Mode. This ability costs an additional 1 Energy/s.",
-    "rarity": "uncommon"
-  },
-  {
     "id": "void_levitation",
     "name": "Void Levitation",
     "polarity": "naramon",
@@ -21534,18 +21120,6 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {},
     "description": "First Ability creates a 6m wide shockwave lasting 4s, that inflicts Lift Status on all enemies it touches.",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "void_radiance",
-    "name": "Void Radiance",
-    "polarity": "madurai",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Consumes 50 Energy on leaving Void Mode to blind enemies within 10m for 5s.",
     "rarity": "uncommon"
   },
   {
@@ -21559,30 +21133,6 @@ const RAW_MODS: Mod[] = [
     "stats": {},
     "description": "Void Mode starts healing at +10 Health per second, increasing by 10 per second up to a maximum of 50.",
     "rarity": "uncommon"
-  },
-  {
-    "id": "void_shadow",
-    "name": "Void Shadow",
-    "polarity": "unairu",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Mode now renders allies within 40m invisible. This ability costs an additional 4 Energy/s per ally cloaked.",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "void_singularity",
-    "name": "Void Singularity",
-    "polarity": "zenurik",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Mode pulls enemies within 20m towards the Operator, and costs an additional 2 Energy/s.",
-    "rarity": "rare"
   },
   {
     "id": "void_siphon",
@@ -21609,42 +21159,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "uncommon"
   },
   {
-    "id": "void_spines",
-    "name": "Void Spines",
-    "polarity": "unairu",
-    "drain": 4,
-    "maxRank": 5,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "100% Damage taken is returned to the attacker.",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "void_stalker",
-    "name": "Void Stalker",
-    "polarity": "naramon",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Mode increases Critical Chance of melee attacks by up to 50% over 5s. This chance gradually decreases over 20s when the Operator leaves Void Mode. This ability costs an additional 4 Energy/s.",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "void_static",
-    "name": "Void Static",
-    "polarity": "zenurik",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Mode emits a pulse that deals 500 Damage/s over 15m, and costs an additional 1 Energy/s.",
-    "rarity": "uncommon"
-  },
-  {
     "id": "void_strike",
     "name": "Void Strike",
     "polarity": "madurai",
@@ -21654,18 +21168,6 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {},
     "description": "First Ability consumes all energy to increase damage for 8s. Deal 10% additional damage for every percentage of energy consumed. 40s cooldown.",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "voltaic_blast",
-    "name": "Voltaic Blast",
-    "polarity": "zenurik",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "operator",
-    "subCategory": "",
-    "stats": {},
-    "description": "Void Blast creates a surge of electricity, zapping enemies within 10m for 200% Damage.",
     "rarity": "uncommon"
   },
   {
@@ -22438,21 +21940,6 @@ const RAW_MODS: Mod[] = [
     "warframeId": "ash"
   },
   {
-    "id": "firequake",
-    "name": "Firequake",
-    "polarity": "zenurik",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "augment",
-    "subCategory": "",
-    "stats": {
-      "knockdownChance": 25.0
-    },
-    "description": "Firequake augment.",
-    "rarity": "rare",
-    "warframeId": "ember"
-  },
-  {
     "id": "iron_vault",
     "name": "Iron Vault",
     "polarity": "zenurik",
@@ -22467,19 +21954,6 @@ const RAW_MODS: Mod[] = [
     "description": "Iron Jab Augment: Aiming Iron Jab at the ground launches Wukong into the air. Executing a slam attack increases range by 15m and applies 300% extra damage.",
     "rarity": "rare",
     "warframeId": "wukong"
-  },
-  {
-    "id": "perpetual_vortex",
-    "name": "Perpetual Vortex",
-    "polarity": "zenurik",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "augment",
-    "subCategory": "",
-    "stats": {},
-    "description": "Perpetual Vortex augment.",
-    "rarity": "rare",
-    "warframeId": "vauban"
   },
   {
     "id": "shield_transference",

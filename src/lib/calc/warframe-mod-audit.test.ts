@@ -222,10 +222,6 @@ describe("warframe remainder (wiki max rank, Phase M11)", () => {
     expect(stats.totalShield / bare.totalShield).toBeCloseTo(1.75, 5);
   });
 
-  it("Primed Streamline R14: +55% efficiency", () => {
-    expect(withMod("primed_streamline").abilityEfficiency).toBeCloseTo(1.55, 5);
-  });
-
   it("Rush R5: +30% sprint (5% × 6)", () => {
     expect(withMod("rush_r3").sprintSpeedBonus).toBeCloseTo(0.3, 8);
   });
@@ -266,10 +262,6 @@ describe("warframe remainder (wiki max rank, Phase M11)", () => {
 
   it("Controlled Slide R5: +15% strength", () => {
     expect(withMod("controlled_slide").abilityStrength).toBeCloseTo(1.15, 8);
-  });
-
-  it("Sprint Speed aura R10: +22% sprint (2% × 11)", () => {
-    expect(withMod("aura_sprint_speed").sprintSpeedBonus).toBeCloseTo(0.22, 8);
   });
 
   it("Heightened Reflexes R3: −20% efficiency (casting is unmodeled)", () => {

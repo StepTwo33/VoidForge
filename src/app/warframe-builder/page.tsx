@@ -229,7 +229,7 @@ export default function WarframeBuilderPage() {
         }
         setSelectedWarframe(wf);
         setShowWarframeList(false);
-        setEquippedMods(cleanLoadedMods(dropUnknownMods(shared.mods.map((m, i) => ({ modId: m.id, rank: m.rank, slotIndex: m.slotIndex ?? i })), modsMap)).map((m) => {
+        setEquippedMods(dropUnknownMods(cleanLoadedMods(shared.mods.map((m, i) => ({ modId: m.id, rank: m.rank, slotIndex: m.slotIndex ?? i }))), modsMap).map((m) => {
           const mod = modsMap.get(m.modId);
           return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
         }));

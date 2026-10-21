@@ -138,9 +138,6 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Elusive Retribution: duration \u2014 Elude Augment: Every attack Baruuk Eludes increases his Melee Attack Speed and M\u2026"),
     line("evasionToDamage", "mod_panel", "multiplicative_percent", "Elusive Retribution: evasionToDamage \u2014 Elude Augment: Every attack Baruuk Eludes increases his Melee Attack Speed and M\u2026"),
   ]),
-  augment_baruuk_endless_lull: mod("augment_baruuk_endless_lull", [
-    line("lullDuration", "mod_panel", "multiplicative_percent", "Endless Lull: lullDuration \u2014 +3s Lull duration per rank"),
-  ]),
   augment_baruuk_reactive_storm: mod("augment_baruuk_reactive_storm", [
     line("statusChance", "mod_panel", "multiplicative_percent", "Reactive Storm: statusChance \u2014 Serene Storm Augment: Desert Wind is granted +250% Status Chance and changes its\u2026"),
   ]),
@@ -165,17 +162,11 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("energy", "mod_panel", "multiplicative_percent", "Exothermic: energy \u2014 Inferno Augment: Enemies killed while under the effect of Inferno have a 15% cha\u2026"),
     line("energyOrbChance", "mod_panel", "multiplicative_percent", "Exothermic: energyOrbChance \u2014 Inferno Augment: Enemies killed while under the effect of Inferno have a 15% cha\u2026"),
   ]),
-  augment_ember_fire_fright: mod("augment_ember_fire_fright", [
-    line("panicChance", "mod_panel", "multiplicative_percent", "Fire Fright: panicChance \u2014 +25% chance to panic enemies per rank"),
-  ]),
   augment_ember_fireball_frenzy: mod("augment_ember_fireball_frenzy", [
     line("allyCast", "mod_panel", "multiplicative_percent", "Fireball Frenzy: allyCast \u2014 Fireball Augment: Hold to cast will grant all allies within 15m an additional 10\u2026"),
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Fireball Frenzy — Fireball-gated parallel Heat × Strength (not always-on)"),
     line("duration", "mod_panel", "multiplicative_percent", "Fireball Frenzy: duration \u2014 Fireball Augment: Hold to cast will grant all allies within 15m an additional 10\u2026"),
     line("range", "mod_panel", "multiplicative_percent", "Fireball Frenzy: range \u2014 Fireball Augment: Hold to cast will grant all allies within 15m an additional 10\u2026"),
-  ]),
-  augment_ember_flash_accelerant: mod("augment_ember_flash_accelerant", [
-    line("castSpeedBonus", "mod_panel", "multiplicative_percent", "Flash Accelerant: castSpeedBonus \u2014 Immolation grants +25% Cast Speed per rank"),
   ]),
   augment_ember_healing_flame: mod("augment_ember_healing_flame", [
     line("healthOnImmolation", "mod_panel", "multiplicative_percent", "Healing Flame: healthOnImmolation \u2014 Fire Blast Augment: Each enemy hit heals by 25 to 50 depending on current Immola\u2026"),
@@ -538,9 +529,6 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
   augment_vauban_repelling_bastille: mod("augment_vauban_repelling_bastille", [
     line("repelChance", "mod_panel", "multiplicative_percent", "Repelling Bastille: repelChance \u2014 +25% chance to repel enemies per rank"),
   ]),
-  augment_vauban_tesla_link: mod("augment_vauban_tesla_link", [
-    line("linkDamageReduction", "mod_panel", "multiplicative_percent", "Tesla Link: linkDamageReduction \u2014 Tesla chains grant +15% Damage Reduction per rank"),
-  ]),
   augment_volt_capacitance: mod("augment_volt_capacitance", [
     line("damage", "mod_panel", "multiplicative_percent", "Capacitance: damage \u2014 Discharge Augment: Converts 3% of Damage dealt into Shields split between Volt a\u2026"),
     line("shieldPerTarget", "mod_panel", "multiplicative_percent", "Capacitance: shieldPerTarget \u2014 Discharge Augment: Converts 3% of Damage dealt into Shields split between Volt a\u2026"),
@@ -711,9 +699,6 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
   fatal_teleport: mod("fatal_teleport", [
     line("damage", "mod_panel", "multiplicative_percent", "Fatal Teleport: damage \u2014 Teleport Augment: Teleport will perform a Finisher on the target, dealing 200% E\u2026"),
   ]),
-  firequake: mod("firequake", [
-    line("knockdownChance", "mod_panel", "multiplicative_percent", "Firequake: knockdownChance \u2014 World On Fire Augment: Enemies caught in the flames have a chance to be knocked down."),
-  ]),
   flux_overdrive: mod("flux_overdrive", [
     line("duration", "mod_panel", "multiplicative_percent", "Flux Overdrive: duration \u2014 Status Chance fluctuates between +150% and +250% over 5s while the beam is fired\u2026"),
     line("heat", "mod_panel", "multiplicative_percent", "Flux Overdrive: heat \u2014 Status Chance fluctuates between +150% and +250% over 5s while the beam is fired\u2026"),
@@ -827,7 +812,6 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
   peaceful_provocation: mod("peaceful_provocation", [
     line("damage", "mod_panel", "multiplicative_percent", "Peaceful Provocation: damage \u2014 Pacify & Provoke Augment: Pacify converts damage done to allies into an aura tha\u2026"),
   ]),
-  perpetual_vortex: mod("perpetual_vortex", [], "wiki: Perpetual Vortex \u2014 Perpetual Vortex augment."),
   phoenix_renewal: mod("phoenix_renewal", [
     line("duration", "mod_panel", "multiplicative_percent", "Phoenix Renewal: duration \u2014 Renewal Augment: Taking fatal damage while under the effects of Renewal will ins\u2026"),
     line("health", "mod_panel", "multiplicative_percent", "Phoenix Renewal: health \u2014 Renewal Augment: Taking fatal damage while under the effects of Renewal will ins\u2026"),

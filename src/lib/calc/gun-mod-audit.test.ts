@@ -176,9 +176,9 @@ describe("shotgun mods (wiki max rank)", () => {
     expect(stats.elements.find((e) => e.type === "heat")?.value).toBeCloseTo(expectedHeat, 8);
   });
 
-  it("Shotgun Spazz R5: +90% fire rate", () => {
+  it("Shotgun Barrage R5 (formerly Shotgun Spazz): +90% fire rate", () => {
     const weapon = requireWeapon("strun");
-    const stats = withMod("strun", "shotgun_spazz");
+    const stats = withMod("strun", "shotgun_barrage");
     expect(stats.fireRate).toBeCloseTo(weapon.fireRate * 1.9, 8);
   });
 
@@ -888,14 +888,10 @@ describe("primary/secondary leftovers + elementalist (wiki max rank, Phase M8)",
 });
 
 describe("shotgun general cores (wiki max rank, Phase M9)", () => {
-  it("Blunderbuss R5 / Primed Blunderbuss R10: +90% / +165% crit chance", () => {
+  it("Blunderbuss R5: +90% crit chance (Primed Blunderbuss is unreleased, not in the catalog)", () => {
     const weapon = requireWeapon("strun");
     expect(withMod("strun", "blunderbuss_r3").criticalChance).toBeCloseTo(
       weapon.criticalChance * 1.9,
-      8,
-    );
-    expect(withMod("strun", "primed_blunderbuss").criticalChance).toBeCloseTo(
-      weapon.criticalChance * 2.65,
       8,
     );
   });
@@ -1307,14 +1303,6 @@ describe("gun leftovers (wiki max rank, Phase M15)", () => {
     const modded = withMod("braton", "primed_chamber");
     expect(modded.totalDamage).toBeCloseTo(bare.totalDamage, 5);
     expect(modded.burstDps / bare.burstDps).toBeCloseTo(1 + 1 / bare.magazine, 5);
-  });
-
-  it("Primed Charged Chamber R10: +110% first-shot averaged over magazine in DPS", () => {
-    const weapon = requireWeapon("braton");
-    const bare = calculateWeaponBuild(weapon, [], modsMap());
-    const modded = withMod("braton", "primed_charged_chamber");
-    expect(modded.totalDamage).toBeCloseTo(bare.totalDamage, 5);
-    expect(modded.burstDps / bare.burstDps).toBeCloseTo(1 + 1.1 / bare.magazine, 5);
   });
 
   it("Jet Stream: paper stays panel; Turbulence gate applies via external buffs", () => {

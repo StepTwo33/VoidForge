@@ -50,10 +50,6 @@ describe("companion survivability (wiki max rank, Phase M12)", () => {
     expect(withMod("resourceful_retriever").resourcePickupDoubleChance).toBeCloseTo(0.18, 5);
   });
 
-  it("Helminth Ferocity R5: +120% finisher damage", () => {
-    expect(withMod("helminth_ferocity").finisherDamageBonus).toBeCloseTo(1.2, 8);
-  });
-
   it("Accelerated/Hastened Deflection, Link suite, Vicious Bond: panel-only", () => {
     for (const id of [
       "accelerated_deflection",

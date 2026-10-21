@@ -24,8 +24,8 @@ describe("fire rate bonus shortens burst delay", () => {
   it("Sicarus + Gunslinger (+72%): 3 / (1/(3.5 x 1.72) + 2 x 0.04/1.72) = 14.11", () => {
     expect(efr("sicarus", ["gunslinger_r3"])).toBeCloseTo(3 / (1 / 6.02 + 0.08 / 1.72), 6);
   });
-  it("Tigris + Shotgun Spazz (+90%): 2 / (1/3.8 + 0.15/1.9) = 5.846", () => {
-    expect(efr("tigris", ["shotgun_spazz"])).toBeCloseTo(2 / (1 / 3.8 + 0.15 / 1.9), 6);
+  it("Tigris + Shotgun Barrage (+90%): 2 / (1/3.8 + 0.15/1.9) = 5.846", () => {
+    expect(efr("tigris", ["shotgun_barrage"])).toBeCloseTo(2 / (1 / 3.8 + 0.15 / 1.9), 6);
   });
   it("Helstrum + Speed Trigger: 4 / (1/0.4 + 3 x 0.1/1.6) = 1.4884", () => {
     expect(efr("helstrum", ["speed_trigger_r3"])).toBeCloseTo(4 / (2.5 + 0.3 / 1.6), 6);

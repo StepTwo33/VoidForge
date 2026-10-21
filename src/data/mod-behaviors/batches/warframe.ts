@@ -136,9 +136,6 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   aura_infested_impedance: mod("aura_infested_impedance", [
     line("infestedSpeedReduction", "mod_panel", "multiplicative_percent", "Infested Impedance: infestedSpeedReduction \u2014 Enemy Infested lose -18% Speed"),
   ]),
-  aura_looters: mod("aura_looters", [
-    line("lootRadar", "mod_panel", "multiplicative_percent", "Looters: lootRadar \u2014 +10m Loot Radar per rank"),
-  ]),
   aura_physique: mod("aura_physique", [
     line("health", "warframe_totals", "multiplicative_percent", "Physique: health \u2014 Squad gains +20% Maximum Health"),
   ]),
@@ -162,14 +159,8 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("damage", "weapon_dps", "multiplicative_percent", "Shotgun Amp: damage \u2014 Squad receives +18% Shotgun Damage"),
     line("shotgunDamage", "mod_panel", "multiplicative_percent", "Shotgun Amp: shotgunDamage \u2014 Squad receives +18% Shotgun Damage (display key; damage line is paper)"),
   ]),
-  aura_speed_holster: mod("aura_speed_holster", [
-    line("holsterSpeed", "mod_panel", "multiplicative_percent", "Speed Holster: holsterSpeed \u2014 +20% Holster Speed per rank"),
-  ]),
   aura_sprint_boost: mod("aura_sprint_boost", [
     line("sprintSpeed", "warframe_totals", "multiplicative_percent", "Sprint Boost: sprintSpeed \u2014 Squad receives +15% Sprint Speed"),
-  ]),
-  aura_sprint_speed: mod("aura_sprint_speed", [
-    line("sprintSpeed", "warframe_totals", "multiplicative_percent", "Sprint Speed: sprintSpeed \u2014 +2% Sprint Speed per rank"),
   ]),
   aura_steel_charge: mod("aura_steel_charge", [
     line("damage", "weapon_dps", "multiplicative_percent", "Steel Charge: damage \u2014 Squad receives +60% Melee Damage"),
@@ -470,9 +461,6 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   ]),
   primed_redirection: mod("primed_redirection", [
     line("shield", "warframe_totals", "multiplicative_percent", "Primed Redirection: shield \u2014 +55% Shield Capacity per rank (Primed)"),
-  ]),
-  primed_streamline: mod("primed_streamline", [
-    line("abilityEfficiency", "warframe_totals", "multiplicative_percent", "Primed Streamline: abilityEfficiency \u2014 +55% Ability Efficiency"),
   ]),
   primed_vigor: mod("primed_vigor", [
     line("health", "warframe_totals", "multiplicative_percent", "Primed Vigor: health \u2014 +75% Shield Capacity, +75% Health"),

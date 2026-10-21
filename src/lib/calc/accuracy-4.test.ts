@@ -46,11 +46,8 @@ describe("accuracy-4 other data", () => {
     const h = (n: string) => allHelminthAbilities.find((x) => x.name === n)!.energyCost;
     expect([h("Eclipse"), h("Larva"), h("Roar"), h("Warcry")]).toEqual([25, 25, 75, 75]);
   });
-  it("Amalgam Serration +25% sprint, Primed Streamline R10 +55%", () => {
-    const ps = mm.get("primed_streamline")!;
-    expect(ps.maxRank).toBe(10);
-    const f = calculateWarframeBuild(warframesMap.get("excalibur")!, [{ modId: ps.id, rank: 10, slotIndex: 0 }], mm);
-    expect(f.abilityEfficiency).toBeCloseTo(1.55, 6);
+  it("Primed Streamline is not in the catalog (wiki.warframe.com: Retrieved Content, unavailable)", () => {
+    expect(mm.get("primed_streamline")).toBeUndefined();
   });
   it("Narin rank-30 energy 290, Adarza shield 230", () => {
     expect(calculateWarframeBuild(warframesMap.get("narin")!, [], mm).baseEnergy).toBe(290);
