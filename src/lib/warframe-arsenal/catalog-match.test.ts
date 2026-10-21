@@ -41,7 +41,7 @@ describe("warframe arsenal catalog match", () => {
 });
 
 describe("warframe arsenal lotus resolve", () => {
-  // abilityOverride.index is 0-based (0 = 1st ability); out-of-range values clamp to 0–3.
+  // abilityOverride.index is 0-based (0 = 1st ability … 3 = 4th); out-of-range values are rejected.
   it("resolves helminth empower from DE ability path", () => {
     const result = resolveHelminthOverride({
       ability: "/Lotus/Powersuits/PowersuitAbilities/HelminthStrengthAbility",
@@ -72,10 +72,12 @@ describe("warframe arsenal lotus resolve", () => {
   it("resolves Ophanim Eyes from ChoirEyesAbility codename", () => {
     const result = resolveHelminthOverride({
       ability: "/Lotus/Powersuits/Choir/Abilities/ChoirEyesAbility",
-      index: 4,
+      index: 3,
     });
     expect(result?.helminthAbilityId).toBe("subsume_jade");
     expect(result?.helminthSlot).toBe(3);
+    expect(resolveHelminthOverride({ ability: "/Lotus/Powersuits/Choir/Abilities/ChoirEyesAbility", index: 4 })).toBeUndefined();
+    expect(resolveHelminthOverride({ ability: "/Lotus/Powersuits/Choir/Abilities/ChoirEyesAbility", index: -1 })).toBeUndefined();
   });
 
   it("resolves Rest & Rage from YinYangTargetAbility codename", () => {

@@ -3,7 +3,9 @@
  * Fixtures mirror the user's Kuva Sobek / Grendel / Smeeta screenshots (2026-10-18).
  */
 import { describe, expect, it } from "vitest";
+import { allWarframes } from "@/data/warframes";
 import { buildArsenalData } from "@/lib/warframe-arsenal/normalize-payload";
+import { resolveAbilitiesWithHelminth } from "@/lib/weapons/weapon-external-buffs";
 import {
   mapArsenalToImportPayload,
   mapPositionalWeaponMods,
@@ -92,11 +94,16 @@ describe("Player Sync positional slot import", () => {
     expect(bySlot[8]).toMatch(/gastro/);
   });
 
-  it("helminth: abilityOverride.index is 0-based (index 2 = Grendel's 3rd ability, Pulverize)", () => {
+  it("helminth: Roar infused over Grendel's 3rd ability (raw index 2, 0-based) replaces Pulverize", () => {
     const wb = importOf(payload({}, 2)).loadout.warframeBuild!;
     expect(wb.helminthAbilityId).toBe("subsume_rhino");
     expect(wb.helminthSlot).toBe(2);
-    expect(importOf(payload({}, 1)).loadout.warframeBuild!.helminthSlot).toBe(1); // 2nd ability, Nourish
+    const names = resolveAbilitiesWithHelminth(
+      allWarframes.find((w) => w.id === "grendel")!.abilities,
+      wb.helminthAbilityId,
+      wb.helminthSlot,
+    ).map((a) => a.name);
+    expect(names).toEqual(["Feast", "Nourish", "Roar", "Regurgitate"]);
   });
 
   it("beast claws: posture → slot 8, all 8 regular claw mods kept", () => {

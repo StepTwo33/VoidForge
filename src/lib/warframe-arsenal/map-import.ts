@@ -29,6 +29,7 @@ import {
   mapModularPartsFromArsenal,
   parseProgenitorFromRawWeapon,
   readAbilityOverride,
+  normalizeAbilitySlot,
   readRawWeaponFields,
   resolveHelminthOverride,
 } from "@/lib/warframe-arsenal/lotus-resolve";
@@ -787,9 +788,11 @@ export function mapArsenalToImportPayload(
   const helminthOverride = readAbilityOverride(rawNormal?.warframe);
   const helminth = resolveHelminthOverride(helminthOverride);
   if (helminthOverride?.ability && !helminth) {
+    const abilityLabel = helminthOverride.ability.split("/").pop() ?? "Helminth ability";
+    const badSlot = helminthOverride.index != null && normalizeAbilitySlot(helminthOverride.index) == null;
     warnings.push({
       kind: "helminth",
-      label: helminthOverride.ability.split("/").pop() ?? "Helminth ability",
+      label: badSlot ? `${abilityLabel} (ability slot index ${helminthOverride.index} out of range)` : abilityLabel,
     });
   }
 

@@ -208,17 +208,24 @@ export function findNecramechByLotusPath(uniqueName?: string) {
   return id ? { id, name } : undefined;
 }
 
-/** Map DE abilityOverride to Voidforge helminth fields (0-based slot). */
+/**
+ * Map DE abilityOverride ({ ability, index }) to Voidforge helminth fields. Generic for every
+ * warframe: the infused ability replaces the native ability at `index` (0-based, see
+ * normalizeAbilitySlot); the other three native abilities are untouched. Returns undefined
+ * (→ import warning) for an unknown ability or an out-of-range index.
+ */
 export function resolveHelminthOverride(override?: {
   ability?: string;
   index?: number;
 }): { helminthSlot: number; helminthAbilityId: string } | undefined {
   if (!override?.ability || override.index == null) return undefined;
+  const helminthSlot = normalizeAbilitySlot(override.index);
+  if (helminthSlot == null) return undefined;
 
   const suffix = override.ability.split("/").filter(Boolean).pop() ?? "";
   const mappedId = HELMINTH_LOTUS_SUFFIX_TO_ID[suffix];
   if (mappedId) {
-    return { helminthAbilityId: mappedId, helminthSlot: normalizeAbilitySlot(override.index) };
+    return { helminthAbilityId: mappedId, helminthSlot };
   }
 
   const abilityLabel = suffix
@@ -229,24 +236,27 @@ export function resolveHelminthOverride(override?: {
 
   for (const [normName, id] of helminthByName) {
     if (normalize(abilityLabel).includes(normName) || normName.includes(normalize(abilityLabel))) {
-      return { helminthAbilityId: id, helminthSlot: normalizeAbilitySlot(override.index) };
+      return { helminthAbilityId: id, helminthSlot };
     }
   }
 
   const fuzzy = allHelminthAbilities.find((a) => normalize(a.name) === normalize(abilityLabel));
   if (fuzzy) {
-    return { helminthAbilityId: fuzzy.id, helminthSlot: normalizeAbilitySlot(override.index) };
+    return { helminthAbilityId: fuzzy.id, helminthSlot };
   }
 
   return undefined;
 }
 
-export function normalizeAbilitySlot(index: number): number {
-  // DE's abilityOverride.index is the 0-based ability slot (0 = 1st ability … 3 = 4th),
-  // the same convention Voidforge uses. Treating 1–4 as 1-based shifted every subsume
-  // one slot left (user report: Roar over Grendel's 3rd ability imported over his 2nd).
-  if (!Number.isFinite(index)) return 0;
-  return Math.max(0, Math.min(3, Math.trunc(index)));
+export function normalizeAbilitySlot(index: number): number | null {
+  // DE's AbilityOverride.Index is the 0-based ability slot (0 = 1st ability … 3 = 4th), the same
+  // convention Voidforge's helminthSlot uses. Evidence: OpenWF SpaceNinjaServer's web UI (which
+  // reads/writes the real inventory field) shows "slot" as Index + 1 with min 1 / max 4 and sends
+  // Index = slot - 1. Treating 1–4 as 1-based shifted every subsume one slot left (user report:
+  // Roar over Grendel's 3rd ability imported over his 2nd). Anything outside 0–3 is invalid data,
+  // not guessed into a slot.
+  if (!Number.isInteger(index) || index < 0 || index > 3) return null;
+  return index;
 }
 
 type RawUpgrade = {
