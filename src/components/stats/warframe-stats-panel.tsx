@@ -6,7 +6,8 @@ import { formatAbilityDescription } from "@/lib/display/ability-text";
 import { cleanModDescription, getModStatDisplayLines } from "@/lib/display/mod-display";
 import { getArcaneDisplayInfo } from "@/lib/display/arcane-display";
 import {
-  ADAPTATION_MAX_STACKS,
+  ADAPTATION_DR_PER_STACK,
+  adaptationMaxStacks,
   computeAdaptationSurvivability,
 } from "@/lib/calc/calculator";
 import {
@@ -2009,13 +2010,18 @@ function UrielLegionPassivePanel() {
 }
 
 function AdaptationSurvivability({ stats }: { stats: WarframeCalculatedStats }) {
-  const [stacks, setStacks] = useState(ADAPTATION_MAX_STACKS);
+  const perStack = stats.adaptationDrPerStack ?? ADAPTATION_DR_PER_STACK;
+  const maxStacks = adaptationMaxStacks(perStack);
+  const [stacksRaw, setStacks] = useState<number | null>(null);
+  const stacks = Math.min(stacksRaw ?? maxStacks, maxStacks);
   const armorDR = stats.damageReduction / 100;
   const { typedDRPercent, combinedDRPercent, adaptedEHP } = computeAdaptationSurvivability(
     stats.effectiveHealth,
     armorDR,
     stacks,
+    perStack,
   );
+  const perStackPct = +(perStack * 100).toFixed(1);
 
   return (
     <div className="py-1 space-y-1 border-t border-violet-500/20 mt-1">
@@ -2024,9 +2030,9 @@ function AdaptationSurvivability({ stats }: { stats: WarframeCalculatedStats }) 
         label="Stacks"
         value={stacks}
         min={0}
-        max={ADAPTATION_MAX_STACKS}
+        max={maxStacks}
         onChange={setStacks}
-        tooltip="+10% resistance per stack to the damage type you're taking (20s)"
+        tooltip={`+${perStackPct}% resistance per stack to the damage type you're taking (90% max)`}
       />
       <StatRow
         label="Typed resist"
@@ -2292,8 +2298,18 @@ export function WarframeStatsPanel({
       </CollapsibleSection>
 
       <CollapsibleSection title="EFFECTIVE HEALTH" defaultOpen>
-        <StatRow label="Effective Health" value={stats.effectiveHealth.toFixed(0)} highlighted />
-        <StatRow label="Damage Reduction" value={`${stats.damageReduction.toFixed(1)}%`} highlighted />
+        <StatRow
+          label="Effective Health"
+          value={stats.effectiveHealth.toFixed(0)}
+          highlighted
+          tooltip="Health ÷ (1 − Damage Reduction) + Shields × 2. Warframe shields take 50% less damage; armor does not apply to shields."
+        />
+        <StatRow
+          label="Damage Reduction"
+          value={`${stats.damageReduction.toFixed(1)}%`}
+          highlighted
+          tooltip="Armor ÷ (Armor + 300), combined with other damage reduction. Player armor has no 90% cap."
+        />
         {stats.adaptationNoteMaxTypedDRPercent != null && (
           <AdaptationSurvivability stats={stats} />
         )}

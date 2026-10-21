@@ -1,4 +1,6 @@
 // Advanced Build Calculator - ported from Dart with elemental combos, status procs, heavy attacks
+import { playerEffectiveHealth } from './player-ehp';
+export { PLAYER_SHIELD_DAMAGE_TAKEN, playerEffectiveHealth } from './player-ehp';
 import { SNIPER_DATA, sniperComboMultiplier } from "@/data/sniper-zoom";
 import { CONTINUOUS_WEAPON_IDS } from "@/data/continuous-weapons";
 import { MELEE_ATTACK_DATA } from "@/data/melee-attack-data";
@@ -2312,9 +2314,9 @@ export function calculateWarframeBuild(
   stats.totalEnergy = stats.baseEnergy * (1 + stats.energyBonus + stats.flowBonus);
   stats.totalSprint = stats.baseSprint * (1 + stats.sprintSpeedBonus);
 
-  // EHP = health / (1 - DR) + shields, where DR = armor / (armor + 300)
+  // EHP = health / (1 - DR) + shields / 0.5, where DR = armor / (armor + 300)
   const armorDR = stats.totalArmor / (stats.totalArmor + 300);
-  stats.effectiveHealth = (stats.totalHealth / (1 - armorDR)) + stats.totalShield;
+  stats.effectiveHealth = playerEffectiveHealth(stats.totalHealth, armorDR, stats.totalShield);
   stats.damageReduction = armorDR * 100;
 
   stats.setBonusSummary = buildWarframeSetBonusSummary(equippedMods, linkage);
@@ -2326,25 +2328,42 @@ export function calculateWarframeBuild(
   stats.hunterCompanionVsStatusDamagePercent = (hun?.pieces ?? 0) * 25;
   stats.mechaSetPieces = mecha?.pieces ?? 0;
 
-  if (equippedMods.some((s) => s.modId === "adaptation")) {
+  const adaptationSlot = equippedMods.find((s) => s.modId === "adaptation");
+  if (adaptationSlot) {
     stats.adaptationNoteMaxTypedDRPercent = 90;
+    stats.adaptationDrPerStack = adaptationDrPerStack(adaptationSlot.rank ?? 0);
   }
 
   return stats;
 }
 
-/** Adaptation: +10% typed resistance per stack when hit, max 9 stacks (90%). */
+/** Adaptation at max rank (R10): +10% typed resistance per stack when hit, max 9 stacks (90%). */
 export const ADAPTATION_MAX_STACKS = 9;
 export const ADAPTATION_DR_PER_STACK = 0.1;
+/** wiki Adaptation: resistance cap is 90% at every rank. */
+export const ADAPTATION_MAX_TYPED_DR = 0.9;
+
+/** wiki Adaptation table: +5% per stack at R0, +0.5% per rank, +10% at R10. */
+export function adaptationDrPerStack(rank: number): number {
+  const r = Math.min(Math.max(Math.round(rank), 0), 10);
+  return 0.05 + 0.005 * r;
+}
+
+/** Stacks needed to reach the 90% cap at this per-stack value (R10 → 9, R5 → 12, R0 → 18). */
+export function adaptationMaxStacks(perStack: number = ADAPTATION_DR_PER_STACK): number {
+  if (!(perStack > 0)) return ADAPTATION_MAX_STACKS;
+  return Math.ceil(ADAPTATION_MAX_TYPED_DR / perStack - 1e-9);
+}
 
 /** Multiplicative armor DR + typed Adaptation resistance vs one adapted damage type. */
 export function computeAdaptationSurvivability(
   effectiveHealth: number,
   armorDRFraction: number,
   stacks: number,
+  perStack: number = ADAPTATION_DR_PER_STACK,
 ): { typedDRPercent: number; combinedDRPercent: number; adaptedEHP: number } {
-  const cappedStacks = Math.min(Math.max(Math.round(stacks), 0), ADAPTATION_MAX_STACKS);
-  const typedDR = cappedStacks * ADAPTATION_DR_PER_STACK;
+  const cappedStacks = Math.min(Math.max(Math.round(stacks), 0), adaptationMaxStacks(perStack));
+  const typedDR = Math.min(cappedStacks * perStack, ADAPTATION_MAX_TYPED_DR);
   const armorMult = 1 - Math.min(Math.max(armorDRFraction, 0), 0.99);
   const combinedMult = armorMult * (1 - typedDR);
   const combinedDRPercent = (1 - combinedMult) * 100;
@@ -2542,7 +2561,9 @@ export function applyWarframeShardsAndArcanes(
   } else {
     stats.damageReduction = armorDR * 100;
   }
-  stats.effectiveHealth = (stats.totalHealth / (1 - Math.min(0.9, stats.damageReduction / 100))) + stats.totalShield;
+  // wiki Armor: Tenno DR = armor / (armor + 300) with no 90% cap (2700 is the enemy clamp),
+  // so EHP uses the same DR the panel shows.
+  stats.effectiveHealth = playerEffectiveHealth(stats.totalHealth, stats.damageReduction / 100, stats.totalShield);
 
   return stats;
 }

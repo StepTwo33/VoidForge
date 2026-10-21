@@ -92,7 +92,12 @@ export function ArchwingStatsPanel({
       )}
 
       <div className="border-t border-border/50 my-1" />
-      <StatRow label="Effective Health" value={stats.effectiveHealth.toFixed(0)} highlighted />
+      <StatRow
+        label="Effective Health"
+        value={stats.effectiveHealth.toFixed(0)}
+        highlighted
+        tooltip="Health ÷ (1 − armor DR) + Shields × 2. Archwing and Necramech shields take 50% less damage; armor does not apply to shields."
+      />
       <StatRow label="Damage Reduction" value={`${stats.damageReduction.toFixed(1)}%`} highlighted />
     </div>
   );

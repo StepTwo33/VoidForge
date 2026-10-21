@@ -1053,6 +1053,8 @@ export interface WarframeCalculatedStats {
    * When Adaptation is equipped: typed DR stacks (see computeAdaptationSurvivability in UI).
    */
   adaptationNoteMaxTypedDRPercent?: number;
+  /** Adaptation typed DR per stack at the equipped rank (0.05 at R0 → 0.10 at R10). */
+  adaptationDrPerStack?: number;
   /** Arcane Persistence: shields stripped while equipped. */
   shieldsNullifiedByPersistence?: boolean;
   /** Arcane Persistence damage/s cap at current arcane rank (inactive below 700 armor). */

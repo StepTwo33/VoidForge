@@ -2,6 +2,7 @@ import { getEffectiveModsMap } from "@/lib/weapons/effective-data";
 import type { Archwing, Necramech } from "@/data/archwing";
 import { ARCHWING_RANK30_BONUS, NECRAMECH_RANK30_BONUS } from "@/data/archwing";
 import { gunneryArchwingAbilityBonus } from "@/data/railjack-intrinsics";
+import { playerEffectiveHealth } from "@/lib/calc/player-ehp";
 import {
   applyVerifiedModStatToArchwing,
   applyVerifiedModStatToNecramech,
@@ -99,7 +100,7 @@ export function calculateArchwingBuild(
     totalArmor,
     totalEnergy,
     totalFlightSpeed,
-    effectiveHealth: totalHealth / (1 - armorDR) + totalShield,
+    effectiveHealth: playerEffectiveHealth(totalHealth, armorDR, totalShield),
     damageReduction: armorDR * 100,
     kineticDiversionPercent: acc.kineticDiversionPercent,
     modBonuses: panel.modBonuses,
@@ -164,7 +165,7 @@ export function calculateNecramechBuild(
     totalArmor,
     totalEnergy,
     totalFlightSpeed: 0,
-    effectiveHealth: totalHealth / (1 - armorDR) + totalShield,
+    effectiveHealth: playerEffectiveHealth(totalHealth, armorDR, totalShield),
     damageReduction: armorDR * 100,
     kineticDiversionPercent: 0,
     modBonuses: panel.modBonuses,
