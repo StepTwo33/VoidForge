@@ -19085,7 +19085,8 @@ const RAW_MODS: Mod[] = [
     "category": "necramech",
     "subCategory": "",
     "stats": {
-      "shield": -7.5
+      "shieldRecharge": 15,
+      "shieldRechargeDelay": -7.5
     },
     "description": "+90% Shield Recharge, -45% Shield Recharge Delay",
     "rarity": "common"

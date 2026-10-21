@@ -28,7 +28,8 @@ export const MOD_BEHAVIORS_NECRAMECH: Record<string, VerifiedModBehavior> = {
     line("abilityDuration", "warframe_totals", "multiplicative_percent", "Necramech Continuity: abilityDuration \u2014 +30% Ability Duration"),
   ]),
   necramech_deflection: mod("necramech_deflection", [
-    line("shield", "mod_panel", "multiplicative_percent", "wiki: Necramech Deflection — shield recharge rate/delay (not capacity)"),
+    line("shieldRecharge", "mod_panel", "multiplicative_percent", "wiki: Necramech Deflection — +15% Shield Recharge per rank (+90% max)"),
+    line("shieldRechargeDelay", "mod_panel", "multiplicative_percent", "wiki: Necramech Deflection — -7.5% Shield Recharge Delay per rank (-45% max)"),
   ]),
   necramech_drift: mod("necramech_drift", [], "wiki: Necramech Drift \u2014 +60% Hover Efficiency"),
   necramech_efficiency: mod("necramech_efficiency", [], "wiki: Necramech Efficiency \u2014 +30% Engine Efficiency"),
