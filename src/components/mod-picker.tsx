@@ -14,7 +14,8 @@ import { PolarityIcon } from "@/components/polarity-icon";
 import { getModImage, getArcaneImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
 import { EmptyState } from "@/components/page-shell";
-import { getBlockedModIds } from "@/data/mod-exclusions";
+import { findBlockingModId, getBlockedModIds } from "@/data/mod-exclusions";
+import { modsMap as catalogModsMap } from "@/data/mods";
 import { cleanModDescription, getModStatDisplayLines } from "@/lib/display/mod-display";
 import { getRivenWeaponType, rivenModMatchesWeapon } from "@/lib/weapons/riven-weapon-type";
 
@@ -123,6 +124,10 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
   );
 
   const blockedByExclusion = useMemo(() => getBlockedModIds(equippedModIds), [equippedModIds]);
+  const blockingModName = (modId: string) => {
+    const id = findBlockingModId(modId, equippedModIds);
+    return (id && (mods.find((m) => m.id === id) ?? catalogModsMap.get(id))?.name) || "an equipped mod";
+  };
 
   const weaponModProfile = useMemo(
     () => (weapon ? getWeaponModProfile(weapon) : undefined),
@@ -740,7 +745,9 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                         <span className="text-[10px] text-muted-foreground">Already equipped</span>
                       )}
                       {isBlocked && !isEquipped && (
-                        <span className="text-[10px] text-orange-700 dark:text-orange-400">Variant equipped</span>
+                        <span className="text-[10px] text-orange-700 dark:text-orange-400" data-testid="mod-picker-incompatible">
+                          Can&apos;t be equipped with {blockingModName(mod.id)}
+                        </span>
                       )}
                     </button>
                   );
