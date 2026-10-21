@@ -2513,6 +2513,9 @@ export function applyArcaneToWarframe(
   applyArcaneToWarframeFromMod(stats, arcane, stacks, rank, ctx);
 }
 
+/** wiki Archon Shard (Violet): the melee crit bonus doubles when Max Energy is over 500 (501+). */
+export const VIOLET_MELEE_CRIT_ENERGY_THRESHOLD = 500;
+
 /**
  * Apply archon shards + warframe arcanes on top of `calculateWarframeBuild` output,
  * then recompute derived totals (health/shield/armor/energy/sprint, Persistence,
@@ -2525,6 +2528,7 @@ export function applyWarframeShardsAndArcanes(
   arcanes?: (Mod | null)[],
   arcaneRanks?: number[],
 ): WarframeCalculatedStats {
+  let violetEnergyMeleeCrit = 0;
   for (const shard of shards ?? []) {
     if (!shard) continue;
     const bonusKey = shard.selectedBonus;
@@ -2576,8 +2580,12 @@ export function applyWarframeShardsAndArcanes(
         break;
       // Crimson weapon bonuses (display only on warframe, applied via weapon builder)
       case 'meleeCritDamage':
-      case 'meleeCritDamageEnergy':
         stats.meleeCritDamageBonus += bonusValue;
+        break;
+      // Violet: +25% (+37.5%) melee crit damage, doubled when max energy is over 500
+      // (wiki Archon Shard: 501+). Applied after max energy is recomputed below.
+      case 'meleeCritDamageEnergy':
+        violetEnergyMeleeCrit += bonusValue;
         break;
       case 'primaryStatusChance':
         stats.primaryShardBonus += bonusValue;
@@ -2641,6 +2649,13 @@ export function applyWarframeShardsAndArcanes(
   stats.totalArmor = stats.baseArmor * (1 + stats.armorBonus) + stats.flatArmorBonus;
   stats.totalEnergy = stats.baseEnergy * (1 + stats.energyBonus + stats.flowBonus) + stats.flatEnergyBonus;
   stats.totalSprint = stats.baseSprint * (1 + stats.sprintSpeedBonus);
+  if (violetEnergyMeleeCrit > 0) {
+    const doubled = stats.totalEnergy > VIOLET_MELEE_CRIT_ENERGY_THRESHOLD;
+    stats.violetMeleeCritDamage = { base: violetEnergyMeleeCrit, doubled };
+    stats.meleeCritDamageBonus += doubled ? violetEnergyMeleeCrit * 2 : violetEnergyMeleeCrit;
+  } else {
+    delete stats.violetMeleeCritDamage;
+  }
   if (stats.shieldsNullifiedByPersistence) {
     stats.totalShield = 0;
   }

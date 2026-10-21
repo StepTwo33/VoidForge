@@ -1080,6 +1080,11 @@ export interface WarframeCalculatedStats {
   /** Emerald shard: + max Corrosion stacks. */
   corrosionMaxStacksShardBonus?: number;
   meleeCritDamageBonus: number;
+  /**
+   * Violet shard "melee crit damage" bonus (sum of its shards' base values) and whether
+   * it is doubled because Max Energy is over 500. Already folded into meleeCritDamageBonus.
+   */
+  violetMeleeCritDamage?: { base: number; doubled: boolean };
   healingBonus: number;
   statusDurationBonus: number;
   energyCostReduction: number;

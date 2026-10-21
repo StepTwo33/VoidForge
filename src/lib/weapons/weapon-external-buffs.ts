@@ -1230,7 +1230,9 @@ function resolveShardBuffs(weapon: Weapon, ctx: WeaponBuffContext): WeaponExtern
       label: "Archon Shard (Melee Crit)",
       category: "shard",
       critMultBonus: stats.meleeCritDamageBonus / 100,
-      nominal: `+${stats.meleeCritDamageBonus}% melee crit damage`,
+      nominal: `+${stats.meleeCritDamageBonus}% melee crit damage${
+        stats.violetMeleeCritDamage?.doubled ? " (Violet doubled: Max Energy over 500)" : ""
+      }`,
     });
   }
 
