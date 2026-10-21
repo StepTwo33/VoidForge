@@ -56,6 +56,16 @@ function resolveSlot(kind: BuilderKind, slot: string | null, data: unknown): str
   return "primary";
 }
 
+/** Remove `?loadout=&slot=` from the current URL, keeping any other params. */
+export function stripLoadoutParams(): void {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has("loadout") && !url.searchParams.has("slot")) return;
+  url.searchParams.delete("loadout");
+  url.searchParams.delete("slot");
+  const qs = url.searchParams.toString();
+  window.history.replaceState(window.history.state, "", qs ? `${url.pathname}?${qs}` : url.pathname);
+}
+
 /**
  * Open a loadout slot in a builder via `?loadout=<id>&slot=<slot>`.
  * Wraps the slot payload as a SavedBuild (empty id, so "Save as new build"
@@ -94,15 +104,14 @@ export function useLoadoutSlotFromUrl(
         data,
       });
       setContext({ loadoutId: loadout.id, loadoutName: loadout.name, kind, slot });
-
-      const url = new URL(window.location.href);
-      url.searchParams.delete("loadout");
-      url.searchParams.delete("slot");
-      const qs = url.searchParams.toString();
-      window.history.replaceState({}, "", qs ? `${url.pathname}?${qs}` : url.pathname);
+      // ?loadout=&slot= stay in the URL, so a refresh reopens the same slot with its banner.
     });
   }, [kind, apply, ready]);
 
-  const clearContext = useCallback(() => setContext(null), []);
+  /** Detach from the loadout: drop the banner and the URL params (a refresh stays detached). */
+  const clearContext = useCallback(() => {
+    setContext(null);
+    stripLoadoutParams();
+  }, []);
   return { context, clearContext };
 }

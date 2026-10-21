@@ -2,6 +2,7 @@
 
 import { Sparkles } from "lucide-react";
 import { ModSlotCard } from "@/components/mod-slot";
+import { isInnatePolarity } from "@/lib/builds/innate-polarities";
 import { ArcaneSlotCard } from "@/components/arcane-picker";
 import { WeaponStatsPanel } from "@/components/stats-panel";
 import { GameAssetImage } from "@/components/game-asset-image";
@@ -20,6 +21,8 @@ export function ExaltedWeaponSection({
   exaltedMods,
   modsMap,
   exaltedSlotPolarities,
+  exaltedSlotOverrides,
+  exaltedInnatePolarities,
   exaltedArcaneConfig,
   exaltedArcanes,
   exaltedStats,
@@ -38,7 +41,11 @@ export function ExaltedWeaponSection({
   exaltedCapacity: number;
   exaltedMods: EquippedMod[];
   modsMap: Map<string, Mod>;
+  /** Effective polarities (innate defaults merged with overrides). */
   exaltedSlotPolarities: Record<number, string>;
+  /** Stored overrides only; with the innate map, marks slots that show a default. */
+  exaltedSlotOverrides?: Record<number, string>;
+  exaltedInnatePolarities?: Record<number, string>;
   exaltedArcaneConfig: { slots: number; label: string };
   exaltedArcanes: (Mod | null)[];
   exaltedStats: CalculatedStats | null;
@@ -107,6 +114,7 @@ export function ExaltedWeaponSection({
               rank={equipped?.rank ?? 0}
               slotIndex={i}
               slotPolarity={exaltedSlotPolarities[i]}
+              innatePolarity={isInnatePolarity(exaltedInnatePolarities ?? {}, exaltedSlotOverrides, i)}
               onAdd={() => onAddMod(i)}
               onRemove={() => onRemoveMod(i)}
               onPolarize={(p) => onPolarize(i, p)}
@@ -132,6 +140,7 @@ export function ExaltedWeaponSection({
                 slotIndex={i}
                 label="Exilus"
                 slotPolarity={exaltedSlotPolarities[i]}
+                innatePolarity={isInnatePolarity(exaltedInnatePolarities ?? {}, exaltedSlotOverrides, i)}
                 onAdd={() => onAddMod(i)}
                 onRemove={() => onRemoveMod(i)}
                 onPolarize={(p) => onPolarize(i, p)}

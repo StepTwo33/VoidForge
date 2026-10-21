@@ -2,7 +2,7 @@
 import { SNIPER_DATA, sniperComboMultiplier } from "@/data/sniper-zoom";
 import { CONTINUOUS_WEAPON_IDS } from "@/data/continuous-weapons";
 import { MELEE_ATTACK_DATA } from "@/data/melee-attack-data";
-import { Mod, Weapon, Warframe, ModSlot, CalculatedStats, WarframeCalculatedStats, ElementalDamage, StatusProc, SimulationParams, DEFAULT_SIM_PARAMS, WeaponCalculationOptions, SetBonusLinkage, EquippedArchonShard, WeaponExternalBuff } from '../types';
+import { Mod, Weapon, Warframe, ModSlot, CalculatedStats, WarframeCalculatedStats, ElementalDamage, StatusProc, SimulationParams, KillStackSource, StackSourceInfo, DEFAULT_SIM_PARAMS, WeaponCalculationOptions, SetBonusLinkage, EquippedArchonShard, WeaponExternalBuff } from '../types';
 import { avgCritMultiplier, quantizeBaseCritMultiplier } from './crit-utils';
 import { resolveEffectiveFireRate } from './effective-fire-rate';
 import { evolutionExtraRadials, scaleRadialAttacksWithDps } from './weapon-radial-dps';
@@ -74,20 +74,24 @@ import {
  * Update 34 (wiki Vitality / Redirection). Frames without a wiki row (Necramechs,
  * Helminth) keep their listed value.
  */
+function rank30Row(table: Record<string, number>, warframe: Warframe): number | undefined {
+  if (warframe.statFormId) return table[`${warframe.id}#${warframe.statFormId}`];
+  return table[warframe.id];
+}
 export function getWarframeHealthModBase(warframe: Warframe): number {
-  return WARFRAME_HEALTH_RANK30[warframe.id] ?? warframe.health;
+  return rank30Row(WARFRAME_HEALTH_RANK30, warframe) ?? warframe.health;
 }
 export function getWarframeShieldModBase(warframe: Warframe): number {
-  return WARFRAME_SHIELD_RANK30[warframe.id] ?? warframe.shield;
+  return rank30Row(WARFRAME_SHIELD_RANK30, warframe) ?? warframe.shield;
 }
 export function getWarframeArmorModBase(warframe: Warframe): number {
-  return WARFRAME_ARMOR_RANK30[warframe.id] ?? warframe.armor;
+  return rank30Row(WARFRAME_ARMOR_RANK30, warframe) ?? warframe.armor;
 }
 
 /** Unmodded rank-30 energy capacity — the pool Flow and +% max energy mods scale (wiki Energy Capacity). */
 export function getWarframeEnergyModBase(warframe: Warframe): number {
   if (warframe.energy <= 0) return 0;
-  const fromTable = WARFRAME_ENERGY_RANK30[warframe.id];
+  const fromTable = rank30Row(WARFRAME_ENERGY_RANK30, warframe);
   if (fromTable != null) return fromTable;
   return warframe.energy + 50;
 }
@@ -379,6 +383,35 @@ function calculateStatusProcs(
     });
   }
 
+  // Weapon forced procs (wiki ForcedProcs, e.g. Talons Embedded Detonation → Puncture):
+  // one guaranteed proc of that type per hit, separate from status chance. Damage only
+  // for types that deal damage as a status (DoTs, Blast detonation); others add 0.
+  for (const forced of stats.forcedProcs ?? []) {
+    const t = forced.toLowerCase();
+    const info = STATUS_INFO[t];
+    if (!info) continue; // ragdoll / knockdown etc. are not status effects
+    const frac = DOT_TICK_FRACTION[t];
+    const duration = info.duration * durMult;
+    const ticks = frac != null ? dotTickCount(t, duration) : info.ticks;
+    let dpt = 0;
+    if (frac != null) {
+      const typeMult = t === "slash" ? 1 : 1 + elementalTypeBonus(stats, t, moddedBaseDamage);
+      dpt = frac * dotBase * typeMult;
+      if (t === "toxin") dpt *= toxinStatusFactor(stats);
+    } else if (t === "blast") {
+      dpt = BLAST_DETONATE_FRACTION * dotBase;
+    }
+    procs.push({
+      type: t,
+      chance: 1,
+      damagePerTick: dpt,
+      duration,
+      ticks,
+      totalDamage: dpt * ticks,
+      description: `Forced ${t[0].toUpperCase()}${t.slice(1)} on hit (weapon)`,
+    });
+  }
+
   // Prototype Shock Coils: extra Electric proc on hit, independent of modded damage types.
   const extraElec = stats.extraElectricProcChance ?? 0;
   if (extraElec > 0) {
@@ -459,7 +492,7 @@ function quantizeStatsDamage(stats: CalculatedStats, moddedBaseDamage: number): 
 
 // ── Set Bonus Detection ─────────────────────────────────────────────────
 // Implemented: Umbral (×stats on Vit/Fiber/Int; Tau unscaled), Sacrificial (1.5× on both mods when 2),
-// Gladiator (+10% crit/(CM−1) per piece + +15%/(CM−1) at 6 total w/ sim.wf pieces), Vigilante (5%/mod, primary only;
+// Gladiator (+10% crit/(CM−1) per piece, incl. sim.wf pieces; 6 pieces = +60%), Vigilante (5%/mod, primary only;
 //   also counts Vigilante on linked Warframe or sim.extraVigilanteModsFromWarframe; folded into avg crit for DPS).
 // Cross-slot: Synth 4pc +15% pistol reload; Tek 4pc optional ×1.6 vs marked (primary); loadout linkage in set-bonuses.ts.
 // Warframe panel: Augur/Hunter/Mecha/Synth/Tek + Augur shields/cast + Mecha mark timing.
@@ -821,6 +854,7 @@ export function calculateWeaponBuild(
     burstDps: 0,
     sustainedDps: 0,
     statusProcs: [],
+    ...(baseWeapon.forcedProcs?.length ? { forcedProcs: baseWeapon.forcedProcs } : {}),
     heavyAttackDamage: 0,
     heavyAttackWindUp: 0.6,
     comboCount: 0,
@@ -1134,7 +1168,12 @@ export function calculateWeaponBuild(
   critMultFlatBonus.critEventBonus += incarnonStatChanges?.critMultFlat ?? 0;
 
   // Apply Galvanized Condition (Aptitude/Savvy/Shot): damage per status on target per kill stack
-  const galvConditionStacks = Math.min(sim.killStacks, weaponModAcc.galvDamagePerStatusStackCap);
+  const killStacksFor = (src: KillStackSource) => Math.max(0, sim.killStacksBySource?.[src] ?? sim.killStacks);
+  const killStackSources: StackSourceInfo[] = [];
+  const galvConditionStacks = Math.min(killStacksFor("galvCondition"), weaponModAcc.galvDamagePerStatusStackCap);
+  if (galvDamagePerStatusPerStack > 0 && weaponModAcc.galvDamagePerStatusStackCap > 0) {
+    killStackSources.push({ id: "galvCondition", label: "Galvanized dmg/status", cap: weaponModAcc.galvDamagePerStatusStackCap });
+  }
   if (galvDamagePerStatusPerStack > 0 && galvConditionStacks > 0 && sim.statusTypesOnTarget > 0) {
     damageBonus += galvDamagePerStatusPerStack * galvConditionStacks * sim.statusTypesOnTarget;
     directOnlyDamageBonus += galvDamagePerStatusPerStack * galvConditionStacks * sim.statusTypesOnTarget;
@@ -1143,7 +1182,10 @@ export function calculateWeaponBuild(
   stats.galvanizedDamagePerStatusStackCap = weaponModAcc.galvDamagePerStatusStackCap;
 
   // Apply Galvanized Multishot on-kill stacks (Chamber caps at 5, Hell/Diffusion at 4)
-  const galvMultishotStacks = Math.min(sim.killStacks, weaponModAcc.galvMultishotStackCap);
+  const galvMultishotStacks = Math.min(killStacksFor("galvMultishot"), weaponModAcc.galvMultishotStackCap);
+  if (galvMultishotOnKillPerStack > 0 && weaponModAcc.galvMultishotStackCap > 0) {
+    killStackSources.push({ id: "galvMultishot", label: "Galvanized multishot", cap: weaponModAcc.galvMultishotStackCap });
+  }
   if (galvMultishotOnKillPerStack > 0 && galvMultishotStacks > 0) {
     multishotBonus += galvMultishotOnKillPerStack * galvMultishotStacks;
   }
@@ -1207,7 +1249,13 @@ export function calculateWeaponBuild(
     }
   }
   // Galvanized Steel / Elementalist: per-kill-stack bonuses (cap 4).
-  const onKillStacks = Math.min(sim.killStacks, weaponModAcc.onKillPerStackCap);
+  const onKillStacks = Math.min(killStacksFor("onKillPerStack"), weaponModAcc.onKillPerStackCap);
+  if (
+    weaponModAcc.onKillPerStackCap > 0 &&
+    Object.values(weaponModAcc.onKillPerStackBonuses).some((v) => (v ?? 0) !== 0)
+  ) {
+    killStackSources.push({ id: "onKillPerStack", label: "Per-kill stacks", cap: weaponModAcc.onKillPerStackCap });
+  }
   if (onKillStacks > 0) {
     const per = weaponModAcc.onKillPerStackBonuses;
     critMultBonus += (per.criticalMultiplier ?? 0) * onKillStacks;
@@ -1235,17 +1283,22 @@ export function calculateWeaponBuild(
   const galvCritOnHeadshotBase = weaponModAcc.galvCritOnHeadshotBase;
   const galvCritOnHeadshotPerStack = weaponModAcc.galvCritOnHeadshotPerStack;
   if (galvCritOnHeadshotBase > 0 && sim.applyHeadshots) {
-    const galvCritStacks = Math.min(sim.killStacks, 5);
+    const galvCritStacks = Math.min(killStacksFor("galvCrit"), 5);
     critChanceBonus += galvCritOnHeadshotBase + galvCritOnHeadshotPerStack * galvCritStacks;
+  }
+  if (galvCritOnHeadshotBase > 0) {
+    killStackSources.push({ id: "galvCrit", label: "Galvanized headshot", cap: 5 });
   }
   stats.galvanizedCritOnHeadshot = galvCritOnHeadshotBase;
   stats.galvanizedCritOnHeadshotPerStack = galvCritOnHeadshotPerStack;
 
   // Apply Berserker Fury on-kill stacks (max 2 stacks)
-  if (hasBerserkerFury && sim.killStacks > 0) {
-    const bfStacks = Math.min(sim.killStacks, 2);
-    fireRateBonus += berserkerFuryPerStack * bfStacks;
+  if (hasBerserkerFury) {
+    const bfStacks = Math.min(killStacksFor("berserker"), 2);
+    if (bfStacks > 0) fireRateBonus += berserkerFuryPerStack * bfStacks;
+    killStackSources.push({ id: "berserker", label: "Berserker Fury", cap: 2 });
   }
+  if (killStackSources.length > 0) stats.killStackSources = killStackSources;
   stats.berserkerFuryBonus = berserkerFuryPerStack;
 
   // Melee Elementalist / wind-up speed mods: +N% shortens windup time.
@@ -1616,6 +1669,10 @@ export function calculateWeaponBuild(
         case 'heavyAttackDamageBonus':
         case 'slamDamage':
         case 'parryAngle':
+        // Melee riven rolls with no Voidforge model (slide-attack crit, combo count chances).
+        case 'slideAttackCritChance':
+        case 'comboCountChance':
+        case 'comboGainChance':
           break;
         // Physical damage type bonuses (from rivens)
         case 'impact': stats.impact *= (1 + value); break;
@@ -2508,13 +2565,25 @@ export function calculateWeaponBuildWithArcanes(
   const stats = calculateWeaponBuild(baseWeapon, equippedMods, allMods, incarnonStatChanges, sim, calcOptions, linkage, rivenStatChanges);
   const preArcaneHeavy = stats.heavyAttackDamage;
   const preArcaneCombo = stats.comboCount;
+  const arcaneStackSources: StackSourceInfo[] = [];
   for (const arcane of arcanes) {
-    // Pass raw sim.arcaneStacks — applyArcaneEffectsToWeapon computes effective stacks per arcane.
-    applyArcaneToWeapon(stats, arcane, sim.arcaneStacks, baseWeapon, {
+    const arcaneDef = getArcaneEffectDef(arcane.id);
+    if (arcaneDef?.trigger === "stacks") {
+      arcaneStackSources.push({
+        id: arcane.id,
+        label: arcane.name,
+        cap: arcaneDef.stackCap ?? arcaneDef.maxRank + 1,
+      });
+    }
+    // Pass raw sim stacks (per-arcane override, else the shared slider) — applyArcaneEffectsToWeapon
+    // computes effective stacks per arcane.
+    const simArcaneStacks = sim.arcaneStacksById?.[arcane.id] ?? sim.arcaneStacks;
+    applyArcaneToWeapon(stats, arcane, simArcaneStacks, baseWeapon, {
       applyHeadshots: sim.applyHeadshots,
       warframeArmor: sim.warframeArmor,
     });
   }
+  if (arcaneStackSources.length > 0) stats.arcaneStackSources = arcaneStackSources;
   if (isMelee && stats.meleeComboModContext && stats.comboCount !== preArcaneCombo) {
     const arcaneHeavyFactor = preArcaneHeavy > 0 ? stats.heavyAttackDamage / preArcaneHeavy : 1;
     applyMeleeComboToStats(

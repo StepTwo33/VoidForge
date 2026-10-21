@@ -27,13 +27,13 @@ export function isLocalBuildId(id: string): boolean {
   return /^\d{10,}_[a-z0-9]+$/i.test(id);
 }
 
-function bytesToBase64Url(bytes: Uint8Array): string {
+export function bytesToBase64Url(bytes: Uint8Array): string {
   let binary = "";
   for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!);
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function base64UrlToBytes(hash: string): Uint8Array {
+export function base64UrlToBytes(hash: string): Uint8Array {
   let b64 = hash.replace(/-/g, "+").replace(/_/g, "/");
   while (b64.length % 4) b64 += "=";
   const binary = atob(b64);
@@ -202,70 +202,38 @@ function isLegacyShareObject(value: unknown): value is ShareableBuild {
   );
 }
 
-async function deflateUtf8(text: string): Promise<Uint8Array | null> {
+/**
+ * Browser deflate via CompressionStream. Reads while writing (pipeThrough + Response): awaiting
+ * writer.write/close before reading deadlocks, because the readable side has no buffer.
+ */
+export async function deflateUtf8(text: string): Promise<Uint8Array | null> {
   try {
-    if (typeof CompressionStream === "undefined") return null;
-    const stream = new CompressionStream("deflate");
-    const writer = stream.writable.getWriter();
-    await writer.write(new TextEncoder().encode(text));
-    await writer.close();
-    const reader = stream.readable.getReader();
-    const chunks: Uint8Array[] = [];
-    let total = 0;
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) {
-        chunks.push(value);
-        total += value.length;
-      }
+    if (typeof CompressionStream === "undefined" || typeof Response === "undefined" || typeof Blob === "undefined") {
+      return null;
     }
-    const out = new Uint8Array(total);
-    let offset = 0;
-    for (const chunk of chunks) {
-      out.set(chunk, offset);
-      offset += chunk.length;
-    }
-    return out;
+    const stream = new Blob([text]).stream().pipeThrough(new CompressionStream("deflate"));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
   } catch {
     return null;
   }
 }
 
-async function inflateToUtf8(bytes: Uint8Array): Promise<string | null> {
+export async function inflateToUtf8(bytes: Uint8Array): Promise<string | null> {
   try {
-    if (typeof DecompressionStream === "undefined") return null;
-    const stream = new DecompressionStream("deflate");
-    const writer = stream.writable.getWriter();
+    if (typeof DecompressionStream === "undefined" || typeof Response === "undefined" || typeof Blob === "undefined") {
+      return null;
+    }
     // Copy into a fresh ArrayBuffer-backed view — TS DOM typings reject Uint8Array<ArrayBufferLike>.
     const input = new Uint8Array(bytes.length);
     input.set(bytes);
-    await writer.write(input);
-    await writer.close();
-    const reader = stream.readable.getReader();
-    const chunks: Uint8Array[] = [];
-    let total = 0;
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) {
-        chunks.push(value);
-        total += value.length;
-      }
-    }
-    const out = new Uint8Array(total);
-    let offset = 0;
-    for (const chunk of chunks) {
-      out.set(chunk, offset);
-      offset += chunk.length;
-    }
-    return new TextDecoder().decode(out);
+    const stream = new Blob([input]).stream().pipeThrough(new DecompressionStream("deflate"));
+    return await new Response(stream).text();
   } catch {
     return null;
   }
 }
 
-function inflateToUtf8Sync(bytes: Uint8Array): string | null {
+export function inflateToUtf8Sync(bytes: Uint8Array): string | null {
   try {
     // Node / vitest — keep browser bundle free of zlib by dynamic require.
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -276,7 +244,7 @@ function inflateToUtf8Sync(bytes: Uint8Array): string | null {
   }
 }
 
-function deflateUtf8Sync(text: string): Uint8Array | null {
+export function deflateUtf8Sync(text: string): Uint8Array | null {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const zlib = require("zlib") as typeof import("zlib");

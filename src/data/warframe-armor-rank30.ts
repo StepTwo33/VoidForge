@@ -122,4 +122,5 @@ export const WARFRAME_ARMOR_RANK30: Record<string, number> = {
   "zephyr": 105,
   "zephyr_prime": 135,
   "sirius_orion": 160,
+  "sirius_orion#orion": 300,
 };

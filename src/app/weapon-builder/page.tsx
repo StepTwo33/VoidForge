@@ -8,7 +8,7 @@ import {
 } from "@/lib/builds/innate-polarities";
 import { cleanModDescription } from "@/lib/display/mod-display";
 import { BuilderSectionNav } from "@/components/builder-section-nav";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
 import {
@@ -167,12 +167,14 @@ export default function WeaponBuilderPage() {
   }, [selectedWeapon, progenitorElement, progenitorBonusPercent, selectedEvolutions]);
 
   // Load build from URL ?build= param
+  const appliedShareParamRef = useRef<string | null>(null);
   useEffect(() => {
     let cancelled = false;
     queueMicrotask(() => {
       void (async () => {
         if (allWeapons.length === 0) return;
         const params = new URLSearchParams(window.location.search);
+        if (params.get("build") && params.get("build") === appliedShareParamRef.current) return;
         const shared = await extractBuildFromUrlAsync(params);
         if (cancelled || !shared || shared.type !== "weapon") return;
         const weapon = allWeapons.find((w) => w.id === shared.itemId);
@@ -220,10 +222,9 @@ export default function WeaponBuilderPage() {
         if (shared.slotPolarities) setSlotPolarities(shared.slotPolarities);
         const sharedIncarnon = (shared as ShareableBuild & { incarnonEvolutions?: Record<number, number> }).incarnonEvolutions;
         if (sharedIncarnon) setSelectedEvolutions(sharedIncarnon);
-        const url = new URL(window.location.href);
-        url.searchParams.delete("build");
-        const qs = url.searchParams.toString();
-        window.history.replaceState({}, "", qs ? `${url.pathname}?${qs}` : url.pathname);
+        // ?build= stays in the URL (shareable, survives refresh); remember it so a later
+        // catalog update does not re-apply it over edits.
+        appliedShareParamRef.current = params.get("build");
       })();
     });
     return () => {

@@ -1,4 +1,4 @@
-import type { Ability, ModSlot } from "@/lib/types";
+import type { Ability, ModSlot, Warframe } from "@/lib/types";
 import type { WarframeBuildData } from "@/lib/builds/build-storage";
 
 export const EMPTY_ARCANE_IDS: (string | null)[] = [null, null];
@@ -9,6 +9,11 @@ export interface DualFormDef {
   label: string;
   /** Signature melee weapon id when this form is active (e.g. Pride / Wrath). */
   signatureMeleeId?: string;
+  /**
+   * Base (rank 0) stats when this form has its own stat block. The rank-30 values
+   * live in the rank-30 tables under `<warframeId>#<formId>`.
+   */
+  baseStats?: Pick<Warframe, "health" | "shield" | "armor" | "energy" | "sprintSpeed">;
 }
 
 export interface DualFormWarframeConfig {
@@ -23,10 +28,28 @@ export const DUAL_FORM_WARFRAMES: Record<string, DualFormWarframeConfig> = {
     defaultFormId: "sirius",
     forms: [
       { id: "sirius", label: "Sirius", signatureMeleeId: "pride" },
-      { id: "orion", label: "Orion", signatureMeleeId: "wrath" },
+      // wiki.warframe.com/w/Orion + WFCD OrionSuit: 350 HP / 270 SH / 300 AR / 200 EN, sprint 1.15.
+      {
+        id: "orion",
+        label: "Orion",
+        signatureMeleeId: "wrath",
+        baseStats: { health: 350, shield: 270, armor: 300, energy: 200, sprintSpeed: 1.15 },
+      },
     ],
   },
 };
+
+/**
+ * The warframe record to calculate stats with for one form. Forms with their own
+ * stat block get their base stats and a `statFormId`, so the rank-30 lookups use the
+ * `<id>#<formId>` rows. Other forms (and non dual-form frames) return the input as-is.
+ */
+export function warframeForDualForm<T extends Warframe>(warframe: T, formId: string | undefined): T {
+  if (!formId) return warframe;
+  const form = getDualFormConfig(warframe.id)?.forms.find((f) => f.id === formId);
+  if (!form?.baseStats) return warframe;
+  return { ...warframe, ...form.baseStats, statFormId: formId };
+}
 
 /** Indices into `warframe.abilities` per form (slot 4 = shared ultimate). */
 const DUAL_FORM_ABILITY_INDICES: Record<string, Record<string, number[]>> = {

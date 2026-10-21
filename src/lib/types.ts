@@ -75,6 +75,12 @@ export interface Weapon {
   /** AoE / radial attacks (merged from data/weapon-radial-attacks when present). */
   radialAttacks?: WeaponRadialAttack[];
   /**
+   * Forced procs on every hit of this attack (wiki Module:Weapons `ForcedProcs`), lower-case
+   * status names. Each adds one guaranteed proc of that type per hit on top of status chance.
+   * Non-status effects (e.g. "ragdoll") are kept for reference and ignored by the calc.
+   */
+  forcedProcs?: string[];
+  /**
    * Base charge time in seconds (unmodded). Used for charge / bow effective fire rate.
    * Populated by weapon-enrich from WEAPON_FIRE_TIMING when known.
    */
@@ -176,6 +182,8 @@ export interface WeaponAlternateModeStats {
   stanceType?: string;
   /** Replace default radial profiles while alternate mode is on. */
   radialAttacks?: WeaponRadialAttack[];
+  /** Forced procs while this mode is active (overrides the default list when set). */
+  forcedProcs?: string[];
 }
 
 /** Secondary AoE profile (explosion, slam radial, cube blast, etc.). */
@@ -222,6 +230,11 @@ export interface Warframe {
   abilities: Ability[];
   description: string;
   passive: string;
+  /**
+   * Set by `warframeForDualForm` when a dual-form frame's active form has its own
+   * stat block; the rank-30 tables are then read at `<id>#<statFormId>`.
+   */
+  statFormId?: string;
 }
 
 export interface Ability {
@@ -428,6 +441,21 @@ export interface StatusProc {
   description: string;
 }
 
+/** Groups of on-kill stacking mods that can take their own stack count in the sim. */
+export type KillStackSource =
+  | "galvCondition" // Galvanized Aptitude / Savvy / Shot (damage per status per stack)
+  | "galvMultishot" // Galvanized Chamber / Diffusion / Hell (multishot per stack)
+  | "onKillPerStack" // Galvanized Steel / Elementalist and similar per-stack on-kill bonuses
+  | "galvCrit" // Galvanized Scope / Crosshairs (headshot-kill stacks)
+  | "berserker"; // Berserker Fury
+
+/** A stacking source present on the current build, with its in-game stack cap. */
+export interface StackSourceInfo {
+  id: string;
+  label: string;
+  cap: number;
+}
+
 export interface SimulationParams {
   /**
    * Sniper zoom level (1-based index into SNIPER_DATA zooms). 0/unset = unscoped (no zoom buff).
@@ -438,8 +466,12 @@ export interface SimulationParams {
   sniperComboTier?: number;
   comboCount: number;         // melee combo hit count (default 0)
   killStacks: number;         // Galvanized / Berserker on-kill stacks (0-5)
-  statusTypesOnTarget: number; // Condition Overload / Galvanized Aptitude (0-5)
+  /** Per-source on-kill stacks; each falls back to `killStacks` when unset. */
+  killStacksBySource?: Partial<Record<KillStackSource, number>>;
+  statusTypesOnTarget: number; // Condition Overload / Galvanized Aptitude (no in-game cap; UI 0-14)
   arcaneStacks: number;       // e.g. Merciless (0–12), other arcanes vary
+  /** Per-arcane stack count (arcane id → stacks); each falls back to `arcaneStacks` when unset. */
+  arcaneStacksById?: Record<string, number>;
   extraGladiatorMods: number; // Gladiator mods on warframe (0-3, adds to weapon-side count)
   /** When no SetBonusLinkage: Vigilante mods on Warframe that apply to primary crit tier. */
   extraVigilanteModsFromWarframe?: number;
@@ -814,6 +846,10 @@ export interface CalculatedStats {
   galvanizedDamagePerStatus: number; // per-status bonus from Galvanized Aptitude/Savvy/Shot
   /** In-game stack cap for the equipped galvanized multishot mod (Chamber 5, Hell/Diffusion 4). */
   galvanizedMultishotStackCap?: number;
+  /** On-kill stacking sources on this build (sim UI: per-source stack inputs). Set only when non-empty. */
+  killStackSources?: StackSourceInfo[];
+  /** Stacking arcanes applied to this weapon with their real stack caps. Set only when non-empty. */
+  arcaneStackSources?: StackSourceInfo[];
   /** In-game stack cap for the equipped galvanized condition mod (Aptitude/Savvy 2, Shot 3). */
   galvanizedDamagePerStatusStackCap?: number;
   /** Galvanized Scope/Crosshairs: crit chance while aiming after a headshot (sim-gated). */
@@ -930,6 +966,8 @@ export interface CalculatedStats {
   extraHitGuaranteedToxin?: boolean;
   /** Forced status element on every hit (Valence Formation). */
   guaranteedStatusElement?: string;
+  /** Weapon / attack forced procs (copied from `Weapon.forcedProcs`). */
+  forcedProcs?: string[];
   /**
    * How many Extra Hit damage instances per weapon hit (1, or 2 with Spores synergy).
    * Does not multiply the guaranteed Toxin DoT stack count.
@@ -1232,6 +1270,8 @@ export interface Loadout {
   cloudId?: string;
   /** Local-only: labels Player Sync could not map (shown on the loadout card until dismissed). */
   importWarnings?: string[];
+  /** Local-only: the Player Sync account this loadout was imported from (re-import offers Update). */
+  importSource?: { platform: string; account: string };
   createdAt: number;
   updatedAt: number;
   /** Matches warframe builder / saved build payload so mods, arcanes, helminth, etc. round-trip. */
@@ -1349,7 +1389,7 @@ export interface RivenStatDef {
   isPercent: boolean; // whether value is entered as %
   /** Riven Splicer trait (Update 44.1). Always positive, max one per riven. */
   spliced?: boolean;
-  /** Spliced trait has no DPS model in Voidforge (shown on the riven only). */
+  /** No DPS model in Voidforge (shown on the riven only). */
   displayOnly?: boolean;
 }
 
@@ -1420,6 +1460,10 @@ const RIVEN_MELEE: RivenStatDef[] = [
   { key: "comboDuration", label: "Combo Duration", isPercent: false },
   { key: "initialCombo", label: "Initial Combo", isPercent: false },
   { key: "heavyAttackEfficiency", label: "Heavy Attack Efficiency", isPercent: true },
+  // Wiki Riven Mods: slide crit (+/-), extra combo count (buff only), combo gain (curse only).
+  { key: "slideAttackCritChance", label: "Critical Chance for Slide Attack", isPercent: true, displayOnly: true },
+  { key: "comboCountChance", label: "Additional Combo Count Chance", isPercent: true, displayOnly: true },
+  { key: "comboGainChance", label: "Chance to Gain Combo Count", isPercent: true, displayOnly: true },
   { key: "factionGrineer", label: "Damage to Grineer", isPercent: true },
   { key: "factionCorpus", label: "Damage to Corpus", isPercent: true },
   { key: "factionInfested", label: "Damage to Infested", isPercent: true },

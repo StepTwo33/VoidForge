@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { getLoadouts } from "@/lib/builds/loadouts";
 import { PageShell, PageMain, PageHero, FilterChip, ContentPanel, EmptyState } from "@/components/page-shell";
 import { WeaponStatsPanel } from "@/components/stats-panel";
 import { useWeapons, useMods } from "@/lib/weapons/use-data";
@@ -608,11 +609,22 @@ function SlotSection({ slot, a, b, weapons, loadoutA, loadoutB }: {
   );
 }
 
-function LoadoutCompareTab() {
+function LoadoutCompareTab({ initialA }: { initialA?: string | null }) {
   const allWeapons = useWeapons();
   const [sides, setSides] = useState<[Loadout | null, Loadout | null]>([null, null]);
   const [sourceMeta, setSourceMeta] = useState<[string | null, string | null]>([null, null]);
   const [pickerOpen, setPickerOpen] = useState<0 | 1 | null>(null);
+
+  // /compare?tab=loadout&a=<loadout id>: preselect side A from this device's loadouts.
+  useEffect(() => {
+    if (!initialA) return;
+    const local = getLoadouts().find((l) => l.id === initialA || l.cloudId === initialA);
+    if (!local) return;
+    queueMicrotask(() => {
+      setSides((prev) => [local, prev[1]]);
+      setSourceMeta((prev) => ["This device", prev[1]]);
+    });
+  }, [initialA]);
 
   const pickLoadout = (side: 0 | 1, build: SavedBuild, origin: "yours" | "community") => {
     const loadout = savedBuildToLoadout(build);
@@ -779,6 +791,16 @@ function LoadoutCompareTab() {
 
 export default function ComparePage() {
   const [tab, setTab] = useState<CompareTab>("build");
+  const [initialLoadoutA, setInitialLoadoutA] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("tab") !== "loadout") return;
+    queueMicrotask(() => {
+      setTab("loadout");
+      setInitialLoadoutA(params.get("a"));
+    });
+  }, []);
 
   return (
     <PageShell>
@@ -801,7 +823,7 @@ export default function ComparePage() {
           </FilterChip>
         </div>
 
-        {tab === "build" ? <BuildCompareTab /> : <LoadoutCompareTab />}
+        {tab === "build" ? <BuildCompareTab /> : <LoadoutCompareTab initialA={initialLoadoutA} />}
       </PageMain>
     </PageShell>
   );

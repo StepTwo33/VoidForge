@@ -176,3 +176,24 @@ export const COMPANION_WEAPON_POSTURE_SLOT_INDEX = 8;
 export function isCompanionPostureMod(mod: { id: string; name?: string }): boolean {
   return /_posture$/.test(mod.id) || /\bPosture$/.test(mod.name ?? "");
 }
+
+/**
+ * Load migration: older Player Sync imports put a beast's posture mod in a regular claw
+ * slot. Posture mods only fit the Posture slot in game, so move the first one there when
+ * that slot is empty. Idempotent; returns the same array when nothing moves.
+ */
+export function migratePostureToPostureSlot<T extends { modId: string; slotIndex: number }>(
+  weaponMods: T[],
+  companion: Pick<Companion, "type"> | null | undefined,
+): T[] {
+  if (!companionHasFixedWeapon(companion)) return weaponMods;
+  if (weaponMods.some((m) => m.slotIndex === COMPANION_WEAPON_POSTURE_SLOT_INDEX)) return weaponMods;
+  const i = weaponMods.findIndex(
+    (m) => m.slotIndex !== COMPANION_WEAPON_POSTURE_SLOT_INDEX && isCompanionPostureMod({ id: m.modId }),
+  );
+  if (i < 0) return weaponMods;
+  const next = [...weaponMods];
+  next[i] = { ...next[i], slotIndex: COMPANION_WEAPON_POSTURE_SLOT_INDEX };
+  return next;
+}
+

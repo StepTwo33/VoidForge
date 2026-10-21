@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useCallback, useMemo, startTransition } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, startTransition } from "react";
+import { useRouter } from "next/navigation";
 import { PageShell, PageMain, PageHero, ContentPanel, EmptyState } from "@/components/page-shell";
-import { getLoadouts, saveLoadout, deleteLoadout, generateId, loadoutToBuildData, loadoutFromSavedBuild, mergeCloudLoadoutPreservingSlots } from "@/lib/builds/loadouts";
+import { getLoadouts, saveLoadout, deleteLoadout, generateId, loadoutToBuildData, loadoutFromSavedBuild, mergeCloudLoadoutPreservingSlots, moveLoadout } from "@/lib/builds/loadouts";
+import { decodeLoadoutShare, encodeLoadoutShare, loadoutSharePath } from "@/lib/builds/loadout-share";
 import {
   generateBuildId,
   saveCloudBuild,
+  deleteCloudBuild,
+  persistSavedBuild,
   SavedBuild,
   WarframeBuildData,
   WeaponBuildData,
@@ -26,7 +30,7 @@ import { allCompanions } from "@/data/companions";
 import { useWeapons } from "@/lib/weapons/use-data";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Plus,
@@ -51,6 +55,11 @@ import {
   Share2,
   Globe,
   RefreshCw,
+  ChevronUp,
+  ChevronDown,
+  Layers,
+  ArrowLeftRight,
+  EyeOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GameAssetImage } from "@/components/game-asset-image";
@@ -75,6 +84,9 @@ import {
   normalizeWarframeBuild,
   getLoadoutModular,
   withLoadoutModular,
+  loadoutCardDomId,
+  loadoutSlotEditHref,
+  loadoutSlotsAsBuilds,
 } from "@/lib/builds/loadout-slot-helpers";
 import { PointerVerb } from "@/components/pointer-verb";
 
@@ -91,8 +103,36 @@ const SLOT_ICONS: Record<SlotType, React.ReactNode> = {
   companion: <Dog className="h-4 w-4" />,
 };
 
+/** null = could not check (offline / error). */
+async function fetchSignedIn(): Promise<boolean | null> {
+  try {
+    const res = await fetch("/api/auth/session");
+    const session = await res.json().catch(() => null);
+    return !!session?.user;
+  } catch {
+    return null;
+  }
+}
+
+async function copyText(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Account share URL for a saved loadout (public build page, else the owner-only link). */
+function accountShareUrl(loadout: Pick<Loadout, "cloudId" | "isPublic">): string | null {
+  if (!loadout.cloudId) return null;
+  if (loadout.isPublic) return `${window.location.origin}/build/${loadout.cloudId}`;
+  return `${window.location.origin}/loadouts?buildId=${encodeURIComponent(loadout.cloudId)}`;
+}
+
 export default function LoadoutsPage() {
   const { confirm } = useConfirmDialog();
+  const router = useRouter();
   const weapons = useWeapons();
   const weaponsMap = useMemo(() => new Map(weapons.map((w) => [w.id, w])), [weapons]);
   const [loadouts, setLoadouts] = useState<Loadout[]>([]);
@@ -107,6 +147,13 @@ export default function LoadoutsPage() {
   const [saveDialogLoadoutId, setSaveDialogLoadoutId] = useState<string | null>(null);
   const [saveDialogDefaultPublic, setSaveDialogDefaultPublic] = useState(false);
   const [shareCopiedId, setShareCopiedId] = useState<string | null>(null);
+  /** Card to scroll to and pulse (?highlight= after an import, a builder Back, or a shared link). */
+  const [highlightId, setHighlightId] = useState<string | null>(null);
+  /** Loadout whose save was started from Share: copy its link once the save succeeds. */
+  const shareAfterSaveRef = useRef<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Loadout | null>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [bulkBusyId, setBulkBusyId] = useState<string | null>(null);
 
   const saveDialogLoadout = useMemo(
     () => (saveDialogLoadoutId ? loadouts.find((l) => l.id === saveDialogLoadoutId) ?? null : null),
@@ -118,6 +165,49 @@ export default function LoadoutsPage() {
   }, []);
 
   const refresh = useCallback(() => setLoadouts(getLoadouts()), []);
+
+  // ?shared=<code> adds the shared loadout to this device; ?highlight=<id> scrolls to a card.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const shared = url.searchParams.get("shared");
+    const hl = url.searchParams.get("highlight");
+    if (!shared && !hl) return;
+    let cancelled = false;
+    void (async () => {
+      let target = hl;
+      if (shared) {
+        const decoded = await decodeLoadoutShare(shared);
+        if (cancelled) return;
+        if (!decoded) {
+          toast.error("Could not open shared loadout", { description: "The link is incomplete or damaged." });
+        } else {
+          const now = Date.now();
+          const added: Loadout = { ...decoded.data, id: generateId(), name: decoded.name, createdAt: now, updatedAt: now };
+          saveLoadout(added);
+          target = added.id;
+          toast.success(`Added “${decoded.name}”`, { description: "Shared loadout saved on this device." });
+        }
+      }
+      if (cancelled) return;
+      url.searchParams.delete("shared");
+      url.searchParams.delete("highlight");
+      window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+      setLoadouts(getLoadouts());
+      if (target) setHighlightId(target);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!highlightId) return;
+    const el = document.getElementById(loadoutCardDomId(highlightId));
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    const t = window.setTimeout(() => setHighlightId(null), 2800);
+    return () => window.clearTimeout(t);
+  }, [highlightId, loadouts]);
 
   const applyCloudLoadout = useCallback(
     (build: SavedBuild, options?: { silent?: boolean }) => {
@@ -137,23 +227,23 @@ export default function LoadoutsPage() {
   useCloudBuildFromUrl("loadout", (build) => applyCloudLoadout(build, { silent: true }));
 
   const handleOpenSaveDialog = useCallback(async (loadoutId: string, defaultPublic = false) => {
-    try {
-      const res = await fetch("/api/auth/session");
-      const session = await res.json().catch(() => null);
-      if (!session?.user) {
-        toast.error("Sign in to save loadouts", {
-          description: "Create an account or sign in, then try again.",
-        });
-        return;
-      }
-    } catch {
+    shareAfterSaveRef.current = null;
+    const signedIn = await fetchSignedIn();
+    if (signedIn === null) {
       toast.error("Could not verify sign-in status", { description: "Check your connection and try again." });
+      return;
+    }
+    if (!signedIn) {
+      toast.error("Sign in to save loadouts", {
+        description: "Create an account or sign in, then try again.",
+        action: { label: "Sign in", onClick: () => router.push("/signin") },
+      });
       return;
     }
     setSaveDialogLoadoutId(loadoutId);
     setSaveDialogDefaultPublic(defaultPublic);
     setSaveDialogOpen(true);
-  }, []);
+  }, [router]);
 
   const handleSaveLoadoutConfirm = useCallback(
     async ({ name, description, isPublic, tags }: SaveBuildDialogValues) => {
@@ -193,9 +283,28 @@ export default function LoadoutsPage() {
         saveLoadout(updated);
         markCloudBuildLoaded(cloudResult.id);
         startTransition(() => refresh());
-        toast.success("Loadout saved", {
-          description: isPublic ? "Listed in Community." : "Saved to your account.",
-        });
+        const fromShare = shareAfterSaveRef.current === loadout.id;
+        shareAfterSaveRef.current = null;
+        const link = fromShare ? accountShareUrl(updated) : null;
+        if (link) {
+          const copied = await copyText(link);
+          if (copied) {
+            setShareCopiedId(loadout.id);
+            setTimeout(() => setShareCopiedId(null), 2000);
+            toast.success("Saved — share link copied", {
+              description: updated.isPublic ? "Listed in Community. Anyone with the link can view it." : "Private link — only you can open it when signed in.",
+            });
+          } else {
+            toast.success("Loadout saved", {
+              description: "Copy the share link now.",
+              action: { label: "Copy link", onClick: () => void copyText(link) },
+            });
+          }
+        } else {
+          toast.success("Loadout saved", {
+            description: isPublic ? "Listed in Community." : "Saved to your account.",
+          });
+        }
         void import("@/lib/site/support").then((m) => m.maybePromptSupportTip()).catch(() => {});
       } catch (err) {
         console.error("Failed to save loadout", err);
@@ -225,10 +334,29 @@ export default function LoadoutsPage() {
         return;
       }
 
-      handleOpenSaveDialog(loadout.id, true);
-      toast.info("Save to share", { description: "Save to your account first, then copy a share link." });
+      const signedIn = await fetchSignedIn();
+      if (signedIn) {
+        // Save first; the link is copied automatically once the save succeeds.
+        await handleOpenSaveDialog(loadout.id, true);
+        shareAfterSaveRef.current = loadout.id;
+        return;
+      }
+      // Signed out: the link carries the loadout itself, so it works without an account.
+      const code = await encodeLoadoutShare(loadout);
+      const link = code ? `${window.location.origin}${loadoutSharePath(code)}` : null;
+      const copied = link ? await copyText(link) : false;
+      if (copied) {
+        setShareCopiedId(loadout.id);
+        setTimeout(() => setShareCopiedId(null), 2000);
+      }
+      toast.info(copied ? "Loadout link copied" : "Sign in to share", {
+        description: copied
+          ? "The link carries this loadout, so anyone can open a copy. Sign in to list it in Community."
+          : "Sign in to save this loadout to your account and share it.",
+        action: { label: "Sign in", onClick: () => router.push("/signin") },
+      });
     },
-    [handleOpenSaveDialog],
+    [handleOpenSaveDialog, router],
   );
 
   const handleCreate = useCallback(() => {
@@ -262,21 +390,99 @@ export default function LoadoutsPage() {
     [refresh]
   );
 
-  const handleDelete = useCallback(
-    async (id: string) => {
-      const ok = await confirm({
-        title: "Delete loadout?",
-        description: "This loadout will be permanently removed from this device.",
-        confirmLabel: "Delete",
-        destructive: true,
-      });
-      if (!ok) return;
-      deleteLoadout(id);
-      refresh();
-      toast.success("Loadout deleted");
+  const handleMakePrivate = useCallback(
+    async (loadout: Loadout) => {
+      if (!loadout.cloudId) return;
+      setDeleteBusy(true);
+      try {
+        const result = await saveCloudBuild({
+          id: loadout.cloudId,
+          name: loadout.name,
+          description: loadout.description,
+          isPublic: false,
+          type: "loadout",
+          createdAt: loadout.createdAt,
+          updatedAt: Date.now(),
+          data: loadoutToBuildData(loadout),
+        });
+        if (!result) {
+          toast.error("Could not make it private", { description: "Sign in and try again. Nothing changed." });
+          return;
+        }
+        saveLoadout({ ...loadout, isPublic: result.isPublic ?? false });
+        refresh();
+        setDeleteTarget(null);
+        toast.success("Loadout is private", {
+          description: "Removed from Community and public links. It stays here and in your account.",
+        });
+      } finally {
+        setDeleteBusy(false);
+      }
     },
-    [confirm, refresh],
+    [refresh],
   );
+
+  const handleDeleteEverywhere = useCallback(
+    async (loadout: Loadout) => {
+      setDeleteBusy(true);
+      try {
+        if (loadout.cloudId) {
+          const ok = await deleteCloudBuild(loadout.cloudId);
+          if (!ok) {
+            toast.error("Could not delete the account copy", {
+              description: "Sign in and try again. Nothing was deleted.",
+              action: {
+                label: "Delete on this device only",
+                onClick: () => {
+                  deleteLoadout(loadout.id);
+                  refresh();
+                  toast.success("Deleted from this device");
+                },
+              },
+            });
+            return;
+          }
+        }
+        deleteLoadout(loadout.id);
+        refresh();
+        setDeleteTarget(null);
+        toast.success("Loadout deleted", {
+          description: loadout.cloudId ? "Removed from this device and your account." : undefined,
+        });
+      } finally {
+        setDeleteBusy(false);
+      }
+    },
+    [refresh],
+  );
+
+  const handleMove = useCallback((id: string, delta: -1 | 1) => {
+    setLoadouts(moveLoadout(id, delta));
+  }, []);
+
+  const handleSaveSlotsAsBuilds = useCallback(async (loadout: Loadout) => {
+    const builds = loadoutSlotsAsBuilds(loadout, generateBuildId);
+    if (builds.length === 0) {
+      toast.info("Nothing to save", { description: "This loadout has no filled slots." });
+      return;
+    }
+    setBulkBusyId(loadout.id);
+    try {
+      let synced = 0;
+      for (const b of builds) {
+        const res = await persistSavedBuild(b);
+        if (res.synced) synced++;
+      }
+      toast.success(`Saved ${builds.length} build${builds.length === 1 ? "" : "s"}`, {
+        description:
+          synced === builds.length
+            ? "In each builder's library and your account."
+            : "Saved on this device. Find them in each builder's library.",
+      });
+    } finally {
+      setBulkBusyId(null);
+    }
+  }, []);
 
   const handleStartEdit = useCallback((loadout: Loadout) => {
     setEditingId(loadout.id);
@@ -630,7 +836,7 @@ export default function LoadoutsPage() {
           </EmptyState>
         ) : (
           <div className="space-y-4">
-            {loadouts.map((loadout) => (
+            {loadouts.map((loadout, index) => (
               <LoadoutSectionErrorBoundary
                 key={loadout.id}
                 label="loadout card"
@@ -642,6 +848,15 @@ export default function LoadoutsPage() {
                     </p>
                   </ContentPanel>
                 }
+              >
+              <div
+                id={loadoutCardDomId(loadout.id)}
+                data-highlighted={highlightId === loadout.id ? "true" : undefined}
+                className={cn(
+                  "scroll-mt-24 rounded-xl transition-shadow duration-500",
+                  highlightId === loadout.id &&
+                    "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-lg shadow-primary/30 motion-safe:animate-[pulse_0.9s_ease-in-out_3]",
+                )}
               >
               <ContentPanel className="p-5">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
@@ -735,9 +950,48 @@ export default function LoadoutsPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDelete(loadout.id)}
+                        onClick={() => void handleSaveSlotsAsBuilds(loadout)}
+                        disabled={bulkBusyId === loadout.id}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50 sm:h-10 sm:w-10"
+                        title="Save slots as builds"
+                        aria-label="Save slots as builds"
+                      >
+                        <Layers className="h-4 w-4" />
+                      </button>
+                      <Link
+                        href={`/compare?tab=loadout&a=${encodeURIComponent(loadout.id)}`}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:h-10 sm:w-10"
+                        title="Compare with another loadout"
+                        aria-label="Compare with another loadout"
+                      >
+                        <ArrowLeftRight className="h-4 w-4" />
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => handleMove(loadout.id, -1)}
+                        disabled={index === 0}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30 sm:h-10 sm:w-10"
+                        title="Move up"
+                        aria-label="Move loadout up"
+                      >
+                        <ChevronUp className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMove(loadout.id, 1)}
+                        disabled={index === loadouts.length - 1}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30 sm:h-10 sm:w-10"
+                        title="Move down"
+                        aria-label="Move loadout down"
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(loadout)}
                         className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/15 hover:text-destructive sm:h-10 sm:w-10"
                         title="Delete loadout"
+                        aria-label="Delete loadout"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -825,7 +1079,7 @@ export default function LoadoutsPage() {
                           </div>
                           <div className="flex flex-col gap-1.5 mt-auto pt-1">
                             <a
-                              href={`${isModularSlot ? "/modular-builder" : cfg.builderPath}?loadout=${encodeURIComponent(loadout.id)}&slot=${slot}`}
+                              href={loadoutSlotEditHref(loadout, slot) ?? `${isModularSlot ? "/modular-builder" : cfg.builderPath}?loadout=${encodeURIComponent(loadout.id)}&slot=${slot}`}
                               className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-background/60 text-xs font-medium transition-colors hover:border-primary/35 hover:text-primary"
                             >
                               <Pencil className="h-3 w-3 opacity-70" aria-hidden /> Edit in builder
@@ -856,6 +1110,7 @@ export default function LoadoutsPage() {
                     <LoadoutDamagePanel loadout={loadout} />
                   </LoadoutSectionErrorBoundary>
                 </ContentPanel>
+              </div>
               </LoadoutSectionErrorBoundary>
               ))}
             </div>
@@ -1047,6 +1302,65 @@ export default function LoadoutsPage() {
               </TabsContent>
             )}
           </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deleteTarget != null} onOpenChange={(open) => !deleteBusy && !open && setDeleteTarget(null)}>
+        <DialogContent className="sm:max-w-md" data-testid="loadout-delete-dialog">
+          <DialogHeader>
+            <DialogTitle className="text-left break-words">Delete “{deleteTarget?.name}”?</DialogTitle>
+            <DialogDescription className="text-left">
+              Choose whether to stop sharing it or delete it for good.
+            </DialogDescription>
+          </DialogHeader>
+          {deleteTarget && (
+            <div className="space-y-2">
+              <button
+                type="button"
+                data-testid="loadout-delete-private"
+                onClick={() => void handleMakePrivate(deleteTarget)}
+                disabled={deleteBusy || !(deleteTarget.isPublic && deleteTarget.cloudId)}
+                className="flex w-full items-start gap-3 rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent"
+              >
+                <EyeOff className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium">Remove visibility</span>
+                  <span className="block text-xs text-muted-foreground">
+                    {deleteTarget.isPublic && deleteTarget.cloudId
+                      ? "Make it private: removed from Community and public links. The loadout stays here and in your account."
+                      : "It isn't listed publicly, so there is nothing to hide."}
+                  </span>
+                </span>
+              </button>
+              <button
+                type="button"
+                data-testid="loadout-delete-everywhere"
+                onClick={() => void handleDeleteEverywhere(deleteTarget)}
+                disabled={deleteBusy}
+                className="flex w-full items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-left text-destructive transition-colors hover:bg-destructive/15 disabled:opacity-60"
+              >
+                <Trash2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold">Delete altogether</span>
+                  <span className="block text-xs text-destructive/80">
+                    {deleteTarget.cloudId
+                      ? "Deletes it from this device and from your account. This can't be undone."
+                      : "Deletes it from this device. This can't be undone."}
+                  </span>
+                </span>
+              </button>
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(null)}
+                  disabled={deleteBusy}
+                  className="inline-flex min-h-11 items-center rounded-lg px-4 text-sm text-muted-foreground hover:bg-muted hover:text-foreground lg:pointer-fine:min-h-9"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

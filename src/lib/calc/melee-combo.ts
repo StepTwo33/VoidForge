@@ -161,8 +161,9 @@ export function applyMeleeComboToStats(
     critComboBonus += ctx.bloodRushValue * comboTier;
   }
   if (ctx.gladiatorCount > 0 && comboTier > 0) {
-    let gladPerTier = 0.1 * ctx.gladiatorCount;
-    if (ctx.gladiatorCount >= 6) gladPerTier += 0.15;
+    // Both wikis: +10% per set piece per (CM−1), 6 pieces = +60%. The old extra +15% at 6
+    // pieces predates Update 26.0 ("changed from 15% to 10%").
+    const gladPerTier = 0.1 * ctx.gladiatorCount;
     critComboBonus += gladPerTier * comboTier;
   }
   // Additive with other crit chance mods: preCombo + base × BR/Glad bonus.

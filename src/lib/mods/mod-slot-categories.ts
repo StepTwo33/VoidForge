@@ -43,6 +43,16 @@ export const TOME_CANTICLE_MOD_IDS = new Set([
 /** Warframe Exilus slot mods (utility / drift / mobility). */
 export const WARFRAME_EXILUS_MOD_IDS = new Set([
   "augment_wisp_fused_reservoir",
+  // Augment / Exilus mods (wiki.warframe.com + fandom mod pages and Exilus Warframe Adapter
+  // list). Still limited to their own frame by warframeAugmentEligibleInBuilder.
+  // Controlled Slide (Nezha) and Warrior's Rest (Excalibur Umbra): both wikis call them
+  // "Warframe Augment / Exilus Mod".
+  "augment_saryn_revealing_spores",
+  "augment_grendel_catapult",
+  "augment_nova_escape_velocity",
+  "ironclad_flight",
+  "controlled_slide",
+  "warriors_rest",
   "augment_mesa_mess_waltz",
   "hysterical_assault",
   "rush_r3",

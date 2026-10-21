@@ -18,8 +18,8 @@ export default function PlayerSyncPage() {
           description="Import your active Warframe loadout from PC, Xbox, PlayStation, or Switch — the same data source used by the official Arsenal Twitch extension."
         />
         <WarframePlayerSync
-          onImported={() => {
-            router.push("/loadouts");
+          onImported={(loadout) => {
+            router.push(`/loadouts?highlight=${encodeURIComponent(loadout.id)}`);
           }}
         />
       </PageMain>

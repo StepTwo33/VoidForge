@@ -1,5 +1,7 @@
 import { Loadout, ModularBuildData, ModSlot } from "../types";
 import { inferModularLoadoutSlot } from "./modular-resolve";
+import { companionsMap } from "@/data/companions";
+import { migratePostureToPostureSlot } from "@/lib/weapons/companion-weapons";
 import type { SavedBuild } from "./build-storage";
 
 const STORAGE_KEY = "overframe_loadouts";
@@ -7,7 +9,7 @@ const STORAGE_KEY = "overframe_loadouts";
 /** Slot payloads only — name/description/isPublic live on SavedBuild when cloud-synced. */
 export type LoadoutBuildData = Omit<
   Loadout,
-  "id" | "name" | "description" | "isPublic" | "cloudId" | "importWarnings" | "createdAt" | "updatedAt"
+  "id" | "name" | "description" | "isPublic" | "cloudId" | "importWarnings" | "importSource" | "createdAt" | "updatedAt"
 >;
 
 /** Ensure cloud-safe defaults on slot payloads before POST /api/builds. */
@@ -105,11 +107,12 @@ export function loadoutToBuildData(loadout: Loadout): LoadoutBuildData {
   } = loadout;
   // Import warnings are a local-only hint; never send them to the account.
   delete (data as { importWarnings?: string[] }).importWarnings;
+  delete (data as { importSource?: unknown }).importSource;
   return normalizeLoadoutBuildData(data);
 }
 
 export function loadoutFromSavedBuild(build: SavedBuild): Loadout {
-  return {
+  return migrateCompanionPosture({
     id: build.id,
     cloudId: build.id,
     name: build.name,
@@ -118,7 +121,7 @@ export function loadoutFromSavedBuild(build: SavedBuild): Loadout {
     createdAt: build.createdAt,
     updatedAt: build.updatedAt,
     ...(build.data as LoadoutBuildData),
-  };
+  });
 }
 
 export function mergeCloudLoadout(local: Loadout, cloud: SavedBuild): Loadout {
@@ -224,7 +227,16 @@ function normalizeLoadout(raw: Loadout): Loadout {
   delete out.modularBuild;
   if (Object.keys(modularBuilds).length > 0) out.modularBuilds = modularBuilds;
   else delete out.modularBuilds;
-  return out;
+  return migrateCompanionPosture(out);
+}
+
+/** Older imports: beast posture mod sat in a regular claw slot (see migratePostureToPostureSlot). */
+export function migrateCompanionPosture<T extends Pick<Loadout, "companionBuild">>(loadout: T): T {
+  const cb = loadout.companionBuild;
+  if (!cb?.weaponMods?.length) return loadout;
+  const weaponMods = migratePostureToPostureSlot(cb.weaponMods, companionsMap.get(cb.companionId));
+  if (weaponMods === cb.weaponMods) return loadout;
+  return { ...loadout, companionBuild: { ...cb, weaponMods } };
 }
 
 export function getLoadouts(): Loadout[] {
@@ -257,6 +269,57 @@ export function saveLoadout(loadout: Loadout): void {
 export function deleteLoadout(id: string): void {
   const loadouts = getLoadouts().filter((l) => l.id !== id);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(loadouts));
+}
+
+/** Move a loadout one place up (-1) or down (+1) in the stored order. Returns the new list. */
+export function moveLoadout(id: string, delta: -1 | 1): Loadout[] {
+  const loadouts = getLoadouts();
+  const from = loadouts.findIndex((l) => l.id === id);
+  const to = from + delta;
+  if (from < 0 || to < 0 || to >= loadouts.length) return loadouts;
+  const [item] = loadouts.splice(from, 1);
+  loadouts.splice(to, 0, item);
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(loadouts));
+  } catch (err) {
+    console.warn("Failed to save loadouts to localStorage", err);
+  }
+  return loadouts;
+}
+
+/** Local loadouts previously imported from this Player Sync account (case-insensitive name). */
+export function findImportedLoadouts(platform: string, account: string): Loadout[] {
+  const acc = account.trim().toLowerCase();
+  return getLoadouts().filter(
+    (l) => l.importSource?.platform === platform && l.importSource.account.trim().toLowerCase() === acc,
+  );
+}
+
+/**
+ * Re-import onto an existing loadout: slot data and import warnings come from the new import;
+ * id, name, description, sharing and account link stay.
+ */
+export function applyImportToLoadout(
+  existing: Loadout,
+  imported: Omit<Loadout, "id" | "createdAt" | "updatedAt">,
+): Loadout {
+  const {
+    name: _name,
+    description: _description,
+    isPublic: _isPublic,
+    cloudId: _cloudId,
+    ...slots
+  } = imported;
+  return {
+    id: existing.id,
+    name: existing.name,
+    description: existing.description,
+    isPublic: existing.isPublic,
+    cloudId: existing.cloudId,
+    createdAt: existing.createdAt,
+    updatedAt: Date.now(),
+    ...slots,
+  };
 }
 
 export function generateId(): string {

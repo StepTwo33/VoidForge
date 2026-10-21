@@ -7,7 +7,7 @@ import {
   sniperComboMultiplier,
   type SniperZoomLevel,
 } from "@/data/sniper-zoom";
-import type { CalculatedStats, SimulationParams, Weapon } from "@/lib/types";
+import type { CalculatedStats, KillStackSource, SimulationParams, Weapon } from "@/lib/types";
 import {
   weaponSupportsPrimaryStyleSets,
   weaponAcceptsSynthReloadBonus,
@@ -36,6 +36,13 @@ export function WeaponSimControls({
   onKillBuffTotal: number;
   triggerBuffTotal: number;
 }) {
+  const killSources = stats.killStackSources ?? [];
+  const arcaneSources = stats.arcaneStackSources ?? [];
+  const ks = (src: KillStackSource) => Math.max(0, simParams.killStacksBySource?.[src] ?? simParams.killStacks);
+  const simKs = (src: KillStackSource) =>
+    Math.max(0, stats.simParams.killStacksBySource?.[src] ?? stats.simParams.killStacks);
+  const arcaneMax = arcaneSources.length > 0 ? Math.max(...arcaneSources.map((a) => a.cap)) : 12;
+  const singleArcane = arcaneSources.length === 1 ? arcaneSources[0] : null;
   return (
         <div className="space-y-1.5 py-1 min-w-0">
           {isMelee && (
@@ -47,19 +54,64 @@ export function WeaponSimControls({
           )}
           <SimSlider
             label="Kill Stacks" value={simParams.killStacks} min={0} max={5}
-            onChange={(v) => onSimParamsChange({ ...simParams, killStacks: v })}
-            tooltip="On-kill stacks — Galvanized Chamber/Scope (max 5), Hell/Diffusion (max 4), Aptitude/Savvy (max 2), Shot (max 3), Berserker Fury (max 2). Any stacks also activate non-stacking on-kill buffs (Bladed Rounds etc.)"
+            onChange={(v) => onSimParamsChange({ ...simParams, killStacks: v, killStacksBySource: undefined })}
+            tooltip="On-kill stacks — Galvanized Chamber/Scope (max 5), Hell/Diffusion (max 4), Aptitude/Savvy (max 2), Shot (max 3), Berserker Fury (max 2). Any stacks also activate non-stacking on-kill buffs (Bladed Rounds etc.). Moving this slider resets the per-source values below."
           />
+          {killSources.length > 1 && (
+            <div className="space-y-1.5 border-l border-border/60 pl-2" data-testid="kill-stack-sources">
+              {killSources.map((src) => (
+                <SimSlider
+                  key={src.id}
+                  label={src.label}
+                  value={Math.min(ks(src.id as KillStackSource), src.cap)}
+                  min={0}
+                  max={src.cap}
+                  onChange={(v) =>
+                    onSimParamsChange({
+                      ...simParams,
+                      killStacksBySource: { ...simParams.killStacksBySource, [src.id]: v },
+                    })
+                  }
+                  tooltip={`Stacks for ${src.label} only (in-game max ${src.cap}). Defaults to the shared Kill Stacks value.`}
+                />
+              ))}
+            </div>
+          )}
           <SimSlider
-            label="Status Types" value={simParams.statusTypesOnTarget} min={0} max={5}
+            label="Status Types" value={simParams.statusTypesOnTarget} min={0} max={14}
             onChange={(v) => onSimParamsChange({ ...simParams, statusTypesOnTarget: v })}
-            tooltip="Unique status types on target — Condition Overload, Galvanized Aptitude/Savvy/Shot"
+            tooltip="Unique status types on target — Condition Overload, Galvanized Aptitude/Savvy/Shot. No in-game cap; 14 = every status type including Tau (wiki.warframe.com lists Tau, fandom does not)."
           />
           <SimSlider
-            label="Arcane Stacks" value={simParams.arcaneStacks} min={0} max={12}
-            onChange={(v) => onSimParamsChange({ ...simParams, arcaneStacks: v })}
-            tooltip="Stack count for arcanes like Primary/Secondary/Melee Merciless (max 12)"
+            label={singleArcane ? `Arcane Stacks (${singleArcane.label})` : "Arcane Stacks"}
+            value={Math.min(simParams.arcaneStacks, arcaneMax)} min={0} max={arcaneMax}
+            onChange={(v) => onSimParamsChange({ ...simParams, arcaneStacks: v, arcaneStacksById: undefined })}
+            tooltip={
+              arcaneSources.length > 0
+                ? `Stack count for equipped stacking arcanes: ${arcaneSources.map((a) => `${a.label} (max ${a.cap})`).join(", ")}. Each arcane clamps to its own cap.`
+                : "Stack count for stacking arcanes like Primary/Secondary/Melee Merciless (max 12). The max follows the equipped arcane's cap."
+            }
           />
+          {arcaneSources.length > 1 && (
+            <div className="space-y-1.5 border-l border-border/60 pl-2" data-testid="arcane-stack-sources">
+              {arcaneSources.map((a) => (
+                <SimSlider
+                  key={a.id}
+                  label={a.label}
+                  value={Math.min(simParams.arcaneStacksById?.[a.id] ?? simParams.arcaneStacks, a.cap)}
+                  min={0}
+                  max={a.cap}
+                  onChange={(v) =>
+                    onSimParamsChange({
+                      ...simParams,
+                      arcaneStacksById: { ...simParams.arcaneStacksById, [a.id]: v },
+                    })
+                  }
+                  tooltip={`Stacks for ${a.label} only (in-game max ${a.cap}). Defaults to the shared Arcane Stacks value.`}
+                />
+              ))}
+            </div>
+          )}
           {isMelee && (
             <SimSlider
               label="WF Gladiator" value={simParams.extraGladiatorMods} min={0} max={3}
@@ -637,14 +689,14 @@ export function WeaponSimControls({
             )}
             {stats.galvanizedMultishotOnKill > 0 && (() => {
               const msCap = stats.galvanizedMultishotStackCap ?? 5;
-              const msStacks = Math.min(stats.simParams.killStacks, msCap);
+              const msStacks = Math.min(simKs("galvMultishot"), msCap);
               return (
                 <div className="text-[10px] text-blue-700 dark:text-blue-400">Galv. Multishot: +{(stats.galvanizedMultishotOnKill * msStacks * 100).toFixed(0)}% MS ({msStacks}/{msCap} stacks)</div>
               );
             })()}
             {stats.galvanizedDamagePerStatus > 0 && (() => {
               const cdCap = stats.galvanizedDamagePerStatusStackCap ?? 5;
-              const cdStacks = Math.min(stats.simParams.killStacks, cdCap);
+              const cdStacks = Math.min(simKs("galvCondition"), cdCap);
               return (
                 <div className="text-[10px] text-blue-700 dark:text-blue-400">Galv. Condition: +{(stats.galvanizedDamagePerStatus * cdStacks * stats.simParams.statusTypesOnTarget * 100).toFixed(0)}% DMG ({cdStacks}/{cdCap} stacks × {stats.simParams.statusTypesOnTarget} status)</div>
               );
@@ -663,13 +715,13 @@ export function WeaponSimControls({
             )}
             {(stats.galvanizedCritOnHeadshot ?? 0) > 0 && (
               stats.simParams.applyHeadshots ? (
-                <div className="text-[10px] text-blue-700 dark:text-blue-400">Galv. Crit: +{(((stats.galvanizedCritOnHeadshot ?? 0) + (stats.galvanizedCritOnHeadshotPerStack ?? 0) * Math.min(stats.simParams.killStacks, 5)) * 100).toFixed(0)}% CC while aiming ({Math.min(stats.simParams.killStacks, 5)} headshot-kill stacks)</div>
+                <div className="text-[10px] text-blue-700 dark:text-blue-400">Galv. Crit: +{(((stats.galvanizedCritOnHeadshot ?? 0) + (stats.galvanizedCritOnHeadshotPerStack ?? 0) * Math.min(simKs("galvCrit"), 5)) * 100).toFixed(0)}% CC while aiming ({Math.min(simKs("galvCrit"), 5)} headshot-kill stacks)</div>
               ) : (
                 <div className="text-[10px] text-muted-foreground/70">Galv. Crit: inactive — enable Headshots to model on-headshot crit</div>
               )
             )}
             {stats.berserkerFuryBonus > 0 && (
-              <div className="text-[10px] text-yellow-700 dark:text-yellow-400">Berserker Fury: +{(stats.berserkerFuryBonus * Math.min(stats.simParams.killStacks, 2) * 100).toFixed(0)}% AS ({Math.min(stats.simParams.killStacks, 2)}/2 stacks)</div>
+              <div className="text-[10px] text-yellow-700 dark:text-yellow-400">Berserker Fury: +{(stats.berserkerFuryBonus * Math.min(simKs("berserker"), 2) * 100).toFixed(0)}% AS ({Math.min(simKs("berserker"), 2)}/2 stacks)</div>
             )}
             {stats.vigilanteCritBonus && stats.vigilanteCritBonus > 0 && (
               <div className="text-[10px] text-orange-700 dark:text-orange-400" title="Primary rifles/shotguns/bows/archguns only — does not apply to secondaries or melee. Averaged into DPS as bonus crit chance.">

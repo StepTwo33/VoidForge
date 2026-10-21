@@ -179,7 +179,7 @@ describe("warframe arsenal riven resolve", () => {
     expect(stats.factionCorpus).toBeCloseTo(0.4);
   });
 
-  it("reports unmapped combo-gain tags", () => {
+  it("maps combo-gain and slide-crit tags (R10-D)", () => {
     const riven = resolveRivenUpgrade({
       uniqueName: "/Lotus/Upgrades/Mods/Randomized/PlayerMeleeWeaponRandomModRare",
       buffs: [
@@ -190,9 +190,9 @@ describe("warframe arsenal riven resolve", () => {
       curses: [],
     });
     expect(riven?.rivenStats.damage).toBeCloseTo(0.2);
-    expect(riven?.unmappedTags).toEqual(
-      expect.arrayContaining(["WeaponMeleeComboPointsOnHitMod", "SlideAttackCritChanceMod"]),
-    );
+    expect(riven?.unmappedTags).toEqual([]);
+    expect(riven?.rivenStats.comboGainChance).toBeCloseTo(0.1);
+    expect(riven?.rivenStats.slideAttackCritChance).toBeCloseTo(0.15);
   });
 
   it("resolves full riven upgrade for import", () => {

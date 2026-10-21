@@ -185,5 +185,29 @@
    "madurai",
    "madurai"
   ]
+ },
+ "Sirius & Orion": {
+  "aura": [
+   "vazarin"
+  ],
+  "exilus": [
+   null
+  ],
+  "slots": [
+   "vazarin",
+   "naramon"
+  ]
+ },
+ "Orion & Sirius": {
+  "aura": [
+   "naramon"
+  ],
+  "exilus": [
+   null
+  ],
+  "slots": [
+   "madurai",
+   "naramon"
+  ]
  }
 }

@@ -244,3 +244,60 @@ export function normalizeWarframeBuild(d: WarframeBuildData): NonNullable<Loadou
     dualFormBuilds: d.dualFormBuilds,
   };
 }
+
+/** Loadouts page URL that scrolls to (and briefly highlights) one loadout card. */
+export function loadoutCardHref(loadoutId: string): string {
+  return `/loadouts?highlight=${encodeURIComponent(loadoutId)}`;
+}
+
+/** DOM id of a loadout card on /loadouts. */
+export function loadoutCardDomId(loadoutId: string): string {
+  return `loadout-${loadoutId}`;
+}
+
+/** Builder URL for one filled loadout slot (`?loadout=&slot=`), or null when the slot is empty. */
+export function loadoutSlotEditHref(loadout: Loadout, slot: LoadoutSlotType): string | null {
+  const qs = `?loadout=${encodeURIComponent(loadout.id)}&slot=${slot}`;
+  if (slot === "warframe") return loadout.warframeBuild?.warframeId ? `${LOADOUT_SLOT_CONFIG.warframe.builderPath}${qs}` : null;
+  if (slot === "companion") return loadout.companionBuild?.companionId ? `${LOADOUT_SLOT_CONFIG.companion.builderPath}${qs}` : null;
+  const p = getWeaponSlotPayload(loadout, slot);
+  if (!p) return null;
+  return `${p.kind === "modular" ? "/modular-builder" : LOADOUT_SLOT_CONFIG[slot].builderPath}${qs}`;
+}
+
+/**
+ * One SavedBuild per filled loadout slot (Warframe, weapons or their modular builds, companion),
+ * named "<loadout> — <slot>", ready for the builders' library. Fresh ids; private.
+ */
+export function loadoutSlotsAsBuilds(
+  loadout: Loadout,
+  newId: () => string,
+  now = Date.now(),
+): SavedBuild[] {
+  const out: SavedBuild[] = [];
+  const push = (type: SavedBuild["type"], slotLabel: string, data: unknown) =>
+    out.push({
+      id: newId(),
+      name: `${loadout.name} — ${slotLabel}`,
+      isPublic: false,
+      type,
+      createdAt: now,
+      updatedAt: now,
+      data: JSON.parse(JSON.stringify(data)),
+    });
+  if (loadout.warframeBuild?.warframeId) push("warframe", "Warframe", loadout.warframeBuild);
+  for (const slot of ["primary", "secondary", "melee"] as const) {
+    const p = getWeaponSlotPayload(loadout, slot);
+    if (!p) continue;
+    const label = LOADOUT_SLOT_CONFIG[slot].label;
+    if (p.kind === "modular") {
+      const { slot: _slot, ...data } = p.data;
+      push("modular", label, data);
+    } else {
+      const build = slot === "primary" ? loadout.primaryBuild : slot === "secondary" ? loadout.secondaryBuild : loadout.meleeBuild;
+      push("weapon", label, build);
+    }
+  }
+  if (loadout.companionBuild?.companionId) push("companion", "Companion", loadout.companionBuild);
+  return out;
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import { dropUnknownMods } from "@/lib/mods/known-mods";
 import {
   applyPolarityOverride,
   effectiveSlotPolarities,
@@ -80,6 +81,7 @@ import { getWeaponArcanes } from "@/lib/weapons/weapon-arcane-config";
 import {
   dualFormStatesFromBuild,
   getDualFormConfig,
+  warframeForDualForm,
   buildAbilityDisplayEntries,
   serializeDualFormBuilds,
   EMPTY_ARCANE_IDS,
@@ -199,7 +201,7 @@ export default function WarframeBuilderPage() {
   }, [selectedWarframe?.id, frostColdEnemies]);
 
   const modSlotsToEquipped = useCallback((mods: { modId: string; rank: number; slotIndex: number }[]): EquippedMod[] => {
-    return mods.map((m) => {
+    return dropUnknownMods(mods, modsMap).map((m) => {
       const mod = modsMap.get(m.modId);
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
     });
@@ -217,9 +219,9 @@ export default function WarframeBuilderPage() {
         if (!wf) return;
         setSelectedWarframe(wf);
         setShowWarframeList(false);
-        setEquippedMods(shared.mods.map((m, i) => {
-          const mod = modsMap.get(m.id);
-          return { modId: m.id, modName: mod?.name ?? "", rank: m.rank, slotIndex: m.slotIndex ?? i, polarity: mod?.polarity, drain: mod?.drain };
+        setEquippedMods(dropUnknownMods(shared.mods.map((m, i) => ({ modId: m.id, rank: m.rank, slotIndex: m.slotIndex ?? i })), modsMap).map((m) => {
+          const mod = modsMap.get(m.modId);
+          return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
         }));
         if (shared.arcanes) {
           setEquippedArcanes(resolveSavedArcaneSlots(shared.arcanes.map((id) => id || null), 2));
@@ -244,10 +246,7 @@ export default function WarframeBuilderPage() {
         setCurrentBuildId(null);
         setBuildName(`${wf.name} Build`);
         setBuildDescription("");
-        const url = new URL(window.location.href);
-        url.searchParams.delete("build");
-        const qs = url.searchParams.toString();
-        window.history.replaceState({}, "", qs ? `${url.pathname}?${qs}` : url.pathname);
+        // ?build= stays in the URL (shareable, survives refresh). Runs once on mount.
       })();
     });
     return () => {
@@ -368,13 +367,13 @@ export default function WarframeBuilderPage() {
     setEquippedShards(d.shards?.length === 5 ? d.shards : [...EMPTY_SHARDS]);
     setSelectedWarframe(wf);
     setHasOrokinReactor(d.hasOrokinReactor);
-    setExaltedMods((d.exaltedMods || []).map((m) => {
+    setExaltedMods(dropUnknownMods(d.exaltedMods, modsMap).map((m) => {
       const mod = modsMap.get(m.modId);
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
     }));
     setExaltedSlotPolarities(d.exaltedSlotPolarities || {});
     setExaltedArcanes(resolveSavedArcaneSlots(d.exaltedArcaneIds, 2));
-    setExaltedMeleeMods((d.exaltedMeleeMods || []).map((m) => {
+    setExaltedMeleeMods(dropUnknownMods(d.exaltedMeleeMods, modsMap).map((m) => {
       const mod = modsMap.get(m.modId);
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
     }));
@@ -522,9 +521,11 @@ export default function WarframeBuilderPage() {
       rank: m.rank,
       slotIndex: m.slotIndex,
     }));
-    const stats = calculateWarframeBuild(selectedWarframe, modSlots, modsMap);
+    // Dual-form frames (Orion) can have their own stat block per form.
+    const statsWarframe = dualFormConfig ? warframeForDualForm(selectedWarframe, activeDualFormId) : selectedWarframe;
+    const stats = calculateWarframeBuild(statsWarframe, modSlots, modsMap);
     return applyWarframeShardsAndArcanes(stats, equippedShards, equippedArcanes, equippedArcaneRanks);
-  }, [selectedWarframe, equippedMods, equippedShards, equippedArcanes, equippedArcaneRanks, modsMap]);
+  }, [selectedWarframe, dualFormConfig, activeDualFormId, equippedMods, equippedShards, equippedArcanes, equippedArcaneRanks, modsMap]);
 
   /** Exalted DPS scales with host Ability Strength (wiki). */
   const exaltedCalcOptions = useMemo<WeaponCalculationOptions>(
@@ -650,14 +651,32 @@ export default function WarframeBuilderPage() {
     exaltedCalcOptions,
   ]);
 
+  // Exalted weapons have innate polarities like any weapon; the state holds overrides only.
+  const exaltedInnatePolarities = useMemo(
+    () => innateSlotPolarities("weapon", exaltedWeapon?.id),
+    [exaltedWeapon?.id],
+  );
+  const exaltedEffectivePolarities = useMemo(
+    () => effectiveSlotPolarities(exaltedInnatePolarities, exaltedSlotPolarities),
+    [exaltedInnatePolarities, exaltedSlotPolarities],
+  );
+  const exaltedMeleeInnatePolarities = useMemo(
+    () => innateSlotPolarities("weapon", exaltedMeleeWeapon?.id),
+    [exaltedMeleeWeapon?.id],
+  );
+  const exaltedMeleeEffectivePolarities = useMemo(
+    () => effectiveSlotPolarities(exaltedMeleeInnatePolarities, exaltedMeleeSlotPolarities),
+    [exaltedMeleeInnatePolarities, exaltedMeleeSlotPolarities],
+  );
+
   const exaltedCapacity = useMemo(
-    () => computeUsedCapacity(exaltedMods, modsMap, exaltedSlotPolarities),
-    [exaltedMods, exaltedSlotPolarities, modsMap],
+    () => computeUsedCapacity(exaltedMods, modsMap, exaltedEffectivePolarities),
+    [exaltedMods, exaltedEffectivePolarities, modsMap],
   );
 
   const exaltedMeleeCapacity = useMemo(
-    () => computeUsedCapacity(exaltedMeleeMods, modsMap, exaltedMeleeSlotPolarities),
-    [exaltedMeleeMods, exaltedMeleeSlotPolarities, modsMap],
+    () => computeUsedCapacity(exaltedMeleeMods, modsMap, exaltedMeleeEffectivePolarities),
+    [exaltedMeleeMods, exaltedMeleeEffectivePolarities, modsMap],
   );
 
   const filteredWarframes = useMemo(() => {
@@ -709,8 +728,13 @@ export default function WarframeBuilderPage() {
   );
 
   const innatePolarities = useMemo(
-    () => innateSlotPolarities("warframe", selectedWarframe?.id),
-    [selectedWarframe?.id],
+    () =>
+      innateSlotPolarities(
+        "warframe",
+        selectedWarframe?.id,
+        dualFormConfig ? activeDualFormId : undefined,
+      ),
+    [selectedWarframe?.id, dualFormConfig, activeDualFormId],
   );
   const effectivePolarities = useMemo(
     () => effectiveSlotPolarities(innatePolarities, slotPolarities),
@@ -1319,7 +1343,9 @@ export default function WarframeBuilderPage() {
                     exaltedCapacity={exaltedCapacity}
                     exaltedMods={exaltedMods}
                     modsMap={modsMap}
-                    exaltedSlotPolarities={exaltedSlotPolarities}
+                    exaltedSlotPolarities={exaltedEffectivePolarities}
+                    exaltedSlotOverrides={exaltedSlotPolarities}
+                    exaltedInnatePolarities={exaltedInnatePolarities}
                     exaltedArcaneConfig={exaltedArcaneConfig}
                     exaltedArcanes={exaltedArcanes}
                     exaltedStats={exaltedStats}
@@ -1335,12 +1361,7 @@ export default function WarframeBuilderPage() {
                       setExaltedMods((prev) => prev.filter((m) => m.slotIndex !== i))
                     }
                     onPolarize={(i, p) =>
-                      setExaltedSlotPolarities((prev) => {
-                        const next = { ...prev };
-                        if (p) next[i] = p;
-                        else delete next[i];
-                        return next;
-                      })
+                      setExaltedSlotPolarities((prev) => applyPolarityOverride(prev, exaltedInnatePolarities, i, p))
                     }
                     onAddArcane={(i) => {
                       setExaltedActiveArcaneSlot(i);
@@ -1363,7 +1384,9 @@ export default function WarframeBuilderPage() {
                     exaltedCapacity={exaltedMeleeCapacity}
                     exaltedMods={exaltedMeleeMods}
                     modsMap={modsMap}
-                    exaltedSlotPolarities={exaltedMeleeSlotPolarities}
+                    exaltedSlotPolarities={exaltedMeleeEffectivePolarities}
+                    exaltedSlotOverrides={exaltedMeleeSlotPolarities}
+                    exaltedInnatePolarities={exaltedMeleeInnatePolarities}
                     exaltedArcaneConfig={exaltedMeleeArcaneConfig}
                     exaltedArcanes={exaltedMeleeArcanes}
                     exaltedStats={exaltedMeleeStats}
@@ -1379,12 +1402,7 @@ export default function WarframeBuilderPage() {
                       setExaltedMeleeMods((prev) => prev.filter((m) => m.slotIndex !== i))
                     }
                     onPolarize={(i, p) =>
-                      setExaltedMeleeSlotPolarities((prev) => {
-                        const next = { ...prev };
-                        if (p) next[i] = p;
-                        else delete next[i];
-                        return next;
-                      })
+                      setExaltedMeleeSlotPolarities((prev) => applyPolarityOverride(prev, exaltedMeleeInnatePolarities, i, p))
                     }
                     onAddArcane={(i) => {
                       setExaltedMeleeActiveArcaneSlot(i);

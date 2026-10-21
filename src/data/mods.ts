@@ -11817,20 +11817,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "uncommon"
   },
   {
-    "id": "augmented_sonar",
-    "name": "Augmented Sonar",
-    "polarity": "zenurik",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "warframe",
-    "subCategory": "",
-    "stats": {
-      "duration": 2.5
-    },
-    "description": "Sonar Augment: Affected enemies also become visible through walls for 10s.",
-    "rarity": "rare"
-  },
-  {
     "id": "aviator",
     "name": "Aviator",
     "polarity": "vazarin",
@@ -11882,7 +11868,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "Augment",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "criticalChance": 50,
@@ -11958,13 +11944,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "duration": 2.5
     },
     "description": "Sol Gate Augment : Wisp and 2 spectral images cast a single blast of Sol Gate, leaving an area with 500 <DT_FIRE_COLOR>Heat Damage / Second with guaranteed Heat and Radiation Status Effects for 10s. ",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "wisp"
   },
   {
     "id": "catalyzing_shields",
@@ -12001,13 +11988,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "duration": 7.5
     },
     "description": "Blessing Augment: Gain Primary and Secondary Critical Chance for 30s for each percent you heal on allies up to 350%.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "trinity"
   },
   {
     "id": "coaction_drift",
@@ -12086,13 +12074,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 2,
     "maxRank": 5,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "abilityStrength": 2.5
     },
     "description": "Disable Nezha's passive ability. Increase Ability Strength by 15%.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "nezha"
   },
   {
     "id": "damage_decoy",
@@ -12100,13 +12089,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "damage": 87.5
     },
     "description": "Decoy Augment: Decoy can be cast on enemies. Enemies who attack that decoy receive 5 random Status Effects, and the reflected damage is increased by 350%.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "loki"
   },
   {
     "id": "dark_propagation",
@@ -12245,13 +12235,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "abilityDuration": 12.5
     },
     "description": "Lull Augment: Performing a finisher on or killing a sleeping enemy will retrigger Lull for 100% of the remaining duration.\\nPassive: +50% Lull Duration.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "baruuk"
   },
   {
     "id": "endurance_drift",
@@ -12817,13 +12808,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "duration": 3.75
     },
     "description": "Transmutation Probe Augment: Probe returns to cast position after reaching max range, and remains nearby for 15s. Recall Probe by recasting. Recast again to end.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "lavos"
   },
   {
     "id": "loot_detector",
@@ -12845,13 +12837,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "cooldown": 0.5
     },
     "description": "Merulina Augment: Yareli no longer rides Merulina. Instead, Merulina follows her and casts Sea Snare on nearby enemies. 2s cooldown.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "yareli"
   },
   {
     "id": "maglev",
@@ -13032,13 +13025,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "health": 1.0
     },
     "description": "Parasitic Link Augment: Nidus and any ally he's bound to gain 4% Max Health per Mutation during Parasitic Link.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "nidus"
   },
   {
     "id": "peaceful_provocation",
@@ -13368,7 +13362,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "electricity": 17.5,
@@ -13376,7 +13370,8 @@ const RAW_MODS: Mod[] = [
       "duration": 1.5
     },
     "description": "Razor Gyre Augment: Groups enemies together, while Lethal Progeny's Ortholysts focus fire on those enemies with +70% <DT_ELECTRICITY_COLOR>Electricity Damage and Fire Rate for 6s.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "caliban"
   },
   {
     "id": "ready_steel",
@@ -13500,13 +13495,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "damage": 8.75
     },
     "description": "Rotorswell Augment: 35% of damage received is redirected toward the instigator as <DT_ELECTRICITY_COLOR> Electricity Damage.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "gyre"
   },
   {
     "id": "rifle_scavenger",
@@ -14047,13 +14043,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "criticalMultiplier": 25.0
     },
     "description": "Tharros Strike Augment: Increases Critical Damage by 100% on enemies you hit. Critical Damage bonus is doubled for Spearguns.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "styanax"
   },
   {
     "id": "the_relentless_lost",
@@ -14061,13 +14058,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "abilityStrength": 8.75
     },
     "description": "The Lost Augment: The Lost gains 35% Ability Strength and 15% Ability Efficiency when cast. The effect stacks up to 3x. Casting the same ability back-to-back resets the effect.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "xaku"
   },
   {
     "id": "thrall_pact",
@@ -14165,13 +14163,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "range": 3.75
     },
     "description": "The Vast Untime Augment: Creates a Rift that connects to enemies suffering from <DT_RADIANT_COLOR> Void Status Effect within 15m, doubling debuffs applied by The Vast Untime and maintaining <DT_RADIANT_COLOR> Void Status.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "xaku"
   },
   {
     "id": "valence_formation",
@@ -14179,13 +14178,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "duration": 5.0
     },
     "description": "Passive Augment: Casting an Ability imbued with extra Elemental Damage applies that Element as a 200% bonus to your weapons with guaranteed Status for 20s.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "lavos"
   },
   {
     "id": "vampiric_grasp",
@@ -14193,13 +14193,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "healthRegen": 6.25
     },
     "description": "Grasp of Lohk Augment: When a stolen weapon deals damage to an enemy affected by The Lost: Gaze or The Vast Untime, Xaku heals by 25.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "xaku"
   },
   {
     "id": "venomous_rise",
@@ -14263,13 +14264,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "duration": 6.25
     },
     "description": "Recompense Augment: Daggers whirl in a ring around Kullervo for 25s, slashing nearby foes and dealing <DT_EXPLOSION_COLOR>Blast Damage and Status Effect before returning to the ring.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "kullervo"
   },
   {
     "id": "voltaic_lance",
@@ -14333,13 +14335,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 2,
     "maxRank": 5,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "abilityStrength": 2.5
     },
     "description": "Passive Augment: Umbra's Ability Strength increases by +15% but he no longer fights independently alongside his Operator.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "excalibur_umbra"
   },
   {
     "id": "worthy_comradery",
@@ -14361,13 +14364,14 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "duration": 1.5
     },
     "description": "Storm of Ukko Augment: Wrathful Advance moves the storm of daggers to the teleportation location and increases its duration by 6s.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "kullervo"
   },
   {
     "id": "wrecking_wall",
@@ -14731,14 +14735,15 @@ const RAW_MODS: Mod[] = [
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "augment",
     "subCategory": "",
     "stats": {
       "abilityRange": 7.5,
       "cooldown": 1.0
     },
     "description": "Ophidian Bite Augment: Reduce Ability Cooldowns by 4s when at least 4 enemies are hit. Ophidian Bite is granted 30% additional Ability Range.",
-    "rarity": "rare"
+    "rarity": "rare",
+    "warframeId": "lavos"
   },
   {
     "id": "synth_reflex_r3",

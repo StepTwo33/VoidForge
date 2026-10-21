@@ -211,7 +211,7 @@ export default function ModularBuilderPage() {
           }
         }
         setSlotPolarities(pol);
-        window.history.replaceState({}, "", window.location.pathname);
+        // ?build= stays in the URL (shareable, survives refresh). Runs once on mount.
         toast.info("Build loaded from link", { description: "Modular configuration applied" });
       })();
     });

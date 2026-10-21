@@ -14,7 +14,6 @@ STATS_BY_ID: dict[str, dict[str, float]] = {
     "adept_surge": {"parkourVelocity": 2.5, "health": -6.25},
     "aero_vantage": {"gravityReduction": -25.0},
     "anti_flak_plating": {"damageReduction": 5.0, "parkourVelocity": -2.5},
-    "augmented_sonar": {"duration": 2.5},
     "damage_decoy": {"damage": 87.5},
     "endless_lullaby": {"abilityDuration": 12.5},
     "gladiator_finesse": {"abilityEfficiency": 10.0},
