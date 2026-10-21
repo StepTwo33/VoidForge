@@ -202,31 +202,17 @@ function isLegacyShareObject(value: unknown): value is ShareableBuild {
   );
 }
 
+/**
+ * Browser deflate via CompressionStream. Reads while writing (pipeThrough + Response): awaiting
+ * writer.write/close before reading deadlocks, because the readable side has no buffer.
+ */
 export async function deflateUtf8(text: string): Promise<Uint8Array | null> {
   try {
-    if (typeof CompressionStream === "undefined") return null;
-    const stream = new CompressionStream("deflate");
-    const writer = stream.writable.getWriter();
-    await writer.write(new TextEncoder().encode(text));
-    await writer.close();
-    const reader = stream.readable.getReader();
-    const chunks: Uint8Array[] = [];
-    let total = 0;
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) {
-        chunks.push(value);
-        total += value.length;
-      }
+    if (typeof CompressionStream === "undefined" || typeof Response === "undefined" || typeof Blob === "undefined") {
+      return null;
     }
-    const out = new Uint8Array(total);
-    let offset = 0;
-    for (const chunk of chunks) {
-      out.set(chunk, offset);
-      offset += chunk.length;
-    }
-    return out;
+    const stream = new Blob([text]).stream().pipeThrough(new CompressionStream("deflate"));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
   } catch {
     return null;
   }
@@ -234,32 +220,14 @@ export async function deflateUtf8(text: string): Promise<Uint8Array | null> {
 
 export async function inflateToUtf8(bytes: Uint8Array): Promise<string | null> {
   try {
-    if (typeof DecompressionStream === "undefined") return null;
-    const stream = new DecompressionStream("deflate");
-    const writer = stream.writable.getWriter();
+    if (typeof DecompressionStream === "undefined" || typeof Response === "undefined" || typeof Blob === "undefined") {
+      return null;
+    }
     // Copy into a fresh ArrayBuffer-backed view — TS DOM typings reject Uint8Array<ArrayBufferLike>.
     const input = new Uint8Array(bytes.length);
     input.set(bytes);
-    await writer.write(input);
-    await writer.close();
-    const reader = stream.readable.getReader();
-    const chunks: Uint8Array[] = [];
-    let total = 0;
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) {
-        chunks.push(value);
-        total += value.length;
-      }
-    }
-    const out = new Uint8Array(total);
-    let offset = 0;
-    for (const chunk of chunks) {
-      out.set(chunk, offset);
-      offset += chunk.length;
-    }
-    return new TextDecoder().decode(out);
+    const stream = new Blob([input]).stream().pipeThrough(new DecompressionStream("deflate"));
+    return await new Response(stream).text();
   } catch {
     return null;
   }
