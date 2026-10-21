@@ -53,6 +53,7 @@ export function useUnsavedChanges(snapshot: string | null): { dirty: boolean; ma
 
   return { dirty: isBuildDirty(snapshot, baseline), markClean };
 }
+
 /** Tailwind classes for a Save button with unsaved changes (primary token, pulse respects reduced motion). */
 export const SAVE_DIRTY_CLASS =
   "relative bg-primary/10 text-primary ring-1 ring-primary/50 hover:bg-primary/15";
