@@ -1,21 +1,18 @@
 #!/usr/bin/env bash
 # Maintainer deploy helper for void-forge.org — not public self-host documentation.
-# Server deploy: fetch latest code, discard local npm drift, install, build, restart.
+# Run on the server (Cockpit terminal), from the repo root:
+#   bash scripts/deploy.sh
 #
-# Usage (on the server, from repo root):
-#   bash scripts/deploy.sh              # deploy origin/dev (default) and restart
-#   bash scripts/deploy.sh main         # deploy origin/main and restart
+# Fetches origin/dev and origin/design/ui-pass, fast-forwards dev when the UI
+# branch is ahead, merges if the two have diverged, then npm ci, build, and
+# restart. Pushes origin/dev when this machine has GitHub credentials.
 #
-# Usage (on your PC, from repo root):
-#   .\scripts\ship.ps1                  # PowerShell: merge design/ui-pass into dev, push, deploy on .50
-#   bash scripts/deploy.sh ship         # Git Bash (not WSL bash — that one has no GitHub login)
+#   bash scripts/deploy.sh main
+# deploys that branch only (no UI-pass merge).
 #
 # Do NOT run `npm install` on the server by hand — it rewrites package-lock.json
-# and blocks the next `git pull`. This script uses `npm ci` from the committed lockfile.
+# and blocks the next fetch. This script uses `npm ci` from the committed lockfile.
 # Requires FRAMEHUB_MAINTAINER=1 or VOIDFORGE_MAINTAINER=1 in the server .env before build/start.
-#
-# ship host override: DEPLOY_HOST (default jason@192.168.1.50)
-#                     DEPLOY_REPO (default /home/jason/framehub)
 
 set -euo pipefail
 
@@ -61,42 +58,49 @@ restart_framehub() {
   return 1
 }
 
-# From a workstation checkout: publish design/ui-pass onto origin/dev, then deploy that on the box.
-if [ "${1:-}" = "ship" ]; then
-  HOST="${DEPLOY_HOST:-jason@192.168.1.50}"
-  REPO="${DEPLOY_REPO:-/home/jason/framehub}"
-
+# Bring design/ui-pass onto local dev. Push when GitHub login works; otherwise
+# still build the merged tree so Cockpit deploys the UI branch.
+include_ui_pass() {
   echo "==> Fetching origin/dev and origin/design/ui-pass"
   git fetch origin dev design/ui-pass
 
-  if [ "$(git rev-parse --abbrev-ref HEAD)" != "dev" ]; then
-    git checkout dev
-  fi
-  git merge --ff-only origin/dev
+  echo "==> Resetting working tree to origin/dev (discards local package.json/lock drift)"
+  git checkout dev
+  git reset --hard origin/dev
 
-  if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/design/ui-pass)" ]; then
-    echo "==> dev already matches design/ui-pass"
-  elif git merge-base --is-ancestor origin/design/ui-pass HEAD; then
-    echo "==> dev already includes design/ui-pass"
+  if git merge-base --is-ancestor origin/design/ui-pass HEAD; then
+    echo "==> dev already includes design/ui-pass ($(git rev-parse --short HEAD))"
+    return 0
+  fi
+
+  if git merge-base --is-ancestor HEAD origin/design/ui-pass; then
+    echo "==> Fast-forwarding dev to design/ui-pass"
+    git merge --ff-only origin/design/ui-pass
   else
-    echo "==> Merging design/ui-pass into dev"
+    echo "==> design/ui-pass and dev have diverged; merging"
     git merge --no-edit origin/design/ui-pass
   fi
 
-  git push origin HEAD:dev
-
-  echo "==> Deploying on $HOST"
-  ssh -o BatchMode=yes -o ConnectTimeout=15 "$HOST" "cd '$REPO' && bash scripts/deploy.sh dev"
-  exit 0
-fi
+  echo "==> Pushing dev"
+  if GIT_TERMINAL_PROMPT=0 git push origin HEAD:dev; then
+    echo "==> origin/dev updated"
+  else
+    echo "WARN: this box has no GitHub login, so origin/dev was not pushed."
+    echo "      The build below still includes design/ui-pass."
+  fi
+}
 
 BRANCH="${1:-dev}"
 
-echo "==> Fetching origin/$BRANCH"
-git fetch origin "$BRANCH"
-
-echo "==> Resetting working tree to origin/$BRANCH (discards local package.json/lock drift)"
-git reset --hard "origin/$BRANCH"
+if [ "$BRANCH" = "dev" ]; then
+  include_ui_pass
+else
+  echo "==> Fetching origin/$BRANCH"
+  git fetch origin "$BRANCH"
+  echo "==> Resetting working tree to origin/$BRANCH"
+  git checkout "$BRANCH"
+  git reset --hard "origin/$BRANCH"
+fi
 
 echo "==> Installing dependencies from package-lock.json"
 npm ci
