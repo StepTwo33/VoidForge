@@ -1,10 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, FolderOpen, X } from "lucide-react";
 import { loadoutSlotLabel, type LoadoutEditContext } from "@/lib/builds/loadout-edit-context";
+import { getLoadouts } from "@/lib/builds/loadouts";
+import {
+  loadoutCardHref,
+  loadoutSlotEditHref,
+  type LoadoutSlotType,
+} from "@/lib/builds/loadout-slot-helpers";
+import type { Loadout } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,7 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const LOADOUTS_HREF = "/loadouts";
+const SWITCH_SLOTS: LoadoutSlotType[] = ["warframe", "primary", "secondary", "melee", "companion"];
 
 /** Shown at the top of a builder opened from a loadout slot. */
 export function LoadoutEditBanner({
@@ -34,9 +42,34 @@ export function LoadoutEditBanner({
   const router = useRouter();
   const [promptOpen, setPromptOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  /** Where to go after Save / Discard in the unsaved prompt: the loadout card or another slot. */
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+  const [loadout, setLoadout] = useState<Loadout | null>(null);
+  const loadoutId = context?.loadoutId;
+  useEffect(() => {
+    if (!loadoutId) return;
+    queueMicrotask(() => setLoadout(getLoadouts().find((l) => l.id === loadoutId) ?? null));
+  }, [loadoutId]);
   if (!context) return null;
   const slotLabel = loadoutSlotLabel(context.slot);
   const guardBack = dirty && onSaveToLoadout != null;
+  const backHref = loadoutCardHref(context.loadoutId);
+  const target = pendingHref ?? backHref;
+
+  const go = (href: string) => {
+    // Another slot opens a builder (maybe this same page): do a full load so the slot is read fresh.
+    if (href === backHref) router.push(href);
+    else window.location.assign(href);
+  };
+
+  const requestNavigate = (href: string) => {
+    if (guardBack) {
+      setPendingHref(href);
+      setPromptOpen(true);
+      return;
+    }
+    go(href);
+  };
 
   const handleSave = async () => {
     if (!onSaveToLoadout) return;
@@ -45,7 +78,7 @@ export function LoadoutEditBanner({
       const ok = await onSaveToLoadout();
       if (ok) {
         setPromptOpen(false);
-        router.push(LOADOUTS_HREF);
+        go(target);
       }
     } finally {
       setSaving(false);
@@ -64,11 +97,12 @@ export function LoadoutEditBanner({
       </p>
       <div className="ml-auto flex items-center gap-1">
         <Link
-          href={LOADOUTS_HREF}
+          href={backHref}
           data-testid="loadout-banner-back"
           onClick={(e) => {
             if (!guardBack) return;
             e.preventDefault();
+            setPendingHref(null);
             setPromptOpen(true);
           }}
           className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 text-xs font-medium text-primary hover:bg-primary/10 lg:pointer-fine:min-h-8"
@@ -86,13 +120,60 @@ export function LoadoutEditBanner({
         </button>
       </div>
 
+      {loadout && (
+        <nav aria-label="Loadout slots" className="flex w-full flex-wrap items-center gap-1" data-testid="loadout-slot-switcher">
+          {SWITCH_SLOTS.map((slot) => {
+            const href = loadoutSlotEditHref(loadout, slot);
+            const current = slot === context.slot;
+            const label = loadoutSlotLabel(slot);
+            if (current) {
+              return (
+                <span
+                  key={slot}
+                  aria-current="page"
+                  className="inline-flex min-h-11 items-center rounded-md bg-primary px-2.5 text-xs font-medium text-primary-foreground lg:pointer-fine:min-h-7"
+                >
+                  {label}
+                </span>
+              );
+            }
+            if (!href) {
+              return (
+                <span
+                  key={slot}
+                  title={`${label} slot is empty — add it from the loadout`}
+                  className="inline-flex min-h-11 items-center rounded-md px-2.5 text-xs text-muted-foreground/50 lg:pointer-fine:min-h-7"
+                >
+                  {label}
+                </span>
+              );
+            }
+            return (
+              <a
+                key={slot}
+                href={href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  requestNavigate(href);
+                }}
+                className={cn(
+                  "inline-flex min-h-11 items-center rounded-md border border-primary/25 px-2.5 text-xs font-medium text-primary hover:bg-primary/10 lg:pointer-fine:min-h-7",
+                )}
+              >
+                {label}
+              </a>
+            );
+          })}
+        </nav>
+      )}
+
       <Dialog open={promptOpen} onOpenChange={(open) => !saving && setPromptOpen(open)}>
         <DialogContent className="sm:max-w-md" data-testid="loadout-unsaved-prompt">
           <DialogHeader>
             <DialogTitle>Save changes to {context.loadoutName}?</DialogTitle>
             <DialogDescription>
               You changed the {slotLabel} slot since it was opened. Save it to the loadout, or discard the
-              changes and go back.
+              changes and {pendingHref ? "switch slots" : "go back"}.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-2">
@@ -103,7 +184,7 @@ export function LoadoutEditBanner({
               variant="outline"
               onClick={() => {
                 setPromptOpen(false);
-                router.push(LOADOUTS_HREF);
+                go(target);
               }}
               disabled={saving}
             >
