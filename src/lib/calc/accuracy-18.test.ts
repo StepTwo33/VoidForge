@@ -81,3 +81,25 @@ describe("R9-D2 Nurinarim (wiki: 20s max duration; 2× on marked targets)", asyn
     expect(nur.miscStats?.explosionDamage).toBe(2 * 10000);
   });
 });
+
+describe("R9-A codex base stats (wiki.gg Warframes/data rank 0; rank-30 tables unchanged)", async () => {
+  const { allWarframes } = await import("@/data/warframes");
+  const { WARFRAME_HEALTH_RANK30, WARFRAME_SHIELD_RANK30 } = await import("@/data/warframe-health-shield-rank30");
+  const { WARFRAME_ARMOR_RANK30 } = await import("@/data/warframe-armor-rank30");
+  const f = (id: string) => allWarframes.find((w) => w.id === id)!;
+  it.each([
+    ["hydroid", 365, 270, 240],
+    ["hydroid_prime", 550, 270, 290],
+    ["narin", 270, 550, 165],
+    ["kullervo", 1005, 0, 550],
+  ])("%s base %d/%d/%d", (id, h, s, a) => {
+    expect([f(id).health, f(id).shield, f(id).armor]).toEqual([h, s, a]);
+  });
+  it("base + 100 = rank-30 health/shield (wiki HealthRank30 rule); Kullervo armor 650 at 30 via override", () => {
+    for (const id of ["hydroid", "hydroid_prime", "narin"]) {
+      expect(WARFRAME_HEALTH_RANK30[id]).toBe(f(id).health + 100);
+      expect(WARFRAME_SHIELD_RANK30[id]).toBe(f(id).shield + 100);
+    }
+    expect(WARFRAME_ARMOR_RANK30.kullervo).toBe(650);
+  });
+});
