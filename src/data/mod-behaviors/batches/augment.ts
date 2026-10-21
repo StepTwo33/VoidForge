@@ -387,9 +387,8 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("healthCost", "mod_panel", "multiplicative_percent", "Despoil: healthCost \u2014 Desecrate Augment: No longer consumes Energy, but consumes 10 Health per corpse \u2026"),
   ]),
   augment_nekros_shield_of_shadows: mod("augment_nekros_shield_of_shadows", [
-    line("damage", "mod_panel", "multiplicative_percent", "Shield of Shadows: damage \u2014 Shadows of the Dead Augment: Each Shadow within 50m take 6% of the Damage done t\u2026"),
-    line("damageReductionPerShadow", "mod_panel", "multiplicative_percent", "Shield of Shadows: damageReductionPerShadow \u2014 Shadows of the Dead Augment: Each Shadow within 50m take 6% of the Damage done t\u2026"),
-    line("range", "mod_panel", "multiplicative_percent", "Shield of Shadows: range \u2014 Shadows of the Dead Augment: Each Shadow within 50m take 6% of the Damage done t\u2026"),
+    line("damageRedirectedPerShadow", "mod_panel", "multiplicative_percent", "wiki: Shield of Shadows \u2014 each Shadow within 50m takes 3/4/5/6% of the damage done to Nekros (R0\u2013R3)"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Shield of Shadows \u2014 50m at every rank"),
   ]),
   augment_nekros_soul_survivor: mod("augment_nekros_soul_survivor", [
     line("allyRevive", "mod_panel", "multiplicative_percent", "Soul Survivor: allyRevive \u2014 Soul Punch Augment: Use on a downed ally to revive them with 30% Health."),
@@ -654,8 +653,8 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("statusChance", "mod_panel", "multiplicative_percent", "Efficient Beams: statusChance \u2014 Only consume ammo when dealing damage.\\\\n+150% Status Chance"),
   ]),
   electromagnetic_shielding: mod("electromagnetic_shielding", [
-    line("damage", "mod_panel", "multiplicative_percent", "Electromagnetic Shielding: damage \u2014 While blocking, redirect 50% of damage taken by allies within 12m to yourself."),
-    line("range", "mod_panel", "multiplicative_percent", "Electromagnetic Shielding: range \u2014 While blocking, redirect 50% of damage taken by allies within 12m to yourself."),
+    line("allyDamageRedirected", "mod_panel", "multiplicative_percent", "wiki: Electromagnetic Shielding \u2014 while blocking, redirects 25\u201350% of damage taken by allies (R0\u2013R5) to Ack & Brunt's wielder"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Electromagnetic Shielding \u2014 2m per rank (12m R5)"),
   ]),
   enduring_bastille: mod("enduring_bastille", [
     line("duration", "mod_panel", "multiplicative_percent", "Enduring Bastille: duration \u2014 Bastille Augment: Killing an enemy in Bastille extends the duration by 2s. Vorte\u2026"),

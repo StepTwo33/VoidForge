@@ -44,7 +44,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("wallLatchTime", "mod_panel", "flat", "wiki: Aerodynamic \u2014 +2s Wall Latch per rank (+12s R5)"),
   ]),
   agility_drift: mod("agility_drift", [
-    line("accuracy", "mod_panel", "multiplicative_percent", "Agility Drift: accuracy \u2014 Reduced damage by 12% while airborne, <LOWER_IS_BETTER>-6% Enemy Accuracy when t\u2026 (arsenal display only)"),
+    line("evasion", "mod_panel", "multiplicative_percent", "wiki: Agility Drift \u2014 +1% Evasion per rank (+6% R5; in-game text: -6% Enemy Accuracy when targeting Warframe)"),
     line("airborneDamageReduction", "mod_panel", "multiplicative_percent", "wiki: Agility Drift \u2014 2% airborne damage reduction per rank (12% R5), applied in the Airborne DR rows"),
   ]),
   air_thrusters: mod("air_thrusters", [
@@ -55,8 +55,8 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Ambush: duration \u2014 When Ghost invisibility is broken, Shade's owner is granted +240% Weapon Damage \u2026"),
   ]),
   anti_flak_plating: mod("anti_flak_plating", [
-    line("damageReduction", "mod_panel", "multiplicative_percent", "Anti-Flak Plating: damageReduction \u2014 +20 <DT_EXPLOSION_COLOR>Blast Resistance, -10% Mobility"),
-    line("parkourVelocity", "warframe_totals", "multiplicative_percent", "Anti-Flak Plating: parkourVelocity \u2014 +20 <DT_EXPLOSION_COLOR>Blast Resistance, -10% Mobility"),
+    line("blastDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Anti-Flak Plating \u2014 +5% Blast resistance per rank (+20% R3), Conclave"),
+    line("mobility", "mod_panel", "multiplicative_percent", "wiki: Anti-Flak Plating \u2014 -2.5% Mobility per rank (-10% R3), Conclave (not Parkour Velocity)"),
   ]),
   anticipation: mod("anticipation", [
     line("duration", "mod_panel", "multiplicative_percent", "Anticipation: duration \u2014 Immune to Knockdown for an additional +4s after being knocked down., Immune to S\u2026"),
@@ -85,7 +85,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   ]),
   armored_acrobatics: mod("armored_acrobatics", [
     line("bulletJumpDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Armored Acrobatics \u2014 +5% damage resistance during Bullet Jump per rank (20% R3)"),
-    line("sprintSpeed", "mod_panel", "multiplicative_percent", "wiki: Armored Acrobatics — mobility penalty (not always-on sprint)"),
+    line("mobility", "mod_panel", "multiplicative_percent", "wiki: Armored Acrobatics \u2014 -2.5% Mobility per rank (-10% R3)"),
   ]),
   armored_agility: mod("armored_agility", [
     line("armor", "warframe_totals", "multiplicative_percent", "Armored Agility: armor \u2014 +7.5% Armor, +2.5% Sprint Speed per rank"),
@@ -93,12 +93,11 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   ]),
   armored_evade: mod("armored_evade", [
     line("dodgeDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Armored Evade \u2014 +10% damage resistance while dodging per rank (40% R3)"),
-    line("sprintSpeed", "mod_panel", "multiplicative_percent", "wiki: Armored Evade — mobility penalty (not always-on sprint)"),
+    line("mobility", "mod_panel", "multiplicative_percent", "wiki: Armored Evade \u2014 -2.5% Mobility per rank (-10% R3)"),
   ]),
   armored_recovery: mod("armored_recovery", [
     line("knockedDownDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Armored Recovery \u2014 +12.5% damage resistance when knocked down per rank (50% R3)"),
-    line("sprintSpeed", "mod_panel", "multiplicative_percent", "wiki: Armored Recovery — slide/mobility penalty (not always-on sprint)"),
-    line("slideSpeed", "mod_panel", "multiplicative_percent", "Armored Recovery: slideSpeed \u2014 +50% Damage Resistance when knocked down, -20% Slide"),
+    line("slideSpeed", "mod_panel", "multiplicative_percent", "wiki: Armored Recovery \u2014 -5% Slide per rank (-20% R3); no sprint penalty"),
   ]),
   augur_accord: mod("augur_accord", [
     line("shield", "warframe_totals", "multiplicative_percent", "wiki: Augur Accord — +70% Shield Capacity at max"),
@@ -337,7 +336,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("abilityStrength", "warframe_totals", "multiplicative_percent", "Intensify: abilityStrength \u2014 +55% Ability Strength"),
   ]),
   intruder: mod("intruder", [
-    line("duration", "mod_panel", "multiplicative_percent", "Intruder: duration \u2014 +2s to Hacking"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Intruder \u2014 +2s to Hacking per rank (+8s at infobox Max Rank 3)"),
   ]),
   jades_judgment: mod("jades_judgment", [
     line("spawnChance", "mod_panel", "multiplicative_percent", "Jade's Judgment: spawnChance \u2014 Light's Judgment Augment: +1.25% Jade Light spawn chance per rank (× Strength)"),
@@ -473,7 +472,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("abilityEfficiency", "mod_panel", "multiplicative_percent", "wiki: Quick Thinking — lethal-damage energy drain (not efficiency pool)"),
   ]),
   rage: mod("rage", [
-    line("damage", "mod_panel", "multiplicative_percent", "Rage: damage \u2014 Convert +40% of Damage on Health to Energy. Without Shields, ally Overguard imit\u2026"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Rage \u2014 converts +40% of health damage to energy at infobox Max Rank 5 (6.67%/rank)"),
   ]),
   rapid_resilience: mod("rapid_resilience", [
     line("statusDuration", "mod_panel", "multiplicative_percent", "Rapid Resilience: statusDuration \u2014 -75% Status Duration on Self"),
@@ -565,7 +564,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "Summoner's Wrath: damage \u2014 Squad receives 75% Companion and Summon Damage"),
   ]),
   sure_footed_r5: mod("sure_footed_r5", [
-    line("knockdownResistance", "mod_panel", "multiplicative_percent", "Sure Footed: knockdownResistance \u2014 +60% Chance to Resist Knockdown"),
+    line("knockdownResistance", "mod_panel", "multiplicative_percent", "wiki: Sure Footed \u2014 +60% Chance to Resist Knockdown at infobox Max Rank 5 (10%/rank)"),
   ]),
   primed_sure_footed: mod("primed_sure_footed", [
     line("knockdownResistance", "mod_panel", "multiplicative_percent", "Primed Sure Footed: knockdownResistance \u2014 +100% Chance to Resist Knockdown"),

@@ -362,7 +362,10 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("ordnanceSpeed", "mod_panel", "multiplicative_percent", "Ordnance Velocity: ordnanceSpeed \u2014 +60% Ordnance Projectile Speed"),
   ]),
   orgone_tuning_matrix: mod("orgone_tuning_matrix", [
-    line("heat", "mod_panel", "multiplicative_percent", "wiki: Orgone Tuning Matrix — forge/heat capacity (not weapon heat)"),
+    line("forgeCapacity", "mod_panel", "multiplicative_percent", "fandom/WFCD: Orgone Tuning Matrix \u2014 +3.75% Forge Capacity per rank (+22.5% R5)"),
+    line("forgeCooldown", "mod_panel", "multiplicative_percent", "fandom/WFCD: Orgone Tuning Matrix \u2014 -2.5% Forge Cooldown per rank (-15% R5)"),
+    line("elementalResistance", "mod_panel", "multiplicative_percent", "fandom/WFCD: Orgone Tuning Matrix \u2014 +2.5% Elemental Resistance per rank (+15% R5)"),
+    line("turretHeatCapacity", "mod_panel", "multiplicative_percent", "fandom/WFCD: Orgone Tuning Matrix \u2014 +3% Turret Heat Capacity per rank (+18% R5)"),
   ]),
   oull: mod("oull", [], "wiki: Oull \u2014 Through endless faces, countless forms, a multitude unfolds.  (Mimics any Requiem Mod)"),
   out_of_sight: mod("out_of_sight", [

@@ -110,7 +110,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("comboCountChance", "mod_panel", "multiplicative_percent", "Enduring Strike: comboCountChance \u2014 +20% Additional Combo Count Chance on Lifted enemies"),
   ]),
   energy_channel_r10: mod("energy_channel_r10", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Energy Channel — next-attack energy convert (not always-on)"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Energy Channel \u2014 converts 200% of energy used at infobox Max Rank 5 to next-attack bonus damage (not always-on)"),
   ]),
   explosive_demise: mod("explosive_demise", [
     line("explosionDamage", "mod_panel", "multiplicative_percent", "Explosive Demise: explosionDamage \u2014 Enemies killed explode, dealing 300 Damage shortly after death."),
@@ -232,8 +232,8 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("heat", "weapon_dps", "elemental_from_base_damage", "Molten Impact: heat \u2014 +90% <DT_FIRE_COLOR>Heat"),
   ]),
   mortal_conduct: mod("mortal_conduct", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Mortal Conduct — low-health block reflect"),
-    line("duration", "mod_panel", "multiplicative_percent", "Mortal Conduct: duration \u2014 At Less than 50 Health:\\\\n+60% Damage taken is reflected when Blocking attacks w\u2026"),
+    line("damageReflected", "mod_panel", "multiplicative_percent", "wiki: Mortal Conduct \u2014 +15% damage reflected per rank (+60% R3) when blocking below 50 health"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Mortal Conduct \u2014 2s per rank (8s R3)"),
   ]),
   motus_impact: mod("motus_impact", [
     line("range", "mod_panel", "multiplicative_percent", "Motus Impact: range \u2014 Increase range of aerial melee attacks by +2m. (arsenal display only)"),
@@ -302,7 +302,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("comboCountChance", "mod_panel", "multiplicative_percent", "Quickening: comboCountChance \u2014 +40% Attack Speed, +20% Combo Count Chance"),
   ]),
   reach_r3: mod("reach_r3", [
-    line("range", "mod_panel", "multiplicative_percent", "Reach: range \u2014 +1.5 Range (arsenal display only)"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Reach \u2014 +1.5 m melee range at infobox Max Rank 5 (0.25 m/rank) (arsenal display only)"),
   ]),
   rebound: mod("rebound", [
     line("ricochetBounces", "mod_panel", "multiplicative_percent", "Rebound: ricochetBounces \u2014 +4 Bounce"),
@@ -373,7 +373,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Spring-Loaded Blade: range \u2014 On Status Effect: +1 Range for 24s. Stacks up to 2 times. (arsenal display only)"),
   ]),
   stand_ground: mod("stand_ground", [
-    line("damageReduction", "mod_panel", "multiplicative_percent", "Stand Ground: damageReduction \u2014 Blocking reduces damage taken from enemy abilities by 60%."),
+    line("abilityDamageReductionWhileBlocking", "mod_panel", "multiplicative_percent", "wiki: Stand Ground \u2014 blocking reduces damage from enemy abilities by 60% at max rank"),
   ]),
   strain_infection: mod("strain_infection", [
     line("criticalMultiplier", "weapon_dps", "conditional_stat_per_kill_stack", "wiki: Strain Infection — +20% CD per cyst (cap 8 full set; sim uses killStacks)"),

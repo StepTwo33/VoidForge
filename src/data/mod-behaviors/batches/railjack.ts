@@ -89,7 +89,10 @@ export const MOD_BEHAVIORS_RAILJACK: Record<string, VerifiedModBehavior> = {
     line("shield", "mod_panel", "multiplicative_percent", "Scourging Warheads: ordnance ignores shields"),
   ]),
   orgone_tuning_matrix: mod("orgone_tuning_matrix", [
-    line("heat", "mod_panel", "multiplicative_percent", "Orgone Tuning Matrix: forge + elemental (partial)"),
+    line("forgeCapacity", "mod_panel", "multiplicative_percent", "fandom/WFCD: Orgone Tuning Matrix \u2014 +3.75% Forge Capacity per rank (+22.5% R5)"),
+    line("forgeCooldown", "mod_panel", "multiplicative_percent", "fandom/WFCD: Orgone Tuning Matrix \u2014 -2.5% Forge Cooldown per rank (-15% R5)"),
+    line("elementalResistance", "mod_panel", "multiplicative_percent", "fandom/WFCD: Orgone Tuning Matrix \u2014 +2.5% Elemental Resistance per rank (+15% R5)"),
+    line("turretHeatCapacity", "mod_panel", "multiplicative_percent", "fandom/WFCD: Orgone Tuning Matrix \u2014 +3% Turret Heat Capacity per rank (+18% R5)"),
   ]),
   overloader: mod("overloader", [
     line("magazine", "railjack_totals", "multiplicative_percent", "Overloader: +87% Maximum Ordnance Munitions"),

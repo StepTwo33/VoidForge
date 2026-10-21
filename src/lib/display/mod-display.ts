@@ -71,6 +71,17 @@ const PERCENT_LIKE_KEYS = new Set([
   "tauResistance",
   // Chance to resist knockdown (wiki.warframe.com Sure Footed, Primed Sure Footed, Power Drift, Fortitude).
   "knockdownResistance",
+  // Round 17 labels (wiki.warframe.com): Armored Evade/Acrobatics/Anti-Flak Plating "Mobility",
+  // Agility Drift "Evasion", Mortal Conduct "Damage Reflected", Shield of Shadows damage redirected,
+  // Orgone Tuning Matrix (fandom + WFCD; wiki page down) forge/elemental/turret heat rows.
+  "mobility",
+  "evasion",
+  "damageReflected",
+  "damageRedirectedPerShadow",
+  "forgeCapacity",
+  "forgeCooldown",
+  "elementalResistance",
+  "turretHeatCapacity",
 ]);
 
 /**
@@ -87,6 +98,18 @@ const MOD_RANK_VALUE_TABLES: Record<string, Record<string, readonly number[]>> =
   immolated_radiance: { sharedDamageReduction: [20, 30, 40, 50] },
   // Warding Thurible: allies take 30/35/40/50% less damage (R0–R3).
   warding_thurible: { allyDamageReduction: [30, 35, 40, 50] },
+  // Shield of Shadows: each Shadow takes 3/4/5/6% of Nekros's damage, 50 m at every rank (R0–R3).
+  augment_nekros_shield_of_shadows: { damageRedirectedPerShadow: [3, 4, 5, 6], range: [50, 50, 50, 50] },
+  // Electromagnetic Shielding: redirects 25 … 50% of allies' damage within 2 … 12 m (R0–R5).
+  electromagnetic_shielding: { allyDamageRedirected: [25, 30, 35, 40, 45, 50], range: [2, 4, 6, 8, 10, 12] },
+  // Stasis Field: the field lasts 5 … 30 s (R0–R5).
+  stasis_field: { duration: [5, 10, 15, 20, 25, 30] },
+  // Mortal Conduct: reflect window 2/4/6/8 s (R0–R3).
+  mortal_conduct: { duration: [2, 4, 6, 8] },
+  // Reach: +1.5 m at the wiki infobox Max Rank 5, linear 0.25 m/rank (R0–R5).
+  reach_r3: { range: [0.25, 0.5, 0.75, 1, 1.25, 1.5] },
+  // Intruder: +8s to Hacking at the wiki infobox Max Rank 3, linear 2 s/rank (R0–R3).
+  intruder: { duration: [2, 4, 6, 8] },
 };
 
 /** Card text for a stat that has a wiki rank table or a cap, else null (use the per-rank formula). */
@@ -96,6 +119,7 @@ export function formatModStatSpecial(modId: string, statKey: string, perRank: nu
     const value = table[Math.min(Math.max(Math.round(rank), 0), table.length - 1)];
     const label = getModStatLabel(statKey);
     if (statKey === "duration") return `${formatStatNumber(value)}s ${label}`;
+    if (statKey === "range") return `${formatStatNumber(value)}m ${label}`;
     return `${formatStatNumber(value)}% ${label}`;
   }
   // Adaptation: "Stacks up to 90%" (wiki); the cap doesn't scale with rank.
@@ -128,28 +152,17 @@ export function isFlatModStat(statKey: string): boolean {
   return FLAT_STAT_KEYS.has(statKey);
 }
 
-function formatStatNumber(value: number): string {
-  const abs = Math.abs(value);
-  const decimals = abs % 1 !== 0 && abs < 10 ? 1 : 0;
-  const body = value.toFixed(decimals);
-  return value > 0 ? `+${body}` : body;
-}
-
 /**
- * Resistance stats shown to one decimal at every size (wiki tables: Antitoxin 22.5%, Umbral Tau
- * 14.3% / 19.8%, Primed Sure Footed 18.18% → 18.2%), instead of rounding values ≥ 10 to integers.
+ * One decimal when the value isn't a whole number and is under 100 (wiki tables: 12.5%, 22.5%,
+ * Umbral Tau 14.3%, Primed Sure Footed 18.18% → 18.2%); whole numbers and values ≥ 100 show no
+ * decimals. Float noise from per-rank storage (6.666667 × 6 = 40.000002) rounds to a whole number.
  */
-const ONE_DECIMAL_PERCENT_KEYS = new Set([
-  "tauResistance",
-  "knockdownResistance",
-  "toxinDamageResistance",
-  "radiationDamageResistance",
-  "knockedDownDamageResistance",
-]);
-
-function formatOneDecimal(value: number): string {
-  const body = String(Number(value.toFixed(1)));
-  return value > 0 ? `+${body}` : body;
+export function formatStatNumber(value: number): string {
+  const abs = Math.abs(value);
+  const tenths = Math.round(abs * 10) / 10;
+  const decimals = abs < 100 && tenths % 1 !== 0 ? 1 : 0;
+  const body = value.toFixed(decimals);
+  return value > 0 && Number(body) !== 0 ? `+${body}` : body;
 }
 
 /** Per-rank catalog value → total at a given rank (mods store per-rank increments). */
@@ -172,8 +185,7 @@ export function formatModStatValue(
     return `${formatStatNumber(total)}%/s ${label}`;
   }
   if (usesPercentDisplay(statKey)) {
-    const n = ONE_DECIMAL_PERCENT_KEYS.has(statKey) ? formatOneDecimal(total) : formatStatNumber(total);
-    return `${n}% ${label}`;
+    return `${formatStatNumber(total)}% ${label}`;
   }
   if (statKey === "ricochetBounces") {
     return `${formatStatNumber(perRank)} bounces`;

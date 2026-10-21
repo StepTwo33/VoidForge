@@ -248,3 +248,44 @@ export function dropRetiredModsDeep<T>(
   });
   return { data: dropped.length ? next : data, dropped };
 }
+
+export interface ClampedModRank {
+  modId: string;
+  name: string;
+  fromRank: number;
+  toRank: number;
+}
+
+/**
+ * Clamp saved ranks to each mod's current max rank (Round 17: Sure Footed, Rage, Charged Chamber,
+ * Reach, … went from R5 to the game's R3; Intruder is unranked). Unknown mods and ranks at or below
+ * the max are left alone. Returns the same array when nothing changed.
+ */
+export function clampModRanks<T extends ModEntry>(
+  mods: readonly T[],
+  modsMap: Pick<Map<string, { maxRank?: number; name?: string }>, "get">,
+): { mods: T[]; clamped: ClampedModRank[] } {
+  const clamped: ClampedModRank[] = [];
+  const out = mods.map((m) => {
+    const mod = m ? modsMap.get(m.modId) : undefined;
+    const maxRank = mod?.maxRank;
+    if (!mod || typeof maxRank !== "number" || typeof m.rank !== "number" || m.rank <= maxRank) return m;
+    clamped.push({ modId: m.modId, name: mod.name ?? m.modId, fromRank: m.rank, toRank: maxRank });
+    return { ...m, rank: maxRank };
+  });
+  return { mods: clamped.length ? out : (mods as T[]), clamped };
+}
+
+/** clampModRanks over every mod list in a saved build / loadout payload. Copy only on change. */
+export function clampModRanksDeep<T>(
+  data: T,
+  modsMap: Pick<Map<string, { maxRank?: number; name?: string }>, "get">,
+): { data: T; clamped: ClampedModRank[] } {
+  const clamped: ClampedModRank[] = [];
+  const next = mapModListsDeep(data, (mods) => {
+    const res = clampModRanks(mods, modsMap);
+    clamped.push(...res.clamped);
+    return res.mods;
+  });
+  return { data: clamped.length ? next : data, clamped };
+}

@@ -351,8 +351,8 @@ describe("warframe parkour / aura leftovers (wiki max rank, Phase M13)", () => {
     expect(stats.totalShield / bare.totalShield).toBeCloseTo(1.3, 5);
   });
 
-  it("Anti-Flak / No Current Leap: −/+10% parkour", () => {
-    expect(withMod("anti_flak_plating").parkourVelocityBonus).toBeCloseTo(-0.1, 8);
+  it("Anti-Flak: −10% Mobility is card-only (wiki: Mobility, not Parkour Velocity); No Current Leap: +10% parkour", () => {
+    expect(withMod("anti_flak_plating").parkourVelocityBonus).toBeCloseTo(0, 8);
     expect(withMod("no_current_leap").parkourVelocityBonus).toBeCloseTo(0.1, 8);
   });
 

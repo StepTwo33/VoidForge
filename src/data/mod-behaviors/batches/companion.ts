@@ -513,9 +513,9 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("stealthDuration", "mod_panel", "multiplicative_percent", "Stalk: stealthDuration \u2014 The kubrow cloaks itself and its master to stalk down its prey when they are wit\u2026"),
   ]),
   stasis_field: mod("stasis_field", [
-    line("damage", "mod_panel", "multiplicative_percent", "Stasis Field: damage \u2014 Creates a stasis field for 30s. While inside the field, all enemy projectiles mo\u2026"),
-    line("duration", "mod_panel", "multiplicative_percent", "Stasis Field: duration \u2014 Creates a stasis field for 30s. While inside the field, all enemy projectiles mo\u2026"),
-    line("fieldDuration", "mod_panel", "multiplicative_percent", "Stasis Field: fieldDuration \u2014 Creates a stasis field for 30s. While inside the field, all enemy projectiles mo\u2026"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Stasis Field \u2014 field lasts 5s per rank (30s R5)"),
+    line("enemyProjectileSpeed", "mod_panel", "multiplicative_percent", "wiki: Stasis Field \u2014 enemy projectiles in the field move 15% slower per rank (90% R5)"),
+    line("enemyProjectileDamage", "mod_panel", "multiplicative_percent", "wiki: Stasis Field \u2014 enemy projectiles in the field deal 10% less damage per rank (60% R5)"),
   ]),
   strain_eruption: mod("strain_eruption", [
     line("damage", "mod_panel", "multiplicative_percent", "Strain Eruption: damage \u2014 Maggots explode on death, dealing 4% of an enemy's current Health as <DT_CORROSI\u2026"),

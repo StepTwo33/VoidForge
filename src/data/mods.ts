@@ -3837,9 +3837,8 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "damageReductionPerShadow": 6,
-      "damage": 1.5,
-      "range": 12.5
+      "damageRedirectedPerShadow": 1.5,
+      "range": 50
     },
     "description": "Shadows of the Dead Augment: Each Shadow within 50m take 6% of the Damage done to Nekros in his stead.",
     "rarity": "rare",
@@ -4989,9 +4988,9 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "fieldDuration": 3,
-      "damage": 15.0,
-      "duration": 5.0
+      "duration": 5.0,
+      "enemyProjectileSpeed": -15,
+      "enemyProjectileDamage": -10
     },
     "description": "Creates a stasis field for 30s. While inside the field, all enemy projectiles move 90% slower and deal 60% less Damage.",
     "rarity": "common"
@@ -9945,7 +9944,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "weapon",
     "stats": {
-      "damage": 8.333333,
+      "allyDamageRedirected": 8.333333,
       "range": 2.0
     },
     "description": "While blocking, redirect 50% of damage taken by allies within 12m to yourself.",
@@ -10367,7 +10366,7 @@ const RAW_MODS: Mod[] = [
     "category": "conclave",
     "subCategory": "",
     "stats": {
-      "damage": 15,
+      "damageReflected": 15,
       "duration": 2.0
     },
     "description": "At Less than 50 Health:\\n+60% Damage taken is reflected when Blocking attacks while Channeling for 8s",
@@ -10757,7 +10756,7 @@ const RAW_MODS: Mod[] = [
     "category": "conclave",
     "subCategory": "",
     "stats": {
-      "damageReduction": 10.0
+      "abilityDamageReductionWhileBlocking": 10.0
     },
     "description": "Blocking reduces damage taken from enemy abilities by 60%.",
     "rarity": "rare"
@@ -11395,7 +11394,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "accuracy": -1.0,
+      "evasion": 1.0,
       "airborneDamageReduction": 2.0
     },
     "description": "Reduced damage by 12% while airborne, <LOWER_IS_BETTER>-6% Enemy Accuracy when targeting Warframe",
@@ -11469,8 +11468,8 @@ const RAW_MODS: Mod[] = [
     "category": "conclave",
     "subCategory": "",
     "stats": {
-      "damageReduction": 5.0,
-      "parkourVelocity": -2.5
+      "blastDamageResistance": 5.0,
+      "mobility": -2.5
     },
     "description": "+20 <DT_EXPLOSION_COLOR>Blast Resistance, -10% Mobility",
     "rarity": "uncommon"
@@ -11602,7 +11601,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "bulletJumpDamageResistance": 5,
-      "sprintSpeed": -2.5
+      "mobility": -2.5
     },
     "description": "+20% Damage Resistance during Bullet Jump, -10% Mobility",
     "rarity": "uncommon"
@@ -11617,7 +11616,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "dodgeDamageResistance": 10,
-      "sprintSpeed": -2.5
+      "mobility": -2.5
     },
     "description": "+40% Damage Resistance while Dodging, -10% Mobility",
     "rarity": "uncommon"
@@ -11632,7 +11631,6 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "knockedDownDamageResistance": 12.5,
-      "sprintSpeed": -5,
       "slideSpeed": -5.0
     },
     "description": "+50% Damage Resistance when knocked down, -20% Slide",
@@ -12485,7 +12483,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "duration": 2.0
     },
-    "description": "+2s to Hacking",
+    "description": "+8s to Hacking",
     "rarity": "common"
   },
   {
@@ -19185,7 +19183,10 @@ const RAW_MODS: Mod[] = [
     "category": "railjack",
     "subCategory": "",
     "stats": {
-      "heat": 3.0
+      "forgeCapacity": 3.75,
+      "forgeCooldown": -2.5,
+      "elementalResistance": 2.5,
+      "turretHeatCapacity": 3
     },
     "description": "+22.5% Forge Capacity\\n-15% Forge Cooldown\\n+15% Elemental Resistance\\n+18% Turret Heat Capacity",
     "rarity": "uncommon"
