@@ -39,6 +39,7 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
   amalgam_daikyu_target_acquired: mod("amalgam_daikyu_target_acquired", [
     line("headshotMultiplier", "mod_panel", "multiplicative_percent", "Amalgam Daikyu Target Acquired: headshotMultiplier \u2014 +75% to Headshot Multiplier, +3% Life Steal on Nikanas, <LINE_SEPARATOR>\\\\n60% c\u2026"),
     line("lifeSteal", "mod_panel", "multiplicative_percent", "Amalgam Daikyu Target Acquired: lifeSteal \u2014 +75% to Headshot Multiplier, +3% Life Steal on Nikanas, <LINE_SEPARATOR>\\\\n60% c\u2026"),
+    line("arrowPickupChance", "mod_panel", "multiplicative_percent", "wiki: Amalgam Daikyu Target Acquired — 60% chance to pick up used arrows (panel)"),
   ]),
   amalgam_furax_body_count: mod("amalgam_furax_body_count", [
     line("comboDuration", "weapon_dps", "additive_percent", "wiki: Amalgam Furax Body Count — +15s Combo Duration on melee"),
@@ -53,6 +54,7 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
   amalgam_ripkas_true_steel: mod("amalgam_ripkas_true_steel", [
     line("criticalChance", "weapon_dps", "multiplicative_percent", "wiki: Amalgam Ripkas True Steel — +187% Critical Chance on melee"),
     line("reloadSpeed", "mod_panel", "multiplicative_percent", "wiki: Amalgam Ripkas — +20% Shotgun reload via linkage.meleeMods (Sim5 cross-slot)"),
+    line("goreChance", "mod_panel", "multiplicative_percent", "wiki: Amalgam Ripkas True Steel — +100% Gore Chance (cosmetic, panel)"),
   ]),
   anchored_glide: mod("anchored_glide", [
     line("abilityStrength", "mod_panel", "multiplicative_percent", "Anchored Glide: abilityStrength \u2014 Disable Zephyr's reduced airborne gravity. Increase Ability Strength by 15%."),

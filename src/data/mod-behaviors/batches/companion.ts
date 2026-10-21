@@ -568,10 +568,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("abilityDuration", "mod_panel", "multiplicative_percent", "wiki: Tek Enhance — +30% Kavat/Vulpaphyla Ability Duration (Tek set piece #4)"),
   ]),
   tenacious_bond: mod("tenacious_bond", [
-    line("criticalMultiplier", "mod_panel", "multiplicative_percent", "Tenacious Bond: criticalMultiplier \u2014 Headshot kills reduce Companion Recovery timer by 3s. If the Companion's Critica\u2026"),
     line("duration", "mod_panel", "multiplicative_percent", "Tenacious Bond: duration \u2014 Headshot kills reduce Companion Recovery timer by 3s. If the Companion's Critica\u2026"),
-    line("headshotCritDamage", "mod_panel", "multiplicative_percent", "Tenacious Bond: headshotCritDamage \u2014 Headshot kills reduce Companion Recovery timer by 3s. If the Companion's Critica\u2026"),
-    line("mercyCritDamage", "mod_panel", "multiplicative_percent", "Tenacious Bond: mercyCritDamage \u2014 Headshot kills reduce Companion Recovery timer by 3s. If the Companion's Critica\u2026"),
   ]),
   territorial_aggression_r3: mod("territorial_aggression_r3", [
     line("duration", "mod_panel", "multiplicative_percent", "Territorial Aggression: duration \u2014 The Kavat stakes their territory in a radius of 6m for 15s. Each second, enemies\u2026"),

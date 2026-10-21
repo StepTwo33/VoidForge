@@ -1440,10 +1440,10 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "aimGlide": 2.5,
-      "wallLatch": 2.5
+      "aimGlide": 15,
+      "wallLatch": 15
     },
-    "description": "+2.5s Aim Glide and Wall Latch per rank",
+    "description": "+90% Aim Glide/Wall Latch Duration",
     "rarity": "uncommon"
   },
   {
@@ -1893,9 +1893,6 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "headshotCritDamage": 150,
-      "mercyCritDamage": 150,
-      "criticalMultiplier": 8.333333,
       "duration": 0.5
     },
     "description": "Headshot kills reduce Companion Recovery timer by 3s. If the Companion's Critical Chance is over 50% then you gain +1.2x Final Critical Damage Multiplier.",
@@ -5895,9 +5892,10 @@ const RAW_MODS: Mod[] = [
     "subCategory": "weapon",
     "stats": {
       "lifeSteal": 0.5,
-      "headshotMultiplier": 12.5
+      "headshotMultiplier": 12.5,
+      "arrowPickupChance": 10
     },
-    "description": "+75% to Headshot Multiplier, +3% Life Steal on Nikanas, <LINE_SEPARATOR>\\n60% chance to pickup used arrows.",
+    "description": "+75% to Headshot Multiplier\\n+3% Life Steal on Nikanas\\n60% chance to pickup used arrows",
     "rarity": "rare"
   },
   {
@@ -8111,9 +8109,10 @@ const RAW_MODS: Mod[] = [
     "category": "secondary",
     "subCategory": "weapon",
     "stats": {
-      "multishot": 18.3333
+      "multishot": 18.3333,
+      "dodgeSpeed": 10
     },
-    "description": "+110% Multishot, +60% Dodge Speed",
+    "description": "+110% Multishot\\n+60% Dodge Speed",
     "rarity": "rare"
   },
   {
@@ -9755,9 +9754,10 @@ const RAW_MODS: Mod[] = [
     "subCategory": "weapon",
     "stats": {
       "criticalChance": 31.1667,
-      "reloadSpeed": 3.3333
+      "reloadSpeed": 3.3333,
+      "goreChance": 16.666667
     },
-    "description": "+187% Critical Chance (x2 for Heavy Attacks), +20% Reload Speed on Shotguns, <LINE_SEPARATOR>\\n+100% Gore Chance",
+    "description": "+187% Critical Chance (x2 for Heavy Attacks)\\n+20% Reload Speed on Shotguns\\n+100% Gore Chance",
     "rarity": "rare"
   },
   {
@@ -14421,7 +14421,8 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "shield": -7.5
+      "shieldRecharge": 15,
+      "shieldRechargeDelay": -7.5
     },
     "description": "+90% Shield Recharge\\n-45% Shield Recharge Delay",
     "rarity": "uncommon"
@@ -16223,9 +16224,10 @@ const RAW_MODS: Mod[] = [
     "category": "shotgun",
     "subCategory": "weapon",
     "stats": {
-      "fireRate": 14.1667
+      "fireRate": 14.1667,
+      "reviveSpeed": 7.5
     },
-    "description": "+85% Fire Rate, +45% Revive Speed",
+    "description": "+85% Fire Rate\\n+45% Revive Speed",
     "rarity": "rare"
   },
   {

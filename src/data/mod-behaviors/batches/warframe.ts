@@ -274,7 +274,8 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("health", "mod_panel", "multiplicative_percent", "wiki: Equilibrium — Health/Energy pickup conversion (not max pool)"),
   ]),
   fast_deflection_r3: mod("fast_deflection_r3", [
-    line("shield", "mod_panel", "multiplicative_percent", "wiki: Fast Deflection — shield recharge/delay (not capacity)"),
+    line("shieldRecharge", "mod_panel", "multiplicative_percent", "wiki: Fast Deflection — +15% Shield Recharge per rank (+90% max)"),
+    line("shieldRechargeDelay", "mod_panel", "multiplicative_percent", "wiki: Fast Deflection — -7.5% Shield Recharge Delay per rank (-45% max)"),
   ]),
   final_act: mod("final_act", [
     line("abilityStrength", "mod_panel", "multiplicative_percent", "wiki: Final Act — low-health conditional strength"),
@@ -443,8 +444,8 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("finisherChance", "mod_panel", "multiplicative_percent", "Parry: finisherChance \u2014 +96% chance to open enemies to Finisher Attacks after Warframe blocks Melee"),
   ]),
   patagium: mod("patagium", [
-    line("aimGlide", "mod_panel", "multiplicative_percent", "Patagium: aimGlide \u2014 +2.5s Aim Glide and Wall Latch per rank"),
-    line("wallLatch", "mod_panel", "multiplicative_percent", "Patagium: wallLatch \u2014 +2.5s Aim Glide and Wall Latch per rank"),
+    line("aimGlide", "mod_panel", "multiplicative_percent", "wiki: Patagium — +15% Aim Glide/Wall Latch Duration per rank (+90% max)"),
+    line("wallLatch", "mod_panel", "multiplicative_percent", "wiki: Patagium — +15% Aim Glide/Wall Latch Duration per rank (+90% max)"),
   ]),
   piercing_step: mod("piercing_step", [
     line("bulletJump", "mod_panel", "multiplicative_percent", "Piercing Step: bulletJump \u2014 +18% to Parkour Velocity, +18% Aim Glide/Wall Latch Duration, +60% <DT_PUNCTURE_\u2026"),

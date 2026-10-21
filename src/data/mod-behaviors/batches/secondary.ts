@@ -23,6 +23,7 @@ export const MOD_BEHAVIORS_SECONDARY: Record<string, VerifiedModBehavior> = {
   ]),
   amalgam_barrel_diffusion: mod("amalgam_barrel_diffusion", [
     line("multishot", "weapon_dps", "multiplicative_percent", "Amalgam Barrel Diffusion: multishot \u2014 +110% Multishot, +60% Dodge Speed"),
+    line("dodgeSpeed", "mod_panel", "multiplicative_percent", "wiki: Amalgam Barrel Diffusion — +60% Dodge Speed (movement, panel)"),
   ]),
   barrel_diffusion_r3: mod("barrel_diffusion_r3", [
     line("multishot", "weapon_dps", "multiplicative_percent", "Barrel Diffusion: multishot \u2014 +120% Multishot"),

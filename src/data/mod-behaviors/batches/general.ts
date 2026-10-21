@@ -21,6 +21,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   affinity_spike: mod("affinity_spike", [], "wiki: Affinity Spike \u2014 Kills from Melee Attacks grant 45% more Melee Affinity."),
   amalgam_shotgun_barrage: mod("amalgam_shotgun_barrage", [
     line("fireRate", "weapon_dps", "multiplicative_percent", "Amalgam Shotgun Barrage: fireRate \u2014 +85% Fire Rate, +45% Revive Speed"),
+    line("reviveSpeed", "mod_panel", "multiplicative_percent", "wiki: Amalgam Shotgun Barrage — +45% Revive Speed (panel)"),
   ]),
   amarsetmod: mod("amarsetmod", [], "wiki: Amarsetmod \u2014 catalog entry (stats in ability logic)"),
   ammo_stock_r3: mod("ammo_stock_r3", [

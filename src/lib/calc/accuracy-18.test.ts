@@ -103,3 +103,30 @@ describe("R9-A codex base stats (wiki.gg Warframes/data rank 0; rank-30 tables u
     expect(WARFRAME_ARMOR_RANK30.kullervo).toBe(650);
   });
 });
+
+describe("R9-E mod panel values", async () => {
+  const { allMods } = await import("@/data/mods");
+  const { getModStatDisplayLines } = await import("@/lib/display/mod-display");
+  const lines = (id: string) => {
+    const m = allMods.find((x) => x.id === id)!;
+    return Object.fromEntries(getModStatDisplayLines(m, m.maxRank).map((l) => [l.statKey, l.atRank]));
+  };
+  it("Fast Deflection +90% recharge / -45% delay (no shield capacity)", () => {
+    const l = lines("fast_deflection_r3");
+    expect(l.shield).toBeUndefined();
+    expect(l.shieldRecharge).toMatch(/^\+90%/);
+    expect(l.shieldRechargeDelay).toMatch(/^-45%/);
+  });
+  it("Patagium +90%", () => {
+    expect(lines("patagium").aimGlide).toMatch(/^\+90%/);
+  });
+  it("Amalgam second lines", () => {
+    expect(lines("amalgam_barrel_diffusion").dodgeSpeed).toMatch(/^\+?60%/);
+    expect(lines("amalgam_shotgun_barrage").reviveSpeed).toMatch(/^\+45%/);
+    expect(lines("amalgam_ripkas_true_steel").goreChance).toMatch(/^\+100%/);
+    expect(lines("amalgam_daikyu_target_acquired").arrowPickupChance).toMatch(/^\+?60%/);
+  });
+  it("Tenacious Bond drops stale crit lines", () => {
+    expect(Object.keys(lines("tenacious_bond"))).toEqual(["duration"]);
+  });
+});

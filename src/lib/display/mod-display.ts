@@ -63,6 +63,10 @@ const PERCENT_LIKE_KEYS = new Set([
   "tributeEfficiency",
   "speedPerCast",
   "damageResistancePerStack",
+  "shieldRecharge",
+  "shieldRechargeDelay",
+  "aimGlide",
+  "wallLatch",
 ]);
 
 /** Percent stats stored as the live value (not per-rank × (rank+1)). */
