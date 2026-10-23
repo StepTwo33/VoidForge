@@ -49,7 +49,7 @@ export function calculatedStatsToSimInputs(stats: CalculatedStats): {
       ? { punctureArmorStripPerStack: stats.punctureArmorStripPerStack }
       : {}),
     ammoMax: stats.ammoReserveModelled ? (stats.ammoMax ?? 0) : 0,
-    ammoEfficiency: Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 1),
+    ammoEfficiency: Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 0.75),
   };
 }
 

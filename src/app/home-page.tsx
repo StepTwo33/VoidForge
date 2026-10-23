@@ -86,10 +86,10 @@ export default function Home({ counts }: { counts: CatalogCounts }) {
               <FeatureCard
                 href="/riven-calculator"
                 title="Riven Grader"
-                description="Grade your in-game riven rolls against disposition-scaled ranges and tier rankings."
+                description="Grade your in-game riven rolls against standardized ranges and tier rankings."
                 icon={Dice5}
                 accent="amber"
-                badges={[`${counts.rivenDispositions} Dispositions`, "Grade System"]}
+                badges={["1.2x Standard", "Grade System"]}
               />
               <FeatureCard
                 href="/codex?section=mods&category=aura"

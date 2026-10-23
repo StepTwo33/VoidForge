@@ -102,9 +102,7 @@ WIKI_MAX_RANK = {
     "vik_anam": {"ampEnergy": 30, "ampEnergyRegen": 5},
     "vikla_safor": {"ampFireRate": 30, "ampAmmoEfficiency": 30},
 }
-FLAT_AMP_STATS = frozenset({
-    "cooldown", "ampCritDamage", "ampStatusDamage", "ampSchoolDamage", "ampEnergyRegen",
-})
+FLAT_AMP_STATS: frozenset[str] = frozenset()
 MULTIPLIER_AMP_STATS = frozenset({"ampBonusDamage"})
 
 

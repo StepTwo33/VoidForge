@@ -111,6 +111,14 @@ const RANK_INDEPENDENT_PERCENT_KEYS = new Set([
   "extraElectricProcChance",
 ]);
 
+/** Flat non-percent stats stored as the live value (not per-rank × (rank+1)). */
+const RANK_INDEPENDENT_FLAT_KEYS = new Set([
+  "ricochetBounces",
+  "syndicatePower",
+  "abilityProjectileCount",
+  "damageResistanceCap",
+]);
+
 function usesPercentDisplay(statKey: string): boolean {
   if (RANK_INDEPENDENT_PERCENT_KEYS.has(statKey)) return true;
   if (FLAT_STAT_KEYS.has(statKey)) return false;
@@ -129,10 +137,11 @@ export function isFlatModStat(statKey: string): boolean {
 }
 
 function formatStatNumber(value: number): string {
-  const abs = Math.abs(value);
+  const rounded = Math.round(value * 1e4) / 1e4;
+  const abs = Math.abs(rounded);
   const decimals = abs % 1 !== 0 && abs < 10 ? 1 : 0;
-  const body = value.toFixed(decimals);
-  return value > 0 ? `+${body}` : body;
+  const body = rounded.toFixed(decimals);
+  return rounded > 0 ? `+${body}` : body;
 }
 
 /**
@@ -163,7 +172,8 @@ export function formatModStatValue(
   rank: number,
   multiplier = 1,
 ): string {
-  const total = modStatTotalAtRank(perRank, rank) * multiplier;
+  const unscaled = RANK_INDEPENDENT_FLAT_KEYS.has(statKey) || RANK_INDEPENDENT_PERCENT_KEYS.has(statKey);
+  const total = (unscaled ? perRank : modStatTotalAtRank(perRank, rank)) * multiplier;
   const label = getModStatLabel(statKey);
   if (statKey === "ampBonusDamage") {
     return `x${total.toFixed(1)} ${label}`;
@@ -208,7 +218,7 @@ export function getModStatDisplayLines(mod: Mod, rank: number): ModStatDisplayLi
       const atMax = formatModStatSpecial(mod.id, statKey, perRank, mod.maxRank)!;
       return { statKey, label: getModStatLabel(statKey), atRank: special, atMax: rank >= mod.maxRank ? special : atMax };
     }
-    const unscaled = FLAT_STAT_KEYS.has(statKey) || RANK_INDEPENDENT_PERCENT_KEYS.has(statKey);
+    const unscaled = RANK_INDEPENDENT_FLAT_KEYS.has(statKey) || RANK_INDEPENDENT_PERCENT_KEYS.has(statKey);
     const atRank = unscaled
       ? formatModStatValue(statKey, perRank, 0)
       : formatModStatValue(statKey, perRank, rank);

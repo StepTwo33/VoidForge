@@ -1,6 +1,10 @@
 // Riven Grader — disposition-scaled pools + community heuristic scoring.
 // Users enter in-game rolled values; there is no random generation.
 
+import { STANDARD_RIVEN_DISPOSITION } from "@/data/riven-dispositions";
+
+export { STANDARD_RIVEN_DISPOSITION };
+
 export interface RivenStat {
   name: string;
   type: "percent" | "integer" | "seconds";
@@ -18,7 +22,8 @@ export interface RivenMod {
   rerolls: number;
   positiveStats: RivenStat[];
   negativeStat: RivenStat | null;
-  disposition: number; // 0.5 to 1.55
+  /** Standardized to 1.2 (DE retired individual weapon dispositions). */
+  disposition?: number;
 }
 
 export interface RivenRangeOptions {
@@ -226,7 +231,7 @@ export function getSplicedStats(category: string): RivenStat[] {
 /** Scale pool min/max by disposition × rank × buff-count (plus ±10% roll band already in base min/max). */
 export function getStatsWithDisposition(
   category: string,
-  disposition: number,
+  disposition: number = STANDARD_RIVEN_DISPOSITION,
   options: RivenRangeOptions = {},
 ): RivenStat[] {
   const rank = options.rank ?? 8;
@@ -261,7 +266,7 @@ export function getNegativeStats(category = "rifle"): RivenStat[] {
 }
 
 export function getNegativeStatsWithDisposition(
-  disposition: number,
+  disposition: number = STANDARD_RIVEN_DISPOSITION,
   options: RivenRangeOptions & { category?: string } = {},
 ): RivenStat[] {
   const rank = options.rank ?? 8;
@@ -377,7 +382,7 @@ export function evaluateRiven(riven: RivenMod): number {
   if (greatStats >= 2 && negativeBonus >= 0.3) godRollBonus = 0.5;
   else if (greatStats >= 2) godRollBonus = 0.3;
 
-  score *= riven.disposition;
+  score *= riven.disposition ?? STANDARD_RIVEN_DISPOSITION;
   score += negativeBonus + godRollBonus;
 
   if (riven.rank < 8) {

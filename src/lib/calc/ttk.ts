@@ -606,7 +606,7 @@ export function simulateDiscreteTTK(
     if (!stats.ammoReserveModelled || !(stats.magazine > 0)) return Infinity;
     const reserve = stats.ammoMax ?? 0;
     if (!Number.isFinite(reserve) || reserve < 0) return Infinity;
-    const ae = Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 1);
+    const ae = Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 0.75);
     if (ae >= 0.99) return Infinity;
     const perShot = Math.max(0.01, stats.ammoCost ?? 1) * (1 - ae);
     return Math.floor((stats.magazine + reserve) / perShot + 1e-9);

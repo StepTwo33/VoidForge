@@ -90,11 +90,11 @@ describe("evaluateRiven", () => {
   });
 });
 
-describe("disposition lookup", () => {
-  it("knows Amprex and warns unknown names", () => {
+describe("disposition lookup (DE standardized all Rivens to 1.2)", () => {
+  it("returns 1.2 for all weapons", () => {
     expect(hasKnownDisposition("Amprex")).toBe(true);
-    expect(getDispositionInfo("Amprex").value).toBe(0.85);
+    expect(getDispositionInfo("Amprex").value).toBe(1.2);
     expect(hasKnownDisposition("__NotAWeapon__")).toBe(false);
-    expect(getDispositionInfo("__NotAWeapon__").value).toBe(1.0);
+    expect(getDispositionInfo("__NotAWeapon__").value).toBe(1.2);
   });
 });

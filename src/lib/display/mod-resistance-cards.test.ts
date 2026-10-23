@@ -8,7 +8,7 @@ import { AIRBORNE_DR_MODS, TYPED_RESIST_MODS } from "@/lib/calc/damage-reduction
 import { NECRAMECH_AVIATOR_DR_PER_RANK } from "@/lib/calc/archwing-calculator";
 import { adaptationDrPerStack } from "@/lib/calc/calculator";
 import { getUmbralSetBonusMultiplier } from "@/lib/calc/set-bonuses";
-import { formatModStatValue, getModStatDisplayLines } from "@/lib/display/mod-display";
+import { formatModStatSpecial, formatModStatValue, getModStatDisplayLines } from "@/lib/display/mod-display";
 
 const mm = new Map(allMods.map((m) => [m.id, m]));
 const lines = (id: string, rank?: number) => {
@@ -110,5 +110,47 @@ describe("catalog sweep: no resistance / DR card without a %, no stray damage li
       .filter((m) => m.stats && m.category === "warframe" && /\d+% (<[^>]+>)?(Toxin|Heat|Cold|Electricity|Radiation|Tau|Physical Damage) Resistance/.test(m.description ?? ""))
       .flatMap((m) => lines(m.id).filter((l) => /damage$/i.test(l) || /% Damage$/.test(l)).map((l) => `${m.id}: ${l}`));
     expect(bad).toEqual([]);
+  });
+});
+
+describe("Codex vs Builder Card stat agreement across all mods", () => {
+  it("getModStatDisplayLines (Codex) and formatModStatValue (Builder Card) agree at every rank", () => {
+    const mismatches: string[] = [];
+    for (const m of allMods) {
+      if (!m.stats) continue;
+      for (let r = 0; r <= m.maxRank; r++) {
+        const codexLines = getModStatDisplayLines(m, r);
+        for (const line of codexLines) {
+          const perRank = m.stats[line.statKey];
+          const builder = formatModStatSpecial(m.id, line.statKey, perRank, r) ?? formatModStatValue(line.statKey, perRank, r);
+          if (line.atRank !== builder) {
+            mismatches.push(`${m.id} R${r} ${line.statKey}: codex="${line.atRank}" vs builder="${builder}"`);
+          }
+        }
+      }
+    }
+    expect(mismatches).toEqual([]);
+  });
+
+  it("spot-checks normalized duration/range/cooldown mods at max rank", () => {
+    expect(lines("argon_scope")).toContain("+9s Duration");
+    expect(lines("guardian")).toContain("+30s Cooldown");
+    expect(lines("medi_ray")).toContain("+15m Range");
+    expect(lines("shield_charger")).toContain("+15m Range");
+    expect(lines("protect")).toContain("+30s Cooldown");
+    expect(lines("stalk")).toContain("+18s Cooldown");
+    expect(lines("transfusion")).toContain("+120s Cooldown");
+    expect(lines("covert_bond")).toContain("+10s Duration");
+    expect(lines("augment_saryn_contagion_cloud")).toEqual(
+      expect.arrayContaining(["+5m Range", "+12s Duration"]),
+    );
+    expect(lines("augment_dante_noctua_swarm")).toEqual(
+      expect.arrayContaining(["+8m Range", "+15s Duration", "+25m Ally Radius"]),
+    );
+    expect(lines("augment_nokko_reroot_rampage")).toContain("+8m Range");
+    expect(lines("augment_koumei_kumihimo_loading")).toContain("+6 Kills Required");
+    expect(lines("augment_titania_beguiling_lantern")).toContain("+5m Attraction Range");
+    expect(lines("hok_kaal")).toContain("+5s Cooldown");
+    expect(lines("funnel_clouds")).toContain("+8 projectiles");
   });
 });

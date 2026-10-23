@@ -1644,8 +1644,11 @@ describe("evolution numeric fixes", () => {
     expect(withAe.burstDps).toBeCloseTo(base.burstDps, 5);
     expect(withAe.sustainedDps).toBeGreaterThan(base.sustainedDps);
 
+    const atCap = calculateWeaponBuild(braton, [], modsMap(), { ammoEfficiency: 0.75 });
     const full = calculateWeaponBuild(braton, [], modsMap(), { ammoEfficiency: 1 });
-    expect(full.sustainedDps).toBeCloseTo(full.burstDps, 5);
+    // DE hard-capped Ammo Efficiency at 75% (0.75): 100% AE clamps to the 75% sustained cycle.
+    expect(full.sustainedDps).toBeCloseTo(atCap.sustainedDps, 5);
+    expect(full.sustainedDps).toBeGreaterThan(withAe.sustainedDps);
 
     const bratonInc = incarnonDataMap.get("braton")!;
     expect(mergeIncarnonStatChanges(bratonInc, { 2: 0 }, "braton")?.ammoEfficiency).toBe(0.5);

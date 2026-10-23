@@ -209,7 +209,7 @@ export function scaleRadialAttacksWithDps(
     const expectedRestore =
       restoreP * (stats.ammoRestoreFlat ?? 0) +
       restoreP * (stats.ammoRestoreMagFraction ?? 0) * stats.magazine;
-    const ae = Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 1);
+    const ae = Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 0.75);
     const ammoCost = Math.max(0.01, stats.ammoCost ?? 1);
     const ammoPerShot = ae >= 0.99 ? 1e-9 : ammoCost * (1 - ae);
     const magTime = (stats.magazine + expectedRestore) / (ammoPerShot * efr);

@@ -42,9 +42,12 @@ for (const n of ["Amprex", "Braton Prime", "Soma Prime", "Ignis Wraith", "Rubico
 }
 console.log("total", map.size);
 
+const STANDARD_RIVEN_DISPOSITION = 1.2;
 const entries = [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-const lines = entries.map(([n, v]) => `  ${JSON.stringify(n)}: ${Number(v.toFixed(3))},`);
-const out = `/** Auto-synced disposition table (omegaAttenuation). Source: api.warframestat.us/weapons */
+const lines = entries.map(([n]) => `  ${JSON.stringify(n)}: ${STANDARD_RIVEN_DISPOSITION},`);
+const out = `/** DE retired individual weapon Riven Dispositions and standardized all Rivens to 1.2. */
+export const STANDARD_RIVEN_DISPOSITION = 1.2;
+
 export const rivenDispositions: Record<string, number> = {
 ${lines.join("\n")}
 };
@@ -53,14 +56,14 @@ export function hasKnownDisposition(weaponName: string): boolean {
   return Object.prototype.hasOwnProperty.call(rivenDispositions, weaponName);
 }
 
-/** Returns disposition; falls back to 1.0 when unknown (check hasKnownDisposition). */
-export function getDisposition(weaponName: string): number {
-  return rivenDispositions[weaponName] ?? 1.0;
+/** Returns the standardized Riven Disposition (1.2 across all weapons). */
+export function getDisposition(_weaponName?: string): number {
+  return STANDARD_RIVEN_DISPOSITION;
 }
 
 export function getDispositionInfo(weaponName: string): { value: number; known: boolean } {
   const known = hasKnownDisposition(weaponName);
-  return { value: known ? rivenDispositions[weaponName]! : 1.0, known };
+  return { value: STANDARD_RIVEN_DISPOSITION, known };
 }
 `;
 

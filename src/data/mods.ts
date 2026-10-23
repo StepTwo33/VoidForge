@@ -1711,7 +1711,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "universal",
     "stats": {
       "stealthDamage": 120,
-      "duration": 10.0
+      "duration": 1.666667
     },
     "description": "Finisher and Mercy Kills grant your Companion 10s of stealth that attacks will not disrupt. Max 60s.",
     "rarity": "rare"
@@ -1914,7 +1914,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "robotic",
     "stats": {
       "shieldRestore": 100,
-      "cooldown": 30
+      "cooldown": 5
     },
     "description": "Restores 100% Shields when depleted, 30s cooldown",
     "rarity": "common"
@@ -1929,7 +1929,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "robotic",
     "stats": {
       "healthRestore": 12,
-      "range": 15,
+      "range": 2.5,
       "health": 2.0,
       "duration": 0.666667
     },
@@ -1976,7 +1976,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "robotic",
     "stats": {
       "overshields": 200,
-      "range": 15,
+      "range": 2.5,
       "duration": 1.666667
     },
     "description": "Increase Warframe Max Shields and Shield Regeneration by 60% for 10s.",
@@ -2235,7 +2235,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "beast",
     "stats": {
       "shieldRestore": 100,
-      "cooldown": 30,
+      "cooldown": 5,
       "shield": 5.0,
       "duration": 0.5
     },
@@ -2297,7 +2297,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "beast",
     "stats": {
       "stealthDuration": 9,
-      "cooldown": 18,
+      "cooldown": 3,
       "range": 4.0
     },
     "description": "The kubrow cloaks itself and its master to stalk down its prey when they are within 24m.",
@@ -2420,7 +2420,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "beast",
     "stats": {
       "reviveChance": 90,
-      "cooldown": 120,
+      "cooldown": 30,
       "health": 5.0
     },
     "description": "When its Master is bleeding out, the Vasca Kavat sacrifices 20% of its Health to raise them.",
@@ -2857,8 +2857,8 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "toxinDamagePerSecond": 300,
-      "range": 5,
-      "duration": 12
+      "range": 1.25,
+      "duration": 3
     },
     "description": "Toxic Lash Augment: Create 5m toxic clouds, dealing 300 Toxin Damage/s for 12s with every kill. Damage is twice as strong for Melee kills.",
     "rarity": "rare",
@@ -3698,9 +3698,9 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "range": 8,
-      "duration": 15,
-      "allyRadius": 25
+      "range": 2,
+      "duration": 3.75,
+      "allyRadius": 6.25
     },
     "description": "Noctua Augment: Alternate Fire releases Paragrimms that swarm 8m around the point of aim for 15s, silencing enemies and dealing 500 Slash per second. Each living enemy restores 2 Energy per second to allies within 25m, up to 20.",
     "rarity": "rare",
@@ -3731,7 +3731,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "range": 8
+      "range": 2
     },
     "description": "Reroot Augment: Collecting Reroot orbs summons additional Sprodlings inflicting 250 Toxin Damage in an 8m radius, with 20% more Critical Chance each bounce.",
     "rarity": "rare",
@@ -3746,7 +3746,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "killsRequired": 6
+      "killsRequired": 1.5
     },
     "description": "Kumihimo Augment: 6 kills with weapons affected by Koumei's Passive give a loaded die that always rolls 6. Hold to cast empowered Kumihimo and consume all dice.",
     "rarity": "rare",
@@ -4255,7 +4255,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "attractionRange": 5,
+      "attractionRange": 1.25,
       "damage": 25.0,
       "weaponDamageBonus": 25.0
     },
@@ -12196,7 +12196,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "abilityProjectileCount": 2.0
+      "abilityProjectileCount": 8
     },
     "description": "Tornado Augment: Creates 8 additional tornadoes. All tornadoes are 50% their original size and won't pick up enemies.",
     "rarity": "rare",
@@ -12347,7 +12347,7 @@ const RAW_MODS: Mod[] = [
       "range": 1.0,
       "explosionDamage": 50.0
     },
-    "description": "Create 11m seismic shockwaves from heavy landings, dealing 550 Damage and knocking foes off their feet.",
+    "description": "Create 6m seismic shockwaves from heavy landings, dealing 300 Damage and knocking foes off their feet.",
     "rarity": "uncommon"
   },
   {
@@ -12485,7 +12485,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "duration": 2.0
     },
-    "description": "+2s to Hacking",
+    "description": "+8s to Hacking",
     "rarity": "common"
   },
   {
@@ -14221,7 +14221,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "range": 5.0
     },
-    "description": "+55m Enemy Radar",
+    "description": "+30m Enemy Radar",
     "rarity": "rare"
   },
   {
@@ -21678,7 +21678,7 @@ const RAW_MODS: Mod[] = [
     "category": "tektolyst",
     "stats": {
       "ampBonusDamage": 0.5,
-      "cooldown": 5
+      "cooldown": 0.833333
     },
     "description": "After using Void Mode, the next Amp attack deals x3.0 bonus damage (cooldown 5s)",
     "rarity": "common"
@@ -21759,7 +21759,7 @@ const RAW_MODS: Mod[] = [
     "category": "tektolyst",
     "stats": {
       "ampCriticalChance": 10,
-      "ampCritDamage": 10
+      "ampCritDamage": 1.666667
     },
     "description": "+60% Amp Critical Chance\\n+10% Amp Critical Damage for each Zenurik School Mod",
     "rarity": "uncommon"
@@ -21786,7 +21786,7 @@ const RAW_MODS: Mod[] = [
     "category": "tektolyst",
     "stats": {
       "ampStatusChance": 10,
-      "ampStatusDamage": 15
+      "ampStatusDamage": 2.5
     },
     "description": "+60% Amp Status Chance\\n+15% Status Damage for each Vazarin School Mod",
     "rarity": "uncommon"
@@ -21814,7 +21814,7 @@ const RAW_MODS: Mod[] = [
     "category": "tektolyst",
     "stats": {
       "ampDamage": 10,
-      "ampSchoolDamage": 10
+      "ampSchoolDamage": 1.666667
     },
     "description": "+60% Damage to Amps\\n+10% bonus for each Mod from a unique School",
     "rarity": "rare"
@@ -21841,7 +21841,7 @@ const RAW_MODS: Mod[] = [
     "category": "tektolyst",
     "stats": {
       "ampEnergy": 5,
-      "ampEnergyRegen": 5
+      "ampEnergyRegen": 0.833333
     },
     "description": "+30% Maximum Amp Energy\\n+5% Amp Energy Regen Rate for each Madurai School Mod",
     "rarity": "uncommon"

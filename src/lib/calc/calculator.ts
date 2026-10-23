@@ -2812,8 +2812,8 @@ function calculateSustainedDps(stats: CalculatedStats, baseWeapon?: Weapon): num
   if (baseWeapon?.chargeMode === "bow" || baseWeapon?.triggerType === "Bow") {
     return burstDps;
   }
-  // Ammo Efficiency: expected ammo per shot = ammoCost × (1 − AE) → longer mag before reload.
-  const ae = Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 1);
+  // Ammo Efficiency: expected ammo per shot = ammoCost × (1 − AE) → longer mag before reload (capped at 75%).
+  const ae = Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 0.75);
   if (ae >= 0.99) return burstDps;
   const ammoCost = Math.max(0.01, stats.ammoCost ?? baseWeapon?.ammoCost ?? 1);
   const ammoPerShot = ammoCost * (1 - ae);

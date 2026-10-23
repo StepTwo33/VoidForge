@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { PageShell, PageMain, PageHero, FilterChip } from "@/components/page-shell";
 import { allWeapons } from "@/data/weapons";
-import { getDispositionInfo } from "@/data/riven-dispositions";
+import { STANDARD_RIVEN_DISPOSITION } from "@/data/riven-dispositions";
 import {
   RivenMod, RivenStat,
   evaluateRiven, getRivenGrade, getGradeColor,
@@ -52,10 +52,7 @@ export default function RivenCalculatorPage() {
     return weapons.sort((a, b) => a.name.localeCompare(b.name));
   }, [selectedWeaponType, weaponSearch]);
 
-  const dispositionInfo = selectedWeapon
-    ? getDispositionInfo(selectedWeapon)
-    : { value: 1.0, known: false };
-  const disposition = dispositionInfo.value;
+  const disposition = STANDARD_RIVEN_DISPOSITION;
 
   const rangeOptions = useMemo(
     () => ({
@@ -145,7 +142,7 @@ export default function RivenCalculatorPage() {
           icon={Sparkles}
           accent="purple"
           title="Riven Grader"
-          description="Enter the stats from your in-game riven to grade it against disposition-scaled ranges."
+          description="Enter the stats from your in-game riven to grade it against standardized (1.2x) ranges."
         />
 
         <div className="flex flex-wrap gap-2 mb-4">
@@ -187,15 +184,7 @@ export default function RivenCalculatorPage() {
                         <p className="text-sm text-muted-foreground">No weapons match</p>
                       </div>
                     ) : (
-                      filteredWeapons.map((w) => {
-                      const info = getDispositionInfo(w.name);
-                      const dispColor = !info.known
-                        ? "text-muted-foreground"
-                        : info.value >= 1.3 ? "text-green-700 dark:text-green-400"
-                        : info.value >= 1.0 ? "text-blue-700 dark:text-blue-400"
-                        : info.value >= 0.8 ? "text-orange-700 dark:text-orange-400"
-                        : "text-red-700 dark:text-red-400";
-                      return (
+                      filteredWeapons.map((w) => (
                         <button
                           key={w.id}
                           type="button"
@@ -203,36 +192,17 @@ export default function RivenCalculatorPage() {
                           className="flex w-full min-h-11 items-center justify-between rounded-lg border border-transparent px-3 py-2.5 text-left transition-all hover:border-purple-500/50 hover:bg-purple-500/5"
                         >
                           <span className="text-sm font-medium">{w.name}</span>
-                          <span className={cn("shrink-0 text-xs font-mono tabular-nums", dispColor)}>
-                            {info.known ? info.value.toFixed(2) : "?"}
-                          </span>
                         </button>
-                      );
-                    })
+                      ))
                     )}
                   </div>
                 </div>
               ) : (
                 <div className="flex flex-wrap items-center gap-3 mb-4 p-3 border border-purple-500/30 bg-purple-500/5 rounded-lg">
                   <span className="font-medium">{selectedWeapon}</span>
-                  <span className={cn(
-                    "text-xs font-mono px-2 py-0.5 rounded",
-                    !dispositionInfo.known ? "bg-amber-500/10 text-amber-900 dark:text-amber-400" :
-                    disposition >= 1.3 ? "bg-green-500/10 text-green-700 dark:text-green-400" :
-                    disposition >= 1.0 ? "bg-blue-500/10 text-blue-700 dark:text-blue-400" :
-                    disposition >= 0.8 ? "bg-orange-500/10 text-orange-700 dark:text-orange-400" : "bg-red-500/10 text-red-700 dark:text-red-400"
-                  )}>
-                    Disposition: {disposition.toFixed(2)}
-                    {!dispositionInfo.known ? " (unknown)" : ""}
-                  </span>
                   <button onClick={() => { setSelectedWeapon(null); }} className="ml-auto min-h-11 min-w-11 inline-flex items-center justify-center text-muted-foreground hover:text-foreground">
                     <X className="h-4 w-4" />
                   </button>
-                  {!dispositionInfo.known && (
-                    <p className="w-full text-xs text-amber-900 dark:text-amber-400/90">
-                      No disposition on file for this weapon — ranges use 1.00 as a fallback.
-                    </p>
-                  )}
                 </div>
               )}
             </>
@@ -296,7 +266,7 @@ export default function RivenCalculatorPage() {
                       </div>
                       {poolStat && (
                         <p className={cn("text-[10px] mt-0.5 pl-0.5", outOfRange ? "text-amber-900 dark:text-amber-400" : "text-muted-foreground")}>
-                          Typical range @ disp {disposition.toFixed(2)}: {formatRangeHint(poolStat)}
+                          Typical range: {formatRangeHint(poolStat)}
                           {outOfRange ? " — outside expected band" : ""}
                         </p>
                       )}

@@ -50,6 +50,9 @@ export function moddedAmmoReserve(opts: {
   return Math.max(0, Math.floor(base * Math.max(0, 1 + bonus) + 1e-9));
 }
 
+/** DE hard cap on Ammo Efficiency (introduced with the Riven Disposition retirement update). */
+export const MAX_AMMO_EFFICIENCY = 0.75;
+
 /**
  * Seconds to empty magazine + reserve with no pickups (wiki Ammo Economy:
  * capacity / magazine × (reload + magazine / fire rate), with the starting magazine added).
@@ -64,7 +67,7 @@ export function timeToEmptyAmmo(opts: {
 }): number {
   const { magazine, reserve, fireRate, reloadTime } = opts;
   if (!(magazine > 0) || !(fireRate > 0)) return Infinity;
-  const ae = Math.min(Math.max(opts.ammoEfficiency ?? 0, 0), 1);
+  const ae = Math.min(Math.max(opts.ammoEfficiency ?? 0, 0), MAX_AMMO_EFFICIENCY);
   if (ae >= 0.99) return Infinity;
   const perShot = Math.max(0.01, opts.ammoCost ?? 1) * (1 - ae);
   const magTime = magazine / perShot / fireRate;

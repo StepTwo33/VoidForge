@@ -50,11 +50,11 @@ describe("R8-1 riven ranges (wiki Riven Mods attribute formula)", () => {
   });
 });
 
-describe("R8-1 dispositions (wiki.gg Module:Weapons/data)", () => {
-  it("7 corrected entries", async () => {
+describe("R8-1 dispositions (standardized to 1.2 after DE disposition retirement)", () => {
+  it("7 entries standardized to 1.2", async () => {
     const { rivenDispositions: d } = await import("@/data/riven-dispositions");
     expect([d["Aksondol"], d["Nunchasa"], d["Pathocyst"], d["Sarofang"], d["Tenet Diplos"], d["Tenet Plinx"], d["Coda Bassocyst"]])
-      .toEqual([0.5, 0.5, 1.3, 1.1, 0.75, 0.8, 0.55]);
+      .toEqual([1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2]);
   });
 });
 
