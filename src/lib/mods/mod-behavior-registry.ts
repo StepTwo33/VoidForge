@@ -734,7 +734,9 @@ export function applyVerifiedModStatToArchwing(
   modValue: number,
   acc: ArchwingModAccumulators,
 ): boolean {
-  if (modId === "kinetic_diversion" && statKey === "damage") {
+  // wiki.warframe.com Kinetic Diversion: converts 10%/rank of health damage to energy. Round 18 moved
+  // the value from the stray `damage` key to energyOnHealthDamage (same number, same stat row).
+  if (modId === "kinetic_diversion" && statKey === "energyOnHealthDamage") {
     acc.kineticDiversionPercent += modValue * 100;
     return true;
   }

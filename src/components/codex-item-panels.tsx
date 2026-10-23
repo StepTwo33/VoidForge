@@ -392,7 +392,8 @@ export function ModDetailPanel({ mod, compact, returnTo }: { mod: Mod; compact?:
         </p>
       ) : (
         <p className="text-[10px] leading-snug text-muted-foreground">
-          Capacity drain: R0 = {modDrainAtRank(mod.drain, 0)}, max rank R{mod.maxRank} = {modDrainAtRank(mod.drain, mod.maxRank)} (+1 per rank).
+          {mod.drain < 0 ? "Capacity" : "Capacity drain"}: R0 = {modDrainAtRank(mod.drain, 0)}, max rank R{mod.maxRank} ={" "}
+          {modDrainAtRank(mod.drain, mod.maxRank)} ({mod.drain < 0 ? "-1" : "+1"} per rank).
         </p>
       )}
         </>

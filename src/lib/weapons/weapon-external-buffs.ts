@@ -266,23 +266,9 @@ function resolveCompanionBondBuffs(
     });
   }
 
-  const covertSlot = findCompanionMod(slots, "covert_bond");
-  if (covertSlot) {
-    const mod = allMods.get("covert_bond");
-    if (mod) {
-      const rank = Math.min(Math.max(covertSlot.rank ?? 0, 0), mod.maxRank);
-      const dmg = modStatFraction(mod, "stealthDamage", rank);
-      if (dmg > 0) {
-        buffs.push({
-          id: "companion:covert_bond",
-          label: "Covert Bond",
-          category: "companion",
-          damageBonus: dmg,
-          nominal: modNominalLine(mod, rank),
-        });
-      }
-    }
-  }
+  // Covert Bond: no weapon buff. wiki.warframe.com: finisher / mercy kills grant the companion 1–10s
+  // of stealth (Duration column only); Round 18 removed the stray stealthDamage key that fed a
+  // +720% weapon damage buff here.
 
   return buffs;
 }

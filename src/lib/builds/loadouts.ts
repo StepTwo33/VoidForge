@@ -4,7 +4,7 @@ import { companionsMap } from "@/data/companions";
 import { migratePostureToPostureSlot } from "@/lib/weapons/companion-weapons";
 import type { SavedBuild } from "./build-storage";
 import { modsMap } from "@/data/mods";
-import { dropRetiredModsDeep, migrateRenamedModsDeep } from "@/lib/mods/known-mods";
+import { clampModRanksDeep, dropRetiredModsDeep, migrateRenamedModsDeep } from "@/lib/mods/known-mods";
 
 const STORAGE_KEY = "overframe_loadouts";
 
@@ -113,9 +113,9 @@ export function loadoutToBuildData(loadout: Loadout): LoadoutBuildData {
   return normalizeLoadoutBuildData(data);
 }
 
-/** Migrate renamed mods, then drop removed / Conclave-only mods, in every mod list. */
+/** Migrate renamed mods, drop removed / Conclave-only mods, clamp ranks to max, in every mod list. */
 function cleanLoadoutMods<T>(data: T): T {
-  return dropRetiredModsDeep(migrateRenamedModsDeep(data, modsMap).data, modsMap).data;
+  return clampModRanksDeep(dropRetiredModsDeep(migrateRenamedModsDeep(data, modsMap).data, modsMap).data, modsMap).data;
 }
 
 export function loadoutFromSavedBuild(build: SavedBuild): Loadout {

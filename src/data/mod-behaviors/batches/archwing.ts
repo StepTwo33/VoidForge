@@ -36,7 +36,7 @@ export const MOD_BEHAVIORS_ARCHWING: Record<string, VerifiedModBehavior> = {
     line("flightSpeed", "warframe_totals", "multiplicative_percent", "Hyperion Thrusters: flightSpeed \u2014 +27.5% Flight Speed"),
   ]),
   kinetic_diversion: mod("kinetic_diversion", [
-    line("damage", "mod_panel", "multiplicative_percent", "Kinetic Diversion: damage \u2014 Convert +40% of Damage on Health to Energy. Without Shields, ally Overguard imit\u2026"),
+    line("energyOnHealthDamage", "mod_panel", "multiplicative_percent", "wiki: Kinetic Diversion \u2014 converts 10% of health damage to energy per rank (+40% R3; not damage)"),
   ]),
   morphic_transformer: mod("morphic_transformer", [
     line("abilityStrength", "warframe_totals", "multiplicative_percent", "Morphic Transformer: abilityStrength \u2014 +20% Ability Strength"),

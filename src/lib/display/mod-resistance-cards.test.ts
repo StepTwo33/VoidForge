@@ -81,8 +81,15 @@ describe("wiki.warframe.com max-rank text", () => {
     ["resilient_focus", ["+20% Stun Damage Resistance"]],
     ["warding_thurible", ["+50% Ally Damage Reduction"]],
     ["immolated_radiance", ["+50% Shared Damage Reduction"]],
-    ["armored_evade", ["+40% Dodge Damage Resistance", "-10% Sprint speed"]],
-    ["armored_acrobatics", ["+20% Bullet Jump Damage Resistance", "-10% Sprint speed"]],
+    // Round 17: the wiki calls the penalty Mobility, and Armored Recovery's is Slide only.
+    ["armored_evade", ["+40% Dodge Damage Resistance", "-10% Mobility"]],
+    ["armored_acrobatics", ["+20% Bullet Jump Damage Resistance", "-10% Mobility"]],
+    ["armored_recovery", ["+50% Knocked Down Damage Resistance", "-20% Slide Speed"]],
+    // Round 17: Stand Ground R5 10%/rank, Anti-Flak Plating R3 5%/rank.
+    ["stand_ground", ["+60% Ability Damage Reduction While Blocking"]],
+    ["anti_flak_plating", ["+20% Blast Damage Resistance", "-10% Mobility"]],
+    ["augment_nekros_shield_of_shadows", ["+6% Damage Redirected Per Shadow", "+50m Range"]],
+    ["sure_footed_r5", ["+60% Knockdown Resistance"]],
   ];
   for (const [id, want] of cases) it(id, () => expect(lines(id)).toEqual(want));
   it("rank tables: Warding Thurible 30/35/40/50, Immolated Radiance 20/30/40/50", () => {
@@ -97,8 +104,8 @@ describe("wiki.warframe.com max-rank text", () => {
 
 describe("catalog sweep: no resistance / DR card without a %, no stray damage line", () => {
   const RESIST_LINE = /(Damage (Resistance|Reduction)|Tau Resistance|Knockdown Resistance)/;
-  /** Known, listed in the Round 16 report (need data rework or couldn't be verified). */
-  const KNOWN = new Set(["stand_ground", "anti_flak_plating", "augment_nekros_shield_of_shadows"]);
+  /** Round 16 listed Stand Ground, Anti-Flak Plating and Shield of Shadows here; Round 17 fixed them. */
+  const KNOWN = new Set<string>();
   it("every resistance / DR line shows a %", () => {
     const bad = allMods
       .filter((m) => m.stats && !KNOWN.has(m.id))

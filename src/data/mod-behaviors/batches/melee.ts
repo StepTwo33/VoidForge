@@ -86,9 +86,8 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Counterweight — IPS convert (not always-on damage)"),
   ]),
   covert_lethality: mod("covert_lethality", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Covert Lethality — initial combo / finisher (not light DPS)"),
+    line("initialCombo", "mod_panel", "multiplicative_percent", "wiki: Covert Lethality \u2014 +4 Initial Combo per rank (+16 R3)"),
     line("finisherDamage", "mod_panel", "multiplicative_percent", "Covert Lethality: finisherDamage \u2014 +16 Initial Combo\\\\n+100% Finisher Damage"),
-    line("lethalDamage", "mod_panel", "multiplicative_percent", "Covert Lethality: lethalDamage \u2014 +16 Initial Combo\\\\n+100% Finisher Damage"),
   ]),
   disciplines_merit: mod("disciplines_merit", [], "wiki: Discipline's Merit \u2014 Enables Tennokai. Opportunities occur every 4 melee hits instead of at random."),
   dispatch_overdrive: mod("dispatch_overdrive", [
@@ -110,7 +109,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("comboCountChance", "mod_panel", "multiplicative_percent", "Enduring Strike: comboCountChance \u2014 +20% Additional Combo Count Chance on Lifted enemies"),
   ]),
   energy_channel_r10: mod("energy_channel_r10", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Energy Channel — next-attack energy convert (not always-on)"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Energy Channel \u2014 converts 200% of energy used at infobox Max Rank 5 to next-attack bonus damage (not always-on)"),
   ]),
   explosive_demise: mod("explosive_demise", [
     line("explosionDamage", "mod_panel", "multiplicative_percent", "Explosive Demise: explosionDamage \u2014 Enemies killed explode, dealing 300 Damage shortly after death."),
@@ -119,7 +118,6 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("toxin", "weapon_dps", "elemental_from_base_damage", "Fever Strike: toxin \u2014 +90% <DT_POISON_COLOR>Toxin"),
   ]),
   finishing_touch_r10: mod("finishing_touch_r10", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Finishing Touch — finisher-only (not light DPS)"),
     line("finisherDamage", "mod_panel", "multiplicative_percent", "Finishing Touch: finisherDamage \u2014 +60% Finisher Damage"),
   ]),
   focus_energy_r3: mod("focus_energy_r3", [
@@ -171,8 +169,8 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("healthOnStatus", "mod_panel", "multiplicative_percent", "Healing Return: healthOnStatus \u2014 Restores 11 Health per Status Type affecting the target"),
   ]),
   heartseeker: mod("heartseeker", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Heartseeker — damage block penalty (not melee damage)"),
-    line("range", "mod_panel", "multiplicative_percent", "Heartseeker: range \u2014 Lock onto targets within 1m, but reduces blocking effectiveness., -50% Damage Bl\u2026 (arsenal display only)"),
+    line("damageBlock", "mod_panel", "multiplicative_percent", "wiki: Heartseeker \u2014 -12.5% Damage Blocked per rank (-50% R3; not melee damage)"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Heartseeker \u2014 targeting radius 0.25m per rank (1m R3) (arsenal display only)"),
   ]),
   heavy_trauma: mod("heavy_trauma", [
     line("impact", "weapon_dps", "multiplicative_percent", "Heavy Trauma: impact \u2014 +90% <DT_IMPACT_COLOR>Impact"),
@@ -232,8 +230,8 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("heat", "weapon_dps", "elemental_from_base_damage", "Molten Impact: heat \u2014 +90% <DT_FIRE_COLOR>Heat"),
   ]),
   mortal_conduct: mod("mortal_conduct", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Mortal Conduct — low-health block reflect"),
-    line("duration", "mod_panel", "multiplicative_percent", "Mortal Conduct: duration \u2014 At Less than 50 Health:\\\\n+60% Damage taken is reflected when Blocking attacks w\u2026"),
+    line("damageReflected", "mod_panel", "multiplicative_percent", "wiki: Mortal Conduct \u2014 +15% damage reflected per rank (+60% R3) when blocking below 50 health"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Mortal Conduct \u2014 2s per rank (8s R3)"),
   ]),
   motus_impact: mod("motus_impact", [
     line("range", "mod_panel", "multiplicative_percent", "Motus Impact: range \u2014 Increase range of aerial melee attacks by +2m. (arsenal display only)"),
@@ -302,7 +300,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("comboCountChance", "mod_panel", "multiplicative_percent", "Quickening: comboCountChance \u2014 +40% Attack Speed, +20% Combo Count Chance"),
   ]),
   reach_r3: mod("reach_r3", [
-    line("range", "mod_panel", "multiplicative_percent", "Reach: range \u2014 +1.5 Range (arsenal display only)"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Reach \u2014 +1.5 m melee range at infobox Max Rank 5 (0.25 m/rank) (arsenal display only)"),
   ]),
   rebound: mod("rebound", [
     line("ricochetBounces", "mod_panel", "multiplicative_percent", "Rebound: ricochetBounces \u2014 +4 Bounce"),
@@ -315,7 +313,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("energyOnKill", "mod_panel", "multiplicative_percent", "Relentless Assault: energyOnKill \u2014 On Kill:\\\\n+2 Energy Rate for 4s"),
   ]),
   relentless_combination_r3: mod("relentless_combination_r3", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Relentless Combination — slash-status combo chance (not damage)"),
+    line("comboCountChance", "mod_panel", "multiplicative_percent", "wiki: Relentless Combination \u2014 Slash status has +25% chance per rank (+100% R3) to add to the combo count (not damage)"),
   ]),
   rending_strike: mod("rending_strike", [
     line("puncture", "weapon_dps", "multiplicative_percent", "Rending Strike: puncture \u2014 +60% <DT_SLASH_COLOR>Slash, +80% <DT_PUNCTURE_COLOR>Puncture"),
@@ -373,7 +371,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Spring-Loaded Blade: range \u2014 On Status Effect: +1 Range for 24s. Stacks up to 2 times. (arsenal display only)"),
   ]),
   stand_ground: mod("stand_ground", [
-    line("damageReduction", "mod_panel", "multiplicative_percent", "Stand Ground: damageReduction \u2014 Blocking reduces damage taken from enemy abilities by 60%."),
+    line("abilityDamageReductionWhileBlocking", "mod_panel", "multiplicative_percent", "wiki: Stand Ground \u2014 blocking reduces damage from enemy abilities by 60% at max rank"),
   ]),
   strain_infection: mod("strain_infection", [
     line("criticalMultiplier", "weapon_dps", "conditional_stat_per_kill_stack", "wiki: Strain Infection — +20% CD per cyst (cap 8 full set; sim uses killStacks)"),

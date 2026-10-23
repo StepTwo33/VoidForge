@@ -9,6 +9,9 @@ import {
 } from "@/lib/mods/mod-incompatibility";
 import type { SavedBuild } from "@/lib/builds/build-storage";
 import {
+  clampModRanks,
+  clampModRanksDeep,
+  type ClampedModRank,
   dropRetiredMods,
   dropRetiredModsDeep,
   migrateRenamedMods,
@@ -79,19 +82,36 @@ export function warnRetiredMods(dropped: readonly RetiredModDrop[]): void {
   });
 }
 
+/** "Sure Footed R5 → R3" lines for saved ranks above the mod's current max rank. */
+export function describeClampedRanks(clamped: readonly ClampedModRank[]): string[] {
+  return clamped.map((c) => `${c.name} R${c.fromRank} → R${c.toRank}`);
+}
+
+export function warnClampedRanks(clamped: readonly ClampedModRank[]): void {
+  if (!clamped.length) return;
+  toast.info(clamped.length === 1 ? "Lowered 1 mod to its max rank" : `Lowered ${clamped.length} mods to their max rank`, {
+    id: "mod-ranks-clamped",
+    description: `${describeClampedRanks(clamped).join("; ")}. These mods' max rank now matches the game.`,
+    duration: 9000,
+  });
+}
+
 /**
  * Clean a saved build before it is applied to a builder: migrate renamed mods (Link Shields →
  * Link Redirection, Shotgun Spazz → Shotgun Barrage, …), drop removed and Conclave-only mods,
- * then drop mods the game won't equip together. Shows a toast for each kind of change.
+ * then drop mods the game won't equip together, then clamp ranks above a mod's max rank. Shows a
+ * toast for each kind of change.
  */
 export function cleanLoadedBuild(build: SavedBuild): SavedBuild {
   const renamed = migrateRenamedModsDeep(build.data, modsMap);
   warnMigratedMods(renamed.migrated);
   const retired = dropRetiredModsDeep(renamed.data, modsMap);
   warnRetiredMods(retired.dropped);
-  const { data, dropped } = dropIncompatibleModsDeep(retired.data);
-  warnDroppedIncompatibleMods(dropped);
-  if (!dropped.length && !renamed.migrated.length && !retired.dropped.length) return build;
+  const incompatible = dropIncompatibleModsDeep(retired.data);
+  warnDroppedIncompatibleMods(incompatible.dropped);
+  const { data, clamped } = clampModRanksDeep(incompatible.data, modsMap);
+  warnClampedRanks(clamped);
+  if (!incompatible.dropped.length && !renamed.migrated.length && !retired.dropped.length && !clamped.length) return build;
   return { ...build, data };
 }
 
@@ -103,5 +123,7 @@ export function cleanLoadedMods<T extends { modId: string; slotIndex?: number; r
   warnRetiredMods(retired.dropped);
   const { mods: kept, dropped } = dropIncompatibleMods(retired.mods);
   warnDroppedIncompatibleMods(dropped);
-  return kept;
+  const { mods: ranked, clamped } = clampModRanks(kept, modsMap);
+  warnClampedRanks(clamped);
+  return ranked;
 }

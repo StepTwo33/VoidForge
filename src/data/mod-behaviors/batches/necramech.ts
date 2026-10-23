@@ -53,7 +53,7 @@ export const MOD_BEHAVIORS_NECRAMECH: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "Necramech Pressure Point: damage \u2014 +60% Melee Damage"),
   ]),
   necramech_rage: mod("necramech_rage", [
-    line("damage", "mod_panel", "multiplicative_percent", "Necramech Rage: damage \u2014 Convert +15% of Damage on Health to Energy. Without Shields, ally Overguard imit\u2026"),
+    line("energyOnHealthDamage", "mod_panel", "multiplicative_percent", "wiki: Necramech Rage \u2014 converts 2.5% of health damage to energy per rank (+15% R5; not damage)"),
   ]),
   necramech_reach: mod("necramech_reach", [], "wiki: Necramech Reach \u2014 +1 Melee Range"),
   necramech_rebuke: mod("necramech_rebuke", [

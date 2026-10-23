@@ -937,9 +937,8 @@ const RAW_MODS: Mod[] = [
     "category": "melee",
     "subCategory": "",
     "stats": {
-      "lethalDamage": 100,
-      "damage": 25.0,
-      "finisherDamage": 25.0
+      "initialCombo": 4,
+      "finisherDamage": 25
     },
     "description": "+16 Initial Combo\\n+100% Finisher Damage",
     "rarity": "rare"
@@ -1662,10 +1661,11 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "airborneCrit": 150,
-      "airborneDamage": 60,
-      "duration": 0.5,
-      "range": 1.666667
+      "recoveryTimeReduction": -0.5,
+      "headshotRecoveryTimeReduction": -1.5,
+      "coldStatusChance": 5.833333,
+      "range": 1.666667,
+      "duration": 3
     },
     "description": "Airborne kills decrease Companion Recovery Time by 3s and 9s for headshot kills. Companion creates a field of cold that increases up to 35% and 10m radius while Warframe is airborne, lasting for 3s after returning to ground.",
     "rarity": "rare"
@@ -1710,8 +1710,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "stealthDamage": 120,
-      "duration": 1.666667
+      "duration": 10,
+      "stealthDurationCap": 60
     },
     "description": "Finisher and Mercy Kills grant your Companion 10s of stealth that attacks will not disrupt. Max 60s.",
     "rarity": "rare"
@@ -1725,10 +1725,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "companionDamage": 60,
-      "extraAttack": 30,
-      "energy": 8.333333,
-      "duration": 5.0
+      "duration": 5,
+      "energyOrbDropChance": 8.333333
     },
     "description": "Companion will clone itself each time you expend 100 energy, up to 3 clones. Clones live 30s and cannot use Abilities. Their kills have a 50% chance of dropping Energy Orbs.",
     "rarity": "rare"
@@ -1742,10 +1740,9 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "heavyAttackDamage": 110,
-      "heavyAttackSpeed": 30,
-      "damage": 20.0,
-      "duration": 3.0
+      "damage": 20,
+      "recoveryTimeReduction": -3,
+      "duration": 30
     },
     "description": "Killing Eximus enemies grants 120% bonus of a random Elemental Damage to your Companion for 30s and reduces Companion Recovery Time by 18s.",
     "rarity": "rare"
@@ -1835,9 +1832,7 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "meleeAttackSpeed": 30,
-      "meleeDamage": 60,
-      "damage": 2.5,
+      "armorReduction": 2.5,
       "range": 1.5
     },
     "description": "Companion melee attacks strip 15% of enemy armor. Enemies recently damaged by Abilities spread the effect to other enemies in a 9m radius.",
@@ -1852,7 +1847,6 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "universal",
     "stats": {
-      "abilityDamage": 30,
       "abilityDuration": 30,
       "cooldown": 0.5
     },
@@ -2357,8 +2351,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "beast",
     "stats": {
-      "damageReflection": 60,
-      "damage": 10.0
+      "reflectedDamageAmplification": 15,
+      "reflectChance": 10
     },
     "description": "Adarza Kavat has a 40% chance to reflect damage back to an enemy, amplifying it by 60%.",
     "rarity": "rare"
@@ -2615,9 +2609,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "finisherDamageBonus": 50,
-      "damage": 75.0,
-      "finisherDamage": 75.0
+      "finisherDamage": 75
     },
     "description": "Radial Blind Augment: Blinded enemies take 300% more Finisher Damage.",
     "rarity": "rare",
@@ -2776,7 +2768,6 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "damageIncrease": 50,
       "statusChance": 62.5
     },
     "description": "Serene Storm Augment: Desert Wind is granted +250% Status Chance and changes its damage type to match enemy weaknesses.",
@@ -2809,7 +2800,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "shieldPerTarget": 25,
-      "damage": 0.75
+      "damageToShieldConversion": 0.75
     },
     "description": "Discharge Augment: Converts 3% of Damage dealt into Shields split between Volt and Squadmates.",
     "rarity": "rare",
@@ -3837,9 +3828,8 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "damageReductionPerShadow": 6,
-      "damage": 1.5,
-      "range": 12.5
+      "damageRedirectedPerShadow": 1.5,
+      "range": 50
     },
     "description": "Shadows of the Dead Augment: Each Shadow within 50m take 6% of the Damage done to Nekros in his stead.",
     "rarity": "rare",
@@ -4140,8 +4130,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "rumbleDuration": 5,
-      "damage": 75.0
+      "maxHealthAbsorbed": 75
     },
     "description": "Rumblers Augment: Atlas becomes a Rumbler with Rock Armor that grants Overguard and absorbs up to 300% of damage to Max Health.",
     "rarity": "rare",
@@ -4321,7 +4310,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "elementalChance": 25,
-      "damage": 12.5
+      "sandstormRange": 12.5
     },
     "description": "Sandstorm Augment: Sandstorm gains 50% Ability Range and has a 100% chance of inflicting Status Effects based on the Damage Types on the equipped Melee Weapon.",
     "rarity": "rare",
@@ -4790,8 +4779,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "energyOnHealthDamage": 7.5,
-      "damage": 7.5
+      "energyOnHealthDamage": 7.5
     },
     "description": "Convert +45% of Damage on Health to Energy. Without Shields, ally Overguard imitates Health.",
     "rarity": "common"
@@ -4834,8 +4822,7 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "lifestealToOwner": 7.5,
-      "damage": 5.0
+      "lifestealToOwner": 5.0
     },
     "description": "Warframe healed for +30% Companion Damage dealt",
     "rarity": "common"
@@ -4989,9 +4976,9 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "fieldDuration": 3,
-      "damage": 15.0,
-      "duration": 5.0
+      "duration": 5.0,
+      "enemyProjectileSpeed": -15,
+      "enemyProjectileDamage": -10
     },
     "description": "Creates a stasis field for 30s. While inside the field, all enemy projectiles move 90% slower and deal 60% less Damage.",
     "rarity": "common"
@@ -5102,9 +5089,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 10
-    },
+    "stats": {},
     "description": "Fast cutting attacks with puncture finish.",
     "rarity": "rare"
   },
@@ -5116,9 +5101,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 20
-    },
+    "stats": {},
     "description": "Sword stance: High damage, slow",
     "rarity": "rare"
   },
@@ -5130,9 +5113,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Sword stance: High damage, sweeping",
     "rarity": "rare"
   },
@@ -5144,9 +5125,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 10
-    },
+    "stats": {},
     "description": "Quick slashes with spinning lunges.",
     "rarity": "rare"
   },
@@ -5158,9 +5137,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 10
-    },
+    "stats": {},
     "description": "Multi-angle strikes and deadly thrust attacks.",
     "rarity": "rare"
   },
@@ -5172,9 +5149,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Dual sword stance: Fluid combos",
     "rarity": "uncommon"
   },
@@ -5186,9 +5161,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 20
-    },
+    "stats": {},
     "description": "Strong slashes and quick stabs that keeps momentum forward.",
     "rarity": "rare"
   },
@@ -5200,9 +5173,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Heavy blade stance: Spinning attacks",
     "rarity": "rare"
   },
@@ -5214,9 +5185,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 20
-    },
+    "stats": {},
     "description": "Sweeping strikes and twisting slashes.",
     "rarity": "rare"
   },
@@ -5228,9 +5197,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 10
-    },
+    "stats": {},
     "description": "Fast spinning attacks and staggering strikes.",
     "rarity": "uncommon"
   },
@@ -5242,9 +5209,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "A blend of strong and rapid strikes with leaping combos.",
     "rarity": "rare"
   },
@@ -5256,9 +5221,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 20
-    },
+    "stats": {},
     "description": "A mix of sweeping attacks with precise strikes.",
     "rarity": "rare"
   },
@@ -5270,9 +5233,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 10
-    },
+    "stats": {},
     "description": "Whip stance: Fast strikes",
     "rarity": "uncommon"
   },
@@ -5284,9 +5245,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Powerful arcing strikes with energetic flips.",
     "rarity": "rare"
   },
@@ -5298,9 +5257,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Methodical strikes with reaching combos.",
     "rarity": "rare"
   },
@@ -5312,9 +5269,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Kicks woven between spinning slashes.",
     "rarity": "rare"
   },
@@ -5326,9 +5281,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Fierce, double-handed strikes.",
     "rarity": "rare"
   },
@@ -5340,9 +5293,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Rapier stance: Cunning strikes",
     "rarity": "rare"
   },
@@ -5354,9 +5305,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 20
-    },
+    "stats": {},
     "description": "Bullets spray between wicked slash attacks.",
     "rarity": "rare"
   },
@@ -5368,9 +5317,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Sharpened blades dance with gunfire.",
     "rarity": "rare"
   },
@@ -5382,9 +5329,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Orbiting slashes and lashing strikes.",
     "rarity": "rare"
   },
@@ -5397,9 +5342,8 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "weapon",
     "stats": {
-      "damageBonus": 10,
-      "statusChance": 25.0,
-      "syndicatePower": 1.0
+      "statusChance": 25,
+      "syndicatePower": 1
     },
     "description": "+100% Status Chance\\n+1 'Blight'",
     "rarity": "rare"
@@ -5412,9 +5356,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 10
-    },
+    "stats": {},
     "description": "Dagger stance: Precision strikes",
     "rarity": "rare"
   },
@@ -5426,9 +5368,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 20
-    },
+    "stats": {},
     "description": "Vigorous slashes with forceful stabs.",
     "rarity": "rare"
   },
@@ -5440,9 +5380,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Dagger stance: Seeking strikes",
     "rarity": "uncommon"
   },
@@ -5454,9 +5392,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 10
-    },
+    "stats": {},
     "description": "Steady chopping strikes with focused damage.",
     "rarity": "uncommon"
   },
@@ -5468,9 +5404,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Far flung attacks and multi-hit combos.",
     "rarity": "rare"
   },
@@ -5482,9 +5416,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 20
-    },
+    "stats": {},
     "description": "Lunging spirals and shattering combos.",
     "rarity": "rare"
   },
@@ -5496,9 +5428,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 10
-    },
+    "stats": {},
     "description": "Arcing strikes and focused combos.",
     "rarity": "uncommon"
   },
@@ -5510,9 +5440,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Lifting strikes and whirlwind combos.",
     "rarity": "rare"
   },
@@ -5524,9 +5452,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Lunging punctures with impaling spirals.",
     "rarity": "rare"
   },
@@ -5538,9 +5464,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 10
-    },
+    "stats": {},
     "description": "Strong, focused attacks with multi-hit spins.",
     "rarity": "uncommon"
   },
@@ -5552,9 +5476,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Lightning fast hit chains and hard-hitting combos.",
     "rarity": "uncommon"
   },
@@ -5566,9 +5488,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 20
-    },
+    "stats": {},
     "description": "Deftly executed sweeps and slashes.",
     "rarity": "uncommon"
   },
@@ -5580,9 +5500,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 15
-    },
+    "stats": {},
     "description": "Dual dagger stance: Spinning strikes",
     "rarity": "rare"
   },
@@ -5594,9 +5512,7 @@ const RAW_MODS: Mod[] = [
     "maxRank": 3,
     "category": "stance",
     "subCategory": "weapon",
-    "stats": {
-      "damageBonus": 20
-    },
+    "stats": {},
     "description": "Blade whip stance: Snake-like strikes",
     "rarity": "rare"
   },
@@ -6325,8 +6241,8 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "weapon",
     "stats": {
-      "heat": 25.0,
-      "duration": 0.833333
+      "statusChance": 25.0,
+      "duration": 5
     },
     "description": "Status Chance fluctuates between +150% and +250% over 5s while the beam is fired.",
     "rarity": "rare"
@@ -9945,7 +9861,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "weapon",
     "stats": {
-      "damage": 8.333333,
+      "allyDamageRedirected": 8.333333,
       "range": 2.0
     },
     "description": "While blocking, redirect 50% of damage taken by allies within 12m to yourself.",
@@ -10137,7 +10053,7 @@ const RAW_MODS: Mod[] = [
     "category": "melee",
     "subCategory": "",
     "stats": {
-      "damage": -12.5,
+      "damageBlock": -12.5,
       "range": 0.25
     },
     "description": "Lock onto targets within 1m, but reduces blocking effectiveness., -50% Damage Block",
@@ -10367,7 +10283,7 @@ const RAW_MODS: Mod[] = [
     "category": "conclave",
     "subCategory": "",
     "stats": {
-      "damage": 15,
+      "damageReflected": 15,
       "duration": 2.0
     },
     "description": "At Less than 50 Health:\\n+60% Damage taken is reflected when Blocking attacks while Channeling for 8s",
@@ -10757,7 +10673,7 @@ const RAW_MODS: Mod[] = [
     "category": "conclave",
     "subCategory": "",
     "stats": {
-      "damageReduction": 10.0
+      "abilityDamageReductionWhileBlocking": 10.0
     },
     "description": "Blocking reduces damage taken from enemy abilities by 60%.",
     "rarity": "rare"
@@ -11019,8 +10935,7 @@ const RAW_MODS: Mod[] = [
     "category": "melee",
     "subCategory": "",
     "stats": {
-      "damage": 10.0,
-      "finisherDamage": 10.0
+      "finisherDamage": 10
     },
     "description": "+60% Finisher Damage",
     "rarity": "uncommon"
@@ -11162,7 +11077,7 @@ const RAW_MODS: Mod[] = [
     "category": "melee",
     "subCategory": "",
     "stats": {
-      "damage": 25.0
+      "comboCountChance": 25
     },
     "description": "+100% chance to increase Melee Combo Counter when <DT_SLASH_COLOR>Slash Status deals damage.",
     "rarity": "uncommon"
@@ -11395,7 +11310,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "accuracy": -1.0,
+      "evasion": 1.0,
       "airborneDamageReduction": 2.0
     },
     "description": "Reduced damage by 12% while airborne, <LOWER_IS_BETTER>-6% Enemy Accuracy when targeting Warframe",
@@ -11469,8 +11384,8 @@ const RAW_MODS: Mod[] = [
     "category": "conclave",
     "subCategory": "",
     "stats": {
-      "damageReduction": 5.0,
-      "parkourVelocity": -2.5
+      "blastDamageResistance": 5.0,
+      "mobility": -2.5
     },
     "description": "+20 <DT_EXPLOSION_COLOR>Blast Resistance, -10% Mobility",
     "rarity": "uncommon"
@@ -11602,7 +11517,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "bulletJumpDamageResistance": 5,
-      "sprintSpeed": -2.5
+      "mobility": -2.5
     },
     "description": "+20% Damage Resistance during Bullet Jump, -10% Mobility",
     "rarity": "uncommon"
@@ -11617,7 +11532,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "dodgeDamageResistance": 10,
-      "sprintSpeed": -2.5
+      "mobility": -2.5
     },
     "description": "+40% Damage Resistance while Dodging, -10% Mobility",
     "rarity": "uncommon"
@@ -11632,7 +11547,6 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "knockedDownDamageResistance": 12.5,
-      "sprintSpeed": -5,
       "slideSpeed": -5.0
     },
     "description": "+50% Damage Resistance when knocked down, -20% Slide",
@@ -11958,7 +11872,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "damage": 12.5
+      "damageRedirected": 12.5
     },
     "description": "Decoy Augment: 50% of damage Loki takes is transferred to Decoy, and vice versa.",
     "rarity": "rare",
@@ -12314,7 +12228,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "range": 0.75,
-      "damage": 10.0
+      "reckoningRange": 10
     },
     "description": "Reckoning Augment: Reckoning gains +40% range. A 3m radius around each affected enemy grants bonus armor to allies and deals 300 damage per second to enemies.",
     "rarity": "rare",
@@ -12865,7 +12779,8 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "damage": 10.0
+      "pacifySlow": 10,
+      "provokeStrength": 3.75
     },
     "description": "Pacify & Provoke Augment: Pacify converts damage done to allies into an aura that slows enemies by 40%. Provoke converts damage done to enemies into 15% extra Ability Strength.",
     "rarity": "rare",
@@ -13145,7 +13060,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "damage": 6.666667
+      "energyOnHealthDamage": 6.666667
     },
     "description": "Convert +40% of Damage on Health to Energy. Without Shields, ally Overguard imitates Health.",
     "rarity": "rare"
@@ -13292,7 +13207,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "damage": 15.0
+      "retaliationChance": 15
     },
     "description": "+60% Chance to deal Electrical Damage when shield struck by melee enemies., +80 <DT_ELECTRICITY_COLOR>Electricity",
     "rarity": "rare"
@@ -13306,7 +13221,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "damage": 8.75
+      "damageRedirected": 8.75
     },
     "description": "Rotorswell Augment: 35% of damage received is redirected toward the instigator as <DT_ELECTRICITY_COLOR> Electricity Damage.",
     "rarity": "rare",
@@ -14694,8 +14609,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "damage": 16.666667,
-      "cooldown": 3.333333
+      "repairChance": 16.666667,
+      "cooldown": 20
     },
     "description": "Nautilus has 100% chance to repair nearby Railjack hull damages and extinguishes fires on Railjack. Cooldown: 20s.",
     "rarity": "common"
@@ -15224,7 +15139,7 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "damage": 3.75,
+      "decoyEvasionChance": 3.75,
       "duration": 1.75
     },
     "description": "Smeeta Kavat becomes invisible for 9s every <LOWER_IS_BETTER>7s while a decoy kavat draws fire. Decoy has a 15% chance to evade damage and blinds nearby enemies on death.",
@@ -15340,9 +15255,9 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "damage": 15.0,
+      "damageReflected": 15,
       "duration": 1.666667,
-      "range": 2.0
+      "range": 2
     },
     "description": "Generates a shield that reflects 90% Damage taken in pulses over 10s as <DT_MAGNETIC_COLOR>Magnetic Damage in a 12m radius.",
     "rarity": "rare"
@@ -15709,8 +15624,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "damage": 15.0,
-      "duration": 1.0
+      "lethalImmunityChance": 15,
+      "duration": 1
     },
     "description": "Kavat has 60% chance to ignore Lethal Damage and be immune for 4s.",
     "rarity": "rare"
@@ -15913,7 +15828,7 @@ const RAW_MODS: Mod[] = [
     "category": "archwing",
     "subCategory": "",
     "stats": {
-      "damage": 10.0
+      "energyOnHealthDamage": 10
     },
     "description": "Convert +40% of Damage on Health to Energy. Without Shields, ally Overguard imitates Health.",
     "rarity": "rare"
@@ -18870,7 +18785,7 @@ const RAW_MODS: Mod[] = [
     "category": "necramech",
     "subCategory": "",
     "stats": {
-      "damage": 2.5
+      "energyOnHealthDamage": 2.5
     },
     "description": "Convert +15% of Damage on Health to Energy. Without Shields, ally Overguard imitates Health.",
     "rarity": "uncommon"
@@ -19185,7 +19100,10 @@ const RAW_MODS: Mod[] = [
     "category": "railjack",
     "subCategory": "",
     "stats": {
-      "heat": 3.0
+      "forgeCapacity": 3.75,
+      "forgeCooldown": -2.5,
+      "elementalResistance": 2.5,
+      "turretHeatCapacity": 3
     },
     "description": "+22.5% Forge Capacity\\n-15% Forge Cooldown\\n+15% Elemental Resistance\\n+18% Turret Heat Capacity",
     "rarity": "uncommon"

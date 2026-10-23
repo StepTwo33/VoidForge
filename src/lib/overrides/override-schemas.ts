@@ -213,6 +213,8 @@ export const FIELD_LABELS: Record<string, string> = {
   sprintSpeed: "Sprint speed",
   passive: "Passive description",
   damage: "Damage",
+  // wiki.warframe.com Hunter Recovery: "Life Steal" (Warframe healed for a % of companion damage).
+  lifestealToOwner: "Life Steal",
   fireRate: "Fire rate",
   blastStaggerRadius: "Blast proc and stagger radius",
   criticalChance: "Crit chance",
@@ -268,6 +270,9 @@ export const FIELD_LABELS: Record<string, string> = {
   type: "Companion type",
   precept: "Precept",
   speed: "Flight speed",
+  // Aerial / Momentous Bond (wiki.warframe.com): kills cut the companion's bleedout recovery timer.
+  recoveryTimeReduction: "Companion Recovery Time",
+  headshotRecoveryTimeReduction: "Companion Recovery Time (headshot kill)",
 };
 
 /** Help text for StatRowsEditor — mod vs arcane catalog stats use different scaling. */
