@@ -63,7 +63,7 @@ export const kitgunChambers: KitgunChamber[] = [
     description: "Explosive spore projectiles with AoE on impact. Impact/Toxin damage.",
     category: "projectile_shotgun", baseDamage: 90,
     damageRatios: { impact: 21 / 90, toxin: 69 / 90 },
-    triggerPrimary: "Auto", triggerSecondary: "Semi-Auto",
+    triggerPrimary: "Semi-Auto", triggerSecondary: "Semi-Auto",
     baseCritChance: 0.21, baseCritMultiplier: 3.0, baseStatusChance: 0.21,
     // Wiki Sporelacer primary loader table: base CM 2.0x (secondary 3.0x).
     baseCritMultiplierPrimary: 2.0,
@@ -354,7 +354,12 @@ export function buildKitgun(chamber: KitgunChamber, grip: KitgunGrip, loader: Ki
   return {
     id: `kitgun_${chamber.id}_${grip.id}_${loader.id}`,
     name: `${chamber.name} (${grip.name} / ${loader.name})`,
-    category: grip.type === "primary" ? "primary" : "secondary",
+    category:
+      grip.type === "primary"
+        ? chamber.category === "projectile_shotgun"
+          ? "shotgun"
+          : "primary"
+        : "secondary",
     damage: totalDamage,
     impact: dmgBreakdown.impact || 0,
     puncture: dmgBreakdown.puncture || 0,

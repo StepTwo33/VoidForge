@@ -107,6 +107,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
   const [rivenStats, setRivenStats] = useState<Record<string, number>>({});
   const [rivenStatKey, setRivenStatKey] = useState("");
   const [rivenStatValue, setRivenStatValue] = useState("");
+  const [rivenStatSearch, setRivenStatSearch] = useState("");
   const [statFilter, setStatFilter] = useState<ModStatFilterId>("all");
   // Slot stepper: keep the chosen stat chip while moving between slots of the same type,
   // but reset it when the slot type changes (e.g. regular -> Aura/Exilus), whose chip set differs.
@@ -286,6 +287,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
       setRivenStats({});
       setRivenStatKey("");
       setRivenStatValue("");
+      setRivenStatSearch("");
       setSearch("");
       onClose();
     }
@@ -297,6 +299,7 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
     setRivenStats({});
     setRivenStatKey("");
     setRivenStatValue("");
+    setRivenStatSearch("");
     setSearch("");
     setStatFilter("all");
     setSortId("name");
@@ -418,6 +421,32 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
 
             {isRivenMod(selectedMod) ? (() => {
               const rivenPool = getRivenStatsForCategory(rivenPoolCategory(weapon, weaponCategory || category));
+              const availableStats = rivenPool.filter((s) => !s.spliced && !(s.key in rivenStats));
+              const canAddSpliced = !rivenPool.some((s) => s.spliced && s.key in rivenStats) && rivenPool.some((s) => s.spliced);
+              const availableSplicedStats = canAddSpliced ? rivenPool.filter((s) => s.spliced) : [];
+
+              const q = rivenStatSearch.trim().toLowerCase();
+              const filteredNormalStats = q
+                ? availableStats.filter((s) => s.label.toLowerCase().includes(q) || s.key.toLowerCase().includes(q))
+                : availableStats;
+              const filteredSplicedStats = q
+                ? availableSplicedStats.filter((s) => s.label.toLowerCase().includes(q) || s.key.toLowerCase().includes(q))
+                : availableSplicedStats;
+
+              const selectedStatDef = rivenPool.find((s) => s.key === rivenStatKey);
+              const isPercentStat = selectedStatDef ? selectedStatDef.isPercent !== false : true;
+
+              const handleAddRivenStat = () => {
+                if (!rivenStatKey || !rivenStatValue) return;
+                const num = parseFloat(rivenStatValue);
+                if (isNaN(num)) return;
+                const val = isPercentStat ? num / 100 : num;
+                setRivenStats((prev) => ({ ...prev, [rivenStatKey]: val }));
+                setRivenStatKey("");
+                setRivenStatValue("");
+                setRivenStatSearch("");
+              };
+
               return (
                 <div className="space-y-3">
                   <div className="text-[10px] text-purple-700/70 uppercase tracking-wider dark:text-purple-300/60">
@@ -466,45 +495,120 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
                     </div>
                   )}
                   {Object.keys(rivenStats).length < 4 && (
-                    <div className="flex gap-2">
-                      <select
-                        value={rivenStatKey}
-                        onChange={(e) => setRivenStatKey(e.target.value)}
-                        className="min-h-11 min-w-0 flex-1 rounded border border-border bg-background px-2 py-2 text-xs sm:min-h-9 sm:py-1.5"
-                      >
-                        <option value="">Select stat...</option>
-                        {rivenPool.filter((s) => !s.spliced && !(s.key in rivenStats)).map((s) => (
-                          <option key={s.key} value={s.key}>{s.label}{s.displayOnly ? " (info only)" : ""}</option>
-                        ))}
-                        {!rivenPool.some((s) => s.spliced && s.key in rivenStats) && rivenPool.some((s) => s.spliced) && (
-                          <optgroup label="Spliced traits (Riven Splicer, max 1)">
-                            {rivenPool.filter((s) => s.spliced).map((s) => (
-                              <option key={s.key} value={s.key}>{s.label.replace(" (Spliced)", "")}{s.displayOnly ? " (info only)" : ""}</option>
-                            ))}
-                          </optgroup>
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                        <input
+                          type="text"
+                          placeholder="Search stats (e.g. crit, damage, cold)..."
+                          value={rivenStatSearch}
+                          onChange={(e) => setRivenStatSearch(e.target.value)}
+                          className="h-8 w-full rounded border border-border bg-background pl-8 pr-7 text-xs placeholder:text-muted-foreground focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        />
+                        {rivenStatSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setRivenStatSearch("")}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                            aria-label="Clear stat search"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
                         )}
-                      </select>
-                      <input
-                        type="number"
-                        step="0.1"
-                        placeholder="% value"
-                        value={rivenStatValue}
-                        onChange={(e) => setRivenStatValue(e.target.value)}
-                        className="h-11 w-24 shrink-0 rounded border border-border bg-background px-2 text-xs sm:h-9"
-                      />
-                      <button
-                        onClick={() => {
-                          if (!rivenStatKey || !rivenStatValue) return;
-                          const val = parseFloat(rivenStatValue) / 100;
-                          setRivenStats((prev) => ({ ...prev, [rivenStatKey]: val }));
-                          setRivenStatKey("");
-                          setRivenStatValue("");
-                        }}
-                        disabled={!rivenStatKey || !rivenStatValue}
-                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded bg-purple-600 text-xs text-white transition-colors hover:bg-purple-700 disabled:opacity-40 sm:h-9 sm:w-9"
-                      >
-                        <Plus className="h-3 w-3" />
-                      </button>
+                      </div>
+
+                      {q && (filteredNormalStats.length > 0 || filteredSplicedStats.length > 0) && (
+                        <div className="flex flex-wrap gap-1">
+                          {[...filteredNormalStats, ...filteredSplicedStats].slice(0, 8).map((s) => {
+                            const isSelected = rivenStatKey === s.key;
+                            return (
+                              <button
+                                key={s.key}
+                                type="button"
+                                onClick={() => setRivenStatKey(s.key)}
+                                className={cn(
+                                  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors",
+                                  isSelected
+                                    ? "border-purple-500 bg-purple-500/20 text-purple-700 dark:text-purple-300"
+                                    : "border-border bg-muted/40 text-muted-foreground hover:border-purple-500/50 hover:text-foreground",
+                                )}
+                              >
+                                <span>{s.spliced ? s.label.replace(" (Spliced)", "") : s.label}</span>
+                                {s.spliced && (
+                                  <span className="text-[8px] uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
+                                    spliced
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {q && filteredNormalStats.length === 0 && filteredSplicedStats.length === 0 && (
+                        <p className="text-[11px] text-muted-foreground italic">
+                          No stats match &quot;{rivenStatSearch}&quot;
+                        </p>
+                      )}
+
+                      <div className="flex gap-2">
+                        <select
+                          value={rivenStatKey}
+                          onChange={(e) => setRivenStatKey(e.target.value)}
+                          className="min-h-11 min-w-0 flex-1 rounded border border-border bg-background px-2 py-2 text-xs sm:min-h-9 sm:py-1.5"
+                        >
+                          <option value="">
+                            {q
+                              ? filteredNormalStats.length + filteredSplicedStats.length > 0
+                                ? `Select stat (${filteredNormalStats.length + filteredSplicedStats.length} matching)...`
+                                : "No matching stats"
+                              : "Select stat..."}
+                          </option>
+                          {rivenStatKey && !filteredNormalStats.some((s) => s.key === rivenStatKey) && !filteredSplicedStats.some((s) => s.key === rivenStatKey) && selectedStatDef && (
+                            <option value={selectedStatDef.key}>
+                              {selectedStatDef.spliced ? selectedStatDef.label.replace(" (Spliced)", "") : selectedStatDef.label} (selected)
+                            </option>
+                          )}
+                          {filteredNormalStats.map((s) => (
+                            <option key={s.key} value={s.key}>
+                              {s.label}{s.displayOnly ? " (info only)" : ""}
+                            </option>
+                          ))}
+                          {filteredSplicedStats.length > 0 && (
+                            <optgroup label="Spliced traits (Riven Splicer, max 1)">
+                              {filteredSplicedStats.map((s) => (
+                                <option key={s.key} value={s.key}>
+                                  {s.label.replace(" (Spliced)", "")}{s.displayOnly ? " (info only)" : ""}
+                                </option>
+                              ))}
+                            </optgroup>
+                          )}
+                        </select>
+                        <input
+                          type="number"
+                          step="0.1"
+                          placeholder={isPercentStat ? "% value" : "value"}
+                          value={rivenStatValue}
+                          onChange={(e) => setRivenStatValue(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleAddRivenStat();
+                            }
+                          }}
+                          className="h-11 w-24 shrink-0 rounded border border-border bg-background px-2 text-xs sm:h-9"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddRivenStat}
+                          disabled={!rivenStatKey || !rivenStatValue}
+                          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded bg-purple-600 text-xs text-white transition-colors hover:bg-purple-700 disabled:opacity-40 sm:h-9 sm:w-9"
+                          title="Add stat"
+                          aria-label="Add riven stat"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>

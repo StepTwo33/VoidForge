@@ -41,7 +41,7 @@ export function getWeaponModProfile(
 
   if (category === "bow" || category === "launcher") {
     tags.add("SINGLESHOT");
-  } else if (trigger === "semi" || trigger === "charge") {
+  } else if (trigger.startsWith("semi") || trigger === "charge") {
     tags.add("SINGLESHOT");
   } else if (trigger === "sniper" && !NON_SEMI_SNIPER_IDS.has(weapon.id)) {
     // Sniper class uses triggerType "Sniper" in arsenal data; most are semi-auto
