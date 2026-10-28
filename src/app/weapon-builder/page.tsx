@@ -787,9 +787,9 @@ export default function WeaponBuilderPage() {
                         ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
                         : "text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10"
                     )}
-                    title="Import Build"
+                    title="Import mods from a pasted mod list or a screenshot (replaces the mods on this build)"
                   >
-                    <Upload className="h-3.5 w-3.5" /> <span className="inline">Import</span>
+                    <Upload className="h-3.5 w-3.5" /> <span className="inline">Import mods</span>
                   </button>
                   <button
                     onClick={handleShareBuild}
