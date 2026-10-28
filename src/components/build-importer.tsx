@@ -15,6 +15,11 @@ import {
   type ImportMode,
   type PlanRow,
 } from "@/lib/builds/mod-list-import";
+import {
+  importCapacityPreviewText,
+  isOverCapacity,
+  type CapacityFigures,
+} from "@/lib/builds/import-capacity-notice";
 
 export interface ImportApplied {
   /** Full mod list for the build after the import. */
@@ -40,6 +45,8 @@ interface BuildImporterProps {
   isAura?: (mod: Mod) => boolean;
   /** What is equipped right now. */
   existing: readonly EquippedMod[];
+  /** Capacity the build would show after applying these mods (used / max), for the over-capacity note. */
+  capacityAfter?: (mods: EquippedMod[]) => CapacityFigures;
   onImport: (result: ImportApplied) => void;
   onClose: () => void;
 }
@@ -66,6 +73,7 @@ export function BuildImporter({
   auraSlots,
   isAura,
   existing,
+  capacityAfter,
   onImport,
   onClose,
 }: BuildImporterProps) {
@@ -115,6 +123,13 @@ export function BuildImporter({
     const top = [...kinds.entries()].sort((a, b) => b[1] - a[1])[0][0];
     return `These look like ${top} mods, which ${itemName} can't use. Check you're importing into the right item.`;
   }, [plan, itemName]);
+
+  // Imports carry no Forma/polarities, so the result can look over capacity: say so before applying.
+  const capacityNote = useMemo(() => {
+    if (!capacityAfter || plan.importedCount === 0) return null;
+    const figures = capacityAfter(plan.result);
+    return isOverCapacity(figures.used, figures.max) ? figures : null;
+  }, [capacityAfter, plan]);
 
   const setOverride = useCallback((index: number, modId: string) => {
     setOverrides((prev) => ({ ...prev, [index]: modId }));
@@ -436,6 +451,16 @@ export function BuildImporter({
         )}
         <p className="mt-1.5 text-[11px] text-muted-foreground">You can undo the import right after from the confirmation message.</p>
       </fieldset>
+
+      {capacityNote && (
+        <div role="status" data-testid="import-dialog-capacity-note" className="mb-3 flex items-start gap-2 rounded-lg border border-blue-500/30 bg-blue-500/5 p-2.5 text-xs">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-700 dark:text-blue-400" aria-hidden="true" />
+          <p className="text-muted-foreground">
+            <span className="font-medium text-foreground">Capacity may look over. </span>
+            {importCapacityPreviewText(capacityNote)}
+          </p>
+        </div>
+      )}
 
       {confirming && (
         <div role="alert" className="mb-3 rounded-lg border border-amber-500/40 bg-amber-500/5 p-2.5 text-xs text-amber-900 dark:text-amber-200">

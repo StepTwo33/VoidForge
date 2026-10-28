@@ -60,6 +60,8 @@ import { GameAssetImage } from "@/components/game-asset-image";
 import { BuildImporter, type ImportApplied } from "@/components/build-importer";
 import { weaponImportEligibility } from "@/lib/builds/import-eligibility";
 import { describeImportResult } from "@/lib/builds/mod-list-import";
+import { ImportCapacityNotice, useImportCapacityNotice } from "@/components/import-capacity-notice";
+import { importCapacityToastText, isOverCapacity } from "@/lib/builds/import-capacity-notice";
 import { useCloudBuildFromUrl, fetchCloudBuild, setCloudBuildInUrl, clearCloudBuildInUrl, markCloudBuildLoaded } from "@/lib/builds/use-cloud-build-from-url";
 import { snapshotFromBuild } from "@/lib/builds/compare-build";
 import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
@@ -632,19 +634,40 @@ export default function WeaponBuilderPage() {
     [selectedWeapon, modCategory],
   );
   const importRegularSlots = useMemo(() => Array.from({ length: numSlots }, (_, i) => i), [numSlots]);
+  const weaponCapacityUsed = computeUsedCapacity(equippedMods, modsMap, effectivePolarities);
+  const importCapacityNotice = useImportCapacityNotice(selectedWeapon?.id ?? "", weaponCapacityUsed, modCapacity);
+  const importCapacityAfter = useCallback(
+    (mods: EquippedMod[]) => ({
+      used: computeUsedCapacity(cleanLoadedMods(mods), modsMap, effectivePolarities),
+      max: modCapacity,
+    }),
+    [modsMap, effectivePolarities, modCapacity],
+  );
+  const { arm: armImportCapacityNotice, clear: clearImportCapacityNotice } = importCapacityNotice;
   const handleImportMods = useCallback(
     (r: ImportApplied) => {
       const previous = equippedMods;
-      setEquippedMods(cleanLoadedMods(r.mods));
+      const next = cleanLoadedMods(r.mods);
+      setEquippedMods(next);
       setShowImporter(false);
+      armImportCapacityNotice();
       const { title, description } = describeImportResult(r);
+      const figures = importCapacityAfter(next);
       toast.success(title, {
-        description,
+        description: isOverCapacity(figures.used, figures.max)
+          ? `${description} ${importCapacityToastText(figures)}`
+          : description,
         duration: 12000,
-        action: { label: "Undo", onClick: () => setEquippedMods(previous) },
+        action: {
+          label: "Undo",
+          onClick: () => {
+            setEquippedMods(previous);
+            clearImportCapacityNotice();
+          },
+        },
       });
     },
-    [equippedMods],
+    [equippedMods, armImportCapacityNotice, clearImportCapacityNotice, importCapacityAfter],
   );
   const showAdversaryRank = selectedWeapon != null && weaponSupportsProgenitor(selectedWeapon);
 
@@ -964,14 +987,17 @@ export default function WeaponBuilderPage() {
                   </h2>
                   <span className={cn(
                     "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",
-                    computeUsedCapacity(equippedMods, modsMap, effectivePolarities) > modCapacity
+                    weaponCapacityUsed > modCapacity
                       ? "text-red-700 dark:text-red-400" : "text-muted-foreground"
                   )}>
                     <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
-                    {computeUsedCapacity(equippedMods, modsMap, effectivePolarities)} / {modCapacity}
+                    {weaponCapacityUsed} / {modCapacity}
                   </span>
                   <MobileStatSummary items={weaponStatSummary(calculatedStats)} />
                 </div>
+                {importCapacityNotice.visible && (
+                  <ImportCapacityNotice used={weaponCapacityUsed} max={modCapacity} onDismiss={importCapacityNotice.dismiss} />
+                )}
                 {showImporter && selectedWeapon && importEligibility && (
                   <div className="mb-4">
                     <BuildImporter
@@ -982,6 +1008,7 @@ export default function WeaponBuilderPage() {
                       explainIneligible={importEligibility.explainIneligible}
                       regularSlots={importRegularSlots}
                       existing={equippedMods}
+                      capacityAfter={importCapacityAfter}
                       onImport={handleImportMods}
                       onClose={() => setShowImporter(false)}
                     />

@@ -72,6 +72,8 @@ import { GameAssetImage } from "@/components/game-asset-image";
 import { BuildImporter, type ImportApplied } from "@/components/build-importer";
 import { warframeImportEligibility } from "@/lib/builds/import-eligibility";
 import { describeImportResult } from "@/lib/builds/mod-list-import";
+import { ImportCapacityNotice, useImportCapacityNotice } from "@/components/import-capacity-notice";
+import { importCapacityToastText, isOverCapacity } from "@/lib/builds/import-capacity-notice";
 import { isAuraMod } from "@/lib/mods/aura-mods";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
@@ -748,20 +750,6 @@ export default function WarframeBuilderPage() {
     [selectedWarframe?.id, selectedWarframe?.name],
   );
   const importRegularSlots = useMemo(() => [1, 2, 3, 4, 5, 6, 7, 8], []);
-  const handleImportMods = useCallback(
-    (r: ImportApplied) => {
-      const previous = equippedMods;
-      setEquippedMods(cleanLoadedMods(r.mods));
-      setShowImporter(false);
-      const { title, description } = describeImportResult(r);
-      toast.success(title, {
-        description,
-        duration: 12000,
-        action: { label: "Undo", onClick: () => setEquippedMods(previous) },
-      });
-    },
-    [equippedMods],
-  );
 
   const innatePolarities = useMemo(
     () =>
@@ -788,6 +776,45 @@ export default function WarframeBuilderPage() {
   const capacityUsed = useMemo(
     () => computeWarframeCapacityUsed(equippedMods, modsMap, effectivePolarities, auraSlotIndices),
     [equippedMods, modsMap, effectivePolarities, auraSlotIndices],
+  );
+
+  const importCapacityNotice = useImportCapacityNotice(
+    `${selectedWarframe?.id ?? ""}:${dualFormConfig ? activeDualFormId : ""}`,
+    capacityUsed,
+    totalCapacity,
+  );
+  const importCapacityAfter = useCallback(
+    (mods: EquippedMod[]) => ({
+      used: computeWarframeCapacityUsed(cleanLoadedMods(mods), modsMap, effectivePolarities, auraSlotIndices),
+      max: baseCapacity + computeWarframeAuraBonus(cleanLoadedMods(mods), modsMap, effectivePolarities, auraSlotIndices),
+    }),
+    [modsMap, effectivePolarities, auraSlotIndices, baseCapacity],
+  );
+  const { arm: armImportCapacityNotice, clear: clearImportCapacityNotice } = importCapacityNotice;
+  const handleImportMods = useCallback(
+    (r: ImportApplied) => {
+      const previous = equippedMods;
+      const next = cleanLoadedMods(r.mods);
+      setEquippedMods(next);
+      setShowImporter(false);
+      armImportCapacityNotice();
+      const { title, description } = describeImportResult(r);
+      const figures = importCapacityAfter(next);
+      toast.success(title, {
+        description: isOverCapacity(figures.used, figures.max)
+          ? `${description} ${importCapacityToastText(figures)}`
+          : description,
+        duration: 12000,
+        action: {
+          label: "Undo",
+          onClick: () => {
+            setEquippedMods(previous);
+            clearImportCapacityNotice();
+          },
+        },
+      });
+    },
+    [equippedMods, armImportCapacityNotice, clearImportCapacityNotice, importCapacityAfter],
   );
 
   const handleSelectWarframe = useCallback((warframe: Warframe) => {
@@ -1157,6 +1184,9 @@ export default function WarframeBuilderPage() {
                     </div>
                     <MobileStatSummary items={warframeStatSummary(calculatedStats)} />
                   </div>
+                  {importCapacityNotice.visible && (
+                    <ImportCapacityNotice used={capacityUsed} max={totalCapacity} onDismiss={importCapacityNotice.dismiss} />
+                  )}
 
 
                   {equippedMods.length === 0 && (
@@ -1236,6 +1266,7 @@ export default function WarframeBuilderPage() {
                         auraSlots={auraSlotIndices}
                         isAura={isAuraMod}
                         existing={equippedMods}
+                        capacityAfter={importCapacityAfter}
                         onImport={handleImportMods}
                         onClose={() => setShowImporter(false)}
                       />
