@@ -69,6 +69,11 @@ interface ModPickerProps {
   mods: Mod[];
   category: string;
   slotType?: SlotType;
+  /**
+   * Which builder's stat chips to show when `category` is "_prefiltered" (the caller already filtered the pool).
+   * Defaults to `category`.
+   */
+  statFilterCategory?: string;
   equippedModIds: string[];
   onSelect: (mod: Mod, rank: number) => void;
   onSelectRiven?: (mod: Mod, stats: Record<string, number>) => void;
@@ -98,7 +103,7 @@ export interface ModPickerSlotNav {
   onNext?: () => void;
 }
 
-export function ModPicker({ open, onClose, mods, category, slotType = "regular", equippedModIds, onSelect, onSelectRiven, weaponCategory, weapon, warframeId, helminthAbility, archwingId, arcaneCatalog, pickerMode = "mods", initialBrowseTab = "mods", equippedArcaneIds = [], slotNav }: ModPickerProps) {
+export function ModPicker({ open, onClose, mods, category, statFilterCategory, slotType = "regular", equippedModIds, onSelect, onSelectRiven, weaponCategory, weapon, warframeId, helminthAbility, archwingId, arcaneCatalog, pickerMode = "mods", initialBrowseTab = "mods", equippedArcaneIds = [], slotNav }: ModPickerProps) {
   const [search, setSearch] = useState("");
   const [selectedMod, setSelectedMod] = useState<Mod | null>(null);
   const [selectedRank, setSelectedRank] = useState(0);
@@ -120,8 +125,8 @@ export function ModPicker({ open, onClose, mods, category, slotType = "regular",
   const [sortId, setSortId] = useState<ModSortId>("name");
 
   const statFilterOptions = useMemo(
-    () => getModPickerStatFilters(category, slotType),
-    [category, slotType],
+    () => getModPickerStatFilters(statFilterCategory ?? category, slotType),
+    [category, statFilterCategory, slotType],
   );
 
   const blockedByExclusion = useMemo(() => getBlockedModIds(equippedModIds), [equippedModIds]);

@@ -1200,6 +1200,7 @@ export default function CompanionBuilderPage() {
         onClose={() => setModPickerOpen(false)}
         mods={modPickerTarget === "weapon" ? weaponModPool : companionPickerMods}
         category="_prefiltered"
+        statFilterCategory={modPickerTarget === "weapon" ? "primary" : "companion"}
         slotType="regular"
         equippedModIds={equippedModIds}
         onSelect={handleSelectMod}
