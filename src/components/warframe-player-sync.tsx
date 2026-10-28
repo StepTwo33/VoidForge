@@ -285,6 +285,10 @@ function ImportPreview({
                 </li>
               ))}
             </ul>
+            <p className="mt-2 text-xs text-muted-foreground" data-testid="import-not-included">
+              Mods and ranks, arcanes, Helminth and the Orokin Reactor / Catalyst come across. The game&apos;s data doesn&apos;t include slot polarities (Forma),
+              Incarnon evolutions or Archon Shards, so set those in the builder.
+            </p>
           </>
         ) : (
           <p className="mt-2 text-sm">Ready to import: No mapped slots</p>
