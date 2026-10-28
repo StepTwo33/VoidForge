@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import {
   ThumbsUp,
@@ -44,10 +44,13 @@ export function BuildVoteButton({
   const [voted, setVoted] = useState(initialVoted);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+  // Follow the server-provided values when they change (adjust-state-during-render, no effect).
+  const [prevInitial, setPrevInitial] = useState({ initialCount, initialVoted });
+  if (prevInitial.initialCount !== initialCount || prevInitial.initialVoted !== initialVoted) {
+    setPrevInitial({ initialCount, initialVoted });
     setCount(initialCount);
     setVoted(initialVoted);
-  }, [initialCount, initialVoted]);
+  }
 
   const handleVote = async (e: React.MouseEvent) => {
     e.preventDefault();

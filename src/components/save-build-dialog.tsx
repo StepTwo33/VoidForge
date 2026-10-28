@@ -67,16 +67,23 @@ export function SaveBuildDialog({
   // render; depending on them directly caused an infinite setState loop
   // ("Maximum update depth exceeded") that crashed the page on open.
   // Remember the opener at the moment the dialog opens so Esc/close returns focus to it.
-  const returnFocusRef = useRef<HTMLElement | null>(null);
-  const wasOpenRef = useRef(false);
-  if (open && !wasOpenRef.current && typeof document !== "undefined") {
-    returnFocusRef.current = document.activeElement as HTMLElement | null;
+  // Adjust-state-during-render (no ref writes in render): `returnFocusEl` is captured in the same
+  // render pass that first sees `open`, before the dialog moves focus.
+  const [returnFocusEl, setReturnFocusEl] = useState<HTMLElement | null>(null);
+  const [wasOpen, setWasOpen] = useState(false);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open && typeof document !== "undefined") {
+      setReturnFocusEl(document.activeElement as HTMLElement | null);
+    }
   }
-  wasOpenRef.current = open;
   const loadoutTargetRef = useRef(loadoutTarget);
-  loadoutTargetRef.current = loadoutTarget;
   const defaultsRef = useRef({ defaultName, defaultDescription, defaultIsPublic, defaultTags });
-  defaultsRef.current = { defaultName, defaultDescription, defaultIsPublic, defaultTags };
+  // Keep the latest props available to the open-reset effect below (declared first, so it runs first).
+  useEffect(() => {
+    loadoutTargetRef.current = loadoutTarget;
+    defaultsRef.current = { defaultName, defaultDescription, defaultIsPublic, defaultTags };
+  });
 
   useEffect(() => {
     if (open) {
@@ -115,7 +122,7 @@ export function SaveBuildDialog({
       <DialogContent
         className="max-w-[calc(100%-2rem)] sm:max-w-md"
         onCloseAutoFocus={(e) => {
-          const el = returnFocusRef.current;
+          const el = returnFocusEl;
           if (el?.isConnected) {
             e.preventDefault();
             el.focus();

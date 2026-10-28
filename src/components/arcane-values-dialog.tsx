@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import type { ArcaneEffectDef } from "@/data/arcane-effects";
 import {
@@ -50,12 +50,17 @@ export function ArcaneValuesDialog({
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (!open) return;
-    setLines(toEffectDrafts(effects?.effects ?? []));
-    setTrigger(effects?.trigger ?? "passive");
-    setNote("");
-  }, [open, effects]);
+  // Re-seed the draft whenever the dialog opens (or `effects` changes while open).
+  // Adjust-state-during-render; `prevSeed` null = first render.
+  const [prevSeed, setPrevSeed] = useState<{ open: boolean; effects: typeof effects } | null>(null);
+  if (!prevSeed || prevSeed.open !== open || prevSeed.effects !== effects) {
+    setPrevSeed({ open, effects });
+    if (open) {
+      setLines(toEffectDrafts(effects?.effects ?? []));
+      setTrigger(effects?.trigger ?? "passive");
+      setNote("");
+    }
+  }
 
   const maxRank = effects?.maxRank ?? 5;
 

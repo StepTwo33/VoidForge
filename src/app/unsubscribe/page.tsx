@@ -9,13 +9,12 @@ import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 function UnsubscribeInner() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
-  const [status, setStatus] = useState<"loading" | "ok" | "error">("loading");
+  const [fetchedStatus, setStatus] = useState<"loading" | "ok" | "error">("loading");
+  // No token: the link is invalid, show the error straight away (no request is made).
+  const status = token ? fetchedStatus : "error";
 
   useEffect(() => {
-    if (!token) {
-      setStatus("error");
-      return;
-    }
+    if (!token) return;
     let cancelled = false;
     fetch("/api/newsletter/unsubscribe", {
       method: "POST",

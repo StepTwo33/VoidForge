@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -47,7 +48,10 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
   const [promptValue, setPromptValue] = useState("");
   const pendingRef = useRef<PendingDialog | null>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
-  pendingRef.current = pending;
+  // Mirror of `pending` for `finish`; layout effect keeps it in step with the committed state.
+  useLayoutEffect(() => {
+    pendingRef.current = pending;
+  }, [pending]);
 
   const finish = useCallback((value: boolean | string | null) => {
     const current = pendingRef.current;

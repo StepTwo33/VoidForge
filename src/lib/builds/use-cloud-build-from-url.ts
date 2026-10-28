@@ -51,7 +51,10 @@ export function useCloudBuildFromUrl(
   onLoad: (build: SavedBuild) => void
 ) {
   const onLoadRef = useRef(onLoad);
-  onLoadRef.current = onLoad;
+  // Latest-callback ref, synced in an effect declared before the URL-sync effects so they always see it.
+  useEffect(() => {
+    onLoadRef.current = onLoad;
+  });
   /** Per mount — dedupes StrictMode double-invoke within the same mount cycle. */
   const loadedInMountRef = useRef<string | null>(null);
 

@@ -233,6 +233,7 @@ function HeaderBuildSearch({ className, onNavigate }: { className?: string; onNa
 
   useEffect(() => {
     if (trimmed.length < 2) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- debounced fetch / admin count: results are cleared when the query or role no longer applies
       setCommunityBuilds([]);
       setLoadingBuilds(false);
       return;
@@ -260,9 +261,16 @@ function HeaderBuildSearch({ className, onNavigate }: { className?: string; onNa
     };
   }, [trimmed]);
 
-  useEffect(() => {
+  // Highlight resets to the first row whenever the query or the result counts change.
+  const [prevActiveKey, setPrevActiveKey] = useState({ query, builds: communityBuilds.length, catalog: catalogMatches.length });
+  if (
+    prevActiveKey.query !== query ||
+    prevActiveKey.builds !== communityBuilds.length ||
+    prevActiveKey.catalog !== catalogMatches.length
+  ) {
+    setPrevActiveKey({ query, builds: communityBuilds.length, catalog: catalogMatches.length });
     setActiveIndex(0);
-  }, [query, communityBuilds.length, catalogMatches.length]);
+  }
 
   useEffect(() => {
     if (!showSuggestions) return;
@@ -498,6 +506,7 @@ export function Header() {
 
   useEffect(() => {
     if (!isAdmin) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- debounced fetch / admin count: results are cleared when the query or role no longer applies
       setOpenReportCount(0);
       return;
     }

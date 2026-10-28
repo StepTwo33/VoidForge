@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Mod, getRivenStatsForCategory } from "@/lib/types";
 import { isAuraMod } from "@/lib/mods/aura-mods";
 import { isArchmeleeMod } from "@/lib/mods/archmelee-mods";
@@ -60,6 +60,7 @@ import {
   type ModStatFilterId,
 } from "@/lib/mods/mod-stat-filters";
 import { PointerVerb } from "@/components/pointer-verb";
+import { openResetKey, shouldResetOnOpen } from "@/lib/ui/reset-on-open";
 
 export type SlotType = WeaponModSlotType | "aura" | "exilus" | "companion_precept";
 
@@ -123,6 +124,18 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
     setStatFilter("all");
   }
   const [sortId, setSortId] = useState<ModSortId>("name");
+  // Reset tab / stat chip / sort whenever the picker opens (or its seeds change while open).
+  // Adjust-state-during-render, same timing as the old effect minus one stale frame; see lib/ui/reset-on-open.
+  const resetKey = openResetKey(open, initialBrowseTab, pickerMode);
+  const [prevResetKey, setPrevResetKey] = useState<string | null>(null);
+  if (prevResetKey !== resetKey) {
+    setPrevResetKey(resetKey);
+    if (shouldResetOnOpen(prevResetKey, resetKey, open)) {
+      setBrowseTab(pickerMode === "arcanes" ? "arcanes" : initialBrowseTab);
+      setStatFilter("all");
+      setSortId("name");
+    }
+  }
 
   const statFilterOptions = useMemo(
     () => getModPickerStatFilters(statFilterCategory ?? category, slotType),
@@ -267,13 +280,6 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
 
   const isArcaneBrowse = pickerMode === "arcanes" && !!arcaneCatalog;
 
-  useEffect(() => {
-    if (open) {
-      setBrowseTab(pickerMode === "arcanes" ? "arcanes" : initialBrowseTab);
-      setStatFilter("all");
-      setSortId("name");
-    }
-  }, [open, initialBrowseTab, pickerMode]);
 
   const handleSelectMod = (mod: Mod) => {
     setSelectedMod(mod);

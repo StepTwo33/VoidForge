@@ -98,14 +98,25 @@ export default function DiscoverPage() {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [countsLoading, setCountsLoading] = useState(false);
 
-  useEffect(() => {
+  // Follow the URL: when any URL-derived filter changes (back/forward, links), adopt it.
+  // Adjust-state-during-render (no effect); local edits stay until the URL value itself changes.
+  const [prevUrl, setPrevUrl] = useState({ urlQ, urlItem, urlSort, urlType, urlTag, urlSlot });
+  if (
+    prevUrl.urlQ !== urlQ ||
+    prevUrl.urlItem !== urlItem ||
+    prevUrl.urlSort !== urlSort ||
+    prevUrl.urlType !== urlType ||
+    prevUrl.urlTag !== urlTag ||
+    prevUrl.urlSlot !== urlSlot
+  ) {
+    setPrevUrl({ urlQ, urlItem, urlSort, urlType, urlTag, urlSlot });
     setSearchQuery(urlQ);
     setItemFilter(urlItem);
     setSort(urlSort);
     setTagFilter(urlTag);
     setTypeFilter(urlType);
     setSlotFilter(urlSlot);
-  }, [urlQ, urlItem, urlSort, urlType, urlTag, urlSlot]);
+  }
 
   const subtypes = useMemo(
     () => (typeFilter ? getDiscoverSubtypes(typeFilter) : []),
@@ -205,6 +216,7 @@ export default function DiscoverPage() {
 
   useEffect(() => {
     if (!viewingItem) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- data-fetch effect: resets/loading flags are set when the request starts or the query is cleared
       setBuilds([]);
       setNextCursor(null);
       setLoading(false);
@@ -215,6 +227,7 @@ export default function DiscoverPage() {
 
   useEffect(() => {
     if (!typeFilter || viewingItem) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- data-fetch effect: resets/loading flags are set when the request starts or the query is cleared
       setCounts({});
       setCountsLoading(false);
       return;
