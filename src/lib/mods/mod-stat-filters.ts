@@ -230,7 +230,6 @@ const STAT_KEY_FILTERS: Record<string, ModStatFilterId[]> = {
   revive: ["survivability"], // Sacrifice
   blastDamage: ["damage"], // Self Destruct
   autoRevive: ["survivability"], // Reawaken
-  statusImmunity: ["survivability"], // Negate
   digCooldown: ["utility"], // Dig
   buffChance: ["utility"], // Charm
   reviveChance: ["survivability"], // Transfusion

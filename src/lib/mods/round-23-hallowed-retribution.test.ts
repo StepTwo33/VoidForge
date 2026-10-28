@@ -62,7 +62,7 @@ describe("Retribution", () => {
   it("max-rank card agrees with the wiki description '+80 Electricity'", () => {
     expect(mod("retribution").description).toMatch(/\+80/);
     expect(mod("retribution").stats?.retaliationElectricity).toBe(20);
-    expect(mod("retribution").stats?.retaliationElectricity! * (mod("retribution").maxRank + 1)).toBe(80);
+    expect((mod("retribution").stats?.retaliationElectricity ?? 0) * (mod("retribution").maxRank + 1)).toBe(80);
   });
 
   it("is a defensive proc: mod_panel lines only, survivability chip, no damage chip", () => {
