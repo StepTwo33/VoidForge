@@ -59,7 +59,9 @@ export function CodexDetailCard({ children, onClose }: { children: ReactNode; on
 
   const panelRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   // Focus handling: move focus into the panel, keep Tab inside it, close on Esc,
   // and return focus to the element that opened it.
