@@ -54,12 +54,12 @@ describe("kitgun per-chamber grip tables", () => {
     expect(w.puncture).toBe(0);
   });
 
-  it("beam chambers: grip table damage, fire rate unchanged (grip sets range)", () => {
+  it("beam chambers: grip table damage, primary fire rate 12 (wiki Module:Modular/data; same as secondary)", () => {
     const gaze = kit("gaze", "tremor");
     expect(gaze.damage).toBe(37);
     expect(gaze.radiation).toBe(37);
     expect(gaze.puncture).toBe(0);
-    expect(gaze.fireRate).toBe(8);
+    expect(gaze.fireRate).toBe(12);
     const verm = kit("vermisplicer", "haymaker");
     expect(verm.damage).toBe(18); // was 14 + 2 = 16
     expect(verm.fireRate).toBe(12);
