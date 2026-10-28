@@ -55,7 +55,7 @@ describe("Round 23: companion / Railjack / Archwing filter chips", () => {
     const ids = Object.keys(MOD_FILTER_TAGS_BY_ID);
     const nonScoped = ids.filter((id) => {
       const c = modsMap.get(id)?.category;
-      return c !== "companion" && c !== "railjack";
+      return c !== "companion" && c !== "railjack" && c !== "necramech" && c !== "companion_weapon";
     });
     expect(nonScoped).toEqual([]);
   });

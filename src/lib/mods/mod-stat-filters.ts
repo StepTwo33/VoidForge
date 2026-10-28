@@ -330,6 +330,16 @@ export const MOD_FILTER_TAGS_BY_ID: Record<string, readonly ModStatFilterId[]> =
   intruder_stasis: ["survivability"],
   battle_stations: ["damage"],
   void_cloak: ["survivability"],
+  // --- Necramech (Warframe chip set; wiki.warframe.com Necramech Mods page, max-rank text) ---
+  necramech_reach: ["range"], // +1 Melee Range
+  necramech_hydraulics: ["speed", "utility"], // +120% Jump Height
+  necramech_drift: ["utility"], // +60% Hover Efficiency
+  necramech_efficiency: ["efficiency", "utility"], // +30% Engine Efficiency
+  necramech_refuel: ["utility"], // +20% Engine Replenish
+  necramech_thrusters: ["utility"], // +100% Engine Max
+  // --- Companion weapons (weapon chip set; wiki Claws mods) ---
+  bloodthirst: ["utility"], // health stolen per Slash stack on the target
+  bell_ringer: ["status"], // knockdown + 4 Impact Status Effects
 };
 
 const WEAPON_CATEGORIES = new Set([
