@@ -40,7 +40,7 @@ export function SavedBuildsDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[calc(100%-2rem)] max-h-[80vh] flex flex-col p-0 sm:max-w-lg">
-        <DialogHeader className="p-6 pb-3">
+        <DialogHeader className="p-6 pb-3 sm:pl-6 sm:pr-12 lg:pl-6 lg:pr-12">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto px-6 pb-6 min-h-0">

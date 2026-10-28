@@ -52,7 +52,7 @@ export function StancePickerDialog({
       }}
     >
       <DialogContent className="max-w-[calc(100%-2rem)] max-h-[80vh] flex flex-col p-0 sm:max-w-lg">
-        <DialogHeader className="p-6 pb-0">
+        <DialogHeader className="p-6 pb-0 sm:pl-6 sm:pr-12 lg:pl-6 lg:pr-12">
           <DialogTitle>Select Stance Mod</DialogTitle>
         </DialogHeader>
         <div className="px-6 pb-3">

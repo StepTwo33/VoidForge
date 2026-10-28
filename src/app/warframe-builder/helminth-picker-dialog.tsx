@@ -44,7 +44,7 @@ export function HelminthPickerDialog({
       }}
     >
       <DialogContent className="flex max-h-[85vh] min-h-0 w-full max-w-[calc(100%-2rem)] flex-col overflow-hidden p-0 sm:max-w-lg">
-        <DialogHeader className="shrink-0 space-y-1.5 p-6 pb-0">
+        <DialogHeader className="shrink-0 space-y-1.5 p-6 pb-0 sm:pl-6 sm:pr-12 lg:pl-6 lg:pr-12">
           <DialogTitle className="pr-8 text-base leading-snug sm:text-lg">
             {hasCurrentHelminth
               ? `Change Helminth ability (slot ${pickerSlot + 1})`
