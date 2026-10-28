@@ -1125,7 +1125,7 @@ export default function LoadoutsPage() {
         }}
       >
         <DialogContent className="flex max-h-[85vh] w-full max-w-[calc(100%-2rem)] flex-col gap-0 p-0 sm:max-w-lg">
-          <DialogHeader className="p-5 pb-0 shrink-0">
+          <DialogHeader className="p-5 pb-0 shrink-0 sm:pl-5 sm:pr-12 lg:pl-5 lg:pr-12">
             <DialogTitle className="text-left">Fill {SLOT_CONFIG[pickerSlot]?.label} slot</DialogTitle>
             <p className="text-xs text-muted-foreground text-left font-normal pt-1">
               Saved builds include mods and settings from each builder. Catalog adds the item with an empty build.
@@ -1310,28 +1310,32 @@ export default function LoadoutsPage() {
           <DialogHeader>
             <DialogTitle className="text-left break-words">Delete “{deleteTarget?.name}”?</DialogTitle>
             <DialogDescription className="text-left">
-              Choose whether to stop sharing it or delete it for good.
+              {deleteTarget?.isPublic && deleteTarget.cloudId
+                ? "Choose whether to stop sharing it or delete it for good."
+                : "Deleting a loadout cannot be undone."}
             </DialogDescription>
           </DialogHeader>
           {deleteTarget && (
             <div className="space-y-2">
-              <button
-                type="button"
-                data-testid="loadout-delete-private"
-                onClick={() => void handleMakePrivate(deleteTarget)}
-                disabled={deleteBusy || !(deleteTarget.isPublic && deleteTarget.cloudId)}
-                className="flex w-full items-start gap-3 rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent"
-              >
-                <EyeOff className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-                <span className="min-w-0">
-                  <span className="block text-sm font-medium">Remove visibility</span>
-                  <span className="block text-xs text-muted-foreground">
-                    {deleteTarget.isPublic && deleteTarget.cloudId
-                      ? "Make it private: removed from Community and public links. The loadout stays here and in your account."
-                      : "It isn't listed publicly, so there is nothing to hide."}
+              {deleteTarget.isPublic && deleteTarget.cloudId && (
+                <button
+                  type="button"
+                  data-testid="loadout-delete-private"
+                  onClick={() => void handleMakePrivate(deleteTarget)}
+                  disabled={deleteBusy || !(deleteTarget.isPublic && deleteTarget.cloudId)}
+                  className="flex w-full items-start gap-3 rounded-lg border border-border p-3 text-left transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent"
+                >
+                  <EyeOff className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium">Remove visibility</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {deleteTarget.isPublic && deleteTarget.cloudId
+                        ? "Make it private: removed from Community and public links. The loadout stays here and in your account."
+                        : "It isn't listed publicly, so there is nothing to hide."}
+                    </span>
                   </span>
-                </span>
-              </button>
+                </button>
+              )}
               <button
                 type="button"
                 data-testid="loadout-delete-everywhere"
