@@ -154,7 +154,7 @@ function moddedWeaponStats(
   intrinsicDamageBonus = 0,
 ): CalculatedStats | null {
   const calcOptions = intrinsicDamageBonus > 0
-    ? { externalBuffs: [{ id: "railjack_gunnery", label: "Railjack Gunnery intrinsic", category: "other" as const, damageBonus: intrinsicDamageBonus }] }
+    ? { externalBuffs: [{ id: "railjack_gunnery", label: "Gunnery intrinsic", category: "other" as const, damageBonus: intrinsicDamageBonus }] }
     : undefined;
   const weapon = typeof weaponIdOrWeapon === "string"
     ? getEffectiveWeaponsMap().get(weaponIdOrWeapon)

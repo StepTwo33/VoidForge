@@ -185,7 +185,7 @@ export default function ArchwingBuilderPage() {
     if (!selectedWeapon) return null;
     const gunneryDmg = gunneryArchWeaponDamageBonus(railjackGunnery, selectedWeapon.category, mode);
     const calcOptions = gunneryDmg > 0
-      ? { externalBuffs: [{ id: "railjack_gunnery", label: "Railjack Gunnery intrinsic", category: "other" as const, damageBonus: gunneryDmg }] }
+      ? { externalBuffs: [{ id: "railjack_gunnery", label: "Gunnery intrinsic", category: "other" as const, damageBonus: gunneryDmg }] }
       : undefined;
     return calculateWeaponBuild(selectedWeapon, weaponMods, modsMap, undefined, undefined, calcOptions);
   }, [selectedWeapon, weaponMods, railjackGunnery, mode]);
@@ -447,11 +447,11 @@ export default function ArchwingBuilderPage() {
                     </button>
                     <label
                       className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground lg:pointer-fine:min-h-9 sm:py-1.5"
-                      title="Railjack Gunnery intrinsic: R3 arch-melee +20% dmg, R4 Necramech gun +20% dmg, R8 Archwing +25% dmg and +20% Strength/Range/Efficiency"
+                      title="Gunnery intrinsic: R3 arch-melee +20% dmg, R4 Necramech gun +20% dmg, R8 Archwing +25% dmg and +20% Strength/Range/Efficiency"
                     >
-                      Railjack Gunnery
+                      Gunnery
                       <select
-                        aria-label="Railjack Gunnery intrinsic rank"
+                        aria-label="Gunnery intrinsic rank"
                         value={railjackGunnery}
                         onChange={(e) => setRailjackGunnery(Number(e.target.value))}
                         className="bg-transparent font-mono tabular-nums text-foreground outline-none"
