@@ -2200,7 +2200,7 @@ export function calculateWeaponBuild(
 
   // DPS (direct hits) — includes optional faction / headshot / stance
   stats.burstDps = calculateBurstDps(stats);
-  stats.sustainedDps = calculateSustainedDps(stats, baseWeapon);
+  stats.sustainedDps = calculateSustainedDps(stats, baseWeapon, calcOptions?.incarnonFormActive === true);
 
   stats.setBonusSummary = buildWeaponSetBonusSummary(baseWeapon, equippedMods, linkage, sim);
 
@@ -2744,7 +2744,7 @@ export function calculateWeaponBuildWithArcanes(
     weaponId: baseWeapon.id,
   });
   stats.burstDps = calculateBurstDps(stats);
-  stats.sustainedDps = calculateSustainedDps(stats, baseWeapon);
+  stats.sustainedDps = calculateSustainedDps(stats, baseWeapon, calcOptions?.incarnonFormActive === true);
   applyRadialAttacks(
     baseWeapon,
     stats,
@@ -2811,7 +2811,12 @@ function calculateBurstDps(stats: CalculatedStats): number {
   );
 }
 
-function calculateSustainedDps(stats: CalculatedStats, baseWeapon?: Weapon): number {
+function calculateSustainedDps(
+  stats: CalculatedStats,
+  baseWeapon?: Weapon,
+  /** wiki: "Incarnon Form is not affected by Ammo Efficiency" (its own charge pool; evolution AE perks included). */
+  incarnonFormActive = false,
+): number {
   if (stats.magazine === 0) return calculateBurstDps(stats); // Melee
   const efr = dpsFireRate(stats);
   if (efr <= 0) return 0;
@@ -2822,9 +2827,9 @@ function calculateSustainedDps(stats: CalculatedStats, baseWeapon?: Weapon): num
   }
   // Ammo: expected ammo per shot = ammoCost × (1 − min(AE, 75%)) × (1 − Infinite Ammo uptime)
   // → longer mag before reload. Permanent Infinite Ammo never reloads.
-  if (neverConsumesAmmo(stats.infiniteAmmoUptime)) return burstDps;
+  if (!incarnonFormActive && neverConsumesAmmo(stats.infiniteAmmoUptime)) return burstDps;
   const ammoCost = Math.max(0.01, stats.ammoCost ?? baseWeapon?.ammoCost ?? 1);
-  const ammoPerShot = ammoCost * ammoConsumptionFactor(stats.ammoEfficiency, stats.infiniteAmmoUptime);
+  const ammoPerShot = incarnonFormActive ? ammoCost : ammoCost * ammoConsumptionFactor(stats.ammoEfficiency, stats.infiniteAmmoUptime);
   // Ammo restore (kill / PT / Electric): one opportunity per mag dump →
   // E[extra rounds] = p × flat + p × frac × mag. Holster reload is swap-gated
   // and stays out of same-weapon sustained.
