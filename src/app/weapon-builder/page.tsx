@@ -807,7 +807,7 @@ export default function WeaponBuilderPage() {
                         ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
                         : "text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10"
                     )}
-                    title="Import mods from a pasted mod list or a screenshot (replaces the mods on this build)"
+                    title="Import mods from a pasted mod list or a screenshot. You choose to replace or add, and can undo it"
                   >
                     <Upload className="h-3.5 w-3.5" /> <span className="inline">Import mods</span>
                   </button>
