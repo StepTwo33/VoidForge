@@ -17,6 +17,7 @@ import {
   CompanionBuildData,
   ModularBuildData,
 } from "@/lib/builds/build-storage";
+import { LoadoutCardOverflowMenu } from "@/components/loadout-card-overflow-menu";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import {
   useCloudBuildFromUrl,
@@ -914,15 +915,15 @@ export default function LoadoutsPage() {
                       <button
                         type="button"
                         onClick={() => handleOpenSaveDialog(loadout.id)}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary sm:h-10 sm:w-10"
+                        className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary sm:h-10 sm:w-10 sm:px-0"
                         title="Save to account"
                       >
-                        <Save className="h-4 w-4" />
+                        <Save className="h-4 w-4" /> <span className="sm:hidden">Save</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => handleShareLoadout(loadout)}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary sm:h-10 sm:w-10"
+                        className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary sm:h-10 sm:w-10 sm:px-0"
                         title="Copy share link"
                       >
                         {shareCopiedId === loadout.id ? (
@@ -930,11 +931,12 @@ export default function LoadoutsPage() {
                         ) : (
                           <Share2 className="h-4 w-4" />
                         )}
+                        <span className="sm:hidden">Share</span>
                       </button>
                       {loadout.cloudId && (
                         <a
                           href={`/build/${loadout.cloudId}`}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:h-10 sm:w-10"
+                          className="hidden sm:inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:h-10 sm:w-10"
                           title="View build page"
                         >
                           <Globe className="h-4 w-4" />
@@ -943,7 +945,7 @@ export default function LoadoutsPage() {
                       <button
                         type="button"
                         onClick={() => handleDuplicate(loadout)}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:h-10 sm:w-10"
+                        className="hidden sm:inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:h-10 sm:w-10"
                         title="Duplicate loadout"
                       >
                         <Copy className="h-4 w-4" />
@@ -952,7 +954,7 @@ export default function LoadoutsPage() {
                         type="button"
                         onClick={() => void handleSaveSlotsAsBuilds(loadout)}
                         disabled={bulkBusyId === loadout.id}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50 sm:h-10 sm:w-10"
+                        className="hidden sm:inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50 sm:h-10 sm:w-10"
                         title="Save slots as builds"
                         aria-label="Save slots as builds"
                       >
@@ -960,7 +962,7 @@ export default function LoadoutsPage() {
                       </button>
                       <Link
                         href={`/compare?tab=loadout&a=${encodeURIComponent(loadout.id)}`}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:h-10 sm:w-10"
+                        className="hidden sm:inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:h-10 sm:w-10"
                         title="Compare with another loadout"
                         aria-label="Compare with another loadout"
                       >
@@ -970,7 +972,7 @@ export default function LoadoutsPage() {
                         type="button"
                         onClick={() => handleMove(loadout.id, -1)}
                         disabled={index === 0}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30 sm:h-10 sm:w-10"
+                        className="hidden sm:inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30 sm:h-10 sm:w-10"
                         title="Move up"
                         aria-label="Move loadout up"
                       >
@@ -980,7 +982,7 @@ export default function LoadoutsPage() {
                         type="button"
                         onClick={() => handleMove(loadout.id, 1)}
                         disabled={index === loadouts.length - 1}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30 sm:h-10 sm:w-10"
+                        className="hidden sm:inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-30 sm:h-10 sm:w-10"
                         title="Move down"
                         aria-label="Move loadout down"
                       >
@@ -989,13 +991,25 @@ export default function LoadoutsPage() {
                       <button
                         type="button"
                         onClick={() => setDeleteTarget(loadout)}
-                        className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/15 hover:text-destructive sm:h-10 sm:w-10"
+                        className="hidden sm:inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/15 hover:text-destructive sm:h-10 sm:w-10"
                         title="Delete loadout"
                         aria-label="Delete loadout"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
-                    </div>
+                                          <LoadoutCardOverflowMenu
+                        loadoutName={loadout.name}
+                        actions={[
+                          ...(loadout.cloudId ? [{ key: "view", label: "View build page", icon: <Globe className="h-4 w-4" />, href: `/build/${loadout.cloudId}` }] : []),
+                          { key: "duplicate", label: "Duplicate loadout", icon: <Copy className="h-4 w-4" />, onSelect: () => handleDuplicate(loadout) },
+                          { key: "slots", label: "Save slots as builds", icon: <Layers className="h-4 w-4" />, onSelect: () => void handleSaveSlotsAsBuilds(loadout), disabled: bulkBusyId === loadout.id },
+                          { key: "compare", label: "Compare with another loadout", icon: <ArrowLeftRight className="h-4 w-4" />, href: `/compare?tab=loadout&a=${encodeURIComponent(loadout.id)}` },
+                          { key: "up", label: "Move up", icon: <ChevronUp className="h-4 w-4" />, onSelect: () => handleMove(loadout.id, -1), disabled: index === 0 },
+                          { key: "down", label: "Move down", icon: <ChevronDown className="h-4 w-4" />, onSelect: () => handleMove(loadout.id, 1), disabled: index === loadouts.length - 1 },
+                          { key: "delete", label: "Delete loadout", icon: <Trash2 className="h-4 w-4" />, onSelect: () => setDeleteTarget(loadout), destructive: true },
+                        ]}
+                      />
+</div>
                   </div>
 
                   {loadout.importWarnings && loadout.importWarnings.length > 0 && (
