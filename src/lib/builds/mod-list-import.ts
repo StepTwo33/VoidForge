@@ -283,7 +283,7 @@ export function suggestMods(name: string, index: ModIndex, limit = 5): Mod[] {
       const shared = qTokens.filter((q) => e.tokens.some((t) => t === q || (q.length >= 4 && (t.startsWith(q) || q.startsWith(t) && t.length >= 4)))).length;
       score = Math.max(score, (shared / qTokens.length) * 0.75);
     }
-    if (score >= 0.45) scored.push({ mod: e.mod, score });
+    if (score >= 0.6) scored.push({ mod: e.mod, score });
   }
   scored.sort((a, b) => b.score - a.score || a.mod.name.localeCompare(b.mod.name));
   return scored.slice(0, limit).map((s) => s.mod);
@@ -500,7 +500,6 @@ export function buildImportPlan(matched: readonly MatchedLine[], session: MatchS
     const wanted = m.line.rank;
     if (wanted === null) {
       row.rank = mod.maxRank;
-      row.rankNote = "No rank given, using max rank";
     } else if (wanted > mod.maxRank) {
       row.rank = mod.maxRank;
       row.rankNote = `Rank ${wanted} is above this mod's max, using ${mod.maxRank}`;
@@ -546,4 +545,18 @@ export function buildImportPlan(matched: readonly MatchedLine[], session: MatchS
     skippedCount: rows.length - importedCount,
     replacedCount: opts.mode === "replace" ? (opts.existing?.length ?? 0) : 0,
   };
+}
+
+/** Text for the confirmation message shown after an import (with its Undo button). */
+export function describeImportResult(r: { mode: ImportMode; imported: number; skipped: number; replaced: number }): {
+  title: string;
+  description: string;
+} {
+  const mods = (n: number) => `${n} mod${n === 1 ? "" : "s"}`;
+  const title = `Imported ${mods(r.imported)}`;
+  const parts: string[] = [];
+  if (r.mode === "replace") parts.push(r.replaced > 0 ? `Replaced the ${mods(r.replaced)} that were equipped.` : "Filled the empty build.");
+  else parts.push("Added to the empty slots. Your other mods are unchanged.");
+  if (r.skipped > 0) parts.push(`${r.skipped} line${r.skipped === 1 ? " was" : "s were"} not imported.`);
+  return { title, description: parts.join(" ") };
 }

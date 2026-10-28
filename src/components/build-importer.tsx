@@ -1,153 +1,184 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect, useCallback } from "react";
-import { Upload, Type, X, Search, Check, AlertTriangle, Loader2, Camera } from "lucide-react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { Camera, Type, X, Check, AlertTriangle, Loader2, Info, RotateCcw, Ban } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { allMods } from "@/data/mods";
-import { Mod, EquippedMod } from "@/lib/types";
+import type { EquippedMod, Mod } from "@/lib/types";
+import {
+  MAX_IMPORT_CHARS,
+  MAX_IMPORT_LINES,
+  SKIP_LABEL,
+  buildImportPlan,
+  createMatchSession,
+  matchModList,
+  parseModList,
+  type ImportMode,
+  type PlanRow,
+} from "@/lib/builds/mod-list-import";
 
-// Simple fuzzy match: case-insensitive substring + Levenshtein for close matches
-function fuzzyMatch(query: string, target: string): number {
-  const q = query.toLowerCase().trim();
-  const t = target.toLowerCase();
-  if (t === q) return 1.0;
-  if (t.includes(q)) return 0.9;
-  if (q.length < 3) return 0;
-  // Simple Levenshtein-based score for short distances
-  const dist = levenshtein(q, t);
-  const maxLen = Math.max(q.length, t.length);
-  const score = 1 - dist / maxLen;
-  return score > 0.6 ? score * 0.8 : 0;
-}
-
-function levenshtein(a: string, b: string): number {
-  const m = a.length, n = b.length;
-  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-  for (let i = 0; i <= m; i++) dp[i][0] = i;
-  for (let j = 0; j <= n; j++) dp[0][j] = j;
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      dp[i][j] = a[i - 1] === b[j - 1]
-        ? dp[i - 1][j - 1]
-        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
-    }
-  }
-  return dp[m][n];
-}
-
-function findBestMod(name: string, category: string | null): Mod | null {
-  let best: Mod | null = null;
-  let bestScore = 0;
-  for (const mod of allMods) {
-    // Filter by category if specified
-    if (category && mod.category !== category && mod.category !== "general") continue;
-    const score = fuzzyMatch(name, mod.name);
-    if (score > bestScore) {
-      bestScore = score;
-      best = mod;
-    }
-  }
-  return bestScore > 0.5 ? best : null;
-}
-
-interface MatchedMod {
-  inputName: string;
-  mod: Mod | null;
-  confidence: "high" | "medium" | "low" | "none";
-}
-
-function matchModNames(names: string[], category: string | null): MatchedMod[] {
-  return names.map((name) => {
-    const trimmed = name.trim();
-    if (!trimmed) return { inputName: trimmed, mod: null, confidence: "none" as const };
-    const mod = findBestMod(trimmed, category);
-    if (!mod) return { inputName: trimmed, mod: null, confidence: "none" as const };
-    const score = fuzzyMatch(trimmed, mod.name);
-    const confidence: MatchedMod["confidence"] = score >= 0.9 ? "high" : score >= 0.7 ? "medium" : "low";
-    return { inputName: trimmed, mod, confidence };
-  }).filter((m) => m.inputName.length > 0);
+export interface ImportApplied {
+  /** Full mod list for the build after the import. */
+  mods: EquippedMod[];
+  mode: ImportMode;
+  imported: number;
+  /** Lines that were not imported. */
+  skipped: number;
+  /** Equipped mods a "replace" import removed. */
+  replaced: number;
 }
 
 interface BuildImporterProps {
-  modCategory: string | null;
-  numSlots: number;
-  onImport: (mods: EquippedMod[]) => void;
+  itemName: string;
+  itemKind: "weapon" | "warframe";
+  catalog: readonly Mod[];
+  isEligible: (mod: Mod) => boolean;
+  explainIneligible?: (mod: Mod) => string;
+  /** Regular mod slot indexes, in fill order (never the Exilus / Aura slots). */
+  regularSlots: readonly number[];
+  /** Warframe Aura slot indexes; Aura mods are placed here. */
+  auraSlots?: readonly number[];
+  isAura?: (mod: Mod) => boolean;
+  /** What is equipped right now. */
+  existing: readonly EquippedMod[];
+  onImport: (result: ImportApplied) => void;
   onClose: () => void;
 }
 
-export function BuildImporter({ modCategory, numSlots, onImport, onClose }: BuildImporterProps) {
-  const [mode, setMode] = useState<"text" | "screenshot">("text");
-  const [textInput, setTextInput] = useState("");
-  const [matches, setMatches] = useState<MatchedMod[]>([]);
+const EXAMPLE = "Serration R10\nSplit Chamber (rank 5)\nHeavy Caliber 10/10\nVital Sense";
+
+const NOT_IMPORTED: Record<"weapon" | "warframe", string> = {
+  weapon: "Forma and slot polarities, the Orokin Catalyst, Incarnon evolutions, Arcanes and Rivens aren't part of a mod list, so they stay as they are on this build.",
+  warframe: "Forma and slot polarities, the Orokin Reactor, Archon Shards, Arcanes and Helminth choices aren't part of a mod list, so they stay as they are on this build.",
+};
+
+function rankText(row: PlanRow): string | null {
+  if (!row.mod || row.rank === null) return null;
+  return `Rank ${row.rank}/${row.mod.maxRank}`;
+}
+
+export function BuildImporter({
+  itemName,
+  itemKind,
+  catalog,
+  isEligible,
+  explainIneligible,
+  regularSlots,
+  auraSlots,
+  isAura,
+  existing,
+  onImport,
+  onClose,
+}: BuildImporterProps) {
+  const [tab, setTab] = useState<"paste" | "screenshot">("paste");
+  const [text, setText] = useState("");
+  const [mode, setMode] = useState<ImportMode>("replace");
+  const [overrides, setOverrides] = useState<Record<number, string>>({});
+  const [confirming, setConfirming] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [ocrError, setOcrError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [ocrMessage, setOcrMessage] = useState<{ tone: "error" | "info"; text: string } | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
-  // Autocomplete state for individual mod input
-  const [currentModInput, setCurrentModInput] = useState("");
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedMods, setSelectedMods] = useState<Mod[]>([]);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
-
-  const suggestions = useMemo(() => {
-    if (currentModInput.length < 2) return [];
-    const q = currentModInput.toLowerCase();
-    return allMods
-      .filter((m) => {
-        if (modCategory && m.category !== modCategory && m.category !== "general") return false;
-        return m.name.toLowerCase().includes(q);
-      })
-      .filter((m) => !selectedMods.find((s) => s.id === m.id))
-      .slice(0, 8);
-  }, [currentModInput, modCategory, selectedMods]);
-
-  // Close suggestions on outside click
+  // On a phone the dialog opens below the fold: bring it into view.
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target as Node)) {
-        setShowSuggestions(false);
-      }
+    rootRef.current?.scrollIntoView({ block: "start", behavior: "auto" });
+  }, []);
+
+  const session = useMemo(
+    () => createMatchSession({ catalog, isEligible, explainIneligible, itemName }),
+    [catalog, isEligible, explainIneligible, itemName],
+  );
+
+  const deferredText = useDeferredValue(text);
+  const parsed = useMemo(() => parseModList(deferredText), [deferredText]);
+  const matched = useMemo(() => matchModList(parsed.lines, session), [parsed, session]);
+  const plan = useMemo(
+    () => buildImportPlan(matched, session, { mode, regularSlots, auraSlots, isAura, existing, overrides }),
+    [matched, session, mode, regularSlots, auraSlots, isAura, existing, overrides],
+  );
+
+  const hasText = text.trim().length > 0;
+  const equippedCount = existing.length;
+  const replacing = mode === "replace" && equippedCount > 0;
+
+  // The paste is a list for a different kind of item: nothing fits, and the mods are real mods.
+  const wrongItem = useMemo(() => {
+    if (!plan.rows.length || plan.importedCount > 0) return null;
+    const real = plan.rows.filter((r) => r.matched.status === "ineligible" && r.matched.mod);
+    if (real.length < Math.max(1, Math.ceil(plan.rows.length / 2))) return null;
+    const kinds = new Map<string, number>();
+    for (const r of real) {
+      const c = r.matched.mod!.category;
+      const label = c === "warframe" ? "Warframe" : c === "general" ? "general" : c.replace(/_/g, " ");
+      kinds.set(label, (kinds.get(label) ?? 0) + 1);
     }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    const top = [...kinds.entries()].sort((a, b) => b[1] - a[1])[0][0];
+    return `These look like ${top} mods, which ${itemName} can't use. Check you're importing into the right item.`;
+  }, [plan, itemName]);
+
+  const setOverride = useCallback((index: number, modId: string) => {
+    setOverrides((prev) => ({ ...prev, [index]: modId }));
+    setConfirming(false);
+  }, []);
+  const clearOverride = useCallback((index: number) => {
+    setOverrides((prev) => {
+      const next = { ...prev };
+      delete next[index];
+      return next;
+    });
+    setConfirming(false);
   }, []);
 
-  const handleAddMod = useCallback((mod: Mod) => {
-    if (selectedMods.length >= numSlots) return;
-    setSelectedMods((prev) => [...prev, mod]);
-    setCurrentModInput("");
-    setShowSuggestions(false);
-  }, [selectedMods, numSlots]);
+  const handleText = (value: string) => {
+    setText(value);
+    setOverrides({});
+    setConfirming(false);
+  };
 
-  const handleRemoveMod = useCallback((index: number) => {
-    setSelectedMods((prev) => prev.filter((_, i) => i !== index));
-  }, []);
+  const doImport = useCallback(() => {
+    if (plan.importedCount === 0) return;
+    onImport({
+      mods: plan.result,
+      mode,
+      imported: plan.importedCount,
+      skipped: plan.skippedCount,
+      replaced: plan.replacedCount,
+    });
+  }, [plan, mode, onImport]);
 
-  // Bulk text paste (comma-separated)
-  const handleParseBulk = useCallback(() => {
-    const names = textInput.split(/[,\n]+/).map((s) => s.trim()).filter(Boolean);
-    const matched = matchModNames(names, modCategory);
-    setMatches(matched);
-  }, [textInput, modCategory]);
+  const handleImportClick = () => {
+    if (plan.importedCount === 0) return;
+    if (replacing && !confirming) {
+      setConfirming(true);
+      return;
+    }
+    doImport();
+  };
 
-  // Screenshot OCR
+  // Screenshot: read the text, then drop it into the paste box so it can be checked and edited.
   const handleScreenshot = useCallback(async (file: File) => {
+    setOcrMessage(null);
+    if (!file.type.startsWith("image/")) {
+      setOcrMessage({ tone: "error", text: "That file isn't an image. Choose a PNG or JPG screenshot of your mod screen, or paste the mod names instead." });
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      setOcrMessage({ tone: "error", text: "That image is over 12 MB. Crop it to the mod list or paste the mod names instead." });
+      return;
+    }
     setIsProcessing(true);
-    setOcrError(null);
-    setMatches([]);
     let worker: { terminate: () => Promise<unknown> } | null = null;
     let url: string | null = null;
     try {
       const { createWorker } = await import("tesseract.js");
       const ocrWorker = await createWorker("eng");
       worker = ocrWorker;
-      // Preprocess: create a canvas with high contrast
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
       url = objectUrl;
       await new Promise<void>((resolve, reject) => {
         img.onload = () => resolve();
-        img.onerror = reject;
+        img.onerror = () => reject(new Error("image"));
         img.src = objectUrl;
       });
       const canvas = document.createElement("canvas");
@@ -155,7 +186,6 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
       canvas.height = img.height;
       const ctx = canvas.getContext("2d")!;
       ctx.drawImage(img, 0, 0);
-      // Apply contrast enhancement
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
       for (let i = 0; i < data.length; i += 4) {
@@ -164,64 +194,49 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
         data[i] = data[i + 1] = data[i + 2] = val;
       }
       ctx.putImageData(imageData, 0, 0);
-
       const { data: result } = await ocrWorker.recognize(canvas);
-
-      // Extract potential mod names from OCR text
-      const lines = result.text.split("\n").map((l: string) => l.trim()).filter((l: string) => l.length > 3);
-      const matched = matchModNames(lines, modCategory);
-      const valid = matched.filter((m) => m.mod !== null);
-      if (valid.length === 0) {
-        setOcrError("No mod names detected. Try a clearer screenshot of the mod loadout area.");
+      const lines = result.text
+        .split("\n")
+        .map((l: string) => l.trim())
+        .filter((l: string) => (l.match(/\p{L}/gu) ?? []).length >= 4);
+      if (lines.length === 0) {
+        setOcrMessage({
+          tone: "error",
+          text: "No text could be read from that screenshot. Use a sharp, full-size screenshot of the mod list (not a photo of a screen), or paste the mod names instead.",
+        });
+        return;
       }
-      setMatches(matched);
+      handleText(lines.join("\n"));
+      setTab("paste");
+      setOcrMessage({
+        tone: "info",
+        text: `Read ${lines.length} line${lines.length === 1 ? "" : "s"} from the screenshot. Screenshot reading is a beta and often misreads names, so check the list below and fix anything wrong.`,
+      });
     } catch (err) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("OCR error:", err);
-      }
-      setOcrError("Failed to process image. Please try again.");
+      if (process.env.NODE_ENV === "development") console.error("OCR error:", err);
+      setOcrMessage({
+        tone: "error",
+        text: "The screenshot couldn't be read (the text reader may have failed to load, or the image is damaged). Try again, or paste the mod names instead.",
+      });
     } finally {
       if (worker) {
         try { await worker.terminate(); } catch { /* already terminated */ }
       }
       if (url) URL.revokeObjectURL(url);
       setIsProcessing(false);
+      if (fileRef.current) fileRef.current.value = "";
     }
-  }, [modCategory]);
+  }, []);
 
-  const handleImportMatches = useCallback(() => {
-    const validMods = matches
-      .filter((m) => m.mod !== null)
-      .slice(0, numSlots)
-      .map((m, i) => ({
-        modId: m.mod!.id,
-        modName: m.mod!.name,
-        rank: m.mod!.maxRank,
-        slotIndex: i,
-        polarity: m.mod!.polarity,
-        drain: m.mod!.drain,
-      }));
-    onImport(validMods);
-  }, [matches, numSlots, onImport]);
-
-  const handleImportSelected = useCallback(() => {
-    const equipped: EquippedMod[] = selectedMods.map((mod, i) => ({
-      modId: mod.id,
-      modName: mod.name,
-      rank: mod.maxRank,
-      slotIndex: i,
-      polarity: mod.polarity,
-      drain: mod.drain,
-    }));
-    onImport(equipped);
-  }, [selectedMods, onImport]);
-
-  const validMatchCount = matches.filter((m) => m.mod !== null).length;
+  const importLabel =
+    plan.importedCount === 0
+      ? "Nothing to import yet"
+      : `${replacing ? "Replace with " : "Import "}${plan.importedCount} mod${plan.importedCount === 1 ? "" : "s"}`;
 
   return (
-    <div className="min-w-0 w-full overflow-hidden border border-blue-500/30 rounded-xl bg-card p-4 sm:p-5">
-      <div className="flex items-center justify-between gap-2 mb-4">
-        <h2 className="text-sm font-semibold text-blue-700 dark:text-blue-400">IMPORT BUILD</h2>
+    <div ref={rootRef} className="min-w-0 w-full scroll-mt-20 overflow-hidden rounded-xl border border-blue-500/30 bg-card p-4 sm:p-5" data-testid="mod-importer">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <h2 className="text-sm font-semibold text-blue-700 dark:text-blue-400">IMPORT MODS</h2>
         <button
           type="button"
           onClick={onClose}
@@ -232,31 +247,37 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
         </button>
       </div>
 
-      {/* Mode tabs */}
-      <div className="mb-4 flex flex-wrap gap-1.5">
+      {/* What it accepts + what it does */}
+      <div className="mb-4 space-y-2 rounded-lg border border-border bg-muted/30 p-3 text-xs leading-relaxed text-muted-foreground">
+        <p>
+          <span className="font-semibold text-foreground">Paste mod names</span> (one per line or comma-separated, with an optional rank) or{" "}
+          <span className="font-semibold text-foreground">upload a screenshot</span> of your mod screen. Each name is matched to a mod {itemName} can equip.
+        </p>
+        <pre className="overflow-x-auto rounded-md bg-background/60 p-2 font-mono text-[11px] leading-snug text-foreground" aria-label="Example list">{EXAMPLE}</pre>
+        <p>No rank written means max rank. A pasted list only carries mod names and ranks. {NOT_IMPORTED[itemKind]}</p>
+      </div>
+
+      <div className="mb-3 flex flex-wrap gap-1.5" role="tablist" aria-label="Import source">
         <button
           type="button"
-          onClick={() => { setMode("text"); setMatches([]); }}
+          role="tab"
+          aria-selected={tab === "paste"}
+          onClick={() => setTab("paste")}
           className={cn(
             "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-colors",
-            mode === "text" ? "border-blue-600 bg-blue-600 text-white" : "border-border text-muted-foreground hover:text-foreground",
+            tab === "paste" ? "border-blue-600 bg-blue-600 text-white" : "border-border text-muted-foreground hover:text-foreground",
           )}
         >
-          <Type className="h-3.5 w-3.5" /> Mod Picker
+          <Type className="h-3.5 w-3.5" /> Paste list
         </button>
         <button
           type="button"
-          onClick={() => { setMode("text"); setMatches([]); setTextInput(""); }}
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <Search className="h-3.5 w-3.5" /> Paste Names
-        </button>
-        <button
-          type="button"
-          onClick={() => { setMode("screenshot"); setMatches([]); setSelectedMods([]); }}
+          role="tab"
+          aria-selected={tab === "screenshot"}
+          onClick={() => setTab("screenshot")}
           className={cn(
             "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-colors",
-            mode === "screenshot" ? "border-blue-600 bg-blue-600 text-white" : "border-border text-muted-foreground hover:text-foreground",
+            tab === "screenshot" ? "border-blue-600 bg-blue-600 text-white" : "border-border text-muted-foreground hover:text-foreground",
           )}
         >
           <Camera className="h-3.5 w-3.5" /> Screenshot
@@ -264,178 +285,283 @@ export function BuildImporter({ modCategory, numSlots, onImport, onClose }: Buil
         </button>
       </div>
 
-      {mode === "text" && (
-        <>
-          {/* Individual mod picker with autocomplete */}
-          <div className="mb-4">
-            <label className="text-xs text-muted-foreground mb-1.5 block">
-              Add mods one by one ({selectedMods.length}/{numSlots})
-            </label>
-            {selectedMods.length === 0 && (
-              <p className="mb-2 text-xs text-muted-foreground">No mods selected yet — search below or paste a list.</p>
+      {tab === "screenshot" && (
+        <div className="mb-3">
+          <p className="mb-2 text-xs text-muted-foreground">
+            Upload a screenshot of the mod list. The text is read in your browser (nothing is uploaded) and put in the paste box so you can fix misreads before importing.
+          </p>
+          <label
+            className={cn(
+              "flex min-h-24 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-border p-4 text-center transition-colors hover:border-blue-500/50",
+              isProcessing && "pointer-events-none opacity-60",
             )}
-            <div className="mb-2 flex flex-wrap gap-1.5">
-              {selectedMods.map((mod, i) => (
-                <span key={`${mod.id}-${i}`} className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-blue-500/30 bg-blue-500/10 px-2.5 py-1.5 text-xs text-blue-700 dark:text-blue-400 sm:min-h-0">
-                  <span className="max-w-[12rem] truncate sm:max-w-none">{mod.name}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveMod(i)}
-                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:text-red-700 dark:hover:text-red-400 lg:pointer-fine:min-h-0 lg:min-w-0"
-                    aria-label={`Remove ${mod.name}`}
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </span>
-              ))}
-            </div>
-            <div className="relative" ref={suggestionsRef}>
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <input
-                value={currentModInput}
-                onChange={(e) => { setCurrentModInput(e.target.value); setShowSuggestions(true); }}
-                onFocus={() => setShowSuggestions(true)}
-                placeholder="Type a mod name..."
-                disabled={selectedMods.length >= numSlots}
-                className="min-h-11 h-11 w-full rounded-lg border border-border bg-background py-2 pl-8 pr-3 text-base focus:border-blue-500/50 focus:outline-none focus-visible:ring-[3px] focus-visible:ring-ring placeholder:text-muted-foreground disabled:opacity-50 lg:h-9 lg:min-h-9 sm:text-sm"
-              />
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute z-50 mt-1 w-full bg-card border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                  {suggestions.map((mod) => (
-                    <button
-                      key={mod.id}
-                      onClick={() => handleAddMod(mod)}
-                      className="flex min-h-11 w-full min-w-0 items-center justify-between gap-2 px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted/50"
-                    >
-                      <span className="min-w-0 truncate">{mod.name}</span>
-                      <span className="shrink-0 text-[10px] capitalize text-muted-foreground">{mod.category}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          >
+            {isProcessing ? <Loader2 className="h-5 w-5 animate-spin text-blue-500" /> : <Camera className="h-5 w-5 text-muted-foreground" />}
+            <span className="text-xs text-muted-foreground">{isProcessing ? "Reading screenshot…" : "Choose a screenshot (PNG or JPG)"}</span>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              aria-label="Choose a screenshot of your mods"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleScreenshot(f); }}
+            />
+          </label>
+        </div>
+      )}
 
-          {selectedMods.length > 0 && (
-            <button
-              onClick={handleImportSelected}
-              className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-            >
-              <Upload className="h-4 w-4" /> Import {selectedMods.length} Mod{selectedMods.length !== 1 ? "s" : ""}
+      {ocrMessage && (
+        <div
+          role={ocrMessage.tone === "error" ? "alert" : "status"}
+          className={cn(
+            "mb-3 flex items-start gap-2 rounded-lg border p-2.5 text-xs",
+            ocrMessage.tone === "error" ? "border-red-500/30 bg-red-500/5 text-red-700 dark:text-red-400" : "border-blue-500/30 bg-blue-500/5 text-blue-800 dark:text-blue-300",
+          )}
+        >
+          {ocrMessage.tone === "error" ? <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" /> : <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />}
+          <span>{ocrMessage.text}</span>
+        </div>
+      )}
+
+      {/* Paste box */}
+      <div className="mb-3">
+        <label htmlFor="mod-import-text" className="mb-1.5 block text-xs text-muted-foreground">
+          Mod list
+        </label>
+        <textarea
+          id="mod-import-text"
+          value={text}
+          onChange={(e) => handleText(e.target.value)}
+          rows={5}
+          spellCheck={false}
+          placeholder={EXAMPLE}
+          className="min-h-28 w-full resize-y rounded-lg border border-border bg-background p-3 text-base placeholder:text-muted-foreground/60 focus:border-blue-500/50 focus:outline-none focus-visible:ring-[3px] focus-visible:ring-ring sm:text-sm"
+        />
+        <div className="mt-1 flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+          <span>{hasText ? `${parsed.lines.length} line${parsed.lines.length === 1 ? "" : "s"} read` : "The preview appears as you type."}</span>
+          {hasText && (
+            <button type="button" onClick={() => handleText("")} className="inline-flex min-h-11 items-center px-2 underline-offset-2 hover:underline sm:min-h-0">
+              Clear
             </button>
           )}
+        </div>
+      </div>
 
-          {/* Bulk paste separator */}
-          <div className="flex items-center gap-3 my-4">
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-[10px] text-muted-foreground uppercase">or paste in bulk</span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-
-          {/* Bulk text paste */}
-          <div className="mb-3">
-            <textarea
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-              placeholder={"Paste mod names, one per line or comma-separated:\nSerration, Split Chamber, Heavy Caliber\nVital Sense, Point Strike"}
-              className="h-24 w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-base focus:border-blue-500/50 focus:outline-none focus-visible:ring-[3px] focus-visible:ring-ring placeholder:text-muted-foreground sm:text-sm"
-            />
-          </div>
-          <button
-            onClick={handleParseBulk}
-            disabled={!textInput.trim()}
-            className="min-h-11 w-full rounded-lg bg-muted py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/80 disabled:opacity-50"
-          >
-            Match Mod Names
-          </button>
-        </>
-      )}
-
-      {mode === "screenshot" && (
-        <div className="space-y-3">
-          <div
-            onClick={() => fileInputRef.current?.click()}
-            className="min-h-[11rem] cursor-pointer rounded-xl border-2 border-dashed border-border p-8 text-center transition-colors hover:border-blue-500/50"
-          >
-            {isProcessing ? (
-              <div className="flex flex-col items-center gap-2">
-                <Loader2 className="h-8 w-8 text-blue-700 dark:text-blue-400 animate-spin" />
-                <p className="text-sm text-muted-foreground">Processing screenshot...</p>
-                <p className="text-[10px] text-muted-foreground">This may take a few seconds on first use</p>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-2">
-                <Camera className="h-8 w-8 text-muted-foreground" />
-                <p className="text-sm">Click to upload a screenshot</p>
-                <p className="text-[10px] text-muted-foreground">Screenshot the mod loadout area for best results</p>
-              </div>
-            )}
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleScreenshot(file);
-              // Allow re-selecting the same file after a failure
-              e.target.value = "";
-            }}
-          />
-          {ocrError && (
-            <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 p-2.5 text-xs text-red-700 dark:text-red-400">
-              <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
-              {ocrError}
-            </div>
-          )}
+      {(parsed.textCut || parsed.extraLines > 0) && (
+        <div role="status" className="mb-3 flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-2.5 text-xs text-amber-800 dark:text-amber-300">
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>
+            {parsed.textCut
+              ? `That paste is very long, so only the first ${MAX_IMPORT_CHARS.toLocaleString()} characters were read. `
+              : ""}
+            {parsed.extraLines > 0
+              ? `Only the first ${MAX_IMPORT_LINES} lines were read (${parsed.extraLines} more ignored). A build holds ${regularSlots.length}${auraSlots?.length ? " plus an Aura" : ""} mods, so check this is a mod list.`
+              : ""}
+          </span>
         </div>
       )}
 
-      {/* Match results */}
-      {matches.length > 0 && (
-        <div className="mt-4 border border-border rounded-lg overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-2 bg-muted/30 px-3 py-2 text-xs font-semibold text-muted-foreground">
-            <span className="min-w-0">Detected Mods ({validMatchCount} matched)</span>
-            {matches.some((m) => m.confidence === "none") && (
-              <span className="shrink-0 text-amber-800 dark:text-amber-400">{matches.filter((m) => m.confidence === "none").length} unmatched</span>
-            )}
+      {hasText && parsed.lines.length === 0 && (
+        <p role="status" className="mb-3 rounded-lg border border-border p-2.5 text-xs text-muted-foreground">
+          No mod names found in that text. Each line needs a mod name, such as <span className="font-mono text-foreground">Serration R10</span>.
+        </p>
+      )}
+
+      {wrongItem && (
+        <div role="alert" className="mb-3 flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-2.5 text-xs text-amber-800 dark:text-amber-300">
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <span>{wrongItem}</span>
+        </div>
+      )}
+
+      {/* Preview */}
+      {plan.rows.length > 0 && (
+        <div className="mb-3 overflow-hidden rounded-lg border border-border" data-testid="import-preview">
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-border bg-muted/30 px-3 py-2 text-xs" aria-live="polite">
+            <span className="font-medium text-foreground">
+              {plan.importedCount} of {plan.rows.length} line{plan.rows.length === 1 ? "" : "s"} will be imported
+            </span>
+            {plan.skippedCount > 0 && <span className="font-medium text-amber-700 dark:text-amber-400">{plan.skippedCount} won&apos;t be</span>}
           </div>
-          <div className="max-h-60 divide-y divide-border overflow-y-auto">
-            {matches.map((m, i) => (
-              <div key={i} className="flex min-h-11 min-w-0 flex-wrap items-center gap-2 px-3 py-2 text-sm sm:gap-3">
-                <div className={cn(
-                  "h-1.5 w-1.5 shrink-0 rounded-full",
-                  m.confidence === "high" ? "bg-green-400" :
-                  m.confidence === "medium" ? "bg-amber-400" :
-                  m.confidence === "low" ? "bg-orange-400" : "bg-red-400"
-                )} />
-                <div className="min-w-0 flex-1 break-words">
-                  <span className="mr-2 text-xs text-muted-foreground line-through break-all">{m.inputName}</span>
-                  {m.mod ? (
-                    <span className="font-medium break-words">{m.mod.name}</span>
-                  ) : (
-                    <span className="italic text-red-700 dark:text-red-400">No match</span>
-                  )}
-                </div>
-                {m.mod && (
-                  <span className="shrink-0 text-[10px] capitalize text-muted-foreground">{m.mod.category}</span>
+          <ul className="divide-y divide-border">
+            {plan.rows.map((row) => (
+              <PreviewRow
+                key={row.matched.line.index}
+                row={row}
+                onPick={(id) => setOverride(row.matched.line.index, id)}
+                onSkip={() => setOverride(row.matched.line.index, "skip")}
+                onReset={() => clearOverride(row.matched.line.index)}
+                hasOverride={overrides[row.matched.line.index] !== undefined}
+              />
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* What the import does to the build */}
+      <fieldset className="mb-3">
+        <legend className="mb-1.5 text-xs text-muted-foreground">
+          {equippedCount > 0 ? `This build has ${equippedCount} mod${equippedCount === 1 ? "" : "s"} equipped. When you import:` : "This build has no mods equipped yet."}
+        </legend>
+        {equippedCount > 0 && (
+          <div className="flex flex-col gap-1.5 sm:flex-row">
+            {(
+              [
+                ["replace", "Replace all mods", "Clears every slot (Exilus and Aura too), then fills from the top"],
+                ["fill", "Add to empty slots", "Keeps what's equipped and only fills free slots"],
+              ] as const
+            ).map(([value, label, hint]) => (
+              <label
+                key={value}
+                className={cn(
+                  "flex min-h-11 flex-1 cursor-pointer items-start gap-2 rounded-lg border p-2.5 text-xs transition-colors",
+                  mode === value ? "border-blue-500/60 bg-blue-500/10" : "border-border hover:border-blue-500/30",
                 )}
-              </div>
+              >
+                <input
+                  type="radio"
+                  name="mod-import-mode"
+                  value={value}
+                  checked={mode === value}
+                  onChange={() => { setMode(value); setConfirming(false); }}
+                  className="mt-0.5"
+                />
+                <span>
+                  <span className="block font-medium text-foreground">{label}</span>
+                  <span className="block text-muted-foreground">{hint}</span>
+                </span>
+              </label>
             ))}
           </div>
-          {validMatchCount > 0 && (
-            <div className="p-3 border-t border-border">
-              <button
-                onClick={handleImportMatches}
-                className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-              >
-                <Check className="h-4 w-4" /> Import {Math.min(validMatchCount, numSlots)} Mod{Math.min(validMatchCount, numSlots) !== 1 ? "s" : ""}
-              </button>
-            </div>
-          )}
+        )}
+        <p className="mt-1.5 text-[11px] text-muted-foreground">You can undo the import right after from the confirmation message.</p>
+      </fieldset>
+
+      {confirming && (
+        <div role="alert" className="mb-3 rounded-lg border border-amber-500/40 bg-amber-500/5 p-2.5 text-xs text-amber-900 dark:text-amber-200">
+          This removes all {equippedCount} mod{equippedCount === 1 ? "" : "s"} currently on this build (including Exilus and Aura) and equips the {plan.importedCount} imported
+          mod{plan.importedCount === 1 ? "" : "s"}. You can undo it right after.
         </div>
       )}
+
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <button
+          type="button"
+          onClick={handleImportClick}
+          disabled={plan.importedCount === 0}
+          className={cn(
+            "inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            plan.importedCount === 0
+              ? "cursor-not-allowed bg-muted text-muted-foreground"
+              : confirming
+                ? "bg-amber-600 text-white hover:bg-amber-700"
+                : "bg-blue-600 text-white hover:bg-blue-700",
+          )}
+        >
+          <Check className="h-4 w-4" />
+          {confirming ? `Yes, replace ${equippedCount} with ${plan.importedCount}` : importLabel}
+        </button>
+        {confirming && (
+          <button
+            type="button"
+            onClick={() => setConfirming(false)}
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </div>
+  );
+}
+
+function PreviewRow({
+  row,
+  onPick,
+  onSkip,
+  onReset,
+  hasOverride,
+}: {
+  row: PlanRow;
+  onPick: (modId: string) => void;
+  onSkip: () => void;
+  onReset: () => void;
+  hasOverride: boolean;
+}) {
+  const { matched } = row;
+  const imported = row.skip === null;
+  const pasted = matched.line.raw;
+  const showPasted = row.mod ? matched.line.name.toLowerCase().replace(/\s+/g, " ") !== row.mod.name.toLowerCase() || matched.line.rank !== null : true;
+  const warn = imported && (matched.status === "typo" || matched.status === "partial" || matched.status === "renamed");
+  const choices = !imported && (matched.status === "ambiguous" || matched.status === "unmatched") ? matched.candidates : [];
+
+  return (
+    <li className="flex flex-col gap-1.5 px-3 py-2.5 text-xs" data-status={imported ? "imported" : row.skip}>
+      <div className="flex items-start gap-2">
+        <span className="mt-0.5 shrink-0">
+          {imported ? (
+            warn ? <AlertTriangle className="h-3.5 w-3.5 text-amber-500" /> : <Check className="h-3.5 w-3.5 text-green-500" />
+          ) : (
+            <Ban className="h-3.5 w-3.5 text-red-500" />
+          )}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            {row.mod ? (
+              <span className={cn("break-words text-sm font-medium", imported ? "text-foreground" : "text-muted-foreground")}>{row.mod.name}</span>
+            ) : (
+              <span className="break-words text-sm font-medium text-muted-foreground">&ldquo;{matched.line.name}&rdquo;</span>
+            )}
+            {imported && rankText(row) && <span className="text-[11px] text-muted-foreground">{rankText(row)}</span>}
+            {!imported && row.skip && (
+              <span className="rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-700 dark:text-red-400">{SKIP_LABEL[row.skip]}</span>
+            )}
+          </div>
+          {showPasted && row.mod && <div className="break-words text-[11px] text-muted-foreground">from &ldquo;{pasted}&rdquo;</div>}
+          {imported && matched.note && <div className="text-[11px] text-amber-700 dark:text-amber-400">{matched.note}</div>}
+          {imported && row.rankNote && <div className="text-[11px] text-muted-foreground">{row.rankNote}</div>}
+          {!imported && row.skipNote && <div className="text-[11px] text-muted-foreground">{row.skipNote}</div>}
+          {!imported && matched.status === "unmatched" && choices.length === 0 && (
+            <div className="text-[11px] text-muted-foreground">Fix the spelling in the list above, or add the mod from its slot.</div>
+          )}
+        </div>
+        <div className="shrink-0">
+          {imported ? (
+            <button
+              type="button"
+              onClick={onSkip}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:text-red-700 dark:hover:text-red-400 sm:min-h-8 sm:min-w-8"
+              aria-label={`Skip ${row.mod?.name ?? pasted}`}
+              title="Skip this line"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          ) : hasOverride ? (
+            <button
+              type="button"
+              onClick={onReset}
+              className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-[11px] text-muted-foreground hover:text-foreground sm:min-h-8"
+              aria-label={`Restore ${pasted}`}
+            >
+              <RotateCcw className="h-3 w-3" /> Restore
+            </button>
+          ) : null}
+        </div>
+      </div>
+      {choices.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 pl-5" aria-label={`Choices for ${matched.line.name}`}>
+          {choices.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => onPick(c.id)}
+              className="inline-flex min-h-11 items-center rounded-lg border border-blue-500/30 bg-blue-500/10 px-2.5 py-1.5 text-xs text-blue-700 hover:bg-blue-500/20 dark:text-blue-400 sm:min-h-8"
+            >
+              Use {c.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </li>
   );
 }

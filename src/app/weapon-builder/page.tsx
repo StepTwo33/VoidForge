@@ -57,7 +57,9 @@ import { shareBuilderBuild } from "@/lib/builds/share-build";
 import { toast } from "sonner";
 import { getWeaponImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
-import { BuildImporter } from "@/components/build-importer";
+import { BuildImporter, type ImportApplied } from "@/components/build-importer";
+import { weaponImportEligibility } from "@/lib/builds/import-eligibility";
+import { describeImportResult } from "@/lib/builds/mod-list-import";
 import { useCloudBuildFromUrl, fetchCloudBuild, setCloudBuildInUrl, clearCloudBuildInUrl, markCloudBuildLoaded } from "@/lib/builds/use-cloud-build-from-url";
 import { snapshotFromBuild } from "@/lib/builds/compare-build";
 import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
@@ -624,8 +626,26 @@ export default function WeaponBuilderPage() {
   const isSecondaryWeapon = selectedWeapon ? ["pistol", "secondary", "dual_pistols"].includes(selectedWeapon.category) : false;
   const isMeleeWeapon = selectedWeapon?.category === "melee";
   const hasWeaponExilusSlot = isPrimaryWeapon || isSecondaryWeapon || isMeleeWeapon;
-  const totalModSlots = hasWeaponExilusSlot ? numSlots + 1 : numSlots;
   const modCapacity = weaponModCapacity(selectedWeapon, adversaryFormas, hasOrokinCatalyst);
+  const importEligibility = useMemo(
+    () => (selectedWeapon ? weaponImportEligibility(selectedWeapon, modCategory) : null),
+    [selectedWeapon, modCategory],
+  );
+  const importRegularSlots = useMemo(() => Array.from({ length: numSlots }, (_, i) => i), [numSlots]);
+  const handleImportMods = useCallback(
+    (r: ImportApplied) => {
+      const previous = equippedMods;
+      setEquippedMods(cleanLoadedMods(r.mods));
+      setShowImporter(false);
+      const { title, description } = describeImportResult(r);
+      toast.success(title, {
+        description,
+        duration: 12000,
+        action: { label: "Undo", onClick: () => setEquippedMods(previous) },
+      });
+    },
+    [equippedMods],
+  );
   const showAdversaryRank = selectedWeapon != null && weaponSupportsProgenitor(selectedWeapon);
 
   return (
@@ -952,15 +972,17 @@ export default function WeaponBuilderPage() {
                   </span>
                   <MobileStatSummary items={weaponStatSummary(calculatedStats)} />
                 </div>
-                {showImporter && (
+                {showImporter && selectedWeapon && importEligibility && (
                   <div className="mb-4">
                     <BuildImporter
-                      modCategory={modCategory}
-                      numSlots={totalModSlots}
-                      onImport={(mods) => {
-                        setEquippedMods(cleanLoadedMods(mods));
-                        setShowImporter(false);
-                      }}
+                      itemName={selectedWeapon.name}
+                      itemKind="weapon"
+                      catalog={allMods}
+                      isEligible={importEligibility.isEligible}
+                      explainIneligible={importEligibility.explainIneligible}
+                      regularSlots={importRegularSlots}
+                      existing={equippedMods}
+                      onImport={handleImportMods}
                       onClose={() => setShowImporter(false)}
                     />
                   </div>

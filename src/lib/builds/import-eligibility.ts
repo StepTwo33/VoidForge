@@ -20,9 +20,14 @@ export interface ImportEligibility {
 function categoryLabel(mod: Mod): string {
   const c = mod.category;
   if (c === "warframe") return "Warframe";
+  if (c === "augment") return "Warframe augment";
   if (c === "general") return "general";
   return c.replace(/_/g, " ");
 }
+
+const WEAPON_MOD_CATEGORIES = new Set(["primary", "rifle", "shotgun", "bow", "secondary", "pistol", "melee"]);
+
+const withArticle = (label: string) => `${/^[aeiou]/i.test(label) ? "an" : "a"} ${label}`;
 
 function baseExplain(mod: Mod, itemName: string): string | null {
   if (mod.subCategory === "riven") return "Rivens can't be imported (their stats aren't in a name list). Add it from the mod picker";
@@ -48,7 +53,7 @@ export function weaponImportEligibility(weapon: Weapon, builderCategory: string)
     return m.category === builderCategory || m.category === "general";
   };
   const explainIneligible = (m: Mod): string =>
-    baseExplain(m, weapon.name) ?? `${m.name} is a ${categoryLabel(m)} mod, so it can't go on ${weapon.name}`;
+    baseExplain(m, weapon.name) ?? `${m.name} is ${withArticle(`${categoryLabel(m)} mod`)}, so it can't go on ${weapon.name}`;
   return { isEligible, explainIneligible };
 }
 
@@ -64,7 +69,8 @@ export function warframeImportEligibility(warframeId: string | undefined, warfra
     const base = baseExplain(m, warframeName);
     if (base) return base;
     if (isWarframeAugment(m)) return `${m.name} is an augment for a different Warframe, so it can't go on ${warframeName}`;
-    return `${m.name} is a ${categoryLabel(m)} mod, so it can't go on ${warframeName}`;
+    if (WEAPON_MOD_CATEGORIES.has(m.category)) return `${m.name} is a ${categoryLabel(m)} weapon mod, so it can't go on ${warframeName}`;
+    return `${m.name} is ${withArticle(`${categoryLabel(m)} mod`)}, so it can't go on ${warframeName}`;
   };
   return { isEligible, explainIneligible };
 }

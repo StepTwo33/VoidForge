@@ -14,6 +14,7 @@ import {
   matchModList,
   normalizeModName,
   parseModLine,
+  describeImportResult,
   parseModList,
   MAX_IMPORT_CHARS,
   MAX_IMPORT_LINES,
@@ -151,6 +152,11 @@ describe("matching on a rifle (Acceltra)", () => {
     const lato = weaponSession("Lato");
     expect(match(lato, "Hornet Strike")[0].status).toBe("exact");
   });
+  it("a melee weapon takes melee mods and refuses gun mods", () => {
+    const skana = weaponSession("Skana");
+    expect(match(skana, "Pressure Point")[0].status).toBe("exact");
+    expect(match(skana, "Serration")[0].status).toBe("ineligible");
+  });
   it("renamed / retired names are explained, not 'No match'", () => {
     const wf = frameSession("Vauban").session;
     const r = match(wf, "Repelling Bastille")[0];
@@ -196,7 +202,8 @@ describe("buildImportPlan", () => {
   it("defaults to max rank and uses a rank that was written", () => {
     const p = plan("Serration\nSplit Chamber R5\nVital Sense 12");
     expect(p.added.map((m) => [m.modName, m.rank])).toEqual([["Serration", 10], ["Split Chamber", 5], ["Vital Sense", 5]]);
-    expect(p.rows[0].rankNote).toMatch(/max rank/);
+    expect(p.rows[0].rankNote).toBeNull();
+    expect(p.rows[0].rank).toBe(10);
     expect(p.rows[2].rankNote).toMatch(/above this mod's max/);
   });
   it("fills slots in order from the given slot list", () => {
@@ -275,5 +282,19 @@ describe("warframe plans", () => {
   it("a weapon mod pasted on a frame is ineligible", () => {
     const { session } = frameSession("Banshee");
     expect(match(session, "Serration")[0].status).toBe("ineligible");
+  });
+});
+
+describe("describeImportResult", () => {
+  it("says what happened to the equipped mods and the skipped lines", () => {
+    expect(describeImportResult({ mode: "replace", imported: 5, skipped: 2, replaced: 8 })).toEqual({
+      title: "Imported 5 mods",
+      description: "Replaced the 8 mods that were equipped. 2 lines were not imported.",
+    });
+    expect(describeImportResult({ mode: "fill", imported: 1, skipped: 1, replaced: 0 })).toEqual({
+      title: "Imported 1 mod",
+      description: "Added to the empty slots. Your other mods are unchanged. 1 line was not imported.",
+    });
+    expect(describeImportResult({ mode: "replace", imported: 3, skipped: 0, replaced: 0 }).description).toBe("Filled the empty build.");
   });
 });

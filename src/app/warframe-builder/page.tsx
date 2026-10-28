@@ -69,7 +69,10 @@ import { shareBuilderBuild } from "@/lib/builds/share-build";
 import { toast } from "sonner";
 import { getWarframeImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
-import { BuildImporter } from "@/components/build-importer";
+import { BuildImporter, type ImportApplied } from "@/components/build-importer";
+import { warframeImportEligibility } from "@/lib/builds/import-eligibility";
+import { describeImportResult } from "@/lib/builds/mod-list-import";
+import { isAuraMod } from "@/lib/mods/aura-mods";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
@@ -740,6 +743,26 @@ export default function WarframeBuilderPage() {
     [selectedWarframe?.id],
   );
 
+  const importEligibility = useMemo(
+    () => warframeImportEligibility(selectedWarframe?.id, selectedWarframe?.name ?? "this Warframe"),
+    [selectedWarframe?.id, selectedWarframe?.name],
+  );
+  const importRegularSlots = useMemo(() => [1, 2, 3, 4, 5, 6, 7, 8], []);
+  const handleImportMods = useCallback(
+    (r: ImportApplied) => {
+      const previous = equippedMods;
+      setEquippedMods(cleanLoadedMods(r.mods));
+      setShowImporter(false);
+      const { title, description } = describeImportResult(r);
+      toast.success(title, {
+        description,
+        duration: 12000,
+        action: { label: "Undo", onClick: () => setEquippedMods(previous) },
+      });
+    },
+    [equippedMods],
+  );
+
   const innatePolarities = useMemo(
     () =>
       innateSlotPolarities(
@@ -1201,16 +1224,19 @@ export default function WarframeBuilderPage() {
                   </div>
 
                   {/* Build Importer */}
-                  {showImporter && (
+                  {showImporter && selectedWarframe && (
                     <div className="mb-4">
                       <BuildImporter
-                        modCategory="warframe"
-                        numSlots={8}
-                        onImport={(mods) => {
-                          const remapped = mods.map((m, i) => ({ ...m, slotIndex: i + 1 }));
-                          setEquippedMods(cleanLoadedMods(remapped));
-                          setShowImporter(false);
-                        }}
+                        itemName={selectedWarframe.name}
+                        itemKind="warframe"
+                        catalog={allMods}
+                        isEligible={importEligibility.isEligible}
+                        explainIneligible={importEligibility.explainIneligible}
+                        regularSlots={importRegularSlots}
+                        auraSlots={auraSlotIndices}
+                        isAura={isAuraMod}
+                        existing={equippedMods}
+                        onImport={handleImportMods}
                         onClose={() => setShowImporter(false)}
                       />
                     </div>
