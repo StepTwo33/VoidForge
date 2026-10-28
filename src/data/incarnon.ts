@@ -85,7 +85,7 @@ function getRangedEvolutions(): IncarnonEvolution[] {
     // Tier 3: Utility/damage
     { tier: 3, slot: 0, name: "Elemental Excess", description: "+20% Elemental Damage per unique status type affecting the target.", statChanges: {} },
     { tier: 3, slot: 1, name: "Swift Transformation", description: "+50% Incarnon Transmutation Buildup.", statChanges: {} },
-    { tier: 3, slot: 2, name: "Metabolic Recharge", description: "+100% Ammo Efficiency in Incarnon Form.", statChanges: {} },
+    { tier: 3, slot: 2, name: "Metabolic Recharge", description: "Placeholder perk (not on the wiki; unused because every Incarnon weapon resolves to its wiki-parsed evolutions). Incarnon Form ignores Ammo Efficiency and Ammo Efficiency is capped at 75% since Hotfix 44.1.3.", statChanges: {} },
     // Tier 4: Offensive utility
     { tier: 4, slot: 0, name: "Long Shot", description: "+100% Damage Falloff Range.", statChanges: {} },
     { tier: 4, slot: 1, name: "Status Surge", description: "+50% Status Chance.", statChanges: { statusChance: 0.5 } },
@@ -128,7 +128,7 @@ const WEAPON_SPECIFIC_EVOLUTION_IDS = new Set([
 function getVectisIncarnonEvolutions(): IncarnonEvolution[] {
   return [
     { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation. Alt-fire while unscoped to transform.", statChanges: {} },
-    { tier: 2, slot: 0, name: "Inciting Incident", description: "On Headshot: +100% Ammo Efficiency for 4s.", statChanges: {} },
+    { tier: 2, slot: 0, name: "Inciting Incident", description: "Increase Base Damage by +100 (+200 Vectis Prime). With Channeled Ability Active: +2 Punch Through (wiki.warframe.com/w/Vectis).", statChanges: {} },
     { tier: 2, slot: 1, name: "Lone Enforcer", description: "+75 Base Damage (+150 Vectis Prime) and +25% Multishot when no enemies are within range.", statChanges: {} },
     { tier: 3, slot: 0, name: "Rapid Reinforcement", description: "+60% Reload Speed.", statChanges: { reloadSpeed: 0.6 } },
     { tier: 3, slot: 1, name: "Marksman's Hand", description: "+60% Zoom while Aiming.", statChanges: {} },
