@@ -18,7 +18,7 @@ import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, persistSavedB
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { toast } from "sonner";
 import {
-  kitgunChambers, kitgunGrips, kitgunLoaders, buildKitgun,
+  kitgunChambers, kitgunGrips, kitgunLoaders, buildKitgun, kitgunWeaponClass,
   zawStrikes, zawGrips, zawLinks, buildZaw,
   ampPrisms, ampScaffolds, ampBraces, ampScaffoldProcsPerTrigger, ampScaffoldEdgeDamage,
   recommendedBuilds,
@@ -557,6 +557,15 @@ export default function ModularBuilderPage() {
                       </button>
                     ))}
                   </div>
+                  {kitgunChamber && kitgunGrip && assembledWeapon && (
+                    <p data-testid="kitgun-slot-summary" className="mt-2 text-xs text-muted-foreground">
+                      The grip sets the slot: <span className="font-medium text-foreground">{kitgunGrip.type === "primary" ? "Primary" : "Secondary"}</span>
+                      {" • "}
+                      <span className="font-medium text-foreground">{kitgunWeaponClass(assembledWeapon)}</span> class
+                      {" • "}
+                      <span className="font-medium text-foreground">{assembledWeapon.triggerType}</span> trigger
+                    </p>
+                  )}
                 </div>
 
                 {/* Loader */}
