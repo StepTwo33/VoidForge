@@ -11,7 +11,7 @@ import {
   allReactors, allShieldArrays, allEngines, allPlating,
   allTurrets, allOrdnance,
   RailjackComponent, RailjackArmament,
-  railjackPresets, uranusProximaMissions,
+  railjackPresets,
   findRailjackComponent, findRailjackArmament,
   getRailjackComponentTraits,
 } from "@/data/railjack";
@@ -379,37 +379,6 @@ export default function RailjackBuilderPage() {
     toast.success(`Loaded ${preset.name} (components + Plexus)`);
   }, [beginNewRailjackDraft, modsMap]);
 
-  // Uranus Proxima event body, shared by the open desktop card and the mobile <details>.
-  const eventCardBody = (
-    <>
-          <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-            Jade Shadows: Constellations adds Pontis Tower, Steel Path Railjack, four new Arcanes, and two story missions with reference ship loadouts.
-          </p>
-          <div className="grid sm:grid-cols-2 gap-2 mb-3">
-            {uranusProximaMissions.map((m) => (
-              <div key={m.id} className="text-xs border border-border/50 rounded-lg p-2.5 bg-card/50">
-                <div className="font-medium">{m.name}</div>
-                <div className="text-muted-foreground mt-0.5">Ally: {m.ally} • {m.rewards[0]}</div>
-              </div>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {railjackPresets.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => applyRailjackPreset(p.id)}
-                className="inline-flex min-h-11 items-center rounded-lg border border-rose-500/30 px-3 py-2 text-xs text-rose-800 transition-colors hover:bg-rose-500/10 lg:pointer-fine:min-h-9 sm:py-1.5 dark:text-rose-300"
-              >
-                Load {p.name} ({p.owner})
-              </button>
-            ))}
-          </div>
-          <p className="text-[10px] text-muted-foreground dark:text-muted-foreground/80 mt-2">
-            Presets apply ship components, Nose/Swivel turrets, ordnance, and max-rank Plexus mods.
-          </p>
-    </>
-  );
-
   return (
     <PageShell>
       <main className="container mx-auto px-4 pt-8 pb-24 lg:pb-8">
@@ -434,18 +403,20 @@ export default function RailjackBuilderPage() {
         </div>
         <p className="text-muted-foreground mb-4">Configure your Railjack components, armaments, and Plexus mods</p>
 
-        <div className="mb-6 hidden border border-rose-500/20 rounded-xl p-4 bg-rose-500/5 lg:block">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-rose-800 mb-2 dark:text-rose-300">Uranus Proxima (Update 43)</h2>
-          {eventCardBody}
+        {/* Reference ships: one-tap loads of the in-game reference Railjack loadouts (components, turrets, ordnance, max-rank Plexus). */}
+        <div className="mb-6 flex flex-wrap items-center gap-2" data-testid="railjack-reference-ships">
+          <span className="text-xs text-muted-foreground">Reference ships:</span>
+          {railjackPresets.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => applyRailjackPreset(p.id)}
+              title={`Load ${p.name} (${p.owner}): ship components, Nose/Swivel turrets, ordnance, and max-rank Plexus mods`}
+              className="inline-flex min-h-11 items-center rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground lg:pointer-fine:min-h-9 sm:py-1.5"
+            >
+              {p.name} ({p.owner})
+            </button>
+          ))}
         </div>
-        <details className="group mb-6 border border-rose-500/20 rounded-xl p-4 bg-rose-500/5 lg:hidden">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-            {/* Same event title as the lg+ card: one heading in the DOM, so this copy is the disclosure label only. */}
-            <span className="text-xs font-semibold uppercase tracking-wider text-rose-800 dark:text-rose-300">Uranus Proxima (Update 43)</span>
-            <span aria-hidden className="text-xs text-rose-800 transition-transform group-open:rotate-180 dark:text-rose-300">▾</span>
-          </summary>
-          <div className="mt-2">{eventCardBody}</div>
-        </details>
 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* ── Left Column: Ship Components & Stats ── */}
