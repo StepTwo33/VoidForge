@@ -15,6 +15,7 @@ import {
   normalizeModName,
   parseModLine,
   describeImportResult,
+  looksLikeModList,
   parseModList,
   MAX_IMPORT_CHARS,
   MAX_IMPORT_LINES,
@@ -296,5 +297,14 @@ describe("describeImportResult", () => {
       description: "Added to the empty slots. Your other mods are unchanged. 1 line was not imported.",
     });
     expect(describeImportResult({ mode: "replace", imported: 3, skipped: 0, replaced: 0 }).description).toBe("Filled the empty build.");
+  });
+});
+
+describe("looksLikeModList", () => {
+  it("recognises a mod list but not a share code, URL or prose", () => {
+    expect(looksLikeModList("Serration\nSplit Chamber, Vital Sense R5", allMods)).toBe(true);
+    expect(looksLikeModList("Serration\nhello\nworld\nfoo", allMods)).toBe(false);
+    expect(looksLikeModList("eyJfdiI6MSwidHlwZSI6IndlYXBvbiJ9", allMods)).toBe(false);
+    expect(looksLikeModList("", allMods)).toBe(false);
   });
 });

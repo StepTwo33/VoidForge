@@ -230,6 +230,14 @@ export default function ImportExportPage() {
     if (!decoded || typeof decoded !== "object") {
       setImportError("Invalid share code. Make sure you copied the full code or link.");
       toast.error("Invalid share code");
+      // A list of mod names is not a share code: say where mod lists are imported.
+      void Promise.all([import("@/data/mods"), import("@/lib/builds/mod-list-import")]).then(([{ allMods }, { looksLikeModList }]) => {
+        if (looksLikeModList(rawCode, allMods)) {
+          setImportError(
+            "That looks like a list of mod names, not a share code. To import mod names, open a weapon or Warframe builder and press Import mods. Share codes and links come from the Share button.",
+          );
+        }
+      });
       return;
     }
 

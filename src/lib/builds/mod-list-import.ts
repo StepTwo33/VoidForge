@@ -560,3 +560,19 @@ export function describeImportResult(r: { mode: ImportMode; imported: number; sk
   if (r.skipped > 0) parts.push(`${r.skipped} line${r.skipped === 1 ? " was" : "s were"} not imported.`);
   return { title, description: parts.join(" ") };
 }
+
+/**
+ * True when pasted text is clearly a list of mod names (at least half of its lines are exact mod
+ * names, minimum one). Used to point someone who pasted mod names into a share-code box at the
+ * "Import mods" button in the builders.
+ */
+export function looksLikeModList(text: string, catalog: readonly Mod[]): boolean {
+  const { lines } = parseModList(text);
+  if (lines.length === 0) return false;
+  const index = buildModIndex(catalog);
+  const exact = lines.filter((l) => {
+    const n = normalizeModName(l.name);
+    return index.byNorm.has(n) || index.bySquash.has(squash(n));
+  }).length;
+  return exact >= 1 && exact * 2 >= lines.length;
+}
