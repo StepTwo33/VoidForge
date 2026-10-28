@@ -36,6 +36,15 @@ describe("base Ammo Maximum data (wiki Module:Weapons/data AmmoMax)", () => {
     expect(WEAPON_BASE_AMMO_MAX.kuva_zarr).toBe(5);
     expect(WEAPON_BASE_AMMO_MAX.lex).toBe(210);
   });
+  it("R29: recent weapons now carry their wiki AmmoMax (page-verified)", () => {
+    const wiki: Record<string, number> = {
+      nunchasa: 50, enkaus: 60, steflos_prime: 36, aksondol: 210, athodai_prime: 72, afentis_prime: 12,
+      perigale_prime: 32, daikyu_prime: 72, tenet_quanta: 540, reconifex: 1000, zymos: 51, scyotid: 320,
+    };
+    for (const [id, n] of Object.entries(wiki)) expect(WEAPON_BASE_AMMO_MAX[id], id).toBe(n);
+    // Ammo Drum R5 (+90%): Tenet Quanta 540 -> 1026, Afentis Prime 12 -> 22 (rounded)
+    expect(calculateWeaponBuild(weapon("tenet_quanta"), [slot("ammo_drum", 5)], modsMap()).ammoMax).toBe(1026);
+  });
   it("battery weapons (AmmoMax 0) have no reserve", () => {
     expect(baseAmmoMaxForWeapon("fulmin")).toBeUndefined();
     expect(baseAmmoMaxForWeapon("artemis_bow")).toBeUndefined();
