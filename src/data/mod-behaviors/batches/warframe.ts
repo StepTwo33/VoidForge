@@ -113,7 +113,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   ]),
   // Enemy armor strip — not player armor. Keep both lines panel until TTK enemy-aura wiring.
   aura_corrosive_projection: mod("aura_corrosive_projection", [
-    line("armor", "mod_panel", "multiplicative_percent", "Corrosive Projection: armor \u2014 -6% Enemy Armor per rank (enemy-side; not warframe armor)"),
+    line("armor", "mod_panel", "multiplicative_percent", "Corrosive Projection: armor \u2014 -3% Enemy Armor per rank (enemy-side; not warframe armor)"),
   ]),
   aura_cunning_drift: mod("aura_cunning_drift", [
     line("abilityRange", "warframe_totals", "multiplicative_percent", "Cunning Drift: abilityRange \u2014 +12% Slide\\\\n-30% Friction\\\\n+15% Ability Range"),
@@ -359,8 +359,8 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("cooldown", "mod_panel", "multiplicative_percent", "Loyal Merulina: cooldown \u2014 Merulina Augment: Yareli no longer rides Merulina. Instead, Merulina follows her\u2026"),
   ]),
   maglev: mod("maglev", [
-    line("slideFriction", "mod_panel", "multiplicative_percent", "Maglev: slideFriction \u2014 +20% Slide, -20% Friction"),
-    line("slideSpeed", "mod_panel", "multiplicative_percent", "Maglev: slideSpeed \u2014 +20% Slide, -20% Friction"),
+    line("slideFriction", "mod_panel", "multiplicative_percent", "Maglev: slideFriction \u2014 +5% Slide, -5% Friction per rank"),
+    line("slideSpeed", "mod_panel", "multiplicative_percent", "Maglev: slideSpeed \u2014 +5% Slide, -5% Friction per rank"),
   ]),
   master_thief: mod("master_thief", [
     line("lockerUnlockChance", "mod_panel", "multiplicative_percent", "Master Thief: lockerUnlockChance \u2014 +40% chance to unlock locked lockers."),
@@ -483,8 +483,8 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("shield", "warframe_totals", "multiplicative_percent", "Redirection: shield \u2014 +100% Shield Capacity"),
   ]),
   reflection: mod("reflection", [
-    line("blockStaggerChance", "mod_panel", "multiplicative_percent", "Reflection: blockStaggerChance \u2014 +73.3% chance to Stagger on Block, +18.3% chance to Stun on Block"),
-    line("blockStunChance", "mod_panel", "multiplicative_percent", "Reflection: blockStunChance \u2014 +73.3% chance to Stagger on Block, +18.3% chance to Stun on Block"),
+    line("blockStaggerChance", "mod_panel", "multiplicative_percent", "Reflection: blockStaggerChance \u2014 +40% chance to Stagger on Block, +10% chance to Stun on Block"),
+    line("blockStunChance", "mod_panel", "multiplicative_percent", "Reflection: blockStunChance \u2014 +40% chance to Stagger on Block, +10% chance to Stun on Block"),
   ]),
   reflex_guard_r10: mod("reflex_guard_r10", [
     line("comboCountChance", "mod_panel", "multiplicative_percent", "Reflex Guard: comboCountChance \u2014 +100% Combo Count Chance while Blocking"),

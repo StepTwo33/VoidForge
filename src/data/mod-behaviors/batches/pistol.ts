@@ -27,8 +27,8 @@ export const MOD_BEHAVIORS_PISTOL: Record<string, VerifiedModBehavior> = {
   ]),
 
   creeping_bullseye: mod("creeping_bullseye", [
-    line("criticalChance", "weapon_dps", "multiplicative_percent", "Creeping Bullseye: criticalChance \u2014 +8% Crit Chance, -6% Fire Rate per rank"),
-    line("fireRate", "weapon_dps", "multiplicative_percent", "Creeping Bullseye: fireRate \u2014 +8% Crit Chance, -6% Fire Rate per rank"),
+    line("criticalChance", "weapon_dps", "multiplicative_percent", "Creeping Bullseye: criticalChance \u2014 +33.3% Crit Chance, -3.3% Fire Rate per rank"),
+    line("fireRate", "weapon_dps", "multiplicative_percent", "Creeping Bullseye: fireRate \u2014 +33.3% Crit Chance, -3.3% Fire Rate per rank"),
   ]),
   embedded_catalyzer: mod("embedded_catalyzer", [
     line("duration", "mod_panel", "multiplicative_percent", "Embedded Catalyzer: duration \u2014 On Ability Cast:\\\\n+90% Status Chance when Aiming for 9s"),

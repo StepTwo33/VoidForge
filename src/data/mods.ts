@@ -314,7 +314,7 @@ const RAW_MODS: Mod[] = [
       "criticalChance": 33.3333,
       "fireRate": -3.3333
     },
-    "description": "+8% Crit Chance, -6% Fire Rate per rank",
+    "description": "+33.3% Crit Chance, -3.3% Fire Rate per rank",
     "rarity": "rare"
   },
   {
@@ -540,7 +540,7 @@ const RAW_MODS: Mod[] = [
       "criticalChance": 33.3333,
       "fireRate": -3.3333
     },
-    "description": "+8% Crit Chance, -6% Fire Rate per rank",
+    "description": "+33.3% Crit Chance, -3.3% Fire Rate per rank",
     "rarity": "rare"
   },
   {
@@ -1073,7 +1073,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "armor": -3.0
     },
-    "description": "-6% Enemy Armor per rank",
+    "description": "-3% Enemy Armor per rank",
     "rarity": "uncommon"
   },
   {
@@ -12560,7 +12560,7 @@ const RAW_MODS: Mod[] = [
       "slideSpeed": 5.0,
       "slideFriction": -5.0
     },
-    "description": "+20% Slide, -20% Friction",
+    "description": "+5% Slide, -5% Friction per rank",
     "rarity": "uncommon"
   },
   {
@@ -13113,10 +13113,10 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "blockStaggerChance": 12.216667,
-      "blockStunChance": 3.05
+      "blockStaggerChance": 6.666667,
+      "blockStunChance": 1.666667
     },
-    "description": "+73.3% chance to Stagger on Block, +18.3% chance to Stun on Block",
+    "description": "+40% chance to Stagger on Block, +10% chance to Stun on Block",
     "rarity": "uncommon"
   },
   {

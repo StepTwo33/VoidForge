@@ -28,8 +28,8 @@ export const MOD_BEHAVIORS_RIFLE: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Bladed Rounds: duration \u2014 On Kill:\\\\n+120% Critical Damage when Aiming for 9s"),
   ]),
   critical_deceleration: mod("critical_deceleration", [
-    line("criticalChance", "weapon_dps", "multiplicative_percent", "Critical Deceleration: criticalChance \u2014 +8% Crit Chance, -6% Fire Rate per rank"),
-    line("fireRate", "weapon_dps", "multiplicative_percent", "Critical Deceleration: fireRate \u2014 +8% Crit Chance, -6% Fire Rate per rank"),
+    line("criticalChance", "weapon_dps", "multiplicative_percent", "Critical Deceleration: criticalChance \u2014 +33.3% Crit Chance, -3.3% Fire Rate per rank"),
+    line("fireRate", "weapon_dps", "multiplicative_percent", "Critical Deceleration: fireRate \u2014 +33.3% Crit Chance, -3.3% Fire Rate per rank"),
   ]),
   critical_delay: mod("critical_delay", [
     line("criticalChance", "weapon_dps", "multiplicative_percent", "Critical Delay: criticalChance \u2014 +200% Critical Chance\\\\n-20% Fire Rate (x2 for Bows)"),
