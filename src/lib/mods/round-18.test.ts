@@ -49,8 +49,7 @@ const STRAY: [string, string[], string[]][] = [
   ["augment_volt_capacitance", ["+25 Shield Per Target", "+1.5% Damage To Shield Conversion"], ["+100 Shield Per Target", "+3% Damage To Shield Conversion"]],
   // Deceptive Bond: Damage Redirected 20/30/45/50%.
   ["deceptive_bond", ["+20% Damage Redirected"], ["+50% Damage Redirected"]],
-  // Hallowed Reckoning: Ability Range +40% at every rank, radius 1.5–3m.
-  ["hallowed_reckoning", ["+1.5m Range", "+40% Reckoning Range"], ["+3m Range", "+40% Reckoning Range"]],
+  // Hallowed Reckoning moved to round-23-hallowed-retribution.test.ts (it deals Radiation damage per second).
   // Peaceful Provocation: Pacify Slow 20/30/35/40%, Provoke Ability Strength +6/9/12/15%.
   ["peaceful_provocation", ["+20% Pacify Slow", "+6% Provoke Strength"], ["+40% Pacify Slow", "+15% Provoke Strength"]],
   // Reverse Rotorswell: 20/25/30/35% of damage received redirected.
@@ -62,8 +61,7 @@ const STRAY: [string, string[], string[]][] = [
   // Kinetic Diversion: +10…40%; Necramech Rage: 2.5…15%.
   ["kinetic_diversion", ["+10% Energy On Health Damage"], ["+40% Energy On Health Damage"]],
   ["necramech_rage", ["+2.5% Energy On Health Damage"], ["+15% Energy On Health Damage"]],
-  // Retribution: Effect 15/30/45/60% chance.
-  ["retribution", ["+15% Retaliation Chance"], ["+60% Retaliation Chance"]],
+  // Retribution moved to round-23-hallowed-retribution.test.ts (it deals +20/rank Electricity).
   // Heartseeker: % Damage Blocked -12.5…-50%, targeting radius 0.25–1m.
   ["heartseeker", ["-12.5% Damage Block", "+0.3m Range"], ["-50% Damage Block", "+1m Range"]],
   // Relentless Combination: +25…100% combo count chance.

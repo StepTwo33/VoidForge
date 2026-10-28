@@ -281,6 +281,12 @@ export const FIELD_LABELS: Record<string, string> = {
   speed: "Flight speed",
   // Aerial / Momentous Bond (wiki.warframe.com): kills cut the companion's bleedout recovery timer.
   recoveryTimeReduction: "Companion Recovery Time",
+  // Hallowed Reckoning / Retribution (wiki.warframe.com stat tables).
+  reckoningRadiationDps: "Radiation Damage per Second",
+  reckoningArmor: "Armor Bonus",
+  reckoningDuration: "Duration",
+  reckoningArmorGrace: "Armor Bonus Grace Period",
+  retaliationElectricity: "Electricity Damage",
   headshotRecoveryTimeReduction: "Companion Recovery Time (headshot kill)",
 };
 

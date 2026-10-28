@@ -375,6 +375,14 @@ export const MOD_WIKI_RANK_TABLES: Record<string, Record<string, WikiRankTable>>
   guardian: {
     shieldRestore: { unit: "%", values: [58, 67, 75, 83, 92, 100] },
   },
+  hallowed_reckoning: {
+    reckoningRange: { unit: "%", values: [40, 40, 40, 40] },
+    reckoningRadiationDps: { unit: "", values: [150, 200, 250, 300] },
+    reckoningArmor: { unit: "", values: [150, 180, 210, 250] },
+    armorBonusRadius: { unit: "m", values: [1.5, 2, 2.5, 3] },
+    reckoningDuration: { unit: "s", values: [7, 8, 9, 10] },
+    reckoningArmorGrace: { unit: "s", values: [3, 3, 3, 3] },
+  },
   howl: {
     duration: { unit: "s", values: [6, 8, 10, 12, 14, 16] },
   },

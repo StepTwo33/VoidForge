@@ -236,8 +236,6 @@ const MOD_RANK_VALUE_TABLES: Record<string, Record<string, readonly number[]>> =
   augment_volt_capacitance: { damageToShieldConversion: [1.5, 2, 2.5, 3] },
   // Deceptive Bond: 20/30/45/50% Damage Redirected (R0–R3).
   deceptive_bond: { damageRedirected: [20, 30, 45, 50] },
-  // Hallowed Reckoning: +40% Ability Range at every rank, 1.5–3 m radius (R0–R3).
-  hallowed_reckoning: { reckoningRange: [40, 40, 40, 40], range: [1.5, 2, 2.5, 3] },
   // Peaceful Provocation: Pacify Slow 20/30/35/40%, Provoke Ability Strength +6/9/12/15% (R0–R3).
   peaceful_provocation: { pacifySlow: [20, 30, 35, 40], provokeStrength: [6, 9, 12, 15] },
   // Reverse Rotorswell: 20/25/30/35% of damage received redirected (R0–R3).

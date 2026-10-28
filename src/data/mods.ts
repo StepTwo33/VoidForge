@@ -12204,8 +12204,12 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "range": 0.75,
-      "reckoningRange": 10
+      "reckoningRange": 10,
+      "armorBonusRadius": 0.75,
+      "reckoningRadiationDps": 75,
+      "reckoningArmor": 62.5,
+      "reckoningDuration": 2.5,
+      "reckoningArmorGrace": 0.75
     },
     "description": "Reckoning Augment: Reckoning gains +40% range. A 3m radius around each affected enemy grants bonus armor to allies and deals 300 damage per second to enemies.",
     "rarity": "rare",
@@ -13184,7 +13188,8 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "retaliationChance": 15
+      "retaliationChance": 15,
+      "retaliationElectricity": 20
     },
     "description": "+60% Chance to deal Electrical Damage when shield struck by melee enemies., +80 <DT_ELECTRICITY_COLOR>Electricity",
     "rarity": "rare"

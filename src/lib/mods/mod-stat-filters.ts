@@ -189,6 +189,12 @@ const STAT_KEY_FILTERS: Record<string, ModStatFilterId[]> = {
   damageToShieldConversion: ["survivability"],
   damageRedirected: ["survivability"],
   reckoningRange: ["range"],
+  // Round 23: Hallowed Reckoning (wiki.warframe.com stat table) and Retribution's +20/rank Electricity.
+  armorBonusRadius: ["range"],
+  reckoningArmor: ["survivability"],
+  reckoningDuration: ["duration"],
+  reckoningArmorGrace: ["survivability"],
+  retaliationElectricity: ["survivability"],
   pacifySlow: ["utility"],
   provokeStrength: ["strength"],
   energyOnHealthDamage: ["survivability", "utility"],

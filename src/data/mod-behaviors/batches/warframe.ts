@@ -498,6 +498,7 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   ]),
   retribution: mod("retribution", [
     line("retaliationChance", "mod_panel", "multiplicative_percent", "wiki: Retribution \u2014 15% chance per rank (60% R3) to retaliate with Electricity when shields are struck by melee (not a damage bonus)"),
+    line("retaliationElectricity", "mod_panel", "multiplicative_percent", "wiki + WFCD: Retribution \u2014 the retaliation deals +20 Electricity per rank (+80 at R3) to the melee attacker (defensive proc, not a weapon damage bonus)"),
   ]),
   reverse_rotorswell: mod("reverse_rotorswell", [
     line("damageRedirected", "mod_panel", "multiplicative_percent", "wiki: Reverse Rotorswell \u2014 20/25/30/35% of damage received is redirected toward the instigator (R0\u2013R3; wiki column 'Damage Reduction'; not damage)"),

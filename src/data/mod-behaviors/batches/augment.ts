@@ -718,8 +718,12 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("abilityDuration", "mod_panel", "multiplicative_percent", "Hallowed Eruption: abilityDuration \u2014 Hallowed Ground Augment: Reactivate to deal all Remaining Damage and <DT_RADIATION_COLOR>Radiation Status.\\\\nPassive: +200% Hallowed Ground Duration."),
   ]),
   hallowed_reckoning: mod("hallowed_reckoning", [
-    line("range", "mod_panel", "multiplicative_percent", "wiki: Hallowed Reckoning \u2014 armor-bonus radius 1.5/2/2.5/3m (R0\u2013R3) (arsenal display only)"),
     line("reckoningRange", "mod_panel", "multiplicative_percent", "wiki: Hallowed Reckoning \u2014 Reckoning gains +40% Ability Range at every rank (panel only)"),
+    line("armorBonusRadius", "mod_panel", "multiplicative_percent", "wiki: Hallowed Reckoning \u2014 armor-bonus / damage zone radius 1.5/2/2.5/3m (R0\u2013R3); scales with Ability Range (panel only)"),
+    line("reckoningRadiationDps", "mod_panel", "multiplicative_percent", "wiki: Hallowed Reckoning \u2014 Radiation damage per second 150/200/250/300 (R0\u2013R3), +50 per Radiation stack on the target; 1 forced Radiation proc per hit (ability damage, not a weapon stat)"),
+    line("reckoningArmor", "mod_panel", "multiplicative_percent", "wiki: Hallowed Reckoning \u2014 Armor Bonus 150/180/210/250 (R0\u2013R3) to allies in the zone (panel only)"),
+    line("reckoningDuration", "mod_panel", "multiplicative_percent", "wiki: Hallowed Reckoning \u2014 zone Duration 7/8/9/10s (R0\u2013R3); scales with Ability Duration (Hotfix 33.5.5)"),
+    line("reckoningArmorGrace", "mod_panel", "multiplicative_percent", "wiki: Hallowed Reckoning \u2014 Armor Bonus Grace Period 3s at every rank"),
   ]),
   hunters_bonesaw: mod("hunters_bonesaw", [
     line("finisherDamage", "mod_panel", "multiplicative_percent", "Hunter's Bonesaw: finisherDamage \u2014 Increase Finisher Damage by 120% against prone enemies."),
