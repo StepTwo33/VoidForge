@@ -60,6 +60,16 @@ const COMPANION_FILTERS: ModStatFilterOption[] = [
   { id: "utility", label: "Utility" },
 ];
 
+/** Railjack Plexus mods are turret / ordnance / ability mods, not Warframe ability-stat mods. */
+const RAILJACK_FILTERS: ModStatFilterOption[] = [
+  { id: "all", label: "All" },
+  { id: "damage", label: "Damage" },
+  { id: "crit", label: "Crit" },
+  { id: "speed", label: "Speed" },
+  { id: "survivability", label: "Survivability" },
+  { id: "utility", label: "Utility" },
+];
+
 /** Map mod stat keys → picker filter tags (mods can match multiple). */
 const STAT_KEY_FILTERS: Record<string, ModStatFilterId[]> = {
   abilityStrength: ["strength"],
@@ -203,6 +213,124 @@ const STAT_KEY_FILTERS: Record<string, ModStatFilterId[]> = {
   initialCombo: ["utility"],
   // Round 19: Duplex Bond's Energy Orb drop chance (replaced its stray `energy` key).
   energyOrbDropChance: ["utility"],
+  // Round 23: companion mods whose only stat keys had no chip (effects from the wiki max-rank text).
+  healOnMelee: ["survivability"], // Pack Leader: heal the companion on melee hits, excess becomes Overguard
+  healthPickupBonus: ["survivability"], // Synth Fiber: Health Orbs give the companion Armor
+  stealthDurationCap: ["utility"], // Covert Bond: companion stealth
+  reviveOverguard: ["survivability"], // Reinforced Bond: reload restores companion Overshields
+  healthOnKill: ["survivability"], // Restorative Bond
+  restoreNearby: ["survivability"],
+  coldDamage: ["damage"], // Coolant Leak: radial Cold blast
+  shieldRestore: ["survivability"], // Guardian, Protect
+  healthRestore: ["survivability"], // Medi-Ray
+  healthRestoreMove: ["survivability"], // Odomedic
+  bubbleHealth: ["survivability"], // Sanctuary
+  overshields: ["survivability"], // Shield Charger
+  regenCharges: ["survivability"], // Regen, Primed Regen (revive)
+  revive: ["survivability"], // Sacrifice
+  blastDamage: ["damage"], // Self Destruct
+  autoRevive: ["survivability"], // Reawaken
+  statusImmunity: ["survivability"], // Negate
+  digCooldown: ["utility"], // Dig
+  buffChance: ["utility"], // Charm
+  reviveChance: ["survivability"], // Transfusion
+  commandOnStatus: ["status"], // Hunter Command: Slash status makes the companion attack
+  critLink: ["crit"], // Hunter Synergy: Critical Chance added to the companion
+  energyOnAssist: ["utility"], // Energy Generator
+  hotspotRange: ["utility"], // Scan Aquatic Lifeforms
+  dodgeChance: ["survivability"], // Evasive Denial
+  fireRateBonus: ["damage"], // Reinforced Bond: +60% fire rate while the companion has 1200+ shields
+};
+
+/**
+ * Mods whose effect is in their wiki text but not in any chip-mapped stat key (generic duration /
+ * cooldown, or no stats at all). Tags come from the wiki max-rank description (wiki.warframe.com
+ * mod pages, Plexus Mods table). Applied on top of STAT_KEY_FILTERS.
+ */
+export const MOD_FILTER_TAGS_BY_ID: Record<string, readonly ModStatFilterId[]> = {
+  // --- Companion (Companion filters: survivability / damage / crit / status / utility) ---
+  tenacious_bond: ["survivability", "crit"], // headshot kills cut Recovery Time; +1.2x Final Crit Damage over 50% crit
+  manifold_bond: ["status", "utility"], // precepts apply Status Effects; ability cooldown reduction
+  anabolic_pollination: ["damage"], // +100% Toxin Damage cloud
+  crescent_devolution: ["damage"], // larval charge dealing 100 Puncture
+  panzer_devolution: ["damage"], // quills dealing 60 Viral each
+  sly_devolution: ["survivability"], // enemy accuracy -20%
+  focused_prospectus: ["damage"], // beam dealing 900 Heat
+  iatric_mycelium: ["survivability"], // heals the companion and allies 300 health
+  null_audit: ["utility"], // Eximus aura / abilities, strips Overguard
+  survival_instinct: ["survivability"], // enemies lose sight on Bullet Jump
+  tandem_bond: ["damage"], // Combo and +30% companion melee damage
+  ammo_case: ["utility"], // +25% Ammo Capacity, ammo pickup conversion
+  elusive_posture: ["survivability"], // +50% Evasion
+  scavenge: ["utility"], // locker prying
+  // Keys shared with non-companion mods (Health Orb chance, loot chance, status damage / duration)
+  // are tagged by id so no Warframe / weapon mod changes chip.
+  synth_deconstruct: ["survivability"], // Health Orb drops
+  spare_parts: ["utility"], // marked target drops more items
+  immunity_resistance: ["status"], // +50% Status Damage
+  frenzied_posture: ["status"], // +80% Status Duration
+  mystic_bond: ["utility"], // free Warframe ability cast after the companion uses abilities
+  anti_grav_array: ["utility"], // owner jump height +40%
+  coolant_leak: ["damage", "status"], // radial Cold blast, slows / Cold stacks
+  regen: ["survivability"], // Sentinel revives with 10s invulnerability
+  primed_regen: ["survivability"],
+  reawaken: ["survivability"], // Overshields + recovery timer
+  negate: ["survivability"], // prevents Status Effects on the owner
+  dig: ["utility"], // sniffs out buried objects
+  transfusion: ["survivability"], // Vasca Kavat raises its bleeding-out Master
+  hunter_command: ["status"], // Slash Status makes the companion attack the target
+  energy_generator: ["utility"], // Dethcube drops Energy Orbs
+  tek_enhance: ["utility"], // +30% Ability Duration for the Tek abilities
+  // --- Railjack (RAILJACK_FILTERS: damage / crit / speed / survivability / utility) ---
+  indomitable_matrix: ["survivability"],
+  ironclad_matrix: ["survivability"],
+  onslaught_matrix: ["damage", "survivability"],
+  orgone_tuning_matrix: ["survivability", "utility"],
+  raider_matrix: ["utility", "speed", "damage"],
+  conic_nozzle: ["speed"],
+  cruising_speed: ["speed"],
+  ion_burn: ["speed"],
+  crimson_fugue: ["damage"],
+  defensive_fire: ["survivability"],
+  fortifying_fire: ["survivability", "crit"],
+  hyperstrike: ["damage"],
+  predator: ["crit"],
+  protective_shots: ["damage"],
+  section_density: ["crit"],
+  turret_velocity: ["utility"],
+  waveband_disruptor: ["crit", "damage"],
+  granums_nemesis: ["damage"],
+  sentient_scalpel: ["damage"],
+  worms_torment: ["damage"],
+  ordnance_cheap_shot: ["utility"],
+  ordnance_velocity: ["utility"],
+  overloader: ["utility"],
+  quicklock: ["utility"],
+  ripload: ["utility"],
+  scourging_warheads: ["damage"],
+  warhead: ["damage"],
+  artillery_cheap_shot: ["utility"],
+  forward_artillery: ["damage"],
+  revo_reducer: ["utility"],
+  blackout_pulse: ["damage", "utility"],
+  countermeasures: ["survivability"],
+  munitions_vortex: ["survivability", "damage"],
+  particle_ram: ["damage"],
+  shatter_burst: ["damage"],
+  tether: ["utility", "damage"],
+  phoenix_blaze: ["damage", "speed", "survivability"],
+  seeker_volley: ["damage"],
+  void_hole: ["damage", "utility"],
+  battle_forge: ["utility"],
+  breach_quanta: ["survivability"],
+  death_blossom: ["damage"],
+  fire_suppression: ["survivability"],
+  flow_burn: ["speed"],
+  form_up: ["survivability"],
+  squad_renew: ["survivability"],
+  intruder_stasis: ["survivability"],
+  battle_stations: ["damage"],
+  void_cloak: ["survivability"],
 };
 
 const WEAPON_CATEGORIES = new Set([
@@ -246,6 +374,7 @@ export function getModStatFilterTags(mod: Mod): Set<ModStatFilterId> {
       for (const tag of mapped) tags.add(tag);
     }
   }
+  for (const tag of MOD_FILTER_TAGS_BY_ID[mod.id] ?? []) tags.add(tag);
   return tags;
 }
 
@@ -263,6 +392,9 @@ export function getModPickerStatFilters(
   }
   if (WEAPON_CATEGORIES.has(builderCategory)) {
     return WEAPON_FILTERS;
+  }
+  if (builderCategory === "railjack") {
+    return RAILJACK_FILTERS;
   }
   if (builderCategory === "warframe") {
     if (slotType === "aura" || slotType === "exilus") {

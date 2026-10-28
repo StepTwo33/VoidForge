@@ -650,6 +650,7 @@ export default function ArchwingBuilderPage() {
         onClose={() => setWeaponModPickerOpen(false)}
         mods={filteredWeaponMods}
         category="_prefiltered"
+        statFilterCategory={selectedWeapon?.category}
         equippedModIds={weaponMods.map((m) => m.modId)}
         slotNav={buildSlotNav(Array.from({ length: selectedWeapon?.modSlots ?? 0 }, (_, i) => i), weaponActiveSlot, setWeaponActiveSlot)}
         onSelect={(mod, rank) => {

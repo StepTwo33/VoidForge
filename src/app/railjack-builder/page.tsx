@@ -1348,6 +1348,7 @@ export default function RailjackBuilderPage() {
         onClose={() => setModPickerOpen(false)}
         mods={slotRailjackMods}
         category="_prefiltered"
+        statFilterCategory="railjack"
         equippedModIds={currentMods.map((m) => m.modId)}
         slotNav={buildSlotNav(
           plexusTab === "integrated"
