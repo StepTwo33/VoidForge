@@ -2947,17 +2947,17 @@ export const allWarframes: Warframe[] = [
     "abilities": [
       {
         "name": "Energized Munitions",
-        "energyCost": 25,
+        "energyCost": 50,
         "description": "Increase the efficiency of your ammo consumption."
       },
       {
         "name": "Master's Summons",
-        "energyCost": 25,
+        "energyCost": 50,
         "description": "Heal your companion and call it to your side."
       },
       {
         "name": "Voracious Metastasis",
-        "energyCost": 25,
+        "energyCost": 50,
         "description": "Consume Energy to heal yourself and grant matching Energy to each ally."
       },
       {
@@ -3865,7 +3865,7 @@ export const allWarframes: Warframe[] = [
         "castTime": 0.6,
         "damageType": "Slash",
         "miscStats": {
-          "healthPerHit": 350,
+          "healthPerHit": 325,
           "missDrain": 35,
           "overguardCap": 10000,
           "daggerCount": 10,
