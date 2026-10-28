@@ -128,7 +128,7 @@ export function SaveBuildDialog({
             <DialogDescription>
               {toLoadoutMode
                 ? `Update the ${loadoutTarget!.slotLabel} slot in ${loadoutTarget!.loadoutName}.`
-                : "Save to your account. Optionally list it in Community so others can find and upvote it."}
+                : "Saves to your account when you are signed in, otherwise on this device only. Optionally list it in Community so others can find and upvote it."}
             </DialogDescription>
           </DialogHeader>
 

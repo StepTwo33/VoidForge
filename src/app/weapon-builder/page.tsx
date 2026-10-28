@@ -723,11 +723,11 @@ export default function WeaponBuilderPage() {
                       <span>Tektolyst Artifact — {weapon.focusSchool || "Focus"} School</span>
                     ) : (
                       <>
-                        <span>DMG {weapon.damage}</span>
-                        <span>CC {(weapon.criticalChance * 100).toFixed(0)}%</span>
-                        <span>CM {weapon.criticalMultiplier.toFixed(1)}x</span>
-                        <span>SC {(weapon.statusChance * 100).toFixed(0)}%</span>
-                        <span>FR {weapon.fireRate.toFixed(1)}</span>
+                        <span title="Total base damage per shot">DMG {weapon.damage}</span>
+                        <span title="Critical chance">CC {(weapon.criticalChance * 100).toFixed(0)}%</span>
+                        <span title="Critical multiplier">CM {weapon.criticalMultiplier.toFixed(1)}x</span>
+                        <span title="Status chance">SC {(weapon.statusChance * 100).toFixed(0)}%</span>
+                        <span title="Fire rate (attacks per second)">FR {weapon.fireRate.toFixed(1)}</span>
                       </>
                     )}
                   </div>
@@ -829,6 +829,8 @@ export default function WeaponBuilderPage() {
                   )}
                   <button
                     onClick={() => setHasOrokinCatalyst(!hasOrokinCatalyst)}
+                    title="Orokin Catalyst — doubles mod capacity"
+                    aria-pressed={hasOrokinCatalyst}
                     className={cn(
                       "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
                       hasOrokinCatalyst
@@ -960,11 +962,16 @@ export default function WeaponBuilderPage() {
                     />
                   </div>
                 )}
+                {equippedMods.length === 0 && (
+                  <p className="mb-2 text-[11px] leading-snug text-muted-foreground sm:hidden" data-testid="mobile-slot-hint">
+                    Tap a slot to add a mod. Tap the hexagon beside a slot to add a forma.
+                  </p>
+                )}
                 {hasWeaponExilusSlot && (
                   <p className="mb-2 text-[11px] leading-snug text-muted-foreground">
-                    Slot 9 is <span className="font-medium text-foreground/80">Exilus</span>
+                    The last slot, <span className="font-medium text-foreground/80">Exilus</span>
                     {selectedWeapon && isTomeWeapon(selectedWeapon.id) ? " (Canticle on tomes)" : ""}
-                    {" "}— only Exilus-eligible mods for this weapon.
+                    {", "}only takes Exilus-eligible mods for this weapon.
                   </p>
                 )}
                 <div className="grid grid-cols-2 gap-1.5 sm:gap-2.5 lg:grid-cols-4">

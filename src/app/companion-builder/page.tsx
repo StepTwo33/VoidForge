@@ -751,6 +751,8 @@ export default function CompanionBuilderPage() {
                 <BuilderActionGroup>
                   <button
                     onClick={() => setHasReactor(!hasReactor)}
+                    title="Orokin Reactor — doubles mod capacity"
+                    aria-pressed={hasReactor}
                     className={cn(
                       "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
                       hasReactor
@@ -970,6 +972,8 @@ export default function CompanionBuilderPage() {
                   {selectedWeapon && (
                     <button
                       onClick={() => setHasCatalyst(!hasCatalyst)}
+                      title="Orokin Catalyst — doubles mod capacity"
+                      aria-pressed={hasCatalyst}
                       className={cn(
                         "ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
                         hasCatalyst
@@ -1016,10 +1020,10 @@ export default function CompanionBuilderPage() {
                               <span className="shrink-0 text-[10px] capitalize text-muted-foreground">{w.category.replace('_', ' ')}</span>
                             </div>
                             <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-muted-foreground">
-                              <span>DMG {w.damage}</span>
-                              <span>CC {(w.criticalChance * 100).toFixed(0)}%</span>
-                              <span>CD {w.criticalMultiplier.toFixed(1)}x</span>
-                              <span>SC {(w.statusChance * 100).toFixed(0)}%</span>
+                              <span title="Total base damage per shot">DMG {w.damage}</span>
+                              <span title="Critical chance">CC {(w.criticalChance * 100).toFixed(0)}%</span>
+                              <span title="Critical multiplier">CM {w.criticalMultiplier.toFixed(1)}x</span>
+                              <span title="Status chance">SC {(w.statusChance * 100).toFixed(0)}%</span>
                             </div>
                           </button>
                         ))

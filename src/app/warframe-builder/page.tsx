@@ -1053,6 +1053,8 @@ export default function WarframeBuilderPage() {
                 <BuilderActionGroup>
                   <button
                     onClick={() => setHasOrokinReactor(!hasOrokinReactor)}
+                    title="Orokin Reactor — doubles mod capacity"
+                    aria-pressed={hasOrokinReactor}
                     className={cn(
                       "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
                       hasOrokinReactor
@@ -1131,6 +1133,11 @@ export default function WarframeBuilderPage() {
                   </div>
 
 
+                  {equippedMods.length === 0 && (
+                    <p className="mb-2 text-[11px] leading-snug text-muted-foreground sm:hidden" data-testid="mobile-slot-hint">
+                      Tap a slot to add a mod. Tap the hexagon beside a slot to add a forma.
+                    </p>
+                  )}
                   {/* Aura + Exilus — top row (matches in-game warframe mod layout; Jade has 2 Auras) */}
                   <div
                     className={cn(

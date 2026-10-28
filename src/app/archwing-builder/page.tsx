@@ -436,6 +436,8 @@ export default function ArchwingBuilderPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => setHasReactor(!hasReactor)}
+                      title="Orokin Reactor — doubles mod capacity"
+                      aria-pressed={hasReactor}
                       className={cn(
                         "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all lg:pointer-fine:min-h-9 sm:py-1.5",
                         hasReactor ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400" : "border-border text-muted-foreground"
@@ -447,7 +449,7 @@ export default function ArchwingBuilderPage() {
                       className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground lg:pointer-fine:min-h-9 sm:py-1.5"
                       title="Railjack Gunnery intrinsic: R3 arch-melee +20% dmg, R4 Necramech gun +20% dmg, R8 Archwing +25% dmg and +20% Strength/Range/Efficiency"
                     >
-                      Gunnery
+                      Railjack Gunnery
                       <select
                         aria-label="Railjack Gunnery intrinsic rank"
                         value={railjackGunnery}
@@ -558,6 +560,8 @@ export default function ArchwingBuilderPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => setHasCatalyst(!hasCatalyst)}
+                      title="Orokin Catalyst — doubles mod capacity"
+                      aria-pressed={hasCatalyst}
                       className={cn(
                         "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all lg:pointer-fine:min-h-9 sm:py-1.5",
                         hasCatalyst ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400" : "border-border text-muted-foreground"
