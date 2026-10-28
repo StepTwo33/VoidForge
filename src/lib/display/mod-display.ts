@@ -1,6 +1,26 @@
 import type { Mod } from "@/lib/types";
 import { modCapacityAtRank } from "@/lib/calc/mod-capacity";
 import { getModStatLabel } from "@/lib/overrides/override-stat-catalog";
+import { MOD_WIKI_RANK_TABLES, isPanelOnlyModStat } from "@/lib/display/mod-wiki-tables";
+
+export { isPanelOnlyModStat };
+
+/**
+ * Faction bane / expel / smite / cleanse mods store the bonus as a percent (30 at R5 = "x1.3").
+ * The game card reads "x1.3 Damage to Corpus", so show the multiplier, not "+30 Faction Corpus".
+ */
+const FACTION_MULTIPLIER_KEYS = new Set([
+  "factionCorpus",
+  "factionGrineer",
+  "factionInfested",
+  "factionOrokin",
+  "factionMurmur",
+  "sentientDamage",
+]);
+
+function formatMultiplier(percentTotal: number): string {
+  return `x${Number((1 + percentTotal / 100).toFixed(2))}`;
+}
 
 /** Strip wiki/HTML markup from mod descriptions for UI. */
 export function cleanModDescription(description: string): string {
@@ -253,6 +273,14 @@ const MOD_RANK_VALUE_TABLES: Record<string, Record<string, readonly number[]>> =
 
 /** Card text for a stat that has a wiki rank table or a cap, else null (use the per-rank formula). */
 export function formatModStatSpecial(modId: string, statKey: string, perRank: number, rank: number): string | null {
+  const wikiTable = MOD_RANK_VALUE_TABLES[modId]?.[statKey] ? undefined : MOD_WIKI_RANK_TABLES[modId]?.[statKey];
+  if (wikiTable) {
+    const value = wikiTable.values[Math.min(Math.max(Math.round(rank), 0), wikiTable.values.length - 1)];
+    return `${formatStatNumber(value)}${wikiTable.unit} ${getModStatLabel(statKey)}`;
+  }
+  if (FACTION_MULTIPLIER_KEYS.has(statKey) && !MOD_RANK_VALUE_TABLES[modId]?.[statKey]) {
+    return `${formatMultiplier(modStatTotalAtRank(perRank, rank))} ${getModStatLabel(statKey)}`;
+  }
   const table = MOD_RANK_VALUE_TABLES[modId]?.[statKey];
   if (table) {
     const value = table[Math.min(Math.max(Math.round(rank), 0), table.length - 1)];
@@ -378,7 +406,9 @@ export interface ModStatDisplayLine {
 
 export function getModStatDisplayLines(mod: Mod, rank: number): ModStatDisplayLine[] {
   const stats = mod.stats ?? {};
-  return Object.entries(stats).map(([statKey, perRank]) => {
+  return Object.entries(stats)
+    .filter(([statKey]) => !isPanelOnlyModStat(mod.id, statKey))
+    .map(([statKey, perRank]) => {
     const special = formatModStatSpecial(mod.id, statKey, perRank, rank);
     if (special !== null) {
       const atMax = formatModStatSpecial(mod.id, statKey, perRank, mod.maxRank)!;

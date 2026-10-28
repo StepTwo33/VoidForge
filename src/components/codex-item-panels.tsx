@@ -23,7 +23,7 @@ import { scaleArcaneEffectLine, scaleArcaneEffectValue } from "@/lib/calc/arcane
 import { getArcaneStatLabel, getArcaneDisplayInfo } from "@/lib/display/arcane-display";
 import { getVerifiedArcaneBehavior } from "@/lib/calc/arcane-behavior-registry";
 import { itemApplyTargetLabel } from "@/lib/codex/item-behavior-types";
-import { cleanModDescription, getModStatDisplayLines, modDrainAtRank } from "@/lib/display/mod-display";
+import { cleanModDescription, getModStatDisplayLines, isPanelOnlyModStat, modDrainAtRank } from "@/lib/display/mod-display";
 import { getModStatLabel } from "@/lib/overrides/override-stat-catalog";
 import { getExclusiveWeaponEntries } from "@/lib/mods/weapon-exclusive-mods";
 import { isWeaponExclusiveMod } from "@/lib/mods/weapon-mod-tags";
@@ -405,11 +405,11 @@ export function ModDetailPanel({ mod, compact, returnTo }: { mod: Mod; compact?:
         </p>
       )}
 
-      {Object.keys(mod.stats ?? {}).length > 0 && (
+      {Object.keys(mod.stats ?? {}).some((statKey) => !isPanelOnlyModStat(mod.id, statKey)) && (
         <div>
           <PanelHeading>{setBonus ? "Effect at full set" : "Stats (R0 → max)"}</PanelHeading>
           <ul className="mt-1 space-y-1">
-            {Object.entries(mod.stats ?? {}).map(([statKey, perRank]) => {
+            {Object.entries(mod.stats ?? {}).filter(([statKey]) => !isPanelOnlyModStat(mod.id, statKey)).map(([statKey, perRank]) => {
               const r0 = getModStatDisplayLines({ ...mod, stats: { [statKey]: perRank } }, 0)[0];
               const rMax = getModStatDisplayLines({ ...mod, stats: { [statKey]: perRank } }, mod.maxRank)[0];
               return (

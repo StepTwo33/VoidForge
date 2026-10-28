@@ -196,6 +196,14 @@ export const SELECT_FIELD_OPTIONS: Record<string, { value: string; label: string
 /** Friendly labels moderators understand. */
 export const FIELD_LABELS: Record<string, string> = {
   infiniteAmmoChance: "Chance for Infinite Ammo",
+  // Faction bane / expel / smite / cleanse mods show "x1.3 Damage to Corpus" (wiki multiplier form).
+  factionCorpus: "Damage to Corpus",
+  factionGrineer: "Damage to Grineer",
+  factionInfested: "Damage to Infested",
+  factionOrokin: "Damage to Orokin",
+  factionMurmur: "Damage to Murmur",
+  sentientDamage: "Damage to Sentients",
+  bladeStormCombo: "Combo per Blade Storm Attack",
   name: "Name",
   drain: "Drain (base at rank 0)",
   maxRank: "Max rank",

@@ -13,7 +13,7 @@ import {
   modCapacityAtRank,
   modSlotCapacityCost,
 } from "@/lib/calc/mod-capacity";
-import { cleanModDescription, formatModStatSpecial, formatModStatValue } from "@/lib/display/mod-display";
+import { cleanModDescription, formatModStatSpecial, formatModStatValue, isPanelOnlyModStat } from "@/lib/display/mod-display";
 import { PointerVerb } from "@/components/pointer-verb";
 
 const rarityBorderColors: Record<string, string> = {
@@ -209,7 +209,9 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innateP
   const umbralCount = equippedModIds?.filter((id) => UMBRAL_MOD_IDS.includes(id as (typeof UMBRAL_MOD_IDS)[number])).length ?? 0;
   const umbralSetMult = getUmbralSetBonusMultiplier(mod.id, umbralCount);
 
-  const statEntries = Object.entries(mod.stats).slice(0, compact ? 2 : 3);
+  const statEntries = Object.entries(mod.stats)
+    .filter(([key]) => !isPanelOnlyModStat(mod.id, key))
+    .slice(0, compact ? 2 : 3);
   const formatStat = (key: string, perRankVal: number) => {
     const special = formatModStatSpecial(mod.id, key, perRankVal, rank);
     if (special !== null) return special;

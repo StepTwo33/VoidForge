@@ -1,5 +1,6 @@
 import type { Mod } from "@/lib/types";
 import { getVerifiedModBehavior } from "@/lib/mods/mod-behavior-registry";
+import { isPanelOnlyModStat } from "@/lib/display/mod-wiki-tables";
 import { isWarframeAugment } from "@/lib/mods/warframe-augment-mods";
 import type { WeaponModSlotType } from "@/lib/mods/mod-weapon-eligibility";
 
@@ -232,6 +233,8 @@ export function getModStatFilterTags(mod: Mod): Set<ModStatFilterId> {
     tags.add("augment");
   }
   for (const key of getModEffectiveStatKeys(mod)) {
+    // Pseudo-stats the card doesn't show (wiki has no stat by that name) don't earn a chip either.
+    if (isPanelOnlyModStat(mod.id, key)) continue;
     const mapped = STAT_KEY_FILTERS[key];
     if (mapped) {
       for (const tag of mapped) tags.add(tag);

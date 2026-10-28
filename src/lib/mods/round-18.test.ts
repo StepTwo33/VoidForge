@@ -112,8 +112,8 @@ describe("stray damage stats: wiki stat and label, no Damage", () => {
     expect(mod("manifold_bond").stats).not.toHaveProperty("abilityDamage");
     expect(mod("momentous_bond").stats).not.toHaveProperty("heavyAttackDamage");
     expect(lines("momentous_bond")).toContain("+120% Damage");
-    // Reactive Storm: Status Chance 100–250% only.
-    expect(mod("augment_volt_reactive_storm").stats).not.toHaveProperty("damageIncrease");
+    // Reactive Storm: Status Chance 100–250% only (Baruuk's augment; the Volt copy is gone, Round 21).
+    expect(mod("augment_baruuk_reactive_storm").stats).not.toHaveProperty("damageIncrease");
     // Stances have no stat table on the wiki (Iron Phoenix: combos only).
     for (const m of allMods.filter((x) => x.category === "stance")) expect(m.stats, m.id).not.toHaveProperty("damageBonus");
     expect(lines("stance_iron_phoenix")).toEqual([]);

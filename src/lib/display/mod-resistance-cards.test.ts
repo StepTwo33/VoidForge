@@ -141,11 +141,13 @@ describe("Codex vs Builder Card stat agreement across all mods", () => {
 
   it("spot-checks normalized duration/range/cooldown mods at max rank", () => {
     expect(lines("argon_scope")).toContain("+9s Duration");
-    expect(lines("guardian")).toContain("+30s Cooldown");
-    expect(lines("medi_ray")).toContain("+15m Range");
-    expect(lines("shield_charger")).toContain("+15m Range");
-    expect(lines("protect")).toContain("+30s Cooldown");
-    expect(lines("stalk")).toContain("+18s Cooldown");
+    // Round 21: wiki.warframe.com has no Cooldown / Range stat on Guardian, Medi-Ray, Shield Charger,
+    // Protect (card) and Stalk (stealth and cooldown); Transfusion's cooldown is a flat 120 s.
+    expect(lines("guardian").join()).not.toMatch(/Cooldown/);
+    expect(lines("medi_ray").join()).not.toMatch(/Range/);
+    expect(lines("shield_charger").join()).not.toMatch(/Range/);
+    expect(lines("protect").join()).not.toMatch(/Cooldown/);
+    expect(lines("stalk")).toEqual(["+24m Range"]);
     expect(lines("transfusion")).toContain("+120s Cooldown");
     expect(lines("covert_bond")).toContain("+10s Duration");
     expect(lines("augment_saryn_contagion_cloud")).toEqual(
@@ -156,7 +158,8 @@ describe("Codex vs Builder Card stat agreement across all mods", () => {
     );
     expect(lines("augment_nokko_reroot_rampage")).toContain("+8m Range");
     expect(lines("augment_koumei_kumihimo_loading")).toContain("+6 Kills Required");
-    expect(lines("augment_titania_beguiling_lantern")).toContain("+5m Attraction Range");
+    // Beguiling Lantern's wiki table is Bonus Weapon Damage only (no attraction range), Round 21.
+    expect(lines("augment_titania_beguiling_lantern")).toEqual(["+100% Damage"]);
     expect(lines("hok_kaal")).toContain("+5s Cooldown");
     expect(lines("funnel_clouds")).toContain("+8 projectiles");
   });
