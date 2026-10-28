@@ -584,9 +584,12 @@ export default function ModularBuilderPage() {
                         )}
                       >
                         <span className="font-medium">{l.name}</span>
-                        <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5 [overflow-wrap:anywhere]">
+                        <div
+                          className="text-xs lg:text-[10px] text-muted-foreground mt-0.5 [overflow-wrap:anywhere]"
+                          title="CC = critical chance, CD = critical damage (critical multiplier), SC = status chance"
+                        >
                           CC {l.critChanceBonus > 0 ? "+" : ""}{(l.critChanceBonus * 100).toFixed(0)}% •
-                          CM {l.critMultiplierBonus > 0 ? "+" : ""}{l.critMultiplierBonus.toFixed(1)}x •
+                          CD {l.critMultiplierBonus > 0 ? "+" : ""}{l.critMultiplierBonus.toFixed(1)}x •
                           SC {l.statusChanceBonus > 0 ? "+" : ""}{(l.statusChanceBonus * 100).toFixed(0)}%
                         </div>
                       </button>

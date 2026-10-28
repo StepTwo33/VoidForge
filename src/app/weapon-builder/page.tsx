@@ -725,7 +725,7 @@ export default function WeaponBuilderPage() {
                       <>
                         <span title="Total base damage per shot">DMG {weapon.damage}</span>
                         <span title="Critical chance">CC {(weapon.criticalChance * 100).toFixed(0)}%</span>
-                        <span title="Critical multiplier">CM {weapon.criticalMultiplier.toFixed(1)}x</span>
+                        <span title="Critical damage (critical multiplier)">CD {weapon.criticalMultiplier.toFixed(1)}x</span>
                         <span title="Status chance">SC {(weapon.statusChance * 100).toFixed(0)}%</span>
                         <span title="Fire rate (attacks per second)">FR {weapon.fireRate.toFixed(1)}</span>
                       </>

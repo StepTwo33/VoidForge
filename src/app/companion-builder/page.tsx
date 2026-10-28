@@ -1022,7 +1022,7 @@ export default function CompanionBuilderPage() {
                             <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-muted-foreground">
                               <span title="Total base damage per shot">DMG {w.damage}</span>
                               <span title="Critical chance">CC {(w.criticalChance * 100).toFixed(0)}%</span>
-                              <span title="Critical multiplier">CM {w.criticalMultiplier.toFixed(1)}x</span>
+                              <span title="Critical damage (critical multiplier)">CD {w.criticalMultiplier.toFixed(1)}x</span>
                               <span title="Status chance">SC {(w.statusChance * 100).toFixed(0)}%</span>
                             </div>
                           </button>

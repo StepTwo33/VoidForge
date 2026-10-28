@@ -545,7 +545,10 @@ export default function ArchwingBuilderPage() {
                         {w.category}
                       </span>
                     </span>
-                    <div className="text-xs lg:text-[10px] text-muted-foreground mt-0.5">
+                    <div
+                      className="text-xs lg:text-[10px] text-muted-foreground mt-0.5"
+                      title="DMG = base damage, CC = critical chance, SC = status chance"
+                    >
                       DMG {w.damage} • CC {(w.criticalChance * 100).toFixed(0)}% • SC {(w.statusChance * 100).toFixed(0)}%
                     </div>
                   </button>
