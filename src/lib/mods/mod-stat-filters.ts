@@ -239,7 +239,7 @@ const STAT_KEY_FILTERS: Record<string, ModStatFilterId[]> = {
   energyOnAssist: ["utility"], // Energy Generator
   hotspotRange: ["utility"], // Scan Aquatic Lifeforms
   dodgeChance: ["survivability"], // Evasive Denial
-  fireRateBonus: ["damage"], // Reinforced Bond: +60% fire rate while the companion has 1200+ shields
+  fireRateBonus: ["utility"], // Reinforced Bond: +60% fire rate while the companion has 1200+ shields
 };
 
 /**

@@ -132,6 +132,9 @@ const REAL_DAMAGE = new Set([
   "diversified_denial", "draining_bite", "equilibrium_audit", "fear_sense", "fired_up", "hunt", "infectious_bite", "maul",
   "momentous_bond", "persistent_posture", "pounce", "repo_audit", "seismic_bond", "sharpened_claws", "strain_eruption",
   "strain_fever", "trample", "unleashed", "volatile_parasite",
+  // Round 23 (Damage chip added; wiki max-rank text): Coolant Leak (10m Cold blast), Anabolic Pollination (+100% Toxin),
+  // Crescent / Panzer Devolution (100 Puncture / 60 Viral each), Focused Prospectus (900 Heat), Tandem Bond (+30% melee).
+  "coolant_leak", "anabolic_pollination", "crescent_devolution", "panzer_devolution", "focused_prospectus", "tandem_bond",
   // Augments that add weapon / ability damage.
   "aegis_gale", "augment_ember_fireball_frenzy", "augment_equinox_duality", "augment_frost_freeze_force",
   "augment_gauss_thermal_transfer", "augment_khora_accumulating_whipclaw", "augment_limbo_rift_torrent",

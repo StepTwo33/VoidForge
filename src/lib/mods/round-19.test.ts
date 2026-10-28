@@ -74,6 +74,7 @@ describe("round 19: wiki mod values, Codex and builder card agree", () => {
     expect([...tags("duplex_bond")].sort()).toEqual(["utility"]);
     expect([...tags("aerial_bond")].sort()).toEqual(["range", "utility"]);
     expect([...tags("momentous_bond")].sort()).toEqual(["damage"]);
-    expect([...tags("covert_bond")]).toEqual([]);
+    // Round 23: Covert Bond (companion stealth after finishers) now has the Utility chip.
+    expect([...tags("covert_bond")]).toEqual(["utility"]);
   });
 });
