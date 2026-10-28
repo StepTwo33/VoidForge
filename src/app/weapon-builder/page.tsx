@@ -21,6 +21,8 @@ import {
 } from "@/components/item-picker";
 import { ModSlotCard } from "@/components/mod-slot";
 import { WeaponStatsPanel } from "@/components/stats-panel";
+import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
+import { weaponStatSummary } from "@/lib/ui/mobile-stat-summary";
 import { ModPicker, buildSlotNav, type SlotType } from "@/components/mod-picker";
 import { useWeapons, useMods } from "@/lib/weapons/use-data";
 import { calculateWeaponBuild, calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
@@ -948,6 +950,7 @@ export default function WeaponBuilderPage() {
                     <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
                     {computeUsedCapacity(equippedMods, modsMap, effectivePolarities)} / {modCapacity}
                   </span>
+                  <MobileStatSummary items={weaponStatSummary(calculatedStats)} />
                 </div>
                 {showImporter && (
                   <div className="mb-4">
