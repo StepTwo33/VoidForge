@@ -85,6 +85,7 @@ export default function BuildsLibraryPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data-fetch effect: loading flag is set when the request starts
     void refresh();
   }, [refresh]);
 

@@ -51,6 +51,7 @@ export function CommunityBuildsSidebar({
   }, [sort, limit]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data-fetch effect: loading flag is set when the request starts
     fetchBuilds();
   }, [fetchBuilds]);
 

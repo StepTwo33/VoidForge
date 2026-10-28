@@ -82,6 +82,7 @@ export default function DamageSimulatorPage() {
     if (typeof window === "undefined") return;
     if (new URLSearchParams(window.location.search).get("from") !== "builder") return;
     const handoff = consumeDamageSimHandoff();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot handoff from the builder (sessionStorage) applied after mount
     if (handoff) onLoaded(handoff);
     router.replace("/damage-simulator", { scroll: false });
   }, [onLoaded, router]);

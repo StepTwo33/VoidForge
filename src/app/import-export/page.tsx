@@ -97,12 +97,14 @@ export default function ImportExportPage() {
     }
 
     items.sort((a, b) => b.updatedAt - a.updatedAt);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- saved builds live in localStorage; read once after mount to stay hydration-safe
     setBuilds(items);
   }, []);
 
   // Generate QR + link when a build is selected
   useEffect(() => {
     if (!selected) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- share link/QR/code are cleared when nothing is selected
       setQrDataUrl(null);
       setShareLink("");
       setShareCode("");
@@ -281,6 +283,7 @@ export default function ImportExportPage() {
     const code = params.get("code");
     if (code) {
       autoImportedRef.current = true;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot import from the ?code= URL param, applied after mount
       setMode("import");
       setImportCode(code);
       // Clean URL before import (code is already captured)

@@ -72,6 +72,7 @@ export function SimLoadBuildPicker({
     abortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data-fetch effect: loading flag is set when the request starts
     setLoadingCommunity(true);
     setError(null);
     const params = new URLSearchParams({

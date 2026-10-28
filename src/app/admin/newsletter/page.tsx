@@ -42,6 +42,7 @@ export default function AdminNewsletterPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- window.location.origin only exists on the client; one-time mount read
     setOrigin(window.location.origin);
     fetch("/api/auth/session")
       .then((r) => r.json())

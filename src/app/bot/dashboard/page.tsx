@@ -118,6 +118,7 @@ export default function BotDashboardPage() {
   }, [loadStatus, loadGuilds]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data-fetch effect: loading flag is set when the request starts
     if (selectedGuildId) void loadGuildDetail(selectedGuildId);
   }, [selectedGuildId, loadGuildDetail]);
 

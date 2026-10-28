@@ -45,6 +45,7 @@ export function AvatarCropDialog({
 
   useEffect(() => {
     if (!open || !imageSrc) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- image loads asynchronously; state is cleared when the dialog closes
       setImage(null);
       setTransform(DEFAULT_TRANSFORM);
       return;

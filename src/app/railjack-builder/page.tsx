@@ -128,6 +128,7 @@ export default function RailjackBuilderPage() {
   // Component pickers
   const [showComponentPicker, setShowComponentPicker] = useState<string | null>(null);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- saved builds live in localStorage; read once after mount to stay hydration-safe
   useEffect(() => { setSavedBuilds(getSavedBuilds("railjack")); }, []);
 
   // Current mods/polarities based on active tab

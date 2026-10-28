@@ -109,6 +109,7 @@ export function useSimStatChangeFlash(
     }
     if (keys.size === 0) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- timed flash: needs the post-commit stats snapshot and a timer, cannot be derived during render
     setChanged(keys);
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => setChanged(new Set()), durationMs);

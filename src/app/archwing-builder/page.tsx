@@ -78,6 +78,7 @@ export default function ArchwingBuilderPage() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- saved builds live in localStorage; read once after mount to stay hydration-safe
   useEffect(() => { setSavedBuilds(getSavedBuilds("archwing")); }, []);
 
   const buildArchwingData = useCallback((): ArchwingBuildData => ({

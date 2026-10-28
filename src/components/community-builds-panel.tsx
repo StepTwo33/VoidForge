@@ -52,18 +52,21 @@ export function CommunityBuildsPanel({
   // Reset when the selected item changes so we refetch for the new item
   useEffect(() => {
     requestIdRef.current++;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data-fetch effect: list resets when the item changes and refetches
     setBuilds([]);
     setLoaded(false);
   }, [type, itemId]);
 
   useEffect(() => {
     if (expanded && !loaded) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch starts when the panel is expanded and not yet loaded; loading flag is set at request start
       fetchBuilds();
     }
   }, [expanded, loaded, fetchBuilds]);
 
   useEffect(() => {
     if (expanded && loaded) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- re-fetch when the sort changes; loading flag is set at request start
       fetchBuilds();
     }
   }, [sort]); // eslint-disable-line react-hooks/exhaustive-deps
