@@ -313,7 +313,8 @@ export const MOD_WIKI_RANK_TABLES: Record<string, Record<string, WikiRankTable>>
   augment_uriel_infernum: {
     heatDamage: { unit: "", values: [1000, 1250, 1350, 1500] },
   },
-  augment_vauban_repelling_bastille: {
+  enduring_bastille: {
+    bastilleDuration: { unit: "s", values: [2, 2, 2, 2] },
     vortexDuration: { unit: "%", values: [50, 55, 60, 70] },
   },
   augment_volt_shock_trooper: {

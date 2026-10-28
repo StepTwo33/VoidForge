@@ -3736,21 +3736,6 @@ const RAW_MODS: Mod[] = [
     "warframeId": "vauban"
   },
   {
-    "id": "augment_vauban_repelling_bastille",
-    "name": "Repelling Bastille",
-    "polarity": "zenurik",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "augment",
-    "subCategory": "",
-    "stats": {
-      "vortexDuration": 17.5
-    },
-    "description": "Bastille Augment: Killing an enemy in Bastille extends the duration by 2s. Vortex's duration is increased by 70% of its Maximum Duration for each additional Vortex thrown into it.",
-    "rarity": "rare",
-    "warframeId": "vauban"
-  },
-  {
     "id": "augment_nekros_creeping_terrify",
     "name": "Creeping Terrify",
     "polarity": "zenurik",
@@ -21812,7 +21797,8 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "duration": 0.5
+      "bastilleDuration": 2.0,
+      "vortexDuration": 17.5
     },
     "description": "Bastille Augment: Killing an enemy in Bastille extends the duration by 2s. Vortex's duration is increased by 70% of its Maximum Duration for each additional Vortex thrown into it.",
     "rarity": "rare",

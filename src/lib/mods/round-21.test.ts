@@ -125,10 +125,10 @@ describe("Round 21: card values match the wiki stat tables", () => {
     expect(card("sacrificial_steel", 10)).toEqual(["+220% Crit chance", "x1.33 Damage to Sentients"]);
   });
 
-  it("Equilibrium +110% / +110% at R10; Claw Shred +1.2 punch through at R5; Repelling Bastille Vortex 50-70%", () => {
+  it("Equilibrium +110% / +110% at R10; Claw Shred +1.2 punch through at R5; Enduring Bastille Vortex 50-70%", () => {
     expect(card("equilibrium", 10)).toEqual(["+110% Energy", "+110% Health"]);
     expect(card("claw_shred", 5)).toEqual(["+1.2 Punch Through", "+30% Fire rate"]);
-    expect([0, 3].map((r) => card("augment_vauban_repelling_bastille", r))).toEqual([["+50% Vortex Duration"], ["+70% Vortex Duration"]]);
+    expect([0, 3].map((r) => card("enduring_bastille", r))).toEqual([["+2s Bastille Duration", "+50% Vortex Duration"], ["+2s Bastille Duration", "+70% Vortex Duration"]]);
   });
 });
 

@@ -28,6 +28,9 @@ export function dropUnknownMods<T extends { modId: string }>(
  * - augment_volt_reactive_storm → augment_baruuk_reactive_storm: Reactive Storm is Baruuk's Serene
  *   Storm augment (wiki.warframe.com Reactive Storm: Type Baruuk, Update 27.1). The catalog also
  *   carried a misspelled "ReactivStorm" copy tied to Volt; it was removed (Round 21).
+ * - augment_vauban_repelling_bastille → enduring_bastille: wiki.warframe.com Enduring Bastille,
+ *   Update 41.1 (2026-02-11): "Augment - Repelling Bastille: Renamed to \u201cEnduring Bastille\u201d"
+ *   (Repelling Bastille redirects there). The catalog carried both ids as separate mods (Round 23).
  */
 export const RENAMED_MOD_IDS: Readonly<Record<string, string>> = {
   link_shields: "link_redirection",
@@ -36,6 +39,7 @@ export const RENAMED_MOD_IDS: Readonly<Record<string, string>> = {
   aura_speed_holster: "holster_amp",
   helminth_ferocity: "proboscis",
   augment_volt_reactive_storm: "augment_baruuk_reactive_storm",
+  augment_vauban_repelling_bastille: "enduring_bastille",
 };
 
 /** Display names of the old ids (they are no longer in the catalog). */
@@ -46,6 +50,7 @@ export const RENAMED_MOD_OLD_NAMES: Readonly<Record<string, string>> = {
   aura_speed_holster: "Speed Holster",
   helminth_ferocity: "Helminth Ferocity",
   augment_volt_reactive_storm: "ReactivStorm (Volt)",
+  augment_vauban_repelling_bastille: "Repelling Bastille",
 };
 
 /** Game update that renamed / replaced each old id (shown in the load toast). */
@@ -55,6 +60,7 @@ export const RENAMED_MOD_UPDATE: Readonly<Record<string, string>> = {
   shotgun_spazz: "Update 32",
   aura_speed_holster: "Update 32",
   helminth_ferocity: "Update 20",
+  augment_vauban_repelling_bastille: "Update 41.1",
 };
 
 export type RetiredModReason = "archived" | "no_source" | "unreleased" | "focus_2" | "conclave";

@@ -521,9 +521,6 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
   augment_vauban_photon_repeater: mod("augment_vauban_photon_repeater", [
     line("extraCast", "mod_panel", "multiplicative_percent", "Photon Repeater: extraCast \u2014 Photon Strike Augment: If Photon Strike hits at least 5 enemies, the next cast w\u2026"),
   ]),
-  augment_vauban_repelling_bastille: mod("augment_vauban_repelling_bastille", [
-    line("vortexDuration", "mod_panel", "multiplicative_percent", "wiki: Enduring Bastille (Repelling Bastille) \u2014 added Vortex duration 50/55/60/70% (R0\u2013R3)"),
-  ]),
   augment_volt_capacitance: mod("augment_volt_capacitance", [
     line("shieldPerTarget", "mod_panel", "multiplicative_percent", "Capacitance: shieldPerTarget \u2014 Discharge Augment: Converts 3% of Damage dealt into Shields split between Volt a\u2026"),
     line("damageToShieldConversion", "mod_panel", "multiplicative_percent", "wiki: Capacitance \u2014 converts 1.5/2/2.5/3% of Discharge damage dealt into Shields (R0\u2013R3; not a damage bonus)"),
@@ -649,7 +646,8 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "wiki: Electromagnetic Shielding \u2014 2m per rank (12m R5)"),
   ]),
   enduring_bastille: mod("enduring_bastille", [
-    line("duration", "mod_panel", "multiplicative_percent", "Enduring Bastille: duration \u2014 Bastille Augment: Killing an enemy in Bastille extends the duration by 2s. Vorte\u2026"),
+    line("bastilleDuration", "mod_panel", "multiplicative_percent", "wiki: Enduring Bastille (was Repelling Bastille, Update 41.1) \u2014 killing an enemy in Bastille adds 2s (cap 2x modded duration)"),
+    line("vortexDuration", "mod_panel", "multiplicative_percent", "wiki: Enduring Bastille \u2014 added Vortex duration 50/55/60/70% (R0\u2013R3)"),
   ]),
   energy_field: mod("energy_field", [
     line("range", "mod_panel", "multiplicative_percent", "Energy Field: range \u2014 Energy Shell Augment: Energy Shell applies to allies within 140m."),

@@ -30,7 +30,6 @@ const MOD_IMAGE_STEM_BY_NAME: Record<string, string> = {
   "Flame Claws": "Heated_Charge",
   "Frost Claws": "Chilling_Claws",
   "Looters": "Looter",
-  "ReactivStorm": "Reactive_Storm",
   "Berserker": "Berserker_Fury",
   "Aero Set Bonus": "Hawksetmod",
   "Carnis Set Bonus": "Ashensetmod",

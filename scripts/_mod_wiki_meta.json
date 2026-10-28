@@ -894,11 +894,6 @@
     "isAugment": true,
     "wikiName": "Shock Trooper"
   },
-  "augment_volt_reactive_storm": {
-    "wikiType": "Baruuk",
-    "isAugment": true,
-    "wikiName": "Reactive Storm"
-  },
   "augment_volt_transistor_shield": {
     "wikiType": "Volt",
     "isAugment": true,
