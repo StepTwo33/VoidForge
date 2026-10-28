@@ -685,6 +685,8 @@ export default function RailjackBuilderPage() {
               )}
             </div>
 
+            {/* Intrinsics + Crew: one phone tab ("Intrinsics") so they no longer sit above every other tab's content. space-y-6 keeps the desktop spacing identical. */}
+            <div id="rj-intrinsics" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] space-y-6">
             {/* Intrinsics */}
             <div>
               <div className="flex items-center justify-between mb-3">
@@ -874,6 +876,8 @@ export default function RailjackBuilderPage() {
                   );
                 })}
               </div>
+            </div>
+
             </div>
 
             {/* Armaments — Nose + Swivel + Ordnance */}
@@ -1255,7 +1259,7 @@ export default function RailjackBuilderPage() {
                       <p className="text-xs lg:text-[10px] text-muted-foreground mt-1">{ability.description}</p>
                       <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-[10px] font-mono text-cyan-700 dark:text-cyan-400">
                         {ability.energyCost !== undefined && <span>Energy {ability.energyCost}</span>}
-                        {ability.cooldownSec !== undefined && <span>CD {ability.cooldownSec}s</span>}
+                        {ability.cooldownSec !== undefined && <span>Cooldown {ability.cooldownSec}s</span>}
                         {ability.turretDamageWhileActive !== undefined && (
                           <span>Turret +{(ability.turretDamageWhileActive * 100).toFixed(0)}%</span>
                         )}
@@ -1361,7 +1365,7 @@ export default function RailjackBuilderPage() {
         showDescription={false}
         onSave={handleSaveBuildConfirm}
       />
-      <BuilderSectionNav sections={[{ id: "rj-plexus", label: "Plexus" }, { id: "rj-armaments", label: "Guns" }, { id: "rj-components", label: "Parts" }, { id: "rj-stats", label: "Stats" }]} />
+      <BuilderSectionNav sections={[{ id: "rj-components", label: "Parts" }, { id: "rj-armaments", label: "Guns" }, { id: "rj-plexus", label: "Plexus" }, { id: "rj-intrinsics", label: "Intrinsics" }, { id: "rj-stats", label: "Stats" }]} />
     </PageShell>
   );
 }
