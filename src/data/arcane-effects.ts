@@ -721,18 +721,11 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "maxRank": 5,
     "effects": [
       {
-        "stat": "headshotProcChance",
+        "stat": "infiniteAmmoChance",
         "maxValue": 60.0,
         "flat": false,
         "stacking": false,
         "baseValue": 10.0
-      },
-      {
-        "stat": "ammoEfficiency",
-        "maxValue": 102.0,
-        "flat": false,
-        "stacking": false,
-        "baseValue": 17.0
       },
       {
         "stat": "buffDuration",
@@ -1270,10 +1263,10 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "ampAmmoEfficiency",
-        "maxValue": 72.0,
+        "maxValue": 75.0,
         "flat": false,
         "stacking": false,
-        "baseValue": 12.0
+        "baseValue": 12.5
       },
       {
         "stat": "buffDuration",

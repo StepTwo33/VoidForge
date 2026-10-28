@@ -1,6 +1,7 @@
 import type { CalculatedStats } from "@/lib/types";
 import { calcSavedWeaponBuildStats } from "@/lib/builds/loadout-stats";
 import { DEFAULT_SIM_PARAMS } from "@/lib/types";
+import { MAX_AMMO_EFFICIENCY } from "@/lib/calc/ammo-efficiency";
 
 /** Map calculator output into damage-simulator form state. */
 export function calculatedStatsToSimInputs(stats: CalculatedStats): {
@@ -20,6 +21,7 @@ export function calculatedStatsToSimInputs(stats: CalculatedStats): {
   /** Modded reserve (0 = unlimited / not modelled for this weapon). */
   ammoMax: number;
   ammoEfficiency: number;
+  infiniteAmmoUptime: number;
 } {
   const dmgTypes: Record<string, number> = {};
   if (stats.impact > 0) dmgTypes.impact = stats.impact;
@@ -49,7 +51,8 @@ export function calculatedStatsToSimInputs(stats: CalculatedStats): {
       ? { punctureArmorStripPerStack: stats.punctureArmorStripPerStack }
       : {}),
     ammoMax: stats.ammoReserveModelled ? (stats.ammoMax ?? 0) : 0,
-    ammoEfficiency: Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 0.75),
+    ammoEfficiency: Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), MAX_AMMO_EFFICIENCY),
+    infiniteAmmoUptime: Math.min(Math.max(stats.infiniteAmmoUptime ?? 0, 0), 1),
   };
 }
 

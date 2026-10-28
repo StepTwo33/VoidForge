@@ -2,6 +2,12 @@ import type { ItemApplyMode, ItemApplyTarget, VerifiedItemStatLine, VerifiedModB
 import { VERIFIED_MOD_BEHAVIORS } from "@/data/mod-behaviors";
 import { FACTION_STAT_TO_ID } from "@/lib/calc/combat-multipliers";
 import type { Mod, SetBonusLinkage, Weapon } from "@/lib/types";
+import {
+  INFINITE_AMMO_CHANCE_PER_RANK,
+  INFINITE_AMMO_MOD_DURATION_BY_RANK,
+  combineInfiniteAmmoUptime,
+  infiniteAmmoUptimeFromChance,
+} from "@/lib/calc/ammo-efficiency";
 
 export type WeaponModAccumulators = {
   damageBonus: number;
@@ -240,6 +246,21 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
       acc.onKillPerStackCap = GALV_STACK_CAPS[ctx.modId] ?? acc.onKillPerStackCap ?? 4;
       return true;
     case "conditional_stat_on_trigger": {
+      // Brain Storm / Skull Shots (Hotfix 44.1.3): "On Headshot: N% chance for Infinite Ammo for Ds".
+      // Catalog value = chance (+10% per rank step); duration follows the wiki rank table
+      // (0.5 / 1 / 2 / 2 s). Converted to an expected Infinite Ammo uptime, not AE.
+      if (statKey === "infiniteAmmoChance") {
+        const durations = INFINITE_AMMO_MOD_DURATION_BY_RANK[ctx.modId] ?? [2];
+        const rankIdx = Math.min(
+          durations.length - 1,
+          Math.max(0, Math.round(modValue / INFINITE_AMMO_CHANCE_PER_RANK) - 1),
+        );
+        acc.triggerStatBonuses.infiniteAmmoUptime = combineInfiniteAmmoUptime(
+          acc.triggerStatBonuses.infiniteAmmoUptime,
+          infiniteAmmoUptimeFromChance(modValue, durations[rankIdx]),
+        );
+        return true;
+      }
       // HP-cap exclusives: catalog `health` is a placeholder; assume wiki +360% cap.
       if (ctx.modId === "dreadful_killshot" && statKey === "health") {
         acc.triggerStatBonuses.damage = (acc.triggerStatBonuses.damage ?? 0) + 3.6;

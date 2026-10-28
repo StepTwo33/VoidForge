@@ -195,6 +195,7 @@ export const SELECT_FIELD_OPTIONS: Record<string, { value: string; label: string
 
 /** Friendly labels moderators understand. */
 export const FIELD_LABELS: Record<string, string> = {
+  infiniteAmmoChance: "Chance for Infinite Ammo",
   name: "Name",
   drain: "Drain (base at rank 0)",
   maxRank: "Max rank",

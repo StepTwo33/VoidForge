@@ -45,6 +45,7 @@ const PROC_CHANCE_STATS = new Set([
   "healthRegenChance",
   "killProcChance",
   "headshotProcChance",
+  "infiniteAmmoChance",
   "statusProcChance",
   "fireRateOnCritChance",
   "reloadProcChance",

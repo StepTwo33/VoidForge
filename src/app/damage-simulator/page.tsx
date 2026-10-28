@@ -41,6 +41,7 @@ export default function DamageSimulatorPage() {
   // 0 = unlimited reserve (the default for hand-entered stats).
   const [ammoMax, setAmmoMax] = useState(0);
   const [ammoEfficiency, setAmmoEfficiency] = useState(0);
+  const [infiniteAmmoUptime, setInfiniteAmmoUptime] = useState(0);
   const [addingType, setAddingType] = useState("");
   const [statusDamageBonus, setStatusDamageBonus] = useState(0);
   const [headshotDamageBonus, setHeadshotDamageBonus] = useState(0);
@@ -68,6 +69,7 @@ export default function DamageSimulatorPage() {
     setReloadTime(applied.reloadTime);
     setAmmoMax(applied.ammoMax ?? 0);
     setAmmoEfficiency(applied.ammoEfficiency ?? 0);
+    setInfiniteAmmoUptime(applied.infiniteAmmoUptime ?? 0);
     setStatusDamageBonus(applied.statusDamageBonus);
     setHeadshotDamageBonus(applied.headshotDamageBonus);
     setWeakPointDamageBonus(applied.weakPointDamageBonus);
@@ -118,6 +120,7 @@ export default function DamageSimulatorPage() {
           punctureArmorStripPerStack > 0 ? punctureArmorStripPerStack : undefined,
         ammoMax: ammoMax > 0 ? ammoMax : undefined,
         ammoEfficiency,
+        infiniteAmmoUptime,
       },
       selectedEnemy,
       enemyLevel,
@@ -144,6 +147,7 @@ export default function DamageSimulatorPage() {
     punctureArmorStripPerStack,
     ammoMax,
     ammoEfficiency,
+    infiniteAmmoUptime,
   ]);
 
   const setDmg = (type: string, val: number) => setDmgTypes((prev) => ({ ...prev, [type]: val }));
@@ -193,6 +197,12 @@ export default function DamageSimulatorPage() {
                   label="Ammo Efficiency"
                   value={ammoEfficiency}
                   onChange={setAmmoEfficiency}
+                  step={0.05}
+                />
+                <SimInputField
+                  label="Infinite Ammo uptime"
+                  value={infiniteAmmoUptime}
+                  onChange={setInfiniteAmmoUptime}
                   step={0.05}
                 />
                 <div className="min-w-0">

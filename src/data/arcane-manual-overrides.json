@@ -2534,14 +2534,9 @@
     "trigger": "conditional",
     "effects": [
       {
-        "stat": "headshotProcChance",
+        "stat": "infiniteAmmoChance",
         "maxValue": 60,
-        "flat": false,
-        "stacking": false
-      },
-      {
-        "stat": "ammoEfficiency",
-        "maxValue": 102,
+        "baseValue": 10,
         "flat": false,
         "stacking": false
       },
@@ -2679,7 +2674,8 @@
     "effects": [
       {
         "stat": "ampAmmoEfficiency",
-        "maxValue": 72,
+        "maxValue": 75,
+        "baseValue": 12.5,
         "flat": false,
         "stacking": false
       },

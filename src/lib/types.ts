@@ -703,10 +703,17 @@ export interface CalculatedStats {
   /** Ammo consumed per shot (default 1). Used with ammoEfficiency for sustained DPS. */
   ammoCost?: number;
   /**
-   * Chance not to consume ammo (0–1). Extends mag cycle in sustained DPS;
-   * ≥0.99 treated as no reload.
+   * Chance not to consume ammo (0–1). Extends mag cycle in sustained DPS.
+   * Capped at 75% where it is consumed (Hotfix 44.1.3); Infinite Ammo is tracked
+   * separately in `infiniteAmmoUptime` so the cap does not undercount it.
    */
   ammoEfficiency?: number;
+  /**
+   * Expected fraction of time Infinite Ammo is active (0–1; 1 = never consumes ammo).
+   * Chance-based sources (Arcane Pistoleer, Brain Storm, Skull Shots) are converted to
+   * an uptime by `infiniteAmmoUptimeFromChance`; sources that combine are independent.
+   */
+  infiniteAmmoUptime?: number;
   multishot: number;
   /** Melee reach / falloff meters added by incarnon (and similar) — display only. */
   range?: number;

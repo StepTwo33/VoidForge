@@ -1,5 +1,6 @@
 import type { CalculatedStats, Weapon, WeaponRadialAttack } from "@/lib/types";
 import { avgCritMultiplier } from "@/lib/calc/crit-utils";
+import { ammoConsumptionFactor, neverConsumesAmmo } from "@/lib/calc/ammo-efficiency";
 import { getWeaponRadialAttacks } from "@/lib/weapons/weapon-radial-utils";
 
 export interface ScaledRadialAttack extends WeaponRadialAttack {
@@ -209,9 +210,10 @@ export function scaleRadialAttacksWithDps(
     const expectedRestore =
       restoreP * (stats.ammoRestoreFlat ?? 0) +
       restoreP * (stats.ammoRestoreMagFraction ?? 0) * stats.magazine;
-    const ae = Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 0.75);
     const ammoCost = Math.max(0.01, stats.ammoCost ?? 1);
-    const ammoPerShot = ae >= 0.99 ? 1e-9 : ammoCost * (1 - ae);
+    const ammoPerShot = neverConsumesAmmo(stats.infiniteAmmoUptime)
+      ? 1e-9
+      : ammoCost * ammoConsumptionFactor(stats.ammoEfficiency, stats.infiniteAmmoUptime);
     const magTime = (stats.magazine + expectedRestore) / (ammoPerShot * efr);
     const instantReloadChance = Math.min(
       1,

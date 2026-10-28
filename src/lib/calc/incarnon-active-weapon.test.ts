@@ -1528,14 +1528,15 @@ describe("evolution numeric fixes", () => {
     expect(mergeIncarnonStatChanges(gammacor, { 2: 1 }, "gammacor")?.flatBaseDamage).toBe(26);
 
     const boltor = incarnonDataMap.get("boltor")!;
-    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "boltor")?.flatBaseDamage).toBe(20);
-    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "boltor")?.ammoEfficiency).toBe(0.8);
-    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "boltor_prime")?.flatBaseDamage).toBe(6);
-    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "boltor_prime")?.ammoEfficiency).toBe(0.6);
-    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "telos_boltor")?.ammoEfficiency).toBe(0.6);
+    // Hotfix 44.1.3 + wiki.warframe.com Boltor: Crimson Overture X = 12 / 0 / 0, On Kill +25% AE ×3 = 0.75.
+    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "boltor")?.flatBaseDamage).toBe(12);
+    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "boltor")?.ammoEfficiency).toBe(0.75);
+    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "boltor_prime")?.flatBaseDamage).toBe(0);
+    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "boltor_prime")?.ammoEfficiency).toBe(0.75);
+    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "telos_boltor")?.ammoEfficiency).toBe(0.75);
 
     const dera = incarnonDataMap.get("dera")!;
-    expect(mergeIncarnonStatChanges(dera, { 2: 0 }, "dera")?.ammoEfficiency).toBe(0.8);
+    expect(mergeIncarnonStatChanges(dera, { 2: 0 }, "dera")?.ammoEfficiency).toBe(0.75);
     expect(mergeIncarnonStatChanges(dera, { 2: 1 }, "dera")?.fireRate).toBe(0.3);
 
     const ceramic = incarnonDataMap.get("ceramic_dagger")!;
@@ -1655,7 +1656,12 @@ describe("evolution numeric fixes", () => {
     const lex = incarnonDataMap.get("lex")!;
     expect(mergeIncarnonStatChanges(lex, { 2: 1 }, "lex")?.ammoEfficiency).toBe(0.6);
     const bronco = incarnonDataMap.get("bronco")!;
-    expect(mergeIncarnonStatChanges(bronco, { 4: 0 }, "bronco")?.ammoEfficiency).toBe(0.8);
+    expect(mergeIncarnonStatChanges(bronco, { 4: 0 }, "bronco")?.ammoEfficiency).toBe(0.75);
+    // Vasto Reaper's Plenty: "On Headshot: Infinite Ammo for 2s" (Hotfix 44.1.3), not +100% AE.
+    const vasto = incarnonDataMap.get("vasto")!;
+    const vastoMerged = mergeIncarnonStatChanges(vasto, { 4: 2 }, "vasto");
+    expect(vastoMerged?.ammoEfficiency ?? 0).toBe(0);
+    expect(vastoMerged?.infiniteAmmoUptime).toBe(1);
   });
 
   it("ammo restore folds into sustained DPS (one proc per mag)", () => {

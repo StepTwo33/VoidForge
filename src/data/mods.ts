@@ -5836,10 +5836,10 @@ const RAW_MODS: Mod[] = [
     "category": "primary",
     "subCategory": "weapon",
     "stats": {
-      "ammoEfficiency": 25,
-      "duration": 0.125
+      "infiniteAmmoChance": 10,
+      "duration": 0.5
     },
-    "description": "On Headshot:\\n+100% Ammo Efficiency for 0.5s",
+    "description": "On Headshot:\\n40% chance for Infinite Ammo for 2s",
     "rarity": "rare"
   },
   {
@@ -8902,10 +8902,10 @@ const RAW_MODS: Mod[] = [
     "category": "secondary",
     "subCategory": "weapon",
     "stats": {
-      "ammoEfficiency": 25,
+      "infiniteAmmoChance": 10,
       "duration": 0.5
     },
-    "description": "On Headshot:\\n+100% Ammo Efficiency for 2s",
+    "description": "On Headshot:\\n40% chance for Infinite Ammo for 2s",
     "rarity": "rare"
   },
   {
@@ -15900,9 +15900,9 @@ const RAW_MODS: Mod[] = [
     "subCategory": "weapon",
     "stats": {
       "health": 7.5,
-      "range": 2.5
+      "range": 1.666667
     },
-    "description": "Enemies explode on death, dealing 450 <DT_CORROSIVE_COLOR>Corrosive Damage (+45% Enemy Max Health) in a 15m radius.",
+    "description": "Enemies explode on death, dealing 450 <DT_CORROSIVE_COLOR>Corrosive Damage (+45% Enemy Max Health) in a 10m radius.",
     "rarity": "uncommon"
   },
   {

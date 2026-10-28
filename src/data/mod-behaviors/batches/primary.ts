@@ -62,8 +62,8 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("statusChance", "weapon_dps", "conditional_stat_on_kill", "wiki: Biotic Rounds — On Weak Point Kill: +150% Status Chance for 15s"),
   ]),
   brain_storm: mod("brain_storm", [
-    line("ammoEfficiency", "weapon_dps", "conditional_stat_on_trigger", "wiki: Brain Storm — On Headshot: +100% Ammo Efficiency for 0.5s"),
-    line("duration", "mod_panel", "multiplicative_percent", "Brain Storm: duration \u2014 On Headshot:\\\\n+100% Ammo Efficiency for 0.5s"),
+    line("infiniteAmmoChance", "weapon_dps", "conditional_stat_on_trigger", "wiki: Brain Storm — On Headshot: 40% chance for Infinite Ammo for 2s (R0-R3: 10-40%, 0.5/1/2/2s)"),
+    line("duration", "mod_panel", "multiplicative_percent", "Brain Storm: duration \u2014 On Headshot:\\\\n40% chance for Infinite Ammo for 2s"),
   ]),
   catalyzer_link: mod("catalyzer_link", [
     line("duration", "mod_panel", "multiplicative_percent", "Catalyzer Link: duration \u2014 On Ability Cast:\\\\n+60% Status Chance when Aiming for 9s"),

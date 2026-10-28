@@ -10,6 +10,7 @@
  */
 import { WEAPON_BASE_AMMO_MAX } from "@/data/weapon-ammo-max";
 import type { Mod, ModSlot } from "@/lib/types";
+import { MAX_AMMO_EFFICIENCY, ammoConsumptionFactor, neverConsumesAmmo } from "@/lib/calc/ammo-efficiency";
 
 export function baseAmmoMaxForWeapon(weaponId: string): number | undefined {
   const v = WEAPON_BASE_AMMO_MAX[weaponId];
@@ -50,8 +51,7 @@ export function moddedAmmoReserve(opts: {
   return Math.max(0, Math.floor(base * Math.max(0, 1 + bonus) + 1e-9));
 }
 
-/** DE hard cap on Ammo Efficiency (introduced with the Riven Disposition retirement update). */
-export const MAX_AMMO_EFFICIENCY = 0.75;
+export { MAX_AMMO_EFFICIENCY };
 
 /**
  * Seconds to empty magazine + reserve with no pickups (wiki Ammo Economy:
@@ -64,12 +64,14 @@ export function timeToEmptyAmmo(opts: {
   reloadTime: number;
   ammoCost?: number;
   ammoEfficiency?: number;
+  /** Expected Infinite Ammo uptime (0–1); 1 = never runs dry. */
+  infiniteAmmoUptime?: number;
 }): number {
   const { magazine, reserve, fireRate, reloadTime } = opts;
   if (!(magazine > 0) || !(fireRate > 0)) return Infinity;
-  const ae = Math.min(Math.max(opts.ammoEfficiency ?? 0, 0), MAX_AMMO_EFFICIENCY);
-  if (ae >= 0.99) return Infinity;
-  const perShot = Math.max(0.01, opts.ammoCost ?? 1) * (1 - ae);
+  if (neverConsumesAmmo(opts.infiniteAmmoUptime)) return Infinity;
+  const perShot =
+    Math.max(0.01, opts.ammoCost ?? 1) * ammoConsumptionFactor(opts.ammoEfficiency, opts.infiniteAmmoUptime);
   const magTime = magazine / perShot / fireRate;
   const mags = (magazine + reserve) / magazine;
   const reloads = Math.max(0, Math.ceil(mags - 1e-9) - 1);

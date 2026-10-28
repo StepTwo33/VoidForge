@@ -1402,7 +1402,7 @@ export const allArcanes: Mod[] = [
     category: "arcane",
     subCategory: "warframe",
     stats: {},
-    description: "On Pistol Weak Point Kill:\ 60% chance for +102% Ammo Efficiency for 12s\ +1 Arcane Revive +1 Arcane Revive",
+    description: "On Pistol Weak Point Kill:\ 60% chance for Infinite Ammo for 12s\ +1 Arcane Revive +1 Arcane Revive",
     rarity: "rare",
   },
 {
@@ -1740,7 +1740,7 @@ export const allArcanes: Mod[] = [
     category: "arcane",
     subCategory: "warframe",
     stats: {},
-    description: "On Void Sling:\ +72% Amp Ammo Efficiency for 8s",
+    description: "On Void Sling:\ +75% Amp Ammo Efficiency for 8s",
     rarity: "rare",
   },
 {

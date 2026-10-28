@@ -57,6 +57,7 @@ import {
 import { WARFRAME_ENERGY_RANK30 } from '@/data/warframe-energy-rank30';
 import { WARFRAME_HEALTH_RANK30, WARFRAME_SHIELD_RANK30 } from '@/data/warframe-health-shield-rank30';
 import { WARFRAME_ARMOR_RANK30 } from '@/data/warframe-armor-rank30';
+import { ammoConsumptionFactor, combineInfiniteAmmoUptime, neverConsumesAmmo } from '@/lib/calc/ammo-efficiency';
 import {
   applyCrossSlotMeleeWeaponBuffs,
   applyVerifiedModStatToWarframe,
@@ -1239,6 +1240,9 @@ export function calculateWeaponBuild(
     if (pool.ammoEfficiency) {
       stats.ammoEfficiency = (stats.ammoEfficiency ?? 0) + pool.ammoEfficiency;
     }
+    if (pool.infiniteAmmoUptime) {
+      stats.infiniteAmmoUptime = combineInfiniteAmmoUptime(stats.infiniteAmmoUptime, pool.infiniteAmmoUptime);
+    }
     if (pool.weakPointDamage) {
       stats.weakPointDamageBonus = (stats.weakPointDamageBonus ?? 0) + pool.weakPointDamage;
     }
@@ -1629,6 +1633,10 @@ export function calculateWeaponBuild(
         case 'reloadSpeed': stats.reloadTime /= (1 + value); break;
         case 'ammoEfficiency':
           stats.ammoEfficiency = (stats.ammoEfficiency ?? 0) + value;
+          break;
+        // Infinite Ammo as an expected uptime (Reaper's Plenty: headshot → Infinite Ammo for 2s).
+        case 'infiniteAmmoUptime':
+          stats.infiniteAmmoUptime = combineInfiniteAmmoUptime(stats.infiniteAmmoUptime, value);
           break;
         case 'punctureArmorStripPerStack':
           stats.punctureArmorStripPerStack = value;
@@ -2812,11 +2820,11 @@ function calculateSustainedDps(stats: CalculatedStats, baseWeapon?: Weapon): num
   if (baseWeapon?.chargeMode === "bow" || baseWeapon?.triggerType === "Bow") {
     return burstDps;
   }
-  // Ammo Efficiency: expected ammo per shot = ammoCost × (1 − AE) → longer mag before reload (capped at 75%).
-  const ae = Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 0.75);
-  if (ae >= 0.99) return burstDps;
+  // Ammo: expected ammo per shot = ammoCost × (1 − min(AE, 75%)) × (1 − Infinite Ammo uptime)
+  // → longer mag before reload. Permanent Infinite Ammo never reloads.
+  if (neverConsumesAmmo(stats.infiniteAmmoUptime)) return burstDps;
   const ammoCost = Math.max(0.01, stats.ammoCost ?? baseWeapon?.ammoCost ?? 1);
-  const ammoPerShot = ammoCost * (1 - ae);
+  const ammoPerShot = ammoCost * ammoConsumptionFactor(stats.ammoEfficiency, stats.infiniteAmmoUptime);
   // Ammo restore (kill / PT / Electric): one opportunity per mag dump →
   // E[extra rounds] = p × flat + p × frac × mag. Holster reload is swap-gated
   // and stays out of same-weapon sustained.

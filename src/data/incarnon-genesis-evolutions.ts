@@ -97,8 +97,8 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
     { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge. Prioritize Slash Damage and gain Multishot.", statChanges: {} },
     // Assumes channeled ability active for paper panel PT + accuracy
     { tier: 2, slot: 0, name: "Hunter's Mantra", description: "Increase Base Damage by +18. With Channeled Ability active: Punch Through +4 and +40% Accuracy.", statChanges: {"flatBaseDamage":18,"punchThrough":4,"accuracy":0.4}, variantStatChanges: {"boltor":{"flatBaseDamage":18,"punchThrough":4,"accuracy":0.4},"telos_boltor":{"flatBaseDamage":4,"punchThrough":4,"accuracy":0.4},"boltor_prime":{"flatBaseDamage":4,"punchThrough":4,"accuracy":0.4}} },
-    // Max stacks assumed for paper DPS (Boltor +2×4 + AE 20%×4; Telos/Prime +2×3 + AE 20%×3). Form mag ignores AE.
-    { tier: 2, slot: 1, name: "Crimson Overture", description: "Increase Base Damage by +12 (Boltor) / +0 (Telos, Prime). On Kill: Increase Base Damage by +2 and +20% Ammo Efficiency for 5 seconds. Stacks up to 4x (Boltor) / 3x (Telos, Prime).", statChanges: {"flatBaseDamage":20,"ammoEfficiency":0.8}, variantStatChanges: {"boltor":{"flatBaseDamage":20,"ammoEfficiency":0.8},"telos_boltor":{"flatBaseDamage":6,"ammoEfficiency":0.6},"boltor_prime":{"flatBaseDamage":6,"ammoEfficiency":0.6}} },
+    // Hotfix 44.1.3 (DE + wiki): On Kill +25% AE for 5s, stacks up to 3x (3 × 25% = 75%, the AE cap). Base Damage is the flat X only (no per-kill damage clause in DE's Was/Now or the wiki table).
+    { tier: 2, slot: 1, name: "Crimson Overture", description: "Increase Base Damage by +12 (Boltor) / +0 (Telos, Prime). On Kill: +25% Ammo Efficiency for 5s. Stacks up to 3x.", statChanges: {"flatBaseDamage":12,"ammoEfficiency":0.75}, variantStatChanges: {"boltor":{"flatBaseDamage":12,"ammoEfficiency":0.75},"telos_boltor":{"flatBaseDamage":0,"ammoEfficiency":0.75},"boltor_prime":{"flatBaseDamage":0,"ammoEfficiency":0.75}} },
     { tier: 3, slot: 0, name: "Swift Deliverance", description: "+60% Projectile Speed.", statChanges: {"projectileSpeed":0.6} },
     { tier: 3, slot: 1, name: "Extended Volley", description: "Increase Base Magazine Capacity by +20.", statChanges: {"flatMagazine":20} },
     { tier: 3, slot: 2, name: "Rapid Reinforcement", description: "+60% Reload Speed.", statChanges: {"reloadSpeed":0.6} },
@@ -129,7 +129,7 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
     { tier: 3, slot: 1, name: "Practised Grip", description: "Increase Accuracy by +30%.", statChanges: {"accuracy":0.3} },
     { tier: 3, slot: 2, name: "Extended Volley", description: "Increase Base Magazine Capacity by +2.", statChanges: {"flatMagazine":2} },
     // Assumes 6 enemies within 6m for paper DPS
-    { tier: 4, slot: 0, name: "Enough for Everyone", description: "+80% Ammo efficiency when 6 enemies are within 6m.", statChanges: {"ammoEfficiency":0.8} },
+    { tier: 4, slot: 0, name: "Enough for Everyone", description: "+75% Ammo efficiency when 6 enemies are within 6m.", statChanges: {"ammoEfficiency":0.75} },
     { tier: 4, slot: 1, name: "Commodore's Fortune", description: "Increase Base Critical Chance by +20%.", statChanges: {"criticalChance":0.2} },
     { tier: 4, slot: 2, name: "Rain of Lead", description: "+2 Base Multishot.", statChanges: {"multishot":2} },
   ],
@@ -176,8 +176,8 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
   ],
   "dera_incarnon": [
     { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge. Fire high power beams and gain Magnetic Damage.", statChanges: {} },
-    // Max stacks assumed for paper DPS (AE 20%×4). Form mag ignores AE.
-    { tier: 2, slot: 0, name: "Crimson Overture", description: "Increase Base Damage by +8. On Kill: +20% Ammo Efficiency for 5s. Stacks up to 4x.", statChanges: {"flatBaseDamage":8,"ammoEfficiency":0.8}, variantStatChanges: {"dera":{"flatBaseDamage":8,"ammoEfficiency":0.8},"dera_vandal":{"flatBaseDamage":6,"ammoEfficiency":0.8}} },
+    // Hotfix 44.1.3: On Kill +25% AE for 5s, stacks up to 3x (max stacks = 75%, the AE cap).
+    { tier: 2, slot: 0, name: "Crimson Overture", description: "Increase Base Damage by +8. On Kill: +25% Ammo Efficiency for 5s. Stacks up to 3x.", statChanges: {"flatBaseDamage":8,"ammoEfficiency":0.75}, variantStatChanges: {"dera":{"flatBaseDamage":8,"ammoEfficiency":0.75},"dera_vandal":{"flatBaseDamage":6,"ammoEfficiency":0.75}} },
     // Max stacks assumed for paper DPS (+5% × 6)
     { tier: 2, slot: 1, name: "Paragon Essence", description: "Increase Base Damage by +6. On Status Effect: +5% Fire Rate for 5s. Stacks up to 6x.", statChanges: {"flatBaseDamage":6,"fireRate":0.3}, variantStatChanges: {"dera":{"flatBaseDamage":6,"fireRate":0.3},"dera_vandal":{"flatBaseDamage":4,"fireRate":0.3}} },
     { tier: 3, slot: 0, name: "Swift Deliverance", description: "+50% Projectile Speed", statChanges: {"projectileSpeed":0.5} },
@@ -728,8 +728,8 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
     { tier: 3, slot: 2, name: "Awakened Readiness", description: "+20% Magazine Reloaded per second when Holstered.", statChanges: {"holsterReloadPerSec":0.2} },
     { tier: 4, slot: 0, name: "Commodore's Fortune", description: "Increase Base Critical Chance by +16%.", statChanges: {"criticalChance":0.16}, variantStatChanges: {"vasto":{"criticalChance":0.16},"vasto_prime":{"criticalChance":0.18}} },
     { tier: 4, slot: 1, name: "Survivor's Edge", description: "Increase Base Critical Chance by +10%. Increase Base Status Chance by +10%.", statChanges: {"criticalChance":0.1,"statusChance":0.1} },
-    // Assumes headshot AE buff up for paper DPS (100% → no reload)
-    { tier: 4, slot: 2, name: "Reaper's Plenty", description: "On Headshot: +100% Ammo Efficiency for 2s.", statChanges: {"ammoEfficiency":1} },
+    // Assumes the headshot Infinite Ammo buff is up for paper DPS (Hotfix 44.1.3; uptime 1 = never reloads)
+    { tier: 4, slot: 2, name: "Reaper's Plenty", description: "On Headshot: Infinite Ammo for 2s.", statChanges: {"infiniteAmmoUptime":1} },
   ],
   "vectis_incarnon": [
     { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint hits charge Incarnon Transmutation; alt fire transmutes. Switching back will expend any remaining charge. Fire slowing projectiles that explode on headshot", statChanges: {} },

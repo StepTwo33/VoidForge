@@ -846,7 +846,7 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
     expect(full.totalDamage).toBeCloseTo(bare.totalDamage * 8, 4);
   });
 
-  it("Arcane Pistoleer: stacks>0 → +102% ammo efficiency at R5", () => {
+  it("Arcane Pistoleer: stacks>0 → 60% chance for Infinite Ammo for 12s at R5 (uptime 1 − 0.4^12), AE stat unchanged", () => {
     const lex = allWeapons.find((w) => w.id === "lex")!;
     const pistoleer = allArcanes.find((a) => a.id === "arcane_pistoleer")!;
     const full = calculateWeaponBuildWithArcanes(
@@ -857,7 +857,9 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
       undefined,
       { ...DEFAULT_SIM_PARAMS, arcaneStacks: 1 },
     );
-    expect(full.ammoEfficiency).toBeCloseTo(1.02, 4);
+    expect(full.ammoEfficiency ?? 0).toBeCloseTo(0, 4);
+    // 1 weak-point kill/s over a 12s window: 1 − (1 − 0.6)^12 = 0.9999832 (hand-worked).
+    expect(full.infiniteAmmoUptime).toBeCloseTo(1 - Math.pow(0.4, 12), 6);
   });
 
   it("Arcane Acceleration: stacks>0 → +90% FR on Braton; no FR on Hek (shotgun)", () => {
@@ -1464,7 +1466,7 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
     expect(heat?.value ?? 0).toBeCloseTo(heatBonus, 4);
   });
 
-  it("Eternal Logistics: stacks>0 → +72% amp ammo efficiency at R5", () => {
+  it("Eternal Logistics: stacks>0 → +75% amp ammo efficiency at R5 (Hotfix 44.1.3; was 72%)", () => {
     const amp = allWeapons.find((w) => w.id === "amp_raplak")!;
     const logistics = allArcanes.find((a) => a.id === "eternal_logistics")!;
     const bare = calculateWeaponBuild(amp, [], new Map());
@@ -1476,7 +1478,7 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
       undefined,
       { ...DEFAULT_SIM_PARAMS, arcaneStacks: 1 },
     );
-    expect(full.ammoEfficiency ?? 0).toBeCloseTo((bare.ammoEfficiency ?? 0) + 0.72, 4);
+    expect(full.ammoEfficiency ?? 0).toBeCloseTo((bare.ammoEfficiency ?? 0) + 0.75, 4);
   });
 
   it("Virtuos Ghost: stacks>0 → +60% amp Status Chance at R3", () => {

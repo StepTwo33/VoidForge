@@ -331,8 +331,8 @@ export const MOD_BEHAVIORS_SECONDARY: Record<string, VerifiedModBehavior> = {
     line("multishot", "weapon_dps", "multiplicative_percent", "Shrapnel Rounds: multishot \u2014 +200% Multishot, -66% Damage"),
   ]),
   skull_shots: mod("skull_shots", [
-    line("ammoEfficiency", "weapon_dps", "conditional_stat_on_trigger", "wiki: Skull Shots — On Headshot: +100% Ammo Efficiency for 2s"),
-    line("duration", "mod_panel", "multiplicative_percent", "Skull Shots: duration \u2014 On Headshot:\\\\n+100% Ammo Efficiency for 2s"),
+    line("infiniteAmmoChance", "weapon_dps", "conditional_stat_on_trigger", "wiki: Skull Shots — On Headshot: 40% chance for Infinite Ammo for 2s (R0-R3: 10-40%, 0.5/1/2/2s)"),
+    line("duration", "mod_panel", "multiplicative_percent", "Skull Shots: duration \u2014 On Headshot:\\\\n40% chance for Infinite Ammo for 2s"),
   ]),
   slip_magazine_r3: mod("slip_magazine_r3", [
     line("magazine", "weapon_dps", "multiplicative_percent", "Slip Magazine: magazine \u2014 +30% Magazine Capacity"),

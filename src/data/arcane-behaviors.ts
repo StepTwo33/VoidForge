@@ -305,8 +305,7 @@ export const VERIFIED_ARCANE_BEHAVIORS: Record<string, VerifiedArcaneBehavior> =
     arcaneId: "arcane_pistoleer",
     customHandler: "arcane_pistoleer",
     effects: [
-      {"statKey": "headshotProcChance", "target": "arcane_panel", "mode": "custom", "source": "wiki: Arcane Pistoleer — 60% chance on pistol Weak Point kill"},
-      {"statKey": "ammoEfficiency", "target": "weapon_dps", "mode": "custom", "source": "wiki: Arcane Pistoleer — +102% Ammo Efficiency for 12s (paper: stacks>0 = buff up)"},
+      {"statKey": "infiniteAmmoChance", "target": "weapon_dps", "mode": "custom", "source": "wiki: Arcane Pistoleer — 10-60% (R0-R5) chance for Infinite Ammo on pistol Weak Point kill, 12s (modelled as expected Infinite Ammo uptime)"},
       {"statKey": "buffDuration", "target": "arcane_panel", "mode": "custom", "source": "wiki: Arcane Pistoleer — 12s buff duration"},
     ],
   },
@@ -592,7 +591,7 @@ export const VERIFIED_ARCANE_BEHAVIORS: Record<string, VerifiedArcaneBehavior> =
     arcaneId: "eternal_logistics",
     customHandler: "eternal_logistics",
     effects: [
-      {"statKey": "ampAmmoEfficiency", "target": "weapon_dps", "mode": "custom", "source": "wiki: Eternal Logistics — +72% amp ammo efficiency for 8s after Void Sling (paper: stacks>0 = buff up)"},
+      {"statKey": "ampAmmoEfficiency", "target": "weapon_dps", "mode": "custom", "source": "wiki: Eternal Logistics — +75% amp ammo efficiency for 8s after Void Sling (paper: stacks>0 = buff up)"},
       {"statKey": "buffDuration", "target": "arcane_panel", "mode": "multiplicative_percent", "source": "Eternal Logistics: buffDuration (panel)"},
     ],
   },

@@ -51,8 +51,10 @@ export interface DamageSimInputs {
    * Ammo pickups are not modelled: the discrete TTK stops when magazine + reserve run out.
    */
   ammoMax?: number;
-  /** Chance not to consume ammo (0–1); stretches the reserve. */
+  /** Chance not to consume ammo (0–1); stretches the reserve. Capped at 75% where consumed. */
   ammoEfficiency?: number;
+  /** Expected Infinite Ammo uptime (0–1); stretches the reserve further (1 = never runs dry). */
+  infiniteAmmoUptime?: number;
 }
 
 export interface DamageSimTypeRow {
@@ -161,6 +163,7 @@ export function simInputsToCalculatedStats(input: DamageSimInputs, enemyFaction:
           ammoMax: input.ammoMax,
           ammoReserveModelled: true,
           ammoEfficiency: input.ammoEfficiency ?? 0,
+          infiniteAmmoUptime: input.infiniteAmmoUptime ?? 0,
         }
       : {}),
   };

@@ -163,6 +163,7 @@ const STAT_LABELS: Record<string, string> = {
   zoneDamage: "Zone Damage",
   zoneDamagePerSec: "Zone Damage/s",
   headshotProcChance: "Proc Chance",
+  infiniteAmmoChance: "Chance for Infinite Ammo",
   killProcChance: "Proc Chance",
   overguardStrip: "Overguard Strip",
   ampAmmoEfficiency: "Amp Ammo Efficiency",

@@ -3,6 +3,7 @@
 // Viral/Corrosive status accounting, Slash/Heat/Toxin DoT damage, reload cycles
 import { CalculatedStats } from "../types";
 import { avgCritMultiplier } from "./crit-utils";
+import { ammoConsumptionFactor, neverConsumesAmmo } from "./ammo-efficiency";
 import {
   combatDamageMultiplier,
   factionBonusFromStats,
@@ -606,9 +607,10 @@ export function simulateDiscreteTTK(
     if (!stats.ammoReserveModelled || !(stats.magazine > 0)) return Infinity;
     const reserve = stats.ammoMax ?? 0;
     if (!Number.isFinite(reserve) || reserve < 0) return Infinity;
-    const ae = Math.min(Math.max(stats.ammoEfficiency ?? 0, 0), 0.75);
-    if (ae >= 0.99) return Infinity;
-    const perShot = Math.max(0.01, stats.ammoCost ?? 1) * (1 - ae);
+    if (neverConsumesAmmo(stats.infiniteAmmoUptime)) return Infinity;
+    const perShot =
+      Math.max(0.01, stats.ammoCost ?? 1) *
+      ammoConsumptionFactor(stats.ammoEfficiency, stats.infiniteAmmoUptime);
     return Math.floor((stats.magazine + reserve) / perShot + 1e-9);
   })();
   let outOfAmmo = false;

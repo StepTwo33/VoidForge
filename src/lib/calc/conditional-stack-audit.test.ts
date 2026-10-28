@@ -523,16 +523,19 @@ describe("Sim2 weak-point / situational exclusives (wiki max rank)", () => {
 });
 
 describe("Sim3 AE + max-stack exclusives (wiki max rank)", () => {
-  it("Brain Storm / Skull Shots / Zazvat-Kar: paper AE 0; trigger → +100% / +100% / +75% AE", () => {
+  it("Brain Storm / Skull Shots / Zazvat-Kar: paper AE 0; trigger → Infinite Ammo 64% uptime / 64% / +75% AE", () => {
+    // Hotfix 44.1.3: R3 "40% chance for Infinite Ammo for 2s", not +100% AE. 1 weak-point hit/s:
+    // two hits in the 2s window → uptime 1 − 0.6² = 0.64 (hand-worked), AE stat stays 0.
     expect(build("braton", "brain_storm", {}).ammoEfficiency ?? 0).toBeCloseTo(0, 5);
-    expect(
-      build("braton", "brain_storm", { applyTriggerBuffs: true }).ammoEfficiency,
-    ).toBeCloseTo(1, 5);
+    expect(build("braton", "brain_storm", {}).infiniteAmmoUptime ?? 0).toBeCloseTo(0, 5);
+    const bs = build("braton", "brain_storm", { applyTriggerBuffs: true });
+    expect(bs.ammoEfficiency ?? 0).toBeCloseTo(0, 5);
+    expect(bs.infiniteAmmoUptime).toBeCloseTo(0.64, 5);
 
     expect(build("lex", "skull_shots", {}).ammoEfficiency ?? 0).toBeCloseTo(0, 5);
-    expect(
-      build("lex", "skull_shots", { applyTriggerBuffs: true }).ammoEfficiency,
-    ).toBeCloseTo(1, 5);
+    const ss = build("lex", "skull_shots", { applyTriggerBuffs: true });
+    expect(ss.ammoEfficiency ?? 0).toBeCloseTo(0, 5);
+    expect(ss.infiniteAmmoUptime).toBeCloseTo(0.64, 5);
 
     expect(build("lex", "zazvat_kar", {}).ammoEfficiency ?? 0).toBeCloseTo(0, 5);
     expect(

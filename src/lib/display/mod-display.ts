@@ -237,6 +237,13 @@ const MOD_RANK_VALUE_TABLES: Record<string, Record<string, readonly number[]>> =
   },
   // Duplex Bond: clones live 5–30 s, Energy Orb drop chance 8/17/25/33/42/50 % (R0–R5).
   duplex_bond: { duration: [5, 10, 15, 20, 25, 30], energyOrbDropChance: [8, 17, 25, 33, 42, 50] },
+  // Round 21 (wiki.warframe.com stat tables, index = rank).
+  // Hotfix 44.1.3: Brain Storm (Grakata) / Skull Shots (Viper) "On Headshot: N% chance for Infinite Ammo
+  // for D s": chance 10/20/30/40%, duration 0.5/1/2/2 s (R0–R3). Calculator: ammo-efficiency.ts.
+  brain_storm: { infiniteAmmoChance: [10, 20, 30, 40], duration: [0.5, 1, 2, 2] },
+  skull_shots: { infiniteAmmoChance: [10, 20, 30, 40], duration: [0.5, 1, 2, 2] },
+  // Acid Shells: Sobek explosion radius is 10 m at every rank since Hotfix 44.1.3 (was 15 m).
+  acid_shells: { range: [10, 10, 10, 10, 10, 10] },
   // Same value at every rank (wiki), tabled so the builder card doesn't scale it by rank+1
   // (Auto Omni Cooldown 20 s is in its entry above):
   // Flux Overdrive oscillation 5 s, Momentous Bond buff 30 s.
