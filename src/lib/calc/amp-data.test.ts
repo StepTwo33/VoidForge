@@ -5,7 +5,7 @@ import { calculateWeaponBuild } from "@/lib/calc/calculator";
 import { enrichWeapon } from "@/lib/weapons/weapon-enrich";
 import { modsMap } from "@/data/mods";
 
-const calc = (w: any) => calculateWeaponBuild(enrichWeapon(w), [], modsMap);
+const calc = (w: Parameters<typeof enrichWeapon>[0]) => calculateWeaponBuild(enrichWeapon(w), [], modsMap);
 const avgCrit = (cc: number, cm: number) => 1 + cc * (cm - 1);
 const KEYS = ["damage", "fireRate", "criticalChance", "criticalMultiplier", "statusChance", "magazine", "ammoCost", "triggerType", "burstCount", "burstDelay"] as const;
 
@@ -14,7 +14,7 @@ describe("main-list amp entries mirror the modular-builder data (same ids)", () 
     it(p.id, () => {
       const main = allWeapons.find((w) => w.id === p.id)!;
       expect(main.category).toBe("amp_prism");
-      for (const k of KEYS) expect((main as any)[k]).toEqual((p as any)[k]);
+      for (const k of KEYS) expect((main as unknown as Record<string, unknown>)[k]).toEqual((p as unknown as Record<string, unknown>)[k]);
     });
   }
   it("scaffold ids in the main list match the scaffold primary-fire paper", () => {
@@ -22,7 +22,7 @@ describe("main-list amp entries mirror the modular-builder data (same ids)", () 
       const main = allWeapons.find((w) => w.id === id)!;
       const sc = ampScaffolds.find((s) => s.id === id)!;
       for (const k of ["damage", "fireRate", "criticalChance", "criticalMultiplier", "statusChance", "burstCount", "burstDelay"] as const)
-        expect((main as any)[k]).toEqual((sc as any)[k]);
+        expect((main as unknown as Record<string, unknown>)[k]).toEqual((sc as unknown as Record<string, unknown>)[k]);
     }
   });
 });

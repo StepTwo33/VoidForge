@@ -208,7 +208,7 @@ export function mergeCloudLoadoutPreservingSlots(local: Loadout, cloud: SavedBui
 }
 
 function normalizeLoadout(raw: Loadout): Loadout {
-  let out: Loadout = { ...raw };
+  const out: Loadout = { ...raw };
   const modularBuilds: NonNullable<Loadout["modularBuilds"]> = {
     ...(out.modularBuilds ?? {}),
   };

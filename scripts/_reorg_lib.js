@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports -- CommonJS maintenance script */
 /**
  * Move src/lib files into domain folders and rewrite @/lib/... imports.
  *

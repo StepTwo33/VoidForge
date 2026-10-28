@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports -- CommonJS maintenance script */
 /** Fix relative imports under src/lib after domain moves. */
 const fs = require("fs");
 const path = require("path");

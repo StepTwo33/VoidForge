@@ -1,11 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { createContext, useContext } from "react";
+import { createContext, createElement, useContext } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Header } from "@/components/header";
 import { resolvePageIcon, type PageIconName } from "@/lib/display/page-icons";
+
 import { cn } from "@/lib/utils";
+
+/** Resolve a page icon (component or serializable name) to a rendered element. */
+function renderPageIcon(icon: LucideIcon | undefined, iconName: PageIconName | undefined) {
+  const resolved = resolvePageIcon(icon, iconName);
+  return resolved ? createElement(resolved, { className: "h-5 w-5" }) : null;
+}
 
 const MAX_WIDTH = {
   sm: "max-w-3xl",
@@ -232,7 +239,7 @@ export function PageHero({
   centered?: boolean;
   className?: string;
 }) {
-  const Icon = resolvePageIcon(icon, iconName);
+  const iconNode = renderPageIcon(icon, iconName);
   const colors = ACCENT[accent];
   return (
     <div
@@ -250,14 +257,14 @@ export function PageHero({
         )}
       >
         <div className={cn("flex gap-3 sm:gap-3.5", centered && "flex-col items-center")}>
-          {Icon && (
+          {iconNode && (
             <div
               className={cn(
                 "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-border/50",
                 colors.icon,
               )}
             >
-              <Icon className="h-5 w-5" />
+              {iconNode}
             </div>
           )}
           <div className={cn("min-w-0", centered && "max-w-2xl")}>
@@ -309,8 +316,8 @@ export function FeatureCard({
   badges?: string[];
   subtitle?: string;
 }) {
-  const Icon = resolvePageIcon(icon, iconName);
-  if (!Icon) {
+  const iconNode = renderPageIcon(icon, iconName);
+  if (!iconNode) {
     throw new Error("FeatureCard requires icon or iconName");
   }
   const colors = ACCENT[accent];
@@ -326,7 +333,7 @@ export function FeatureCard({
     >
       <div className="mb-2.5 flex items-start gap-3 sm:mb-3">
         <div className={cn("rounded-lg p-2 ring-1 ring-border/40", colors.icon)}>
-          <Icon className="h-5 w-5" />
+          {iconNode}
         </div>
         <div className="min-w-0 flex-1">
           <h2 className={cn("text-sm font-semibold transition-colors sm:text-lg", colors.hoverText)}>

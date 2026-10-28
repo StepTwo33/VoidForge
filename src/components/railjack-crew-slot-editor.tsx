@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
   adversaryCrewProfiles,
   commandCompetencyBonusPoints,
@@ -181,30 +181,21 @@ export function CrewSlotEditor({
       ? eliteTraitsForCompetency(highestCompetencyKey(competency))
       : [];
 
-  const weaponList = useMemo(() => {
-    if (working.source === "adversary") {
-      return filterAdversaryWeapons(working.profileId, weapons);
-    }
-    return filterCrewAssignableWeapons(weapons);
-  }, [working.source, working.profileId, weapons]);
+  // Not memoized: `working` is rebuilt every render (ensureSlot), so these would recompute anyway.
+  const weaponList =
+    working.source === "adversary"
+      ? filterAdversaryWeapons(working.profileId, weapons)
+      : filterCrewAssignableWeapons(weapons);
 
-  const filteredWeapons = useMemo(() => {
-    const q = weaponSearch.trim().toLowerCase();
-    return weaponList
-      .filter((w) => !q || w.name.toLowerCase().includes(q) || w.id.includes(q))
-      .slice(0, 80);
-  }, [weaponList, weaponSearch]);
+  const weaponQuery = weaponSearch.trim().toLowerCase();
+  const filteredWeapons = weaponList
+    .filter((w) => !weaponQuery || w.name.toLowerCase().includes(weaponQuery) || w.id.includes(weaponQuery))
+    .slice(0, 80);
 
-  const selectedWeapon = useMemo(() => {
-    const id = working.weaponLoadout?.weaponId;
-    if (!id) return null;
-    return weapons.find((w) => w.id === id) ?? null;
-  }, [working.weaponLoadout?.weaponId, weapons]);
+  const selectedWeaponId = working.weaponLoadout?.weaponId;
+  const selectedWeapon = selectedWeaponId ? (weapons.find((w) => w.id === selectedWeaponId) ?? null) : null;
 
-  const boarding = useMemo(() => {
-    if (!selectedWeapon || !working.weaponLoadout) return null;
-    return computeCrewBoardingDps(working, selectedWeapon, modsMap);
-  }, [selectedWeapon, working, modsMap]);
+  const boarding = selectedWeapon && working.weaponLoadout ? computeCrewBoardingDps(working, selectedWeapon, modsMap) : null;
 
   const setCompetency = (key: keyof CrewCompetency, value: number) => {
     const next = { ...competency, [key]: Math.max(0, Math.min(5, value)) };

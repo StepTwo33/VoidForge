@@ -42,7 +42,7 @@ describe("R9-B Vinquibus melee mode (wiki Weapons/data/melee 'Vinquibus (Melee)'
     expect([w.category, w.damage, w.puncture, w.slash, w.criticalChance, w.criticalMultiplier, w.statusChance, w.fireRate]).toEqual(["melee", 260, 182, 78, 0.4, 3.2, 0.2, 1]);
   });
   it("heavy 2600, slide 520, slam 440 r7, heavy slam 660 r8", () => {
-    const d = (MELEE_ATTACK_DATA as Record<string, any>).vinquibus_melee;
+    const d = (MELEE_ATTACK_DATA as unknown as Record<string, { heavyAttack: number; slideAttack: number; slam: { damage: number; radius: number }; heavySlam: { damage: number; radius: number } }>).vinquibus_melee;
     expect([d.heavyAttack, d.slideAttack, d.slam.damage, d.slam.radius, d.heavySlam.damage, d.heavySlam.radius]).toEqual([2600, 520, 440, 7, 660, 8]);
   });
 });

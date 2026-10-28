@@ -1,6 +1,7 @@
 // Vendored from @wfcd/arsenal-parser 2.1.2 (MIT, Copyright (c) 2020 NicksWorld), dist/ArsenalParser.mjs.
 // Only change: `find` comes from the cached index in ../wfcd-item-index instead of
 // @wfcd/items/utilities, which rebuilt the whole item list on every lookup (R10-E).
+/* eslint-disable @typescript-eslint/ban-ts-comment -- vendored file, kept verbatim apart from the documented change */
 // @ts-nocheck
 import { colors } from "@wfcd/items/utilities";
 import { find } from "../wfcd-item-index";

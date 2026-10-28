@@ -183,7 +183,7 @@ export function scaleArcaneEffectForBuild(
   fireRate = 1,
 ): number {
   const rankScaled = scaleArcaneEffectLine(line, rank, def.maxRank);
-  let value = rankScaled * arcaneEffectStackMultiplier(def, line, stacks);
+  const value = rankScaled * arcaneEffectStackMultiplier(def, line, stacks);
 
   if (isArcaneMetadataStat(line.stat) || isArcaneProcChanceStat(line.stat)) {
     return value;
