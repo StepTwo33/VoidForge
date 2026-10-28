@@ -34,12 +34,13 @@ const riven = (positiveStats: RivenStat[], negativeStat: RivenStat | null, dispo
 
 describe("grader at the standard 1.2 multiplier", () => {
   it("Damage 170% + Critical Chance 170% with an Impact curse (hand-worked)", () => {
-    // value part: (1.70×1.00 + 0.2) + (1.70×0.95 + 0.2) = 1.9 + 1.815 = 3.715; ×1.2 = 4.458
+    // Round 23 calibration: entered values are rescaled by 1.15/1.2 = 0.958333 (reference / rolled-at), then ×1.15.
+    // (1.70×1.00×0.958333 + 0.2) + (1.70×0.95×0.958333 + 0.2) = 1.829167 + 1.747708 = 3.576875; ×1.15 = 4.113406
     // curse Impact 1.0 → +0.5; two great stats and curse ≥ 0.3 → +0.5; rank 8 → no rank penalty
-    // total 4.458 + 1.0 = 5.458 → God Roll (≥ 4.5)
+    // total 4.113406 + 1.0 = 5.113406 → God Roll (≥ 4.5)
     const r = riven([pct("Damage", 170), pct("Critical Chance", 170)], pct("Impact", -50));
     expect(STANDARD_RIVEN_DISPOSITION).toBe(1.2);
-    expect(evaluateRiven(r)).toBeCloseTo(5.458, 6);
+    expect(evaluateRiven(r)).toBeCloseTo(5.113406, 5);
     expect(getRivenGrade(evaluateRiven(r))).toBe("God Roll");
   });
 
@@ -48,11 +49,11 @@ describe("grader at the standard 1.2 multiplier", () => {
     expect(evaluateRiven(riven(stats, null))).toBeCloseTo(evaluateRiven(riven(stats, null, 1.2)), 12);
   });
 
-  it("Damage 120% + Multishot 90%, no curse: (1.2 + 0.2 + 0.855 + 0.2) × 1.2 = 2.946 → Good", () => {
+  it("Damage 120% + Multishot 90%, no curse: hand-worked → Good", () => {
     // Multishot weight 0.95: 0.9 × 0.95 = 0.855. Two great stats, no curse → +0.3 god-roll bonus.
-    // (1.4 + 1.055) × 1.2 = 2.946, + 0.3 = 3.246 → Good (2.5–3.5)
+    // (1.2 × 0.958333 + 0.2) + (0.855 × 0.958333 + 0.2) = 1.35 + 1.019375 = 2.369375; × 1.15 = 2.724781; + 0.3 = 3.024781
     const s = evaluateRiven(riven([pct("Damage", 120), pct("Multishot", 90)], null));
-    expect(s).toBeCloseTo(3.246, 6);
+    expect(s).toBeCloseTo(3.024781, 5);
     expect(getRivenGrade(s)).toBe("Good");
   });
 });

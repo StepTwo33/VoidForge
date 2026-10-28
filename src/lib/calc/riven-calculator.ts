@@ -347,7 +347,21 @@ const NEGATIVE_VALUES: Record<string, number> = {
   "Critical Damage": 0.0,
 };
 
+/**
+ * Reference disposition the grade bands (getRivenGrade) are calibrated at.
+ *
+ * Before Hotfix 44.1.3 every weapon had its own Riven disposition (637 weapons, 0.5x to 1.55x,
+ * median 1.15x, mean 1.12x) and the grader multiplied the score by it. Now every Riven is rolled at
+ * the 1.2x constant, so a roll of the same quality shows values 1.2/1.15 larger than it did on the
+ * median weapon. The grader divides entered values by (disposition / reference) and multiplies by
+ * the reference, so a given roll quality scores exactly what it scored on a median-disposition
+ * weapon and the grade bands keep their old meaning.
+ */
+export const GRADER_REFERENCE_DISPOSITION = 1.15;
+
 export function evaluateRiven(riven: RivenMod): number {
+  const rolledAt = riven.disposition ?? STANDARD_RIVEN_DISPOSITION;
+  const toReference = GRADER_REFERENCE_DISPOSITION / rolledAt;
   let score = 0;
   let greatStats = 0;
 
@@ -356,7 +370,7 @@ export function evaluateRiven(riven: RivenMod): number {
     // established community value for them yet (Update 44.1).
     if (stat.spliced) continue;
     const weight = STAT_WEIGHTS[stat.name] ?? 0.3;
-    const value = scoringMagnitude(stat);
+    const value = scoringMagnitude(stat) * toReference;
 
     let tierBonus = 0;
     if (weight >= 0.9) {
@@ -382,7 +396,7 @@ export function evaluateRiven(riven: RivenMod): number {
   if (greatStats >= 2 && negativeBonus >= 0.3) godRollBonus = 0.5;
   else if (greatStats >= 2) godRollBonus = 0.3;
 
-  score *= riven.disposition ?? STANDARD_RIVEN_DISPOSITION;
+  score *= GRADER_REFERENCE_DISPOSITION;
   score += negativeBonus + godRollBonus;
 
   if (riven.rank < 8) {
