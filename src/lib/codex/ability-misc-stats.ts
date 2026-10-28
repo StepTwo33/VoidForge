@@ -1078,7 +1078,7 @@ function applyBounds(value: number, cap: number | undefined, floor: number | und
 }
 
 function formatBaseValue(key: string, value: unknown): string {
-  if (typeof value === "boolean") return String(value);
+  if (typeof value === "boolean") return value ? "Yes" : "No";
   if (
     key === "arc" ||
     key === "coneAngle" ||
