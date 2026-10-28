@@ -63,7 +63,8 @@ export const kitgunChambers: KitgunChamber[] = [
     description: "Explosive spore projectiles with AoE on impact. Impact/Toxin damage.",
     category: "projectile_shotgun", baseDamage: 90,
     damageRatios: { impact: 21 / 90, toxin: 69 / 90 },
-    triggerPrimary: "Semi-Auto", triggerSecondary: "Semi-Auto",
+    // Wiki Sporelacer (Primary): Auto, shotgun class. Sporelacer (Secondary): Semi-Auto, pistol class.
+    triggerPrimary: "Auto", triggerSecondary: "Semi-Auto",
     baseCritChance: 0.21, baseCritMultiplier: 3.0, baseStatusChance: 0.21,
     // Wiki Sporelacer primary loader table: base CM 2.0x (secondary 3.0x).
     baseCritMultiplierPrimary: 2.0,
@@ -171,7 +172,7 @@ export const kitgunGrips: KitgunGrip[] = [
       projectile_shotgun: { damage: -24, fireRate: 5.67 },
       projectile_rifle: { damage: -20, fireRate: 3.77 },
       hitscan_auto: { damage: -2, fireRate: 17.00 },
-      beam: { damage: -4, fireRate: 8.00 },
+      beam: { damage: -4, fireRate: 12.00 },
     },
   },
   {
@@ -181,7 +182,7 @@ export const kitgunGrips: KitgunGrip[] = [
       projectile_shotgun: { damage: -18, fireRate: 5.17 },
       projectile_rifle: { damage: -15, fireRate: 3.45 },
       hitscan_auto: { damage: -1.5, fireRate: 15.50 },
-      beam: { damage: -3, fireRate: 8.00 },
+      beam: { damage: -3, fireRate: 12.00 },
     },
   },
   {
@@ -191,7 +192,7 @@ export const kitgunGrips: KitgunGrip[] = [
       projectile_shotgun: { damage: -12, fireRate: 4.67 },
       projectile_rifle: { damage: -10, fireRate: 3.13 },
       hitscan_auto: { damage: -1, fireRate: 14.00 },
-      beam: { damage: -2, fireRate: 8.00 },
+      beam: { damage: -2, fireRate: 12.00 },
     },
   },
   {
@@ -201,7 +202,7 @@ export const kitgunGrips: KitgunGrip[] = [
       projectile_shotgun: { damage: 41, fireRate: 3.33 },
       projectile_rifle: { damage: 29, fireRate: 2.32 },
       hitscan_auto: { damage: 9, fireRate: 10.00 },
-      beam: { damage: 2, fireRate: 8.00 },
+      beam: { damage: 2, fireRate: 12.00 },
     },
   },
   {
@@ -211,7 +212,7 @@ export const kitgunGrips: KitgunGrip[] = [
       projectile_shotgun: { damage: 82, fireRate: 3.00 },
       projectile_rifle: { damage: 58, fireRate: 2.13 },
       hitscan_auto: { damage: 18, fireRate: 9.00 },
-      beam: { damage: 4, fireRate: 8.00 },
+      beam: { damage: 4, fireRate: 12.00 },
     },
   },
 ];
@@ -330,6 +331,48 @@ export const kitgunLoaders: KitgunLoader[] = [
   { id: "loader_macro_arcroid", name: "Macro Arcroid", critChanceBonus: 0, critMultiplierBonus: 0, statusChanceBonus: 0, magazineTier: 7, reloadTime: 3.1 },
 ];
 
+// ── WIKI PER-SLOT CHAMBER DATA ───────────────────────────────────────────
+// The wiki keeps a separate "(Primary)" and "(Secondary)" weapon record for every chamber
+// (Module:Weapons/data/modular). The values below are the ones that differ by chamber/slot and
+// are not covered by the grip tables above. Verified against wiki.warframe.com 2026-10-27.
+
+/** Innate multishot by chamber for the secondary slot. Vermisplicer Secondary: "Innate multishot of 5 tendrils". */
+export const KITGUN_SECONDARY_MULTISHOT: Record<string, number> = {
+  vermisplicer_chamber: 5,
+};
+
+/** Beam chambers spend 0.5 ammo per tick (wiki AmmoCost = 0.5 for Gaze and Vermisplicer, both slots). */
+export const KITGUN_BEAM_AMMO_COST = 0.5;
+
+/**
+ * Guaranteed (forced) procs per hit, both slots (wiki ForcedProcs). Catchmoon: "guaranteed Impact
+ * proc against enemies within 9 meters" (range grows with Projectile Speed); Tombfinger: Impact.
+ * The calc has no distance model, so the proc is applied on every hit.
+ */
+export const KITGUN_FORCED_PROCS: Record<string, string[]> = {
+  catchmoon_chamber: ["impact"],
+  tombfinger_chamber: ["impact"],
+};
+
+/**
+ * Tombfinger Primary charge data per grip (wiki Tombfinger page, "Grip" notes). The grip sets the
+ * charge time and the explosion damage (Radiation). Quick shot = uncharged tap; charged shot = held
+ * to full charge (the weapon fires automatically when full).
+ */
+export const TOMBFINGER_PRIMARY_CHARGE: Record<string, { chargeTime: number; quickAoE: number; chargedAoE: number }> = {
+  grip_brash: { chargeTime: 0.5, quickAoE: 30, chargedAoE: 412 },
+  grip_palmaris: { chargeTime: 0.5, quickAoE: 35, chargedAoE: 417 },
+  grip_shrewd: { chargeTime: 0.8, quickAoE: 40, chargedAoE: 422 },
+  grip_steadyslam: { chargeTime: 1.1, quickAoE: 79, chargedAoE: 461 },
+  grip_tremor: { chargeTime: 1.4, quickAoE: 108, chargedAoE: 490 },
+};
+/**
+ * Tombfinger Primary charged-shot explosion radius (m) and linear falloff to the edge (wiki: 100%→30%).
+ * The quick-shot explosion (1.7 m, 100%→75%) is not a separate radial: the table total already contains it.
+ */
+const TOMBFINGER_CHARGED_RADIUS = 6.2;
+const TOMBFINGER_CHARGED_FALLOFF = 0.7;
+
 // ── BUILD KITGUN ─────────────────────────────────────────────────────────
 export function buildKitgun(chamber: KitgunChamber, grip: KitgunGrip, loader: KitgunLoader): Weapon {
   const gripStats = grip.bonuses[chamber.category];
@@ -351,7 +394,13 @@ export function buildKitgun(chamber: KitgunChamber, grip: KitgunGrip, loader: Ki
       ? chamber.baseCritMultiplierPrimary
       : chamber.baseCritMultiplier;
 
-  return {
+  const isPrimary = grip.type === "primary";
+  const multishot = (!isPrimary && KITGUN_SECONDARY_MULTISHOT[chamber.id]) || 1;
+  const forcedProcs = KITGUN_FORCED_PROCS[chamber.id];
+  const tombCharge =
+    isPrimary && chamber.id === "tombfinger_chamber" ? TOMBFINGER_PRIMARY_CHARGE[grip.id] : undefined;
+
+  const built: Weapon = {
     id: `kitgun_${chamber.id}_${grip.id}_${loader.id}`,
     name: `${chamber.name} (${grip.name} / ${loader.name})`,
     category:
@@ -374,7 +423,7 @@ export function buildKitgun(chamber: KitgunChamber, grip: KitgunGrip, loader: Ki
     statusChance: +(chamber.baseStatusChance + loader.statusChanceBonus).toFixed(4),
     magazine: chamber.magazineTiers[loader.magazineTier] || 10,
     reloadTime: loader.reloadTime,
-    multishot: 1,
+    multishot,
     triggerType: trigger,
     modSlots: 8,
     hasPrimaryArcaneSlot: false,
@@ -384,6 +433,47 @@ export function buildKitgun(chamber: KitgunChamber, grip: KitgunGrip, loader: Ki
     arcaneSlots: 2,
     arcaneType: "kitgun",
     kitgunChamberCategory: chamber.category,
+  };
+  if (chamber.category === "beam") built.ammoCost = KITGUN_BEAM_AMMO_COST;
+  if (forcedProcs) built.forcedProcs = [...forcedProcs];
+  if (tombCharge) applyTombfingerPrimaryCharge(built, tombCharge);
+  return built;
+}
+
+/** Weapon class a built kitgun has for mods (wiki: secondary = Pistol; primary = Shotgun for the shotgun-class chambers, else Rifle). */
+export function kitgunWeaponClass(weapon: Pick<Weapon, "category">): "Pistol" | "Shotgun" | "Rifle" {
+  if (weapon.category === "secondary") return "Pistol";
+  return weapon.category === "shotgun" ? "Shotgun" : "Rifle";
+}
+
+/**
+ * Tombfinger Primary models the fully charged shot (like other charge weapons: Opticor, Ogris):
+ * effective fire rate = 1 / (chargeTime + 1 / fireRate) and a large Radiation explosion on top of
+ * the projectile. "Quick shot" (tap, no charge) is the alternate mode: the table damage with no
+ * charge delay (the wiki projectile total already includes the small quick-shot explosion).
+ * Not on the wiki: the charged projectile's own direct damage (only "damage distribution"
+ * changes), so the table direct damage is kept for the charged shot.
+ */
+function applyTombfingerPrimaryCharge(
+  weapon: Weapon,
+  charge: { chargeTime: number; quickAoE: number; chargedAoE: number },
+): void {
+  weapon.chargeTime = charge.chargeTime;
+  weapon.chargeMode = "standard";
+  weapon.radialAttacks = [
+    {
+      name: "Charged Shot Explosion",
+      radiation: charge.chargedAoE,
+      totalDamage: charge.chargedAoE,
+      radius: TOMBFINGER_CHARGED_RADIUS,
+      falloffReduction: TOMBFINGER_CHARGED_FALLOFF,
+    },
+  ];
+  weapon.alternateModeStats = {
+    label: "Quick shot (uncharged)",
+    chargeTime: 0,
+    chargeMode: undefined,
+    radialAttacks: [],
   };
 }
 
@@ -642,7 +732,7 @@ export const recommendedBuilds: RecommendedBuild[] = [
   { name: "Catchmoon Crit", type: "kitgun", parts: ["Catchmoon", "Haymaker", "Splat"], description: "Maximum damage per shot with high crit. The classic hard-hitting secondary. Great for close-range nuking.", tags: ["Secondary", "Crit", "AoE"] },
   { name: "Catchmoon Status", type: "kitgun", parts: ["Catchmoon", "Haymaker", "Flutterfire"], description: "High status chance with massive base damage. Excellent for applying procs to groups of enemies.", tags: ["Secondary", "Status", "AoE"] },
   { name: "Tombfinger Crit", type: "kitgun", parts: ["Tombfinger", "Haymaker", "Splat"], description: "Hard-hitting semi-auto with AoE explosion. High crit (38%) and great single-target DPS.", tags: ["Secondary", "Crit", "Precision"] },
-  { name: "Rattleguts Speed", type: "kitgun", parts: ["Rattleguts", "Gibber", "Splat"], description: "Bullet hose secondary with high crit. 12 shots/sec with 33% CC. Melts enemies at close-mid range.", tags: ["Secondary", "Crit", "Rapid-fire"] },
+  { name: "Rattleguts Speed", type: "kitgun", parts: ["Rattleguts", "Gibber", "Splat"], description: "Bullet hose secondary with high crit. 11 shots/sec with 33% CC. Melts enemies at close-mid range.", tags: ["Secondary", "Crit", "Rapid-fire"] },
   { name: "Rattleguts DPS", type: "kitgun", parts: ["Rattleguts", "Lovetap", "Killstream"], description: "Balanced damage and fire rate with maximum crit chance. Great sustained DPS.", tags: ["Secondary", "Crit", "Balanced"] },
   { name: "Gaze Beam Crit", type: "kitgun", parts: ["Gaze", "Haymaker", "Splat"], description: "Continuous beam with high crit. Melts single targets. Beam ramps up damage over time.", tags: ["Secondary", "Crit", "Beam"] },
   { name: "Sporelacer Hybrid", type: "kitgun", parts: ["Sporelacer", "Haymaker", "Arcroid"], description: "Explosive spores with balanced crit/status. Innate Toxin makes Viral builds easy.", tags: ["Secondary", "Hybrid", "AoE"] },

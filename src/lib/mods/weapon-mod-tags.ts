@@ -21,9 +21,37 @@ export interface WeaponModProfile {
 /** Sniper-class ids whose fire mode is not semi-auto (Charge / Auto). */
 const NON_SEMI_SNIPER_IDS = new Set(["lanka", "buzlok"]);
 
+/**
+ * Kitgun chambers carry the wiki's MODULAR_GUN tag (Module:Weapons/data/modular tags Catchmoon, Sporelacer and
+ * Tombfinger in both slots; the beam / auto chambers never reach a Cannonade anyway). Semi-Rifle and Semi-Shotgun
+ * Cannonade list MODULAR_GUN as incompatible, so they can never go on a kitgun, whatever its class or trigger.
+ * Semi-Pistol Cannonade has no such restriction: it needs a Semi-Auto trigger and the secondary slot.
+ */
+const KITGUN_ID_PREFIX = "kitgun_";
+
+/** Wiki weapon tags for a built kitgun, by chamber (both slots). Tombfinger is tagged AOE on the wiki. */
+const KITGUN_CHAMBER_WIKI_TAGS: Record<string, readonly string[]> = {
+  catchmoon_chamber: ["MODULAR_GUN"],
+  sporelacer_chamber: ["MODULAR_GUN"],
+  tombfinger_chamber: ["MODULAR_GUN", "AOE"],
+};
+
+function isKitgunWeapon(weapon: Pick<Weapon, "category" | "id"> & Partial<Pick<Weapon, "kitgunChamberCategory">>): boolean {
+  return (
+    weapon.kitgunChamberCategory != null ||
+    weapon.id.startsWith(KITGUN_ID_PREFIX) ||
+    (weapon.category || "").toLowerCase() === "kitgun_chamber"
+  );
+}
+
+function kitgunChamberId(weaponId: string): string | undefined {
+  if (!weaponId.startsWith(KITGUN_ID_PREFIX)) return undefined;
+  return Object.keys(KITGUN_CHAMBER_WIKI_TAGS).find((c) => weaponId.startsWith(`${KITGUN_ID_PREFIX}${c}_`));
+}
+
 /** Infer wiki-style weapon tags from arsenal data. */
 export function getWeaponModProfile(
-  weapon: Pick<Weapon, "category" | "triggerType" | "id" | "name">,
+  weapon: Pick<Weapon, "category" | "triggerType" | "id" | "name"> & Partial<Pick<Weapon, "kitgunChamberCategory">>,
 ): WeaponModProfile {
   const tags = new Set<WeaponModProfileTag>();
 
@@ -55,6 +83,12 @@ export function getWeaponModProfile(
 
   for (const tag of WEAPON_WIKI_SPECIFIC_TAGS[weapon.id] ?? []) {
     tags.add(tag);
+  }
+
+  if (isKitgunWeapon(weapon)) {
+    tags.add("MODULAR_GUN");
+    const chamber = kitgunChamberId(weapon.id);
+    for (const tag of chamber ? KITGUN_CHAMBER_WIKI_TAGS[chamber] : []) tags.add(tag);
   }
 
   return {

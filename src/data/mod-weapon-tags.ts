@@ -126,6 +126,8 @@ export const MOD_INCOMPATIBILITY_TAGS: Record<string, readonly string[]> = {
   "saxum_thorax": ["HOUND_WEAPON", "SENTINEL_WEAPON"],
   "scattered_justice": ["SYNDICATEMODBLOCKED"],
   "seismic_wave": ["HOUND_WEAPON", "SENTINEL_WEAPON"],
+  "semi_rifle_cannonade": ["MODULAR_GUN"],
+  "semi_shotgun_cannonade": ["MODULAR_GUN"],
   "sharpened_bullets": ["POWER_WEAPON"],
   "shrapnel_shot": ["POWER_WEAPON"],
   "split_flights": ["POWER_WEAPON"],
