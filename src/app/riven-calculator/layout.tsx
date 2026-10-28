@@ -6,7 +6,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/riven-calculator",
   title: "Riven Grader",
   description:
-    "Grade Warframe riven rolls against disposition-scaled stat ranges and see how good each stat is.",
+    "Grade Warframe riven rolls against the standard stat ranges and see how good each stat is.",
 });
 
 export default function Layout({ children }: { children: React.ReactNode }) {

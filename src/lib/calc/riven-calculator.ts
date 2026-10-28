@@ -1,4 +1,4 @@
-// Riven Grader — disposition-scaled pools + community heuristic scoring.
+// Riven Grader — standard-multiplier (1.2) stat pools + community heuristic scoring.
 // Users enter in-game rolled values; there is no random generation.
 
 import { STANDARD_RIVEN_DISPOSITION } from "@/data/riven-dispositions";

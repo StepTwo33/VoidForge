@@ -102,8 +102,8 @@ Baseline captured 2026-07-21 (Phase 0). Updated as phases complete.
 | Sim14 | Furious Javelin | Radial Javelin hits → melee damage mult × enemies × STR (incl. Exalted Blade) | **Locked** — +1 ID; furiousJavelinEnemies slider |
 | Sim15 | Valence Formation | Lavos imbue → parallel elemental × rank (50–200%) + guaranteed status; not × STR | **Locked** — +1 ID; valenceFormationElement picker |
 | Sim16 | Miss / grenade decay stacks | Critical Precision / Mutation: sim stack sliders (miss −10 / grenade −1) instead of hard max | **Locked** — criticalPrecisionStacks / criticalMutationStacks |
-| R1 | Riven grader | Disposition-scaled ranges (rank × buff-count); heuristic grade; no generation; unknown-disp warn; PT/combo units; IPS curses | **Locked** — `riven-calculator.test.ts` |
-| R1b | Riven dispositions sync | `omegaAttenuation` from api.warframestat.us via `scripts/_sync_riven_dispositions.mjs` (not 1–5 star `disposition`) | **Locked** — 630 weapons |
+| R1 | Riven grader | Ranges at the standard 1.2× multiplier (rank × buff-count; wiki Riven Mods, dispositions retired in Hotfix 44.1.3); heuristic grade; no generation; PT/combo units; IPS curses | **Locked** — `riven-calculator.test.ts` |
+| R1b | Riven disposition constant | DE retired per-weapon dispositions (Hotfix 44.1.3); every weapon is `STANDARD_RIVEN_DISPOSITION` = 1.2 (`src/data/riven-dispositions.ts`) | **Locked** — `accuracy-17.test.ts` |
 | RJ1 | Railjack hardpoints + armaments | Nose/Dorsal/Ventral turrets; Cryophon/Glazio + Lavan Photor/Pulsar/Talyn; Sigma-only ordnance Mk tiers; reactor avionics capacity; Uranus presets apply Plexus mod ids | **Locked** — inventory + calc + preset goldens |
 | RJ2 | Railjack ship paper | Wiki mid-range absolute plating/shields; engine cruise/boost house roles; reactor avionics + dual ability %; Mk IV components still projected | **Locked** — component goldens |
 | RJ3 | Railjack engine/shield formulas | Conic on base 150 + flat engine m/s; SWB = cruise × (1.3×IonBurn + engine boost); shield %/s + delay; flux base 273 (no reactor flux); absolute UI labels | **Locked** — calc + UI goldens |
@@ -169,9 +169,9 @@ Baseline captured 2026-07-21 (Phase 0). Updated as phases complete.
 | Sim14 Furious Javelin | 2026-07-23 | Radial Javelin enemy count → melee damageMult × STR |
 | Sim15 Valence Formation | 2026-07-23 | Lavos imbue → parallel elemental + guaranteed status (not × STR) |
 | Sim16 Miss/grenade decay stacks | 2026-07-23 | Critical Precision / Mutation stack sliders for miss/grenade decay |
-| R1 Riven grader | 2026-07-23 | Disposition ranges + heuristic grade; no generation; unknown-disp warn |
+| R1 Riven grader | 2026-07-23 | Standard-multiplier ranges + heuristic grade; no generation (disposition retired 2026-10-22) |
 | RJ1 Railjack hardpoints/armaments | 2026-07-23 | 3 turret slots; Cryophon/Glazio/Lavan trio; Sigma ordnance; avionics capacity; presets equip Plexus |
-| R1b Riven dispositions sync | 2026-07-23 | omegaAttenuation sync script; 630 weapons |
+| R1b Riven disposition constant | 2026-10-27 | Every weapon 1.2 (was omegaAttenuation sync, 630 weapons) |
 | RJ2 Railjack ship paper | 2026-07-23 | Absolute plating/shields; engine house cruise/boost; reactor avionics + dual ability % |
 | RJ3 Engine/shield formulas | 2026-07-23 | Conic on base 150; SWB mult model; shield %/s + delay; flux 273; absolute UI labels |
 | RJ4 House unique traits | 2026-07-23 | Trait catalog; Lavan plating synergy; shields-depleted sim traits; UI |
@@ -474,6 +474,6 @@ Baseline captured 2026-07-21 (Phase 0). Updated as phases complete.
 - `src/lib/calc/sentinel-weapon-audit.test.ts` — B14 sentinel bare paper (+ `sentinel-bare-goldens.ts`)
 - `src/lib/calc/modular-weapon-audit.test.ts` — B15 kitgun/zaw/amp modular part paper
 - `src/lib/calc/launcher-weapon-audit.test.ts` — B17 category=launcher bare paper (+ `launcher-bare-goldens.ts`)
-- `src/lib/calc/riven-calculator.test.ts` — R1 grader ranges / scoring / disposition
+- `src/lib/calc/riven-calculator.test.ts` — R1 grader ranges / scoring / standard 1.2 multiplier
 - `src/lib/calc/railjack-armament-inventory.test.ts` — RJ1 Cryophon/Glazio/Lavan/ordnance inventory
 - `src/lib/calc/railjack-calculator.test.ts` — RJ2–RJ6 ship paper + Tunguska / Conic / traits goldens

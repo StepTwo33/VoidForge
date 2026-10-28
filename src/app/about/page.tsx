@@ -71,7 +71,7 @@ export default function AboutPage() {
                 { icon: FolderOpen, title: "Loadout Manager", desc: "Save complete loadouts with warframe, weapons, and companion builds. Import and export locally or sync to your account." },
                 { icon: Plane, title: "Archwing & Necramech", desc: "Dedicated builders for Archwing frames and Necramechs with real-time stat preview and mod capacity." },
                 { icon: Rocket, title: "Railjack Builder", desc: "Configure Railjack components, turret stats, and Plexus mods for squad missions." },
-                { icon: Bug, title: "Riven Grader", desc: "Grade your rivens against disposition-scaled stat pools with tier rankings and reroll cost reference." },
+                { icon: Bug, title: "Riven Grader", desc: "Grade your rivens against the standard max-rank stat ranges with tier rankings and reroll cost reference." },
               ].map((f) => (
                 <div
                   key={f.title}

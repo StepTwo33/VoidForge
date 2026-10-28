@@ -12,7 +12,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/guides/how-to-mod/rivens",
   title: "How to Mod: Rivens",
   description:
-    "How Warframe riven mods work: dispositions, stat ranges, rerolls and grading.",
+    "How Warframe riven mods work: stat ranges, rerolls and grading.",
 });
 
 export default function HowToModRivensPage() {
@@ -21,16 +21,17 @@ export default function HowToModRivensPage() {
       <ContentPanel>
         <h2 className="mb-3 text-lg font-semibold">What a riven is for</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          A riven is a weapon-specific mod with random stats scaled by that weapon&apos;s{" "}
-          <span className="font-medium text-foreground">disposition</span>. High disposition
-          means bigger numbers. Low disposition means the same roll types hit smaller
-          ceilings. The riven still spends a full mod slot, so it has to beat a normal mod
-          that would live there.
+          A riven is a weapon-specific mod with random stats. Since Hotfix 44.1.3 (October
+          22, 2026) every riven uses the same multiplier, the equivalent of the old 1.2{" "}
+          <span className="font-medium text-foreground">disposition</span>, so a roll type
+          has the same ceiling on every weapon. The riven still spends a full mod slot, so
+          it has to beat a normal mod that would live there.
         </p>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
           <li>
-            Disposition is per weapon (and known for most of them). Check it before you
-            commit Endo, Kuva, or platinum.
+            Individual weapon dispositions were retired, so the weapon you pick no longer
+            changes how big a roll can be. Check the stat ranges before you commit Endo,
+            Kuva, or platinum.
           </li>
           <li>
             Rolls can include two or three positives, optional negatives, and different
@@ -143,9 +144,9 @@ export default function HowToModRivensPage() {
         <h2 className="mb-3 text-lg font-semibold">Rolling without going broke</h2>
         <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted-foreground">
           <li>
-            Grade the roll against disposition ranges before you decide it is &quot;god
-            tier&quot; or trash. Voidforge&apos;s Riven Grader does that against scaled
-            pools.
+            Grade the roll against the standard stat ranges before you decide it is
+            &quot;god tier&quot; or trash. Voidforge&apos;s Riven Grader does that against
+            the max-rank ranges for each weapon type.
           </li>
           <li>
             Reroll cost climbs. Set a stop rule (budget, or &quot;good enough for this
@@ -157,8 +158,8 @@ export default function HowToModRivensPage() {
           </li>
         </ul>
         <GuideMistake>
-          Rolling forever on a low-disposition weapon for meta stats that a normal mod
-          already provides. Disposition math will keep punishing that loop.
+          Rolling forever for meta stats that a normal mod already provides. The reroll
+          cost climbs every time, so that loop keeps punishing you.
         </GuideMistake>
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-4">
           <GuideCtaLink href="/riven-calculator">Riven Grader</GuideCtaLink>

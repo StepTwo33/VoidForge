@@ -78,7 +78,7 @@ export const HOW_TO_MOD_SECTIONS: HowToModSectionDef[] = [
     href: `${HOW_TO_MOD_BASE}/rivens`,
     label: "Rivens",
     icon: Gem,
-    description: "Disposition, rolls, and when a riven earns a slot",
+    description: "Stat ranges, rolls, and when a riven earns a slot",
   },
   {
     id: "arcanes",

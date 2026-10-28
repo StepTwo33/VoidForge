@@ -2,7 +2,6 @@ import { getEffectiveWeapons } from "@/lib/weapons/effective-data";
 import { allWarframes } from "@/data/warframes";
 import { allCompanions } from "@/data/companions";
 import { allMods } from "@/data/mods";
-import { rivenDispositions } from "@/data/riven-dispositions";
 import { ENEMY_TYPES } from "@/data/enemies";
 import { isNecramechId } from "@/data/archwing";
 
@@ -31,7 +30,6 @@ export interface CatalogCounts {
   warframeRaw: number;
   companions: number;
   companionMods: number;
-  rivenDispositions: number;
   enemies: number;
 }
 
@@ -45,7 +43,6 @@ export function getCatalogCounts(): CatalogCounts {
     warframeRaw: allWarframes.length,
     companions: allCompanions.length,
     companionMods: allMods.filter((m) => m.category === "companion").length,
-    rivenDispositions: Object.keys(rivenDispositions).length,
     enemies: ENEMY_TYPES.length,
   };
 }
