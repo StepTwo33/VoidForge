@@ -8,10 +8,9 @@ const reachable = (id: string, chips: string) =>
 
 describe("Round 24: Necramech and companion-weapon chips", () => {
   it("the Necramech mods the wiki lists all match at least one chip", () => {
-    // Necramech Stamina has no wiki page or entry in Module:Mods/data, so it stays chip-less.
     // Pressure Point (+60% Melee Damage) and Seismic Wave (+45% Slam Attack Damage) have no chip that
     // fits: the Warframe chip set (also used for Necramechs) has no Damage chip.
-    const known = new Set(["necramech_stamina", "necramech_pressure_point", "necramech_seismic_wave"]);
+    const known = new Set(["necramech_pressure_point", "necramech_seismic_wave"]);
     const orphans = allMods
       .filter((m) => m.category === "necramech" && !known.has(m.id))
       .filter((m) => !reachable(m.id, "necramech"))

@@ -40,7 +40,7 @@ const FOCUS_TREES: Record<string, string[]> = {
 describe("removed mods", () => {
   it("are gone from the catalog, behaviors and incompatibility data", () => {
     const ids = [...Object.keys(RETIRED_MODS), "shotgun_spazz", "aura_speed_holster", "helminth_ferocity"];
-    expect(ids).toHaveLength(41);
+    expect(ids).toHaveLength(42);
     for (const id of ids) {
       expect(modsMap.has(id)).toBe(false);
       expect(VERIFIED_MOD_BEHAVIORS[id]).toBeUndefined();

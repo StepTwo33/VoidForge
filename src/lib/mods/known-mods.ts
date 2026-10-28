@@ -66,7 +66,7 @@ export const RENAMED_MOD_UPDATE: Readonly<Record<string, string>> = {
 export type RetiredModReason = "archived" | "no_source" | "unreleased" | "focus_2" | "conclave";
 
 /**
- * Mod ids removed from the catalog in Round 14b. Saved builds that still carry them drop them on
+ * Mod ids removed from the catalog in Round 14b (Necramech Stamina: Round 25, not in game). Saved builds that still carry them drop them on
  * load with a warning. Sources: wiki.warframe.com (fandom as the second source).
  * - archived: augments the wikis mark {{Archived}} (Perpetual Vortex: "Combined into Repelling
  *   Bastille in Update 26.0").
@@ -85,6 +85,7 @@ export const RETIRED_MODS: Readonly<Record<string, { name: string; reason: Retir
   aura_sprint_speed: { name: "Sprint Speed", reason: "no_source" },
   aura_looters: { name: "Looters", reason: "no_source" },
   berserker: { name: "Berserker", reason: "no_source" },
+  necramech_stamina: { name: "Necramech Stamina", reason: "no_source" },
   primed_blunderbuss: { name: "Primed Blunderbuss", reason: "unreleased" },
   primed_charged_chamber: { name: "Primed Charged Chamber", reason: "unreleased" },
   primed_streamline: { name: "Primed Streamline", reason: "unreleased" },

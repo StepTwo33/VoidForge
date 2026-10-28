@@ -75,7 +75,6 @@ export const MOD_BEHAVIORS_NECRAMECH: Record<string, VerifiedModBehavior> = {
   necramech_slipstream: mod("necramech_slipstream", [
     line("slideSpeed", "mod_panel", "multiplicative_percent", "Necramech Slipstream: slideSpeed \u2014 +60% Slide"),
   ]),
-  necramech_stamina: mod("necramech_stamina", [], "wiki: Necramech Stamina \u2014 -60% Sprint Efficiency"),
   necramech_steel_fiber: mod("necramech_steel_fiber", [
     line("armor", "warframe_totals", "multiplicative_percent", "Necramech Steel Fiber: armor \u2014 +100% Armor"),
   ]),

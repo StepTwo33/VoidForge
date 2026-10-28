@@ -18855,18 +18855,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "common"
   },
   {
-    "id": "necramech_stamina",
-    "name": "Necramech Stamina",
-    "polarity": "vazarin",
-    "drain": 6,
-    "maxRank": 5,
-    "category": "necramech",
-    "subCategory": "",
-    "stats": {},
-    "description": "-60% Sprint Efficiency",
-    "rarity": "uncommon"
-  },
-  {
     "id": "necramech_steel_fiber",
     "name": "Necramech Steel Fiber",
     "polarity": "vazarin",
