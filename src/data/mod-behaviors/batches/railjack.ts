@@ -22,7 +22,7 @@ export const MOD_BEHAVIORS_RAILJACK: Record<string, VerifiedModBehavior> = {
     line("engineSpeed", "railjack_totals", "multiplicative_percent", "Conic Nozzle: +25.5% Railjack Speed"),
   ]),
   cruising_speed: mod("cruising_speed", [
-    line("engineSpeed", "railjack_totals", "multiplicative_percent", "Cruising Speed: +100% Speed when no enemies within 3000m"),
+    line("engineSpeed", "railjack_totals", "multiplicative_percent", "Cruising Speed: +110% Speed when no enemies within 3000m"),
     line("range", "mod_panel", "multiplicative_percent", "Cruising Speed: range gate (display only)"),
   ]),
   hyperstrike: mod("hyperstrike", [

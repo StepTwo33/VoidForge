@@ -16010,7 +16010,7 @@ const RAW_MODS: Mod[] = [
     "category": "railjack",
     "subCategory": "",
     "stats": {},
-    "description": "Forward Artillery has a +90% chance to not consume Dome Charges",
+    "description": "Forward Artillery has a +60% chance to not consume Dome Charges",
     "rarity": "rare"
   },
   {
@@ -16183,7 +16183,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "cooldown": 80.0
     },
-    "description": "Reduce Forge Cooldown by 120s\\nCooldown: 480s",
+    "description": "Reduce Forge Cooldown by 100s\\nCooldown: 480s",
     "rarity": "uncommon"
   },
   {
@@ -16198,7 +16198,7 @@ const RAW_MODS: Mod[] = [
       "duration": 4.333333,
       "cooldown": 40.0
     },
-    "description": "Boost Turret Damage by 75% for 30s\\nCooldown: 240s",
+    "description": "Boost Turret Damage by 65% for 26s\\nCooldown: 240s",
     "rarity": "uncommon"
   },
   {
@@ -16395,7 +16395,7 @@ const RAW_MODS: Mod[] = [
       "duration": 7.5,
       "cooldown": 50.0
     },
-    "description": "Temporarily stall Hull Breach for 55s\\nCooldown: 300s",
+    "description": "Temporarily stall Hull Breach for 45s\\nCooldown: 300s",
     "rarity": "common"
   },
   {
@@ -16820,10 +16820,10 @@ const RAW_MODS: Mod[] = [
     "category": "railjack",
     "subCategory": "",
     "stats": {
-      "engineSpeed": 9.09,
+      "engineSpeed": 10.0,
       "range": 272.727273
     },
-    "description": "+100% Railjack Speed when no enemies within 3000m",
+    "description": "+110% Railjack Speed when no enemies within 3000m",
     "rarity": "uncommon"
   },
   {
@@ -16918,7 +16918,7 @@ const RAW_MODS: Mod[] = [
       "cooldown": 50.0,
       "duration": 4.166667
     },
-    "description": "Turret Cooldowns removed for 30s\\nCooldown: 300s",
+    "description": "Turret Cooldowns removed for 25s\\nCooldown: 300s",
     "rarity": "rare"
   },
   {
@@ -17274,7 +17274,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "cooldown": 38.333333
     },
-    "description": "Extinguish 1 fire\\nCooldown: <LOWER_IS_BETTER>200s",
+    "description": "Extinguish 1 fire\\nCooldown: <LOWER_IS_BETTER>230s",
     "rarity": "common"
   },
   {
@@ -17857,7 +17857,7 @@ const RAW_MODS: Mod[] = [
       "duration": 5.833333,
       "cooldown": 50.0
     },
-    "description": "Freeze all Enemy Boarding Parties for 45s\\nCooldown: 300s",
+    "description": "Freeze all Enemy Boarding Parties for 35s\\nCooldown: 300s",
     "rarity": "uncommon"
   },
   {
@@ -19041,7 +19041,7 @@ const RAW_MODS: Mod[] = [
     "category": "railjack",
     "subCategory": "",
     "stats": {},
-    "description": "Ordnance weapons have a +90% chance to not consume Munitions",
+    "description": "Ordnance weapons have a +60% chance to not consume Munitions",
     "rarity": "rare"
   },
   {
@@ -19750,7 +19750,7 @@ const RAW_MODS: Mod[] = [
     "category": "railjack",
     "subCategory": "",
     "stats": {},
-    "description": "-112.5% Ordnance Lock-On Time",
+    "description": "-75% Ordnance Lock-On Time",
     "rarity": "common"
   },
   {
@@ -19890,7 +19890,7 @@ const RAW_MODS: Mod[] = [
     "category": "railjack",
     "subCategory": "",
     "stats": {},
-    "description": "-60.8% Omni Revolite Consumption",
+    "description": "-40.5% Omni Revolite Consumption",
     "rarity": "rare"
   },
   {
@@ -20950,7 +20950,7 @@ const RAW_MODS: Mod[] = [
       "duration": 5.833333,
       "cooldown": 20.0
     },
-    "description": "Cloak from Enemies for 50s\\nEngine Speed reduced to 50%\\nCooldown: 120s",
+    "description": "Cloak from Enemies for 35s\\nEngine Speed reduced to 30%\\nCooldown: 120s",
     "rarity": "common"
   },
   {

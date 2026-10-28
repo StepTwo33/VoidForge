@@ -28,7 +28,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("magazine", "weapon_dps", "multiplicative_percent", "Ammo Stock: magazine \u2014 +60% Magazine Capacity"),
   ]),
   anti_v: mod("anti_v", [], "wiki: Anti-V \u2014 Digital extremists stand no chance when you have Anti-V on your side"),
-  artillery_cheap_shot: mod("artillery_cheap_shot", [], "wiki: Artillery Cheap Shot \u2014 Forward Artillery has a +90% chance to not consume Dome Charges"),
+  artillery_cheap_shot: mod("artillery_cheap_shot", [], "wiki: Artillery Cheap Shot \u2014 Forward Artillery has a +60% chance to not consume Dome Charges"),
   ashensetmod: mod("ashensetmod", [], "wiki: Ashensetmod \u2014 catalog entry (stats in ability logic)"),
   assassin_posture: mod("assassin_posture", [
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Assassin Posture — overguard damage / priority (not base DPS)"),
@@ -45,11 +45,11 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Balanced Posture: range \u2014 The companion acts freely as they see fit. Staggers enemies within 2m while movi\u2026 (arsenal display only)"),
   ]),
   battle_forge: mod("battle_forge", [
-    line("cooldown", "mod_panel", "multiplicative_percent", "Battle Forge: cooldown \u2014 Reduce Forge Cooldown by 120s\\\\nCooldown: 480s"),
+    line("cooldown", "mod_panel", "multiplicative_percent", "Battle Forge: cooldown \u2014 Reduce Forge Cooldown by 100s\\\\nCooldown: 480s"),
   ]),
   battle_stations: mod("battle_stations", [
-    line("cooldown", "mod_panel", "multiplicative_percent", "Battle Stations: cooldown \u2014 Boost Turret Damage by 75% for 30s\\\\nCooldown: 240s"),
-    line("duration", "mod_panel", "multiplicative_percent", "Battle Stations: duration \u2014 Boost Turret Damage by 75% for 30s\\\\nCooldown: 240s"),
+    line("cooldown", "mod_panel", "multiplicative_percent", "Battle Stations: cooldown \u2014 Boost Turret Damage by 65% for 26s\\\\nCooldown: 240s"),
+    line("duration", "mod_panel", "multiplicative_percent", "Battle Stations: duration \u2014 Boost Turret Damage by 65% for 26s\\\\nCooldown: 240s"),
   ]),
   biting_piranha: mod("biting_piranha", [], "wiki: Biting Piranha \u2014 Fighting form devised for Conclave."),
   blackout_pulse: mod("blackout_pulse", [], "wiki: Blackout Pulse \u2014 Electro-Magnetic Pulse that damages enemies and disables them temporarily."),
@@ -74,8 +74,8 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("puncture", "weapon_dps", "multiplicative_percent", "Breach Loader: puncture \u2014 +120% <DT_PUNCTURE_COLOR>Puncture"),
   ]),
   breach_quanta: mod("breach_quanta", [
-    line("cooldown", "mod_panel", "multiplicative_percent", "Breach Quanta: cooldown \u2014 Temporarily stall Hull Breach for 55s\\\\nCooldown: 300s"),
-    line("duration", "mod_panel", "multiplicative_percent", "Breach Quanta: duration \u2014 Temporarily stall Hull Breach for 55s\\\\nCooldown: 300s"),
+    line("cooldown", "mod_panel", "multiplicative_percent", "Breach Quanta: cooldown \u2014 Temporarily stall Hull Breach for 45s\\\\nCooldown: 300s"),
+    line("duration", "mod_panel", "multiplicative_percent", "Breach Quanta: duration \u2014 Temporarily stall Hull Breach for 45s\\\\nCooldown: 300s"),
   ]),
   brilliant_insight: mod("brilliant_insight", [], "wiki: Brilliant Insight \u2014 Spectral pages also fire off beams that blind enemies within 16m."),
   broad_eye: mod("broad_eye", [
@@ -141,8 +141,8 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("radiation", "weapon_dps", "elemental_from_base_damage", "Critical Meltdown: radiation \u2014 +60% <DT_RADIATION_COLOR>Radiation, +60% Critical Chance"),
   ]),
   cruising_speed: mod("cruising_speed", [
-    line("engineSpeed", "mod_panel", "multiplicative_percent", "Cruising Speed: engineSpeed \u2014 +100% Railjack Speed when no enemies within 3000m"),
-    line("range", "mod_panel", "multiplicative_percent", "Cruising Speed: range \u2014 +100% Railjack Speed when no enemies within 3000m (arsenal display only)"),
+    line("engineSpeed", "mod_panel", "multiplicative_percent", "Cruising Speed: engineSpeed \u2014 +110% Railjack Speed when no enemies within 3000m"),
+    line("range", "mod_panel", "multiplicative_percent", "Cruising Speed: range \u2014 +110% Railjack Speed when no enemies within 3000m (arsenal display only)"),
   ]),
   crushing_ruin: mod("crushing_ruin", [], "wiki: Crushing Ruin \u2014 Aerial attacks with Crowd Control combos."),
   cryo_coating: mod("cryo_coating", [
@@ -152,8 +152,8 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   cunning_aspect: mod("cunning_aspect", [], "wiki: Cunning Aspect \u2014 Fighting form devised for Conclave."),
   cyclone_kraken: mod("cyclone_kraken", [], "wiki: Cyclone Kraken \u2014 Brutal strikes with deft movement."),
   death_blossom: mod("death_blossom", [
-    line("cooldown", "mod_panel", "multiplicative_percent", "Death Blossom: cooldown \u2014 Turret Cooldowns removed for 30s\\\\nCooldown: 300s"),
-    line("duration", "mod_panel", "multiplicative_percent", "Death Blossom: duration \u2014 Turret Cooldowns removed for 30s\\\\nCooldown: 300s"),
+    line("cooldown", "mod_panel", "multiplicative_percent", "Death Blossom: cooldown \u2014 Turret Cooldowns removed for 25s\\\\nCooldown: 300s"),
+    line("duration", "mod_panel", "multiplicative_percent", "Death Blossom: duration \u2014 Turret Cooldowns removed for 25s\\\\nCooldown: 300s"),
   ]),
   deathless_currents: mod("deathless_currents", [], "wiki: Deathless Currents \u2014 Vortex heals allies for 250 health/s. Downed players inside the vortex will be instantly revived, and dead players will be resummoned."),
   defensive_fire: mod("defensive_fire", [
@@ -185,7 +185,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   femursetmod: mod("femursetmod", [], "wiki: Femursetmod \u2014 catalog entry (stats in ability logic)"),
   final_harbinger: mod("final_harbinger", [], "wiki: Final Harbinger \u2014 Powerful slashes and shield attacks."),
   fire_suppression: mod("fire_suppression", [
-    line("cooldown", "mod_panel", "multiplicative_percent", "Fire Suppression: cooldown \u2014 Extinguish 1 fire\\\\nCooldown: <LOWER_IS_BETTER>200s"),
+    line("cooldown", "mod_panel", "multiplicative_percent", "Fire Suppression: cooldown \u2014 Extinguish 1 fire\\\\nCooldown: <LOWER_IS_BETTER>230s"),
   ]),
   firewall: mod("firewall", [], "wiki: Firewall \u2014 Reduces damage by 75% while hacking"),
   flak_shot: mod("flak_shot", [
@@ -265,8 +265,8 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   inner_might: mod("inner_might", [], "wiki: Inner Might \u2014 Allows Abilities to be cast without using Energy or Shields but requires 60s to recharge."),
   instant_secure: mod("instant_secure", [], "wiki: Instant Secure \u2014 Gain 15% Disinfection and gain 10,000 H\\u00f6llars"),
   intruder_stasis: mod("intruder_stasis", [
-    line("cooldown", "mod_panel", "multiplicative_percent", "Intruder Stasis: cooldown \u2014 Freeze all Enemy Boarding Parties for 45s\\\\nCooldown: 300s"),
-    line("duration", "mod_panel", "multiplicative_percent", "Intruder Stasis: duration \u2014 Freeze all Enemy Boarding Parties for 45s\\\\nCooldown: 300s"),
+    line("cooldown", "mod_panel", "multiplicative_percent", "Intruder Stasis: cooldown \u2014 Freeze all Enemy Boarding Parties for 35s\\\\nCooldown: 300s"),
+    line("duration", "mod_panel", "multiplicative_percent", "Intruder Stasis: duration \u2014 Freeze all Enemy Boarding Parties for 35s\\\\nCooldown: 300s"),
   ]),
   ion_burn: mod("ion_burn", [
     line("boostSpeed", "mod_panel", "multiplicative_percent", "Ion Burn: boostSpeed \u2014 +45% Railjack Boost Speed"),
@@ -357,7 +357,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   onslaught_matrix: mod("onslaught_matrix", [
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Onslaught Matrix — full-hull gated (railjack.ts)"),
   ]),
-  ordnance_cheap_shot: mod("ordnance_cheap_shot", [], "wiki: Ordnance Cheap Shot \u2014 Ordnance weapons have a +90% chance to not consume Munitions"),
+  ordnance_cheap_shot: mod("ordnance_cheap_shot", [], "wiki: Ordnance Cheap Shot \u2014 Ordnance weapons have a +60% chance to not consume Munitions"),
   ordnance_velocity: mod("ordnance_velocity", [
     line("ordnanceSpeed", "mod_panel", "multiplicative_percent", "Ordnance Velocity: ordnanceSpeed \u2014 +60% Ordnance Projectile Speed"),
   ]),
@@ -441,7 +441,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   ]),
   quaking_hand: mod("quaking_hand", [], "wiki: Quaking Hand \u2014 Fighting form devised for Conclave."),
   quick_correct: mod("quick_correct", [], "wiki: Quick Correct \u2014 Gain 10% Disinfection and 10% chance to drop a Live Heartcell "),
-  quicklock: mod("quicklock", [], "wiki: Quicklock \u2014 -112.5% Ordnance Lock-On Time"),
+  quicklock: mod("quicklock", [], "wiki: Quicklock \u2014 -75% Ordnance Lock-On Time"),
   raider_matrix: mod("raider_matrix", [
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Raider Matrix — archwing slingshot (not gun/RJ paper)"),
     line("shield", "mod_panel", "multiplicative_percent", "wiki: Raider Matrix — archwing slingshot utility"),
@@ -457,7 +457,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "wiki: Repeater Clip — reload+aim gated fire rate"),
     line("fireRate", "weapon_dps", "conditional_stat_on_trigger", "wiki: Repeater Clip — On Reload: +105% Fire Rate when Aiming for 9s"),
   ]),
-  revo_reducer: mod("revo_reducer", [], "wiki: Revo Reducer \u2014 -60.8% Omni Revolite Consumption"),
+  revo_reducer: mod("revo_reducer", [], "wiki: Revo Reducer \u2014 -40.5% Omni Revolite Consumption"),
   rifle_riven_mod: mod("rifle_riven_mod", [], "wiki: Rifle Riven Mod \u2014 You will need to prove yourself before I reveal the beauty within this work."),
   rift_waters: mod("rift_waters", [], "wiki: Rift Waters \u2014 Vortex strips enemy Overguard 25% per second."),
   ripload: mod("ripload", [
@@ -586,8 +586,8 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   vicious_approach: mod("vicious_approach", [], "wiki: Vicious Approach \u2014 Fighting form devised for Conclave."),
   vigilantesetmod: mod("vigilantesetmod", [], "wiki: Vigilantesetmod \u2014 catalog entry (stats in ability logic)"),
   void_cloak: mod("void_cloak", [
-    line("cooldown", "mod_panel", "multiplicative_percent", "Void Cloak: cooldown \u2014 Cloak from Enemies for 50s\\\\nEngine Speed reduced to 50%\\\\nCooldown: 120s"),
-    line("duration", "mod_panel", "multiplicative_percent", "Void Cloak: duration \u2014 Cloak from Enemies for 50s\\\\nEngine Speed reduced to 50%\\\\nCooldown: 120s"),
+    line("cooldown", "mod_panel", "multiplicative_percent", "Void Cloak: cooldown \u2014 Cloak from Enemies for 35s\\\\nEngine Speed reduced to 30%\\\\nCooldown: 120s"),
+    line("duration", "mod_panel", "multiplicative_percent", "Void Cloak: duration \u2014 Cloak from Enemies for 35s\\\\nEngine Speed reduced to 30%\\\\nCooldown: 120s"),
   ]),
   void_hole: mod("void_hole", [], "wiki: Void Hole \u2014 A black hole that draws in enemies, dealing damage."),
   void_levitation: mod("void_levitation", [], "wiki: Void Levitation \u2014 First Ability creates a 6m wide shockwave lasting 4s, that inflicts Lift Status on all enemies it touches."),

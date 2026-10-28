@@ -14,6 +14,11 @@ export interface RailjackPlexusAbility {
   cooldownSec?: number;
   /** Temporary turret damage bonus while active (fraction). */
   turretDamageWhileActive?: number;
+  /**
+   * Turret damage bonus by rank (index = rank, fraction). Overrides `turretDamageWhileActive` when
+   * present. Battle Stations / Phoenix Blaze wiki stat tables (wiki.warframe.com, fetched 2026-10-27).
+   */
+  turretDamageByRank?: readonly number[];
   scalesWith?: ("strength" | "range" | "duration")[];
 }
 
@@ -78,8 +83,10 @@ export const RAILJACK_PLEXUS_ABILITIES: Record<string, RailjackPlexusAbility> = 
     tab: "battle",
     category: "super",
     description: "Wreathes the Railjack in fire, increasing Turret Damage and Speed.",
-    energyCost: 200,
-    turretDamageWhileActive: 0.5,
+    // Wiki Phoenix Blaze stats: Energy Cost 100 at every rank; Extra Heat Turret Damage +15% (R0/R1) … +60% (R10).
+    energyCost: 100,
+    turretDamageWhileActive: 0.6,
+    turretDamageByRank: [0.15, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6],
     scalesWith: ["strength", "duration"],
   },
   seeker_volley: {
@@ -141,7 +148,9 @@ export const RAILJACK_PLEXUS_ABILITIES: Record<string, RailjackPlexusAbility> = 
     category: "offensive",
     description: "Boost Turret Damage for a duration.",
     cooldownSec: 240,
-    turretDamageWhileActive: 0.75,
+    // Wiki Battle Stations stats: Damage Bonus 20/30/50/55/60/65% at R0–R5 (duration 16–26s).
+    turretDamageWhileActive: 0.65,
+    turretDamageByRank: [0.2, 0.3, 0.5, 0.55, 0.6, 0.65],
     scalesWith: ["duration"],
   },
   death_blossom: {
@@ -219,7 +228,9 @@ export function summarizeEquippedAbilities(
       rank,
       energyCost: def.energyCost,
       cooldownSec: def.cooldownSec,
-      turretDamageWhileActive: def.turretDamageWhileActive,
+      turretDamageWhileActive: def.turretDamageByRank
+        ? def.turretDamageByRank[Math.min(Math.max(0, Math.floor(rank)), def.turretDamageByRank.length - 1)]
+        : def.turretDamageWhileActive,
       scalesWith: def.scalesWith,
     });
   }

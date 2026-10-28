@@ -272,6 +272,9 @@ describe("calculateRailjackBuild", () => {
     expect(stats.crewBonuses?.turretDamageBonus ?? 0).toBe(0);
     expect(stats.battleAbilities).toHaveLength(1);
     expect(stats.battleAbilities![0]!.name).toBe("Phoenix Blaze");
-    expect(stats.abilityTurretDamageBonus).toBeGreaterThan(0.5);
+    // Round 23: wiki Phoenix Blaze R0 = +15% Extra Heat Turret Damage (was a flat 50%); Zetki Mk III reactor
+    // Ability Strength +50% → 0.15 × 1.5 = 0.225, Energy Cost 100 × 1.5 = 150.
+    expect(stats.abilityTurretDamageBonus).toBeCloseTo(0.225, 6);
+    expect(stats.battleAbilities![0]!.energyCost).toBe(150);
   });
 });
