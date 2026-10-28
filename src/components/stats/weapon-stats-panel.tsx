@@ -16,6 +16,7 @@ import {
 import { avgCritMultiplier, critTierDamage, critTiersToShow, critTierLabel, critTierColorClass, exceedsWarframeInt32 } from "@/lib/calc/crit-utils";
 import { CollapsibleSection, StatRow, toLightSafeTextColor } from "./stat-primitives";
 import { TTKSection } from "./ttk-section";
+import { WeaponStatsGlossary } from "./weapon-stats-glossary";
 import { WeaponSimPanel } from "./weapon-sim-panel";
 import { useSimStatChangeFlash } from "./use-sim-stat-change-flash";
 
@@ -103,7 +104,10 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
 
   return (
     <div className="border border-border rounded-xl p-4 bg-card space-y-1 min-w-0 overflow-x-hidden">
-      <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{heading ?? "Weapon Stats"}</h3>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{heading ?? "Weapon Stats"}</h3>
+        <WeaponStatsGlossary />
+      </div>
 
       {/* DPS — direct hit vs radial shown separately; totals include both when radial applies */}
       <CollapsibleSection title="DPS" defaultOpen>
