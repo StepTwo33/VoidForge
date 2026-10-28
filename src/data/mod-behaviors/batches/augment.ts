@@ -63,7 +63,7 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Antimatter Mine: duration \u2014 Antimatter Drop Augment: Creates a fully charged stationary orb that explodes af\u2026"),
   ]),
   augment_ash_rising_storm: mod("augment_ash_rising_storm", [
-    line("comboDuration", "mod_panel", "multiplicative_percent", "Rising Storm: comboDuration \u2014 Blade Storm Augment: Blade Storm attacks increase your Ability Combo Counter by \u2026"),
+    line("bladeStormCombo", "mod_panel", "multiplicative_percent", "wiki: Rising Storm \u2014 Blade Storm attacks add 1/2/3/4 Ability Combo (R0\u2013R3); flat 10s Combo Duration"),
     line("duration", "mod_panel", "multiplicative_percent", "Rising Storm: duration \u2014 Blade Storm Augment: Blade Storm attacks increase your Ability Combo Counter by \u2026"),
   ]),
   augment_ash_safeguard_switch: mod("augment_ash_safeguard_switch", [
@@ -352,7 +352,6 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("lootPull", "mod_panel", "multiplicative_percent", "Greedy Pull: lootPull \u2014 Pull Augment: Adds 100% chance to pull pickups towards Mag."),
   ]),
   augment_mesa_ballistic_bullseye: mod("augment_mesa_ballistic_bullseye", [
-    line("critChance", "mod_panel", "multiplicative_percent", "Ballistic Bullseye: critChance \u2014 Ballistic Battery Augment: The shot gains a +50% Final Critical Chance bonus, ba\u2026"),
     line("criticalChance", "mod_panel", "multiplicative_percent", "Ballistic Bullseye: criticalChance \u2014 Ballistic Battery Augment: The shot gains a +50% Final Critical Chance bonus, ba\u2026"),
   ]),
   augment_mesa_mess_waltz: mod("augment_mesa_mess_waltz", [
@@ -523,14 +522,11 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("extraCast", "mod_panel", "multiplicative_percent", "Photon Repeater: extraCast \u2014 Photon Strike Augment: If Photon Strike hits at least 5 enemies, the next cast w\u2026"),
   ]),
   augment_vauban_repelling_bastille: mod("augment_vauban_repelling_bastille", [
-    line("repelChance", "mod_panel", "multiplicative_percent", "Repelling Bastille: repelChance \u2014 +25% chance to repel enemies per rank"),
+    line("vortexDuration", "mod_panel", "multiplicative_percent", "wiki: Enduring Bastille (Repelling Bastille) \u2014 added Vortex duration 50/55/60/70% (R0\u2013R3)"),
   ]),
   augment_volt_capacitance: mod("augment_volt_capacitance", [
     line("shieldPerTarget", "mod_panel", "multiplicative_percent", "Capacitance: shieldPerTarget \u2014 Discharge Augment: Converts 3% of Damage dealt into Shields split between Volt a\u2026"),
     line("damageToShieldConversion", "mod_panel", "multiplicative_percent", "wiki: Capacitance \u2014 converts 1.5/2/2.5/3% of Discharge damage dealt into Shields (R0\u2013R3; not a damage bonus)"),
-  ]),
-  augment_volt_reactive_storm: mod("augment_volt_reactive_storm", [
-    line("statusChance", "mod_panel", "multiplicative_percent", "ReactivStorm: statusChance \u2014 Serene Storm Augment: Desert Wind is granted +250% Status Chance and changes its\u2026"),
   ]),
   augment_volt_shock_trooper: mod("augment_volt_shock_trooper", [
     line("allyShockDamage", "mod_panel", "multiplicative_percent", "Shock Trooper: allyShockDamage \u2014 Shock Augment: Hold to cast will grant all allies within 15m an additional 100% \u2026"),

@@ -417,8 +417,8 @@ describe("melee utility cores (wiki max rank, Phase M9)", () => {
     expect(withMod("body_count").comboDuration).toBeCloseTo(17, 8);
   });
 
-  it("Gladiator Rush R5: +9s combo duration (base 5 → 14)", () => {
-    expect(withMod("gladiator_rush").comboDuration).toBeCloseTo(14, 8);
+  it("Gladiator Rush R5: +6s combo duration (base 5 → 11; wiki Max Rank Description, Round 21)", () => {
+    expect(withMod("gladiator_rush").comboDuration).toBeCloseTo(11, 8);
   });
 
   it("Combo Killer R5: +5s combo duration (base 5 → ~10; catalog 0.83×6)", () => {

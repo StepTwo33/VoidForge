@@ -25,6 +25,9 @@ export function dropUnknownMods<T extends { modId: string }>(
  *   "Speed Holster Aura Mod: Renamed to Holster Amp" (its effect changed to +60% damage on equip).
  * - helminth_ferocity → proboscis: wiki.warframe.com Helminth Ferocity, Update 20.0 (2017-03-24):
  *   "Replaced by Proboscis" (infobox "Succeeded by Proboscis"; removed from inventories).
+ * - augment_volt_reactive_storm → augment_baruuk_reactive_storm: Reactive Storm is Baruuk's Serene
+ *   Storm augment (wiki.warframe.com Reactive Storm: Type Baruuk, Update 27.1). The catalog also
+ *   carried a misspelled "ReactivStorm" copy tied to Volt; it was removed (Round 21).
  */
 export const RENAMED_MOD_IDS: Readonly<Record<string, string>> = {
   link_shields: "link_redirection",
@@ -32,6 +35,7 @@ export const RENAMED_MOD_IDS: Readonly<Record<string, string>> = {
   shotgun_spazz: "shotgun_barrage",
   aura_speed_holster: "holster_amp",
   helminth_ferocity: "proboscis",
+  augment_volt_reactive_storm: "augment_baruuk_reactive_storm",
 };
 
 /** Display names of the old ids (they are no longer in the catalog). */
@@ -41,6 +45,7 @@ export const RENAMED_MOD_OLD_NAMES: Readonly<Record<string, string>> = {
   shotgun_spazz: "Shotgun Spazz",
   aura_speed_holster: "Speed Holster",
   helminth_ferocity: "Helminth Ferocity",
+  augment_volt_reactive_storm: "ReactivStorm (Volt)",
 };
 
 /** Game update that renamed / replaced each old id (shown in the load toast). */

@@ -845,10 +845,9 @@ const RAW_MODS: Mod[] = [
     "category": "melee",
     "subCategory": "",
     "stats": {
-      "comboDuration": 1.5,
-      "duration": 1.0
+      "comboDuration": 1.0
     },
-    "description": "+1.5s Combo Duration per rank (Set)",
+    "description": "+1s Combo Duration per rank (+6s at max rank)",
     "rarity": "common"
   },
   {
@@ -1044,8 +1043,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "energyRegen": 0.3,
-      "energyOnKill": 0.1
+      "energyRegen": 0.1
     },
     "description": "Squad receives +0.6 Energy Regen/s",
     "rarity": "uncommon"
@@ -1059,7 +1057,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "healthRegen": 1
+      "healthRegen": 0.5
     },
     "description": "Squad receives +3 Health Regen/s",
     "rarity": "uncommon"
@@ -1073,7 +1071,6 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "armorReduction": 6,
       "armor": -3.0
     },
     "description": "-6% Enemy Armor per rank",
@@ -1088,7 +1085,6 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "shieldReduction": 6,
       "shield": -3.0
     },
     "description": "Enemies lose -18% Shield Capacity",
@@ -1117,7 +1113,6 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "rifleDamage": 4,
       "damage": 4.5
     },
     "description": "Squad receives +27% Rifle Damage",
@@ -1132,7 +1127,6 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "shotgunDamage": 5,
       "damage": 3.0
     },
     "description": "Squad receives +18% Shotgun Damage",
@@ -1147,7 +1141,6 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "pistolDamage": 6,
       "damage": 4.5
     },
     "description": "Squad receives +27% Pistol Damage",
@@ -1191,7 +1184,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "enemyRadar": 10
+      "enemyRadar": 5
     },
     "description": "Highlights enemies on the Minimap\\nSquad receives +30 Enemy Radar",
     "rarity": "uncommon"
@@ -2459,7 +2452,7 @@ const RAW_MODS: Mod[] = [
     "category": "companion_weapon",
     "subCategory": "beast_weapon",
     "stats": {
-      "punchThrough": 1.2,
+      "punchThrough": 0.2,
       "fireRate": 5.0
     },
     "description": "+30% Fire Rate (x2 for Bows)\\n+1.2 Punch Through",
@@ -2760,21 +2753,6 @@ const RAW_MODS: Mod[] = [
     "warframeId": "volt"
   },
   {
-    "id": "augment_volt_reactive_storm",
-    "name": "ReactivStorm",
-    "polarity": "naramon",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "augment",
-    "subCategory": "",
-    "stats": {
-      "statusChance": 62.5
-    },
-    "description": "Serene Storm Augment: Desert Wind is granted +250% Status Chance and changes its damage type to match enemy weaknesses.",
-    "rarity": "rare",
-    "warframeId": "volt"
-  },
-  {
     "id": "augment_volt_transistor_shield",
     "name": "Transistor Shield",
     "polarity": "zenurik",
@@ -3056,7 +3034,6 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "critChance": 25,
       "criticalChance": 12.5
     },
     "description": "Ballistic Battery Augment: The shot gains a +50% Final Critical Chance bonus, based on the amount charged.",
@@ -3199,7 +3176,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "comboDuration": 4,
+      "bladeStormCombo": 1,
       "duration": 2.5
     },
     "description": "Blade Storm Augment: Blade Storm attacks increase your Ability Combo Counter by 4.\\nPassive: +10s Combo Duration",
@@ -3767,9 +3744,9 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "repelChance": 25
+      "vortexDuration": 17.5
     },
-    "description": "+25% chance to repel enemies per rank",
+    "description": "Bastille Augment: Killing an enemy in Bastille extends the duration by 2s. Vortex's duration is increased by 70% of its Maximum Duration for each additional Vortex thrown into it.",
     "rarity": "rare",
     "warframeId": "vauban"
   },
@@ -12036,7 +12013,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "energy": 8,
+      "energy": 10.0,
       "health": 10.0
     },
     "description": "Health pickups give +110% Energy. Energy pickups give +110% Health.",

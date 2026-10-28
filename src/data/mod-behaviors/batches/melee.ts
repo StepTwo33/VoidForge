@@ -153,8 +153,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "Gladiator Might: criticalMultiplier \u2014 +7.5% Critical Damage per rank (Set)"),
   ]),
   gladiator_rush: mod("gladiator_rush", [
-    line("comboDuration", "weapon_dps", "additive_percent", "wiki: Gladiator Rush — +1.5s Combo Duration per rank (flat seconds)"),
-    line("duration", "mod_panel", "multiplicative_percent", "Gladiator Rush: duration \u2014 +1.5s Combo Duration per rank (Set)"),
+    line("comboDuration", "weapon_dps", "additive_percent", "wiki: Gladiator Rush — +1s Combo Duration per rank (+6s at R5; flat seconds)"),
   ]),
   gladiator_vice: mod("gladiator_vice", [
     line("attackSpeed", "weapon_dps", "multiplicative_percent", "Gladiator Vice: attackSpeed \u2014 +5% Attack Speed per rank (Set)"),

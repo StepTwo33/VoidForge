@@ -43,6 +43,7 @@ describe("old builds migrate instead of dropping", () => {
       shotgun_spazz: "shotgun_barrage",
       aura_speed_holster: "holster_amp",
       helminth_ferocity: "proboscis",
+      augment_volt_reactive_storm: "augment_baruuk_reactive_storm",
     });
     const { mods, migrated } = migrateRenamedMods(
       [{ modId: "link_shields", rank: 5, slotIndex: 2 }, { modId: "link_armor", rank: 3, slotIndex: 3 }, { modId: "bite", rank: 10, slotIndex: 4 }],

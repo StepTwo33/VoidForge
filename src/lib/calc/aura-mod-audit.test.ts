@@ -87,10 +87,10 @@ describe("Growing Power / CP / SD (wiki max rank)", () => {
     expect(withGp.abilityStrength).toBeCloseTo(bare.abilityStrength, 8);
   });
 
-  it("Corrosive Projection R5: −18%/−36% enemy armor (catalog); does not strip warframe armor", () => {
+  it("Corrosive Projection R5: −18% enemy armor (catalog, wiki Effect −3%/rank); does not strip warframe armor", () => {
     const mod = requireMod("aura_corrosive_projection");
     expect(mod.stats.armor! * (mod.maxRank + 1)).toBeCloseTo(-18, 8);
-    expect(mod.stats.armorReduction! * (mod.maxRank + 1)).toBeCloseTo(36, 8);
+    expect(mod.stats).not.toHaveProperty("armorReduction");
     expect(
       VERIFIED_MOD_BEHAVIORS.aura_corrosive_projection?.stats.every((s) => s.target === "mod_panel"),
     ).toBe(true);
