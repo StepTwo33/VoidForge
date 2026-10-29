@@ -31,6 +31,11 @@ export interface AltFireMode extends WeaponAlternateModeStats {
   usesWholeMagazine?: boolean;
   /** Multishot mods add nothing to this shot (wiki Stug: a full blob is capped at 10 stacks). */
   ignoreMultishotMods?: boolean;
+  /**
+   * Each round in the (modded) magazine adds this share to the explosion rows (wiki Javlok
+   * throw: 300 x (1 + 0.2 x rounds)). Shown with a full magazine.
+   */
+  radialBonusPerRound?: number;
 }
 
 export interface AltFireResult {
@@ -50,7 +55,7 @@ export function getAltFireModes(weapon: Weapon | null | undefined): AltFireMode[
 /** Overlay one alt-fire mode on a copy of the weapon (same merge rule as applyAlternateMode). */
 export function applyAltFireMode(weapon: Weapon, mode: AltFireMode): Weapon {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { radialAttacks, radialsKeep, label, note, showDps, damageTimesMagazine, usesWholeMagazine, ignoreMultishotMods, ...overrides } = mode;
+  const { radialAttacks, radialsKeep, label, note, showDps, damageTimesMagazine, usesWholeMagazine, ignoreMultishotMods, radialBonusPerRound, ...overrides } = mode;
   const merged: Weapon = { ...weapon, ...overrides };
   if (radialAttacks) merged.radialAttacks = radialAttacks;
   else if (radialsKeep) {
@@ -77,20 +82,20 @@ export function computeAltFire(
 /** One calc, or two when a flag needs the modded result first (magazine or multishot). */
 function calcAltMode(weapon: Weapon, mode: AltFireMode, calc: (w: Weapon) => CalculatedStats): CalculatedStats {
   let w = applyAltFireMode(weapon, mode);
-  if (!mode.damageTimesMagazine && !mode.usesWholeMagazine && !mode.ignoreMultishotMods) return calc(w);
+  if (!mode.damageTimesMagazine && !mode.usesWholeMagazine && !mode.ignoreMultishotMods && !mode.radialBonusPerRound) return calc(w);
   const first = calc(w);
   const base = w.multishot ?? 1;
   // Undo the multishot bonus: base x base / modded comes back out as base.
   if (mode.ignoreMultishotMods && first.multishot > 0) w = { ...w, multishot: (base * base) / first.multishot };
   const mag = Math.max(1, Math.round(first.magazine));
   if (mode.usesWholeMagazine) w = { ...w, ammoCost: mag };
-  if (mode.damageTimesMagazine) {
-    const times = <T extends object>(o: T): T => {
-      const out = { ...o } as Record<string, unknown>;
-      for (const k of [...DMG_KEYS, "damage", "totalDamage"]) if (typeof out[k] === "number") out[k] = (out[k] as number) * mag;
-      return out as T;
-    };
-    w = { ...times(w), ammoCost: mag, radialAttacks: w.radialAttacks?.map(times) };
-  }
+  const times = <T extends object>(o: T, k: number): T => {
+    const out = { ...o } as Record<string, unknown>;
+    for (const f of [...DMG_KEYS, "damage", "totalDamage"]) if (typeof out[f] === "number") out[f] = (out[f] as number) * k;
+    return out as T;
+  };
+  if (mode.damageTimesMagazine) w = { ...times(w, mag), ammoCost: mag, radialAttacks: w.radialAttacks?.map((r) => times(r, mag)) };
+  const perRound = mode.radialBonusPerRound;
+  if (perRound) w = { ...w, radialAttacks: w.radialAttacks?.map((r) => times(r, 1 + perRound * mag)) };
   return calc(w);
 }

@@ -980,4 +980,83 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       note: "Wiki Stug page: charges a full 10-stack blob over 2 s for 10 ammo. It sticks for 36 Corrosive in 2 m, then bursts at once for 750 Corrosive in 2.8 m (listed below it) with 70% falloff. Multishot mods add nothing past 10 stacks. Not available with the Incarnon Adapter. DPS uses 1 / (charge time + 1 / fire rate).",
     },
   ],
+  // ---- Batch 5: thrown spears (pattern E). One throw, then the weapon reloads, and only one
+  // spear is out at a time, so no DPS is shown. chargeTime 0: the throw is a tap (the primary's
+  // charge does not apply).
+  afentis: [
+    {
+      label: "Spear Throw",
+      ...dmg({ impact: 240, puncture: 120, slash: 40 }),
+      fireRate: 1, criticalChance: 0.3, criticalMultiplier: 3, statusChance: 0.2,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 1, reloadTime: 1.8, forcedProcs: [],
+      ignoreMultishotMods: true, showDps: false,
+      note: "Wiki Afentis attack 3. Throws a copy of the spear for 1 ammo, then reloads. It impales and knocks down enemies; if it misses, it makes a 5 m Ballistarii Might field (buffs, no damage). One spear at a time; multishot does not add spears. No DPS is shown.",
+    },
+  ],
+  afentis_prime: [
+    {
+      label: "Spear Throw",
+      ...dmg({ impact: 330, puncture: 165, slash: 55 }),
+      fireRate: 1, criticalChance: 0.4, criticalMultiplier: 3, statusChance: 0.3,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 1, reloadTime: 1.8, forcedProcs: [],
+      ignoreMultishotMods: true, showDps: false,
+      note: "Wiki Afentis Prime attack 3. Throws a copy of the spear for 1 ammo, then reloads. It impales and knocks down enemies; if it misses, it makes a 10 m Ballistarii Might field (buffs, no damage). One spear at a time; multishot does not add spears. No DPS is shown.",
+    },
+  ],
+  ferrox: [
+    {
+      label: "Spear Throw",
+      ...dmg({ impact: 35, puncture: 5, slash: 10 }),
+      fireRate: 1, criticalChance: 0.04, criticalMultiplier: 2, statusChance: 0.33,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 1, reloadTime: 2, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [{ name: "Attraction Field", electricity: 150, totalDamage: 150, radius: 10 }],
+      note: "Wiki Ferrox attacks 3 and 4. Throws the spear for 1 ammo, then reloads. Where it lands, a 10 m field (listed below it) deals 150 Electricity every 2 s and pulls enemies in, for 30 s. The field's 50% status chance is fixed; fire-rate mods make it tick faster. One spear at a time. No DPS is shown.",
+    },
+  ],
+  tenet_ferrox: [
+    {
+      label: "Spear Throw",
+      ...dmg({ impact: 35, puncture: 5, slash: 10 }),
+      fireRate: 1, criticalChance: 0.04, criticalMultiplier: 2, statusChance: 0.4,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 0, reloadTime: 2, forcedProcs: [],
+      ignoreMultishotMods: true, showDps: false,
+      radialAttacks: [{ name: "Attraction Field", electricity: 150, totalDamage: 150, radius: 10 }],
+      note: "Wiki Tenet Ferrox attacks 3 and 4. The throw costs no ammo, but a reload must finish before you fire or throw again. Where it lands, a 10 m field (listed below it) deals 150 Electricity every 2 s and pulls enemies in, for 30 s. Multishot does not add spears. No DPS is shown.",
+    },
+  ],
+  // Javlok: the throw uses the whole magazine; each round in it adds 20% to the 300 Heat explosion.
+  javlok: [
+    {
+      label: "Spear Throw",
+      ...dmg({ impact: 45, puncture: 75, slash: 30 }),
+      fireRate: 1, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.25,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 6, reloadTime: 0.6, forcedProcs: ["Impact"],
+      usesWholeMagazine: true, radialBonusPerRound: 0.2, ignoreMultishotMods: true, showDps: false,
+      radialAttacks: [{ name: "Spear Throw Explosion", heat: 300, totalDamage: 300, radius: 6, falloffReduction: 0.6 }],
+      note: "Wiki Javlok attacks 3 and 4, shown with a full magazine. Uses the whole magazine, guaranteed Impact. The 6 m explosion (listed below it) is 300 Heat x (1 + 0.2 per round in the magazine), so magazine mods raise it; it falls off to 40% at the edge. Multishot and Ammo Efficiency do not affect it. No DPS is shown.",
+    },
+  ],
+  scourge: [
+    {
+      label: "Spear Throw",
+      ...dmg({ impact: 105, puncture: 22.5, slash: 22.5 }),
+      fireRate: 1, criticalChance: 0.04, criticalMultiplier: 2, statusChance: 0.3,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 1, reloadTime: 0.6, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [{ name: "Spear Throw Explosion", corrosive: 55, totalDamage: 55, radius: 7, falloffReduction: 0.6 }],
+      note: "Wiki Scourge attacks 3 and 4. Throws the spear, then reloads; needs at least 1 round. It impales, explodes for 55 Corrosive in 7 m (listed below it, 100% to 40% falloff), and puts a 2 m Bullet Attractor on the heads of enemies within 14 m. One field at a time. No DPS is shown.",
+    },
+  ],
+  scourge_prime: [
+    {
+      label: "Spear Throw",
+      ...dmg({ impact: 140, puncture: 30, slash: 30 }),
+      fireRate: 1, criticalChance: 0.1, criticalMultiplier: 2, statusChance: 0.3,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 1, reloadTime: 0.6, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [{ name: "Spear Explosion", corrosive: 55, totalDamage: 55, radius: 7, falloffReduction: 0.6 }],
+      note: "Wiki Scourge Prime attacks 3 and 4. Throws the spear for 1 ammo, then reloads. It impales, explodes for 55 Corrosive in 7 m (listed below it, 100% to 40% falloff), and puts a 2 m Bullet Attractor on the heads of enemies within 14 m. One field at a time. No DPS is shown.",
+    },
+  ],
 };

@@ -398,6 +398,13 @@ def main() -> None:
     # with its 25 m projectile range read as a radius (the wiki lists no explosion).
     for wid in ("aeolak", "coda_bassocyst", "tenet_plinx", "tenet_tetra"):
         merged.pop(wid, None)
+    # Batch 5 spear throws: the throw's own rows (wiki attacks 3-4) move to ALT FIRE; the
+    # primary keeps attack 2 (its own explosion).
+    for wid, name in (("ferrox", "Attraction Field"), ("tenet_ferrox", "Attraction Field"),
+                      ("javlok", "Spear Throw Explosion"), ("scourge", "Spear Throw Explosion"),
+                      ("scourge_prime", "Spear Explosion")):
+        if wid in merged:
+            merged[wid] = [a for a in merged[wid] if a.get("name") != name]
     # Stug: the wiki says the blob explosion's falloff is really 70% (100% to 30% at the edge),
     # despite the 30% the game lists. The Incarnon Form rows have no wiki note, so they stay.
     for a in merged.get("stug", []):

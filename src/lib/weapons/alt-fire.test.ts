@@ -786,6 +786,94 @@ describe("ALT FIRE: Batch 4c, the five that each needed one decision (wiki.warfr
   });
 });
 
+describe("ALT FIRE: Batch 5 thrown spears, hand-worked against wiki.warframe.com", () => {
+  const altOf = (id: string, mods: string[] = []) => computeAltFire(byId(id), calcWith(mods)).find((r) => r.label === "Spear Throw")!;
+  const primOf = (id: string) => calculateWeaponBuild(byId(id), [], modsMap);
+  const radNames = (s: { radialAttacks?: { name: string }[] }) => (s.radialAttacks ?? []).map((r) => r.name);
+  const SPEARS = ["afentis", "afentis_prime", "ferrox", "tenet_ferrox", "javlok", "scourge", "scourge_prime"];
+
+  it("every throw: one Spear Throw block, a tap (fire rate 1, no charge), no DPS", () => {
+    for (const id of SPEARS) {
+      const r = altOf(id);
+      expect(r, id).toBeDefined();
+      expect(r.showDps, id).toBe(false);
+      expect(r.stats.effectiveFireRate, id).toBeCloseTo(1, 6);
+    }
+  });
+
+  it("Afentis / Prime: 400 / 550 per throw, 1 ammo; multishot adds no spears; the primary keeps its explosion", () => {
+    const a = altOf("afentis").stats, p = altOf("afentis_prime").stats;
+    expect(a.arsenalDamage?.totalDamage).toBeCloseTo(400, 6);
+    expect(a.criticalChance).toBeCloseTo(0.3, 6);
+    expect(a.criticalMultiplier).toBeCloseTo(3, 2); // engine base crit-multiplier grid (32/4095): 3.0007
+    expect(a.statusChance).toBeCloseTo(0.2, 6);
+    expect(p.arsenalDamage?.totalDamage).toBeCloseTo(550, 6);
+    expect(p.criticalChance).toBeCloseTo(0.4, 6);
+    expect(a.ammoCost).toBe(1);
+    expect(altOf("afentis", ["split_chamber_r3"]).stats.multishot).toBeCloseTo(1, 6);
+    expect(radNames(a)).toEqual([]);
+    for (const id of ["afentis", "afentis_prime"]) expect(radNames(primOf(id))).toEqual(["Radial Attack"]);
+  });
+
+  it("Ferrox / Tenet Ferrox: 50 per throw plus the 150 Electricity field (10 m); the field moves off the primary", () => {
+    for (const id of ["ferrox", "tenet_ferrox"]) {
+      const a = altOf(id).stats;
+      expect(a.arsenalDamage?.totalDamage, id).toBeCloseTo(50, 6);
+      expect(radNames(a), id).toEqual(["Attraction Field"]);
+      expect(a.radialAttacks?.[0]?.radius, id).toBe(10);
+      expect(radNames(primOf(id)), id).toEqual(["Radial Attack"]);
+    }
+    expect(altOf("ferrox").stats.ammoCost).toBe(1);
+    expect(altOf("tenet_ferrox").stats.ammoCost).toBe(0);
+    expect(altOf("tenet_ferrox", ["split_chamber_r3"]).stats.multishot).toBeCloseTo(1, 6);
+  });
+
+  it("Javlok radialBonusPerRound: 300 x (1 + 0.2 x 6) = 660 Heat; Magazine Warp (8 rounds) 780; Serration x2.65", () => {
+    const a = altOf("javlok").stats;
+    expect(a.arsenalDamage?.totalDamage).toBeCloseTo(150, 6);
+    expect(a.ammoCost).toBe(6);
+    expect(a.forcedProcs).toEqual(["Impact"]);
+    expect(a.radialAttacks?.[0]).toMatchObject({ name: "Spear Throw Explosion", totalDamage: 660, radius: 6, falloffReduction: 0.6 });
+    const m = altOf("javlok", ["magazine_warp_r3"]).stats;
+    expect(m.magazine).toBe(8);
+    expect(m.ammoCost).toBe(8);
+    expect(m.radialAttacks?.[0]?.totalDamage).toBeCloseTo(300 * (1 + 0.2 * 8), 6);
+    expect(altOf("javlok", ["serration_r3"]).stats.radialAttacks?.[0]?.totalDamage).toBeCloseTo(660 * 2.65, 6);
+    // the bonus touches only flagged modes: Scourge's explosion stays at the listed 55
+    expect(altOf("scourge", ["magazine_warp_r3"]).stats.radialAttacks?.[0]?.totalDamage).toBeCloseTo(55, 6);
+  });
+
+  it("Scourge / Prime: 150 / 200 per throw plus the 55 Corrosive explosion (7 m, 60% falloff)", () => {
+    const a = altOf("scourge").stats, p = altOf("scourge_prime").stats;
+    expect(a.arsenalDamage?.totalDamage).toBeCloseTo(150, 6);
+    expect(p.arsenalDamage?.totalDamage).toBeCloseTo(200, 6);
+    expect(a.radialAttacks?.[0]).toMatchObject({ name: "Spear Throw Explosion", totalDamage: 55, radius: 7, falloffReduction: 0.6 });
+    expect(p.radialAttacks?.[0]).toMatchObject({ name: "Spear Explosion", totalDamage: 55, radius: 7, falloffReduction: 0.6 });
+  });
+
+  it("primary DPS no longer counts the throw's explosion: Javlok, Scourge, Scourge Prime (wiki attack 1 + its own explosion)", () => {
+    // Javlok: 160 Heat x 1.2 crit x 1 / (0.3 s + 1 / 3.33), plus the 2.4 m explosion at average falloff (1 - 0.3 / 2)
+    const jfr = 1 / (0.3 + 1 / 3.3333335);
+    near(primOf("javlok").burstDps, (160 + 120 * 0.85) * 1.2 * jfr);
+    expect(radNames(primOf("javlok"))).toEqual(["Projectile Explosion"]);
+    near(primOf("scourge").burstDps, (70 + 55 * 0.85) * (1 + 0.02 * 0.5) * (8 / 3));
+    near(primOf("scourge_prime").burstDps, (80 + 60 * 0.85) * (1 + 0.1 * 1) * (8 / 3));
+    for (const id of ["scourge", "scourge_prime"]) expect(radNames(primOf(id))).toEqual(["Explosion"]);
+  });
+
+  it("primary numbers unchanged: wiki attack 1 for every Batch 5 weapon", () => {
+    const want: Record<string, [number, number]> = {
+      afentis: [100, 0.833], afentis_prime: [200, 0.833], ferrox: [350, 1.33], tenet_ferrox: [200, 2.67],
+      javlok: [160, 3.33], scourge: [70, 2.67], scourge_prime: [80, 2.67],
+    };
+    for (const [id, [d, fr]] of Object.entries(want)) {
+      const w = byId(id);
+      expect(w.damage, id).toBeCloseTo(d, 1);
+      expect(w.fireRate, id).toBeCloseTo(fr, 1);
+    }
+  });
+});
+
 describe("ALT FIRE: radial stand-in verdicts", () => {
   it("real wiki explosions on the primary stay (Cyanex, Glaive Prime, Staticor, Zarr)", () => {
     const names = (id: string) => (calculateWeaponBuild(byId(id), [], modsMap).radialAttacks ?? []).map((r) => r.name);

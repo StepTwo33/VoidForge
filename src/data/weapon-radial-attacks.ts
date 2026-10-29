@@ -324,13 +324,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 60.0,
       "radius": 1.7,
       "falloffReduction": 0.3
-    },
-    {
-      "name": "Spear Explosion",
-      "corrosive": 55.0,
-      "totalDamage": 55.0,
-      "radius": 7.0,
-      "falloffReduction": 0.6
     }
   ],
   "secura_penta": [
@@ -398,12 +391,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 60.0,
       "radius": 4.0,
       "falloffReduction": 0.3
-    },
-    {
-      "name": "Attraction Field",
-      "electricity": 150.0,
-      "totalDamage": 150.0,
-      "radius": 10.0
     }
   ],
   "trumna_prime": [
@@ -537,12 +524,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 100.0,
       "radius": 3.6,
       "falloffReduction": 0.4
-    },
-    {
-      "name": "Attraction Field",
-      "electricity": 150.0,
-      "totalDamage": 150.0,
-      "radius": 10.0
     }
   ],
   "gorgon": [
@@ -562,13 +543,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 120.0,
       "radius": 2.4,
       "falloffReduction": 0.3
-    },
-    {
-      "name": "Spear Throw Explosion",
-      "heat": 300.0,
-      "totalDamage": 300.0,
-      "radius": 6.0,
-      "falloffReduction": 0.6
     }
   ],
   "komorex": [
@@ -658,13 +632,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 55.0,
       "radius": 1.7,
       "falloffReduction": 0.3
-    },
-    {
-      "name": "Spear Throw Explosion",
-      "corrosive": 55.0,
-      "totalDamage": 55.0,
-      "radius": 7.0,
-      "falloffReduction": 0.6
     }
   ],
   "shedu": [
