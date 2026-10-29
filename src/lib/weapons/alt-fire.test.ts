@@ -3,6 +3,7 @@ import { modsMap } from "@/data/mods";
 import { WEAPON_ALT_FIRE } from "@/data/weapon-alt-fire";
 import { getEffectiveWeapons } from "@/lib/weapons/effective-data";
 import { calculateWeaponBuild } from "@/lib/calc/calculator";
+import { resolveEffectiveFireRate } from "@/lib/calc/effective-fire-rate";
 import { computeAltFire, getAltFireModes } from "@/lib/weapons/alt-fire";
 import { applyAlternateMode, getAlternateModes, weaponHasStanceFormMode } from "@/lib/weapons/weapon-alternate-mode";
 import type { Weapon } from "@/lib/types";
@@ -677,9 +678,103 @@ describe("ALT FIRE: Batch 4b alt-fire shots, hand-worked against wiki.warframe.c
     expect(q.totalDamage / q0.totalDamage).toBeCloseTo(p.totalDamage / p0.totalDamage, 2);
   });
 
-  it("held back for a decision: Stug, Aeolak, Tenet Plinx, Tenet Tetra, Coda Bassocyst have no alt section yet", () => {
-    for (const id of ["stug", "aeolak", "tenet_plinx", "tenet_tetra", "coda_bassocyst"]) {
-      if (weapons.some((w) => w.id === id)) expect(getAltFireModes(byId(id)), id).toEqual([]);
+});
+
+describe("ALT FIRE: Batch 4c, the five that each needed one decision (wiki.warframe.com)", () => {
+  const altOf = (id: string, label: string, mods: string[] = []) =>
+    computeAltFire(byId(id), calcWith(mods)).find((r) => r.label === label)!;
+  const primOf = (id: string) => calculateWeaponBuild(byId(id), [], modsMap);
+  const radNames = (s: { radialAttacks?: { name: string }[] }) => (s.radialAttacks ?? []).map((r) => r.name);
+
+  it("Aeolak: 97 x (1 + 0.21 x 1.3) / (0.3 s + 1 / 1.5); the explosion moves off the primary", () => {
+    const a = altOf("aeolak", "Alt-Fire").stats;
+    expect(a.effectiveFireRate).toBeCloseTo(1 / (0.3 + 1 / 1.5), 6);
+    near(a.burstDps, 97 * 1.273 / (0.3 + 1 / 1.5));
+    expect(a.ammoCost).toBe(10);
+    expect(a.forcedProcs).toEqual(["Impact"]);
+    expect(a.radialAttacks?.[0]).toMatchObject({ name: "Alt-Fire Explosion", totalDamage: 789, radius: 7, falloffReduction: 0.5 });
+    expect(radNames(primOf("aeolak"))).toEqual([]);
+  });
+
+  it("Aeolak chargeTimeFixed: Speed Trigger (+60%) speeds the 1.5 fire rate but not the 0.3 s charge", () => {
+    const a = altOf("aeolak", "Alt-Fire", ["speed_trigger_r3"]).stats;
+    expect(a.effectiveFireRate).toBeCloseTo(1 / (0.3 + 1 / 2.4), 6); // 1.395, not 1 / (0.3 / 1.6 + 1 / 2.4) = 1.655
+  });
+
+  it("chargeTimeFixed only touches flagged modes: Tenora's charge still scales with fire rate", () => {
+    const t = altOf("tenora", "Charged Shot", ["speed_trigger_r3"]).stats;
+    expect(t.effectiveFireRate).toBeCloseTo(1 / (0.8 / 1.6 + 1 / 16), 6);
+    const base = { triggerType: "Charge", baseFireRate: 1.5, moddedFireRate: 2.4, fireRateBonus: 0.6, reloadTime: 2, chargeTime: 0.3 };
+    expect(resolveEffectiveFireRate(base)).toBeCloseTo(1 / (0.3 / 1.6 + 1 / 2.4), 6);
+    expect(resolveEffectiveFireRate({ ...base, chargeTimeFixed: true })).toBeCloseTo(1 / (0.3 + 1 / 2.4), 6);
+  });
+
+  it("Tenet Plinx: 100 Impact + 100 Radiation per round in the magazine; Slip Magazine (+30%) raises both", () => {
+    const a = altOf("tenet_plinx", "Alt-Fire").stats;
+    expect(a.totalDamage).toBeCloseTo(1000, 6);
+    expect(a.radialAttacks?.[0]?.totalDamage).toBeCloseTo(1000, 6);
+    expect(a.ammoCost).toBe(10);
+    expect(a.effectiveFireRate).toBeCloseTo(1 / (0.8 + 1), 6);
+    near(a.burstDps, 1000 * (1 + 0.4 * 2) / 1.8);
+    near(a.sustainedDps, 1000 * 1.8 / (1.8 + 2.5));
+    const m = altOf("tenet_plinx", "Alt-Fire", ["slip_magazine_r3"]).stats;
+    expect(m.magazine).toBe(13);
+    expect(m.ammoCost).toBe(13);
+    expect(m.totalDamage).toBeCloseTo(1300, 6);
+    expect(m.radialAttacks?.[0]?.totalDamage).toBeCloseTo(1300, 6);
+    expect(radNames(primOf("tenet_plinx"))).toEqual([]);
+  });
+
+  it("Tenet Tetra: 200 Impact + 1000 Blast at a full magazine; magazine mods change the ammo, not the damage", () => {
+    const a = altOf("tenet_tetra", "Grenade").stats;
+    near(a.burstDps, 200 * (1 + 0.28 * 1.2) * 1.33);
+    expect(a.ammoCost).toBe(80);
+    expect(a.radialAttacks?.[0]).toMatchObject({ name: "Grenade AoE", totalDamage: 1000, radius: 8, falloffReduction: 0.6 });
+    const m = altOf("tenet_tetra", "Grenade", ["magazine_warp_r3"]).stats;
+    expect(m.magazine).toBe(104);
+    expect(m.ammoCost).toBe(104);
+    expect(m.totalDamage).toBeCloseTo(200, 6);
+    expect(m.radialAttacks?.[0]?.totalDamage).toBeCloseTo(1000, 6);
+    expect(radNames(primOf("tenet_tetra"))).toEqual([]);
+  });
+
+  it("Coda Bassocyst: 303 Blast mite, 6 targets, 4 ammo, forced Impact + Magnetic, no DPS; the fake 25 m row is gone", () => {
+    const r = altOf("coda_bassocyst", "Mite");
+    expect(r.showDps).toBe(false);
+    expect(r.stats.totalDamage).toBeCloseTo(303, 6);
+    expect(r.stats.multishot).toBeCloseTo(6, 6);
+    expect(r.stats.ammoCost).toBe(4);
+    expect(r.stats.forcedProcs).toEqual(["Impact", "Magnetic"]);
+    expect(radNames(primOf("coda_bassocyst"))).toEqual([]);
+  });
+
+  it("Stug charged blob: 36 + 750 Corrosive (2.8 m, 70% falloff), 10 ammo, 1 / (2 s + 1 / 4)", () => {
+    const a = altOf("stug", "Charged Blob").stats;
+    expect(a.effectiveFireRate).toBeCloseTo(1 / 2.25, 6);
+    expect(a.ammoCost).toBe(10);
+    expect(a.radialAttacks?.[0]).toMatchObject({ name: "Blob Explosion", totalDamage: 750, radius: 2.8, falloffReduction: 0.7 });
+    // the engine counts the explosion at its average falloff: 750 x (1 - 0.7 / 2)
+    near(a.burstDps, (36 + 750 * 0.65) * (1 + 0.05 * 0.5) / 2.25);
+    // the primary keeps its own small blob explosion row
+    expect(radNames(primOf("stug"))).toContain("Blob Explosion");
+  });
+
+  it("ignoreMultishotMods: Barrel Diffusion adds nothing to the full Stug blob or the Buzlok beacon", () => {
+    const a = altOf("stug", "Charged Blob").stats, b = altOf("stug", "Charged Blob", ["barrel_diffusion_r3"]).stats;
+    expect(b.multishot).toBeCloseTo(1, 6);
+    expect(b.burstDps).toBeCloseTo(a.burstDps, 6);
+    expect(altOf("buzlok", "Tracking Beacon", ["split_chamber_r3"]).stats.multishot).toBeCloseTo(1, 6);
+    expect(calcWith(["barrel_diffusion_r3"])(byId("stug")).multishot).toBeCloseTo(2.2, 6); // primary still gets it
+  });
+
+  it("primary numbers unchanged: wiki attack 1 for every Batch 4c weapon", () => {
+    const want: Record<string, [number, number]> = {
+      aeolak: [60, 6], tenet_plinx: [70, 3.33], tenet_tetra: [60, 5], coda_bassocyst: [808, 1.17], stug: [4, 4],
+    };
+    for (const [id, [d, fr]] of Object.entries(want)) {
+      const w = byId(id);
+      expect(w.damage, id).toBeCloseTo(d, 1);
+      expect(w.fireRate, id).toBeCloseTo(fr, 1);
     }
   });
 });

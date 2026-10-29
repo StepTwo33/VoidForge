@@ -98,14 +98,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "falloffReduction": 0.5
     }
   ],
-  "coda_bassocyst": [
-    {
-      "name": "Alt-Fire",
-      "blast": 303.0,
-      "totalDamage": 303.0,
-      "radius": 25.0
-    }
-  ],
   "coda_bubonico": [
     {
       "name": "Radial Attack",
@@ -414,15 +406,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "radius": 10.0
     }
   ],
-  "tenet_tetra": [
-    {
-      "name": "Grenade AoE",
-      "blast": 1000.0,
-      "totalDamage": 1000.0,
-      "radius": 8.0,
-      "falloffReduction": 0.6
-    }
-  ],
   "trumna_prime": [
     {
       "name": "Auto AoE",
@@ -467,15 +450,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "slash": 8.8,
       "totalDamage": 44.0,
       "radius": 4.0,
-      "falloffReduction": 0.5
-    }
-  ],
-  "aeolak": [
-    {
-      "name": "Alt-Fire Explosion",
-      "blast": 789.0,
-      "totalDamage": 789.0,
-      "radius": 7.0,
       "falloffReduction": 0.5
     }
   ],
@@ -893,16 +867,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "radius": 5.0,
       "falloffReduction": 0.3,
       "explosionDelay": 1.2
-    }
-  ],
-  "tenet_plinx": [
-    {
-      "name": "Alt-Fire AoE",
-      "radiation": 100.0,
-      "totalDamage": 100.0,
-      "radius": 6.0,
-      "falloffReduction": 0.4,
-      "explosionDelay": 0.8
     }
   ],
   "tenet_spirex": [

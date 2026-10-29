@@ -394,6 +394,10 @@ def main() -> None:
     for wid in ("corinth", "corinth_prime"):
         if wid in merged:
             merged[wid] = [a for a in merged[wid] if a.get("name") != "Air Burst Explosion"]
+    # Batch 4c alt-fire shots: same rule. The Coda Bassocyst "Alt-Fire" row was the mite shot
+    # with its 25 m projectile range read as a radius (the wiki lists no explosion).
+    for wid in ("aeolak", "coda_bassocyst", "tenet_plinx", "tenet_tetra"):
+        merged.pop(wid, None)
 
     for wid, attacks in MANUAL_RADIAL_ATTACKS.items():
         if wid in known_ids:

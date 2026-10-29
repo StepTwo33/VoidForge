@@ -1,6 +1,6 @@
 import { enrichWeapon } from "@/lib/weapons/weapon-enrich";
 import { getAlternateModes } from "@/lib/weapons/weapon-alternate-mode";
-import { WEAPON_ALT_FIRE } from "@/data/weapon-alt-fire";
+import { DMG_KEYS, WEAPON_ALT_FIRE } from "@/data/weapon-alt-fire";
 import type { CalculatedStats, Weapon, WeaponAlternateModeStats } from "@/lib/types";
 
 /**
@@ -22,6 +22,15 @@ export interface AltFireMode extends WeaponAlternateModeStats {
    * describe the primary mode, not this one.
    */
   radialsKeep?: string[];
+  /**
+   * The shot uses the whole (modded) magazine and its damage is multiplied by it (wiki Tenet
+   * Plinx), so magazine mods scale it. The damage fields hold the per-round value.
+   */
+  damageTimesMagazine?: boolean;
+  /** The shot uses the whole (modded) magazine at the listed damage (wiki Tenet Tetra). */
+  usesWholeMagazine?: boolean;
+  /** Multishot mods add nothing to this shot (wiki Stug: a full blob is capped at 10 stacks). */
+  ignoreMultishotMods?: boolean;
 }
 
 export interface AltFireResult {
@@ -41,7 +50,7 @@ export function getAltFireModes(weapon: Weapon | null | undefined): AltFireMode[
 /** Overlay one alt-fire mode on a copy of the weapon (same merge rule as applyAlternateMode). */
 export function applyAltFireMode(weapon: Weapon, mode: AltFireMode): Weapon {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { radialAttacks, radialsKeep, label, note, showDps, ...overrides } = mode;
+  const { radialAttacks, radialsKeep, label, note, showDps, damageTimesMagazine, usesWholeMagazine, ignoreMultishotMods, ...overrides } = mode;
   const merged: Weapon = { ...weapon, ...overrides };
   if (radialAttacks) merged.radialAttacks = radialAttacks;
   else if (radialsKeep) {
@@ -61,6 +70,27 @@ export function computeAltFire(
     label: mode.label,
     note: mode.note,
     showDps: mode.showDps !== false,
-    stats: calc(applyAltFireMode(weapon, mode)),
+    stats: calcAltMode(weapon, mode, calc),
   }));
+}
+
+/** One calc, or two when a flag needs the modded result first (magazine or multishot). */
+function calcAltMode(weapon: Weapon, mode: AltFireMode, calc: (w: Weapon) => CalculatedStats): CalculatedStats {
+  let w = applyAltFireMode(weapon, mode);
+  if (!mode.damageTimesMagazine && !mode.usesWholeMagazine && !mode.ignoreMultishotMods) return calc(w);
+  const first = calc(w);
+  const base = w.multishot ?? 1;
+  // Undo the multishot bonus: base x base / modded comes back out as base.
+  if (mode.ignoreMultishotMods && first.multishot > 0) w = { ...w, multishot: (base * base) / first.multishot };
+  const mag = Math.max(1, Math.round(first.magazine));
+  if (mode.usesWholeMagazine) w = { ...w, ammoCost: mag };
+  if (mode.damageTimesMagazine) {
+    const times = <T extends object>(o: T): T => {
+      const out = { ...o } as Record<string, unknown>;
+      for (const k of [...DMG_KEYS, "damage", "totalDamage"]) if (typeof out[k] === "number") out[k] = (out[k] as number) * mag;
+      return out as T;
+    };
+    w = { ...times(w), ammoCost: mag, radialAttacks: w.radialAttacks?.map(times) };
+  }
+  return calc(w);
 }

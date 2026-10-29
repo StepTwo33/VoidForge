@@ -27,6 +27,8 @@ export interface FireTimingInput {
   chargeMode?: ChargeMode;
   /** Apply charge timing although the trigger label isn't "Charge" (Auto-Charge weapons). */
   chargeTimingAlways?: boolean;
+  /** Charge time is not affected by fire-rate mods (wiki, e.g. Aeolak alt-fire). */
+  chargeTimeFixed?: boolean;
   burstCount?: number;
   /** Inter-shot delay inside a burst (seconds), unmodded. */
   burstDelay?: number;
@@ -83,6 +85,7 @@ export function resolveEffectiveFireRate(input: FireTimingInput): number {
     chargeTime,
     chargeMode,
     chargeTimingAlways,
+    chargeTimeFixed,
     burstCount,
     burstDelay,
     weaponId,
@@ -95,7 +98,7 @@ export function resolveEffectiveFireRate(input: FireTimingInput): number {
 
   // —— Charge family ——
   if (chargeTime != null && chargeTime > 0 && (chargeTimingAlways || isChargeTrigger(triggerType) || mode === "bow" || mode === "lanka" || weaponId === "lanka")) {
-    const ct = moddedChargeTime(chargeTime, bonus);
+    const ct = chargeTimeFixed ? chargeTime : moddedChargeTime(chargeTime, bonus);
     if (mode === "lanka" || (baseFireRate <= 0 && mode !== "bow")) {
       return ct > 0 ? 1 / ct : 0;
     }

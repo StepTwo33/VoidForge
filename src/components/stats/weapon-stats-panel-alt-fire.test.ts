@@ -45,6 +45,8 @@ const EXPECTED = [
   "tenora", "tenora_prime", "corinth", "corinth_prime", "basmu", "buzlok", "cedo", "cedo_prime", "paracyst",
   "azima", "scyotid", "enkaus", "quanta", "quanta_vandal", "tenet_quanta", "mutalist_quanta", "phantasma",
   "phantasma_prime",
+  // Batch 4c: the five that each needed one decision
+  "aeolak", "tenet_plinx", "tenet_tetra", "coda_bassocyst", "stug",
   // Former toggle weapons (legacy alternateModeStats)
   "nunchasa", "hind", "bubonico", "coda_bubonico", "kuva_hind", "kuva_quartakk", "tiberon_prime", "quatz",
   "staticor", "corufell_prime", "talons_thrown",

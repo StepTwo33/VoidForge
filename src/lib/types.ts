@@ -92,6 +92,8 @@ export interface Weapon {
    * "Rifle") rather than "Charge" — e.g. Auto-Charge Vadarya Prime / Javlok.
    */
   chargeTimingAlways?: boolean;
+  /** Charge time ignores fire-rate mods (wiki says so, e.g. Aeolak alt-fire). */
+  chargeTimeFixed?: boolean;
   /** Shots per burst (burst trigger weapons). */
   burstCount?: number;
   /** Delay between shots inside a burst (seconds). */
@@ -175,6 +177,8 @@ export interface WeaponAlternateModeStats {
   /** Charge timing for effective fire rate while this mode is active. */
   chargeTime?: number;
   chargeMode?: "standard" | "bow" | "lanka";
+  /** Charge time ignores fire-rate mods while this mode is active. */
+  chargeTimeFixed?: boolean;
   triggerType?: string;
   /** Burst timing while this mode is active (wiki BurstCount / BurstDelay). */
   burstCount?: number;

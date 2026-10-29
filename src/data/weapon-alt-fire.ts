@@ -10,7 +10,7 @@ import type { WeaponAlternateModeStats } from "@/lib/types";
  * `multishot` for the pellet count). Every mode lists every damage type explicitly (0 when
  * absent) so the primary mode's elements never leak into it.
  */
-const DMG_KEYS = [
+export const DMG_KEYS = [
   "impact", "puncture", "slash", "heat", "cold", "toxin", "electricity",
   "radiation", "viral", "corrosive", "blast", "gas", "magnetic", "tau",
 ] as const;
@@ -768,7 +768,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       label: "Tracking Beacon",
       ...dmg({ puncture: 3 }),
       fireRate: 1.67, criticalChance: 0, criticalMultiplier: 1, statusChance: 0,
-      triggerType: "Semi-Auto", ammoCost: 1, forcedProcs: [],
+      triggerType: "Semi-Auto", ammoCost: 1, forcedProcs: [], ignoreMultishotMods: true,
       note: "Wiki Buzlok attack 2. Tags a target for 20 s: primary shots home on it and you gain +50% critical chance. Multishot mods do not add beacons.",
     },
   ],
@@ -916,6 +916,68 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
         { name: "Cluster Bombs Explosion", radiation: 18, totalDamage: 18, radius: 2 },
       ],
       note: "Wiki Phantasma Prime attacks 2-5. Costs 2 ammo (more as the magazine empties), guaranteed Impact. The 4.8 m explosion releases 5 homing bomblets (3 Impact each, then the 2 m explosion, listed once). Holding the charge longer adds damage; the wiki's base is shown. DPS uses 1 / (charge time + 1 / fire rate).",
+    },
+  ],
+  // ---- Batch 4c: five alt-fire shots that each needed one decision ---------------------------
+  // Aeolak: the wiki says the charge time is not affected by fire-rate mods (chargeTimeFixed).
+  aeolak: [
+    {
+      label: "Alt-Fire",
+      ...dmg({ impact: 58.2, puncture: 9.7, slash: 29.1 }),
+      fireRate: 1.5, criticalChance: 0.21, criticalMultiplier: 2.3, statusChance: 0.33,
+      multishot: 1, chargeTime: 0.3, chargeMode: "standard", chargeTimeFixed: true,
+      triggerType: "Auto-Charge", ammoCost: 10, forcedProcs: ["Impact"],
+      radialAttacks: [{ name: "Alt-Fire Explosion", blast: 789, totalDamage: 789, radius: 7, falloffReduction: 0.5 }],
+      note: "Wiki Aeolak attacks 2 and 3. Auto-charges, costs 10 ammo, guaranteed Impact. The round explodes in 7 m (listed below it); the hit and the explosion roll status separately. Fire-rate mods speed up the 1.5 fire rate but not the 0.3 s charge. DPS uses 1 / (charge time + 1 / fire rate).",
+    },
+  ],
+  // Tenet Plinx: the shot uses the whole magazine and deals 100 Impact + 100 Radiation per round
+  // in it, so magazine mods scale it (damageTimesMagazine). Values below are per round.
+  tenet_plinx: [
+    {
+      label: "Alt-Fire",
+      ...dmg({ impact: 100 }),
+      fireRate: 1, criticalChance: 0.4, criticalMultiplier: 3, statusChance: 0.2,
+      multishot: 1, chargeTime: 0.8, chargeMode: "standard", triggerType: "Charge",
+      ammoCost: 10, reloadTime: 2.5, forcedProcs: ["Impact"], damageTimesMagazine: true,
+      radialAttacks: [{ name: "Alt-Fire AoE", radiation: 100, totalDamage: 100, radius: 6, falloffReduction: 0.4, explosionDelay: 0.8 }],
+      note: "Wiki Tenet Plinx attacks 2 and 3. Needs a full magazine and uses all of it. Deals 100 Impact on contact and 100 Radiation in a 6 m pull-in explosion 0.8 s later, each multiplied by the magazine size, so magazine mods raise it. Guaranteed Impact. 2 s recharge delay (2.5 s to full at base). Synth Charge does not apply.",
+    },
+  ],
+  // Tenet Tetra: the grenade uses the remaining magazine and scales with the share left; shown full.
+  tenet_tetra: [
+    {
+      label: "Grenade",
+      ...dmg({ impact: 200 }),
+      fireRate: 1.33, criticalChance: 0.28, criticalMultiplier: 2.2, statusChance: 0.3,
+      multishot: 1, triggerType: "Semi-Auto", ammoCost: 80, reloadTime: 1.8, forcedProcs: [],
+      usesWholeMagazine: true,
+      radialAttacks: [{ name: "Grenade AoE", blast: 1000, totalDamage: 1000, radius: 8, falloffReduction: 0.6 }],
+      note: "Wiki Tenet Tetra attacks 2 and 3, shown with a full magazine. Uses the rest of the magazine; damage scales with the share of the magazine left, and magazine mods do not raise it. The 8 m explosion (listed below it) falls off to 40% at the edge. Kinetic Ricochet does not affect it.",
+    },
+  ],
+  // Coda Bassocyst: the mite clings and ticks for 10 s, so no DPS.
+  coda_bassocyst: [
+    {
+      label: "Mite",
+      ...dmg({ blast: 303 }),
+      fireRate: 1.67, criticalChance: 0.18, criticalMultiplier: 2.2, statusChance: 0.4,
+      multishot: 6, triggerType: "Semi-Auto", ammoCost: 4, forcedProcs: ["Impact", "Magnetic"],
+      showDps: false,
+      note: "Wiki Coda Bassocyst attack 2. Costs 4 ammo. Mites latch onto up to 6 enemies, mark their heads for 5 s and deal Impact and Magnetic damage and status every second for 10 s. Galvanized Savvy does not affect it; universal buffs (Xata's Whisper, Nourish, Shock Trooper and the like) do. On-status mods and arcanes do not trigger from it. No DPS is shown.",
+    },
+  ],
+  // Stug: a full 10-stack blob (wiki page; the module has no alt attack). Multishot only adds
+  // stacks, and the blob is already at the 10 cap, so multishot mods add nothing.
+  stug: [
+    {
+      label: "Charged Blob",
+      ...dmg({ corrosive: 36 }),
+      fireRate: 4, criticalChance: 0.05, criticalMultiplier: 1.5, statusChance: 0.1,
+      multishot: 1, chargeTime: 2, chargeMode: "standard", triggerType: "Charge",
+      ammoCost: 10, forcedProcs: [], ignoreMultishotMods: true,
+      radialAttacks: [{ name: "Blob Explosion", corrosive: 750, totalDamage: 750, radius: 2.8, falloffReduction: 0.7 }],
+      note: "Wiki Stug page: charges a full 10-stack blob over 2 s for 10 ammo. It sticks for 36 Corrosive in 2 m, then bursts at once for 750 Corrosive in 2.8 m (listed below it) with 70% falloff. Multishot mods add nothing past 10 stacks. Not available with the Incarnon Adapter. DPS uses 1 / (charge time + 1 / fire rate).",
     },
   ],
 };
