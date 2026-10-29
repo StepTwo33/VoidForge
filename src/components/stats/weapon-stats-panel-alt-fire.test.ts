@@ -41,6 +41,10 @@ const EXPECTED = [
   // Batch 4a: alt-fire shots with their own stats
   "alternox", "alternox_prime", "battacor", "efv_5_jupiter", "efv_8_mars", "euphona_prime", "harpak", "higasa",
   "kuva_hek", "panthera", "panthera_prime", "stahlta", "trumna", "trumna_prime",
+  // Batch 4b: more alt-fire shots
+  "tenora", "tenora_prime", "corinth", "corinth_prime", "basmu", "buzlok", "cedo", "cedo_prime", "paracyst",
+  "azima", "scyotid", "enkaus", "quanta", "quanta_vandal", "tenet_quanta", "mutalist_quanta", "phantasma",
+  "phantasma_prime",
   // Former toggle weapons (legacy alternateModeStats)
   "nunchasa", "hind", "bubonico", "coda_bubonico", "kuva_hind", "kuva_quartakk", "tiberon_prime", "quatz",
   "staticor", "corufell_prime", "talons_thrown",

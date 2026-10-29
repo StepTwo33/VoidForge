@@ -98,15 +98,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "falloffReduction": 0.5
     }
   ],
-  "cedo_prime": [
-    {
-      "name": "Glaive Radial Attack",
-      "blast": 10.0,
-      "totalDamage": 10.0,
-      "radius": 6.0,
-      "falloffReduction": 0.0
-    }
-  ],
   "coda_bassocyst": [
     {
       "name": "Alt-Fire",
@@ -144,13 +135,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 90.0,
       "radius": 36.0,
       "falloffReduction": 0.64444
-    },
-    {
-      "name": "Air Burst Explosion",
-      "blast": 2200.0,
-      "totalDamage": 2200.0,
-      "radius": 9.8,
-      "falloffReduction": 0.9
     }
   ],
   "gorgon_wraith": [
@@ -278,22 +262,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "explosionDelay": 0.25
     }
   ],
-  "mutalist_quanta": [
-    {
-      "name": "Infested Orb",
-      "radiation": 20.0,
-      "totalDamage": 20.0,
-      "radius": 2.0,
-      "falloffReduction": 0.0
-    },
-    {
-      "name": "Orb Explosion",
-      "toxin": 100.0,
-      "totalDamage": 100.0,
-      "radius": 4.4,
-      "falloffReduction": 0.5
-    }
-  ],
   "opticor_vandal": [
     {
       "name": "Charged Shot AoE",
@@ -310,21 +278,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 20.0,
       "radius": 1.6,
       "falloffReduction": 0.2
-    }
-  ],
-  "phantasma_prime": [
-    {
-      "name": "Plasma Bomb Explosion",
-      "radiation": 73.0,
-      "totalDamage": 73.0,
-      "radius": 4.8,
-      "falloffReduction": 0.5
-    },
-    {
-      "name": "Cluster Bombs Explosion",
-      "radiation": 18.0,
-      "totalDamage": 18.0,
-      "radius": 2.0
     }
   ],
   "prisma_gorgon": [
@@ -370,28 +323,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "radius": 7.0,
       "falloffReduction": 0.5,
       "explosionDelay": 1.7
-    }
-  ],
-  "quanta_vandal": [
-    {
-      "name": "Cube (direct hit)",
-      "electricity": 100.0,
-      "totalDamage": 100.0,
-      "radius": 15.0
-    },
-    {
-      "name": "Cube Explosion",
-      "blast": 150.0,
-      "totalDamage": 150.0,
-      "radius": 0.5,
-      "falloffReduction": 0.0
-    },
-    {
-      "name": "Cube (shot by player)",
-      "blast": 600.0,
-      "totalDamage": 600.0,
-      "radius": 6.0,
-      "falloffReduction": 0.0
     }
   ],
   "scourge_prime": [
@@ -481,28 +412,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "electricity": 150.0,
       "totalDamage": 150.0,
       "radius": 10.0
-    }
-  ],
-  "tenet_quanta": [
-    {
-      "name": "Cube (direct hit)",
-      "electricity": 180.0,
-      "totalDamage": 180.0,
-      "radius": 15.0
-    },
-    {
-      "name": "Cube Explosion",
-      "blast": 150.0,
-      "totalDamage": 150.0,
-      "radius": 0.5,
-      "falloffReduction": 0.0
-    },
-    {
-      "name": "Cube (shot by player)",
-      "blast": 600.0,
-      "totalDamage": 600.0,
-      "radius": 6.0,
-      "falloffReduction": 0.0
     }
   ],
   "tenet_tetra": [
@@ -626,15 +535,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "falloffReduction": 0.0
     }
   ],
-  "cedo": [
-    {
-      "name": "Glaive Radial Attack",
-      "blast": 10.0,
-      "totalDamage": 10.0,
-      "radius": 6.0,
-      "falloffReduction": 0.0
-    }
-  ],
   "corinth": [
     {
       "name": "Buckshot",
@@ -644,23 +544,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 90.0,
       "radius": 36.0,
       "falloffReduction": 0.6667
-    },
-    {
-      "name": "Air Burst Explosion",
-      "blast": 404.0,
-      "totalDamage": 404.0,
-      "radius": 9.4,
-      "falloffReduction": 0.9
-    }
-  ],
-  "enkaus": [
-    {
-      "name": "Radial",
-      "corrosive": 10.0,
-      "puncture": 4.0,
-      "totalDamage": 14.0,
-      "radius": 8.0,
-      "falloffReduction": 0.5
     }
   ],
   "evensong": [
@@ -792,43 +675,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 350.0,
       "radius": 4.0,
       "falloffReduction": 0.5
-    }
-  ],
-  "phantasma": [
-    {
-      "name": "Plasma Bomb Explosion",
-      "radiation": 73.0,
-      "totalDamage": 73.0,
-      "radius": 4.8,
-      "falloffReduction": 0.5
-    },
-    {
-      "name": "Cluster Bombs Explosion",
-      "radiation": 18.0,
-      "totalDamage": 18.0,
-      "radius": 2.0
-    }
-  ],
-  "quanta": [
-    {
-      "name": "Cube (direct hit)",
-      "electricity": 100.0,
-      "totalDamage": 100.0,
-      "radius": 15.0
-    },
-    {
-      "name": "Cube Explosion",
-      "blast": 150.0,
-      "totalDamage": 150.0,
-      "radius": 0.5,
-      "falloffReduction": 0.0
-    },
-    {
-      "name": "Cube (shot by player)",
-      "blast": 600.0,
-      "totalDamage": 600.0,
-      "radius": 6.0,
-      "falloffReduction": 0.0
     }
   ],
   "scourge": [
@@ -1120,14 +966,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 450.0,
       "radius": 7.9,
       "falloffReduction": 0.8
-    }
-  ],
-  "azima": [
-    {
-      "name": "Turret Expiry",
-      "blast": 75.0,
-      "totalDamage": 75.0,
-      "radius": 3.0
     }
   ],
   "castanas": [

@@ -385,6 +385,15 @@ def main() -> None:
     for wid in ("trumna", "trumna_prime"):
         if wid in merged:
             merged[wid] = [a for a in merged[wid] if a.get("name") != "Grenade Bounce AoE"]
+    # Batch 4b alt-fire shots: same rule. Quanta "Cube (direct hit)" and Mutalist Quanta
+    # "Infested Orb" are the alt-fire shot itself (shown as its direct damage), and the Azima
+    # "Turret Expiry" row had a stand-in 3 m radius (the wiki lists none).
+    for wid in ("azima", "cedo", "cedo_prime", "enkaus", "mutalist_quanta", "phantasma",
+                "phantasma_prime", "quanta", "quanta_vandal", "tenet_quanta"):
+        merged.pop(wid, None)
+    for wid in ("corinth", "corinth_prime"):
+        if wid in merged:
+            merged[wid] = [a for a in merged[wid] if a.get("name") != "Air Burst Explosion"]
 
     for wid, attacks in MANUAL_RADIAL_ATTACKS.items():
         if wid in known_ids:

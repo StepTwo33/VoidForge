@@ -566,6 +566,124 @@ describe("ALT FIRE: Batch 4a alt-fire shots, hand-worked against wiki.warframe.c
   });
 });
 
+describe("ALT FIRE: Batch 4b alt-fire shots, hand-worked against wiki.warframe.com", () => {
+  const altOf = (id: string, label: string, mods: string[] = []) =>
+    computeAltFire(byId(id), calcWith(mods)).find((r) => r.label === label)!;
+  const primOf = (id: string) => calculateWeaponBuild(byId(id), [], modsMap);
+  const radNames = (s: { radialAttacks?: { name: string }[] }) => (s.radialAttacks ?? []).map((r) => r.name);
+
+  it("Tenora / Prime charged shot: 240 / 280 shown, 10 ammo, 1 / (0.8 s + 1 / FR)", () => {
+    const t = altOf("tenora", "Charged Shot").stats;
+    expect(t.arsenalDamage?.totalDamage ?? t.totalDamage).toBeCloseTo(240, 6);
+    expect(t.effectiveFireRate).toBeCloseTo(1 / (0.8 + 1 / 10), 6);
+    // engine quantises 48 / 144 / 48 to 1/32 of 240: 45 + 142.5 + 45 = 232.5
+    near(t.burstDps, 232.5 * (1 + 0.34 * 2) / 0.9);
+    expect(t.ammoCost).toBe(10);
+    const p = altOf("tenora_prime", "Charged Shot").stats;
+    expect(p.effectiveFireRate).toBeCloseTo(1 / (0.8 + 1 / 2), 6);
+    expect(p.arsenalDamage?.totalDamage ?? p.totalDamage).toBeCloseTo(280, 6);
+  });
+
+  it("Corinth / Prime air burst: 100 Impact x 1.024 x FR, forced Impact; the explosion moves off the primary", () => {
+    const c = altOf("corinth", "Air Burst").stats;
+    expect(c.multishot).toBeCloseTo(1, 6);
+    near(c.burstDps, 100 * 1.024 * 1.17);
+    expect(c.forcedProcs).toEqual(["Impact"]);
+    expect(radNames(c)).toEqual(["Air Burst Explosion"]);
+    const p = altOf("corinth_prime", "Air Burst").stats;
+    expect(p.ammoCost).toBe(4);
+    near(p.burstDps, 100 * 1.024 * 0.667);
+    expect(p.radialAttacks?.[0]?.totalDamage).toBeCloseTo(2200, 6);
+    for (const id of ["corinth", "corinth_prime"]) expect(radNames(primOf(id))).toEqual(["Buckshot"]);
+  });
+
+  it("Basmu twin beams: 2 x 12 x (1 + 0.02 x 3.8) x 12/s = 309.9; heat radial stays on the primary", () => {
+    const s = altOf("basmu", "Twin Beams").stats;
+    expect(s.multishot).toBeCloseTo(2, 6);
+    near(s.burstDps, 2 * 12 * 1.076 * 12);
+    expect(radNames(s)).toEqual([]);
+    expect(radNames(primOf("basmu"))).toEqual(["Radial Attack"]);
+  });
+
+  it("Paracyst harpoon: charge, not burst: 1 / (0.25 s + 1 / 5) = 2.22/s, 15 x 2.22 = 33.3", () => {
+    const s = altOf("paracyst", "Infested Harpoon").stats;
+    expect(s.effectiveFireRate).toBeCloseTo(1 / 0.45, 6);
+    near(s.burstDps, 15 / 0.45);
+  });
+
+  it("Scyotid snare / Buzlok beacon / Enkaus ink shot: single shots at the wiki fire rate", () => {
+    const sc = altOf("scyotid", "Snare").stats;
+    expect(sc.multishot).toBeCloseTo(1, 6);
+    expect(sc.ammoCost).toBe(4);
+    near(sc.burstDps, 40 * (1 + 0.08 * 1.4) * 1.6);
+    near(altOf("buzlok", "Tracking Beacon").stats.burstDps, 3 * 1.67);
+    const e = altOf("enkaus", "Ink Shot").stats;
+    near(e.burstDps, 16 * (1 + 0.16 * 0.8) * 2);
+    expect(radNames(e)).toEqual(["Alt-Fire Radial Attack"]);
+    expect(radNames(primOf("enkaus"))).toEqual([]);
+  });
+
+  it("Phantasma / Prime plasma bomb: 15 x 1.015 / (1 s + 1 / 2), forced Impact; explosions move off the primary", () => {
+    for (const id of ["phantasma", "phantasma_prime"]) {
+      const s = altOf(id, "Plasma Bomb").stats;
+      expect(s.multishot, id).toBeCloseTo(1, 6);
+      near(s.burstDps, 15 * 1.015 / 1.5);
+      expect(s.forcedProcs).toEqual(["Impact"]);
+      expect(radNames(s)).toEqual(["Plasma Bomb Explosion", "Cluster Bombs Explosion"]);
+      expect(radNames(primOf(id))).toEqual([]);
+    }
+  });
+
+  it("Quanta family cube: one cube (beams' innate 2 does not leak), both explosions listed, DPS hidden", () => {
+    for (const [id, d] of [["quanta", 100], ["quanta_vandal", 100], ["tenet_quanta", 180]] as const) {
+      const r = altOf(id, "Cube");
+      expect(r.showDps, id).toBe(false);
+      expect(r.stats.multishot, id).toBeCloseTo(1, 6);
+      expect(r.stats.totalDamage, id).toBeCloseTo(d, 6);
+      expect(r.stats.ammoCost, id).toBe(10);
+      expect(radNames(r.stats)).toEqual(["Cube Explosion", "Cube (shot by player)"]);
+      expect(radNames(primOf(id))).toEqual([]);
+    }
+  });
+
+  it("utility alts show stats with DPS hidden: Cedo / Prime glaive, Azima turret, Mutalist Quanta orb", () => {
+    for (const [id, label] of [["cedo", "Glaive"], ["cedo_prime", "Glaive"], ["azima", "Turret"], ["mutalist_quanta", "Infested Orb"]] as const) {
+      expect(altOf(id, label).showDps, id).toBe(false);
+      expect(radNames(primOf(id)), id).toEqual([]);
+    }
+    expect(altOf("azima", "Turret").stats.ammoCost).toBe(75);
+    expect(altOf("cedo", "Glaive").stats.ammoCost).toBe(0);
+    expect(radNames(altOf("cedo_prime", "Glaive").stats)).toEqual(["Glaive Radial Attack"]);
+    expect(radNames(altOf("mutalist_quanta", "Infested Orb").stats)).toEqual(["Orb Explosion"]);
+  });
+
+  it("primary numbers unchanged: wiki attack 1 for every Batch 4b weapon", () => {
+    const want: Record<string, [number, number]> = {
+      tenora: [24, 11.67], tenora_prime: [28, 12.67], corinth: [90, 1.17], corinth_prime: [90, 1.42], basmu: [39, 12],
+      buzlok: [60, 6.25], cedo: [30, 3.83], cedo_prime: [32, 4.5], paracyst: [33, 8.33], azima: [20, 10], scyotid: [40, 2.4],
+      enkaus: [28, 12], quanta: [10, 12], quanta_vandal: [13, 12], mutalist_quanta: [25, 10], tenet_quanta: [18, 10],
+      phantasma: [15, 12], phantasma_prime: [15, 12],
+    };
+    for (const [id, [d, fr]] of Object.entries(want)) {
+      const w = byId(id);
+      expect(w.damage, id).toBeCloseTo(d, 1);
+      expect(w.fireRate, id).toBeCloseTo(fr, 1);
+    }
+  });
+
+  it("mods apply: Serration scales the Corinth Prime alt like the primary", () => {
+    const p = calcWith(PRIMARY_MODS)(byId("corinth_prime")), p0 = primOf("corinth_prime");
+    const q = altOf("corinth_prime", "Air Burst", PRIMARY_MODS).stats, q0 = altOf("corinth_prime", "Air Burst").stats;
+    expect(q.totalDamage / q0.totalDamage).toBeCloseTo(p.totalDamage / p0.totalDamage, 2);
+  });
+
+  it("held back for a decision: Stug, Aeolak, Tenet Plinx, Tenet Tetra, Coda Bassocyst have no alt section yet", () => {
+    for (const id of ["stug", "aeolak", "tenet_plinx", "tenet_tetra", "coda_bassocyst"]) {
+      if (weapons.some((w) => w.id === id)) expect(getAltFireModes(byId(id)), id).toEqual([]);
+    }
+  });
+});
+
 describe("ALT FIRE: radial stand-in verdicts", () => {
   it("real wiki explosions on the primary stay (Cyanex, Glaive Prime, Staticor, Zarr)", () => {
     const names = (id: string) => (calculateWeaponBuild(byId(id), [], modsMap).radialAttacks ?? []).map((r) => r.name);

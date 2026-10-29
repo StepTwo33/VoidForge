@@ -711,4 +711,211 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       note: "Wiki Trumna Prime attacks 3 and 4. No ammo, but each grenade needs 5 primary-fire kills, so no DPS is shown. It explodes on each bounce (up to 7).",
     },
   ],
+
+  // ---- Batch 4b: more alt-fire shots (pattern D), same rules as 4a ----------------------------
+  // Beam weapons (Enkaus, Quanta family, Phantasma / Prime): the calculator's beam multishot rule
+  // is keyed on weapon id, so it is also set on the alt; it only feeds the TTK status-DoT sim,
+  // which the ALT FIRE section does not show, so the alt numbers are unaffected.
+  tenora: [
+    {
+      label: "Charged Shot",
+      ...dmg({ impact: 48, puncture: 144, slash: 48 }),
+      fireRate: 10, criticalChance: 0.34, criticalMultiplier: 3, statusChance: 0.11,
+      chargeTime: 0.8, chargeMode: "standard", triggerType: "Charge", ammoCost: 10, forcedProcs: [],
+      note: "Wiki Tenora attack 2. One hit-scan shot of 240 for 10 ammo, 1 m punch through; the charge is automatic. DPS uses 1 / (charge time + 1 / fire rate). The wiki lists fire rate 10 here (2 on Tenora Prime).",
+    },
+  ],
+  tenora_prime: [
+    {
+      label: "Charged Shot",
+      ...dmg({ impact: 56, puncture: 168, slash: 56 }),
+      fireRate: 2, criticalChance: 0.4, criticalMultiplier: 3, statusChance: 0.2,
+      chargeTime: 0.8, chargeMode: "standard", triggerType: "Charge", ammoCost: 10, forcedProcs: [],
+      note: "Wiki Tenora Prime attack 2. One hit-scan shot of 280 for 10 ammo, 1 m punch through; the charge is automatic. DPS uses 1 / (charge time + 1 / fire rate).",
+    },
+  ],
+  corinth: [
+    {
+      label: "Air Burst",
+      ...dmg({ impact: 100 }),
+      fireRate: 1.17, criticalChance: 0.04, criticalMultiplier: 1.6, statusChance: 0.28,
+      multishot: 1, triggerType: "Semi-Auto", ammoCost: 1, forcedProcs: ["Impact"],
+      radialAttacks: [{ name: "Air Burst Explosion", blast: 404, totalDamage: 404, radius: 9.4, falloffReduction: 0.9 }],
+      note: "Wiki Corinth attacks 2 and 3. A grenade that bursts in midair after 20 m (not on a surface or enemy); a direct hit is 100 Impact with a guaranteed Impact proc. The 9.4 m explosion is listed below it.",
+    },
+  ],
+  corinth_prime: [
+    {
+      label: "Air Burst",
+      ...dmg({ impact: 100 }),
+      fireRate: 0.667, criticalChance: 0.04, criticalMultiplier: 1.6, statusChance: 0.5,
+      multishot: 1, triggerType: "Semi-Auto", burstCount: 1, burstDelay: 0, ammoCost: 4, forcedProcs: ["Impact"],
+      radialAttacks: [{ name: "Air Burst Explosion", blast: 2200, totalDamage: 2200, radius: 9.8, falloffReduction: 0.9 }],
+      note: "Wiki Corinth Prime attacks 2 and 3. Costs 4 ammo. Press alt-fire again to burst the grenade in midair; a direct hit is 100 Impact with a guaranteed Impact proc. The 9.8 m explosion is listed below it.",
+    },
+  ],
+  basmu: [
+    {
+      label: "Twin Beams",
+      ...dmg({ electricity: 12 }),
+      fireRate: 12, criticalChance: 0.02, criticalMultiplier: 4.8, statusChance: 0.3,
+      multishot: 2, triggerType: "Held", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Basmu attack 3. Two held 9 m beams, 1 battery ammo per tick. The damage ramp-up and the chaining (up to 5 enemies, half damage each step) are not modelled.",
+    },
+  ],
+  buzlok: [
+    {
+      label: "Tracking Beacon",
+      ...dmg({ puncture: 3 }),
+      fireRate: 1.67, criticalChance: 0, criticalMultiplier: 1, statusChance: 0,
+      triggerType: "Semi-Auto", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Buzlok attack 2. Tags a target for 20 s: primary shots home on it and you gain +50% critical chance. Multishot mods do not add beacons.",
+    },
+  ],
+  // Cedo / Prime: only one glaive (or one set, with multishot) is out at a time, about 5 s or 11
+  // bounces, so the fire rate gives no real DPS.
+  cedo: [
+    {
+      label: "Glaive",
+      ...dmg({ slash: 20 }),
+      fireRate: 1, criticalChance: 0.02, criticalMultiplier: 1.4, statusChance: 0.5,
+      multishot: 1, triggerType: "Semi-Auto", ammoCost: 0, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [{ name: "Glaive Radial Attack", blast: 10, totalDamage: 10, radius: 6, falloffReduction: 0 }],
+      note: "Wiki Cedo attacks 2 and 3. No ammo. The glaive bounces up to 11 times, exploding in 6 m on each hit with two guaranteed procs (listed below it). Only one glaive is out at a time, so no DPS is shown.",
+    },
+  ],
+  cedo_prime: [
+    {
+      label: "Glaive",
+      ...dmg({ slash: 20 }),
+      fireRate: 1, criticalChance: 0.1, criticalMultiplier: 2, statusChance: 0.5,
+      multishot: 1, triggerType: "Semi-Auto", ammoCost: 0, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [{ name: "Glaive Radial Attack", blast: 10, totalDamage: 10, radius: 6, falloffReduction: 0 }],
+      note: "Wiki Cedo Prime attacks 2 and 3. No ammo. The glaive bounces up to 11 times, exploding in 6 m on each hit with two guaranteed procs (listed below it). Only one glaive is out at a time, so no DPS is shown.",
+    },
+  ],
+  paracyst: [
+    {
+      label: "Infested Harpoon",
+      ...dmg({ toxin: 15 }),
+      fireRate: 5, criticalChance: 0, criticalMultiplier: 1, statusChance: 0.3,
+      chargeTime: 0.25, chargeMode: "standard", triggerType: "Charge", burstCount: 1, burstDelay: 0,
+      ammoCost: 1, forcedProcs: [],
+      note: "Wiki Paracyst attack 2. A 50 m tether that pulls the enemy in, then 15 Toxin a tick for 5 ticks. The wiki lists it as burst fire but the page says it is a charge shot; DPS uses 1 / (charge time + 1 / fire rate).",
+    },
+  ],
+  // Azima: the alt-fire throws the whole magazine as a turret, so no DPS.
+  azima: [
+    {
+      label: "Turret",
+      ...dmg({ blast: 75 }),
+      fireRate: 10, criticalChance: 0.16, criticalMultiplier: 2, statusChance: 0.16,
+      triggerType: "Semi-Auto", ammoCost: 75, forcedProcs: [],
+      showDps: false,
+      note: "Wiki Azima attack 2. Throws the whole magazine as a turret that fires its rounds as primary shots for about 10 s, then deals 75 Blast (shown). No DPS is shown.",
+    },
+  ],
+  scyotid: [
+    {
+      label: "Snare",
+      ...dmg({ toxin: 40 }),
+      fireRate: 1.6, criticalChance: 0.08, criticalMultiplier: 2.4, statusChance: 0.32,
+      multishot: 1, triggerType: "Semi", ammoCost: 4, forcedProcs: [],
+      note: "Wiki Scyotid attack 2. A webbed snare that damages, holds and pulls together up to 8 enemies within 15 m for about 6 s. Costs 4 ammo.",
+    },
+  ],
+  enkaus: [
+    {
+      label: "Ink Shot",
+      ...dmg({ puncture: 4, corrosive: 12 }),
+      fireRate: 2, criticalChance: 0.16, criticalMultiplier: 1.8, statusChance: 0.32,
+      triggerType: "Semi-Auto", ammoCost: 1, forcedProcs: [],
+      radialAttacks: [{ name: "Alt-Fire Radial Attack", puncture: 4, corrosive: 10, totalDamage: 14, radius: 8, falloffReduction: 0.5 }],
+      note: "Wiki Enkaus attacks 2 and 3. Inks enemies for 20 s (primary hits on them refill ammo; they dissolve below 35% health). The 8 m explosion is listed below it. The wiki data says 1 ammo, the page says 15.",
+    },
+  ],
+  // Quanta family: a cube explodes for 150 (0.5 m) on contact or 600 (6 m) when shot, never
+  // both, so the rows are listed and no DPS is shown.
+  quanta: [
+    {
+      label: "Cube",
+      ...dmg({ electricity: 100 }),
+      fireRate: 4, criticalChance: 0.05, criticalMultiplier: 1.5, statusChance: 0.26,
+      multishot: 1, triggerType: "Semi", ammoCost: 10, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [
+        { name: "Cube Explosion", blast: 150, totalDamage: 150, radius: 0.5, falloffReduction: 0 },
+        { name: "Cube (shot by player)", blast: 600, totalDamage: 600, radius: 6, falloffReduction: 0 },
+      ],
+      note: "Wiki Quanta attacks 2-4. Costs 10 ammo. The cube stops after about 15 m and explodes on contact (150, 0.5 m), when shot (600, 6 m), or after 8 s. One or the other, so no DPS is shown.",
+    },
+  ],
+  quanta_vandal: [
+    {
+      label: "Cube",
+      ...dmg({ electricity: 100 }),
+      fireRate: 4, criticalChance: 0.05, criticalMultiplier: 1.5, statusChance: 0.26,
+      multishot: 1, triggerType: "Semi", ammoCost: 10, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [
+        { name: "Cube Explosion", blast: 150, totalDamage: 150, radius: 0.5, falloffReduction: 0 },
+        { name: "Cube (shot by player)", blast: 600, totalDamage: 600, radius: 6, falloffReduction: 0 },
+      ],
+      note: "Wiki Quanta Vandal attacks 2-4. Costs 10 ammo. The cube stops after about 15 m and explodes on contact (150, 0.5 m), when shot (600, 6 m), or after 8 s. One or the other, so no DPS is shown.",
+    },
+  ],
+  tenet_quanta: [
+    {
+      label: "Cube",
+      ...dmg({ electricity: 180 }),
+      fireRate: 4, criticalChance: 0.05, criticalMultiplier: 1.5, statusChance: 1,
+      multishot: 1, triggerType: "Semi", ammoCost: 10, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [
+        { name: "Cube Explosion", blast: 150, totalDamage: 150, radius: 0.5, falloffReduction: 0 },
+        { name: "Cube (shot by player)", blast: 600, totalDamage: 600, radius: 6, falloffReduction: 0 },
+      ],
+      note: "Wiki Tenet Quanta attacks 2-4. Costs 10 ammo. The cube stops after about 15 m and explodes on contact (150, 0.5 m), when shot (600, 6 m), or after 8 s. One or the other, so no DPS is shown.",
+    },
+  ],
+  // Mutalist Quanta: the orb sits for 9 s (up to 3 merge) to buff shots fired through it, so no DPS.
+  mutalist_quanta: [
+    {
+      label: "Infested Orb",
+      ...dmg({ radiation: 20 }),
+      fireRate: 10, criticalChance: 0, criticalMultiplier: 0, statusChance: 1,
+      triggerType: "Semi", ammoCost: 5, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [{ name: "Orb Explosion", toxin: 100, totalDamage: 100, radius: 4.4, falloffReduction: 0.5 }],
+      note: "Wiki Mutalist Quanta attacks 2 and 3. Costs 5 ammo. The orb sits for 9 s, then explodes (listed below it); shots fired through it gain Electricity and crit but deal 0.66x. No DPS is shown.",
+    },
+  ],
+  phantasma: [
+    {
+      label: "Plasma Bomb",
+      ...dmg({ impact: 15 }),
+      fireRate: 2, criticalChance: 0.03, criticalMultiplier: 1.5, statusChance: 0.37,
+      multishot: 1, chargeTime: 1, chargeMode: "standard", triggerType: "Charge", ammoCost: 2, forcedProcs: ["Impact"],
+      radialAttacks: [
+        { name: "Plasma Bomb Explosion", radiation: 73, totalDamage: 73, radius: 4.8, falloffReduction: 0.5 },
+        { name: "Cluster Bombs Explosion", radiation: 18, totalDamage: 18, radius: 2 },
+      ],
+      note: "Wiki Phantasma attacks 2-5. Costs 2 ammo, guaranteed Impact. The 4.8 m explosion releases 5 homing bomblets (3 Impact each, then the 2 m explosion, listed once). Holding the charge longer adds damage; the wiki's base is shown. DPS uses 1 / (charge time + 1 / fire rate).",
+    },
+  ],
+  phantasma_prime: [
+    {
+      label: "Plasma Bomb",
+      ...dmg({ impact: 15 }),
+      fireRate: 2, criticalChance: 0.03, criticalMultiplier: 1.5, statusChance: 0.37,
+      multishot: 1, chargeTime: 1, chargeMode: "standard", triggerType: "Charge", ammoCost: 2, forcedProcs: ["Impact"],
+      radialAttacks: [
+        { name: "Plasma Bomb Explosion", radiation: 73, totalDamage: 73, radius: 4.8, falloffReduction: 0.5 },
+        { name: "Cluster Bombs Explosion", radiation: 18, totalDamage: 18, radius: 2 },
+      ],
+      note: "Wiki Phantasma Prime attacks 2-5. Costs 2 ammo (more as the magazine empties), guaranteed Impact. The 4.8 m explosion releases 5 homing bomblets (3 Impact each, then the 2 m explosion, listed once). Holding the charge longer adds damage; the wiki's base is shown. DPS uses 1 / (charge time + 1 / fire rate).",
+    },
+  ],
 };
