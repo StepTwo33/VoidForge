@@ -52,16 +52,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "falloffReduction": 0.5
     }
   ],
-  "alternox_prime": [
-    {
-      "name": "Alt-Fire Explosion",
-      "electricity": 140.0,
-      "totalDamage": 140.0,
-      "radius": 6.0,
-      "falloffReduction": 0.6,
-      "explosionDelay": 10.0
-    }
-  ],
   "astilla_prime": [
     {
       "name": "Glass Explosion",
@@ -161,17 +151,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 2200.0,
       "radius": 9.8,
       "falloffReduction": 0.9
-    }
-  ],
-  "efv_5_jupiter": [
-    {
-      "name": "Buckshot",
-      "corrosive": 35.0,
-      "puncture": 57.0,
-      "slash": 35.0,
-      "totalDamage": 127.0,
-      "radius": 10.0,
-      "falloffReduction": 0.9921
     }
   ],
   "gorgon_wraith": [
@@ -542,13 +521,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 50.0,
       "radius": 1.6,
       "falloffReduction": 0.15
-    },
-    {
-      "name": "Grenade Bounce AoE",
-      "heat": 1150.0,
-      "totalDamage": 1150.0,
-      "radius": 6.0,
-      "falloffReduction": 0.4
     }
   ],
   "vectis_prime": [
@@ -608,16 +580,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "explosionDelay": 0.8
     }
   ],
-  "alternox": [
-    {
-      "name": "Alt-Fire Explosion",
-      "electricity": 100.0,
-      "totalDamage": 100.0,
-      "radius": 6.0,
-      "falloffReduction": 0.6,
-      "explosionDelay": 10.0
-    }
-  ],
   "astilla": [
     {
       "name": "Glass Explosion",
@@ -635,15 +597,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 19.0,
       "radius": 1.7,
       "falloffReduction": 0.2
-    }
-  ],
-  "battacor": [
-    {
-      "name": "Secondary Fire AoE",
-      "radiation": 208.0,
-      "totalDamage": 208.0,
-      "radius": 3.4,
-      "falloffReduction": 0.4
     }
   ],
   "braton": [
@@ -743,14 +696,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "radius": 5.0,
       "falloffReduction": 0.1,
       "explosionDelay": 1.1
-    }
-  ],
-  "higasa": [
-    {
-      "name": "Charged Shot",
-      "blast": 390.0,
-      "totalDamage": 390.0,
-      "radius": 3.0
     }
   ],
   "javlok": [
@@ -937,16 +882,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "explosionDelay": 0.9
     }
   ],
-  "stahlta": [
-    {
-      "name": "Alt-Fire AoE",
-      "radiation": 1200.0,
-      "totalDamage": 1200.0,
-      "radius": 7.2,
-      "falloffReduction": 0.7,
-      "explosionDelay": 0.36
-    }
-  ],
   "strun": [
     {
       "name": "Incarnon Form AoE",
@@ -983,13 +918,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 50.0,
       "radius": 1.6,
       "falloffReduction": 0.15
-    },
-    {
-      "name": "Grenade Bounce AoE",
-      "heat": 1000.0,
-      "totalDamage": 1000.0,
-      "radius": 6.0,
-      "falloffReduction": 0.4
     }
   ],
   "vectis": [
@@ -1056,26 +984,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 35.0,
       "radius": 2.8,
       "falloffReduction": 0.0
-    }
-  ],
-  "efv_8_mars": [
-    {
-      "name": "Alt-Fire AoE",
-      "corrosive": 313.0,
-      "totalDamage": 313.0,
-      "radius": 3.0,
-      "falloffReduction": 0.8
-    }
-  ],
-  "euphona_prime": [
-    {
-      "name": "Buckshot",
-      "impact": 4.4,
-      "puncture": 17.6,
-      "slash": 66.0,
-      "totalDamage": 88.0,
-      "radius": 12.0,
-      "falloffReduction": 0.9886
     }
   ],
   "kompressa_prime": [

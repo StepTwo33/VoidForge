@@ -557,4 +557,158 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       note: "Wiki Haalvu attack 2. Split barrels fire 2-shot bursts at up to 4 targets within 10 m, 1.5 ammo a shot. DPS is per target.",
     },
   ],
+  // ---- Batch 4a: alt-fire shots with their own stats (pattern D) --------------------------
+  // The primary is the wiki's first attack; the alt-fire attack (and any AoE whose wiki
+  // AttackParentIndex points at it) is shown here. Every mode sets its own trigger, burst,
+  // ammo cost and forced procs so the primary's never leak in. Forced Stagger is not a status
+  // effect, so the calculator ignores it (as it does Ragdoll / Knockdown).
+  alternox: [
+    {
+      label: "Alt-Fire",
+      ...dmg({ impact: 5, puncture: 37.5, slash: 7.5 }),
+      fireRate: 1.5, criticalChance: 0.02, criticalMultiplier: 2, statusChance: 0.44,
+      triggerType: "Active", ammoCost: 4, forcedProcs: [],
+      radialAttacks: [
+        { name: "Alt-Fire Damage over Time", electricity: 50, totalDamage: 50, radius: 6, falloffReduction: 0.6 },
+        { name: "Alt-Fire Explosion", electricity: 100, totalDamage: 100, radius: 6, falloffReduction: 0.6, explosionDelay: 10 },
+      ],
+      note: "Wiki Alternox attacks 2-4. Costs 4 ammo. The sphere pulses 50 Electricity each second for 10 s, then explodes (or when you fire again). DPS covers the contact hit only; the pulse and explosion are listed below it.",
+    },
+  ],
+  alternox_prime: [
+    {
+      label: "Alt-Fire",
+      ...dmg({ impact: 7, puncture: 52.5, slash: 10.5 }),
+      fireRate: 1.5, criticalChance: 0.02, criticalMultiplier: 2, statusChance: 0.5,
+      triggerType: "Active", ammoCost: 4, forcedProcs: [],
+      radialAttacks: [
+        { name: "Alt-Fire Damage over Time", electricity: 70, totalDamage: 70, radius: 6, falloffReduction: 0.6 },
+        { name: "Alt-Fire Explosion", electricity: 140, totalDamage: 140, radius: 6, falloffReduction: 0.6, explosionDelay: 10 },
+      ],
+      note: "Wiki Alternox Prime attacks 2-4. Costs 4 ammo. The sphere pulses 70 Electricity each second for 10 s, then explodes (or when you fire again). DPS covers the contact hit only; the pulse and explosion are listed below it.",
+    },
+  ],
+  // Battacor: the beam needs 1-3 charges from primary-fire kills (damage x charges), so no DPS.
+  battacor: [
+    {
+      label: "Secondary Fire",
+      ...dmg({ radiation: 208 }),
+      fireRate: 5, criticalChance: 0.34, criticalMultiplier: 3, statusChance: 0.08,
+      chargeTime: 0.4, chargeMode: "standard", triggerType: "Auto-Charge",
+      burstCount: 1, burstDelay: 0, ammoCost: 0, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [{ name: "Secondary Fire AoE", radiation: 208, totalDamage: 208, radius: 3.4, falloffReduction: 0.4 }],
+      note: "Wiki Battacor attacks 2 and 3. Uses no ammo but needs 1-3 charges from primary-fire kills; damage is multiplied by the charges used (shown for 1). The explosion is 3.4 m on an enemy, 6 m on a surface. No DPS shown.",
+    },
+  ],
+  efv_5_jupiter: [
+    {
+      label: "Buckshot",
+      ...dmg({ puncture: 57, slash: 35, corrosive: 35 }),
+      fireRate: 7.8334, criticalChance: 0.21, criticalMultiplier: 2.1, statusChance: 0.0573,
+      multishot: 11, chargeTime: 1, chargeMode: "standard", triggerType: "Auto-Charge",
+      ammoCost: 15, forcedProcs: ["Corrosive"],
+      note: "Wiki EFV-5 Jupiter attack 2. 11 pellets of 127 for 15 ammo, guaranteed Corrosive. DPS uses 1 / (charge time + 1 / fire rate). Falloff to 0.8% from 5 m to 10 m is not modelled.",
+    },
+  ],
+  efv_8_mars: [
+    {
+      label: "Alt-Fire",
+      ...dmg({ corrosive: 35 }),
+      fireRate: 1.5, criticalChance: 0.27, criticalMultiplier: 2.1, statusChance: 0.33,
+      triggerType: "Charge", ammoCost: 3, forcedProcs: [],
+      radialAttacks: [{ name: "Alt-Fire AoE", corrosive: 313, totalDamage: 313, radius: 3, falloffReduction: 0.8 }],
+      note: "Wiki EFV-8 Mars attacks 2 and 3. Costs 3 ammo. The wiki lists no charge time, so DPS uses the 1.5 fire rate. The explosion forces Corrosive and is listed below it.",
+    },
+  ],
+  euphona_prime: [
+    {
+      label: "Buckshot",
+      ...dmg({ impact: 4.4, puncture: 17.6, slash: 66 }),
+      fireRate: 1.5, criticalChance: 0.02, criticalMultiplier: 2, statusChance: 0.09,
+      multishot: 10, ammoCost: 1, forcedProcs: [],
+      note: "Wiki Euphona Prime attack 2. 10 pellets of 88; multishot adds pellets. Falloff to 1.1% from 6 m to 12 m is not modelled.",
+    },
+  ],
+  harpak: [
+    {
+      label: "Harpoon",
+      ...dmg({ impact: 40, puncture: 50, slash: 10 }),
+      fireRate: 1.5, criticalChance: 0.25, criticalMultiplier: 2.3, statusChance: 0.13,
+      triggerType: "Semi-Auto", burstCount: 1, burstDelay: 0, ammoCost: 1, forcedProcs: ["Puncture"],
+      note: "Wiki Harpak attack 2. Tethered harpoon that pulls the enemy in; guaranteed Puncture.",
+    },
+  ],
+  // Higasa: the charged shot needs a full gauge (10% per primary-fire kill), so no DPS.
+  higasa: [
+    {
+      label: "Charged Shot",
+      ...dmg({ blast: 390 }),
+      fireRate: 1.2, criticalChance: 0.24, criticalMultiplier: 2, statusChance: 0.18,
+      chargeTime: 1, chargeMode: "standard", triggerType: "Charge",
+      burstCount: 1, burstDelay: 0, ammoCost: 0, forcedProcs: [],
+      showDps: false,
+      note: "Wiki Higasa attack 2. Hit-scan laser, no ammo, but needs a full gauge (10% per primary-fire kill), so no DPS is shown.",
+    },
+  ],
+  kuva_hek: [
+    {
+      label: "Alt-Fire",
+      ...dmg({ impact: 13.05, puncture: 56.55, slash: 17.4 }),
+      fireRate: 1.17, criticalChance: 0.23, criticalMultiplier: 2.1, statusChance: 0.0332,
+      multishot: 28, ammoCost: 4, forcedProcs: [],
+      note: "Wiki Kuva Hek attack 2. Fires all 4 barrels: 28 pellets of 87 for 4 ammo (the whole magazine). Falloff to 1.1% from 15 m to 30 m is not modelled.",
+    },
+  ],
+  panthera: [
+    {
+      label: "Alt-Fire",
+      ...dmg({ impact: 10, puncture: 10, slash: 80 }),
+      fireRate: 2, criticalChance: 0.25, criticalMultiplier: 2, statusChance: 0.35,
+      triggerType: "Held", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Panthera attack 2. Held spinning blade, 6 m reach, 2 hits a second; ammo is only used while it hits.",
+    },
+  ],
+  panthera_prime: [
+    {
+      label: "Alt-Fire",
+      ...dmg({ slash: 100 }),
+      fireRate: 2, criticalChance: 0.26, criticalMultiplier: 2, statusChance: 0.38,
+      triggerType: "Held", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Panthera Prime attack 3. Held spinning blade, 2 hits a second; ammo is only used while it hits. The ricochet's Radial Attack belongs to the primary.",
+    },
+  ],
+  stahlta: [
+    {
+      label: "Alt-Fire",
+      ...dmg({ impact: 120, puncture: 180, slash: 300 }),
+      fireRate: 0.667, criticalChance: 0.4, criticalMultiplier: 3, statusChance: 0.32,
+      chargeTime: 1.6, chargeMode: "standard", triggerType: "Charge", ammoCost: 20, forcedProcs: ["Impact"],
+      radialAttacks: [{ name: "Alt-Fire AoE", radiation: 1200, totalDamage: 1200, radius: 7.2, falloffReduction: 0.7, explosionDelay: 0.36 }],
+      note: "Wiki Stahlta attacks 2 and 3. Costs 20 ammo, guaranteed Impact; the 7.2 m explosion (50% status) is listed below it. DPS uses 1 / (charge time + 1 / fire rate).",
+    },
+  ],
+  // Trumna: the grenade uses no ammo but needs a gauge filled by 5 primary-fire kills, so no DPS.
+  trumna: [
+    {
+      label: "Alt-Fire Grenade",
+      ...dmg({ impact: 100 }),
+      fireRate: 1.33, criticalChance: 0.38, criticalMultiplier: 2.4, statusChance: 0.5,
+      triggerType: "Semi-Auto", ammoCost: 0, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [{ name: "Grenade Bounce AoE", heat: 1000, totalDamage: 1000, radius: 6, falloffReduction: 0.4 }],
+      note: "Wiki Trumna attacks 3 and 4. No ammo, but each grenade needs 5 primary-fire kills, so no DPS is shown. It explodes on each bounce (up to 7).",
+    },
+  ],
+  trumna_prime: [
+    {
+      label: "Alt-Fire Grenade",
+      ...dmg({ impact: 100 }),
+      fireRate: 1.33, criticalChance: 0.38, criticalMultiplier: 2.4, statusChance: 0.5,
+      triggerType: "Semi-Auto", ammoCost: 0, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [{ name: "Grenade Bounce AoE", heat: 1150, totalDamage: 1150, radius: 6, falloffReduction: 0.4 }],
+      note: "Wiki Trumna Prime attacks 3 and 4. No ammo, but each grenade needs 5 primary-fire kills, so no DPS is shown. It explodes on each bounce (up to 7).",
+    },
+  ],
 };

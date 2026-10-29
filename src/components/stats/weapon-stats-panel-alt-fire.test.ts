@@ -38,6 +38,9 @@ const EXPECTED = [
   // Batch 3: fire-mode toggles
   "kuva_zarr", "ambassador", "argonak", "fulmin", "fulmin_prime", "stradavar", "stradavar_prime", "zenith",
   "fusilai", "hystrix", "hystrix_prime", "sepulcrum", "tenet_diplos", "haalvu",
+  // Batch 4a: alt-fire shots with their own stats
+  "alternox", "alternox_prime", "battacor", "efv_5_jupiter", "efv_8_mars", "euphona_prime", "harpak", "higasa",
+  "kuva_hek", "panthera", "panthera_prime", "stahlta", "trumna", "trumna_prime",
   // Former toggle weapons (legacy alternateModeStats)
   "nunchasa", "hind", "bubonico", "coda_bubonico", "kuva_hind", "kuva_quartakk", "tiberon_prime", "quatz",
   "staticor", "corufell_prime", "talons_thrown",

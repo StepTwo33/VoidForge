@@ -470,6 +470,102 @@ describe("ALT FIRE: Batch 3 fire-mode toggles, hand-worked against wiki.warframe
   });
 });
 
+describe("ALT FIRE: Batch 4a alt-fire shots, hand-worked against wiki.warframe.com", () => {
+  const altOf = (id: string, label: string, mods: string[] = []) =>
+    computeAltFire(byId(id), calcWith(mods)).find((r) => r.label === label)!;
+  const primOf = (id: string) => calculateWeaponBuild(byId(id), [], modsMap);
+  const radNames = (s: { radialAttacks?: { name: string }[] }) => (s.radialAttacks ?? []).map((r) => r.name);
+
+  it("Stahlta: 600 x (1 + 0.4 x 2) / (1.6 s + 1 / 0.667) = 348.5; 20 ammo; the 1,200 explosion moves off the primary", () => {
+    const s = altOf("stahlta", "Alt-Fire").stats;
+    expect(s.effectiveFireRate).toBeCloseTo(1 / (1.6 + 1 / 0.667), 6);
+    near(s.burstDps, 600 * 1.8 / (1.6 + 1 / 0.667));
+    expect(s.ammoCost).toBe(20);
+    expect(s.forcedProcs).toEqual(["Impact"]);
+    expect(radNames(s)).toEqual(["Alt-Fire AoE"]);
+    expect(radNames(primOf("stahlta"))).toEqual([]);
+  });
+
+  it("Kuva Hek: 28 pellets x 87 x (1 + 0.23 x 1.1) x 1.17/s; 4 ammo = one shot a magazine", () => {
+    const s = altOf("kuva_hek", "Alt-Fire").stats;
+    expect(s.multishot).toBeCloseTo(28, 6);
+    near(s.burstDps, 28 * 87 * 1.253 * 1.17);
+    near(s.sustainedDps, (28 * 87 * 1.253) / (1 / 1.17 + 1.9));
+  });
+
+  it("EFV-5 Jupiter Buckshot: 11 x 127 x 1.231 / (1 s + 1 / 7.8334), forced Corrosive; stand-in row gone", () => {
+    const s = altOf("efv_5_jupiter", "Buckshot").stats;
+    near(s.burstDps, 11 * 127 * 1.231 / (1 + 1 / 7.8334));
+    expect(s.forcedProcs).toEqual(["Corrosive"]);
+    expect(radNames(primOf("efv_5_jupiter"))).toEqual([]);
+  });
+
+  it("Harpak Harpoon: single shot (no burst), 100 x 1.325 x 1.5 = 198.75, forced Puncture", () => {
+    const s = altOf("harpak", "Harpoon").stats;
+    expect(s.effectiveFireRate).toBeCloseTo(1.5, 6);
+    near(s.burstDps, 198.75);
+    expect(s.forcedProcs).toEqual(["Puncture"]);
+  });
+
+  it("Panthera / Prime held blade: 100 x 1.25 x 2 = 250; 100 x 1.26 x 2 = 252; Prime ricochet stays on the primary", () => {
+    near(altOf("panthera", "Alt-Fire").stats.burstDps, 250);
+    const p = altOf("panthera_prime", "Alt-Fire").stats;
+    near(p.burstDps, 252);
+    expect(radNames(p)).toEqual([]);
+    expect(radNames(primOf("panthera_prime"))).toEqual(["Radial Attack"]);
+  });
+
+  it("Alternox: 50 x 1.02 x 1.5 = 76.5 contact; pulse + explosion move to the alt", () => {
+    const s = altOf("alternox", "Alt-Fire").stats;
+    near(s.burstDps - (s.radialBurstDps ?? 0), 76.5);
+    expect(radNames(s)).toEqual(["Alt-Fire Damage over Time", "Alt-Fire Explosion"]);
+    expect(radNames(primOf("alternox"))).toEqual([]);
+    expect(radNames(primOf("alternox_prime"))).toEqual([]);
+  });
+
+  it("EFV-8 Mars / Euphona Prime / Higasa: explosion moves or stand-in row goes", () => {
+    expect(radNames(altOf("efv_8_mars", "Alt-Fire").stats)).toEqual(["Alt-Fire AoE"]);
+    expect(radNames(primOf("efv_8_mars"))).toEqual([]);
+    expect(altOf("euphona_prime", "Buckshot").stats.multishot).toBeCloseTo(10, 6);
+    expect(radNames(primOf("euphona_prime"))).toEqual([]);
+    expect(radNames(primOf("higasa"))).toEqual([]);
+  });
+
+  it("gauge-gated alts (Battacor, Higasa, Trumna / Prime): stats shown, DPS hidden", () => {
+    for (const [id, label] of [["battacor", "Secondary Fire"], ["higasa", "Charged Shot"], ["trumna", "Alt-Fire Grenade"], ["trumna_prime", "Alt-Fire Grenade"]] as const) {
+      const r = altOf(id, label);
+      expect(r.showDps).toBe(false);
+      expect(r.stats.ammoCost).toBe(0);
+    }
+    expect(radNames(primOf("battacor"))).toEqual([]);
+    expect(radNames(altOf("battacor", "Secondary Fire").stats)).toEqual(["Secondary Fire AoE"]);
+    for (const id of ["trumna", "trumna_prime"]) {
+      expect(radNames(primOf(id))).toEqual(["Auto AoE"]);
+      expect(radNames(altOf(id, "Alt-Fire Grenade").stats)).toEqual(["Grenade Bounce AoE"]);
+    }
+  });
+
+  it("primary numbers unchanged: wiki attack 1 for every Batch 4a weapon", () => {
+    const want: Record<string, [number, number]> = {
+      alternox: [62, 4.33], alternox_prime: [75, 5.33], battacor: [66, 2.5], efv_5_jupiter: [61, 7.8334],
+      efv_8_mars: [75, 6.5], euphona_prime: [325, 1.5], harpak: [50, 5], higasa: [26, 2.5], kuva_hek: [87, 2.17],
+      panthera: [100, 3], panthera_prime: [100, 3.67], stahlta: [52, 6], trumna: [82, 4.67], trumna_prime: [85, 4.67],
+    };
+    for (const [id, [d, fr]] of Object.entries(want)) {
+      const w = byId(id);
+      expect(w.damage, id).toBeCloseTo(d, 2);
+      expect(w.fireRate, id).toBeCloseTo(fr, 2);
+    }
+  });
+
+  it("mods apply: Serration scales the Stahlta alt like the primary", () => {
+    // Ratio to each mode's own unmodded total (the engine quantises the primary's 52 split).
+    const p = calcWith(PRIMARY_MODS)(byId("stahlta")), p0 = primOf("stahlta");
+    const q = altOf("stahlta", "Alt-Fire", PRIMARY_MODS).stats, q0 = altOf("stahlta", "Alt-Fire").stats;
+    expect(q.totalDamage / q0.totalDamage).toBeCloseTo(p.totalDamage / p0.totalDamage, 2);
+  });
+});
+
 describe("ALT FIRE: radial stand-in verdicts", () => {
   it("real wiki explosions on the primary stay (Cyanex, Glaive Prime, Staticor, Zarr)", () => {
     const names = (id: string) => (calculateWeaponBuild(byId(id), [], modsMap).radialAttacks ?? []).map((r) => r.name);

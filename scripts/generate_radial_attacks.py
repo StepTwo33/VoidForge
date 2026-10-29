@@ -375,6 +375,16 @@ def main() -> None:
     # Ambassador: the primary is the Auto mode; the Charged AoE (wiki attack 3) belongs to the
     # Charge mode and is attached to its ALT FIRE mode in weapon-alt-fire.ts.
     merged.pop("ambassador", None)
+    # Batch 4a alt-fire shots: these AoEs belong to the alt-fire attack (wiki AttackParentIndex,
+    # or the weapon page for Battacor / Trumna) and are attached to its ALT FIRE mode in
+    # weapon-alt-fire.ts. EFV-5 Jupiter / Euphona Prime "Buckshot" and Higasa "Charged Shot" are
+    # hit-scan shots with no AoE on the wiki, so they had no real radial row.
+    for wid in ("alternox", "alternox_prime", "battacor", "efv_5_jupiter", "efv_8_mars",
+                "euphona_prime", "higasa", "stahlta"):
+        merged.pop(wid, None)
+    for wid in ("trumna", "trumna_prime"):
+        if wid in merged:
+            merged[wid] = [a for a in merged[wid] if a.get("name") != "Grenade Bounce AoE"]
 
     for wid, attacks in MANUAL_RADIAL_ATTACKS.items():
         if wid in known_ids:
