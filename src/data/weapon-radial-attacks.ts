@@ -2644,13 +2644,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
   ],
   "redeemer_prime": [
     {
-      "name": "Ranged Attack",
-      "blast": 80.0,
-      "totalDamage": 80.0,
-      "radius": 30.0,
-      "falloffReduction": 0.9375
-    },
-    {
       "name": "Slam Attack",
       "impact": 424.0,
       "totalDamage": 424.0,
@@ -4388,13 +4381,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
     }
   ],
   "redeemer": [
-    {
-      "name": "Ranged Attack",
-      "blast": 30.0,
-      "totalDamage": 30.0,
-      "radius": 20.0,
-      "falloffReduction": 0.8333
-    },
     {
       "name": "Slam Attack",
       "impact": 360.0,

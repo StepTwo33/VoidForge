@@ -950,6 +950,109 @@ describe("ALT FIRE: Batch 6a glaive-style throws, hand-worked against wiki.warfr
   });
 });
 
+describe("ALT FIRE: Batch 6b melee modes, hand-worked against wiki.warframe.com", () => {
+  // Module:Weapons/data/melee attack 2 (warfans: attacks 2 and 3): [label, damage per hit, CC, CM, multishot,
+  // element types]. All show no DPS except Corufell (matches the Corufell Prime overlay).
+  type Row = [string, number, number, number, number, string[]];
+  const want: Record<string, Row[]> = {
+    redeemer: [["Gunblade Shot", 30, 0.1, 1.8, 10, ["blast"]]],
+    redeemer_prime: [["Gunblade Shot", 80, 0.24, 2.2, 10, ["blast"]]],
+    sarpa: [["Gunblade Shot", 35, 0.14, 2, 1, []]],
+    stropha: [["Gunblade Shot", 700, 0.3, 2.4, 1, []]],
+    vastilok: [["Gunblade Shot", 69, 0.19, 1.7, 9, []]],
+    ceramic_dagger: [["Spectral Dagger", 350, 0.1, 1.5, 1, []]],
+    edun: [["Polearm Throw", 480, 0.3, 2.6, 1, []]],
+    "ack_&_brunt": [["Spectral Axe", 149, 0.13, 2, 1, []]],
+    "argo_&_vel": [["Heavy Attack Glaive", 200, 0.32, 2.4, 1, []]],
+    hate: [["Spectral Blade", 130, 0.3, 2.5, 1, []]],
+    okina: [["Spectral Dagger", 140, 0.16, 2, 1, []]],
+    okina_prime: [["Spectral Dagger", 184, 0.3, 2.6, 1, []]],
+    innodem: [["Dagger Projectile", 360, 0.22, 2, 1, ["radiation"]]],
+    nepheri: [["Fireball", 131, 0.21, 2.3, 1, ["heat"]]],
+    "sigma_&_octantis": [["Shield Throw", 116, 0.28, 2.2, 1, []]],
+    arum_spinosa: [["First Heavy Attack", 175, 0.09, 1.7, 18, ["toxin"]], ["Second Heavy Attack", 350, 0.09, 1.7, 9, ["toxin"]]],
+    quassus: [["First Heavy Attack", 190, 0.3, 2, 12, []], ["Second Heavy Attack", 380, 0.3, 2, 6, []]],
+    quassus_prime: [["First Heavy Attack", 190, 0.35, 2.5, 18, []], ["Second Heavy Attack", 380, 0.35, 2.5, 9, []]],
+    corufell: [["Heavy Projectile", 600, 0.26, 2.4, 1, ["heat"]]],
+    tenet_agendus: [["Energy Disk", 2880, 0.24, 2, 1, ["electricity"]]],
+    tenet_grigori: [["Energy Disk", 4080, 0.24, 1.6, 1, []]],
+    tatsu: [["Soul Swarm", 96, 0.11, 1.9, 1, ["radiation"]]],
+    tatsu_prime: [["Soul Swarm", 96, 0.11, 1.9, 1, ["radiation"]]],
+  };
+
+  it("each mode: the wiki's damage, crit and multishot; Manual (no DPS) except Corufell", () => {
+    for (const [id, rows] of Object.entries(want)) {
+      const got = computeAltFire(byId(id), calcWith([]));
+      expect(got.map((r) => r.label), id).toEqual(rows.map((r) => r[0]));
+      rows.forEach(([label, total, cc, cm, ms, els], i) => {
+        const r = got[i]!;
+        expect(r.showDps, `${id} ${label}`).toBe(id === "corufell");
+        const s = r.stats;
+        near(s.arsenalDamage!.totalDamage, total);
+        expect(s.criticalChance, id).toBeCloseTo(cc, 6);
+        expect(s.criticalMultiplier, id).toBeCloseTo(cm, 2);
+        expect(s.multishot, id).toBeCloseTo(ms, 6);
+        expect(s.arsenalDamage!.elements.map((e) => e.type), id).toEqual(els);
+      });
+    }
+  });
+
+  it("hand check: Corufell 600 Heat x (1 + 0.26 x 1.4) x 0.833/s = 681.7 (same as the Corufell Prime overlay)", () => {
+    near(alt("corufell").burstDps, 600 * (1 + 0.26 * 1.4) * 0.833, 0.003);
+  });
+
+  it("damage mods apply normally to the other modes (Pressure Point +120% on the Edun throw and explosion)", () => {
+    const s = alt("edun", ["pressure_point_r3"]);
+    near(s.arsenalDamage!.totalDamage, 480 * 2.2);
+    const scale = s.arsenalDamage!.totalDamage / s.totalDamage;
+    near(s.radialAttacks!.find((x) => x.name === "Polearm Explosion")!.totalDamage * scale, 400 * 2.2);
+  });
+
+  it("Soul Swarm, Tenet Grigori disk and the Incarnon spectral attacks ignore Pressure Point (wiki) but take elementals", () => {
+    for (const [id, total] of [["tatsu", 96], ["tatsu_prime", 96], ["tenet_grigori", 4080], ["ceramic_dagger", 350],
+      ["hate", 130], ["okina", 140], ["okina_prime", 184], ["ack_&_brunt", 149]] as const) {
+      near(alt(id, ["pressure_point_r3"]).arsenalDamage!.totalDamage, total);
+      near(alt(id, ["spoiled_strike_r3"]).arsenalDamage!.totalDamage, total);
+    }
+    // Molten Impact +90% Heat still adds on the unmodded base: 96 Radiation + 86.4 Heat.
+    const s = alt("tatsu", ["pressure_point_r3", "molten_impact_r3"]);
+    near(s.arsenalDamage!.totalDamage, 96 * 1.9);
+    // Explosions follow the same rule: Okina's 140 Cold explosion stays 140 with Pressure Point.
+    const o = alt("okina", ["pressure_point_r3"]);
+    const scale = o.arsenalDamage!.totalDamage / o.totalDamage;
+    near(o.radialAttacks!.find((x) => x.name === "Spectral Dagger Explosion")!.totalDamage * scale, 140);
+  });
+
+  it("explosions: only the throw's own (wiki child attack), none on the gunblade shots", () => {
+    const rad: Record<string, [string, number][]> = {
+      ceramic_dagger: [["Spectral Dagger Explosion", 350]], edun: [["Polearm Explosion", 400]],
+      "ack_&_brunt": [["Spectral Axe Explosion", 303]], "argo_&_vel": [["Heavy Attack Glaive AoE", 100]],
+      hate: [["Spectral Blade Explosion", 130]], okina: [["Spectral Dagger Explosion", 140]],
+      okina_prime: [["Spectral Dagger Explosion", 184]], "sigma_&_octantis": [["Shield Throw Explosion", 50]],
+      redeemer: [], redeemer_prime: [], sarpa: [], stropha: [], vastilok: [], tatsu: [], quassus: [],
+    };
+    for (const [id, rows] of Object.entries(rad)) {
+      const s = alt(id);
+      const scale = (s.arsenalDamage!.totalDamage / s.totalDamage) || 1;
+      expect((s.radialAttacks ?? []).map((x) => [x.name, Math.round(x.totalDamage * scale)]), id).toEqual(rows);
+    }
+  });
+
+  it("the primaries are untouched, and Redeemer loses its 'Ranged Attack' stand-in radial (the hit-scan shot)", () => {
+    const prim: Record<string, number> = { redeemer: 180, "ack_&_brunt": 149, "argo_&_vel": 300, "sigma_&_octantis": 174 };
+    for (const [id, d] of Object.entries(prim)) expect(byId(id).damage, id).toBeCloseTo(d, 1);
+    for (const id of ["redeemer", "redeemer_prime"]) {
+      const names = (calculateWeaponBuild(byId(id), [], modsMap).radialAttacks ?? []).map((r) => r.name);
+      expect(names, id).not.toContain("Ranged Attack");
+    }
+    for (const [id, name] of [["ceramic_dagger", "Spectral Dagger Explosion"], ["edun", "Polearm Explosion"],
+      ["hate", "Spectral Blade Explosion"], ["okina", "Spectral Dagger Explosion"]] as const) {
+      const names = (calculateWeaponBuild(byId(id), [], modsMap).radialAttacks ?? []).map((r) => r.name);
+      expect(names, id).toContain(name);
+    }
+  });
+});
+
 describe("ALT FIRE: radial stand-in verdicts", () => {
   it("real wiki explosions on the primary stay (Cyanex, Glaive Prime, Staticor, Zarr)", () => {
     const names = (id: string) => (calculateWeaponBuild(byId(id), [], modsMap).radialAttacks ?? []).map((r) => r.name);

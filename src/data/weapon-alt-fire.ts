@@ -299,6 +299,249 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       note: "Wiki Wolf Sledge attack 2. DPS covers the direct hit only; the explosions are listed below it. The wiki says the explosion also takes Heavy Attack bonuses (True Steel, Killing Blow, combo); not modelled here.",
     },
   ],
+  // ---- Batch 6b: the other pattern-G melee modes (Round 38). Melee attacks fired by a combo,
+  // heavy attack, slide, aerial or kill gauge have no defined rate, so they show no DPS ("Manual").
+  // Falloff isn't modelled: the numbers are at full damage.
+  redeemer: [
+    {
+      label: "Gunblade Shot",
+      ...dmg({ blast: 30 }),
+      fireRate: 1, criticalChance: 0.1, criticalMultiplier: 1.8, statusChance: 0.066,
+      forcedProcs: ["Impact"], multishot: 10, showDps: false,
+      note: "Wiki Redeemer attack 2. 10 pellets of 30 Blast, hit-scan, no AoE. Falloff to 16.67% from 10 m to 20 m. Shots come from stance combos and the charged heavy attack; heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+    },
+  ],
+  redeemer_prime: [
+    {
+      label: "Gunblade Shot",
+      ...dmg({ blast: 80 }),
+      fireRate: 0.917, criticalChance: 0.24, criticalMultiplier: 2.2, statusChance: 0.09,
+      forcedProcs: ["Impact"], multishot: 10, showDps: false,
+      note: "Wiki Redeemer Prime attack 2. 10 pellets of 80 Blast, hit-scan, no AoE. Falloff to 6.25% from 10 m to 30 m. Shots come from stance combos and the charged heavy attack; heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+    },
+  ],
+  sarpa: [
+    {
+      label: "Gunblade Shot",
+      ...dmg({ impact: 3.5, puncture: 10.5, slash: 21 }),
+      fireRate: 3.33, criticalChance: 0.14, criticalMultiplier: 2, statusChance: 0.28,
+      forcedProcs: [], showDps: false,
+      note: "Wiki Sarpa attack 2. A 5-round burst of 35 per bullet. Falloff to 14.29% from 20 m to 40 m. The page also lists a 25% bonus to physical damage on shots; it isn't added here. Shots come from stance combos and the charged heavy attack; heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+    },
+  ],
+  stropha: [
+    {
+      label: "Gunblade Shot",
+      ...dmg({ impact: 700 }),
+      fireRate: 1, criticalChance: 0.3, criticalMultiplier: 2.4, statusChance: 0.14,
+      forcedProcs: [], showDps: false,
+      note: "Wiki Stropha attack 2. One 700 Impact shockwave, range 17 m, falloff from 6 m to 12 m in the wiki data (the page describes it differently). Shots come from stance combos and the charged heavy attack; heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+    },
+  ],
+  vastilok: [
+    {
+      label: "Gunblade Shot",
+      ...dmg({ impact: 8.97, puncture: 10.35, slash: 49.68 }),
+      fireRate: 1, criticalChance: 0.19, criticalMultiplier: 1.7, statusChance: 0.1033,
+      forcedProcs: [], multishot: 9, showDps: false,
+      note: "Wiki Vastilok attack 2. 9 pellets of 69, hit-scan. Falloff to 4.35% from 24 m to 49 m. The page also lists a 25% bonus to physical damage on shots; it isn't added here. Shots come from stance combos and the charged heavy attack; heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+    },
+  ],
+  ceramic_dagger: [
+    {
+      label: "Spectral Dagger",
+      ...dmg({ impact: 35, puncture: 116.67, slash: 198.33 }),
+      fireRate: 1, criticalChance: 0.1, criticalMultiplier: 1.5, statusChance: 0.2,
+      forcedProcs: [], showDps: false,
+      radialsKeep: ["Spectral Dagger Explosion"], ignoreBaseDamageMods: true,
+      note: "Wiki Ceramic Dagger attack 2. Incarnon Form only. Each heavy attack throws 2 daggers that explode on impact (explosion below). Melee damage mods like Pressure Point don't apply to it (wiki); elemental, crit and status mods do. No DPS is shown.",
+    },
+  ],
+  edun: [
+    {
+      label: "Polearm Throw",
+      ...dmg({ impact: 144, puncture: 192, slash: 144 }),
+      fireRate: 1, criticalChance: 0.3, criticalMultiplier: 2.6, statusChance: 0.2,
+      forcedProcs: ["Impact"], showDps: false,
+      radialsKeep: ["Polearm Explosion"],
+      note: "Wiki Edun attack 2. Heavy attack: throws a copy of the polearm, which explodes after it sticks (explosion below). Heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+    },
+  ],
+  "ack_&_brunt": [
+    {
+      label: "Spectral Axe",
+      ...dmg({ impact: 29.8, puncture: 14.9, slash: 104.3 }),
+      fireRate: 0.833, criticalChance: 0.13, criticalMultiplier: 2, statusChance: 0.33,
+      forcedProcs: [], showDps: false,
+      radialAttacks: [{ name: "Spectral Axe Explosion", heat: 303, totalDamage: 303, radius: 5, falloffReduction: 0.3 }], ignoreBaseDamageMods: true,
+      note: "Wiki Ack & Brunt attack 2. Incarnon Form only. Aerial and slide attacks send a spectral axe that explodes (explosion below); aerial axes deal 2x. Melee damage mods like Pressure Point don't apply to it (wiki); elemental, crit and status mods do. No DPS is shown.",
+    },
+  ],
+  "argo_&_vel": [
+    {
+      label: "Heavy Attack Glaive",
+      ...dmg({ impact: 40, slash: 160 }),
+      fireRate: 0.8, criticalChance: 0.32, criticalMultiplier: 2.4, statusChance: 0.24,
+      forcedProcs: [], showDps: false,
+      radialAttacks: [{ name: "Heavy Attack Glaive AoE", impact: 20, slash: 80, totalDamage: 100, radius: 3, falloffReduction: 0.4 }],
+      note: "Wiki Argo & Vel attack 2. Heavy attack: an energy glaive that bounces once and returns, with an AoE (below). Heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+    },
+  ],
+  hate: [
+    {
+      label: "Spectral Blade",
+      ...dmg({ impact: 19.5, puncture: 19.5, slash: 91 }),
+      fireRate: 0.917, criticalChance: 0.3, criticalMultiplier: 2.5, statusChance: 0.2,
+      forcedProcs: [], showDps: false,
+      radialsKeep: ["Spectral Blade Explosion"], ignoreBaseDamageMods: true,
+      note: "Wiki Hate attack 2. Incarnon Form only. Forward and neutral combos launch a blade that explodes 0.4 s after it sticks (explosion below). Melee damage mods like Pressure Point don't apply to it (wiki); elemental, crit and status mods do. No DPS is shown.",
+    },
+  ],
+  okina: [
+    {
+      label: "Spectral Dagger",
+      ...dmg({ impact: 21, puncture: 49, slash: 70 }),
+      fireRate: 1.08, criticalChance: 0.16, criticalMultiplier: 2, statusChance: 0.2,
+      forcedProcs: [], showDps: false,
+      radialsKeep: ["Spectral Dagger Explosion"], ignoreBaseDamageMods: true,
+      note: "Wiki Okina attack 2. Incarnon Form only. Kills create a dagger that seeks an enemy within 15 m, applies 10 Cold stacks, then explodes (explosion below). Melee damage mods like Pressure Point don't apply to it (wiki); elemental, crit and status mods do. No DPS is shown.",
+    },
+  ],
+  okina_prime: [
+    {
+      label: "Spectral Dagger",
+      ...dmg({ impact: 27.6, puncture: 64.4, slash: 92 }),
+      fireRate: 1.17, criticalChance: 0.3, criticalMultiplier: 2.6, statusChance: 0.24,
+      forcedProcs: [], showDps: false,
+      radialsKeep: ["Spectral Dagger Explosion"], ignoreBaseDamageMods: true,
+      note: "Wiki Okina Prime attack 2. Incarnon Form only. Kills create a dagger that seeks an enemy within 15 m, applies 10 Cold stacks, then explodes (explosion below). Melee damage mods like Pressure Point don't apply to it (wiki); elemental, crit and status mods do. No DPS is shown.",
+    },
+  ],
+  innodem: [
+    {
+      label: "Dagger Projectile",
+      ...dmg({ radiation: 360 }),
+      fireRate: 0.75, criticalChance: 0.22, criticalMultiplier: 2, statusChance: 0.22,
+      forcedProcs: ["Impact"], showDps: false,
+      note: "Wiki Innodem attack 2. Incarnon Form only. Aim-glide melee attacks launch it: range 21 m, falloff from 12 m to 20 m. No DPS is shown.",
+    },
+  ],
+  nepheri: [
+    {
+      label: "Fireball",
+      ...dmg({ heat: 131 }),
+      fireRate: 1, criticalChance: 0.21, criticalMultiplier: 2.3, statusChance: 0.33,
+      forcedProcs: [], showDps: false,
+      note: "Wiki Nepheri attack 2. Each fireball is 50% of base damage; the neutral combo ends with four of them. Range about 20 m. No DPS is shown.",
+    },
+  ],
+  "sigma_&_octantis": [
+    {
+      label: "Shield Throw",
+      ...dmg({ impact: 25.52, puncture: 18.56, slash: 71.92 }),
+      fireRate: 1.08, criticalChance: 0.28, criticalMultiplier: 2.2, statusChance: 0.16,
+      forcedProcs: ["Stun"], showDps: false,
+      radialAttacks: [{ name: "Shield Throw Explosion", blast: 50, totalDamage: 50, radius: 4, falloffReduction: 1 }],
+      note: "Wiki Sigma & Octantis attack 2. Aerial attacks throw the shield; a heavy attack while it's out makes it explode and return (explosion below). Combo bonuses don't apply to the throw. No DPS is shown.",
+    },
+  ],
+  arum_spinosa: [
+    {
+      label: "First Heavy Attack",
+      ...dmg({ impact: 17.5, puncture: 27.5, slash: 57.5, toxin: 72.5 }),
+      fireRate: 2, criticalChance: 0.09, criticalMultiplier: 1.7, statusChance: 0.0616,
+      forcedProcs: [], multishot: 18, showDps: false,
+      note: "Wiki Arum Spinosa attack 2. 18 spines (70 base x 2.5). Heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+    },
+    {
+      label: "Second Heavy Attack",
+      ...dmg({ impact: 35, puncture: 55, slash: 115, toxin: 145 }),
+      fireRate: 2, criticalChance: 0.09, criticalMultiplier: 1.7, statusChance: 0.123,
+      forcedProcs: [], multishot: 9, showDps: false,
+      note: "Wiki Arum Spinosa attack 3. The next heavy attack in sequence: 9 spines (70 base x 5). Heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+    },
+  ],
+  quassus: [
+    {
+      label: "First Heavy Attack",
+      ...dmg({ puncture: 76, slash: 114 }),
+      fireRate: 2, criticalChance: 0.3, criticalMultiplier: 2, statusChance: 0.01,
+      forcedProcs: ["Slash"], multishot: 12, showDps: false,
+      note: "Wiki Quassus attack 2. 12 daggers (76 base x 2.5). Heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+    },
+    {
+      label: "Second Heavy Attack",
+      ...dmg({ puncture: 152, slash: 228 }),
+      fireRate: 2, criticalChance: 0.3, criticalMultiplier: 2, statusChance: 0.02,
+      forcedProcs: ["Slash"], multishot: 6, showDps: false,
+      note: "Wiki Quassus attack 3. The next heavy attack in sequence: 6 daggers (76 base x 5). Heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+    },
+  ],
+  quassus_prime: [
+    {
+      label: "First Heavy Attack",
+      ...dmg({ puncture: 76, slash: 114 }),
+      fireRate: 2, criticalChance: 0.35, criticalMultiplier: 2.5, statusChance: 0.01,
+      forcedProcs: ["Slash"], multishot: 18, showDps: false,
+      note: "Wiki Quassus Prime attack 2. 18 daggers (76 base x 2.5). Heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+    },
+    {
+      label: "Second Heavy Attack",
+      ...dmg({ puncture: 152, slash: 228 }),
+      fireRate: 2, criticalChance: 0.35, criticalMultiplier: 2.5, statusChance: 0.02,
+      forcedProcs: ["Slash"], multishot: 9, showDps: false,
+      note: "Wiki Quassus Prime attack 3. The next heavy attack in sequence: 9 daggers (76 base x 5). Heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+    },
+  ],
+  corufell: [
+    {
+      label: "Heavy Projectile",
+      ...dmg({ heat: 600 }),
+      fireRate: 0.833, criticalChance: 0.26, criticalMultiplier: 2.4, statusChance: 0.14,
+      forcedProcs: [],
+      triggerType: "Charge",
+      note: "Wiki Corufell attack 2. Heavy attack fires up to two energy projectiles; falloff to 50% from 15 m to 30 m. Shown the same way as Corufell Prime (DPS at the wiki fire rate, no charge).",
+    },
+  ],
+  tenet_agendus: [
+    {
+      label: "Energy Disk",
+      ...dmg({ electricity: 2880 }),
+      fireRate: 1, criticalChance: 0.24, criticalMultiplier: 2, statusChance: 0.28,
+      forcedProcs: [], showDps: false,
+      note: "Wiki Tenet Agendus attack 2. Heavy attack (1 s wind-up): one disk, up to 40 m, falloff to 5% from 10 m to 20 m. The 2880 already includes the heavy attack's 5x. Combo bonus isn't applied, so no DPS is shown.",
+    },
+  ],
+  tenet_grigori: [
+    {
+      label: "Energy Disk",
+      ...dmg({ impact: 1360, puncture: 1360, slash: 1360 }),
+      fireRate: 1, criticalChance: 0.24, criticalMultiplier: 1.6, statusChance: 0.38,
+      forcedProcs: [], showDps: false,
+      ignoreBaseDamageMods: true,
+      note: "Wiki Tenet Grigori attack 2. Heavy slide attack, or the second hit of a heavy combo: a ricocheting disk, up to 10 m. Melee damage mods like Pressure Point don't apply to it (wiki); elemental, crit and status mods do. No DPS is shown.",
+    },
+  ],
+  tatsu: [
+    {
+      label: "Soul Swarm",
+      ...dmg({ radiation: 96 }),
+      fireRate: 1, criticalChance: 0.11, criticalMultiplier: 1.9, statusChance: 0.23,
+      forcedProcs: ["Stun"], showDps: false,
+      ignoreBaseDamageMods: true,
+      note: "Wiki Tatsu attack 2. Kills store up to 5 charges; a slide attack releases one seeking projectile per charge (30 m) that stuns. Melee damage mods like Pressure Point don't apply to it (wiki); elemental, crit and status mods do. No DPS is shown.",
+    },
+  ],
+  tatsu_prime: [
+    {
+      label: "Soul Swarm",
+      ...dmg({ radiation: 96 }),
+      fireRate: 1.17, criticalChance: 0.11, criticalMultiplier: 1.9, statusChance: 0.23,
+      forcedProcs: ["Stun"], showDps: false,
+      ignoreBaseDamageMods: true,
+      note: "Wiki Tatsu Prime attack 2. Kills store up to 5 charges; a slide attack releases one seeking projectile per charge (30 m) that stuns. Melee damage mods like Pressure Point don't apply to it (wiki); elemental, crit and status mods do. No DPS is shown.",
+    },
+  ],
 
 
   // ---- Batch 1: magazine dump ("Mag Burst") --------------------------------------------

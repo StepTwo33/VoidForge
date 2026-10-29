@@ -52,6 +52,10 @@ const EXPECTED = [
   // Batch 6a: glaive-style throws
   "glaive", "pathocyst", "coda_pathocyst", "orvius", "cerata", "falcor", "halikar", "halikar_wraith", "kestrel",
   "kestrel_prime", "xoris", "wolf_sledge",
+  // Batch 6b: gunblades, melee projectiles, warfan heavies, disks and Soul Swarm
+  "redeemer", "redeemer_prime", "sarpa", "stropha", "vastilok", "ceramic_dagger", "edun", "ack_&_brunt", "argo_&_vel",
+  "hate", "okina", "okina_prime", "innodem", "nepheri", "sigma_&_octantis", "arum_spinosa", "quassus", "quassus_prime",
+  "corufell", "tenet_agendus", "tenet_grigori", "tatsu", "tatsu_prime",
   // Former toggle weapons (legacy alternateModeStats)
   "nunchasa", "hind", "bubonico", "coda_bubonico", "kuva_hind", "kuva_quartakk", "tiberon_prime", "quatz",
   "staticor", "corufell_prime", "talons_thrown",

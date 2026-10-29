@@ -405,6 +405,11 @@ def main() -> None:
                       ("scourge_prime", "Spear Explosion")):
         if wid in merged:
             merged[wid] = [a for a in merged[wid] if a.get("name") != name]
+    # Batch 6b: the Redeemer "Ranged Attack" row was the gunblade shot (wiki: hit-scan, 10 pellets,
+    # no AoE) with its falloff end range read as a radius. It is shown under ALT FIRE instead.
+    for wid in ("redeemer", "redeemer_prime"):
+        if wid in merged:
+            merged[wid] = [a for a in merged[wid] if a.get("name") != "Ranged Attack"]
     # Stug: the wiki says the blob explosion's falloff is really 70% (100% to 30% at the edge),
     # despite the 30% the game lists. The Incarnon Form rows have no wiki note, so they stay.
     for a in merged.get("stug", []):

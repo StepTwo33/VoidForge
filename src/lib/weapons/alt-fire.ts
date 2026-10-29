@@ -36,6 +36,12 @@ export interface AltFireMode extends WeaponAlternateModeStats {
    * throw: 300 x (1 + 0.2 x rounds)). Shown with a full magazine.
    */
   radialBonusPerRound?: number;
+  /**
+   * Base-damage mods (Pressure Point, Spoiled Strike...) add nothing to this attack; elemental,
+   * faction, crit and status mods still do (wiki: Tatsu Soul Swarm, Tenet Grigori Energy Disk,
+   * the Incarnon spectral attacks). Undoes the whole base-damage multiplier, measured on a probe.
+   */
+  ignoreBaseDamageMods?: boolean;
 }
 
 export interface AltFireResult {
@@ -55,7 +61,7 @@ export function getAltFireModes(weapon: Weapon | null | undefined): AltFireMode[
 /** Overlay one alt-fire mode on a copy of the weapon (same merge rule as applyAlternateMode). */
 export function applyAltFireMode(weapon: Weapon, mode: AltFireMode): Weapon {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { radialAttacks, radialsKeep, label, note, showDps, damageTimesMagazine, usesWholeMagazine, ignoreMultishotMods, radialBonusPerRound, ...overrides } = mode;
+  const { radialAttacks, radialsKeep, label, note, showDps, damageTimesMagazine, usesWholeMagazine, ignoreMultishotMods, radialBonusPerRound, ignoreBaseDamageMods, ...overrides } = mode;
   const merged: Weapon = { ...weapon, ...overrides };
   if (radialAttacks) merged.radialAttacks = radialAttacks;
   else if (radialsKeep) {
@@ -82,7 +88,7 @@ export function computeAltFire(
 /** One calc, or two when a flag needs the modded result first (magazine or multishot). */
 function calcAltMode(weapon: Weapon, mode: AltFireMode, calc: (w: Weapon) => CalculatedStats): CalculatedStats {
   let w = applyAltFireMode(weapon, mode);
-  if (!mode.damageTimesMagazine && !mode.usesWholeMagazine && !mode.ignoreMultishotMods && !mode.radialBonusPerRound) return calc(w);
+  if (!mode.damageTimesMagazine && !mode.usesWholeMagazine && !mode.ignoreMultishotMods && !mode.radialBonusPerRound && !mode.ignoreBaseDamageMods) return calc(w);
   const first = calc(w);
   const base = w.multishot ?? 1;
   // Undo the multishot bonus: base x base / modded comes back out as base.
@@ -97,5 +103,13 @@ function calcAltMode(weapon: Weapon, mode: AltFireMode, calc: (w: Weapon) => Cal
   if (mode.damageTimesMagazine) w = { ...times(w, mag), ammoCost: mag, radialAttacks: w.radialAttacks?.map((r) => times(r, mag)) };
   const perRound = mode.radialBonusPerRound;
   if (perRound) w = { ...w, radialAttacks: w.radialAttacks?.map((r) => times(r, 1 + perRound * mag)) };
+  if (mode.ignoreBaseDamageMods) {
+    // Probe: 100 Tau only (no mod adds Tau), so modded Tau / 100 is the base-damage multiplier.
+    const zero = Object.fromEntries(DMG_KEYS.map((k) => [k, 0]));
+    const probe = calc({ ...w, ...zero, tau: 100, damage: 100, radialAttacks: [] });
+    const tau = (probe.arsenalDamage?.elements ?? probe.elements).find((e) => e.type === "tau")?.value ?? 100;
+    const k = tau > 0 ? 100 / tau : 1;
+    if (k !== 1) w = { ...times(w, k), radialAttacks: w.radialAttacks?.map((r) => times(r, k)) };
+  }
   return calc(w);
 }
