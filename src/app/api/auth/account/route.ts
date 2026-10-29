@@ -4,12 +4,14 @@ import { prisma } from "@/lib/prisma";
 import { checkRateLimit, getClientIp } from "@/lib/auth/rate-limit";
 import { logServerError } from "@/lib/log-server-error";
 import { getPublicOrigin } from "@/lib/site/public-origin";
+import { removeAvatarFiles } from "@/lib/auth/avatar-files";
 
 export const dynamic = "force-dynamic";
 
 /**
  * Permanently delete the signed-in user's account and cascaded data
- * (sessions, OAuth accounts, builds, votes, reports authored, Discord link).
+ * (sessions, OAuth accounts, builds, votes, Discord link) and their uploaded avatar file.
+ * Reports and donation records are kept but unlinked (onDelete: SetNull).
  */
 export async function DELETE(req: NextRequest) {
   const session = await getSession();
@@ -53,6 +55,9 @@ export async function DELETE(req: NextRequest) {
     logServerError("account_delete", err);
     return NextResponse.json({ error: "Could not delete account." }, { status: 500 });
   }
+
+  // The avatar file is served by URL, so remove it too (only after the account row is gone).
+  await removeAvatarFiles(user.id);
 
   const origin = getPublicOrigin(req);
   const response = NextResponse.json({ success: true });

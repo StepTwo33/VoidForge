@@ -1,23 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
-import { writeFile, mkdir, unlink } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { avatarUploadDir, removeAvatarFiles } from "@/lib/auth/avatar-files";
 
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const ALLOWED_EXTS = ["jpg", "png", "webp", "gif"];
-
-const avatarUploadDir = () => path.join(process.cwd(), "public", "uploads", "avatars");
-
-/** Remove avatar files for a user, optionally keeping one extension (ignores missing files). */
-async function removeAvatarFiles(userId: string, keepExt?: string) {
-  await Promise.all(
-    ALLOWED_EXTS.filter((ext) => ext !== keepExt).map((ext) =>
-      unlink(path.join(avatarUploadDir(), `${userId}.${ext}`)).catch(() => {})
-    )
-  );
-}
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
