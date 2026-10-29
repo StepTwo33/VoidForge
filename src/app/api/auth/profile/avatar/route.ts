@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { avatarUploadDir, removeAvatarFiles } from "@/lib/auth/avatar-files";
+import { removeAvatarFiles, saveAvatarFile } from "@/lib/auth/avatar-files";
 
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -43,14 +41,8 @@ export async function POST(req: NextRequest) {
   }
 
   const ext = file.type.split("/")[1] === "jpeg" ? "jpg" : file.type.split("/")[1];
-  const filename = `${session.user.id}.${ext}`;
-  const uploadDir = avatarUploadDir();
-  const filePath = path.join(uploadDir, filename);
-
-  await mkdir(uploadDir, { recursive: true });
-
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(filePath, buffer);
+  const filename = await saveAvatarFile(session.user.id, ext, buffer);
 
   // Remove stale files from previous uploads with a different extension.
   await removeAvatarFiles(session.user.id, ext);
