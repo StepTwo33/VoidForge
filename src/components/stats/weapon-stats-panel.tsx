@@ -726,14 +726,17 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           </p>
           {altFire.map((mode, idx) => {
             const a = mode.stats;
-            const extraElements = a.elements.filter((e) => e.value > 0);
+            // Arsenal-style per-type values (unquantized), same as DIRECT DAMAGE above; the
+            // calculator still uses the quantized hit for DPS, exactly as for the primary.
+            const dmg = a.arsenalDamage ?? a;
+            const extraElements = dmg.elements.filter((e) => e.value > 0);
             return (
               <div key={`${mode.label}-${idx}`} className={idx > 0 ? "mt-2 pt-2 border-t border-border/50" : ""}>
                 <div className="text-[10px] font-medium text-muted-foreground mb-1">{mode.label}</div>
-                <StatRow label={a.multishot > 1 ? "Damage / pellet" : "Damage / shot"} value={a.totalDamage.toFixed(1)} highlighted />
-                {a.impact > 0 && <StatRow label="Impact" value={a.impact.toFixed(1)} color={ELEMENT_COLORS.impact} />}
-                {a.puncture > 0 && <StatRow label="Puncture" value={a.puncture.toFixed(1)} color={ELEMENT_COLORS.puncture} />}
-                {a.slash > 0 && <StatRow label="Slash" value={a.slash.toFixed(1)} color={ELEMENT_COLORS.slash} />}
+                <StatRow label={a.multishot > 1 ? "Damage / pellet" : "Damage / shot"} value={dmg.totalDamage.toFixed(1)} highlighted />
+                {dmg.impact > 0 && <StatRow label="Impact" value={dmg.impact.toFixed(1)} color={ELEMENT_COLORS.impact} />}
+                {dmg.puncture > 0 && <StatRow label="Puncture" value={dmg.puncture.toFixed(1)} color={ELEMENT_COLORS.puncture} />}
+                {dmg.slash > 0 && <StatRow label="Slash" value={dmg.slash.toFixed(1)} color={ELEMENT_COLORS.slash} />}
                 {extraElements.map((e) => (
                   <StatRow key={e.type} label={ELEMENT_LABELS[e.type] || e.type} value={e.value.toFixed(1)} color={ELEMENT_COLORS[e.type]} />
                 ))}

@@ -84,3 +84,28 @@ describe("ALT FIRE section only appears on weapons with an alt fire", () => {
     expect(hasSection(html)).toBe(false);
   });
 });
+
+describe("ALT FIRE shows the wiki's per-type damage (unquantized, like DIRECT DAMAGE)", () => {
+  /** The ALT FIRE block only (from its header to the end of the panel). */
+  const altBlock = (id: string) => renderPanel(byId(id)).split(">ALT FIRE<")[1] ?? "";
+  // [id, [label, wiki value] ...] from Module:Weapons/data (alt-fire attack).
+  const CASES: [string, [string, string][]][] = [
+    ["stahlta", [["Damage / shot", "600.0"], ["Impact", "120.0"], ["Puncture", "180.0"], ["Slash", "300.0"]]],
+    ["harpak", [["Impact", "40.0"], ["Puncture", "50.0"], ["Slash", "10.0"]]],
+    ["panthera", [["Impact", "10.0"], ["Puncture", "10.0"], ["Slash", "80.0"]]],
+    ["efv_5_jupiter", [["Puncture", "57.0"], ["Slash", "35.0"], ["Corrosive", "35.0"]]],
+    ["euphona_prime", [["Impact", "4.4"], ["Puncture", "17.6"], ["Slash", "66.0"]]],
+    ["zenith", [["Impact", "15.0"], ["Puncture", "120.0"], ["Slash", "15.0"]]],
+  ];
+  for (const [id, rows] of CASES) {
+    it(`${id}: ${rows.map(([l, v]) => `${l} ${v}`).join(", ")}`, () => {
+      const html = altBlock(id);
+      for (const [label, value] of rows) expect(html, `${id} ${label}`).toMatch(new RegExp(`>${label}<.*?>${value.replace(".", "\\.")}<`));
+    });
+  }
+
+  it("Stahlta alt DPS is unchanged by the display fix: 600 x 1.8 / (1.6 + 1 / 0.667)", () => {
+    const [alt] = computeAltFire(byId("stahlta"), calc);
+    expect(Math.abs(alt!.stats.burstDps - (600 * 1.8) / (1.6 + 1 / 0.667)) / alt!.stats.burstDps).toBeLessThan(0.002);
+  });
+});
