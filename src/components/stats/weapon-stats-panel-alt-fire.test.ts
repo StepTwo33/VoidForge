@@ -117,3 +117,31 @@ describe("ALT FIRE shows the wiki's per-type damage (unquantized, like DIRECT DA
     expect(Math.abs(alt!.stats.burstDps - (600 * 1.8) / (1.6 + 1 / 0.667)) / alt!.stats.burstDps).toBeLessThan(0.002);
   });
 });
+
+describe("explosion rows show the wiki's unrounded damage (display only, like the per-type fix)", () => {
+  const radialBlock = (id: string) => (renderPanel(byId(id)).split(">RADIAL ATTACK<")[1] ?? "").split(">ALT FIRE<")[0];
+  const altBlock = (id: string) => renderPanel(byId(id)).split(">ALT FIRE<")[1] ?? "";
+  // [id, Total Damage values in order] from Module:Weapons/data; the quantized values were 96.9 / 58.1 / 1017.2 / 10.1, 666.9.
+  const MAIN: [string, string[]][] = [
+    ["ferrox", ["100.0"]], ["tenet_ferrox", ["60.0"]], ["afentis_prime", ["1050.0"]], ["lenz", ["10.0", "660.0"]], ["ogris", ["600.0"]],
+  ];
+  for (const [id, totals] of MAIN) {
+    it(`${id} RADIAL ATTACK: ${totals.join(", ")}`, () => {
+      const got = [...radialBlock(id).matchAll(/>Total Damage<.*?>([\d.]+)</g)].map((m) => m[1]);
+      expect(got).toEqual(totals);
+    });
+  }
+  it("per-type radial rows too: Afentis Prime Blast 800, Heat 250; Tenet Ferrox Puncture 42", () => {
+    expect(radialBlock("afentis_prime")).toMatch(/>Blast<.*?>800\.0</);
+    expect(radialBlock("afentis_prime")).toMatch(/>Heat<.*?>250\.0</);
+    expect(radialBlock("tenet_ferrox")).toMatch(/>Puncture<.*?>42\.0</);
+  });
+  it("ALT FIRE explosion rows: Ferrox / Tenet Ferrox Attraction Field 150, Javlok 660", () => {
+    for (const id of ["ferrox", "tenet_ferrox"]) expect(altBlock(id), id).toContain("150 · 10.0m");
+    expect(altBlock("javlok")).toContain("660 · 6.0m");
+  });
+  it("the calculator still holds the quantized value (DPS unchanged): Ferrox radial 96.875", () => {
+    const r = calc(byId("ferrox")).radialAttacks!.find((a) => a.name === "Radial Attack")!;
+    expect(r.totalDamage).toBeCloseTo(96.875, 6);
+  });
+});

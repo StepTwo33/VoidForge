@@ -43,6 +43,16 @@ const RADIAL_DAMAGE_KEYS = [
   "radiation", "viral", "corrosive", "blast", "gas", "magnetic", "tau",
 ] as const;
 
+/**
+ * Display only: radial rows are scaled by the quantized direct hit (1/32 grid), so a 150 field
+ * reads 145. Multiplying by arsenal / quantized total brings back the wiki's unrounded value,
+ * same as DIRECT DAMAGE and the ALT FIRE per-type rows. DPS still uses the quantized value.
+ */
+export function radialDisplayScale(s: Pick<CalculatedStats, "totalDamage" | "arsenalDamage">): number {
+  const arsenal = s.arsenalDamage?.totalDamage;
+  return arsenal != null && arsenal > 0 && s.totalDamage > 0 ? arsenal / s.totalDamage : 1;
+}
+
 const ELEMENT_LABELS: Record<string, string> = {
   heat: "Heat", cold: "Cold", toxin: "Toxin", electricity: "Electricity",
   blast: "Blast", corrosive: "Corrosive", gas: "Gas", magnetic: "Magnetic",
@@ -666,7 +676,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
               {stats.radialAttacks!.length > 1 && (
                 <div className="text-[10px] font-medium text-muted-foreground mb-1">{attack.name}</div>
               )}
-              <StatRow label="Total Damage" value={attack.totalDamage.toFixed(1)} highlighted />
+              <StatRow label="Total Damage" value={(attack.totalDamage * radialDisplayScale(stats)).toFixed(1)} highlighted />
               {RADIAL_DAMAGE_KEYS.map((key) => {
                 const val = attack[key];
                 if (val == null || val <= 0) return null;
@@ -675,7 +685,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                   <StatRow
                     key={key}
                     label={label}
-                    value={val.toFixed(1)}
+                    value={(val * radialDisplayScale(stats)).toFixed(1)}
                     color={ELEMENT_COLORS[key]}
                   />
                 );
@@ -754,7 +764,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                 )}
                 {!mode.showDps && <StatRow label="DPS" value="Manual" tooltip="Player-triggered special attack; not counted in weapon DPS." />}
                 {a.radialAttacks?.map((r, ri) => (
-                  <StatRow key={`${r.name}-${ri}`} label={r.name} value={`${r.totalDamage.toFixed(0)} · ${r.radius.toFixed(1)}m`} />
+                  <StatRow key={`${r.name}-${ri}`} label={r.name} value={`${(r.totalDamage * radialDisplayScale(a)).toFixed(0)} · ${r.radius.toFixed(1)}m`} />
                 ))}
                 {mode.note && <p className="text-[10px] text-muted-foreground/80 mt-1 leading-snug">{mode.note}</p>}
               </div>
