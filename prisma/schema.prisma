@@ -49,8 +49,8 @@ model User {
   bannedAt      DateTime?
   banReason     String?
   supporterAt   DateTime?
-  /** Opt in to FrameHub newsletters (news@…). Transactional mail is unaffected. */
-  newsletterOptIn Boolean  @default(true)
+  /** Opt in to FrameHub newsletters (news@…). Off unless the user ticks it at sign-up or in Profile → Settings. Transactional mail is unaffected. */
+  newsletterOptIn Boolean  @default(false)
   createdAt     DateTime  @default(now())
   accounts      Account[]
   sessions      Session[]

@@ -25,10 +25,11 @@ export async function POST(req: NextRequest) {
 
         const parsed = await readJsonBodyLimited(req);
         if (!parsed.ok) return parsed.response;
-        const { email, password, name } = parsed.body as {
+        const { email, password, name, newsletterOptIn } = parsed.body as {
             email?: string;
             password?: string;
             name?: string;
+            newsletterOptIn?: unknown;
         };
 
         // ---------- Validation ----------
@@ -95,6 +96,8 @@ export async function POST(req: NextRequest) {
                 username,
                 passwordHash,
                 emailVerified: null,
+                // Opt-in only: on just when the sign-up checkbox was ticked.
+                newsletterOptIn: newsletterOptIn === true,
             },
         });
 

@@ -151,7 +151,7 @@ export default function AdminUsersPage() {
             users.map((user) => {
               const banned = Boolean(user.bannedAt);
               const isSupporter = Boolean(user.supporterAt);
-              const newsletterOn = user.newsletterOptIn !== false;
+              const newsletterOn = user.newsletterOptIn === true;
               return (
                 <div
                   key={user.id}

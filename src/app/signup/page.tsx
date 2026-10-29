@@ -13,6 +13,7 @@ export default function SignUpPage() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [newsletter, setNewsletter] = useState(false);
     const [error, setError] = useState("");
     const [useGoogle, setUseGoogle] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -50,7 +51,7 @@ export default function SignUpPage() {
             const res = await fetch("/api/auth/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password, name: name.trim() || undefined }),
+                body: JSON.stringify({ email, password, name: name.trim() || undefined, newsletterOptIn: newsletter }),
             });
             const data = await res.json();
 
@@ -174,6 +175,17 @@ export default function SignUpPage() {
                                 <p className="text-[10px] mt-1 text-destructive">Passwords do not match</p>
                             )}
                         </div>
+
+                        <label htmlFor="newsletter" className="flex min-h-11 cursor-pointer items-center gap-2.5 text-xs text-muted-foreground">
+                            <input
+                                id="newsletter"
+                                type="checkbox"
+                                checked={newsletter}
+                                onChange={(e) => setNewsletter(e.target.checked)}
+                                className="h-4 w-4 shrink-0 accent-primary"
+                            />
+                            Email me the Voidforge newsletter (site news and updates). You can unsubscribe any time.
+                        </label>
 
                         {error && (
                             <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-xs">

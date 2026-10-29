@@ -200,6 +200,8 @@ export async function findOrCreateUser(
         username,
         image: data.image ?? null,
         emailVerified: data.emailVerified ? new Date() : null,
+        // Google sign-up has no checkbox, so new accounts start opted out (Profile → Settings to opt in).
+        newsletterOptIn: false,
       },
       select: AUTH_USER_SELECT,
     });

@@ -672,19 +672,19 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   role="switch"
-                  aria-checked={user.newsletterOptIn !== false}
+                  aria-checked={user.newsletterOptIn === true}
                   aria-label="Newsletters"
                   disabled={saving}
-                  onClick={() => handleNewsletterToggle(!(user.newsletterOptIn ?? true))}
+                  onClick={() => handleNewsletterToggle(!(user.newsletterOptIn === true))}
                   className={cn(
                     "relative shrink-0 w-11 h-6 rounded-full after:absolute after:-inset-y-2.5 after:inset-x-0 after:content-[''] transition-colors disabled:opacity-50",
-                    user.newsletterOptIn !== false ? "bg-primary" : "bg-muted border border-border",
+                    user.newsletterOptIn === true ? "bg-primary" : "bg-muted border border-border",
                   )}
                 >
                   <span
                     className={cn(
                       "absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-background shadow transition-transform",
-                      user.newsletterOptIn !== false && "translate-x-5",
+                      user.newsletterOptIn === true && "translate-x-5",
                     )}
                   />
                 </button>
