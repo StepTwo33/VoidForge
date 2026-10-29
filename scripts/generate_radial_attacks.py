@@ -104,6 +104,16 @@ MANUAL_RADIAL_ATTACKS: dict[str, list[dict]] = {
             "radius": 1.0,
         },
     ],
+    # Primary is the charged shot: only the charged explosion. The Quick Shot AoE (wiki attack 4,
+    # child of the quick shot) is attached to the ALT FIRE Quick Shot in weapon-alt-fire.ts.
+    "opticor": [
+        {"name": "Charged Shot AoE", "magnetic": 400.0, "totalDamage": 400.0,
+         "radius": 6.0, "falloffReduction": 0.6},
+    ],
+    "opticor_vandal": [
+        {"name": "Charged Shot AoE", "magnetic": 200.0, "totalDamage": 200.0,
+         "radius": 4.6, "falloffReduction": 0.6},
+    ],
     # Uncharged explosion only — charged mode remains dual-mode deferred for DPS.
     "staticor": [
         {
@@ -397,6 +407,11 @@ def main() -> None:
                 merged[wid] = attacks
             else:
                 unmatched.append(wid)
+
+    # Primary is the charged shot, which has no explosion; the wiki "Uncharged AoE" belongs to
+    # the uncharged shot and is attached to its ALT FIRE mode in weapon-alt-fire.ts.
+    for wid in ("epitaph", "epitaph_prime"):
+        merged.pop(wid, None)
 
     for wid, attacks in MANUAL_RADIAL_ATTACKS.items():
         if wid in known_ids:

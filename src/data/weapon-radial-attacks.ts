@@ -322,13 +322,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 200.0,
       "radius": 4.6,
       "falloffReduction": 0.6
-    },
-    {
-      "name": "Quick Shot AoE",
-      "magnetic": 100.0,
-      "totalDamage": 100.0,
-      "radius": 4.6,
-      "falloffReduction": 0.6
     }
   ],
   "panthera_prime": [
@@ -854,13 +847,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 400.0,
       "radius": 6.0,
       "falloffReduction": 0.6
-    },
-    {
-      "name": "Quick Shot AoE",
-      "magnetic": 200.0,
-      "totalDamage": 200.0,
-      "radius": 6.0,
-      "falloffReduction": 0.6
     }
   ],
   "penta": [
@@ -1090,15 +1076,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "falloffReduction": 0.8
     }
   ],
-  "epitaph_prime": [
-    {
-      "name": "Uncharged AoE",
-      "blast": 30.0,
-      "totalDamage": 30.0,
-      "radius": 10.0,
-      "falloffReduction": 0.8
-    }
-  ],
   "euphona_prime": [
     {
       "name": "Buckshot",
@@ -1302,15 +1279,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 160.0,
       "radius": 4.0,
       "falloffReduction": 0.2
-    }
-  ],
-  "epitaph": [
-    {
-      "name": "Uncharged AoE",
-      "blast": 20.0,
-      "totalDamage": 20.0,
-      "radius": 8.0,
-      "falloffReduction": 0.8
     }
   ],
   "gammacor": [

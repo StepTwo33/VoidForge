@@ -256,15 +256,15 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       note: "Wiki Dread attack 1. Quick tap: half the damage of the charged shot, no charge wait.",
     },
   ],
-  // Epitaph: the primary is the charged shot; the "Uncharged AoE" row (a real wiki explosion,
-  // attack 3, child of attack 2) belongs to this mode, so it is kept here and stays in the panel too.
+  // Epitaph: the primary is the charged shot; the "Uncharged AoE" (a real wiki explosion, attack 3,
+  // child of attack 2) belongs to this mode only, so it lives here and not on the primary.
   epitaph: [
     {
       label: "Uncharged Shot",
       ...dmg({ impact: 40, puncture: 30, slash: 30 }),
       fireRate: 1.5, criticalChance: 0.02, criticalMultiplier: 1.2, statusChance: 0.5,
       chargeTime: 0, chargeMode: "standard", triggerType: "Semi-Auto", ammoCost: 1, forcedProcs: ["Impact"],
-      radialsKeep: ["Uncharged AoE"],
+      radialAttacks: [{ name: "Uncharged AoE", blast: 20, totalDamage: 20, radius: 8, falloffReduction: 0.8 }],
       note: "Wiki Epitaph attack 2. DPS covers the direct hit only; its Blast explosion (attack 3) is listed below it.",
     },
   ],
@@ -274,7 +274,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       ...dmg({ impact: 40, puncture: 30, slash: 30 }),
       fireRate: 1.75, criticalChance: 0.04, criticalMultiplier: 1.8, statusChance: 0.5,
       chargeTime: 0, chargeMode: "standard", triggerType: "Semi-Auto", ammoCost: 1, forcedProcs: ["Impact"],
-      radialsKeep: ["Uncharged AoE"],
+      radialAttacks: [{ name: "Uncharged AoE", blast: 30, totalDamage: 30, radius: 10, falloffReduction: 0.8 }],
       note: "Wiki Epitaph Prime attack 2. DPS covers the direct hit only; its Blast explosion (attack 3) is listed below it.",
     },
   ],
@@ -342,7 +342,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       note: "Wiki Nataruk attack 3. Release just after 70% charge: same damage as a full charge, higher crit. Uses the same bow charge timing as the charged shot.",
     },
   ],
-  // Opticor: both explosions are real wiki AoE attacks and stay in the panel; the quick shot keeps its own.
+  // Opticor: both explosions are real wiki AoE attacks; the primary keeps the charged one, the quick shot its own.
   // The wiki's Quick Shot attack has no charge time (the 40% minimum is page text only), so none is modelled.
   opticor: [
     {
@@ -350,7 +350,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       ...dmg({ impact: 50, puncture: 425, slash: 25 }),
       fireRate: 1, criticalChance: 0.2, criticalMultiplier: 2.5, statusChance: 0.2,
       chargeTime: 0, chargeMode: "standard", ammoCost: 1, forcedProcs: [],
-      radialsKeep: ["Quick Shot AoE"],
+      radialAttacks: [{ name: "Quick Shot AoE", magnetic: 200, totalDamage: 200, radius: 6, falloffReduction: 0.6 }],
       note: "Wiki Opticor attack 3. Half-damage shot fired from 40% charge (that wait is not modelled, as for the charged shot here). DPS covers the direct hit only; its explosion (attack 4) is listed below it.",
     },
   ],
@@ -360,7 +360,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       ...dmg({ impact: 20, puncture: 140, slash: 40 }),
       fireRate: 2, criticalChance: 0.24, criticalMultiplier: 2.6, statusChance: 0.3,
       chargeTime: 0, chargeMode: "standard", ammoCost: 1, forcedProcs: [],
-      radialsKeep: ["Quick Shot AoE"],
+      radialAttacks: [{ name: "Quick Shot AoE", magnetic: 100, totalDamage: 100, radius: 4.6, falloffReduction: 0.6 }],
       note: "Wiki Opticor Vandal attack 3. Half-damage shot fired from 40% charge (that wait is not modelled, as for the charged shot here). DPS covers the direct hit only; its explosion (attack 4) is listed below it.",
     },
   ],

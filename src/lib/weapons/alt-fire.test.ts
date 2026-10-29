@@ -331,13 +331,13 @@ describe("ALT FIRE: Batch 2 tap vs hold, hand-worked against wiki.warframe.com",
   });
 
   // Real explosions: the quick / uncharged shot keeps only its own explosion row.
-  it("Epitaph / Prime and Opticor / Vandal: the alt keeps only its own explosion; the primary rows are unchanged", () => {
+  it("Epitaph / Prime and Opticor / Vandal: the alt owns its explosion; the primary keeps only the charged one (Round 31)", () => {
     expect(names(alt("epitaph").radialAttacks)).toEqual(["Uncharged AoE"]);
     expect(names(alt("epitaph_prime").radialAttacks)).toEqual(["Uncharged AoE"]);
     expect(names(alt("opticor").radialAttacks)).toEqual(["Quick Shot AoE"]);
     expect(names(alt("opticor_vandal").radialAttacks)).toEqual(["Quick Shot AoE"]);
-    expect(names(prim("opticor").radialAttacks)).toEqual(["Charged Shot AoE", "Quick Shot AoE"]);
-    expect(names(prim("epitaph").radialAttacks)).toEqual(["Uncharged AoE"]);
+    expect(names(prim("opticor").radialAttacks)).toEqual(["Charged Shot AoE"]);
+    expect(names(prim("epitaph").radialAttacks)).toEqual([]);
     expect(names(alt("evensong").radialAttacks)).toEqual([]);
     expect(names(prim("evensong").radialAttacks)).toEqual(["Charged Radial Attack"]);
     expect(names(alt("mutalist_cernos").radialAttacks)).toEqual([]);

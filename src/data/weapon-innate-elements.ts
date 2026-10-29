@@ -133,27 +133,37 @@ export const WEAPON_FIRE_TIMING: Record<string, WeaponInnateFill> = {
   dread: { chargeTime: 0.5, chargeMode: "bow" },
   cernos: { chargeTime: 0.5, chargeMode: "bow" },
   cernos_prime: { chargeTime: 0.5, chargeMode: "bow" },
-  rakta_cernos: { chargeTime: 0.5, chargeMode: "bow" },
+  // wiki Module:Weapons/data/primary Rakta Cernos Charged Shot ChargeTime 0.25; Fire Rate list 0.25 sec.
+  rakta_cernos: { chargeTime: 0.25, chargeMode: "bow" },
   mutalist_cernos: { chargeTime: 0.5, chargeMode: "bow" },
+  // wiki Module:Weapons/data/primary Charged Shot ChargeTime + Fire Rate list: Cinta 1.5 s,
+  // Evensong 1.2 s, Nataruk 1.0 s (they fell back to the 0.5 s Bow default in weapon-enrich).
+  cinta: { chargeTime: 1.5, chargeMode: "bow" },
+  evensong: { chargeTime: 1.2, chargeMode: "bow" },
+  nataruk: { chargeTime: 1.0, chargeMode: "bow" },
   // wiki Module:Weapons (both wikis) + Fire Rate list: 0.70s
   proboscis_cernos: { chargeTime: 0.7, chargeMode: "bow" },
   daikyu: { chargeTime: 1.0, chargeMode: "bow" },
   daikyu_prime: { chargeTime: 1.0, chargeMode: "bow" },
-  nagantaka: { chargeTime: 0.5, chargeMode: "bow" },
-  nagantaka_prime: { chargeTime: 0.5, chargeMode: "bow" },
+  // wiki Nagantaka: a Semi-Auto crossbow (Module Trigger "Semi-Auto", no ChargeTime, not on the
+  // Fire Rate charge list) that "counts as a bow in regards to fire rate mods". Bow mod bonus only;
+  // no charge time, so it fires at its listed rate and reloads after the 9-round magazine.
+  nagantaka: { chargeMode: "bow" },
+  nagantaka_prime: { chargeMode: "bow" },
   artemis_bow: { chargeTime: 1.0, chargeMode: "bow" },
   artemis_bow_prime: { chargeTime: 1.0, chargeMode: "bow" },
   // Lanka — charge only, no inter-shot delay
   lanka: { chargeTime: 1.0, chargeMode: "lanka" },
   // Standard charge guns
-  opticor: { chargeTime: 2.0, chargeMode: "standard" },
-  opticor_vandal: { chargeTime: 0.6, chargeMode: "standard" },
+  // chargeTimingAlways: the catalog trigger reads "Rifle", which hid the charge time (wiki Fire Rate
+  // list + Module Charged Shot ChargeTime: Opticor 2.0 s, Opticor Vandal 0.6 s, Ferrox 0.5 s, Miter 0.75 s).
+  opticor: { chargeTime: 2.0, chargeMode: "standard", chargeTimingAlways: true },
+  opticor_vandal: { chargeTime: 0.6, chargeMode: "standard", chargeTimingAlways: true },
+  miter: { chargeTime: 0.75, chargeMode: "standard", chargeTimingAlways: true },
   ogris: { chargeTime: 0.3, chargeMode: "standard" },
-  kuva_ogris: { chargeTime: 0.3, chargeMode: "standard" },
-  ferrox: { chargeTime: 0.5, chargeMode: "standard" },
+  ferrox: { chargeTime: 0.5, chargeMode: "standard", chargeTimingAlways: true },
   // wiki Module:Weapons (both wikis) + Fire Rate list: 0.40s
   tenet_ferrox: { chargeTime: 0.4, chargeMode: "standard" },
-  tenet_envoy: { chargeTime: 1.2, chargeMode: "standard" },
   angstrum: { chargeTime: 0.5, chargeMode: "standard" },
   // wiki Module:Weapons (both wikis) + Fire Rate list: 0.20s single rocket
   prisma_angstrum: { chargeTime: 0.2, chargeMode: "standard" },
@@ -166,7 +176,14 @@ export const WEAPON_FIRE_TIMING: Record<string, WeaponInnateFill> = {
   // wiki Fire Rate: Epitaph charged shot uses the bow formula 1 / (CT + reload); CT 0.36s (both wikis)
   epitaph: { chargeTime: 0.36, chargeMode: "bow" },
   epitaph_prime: { chargeTime: 0.36, chargeMode: "bow" },
-  drakgoon: { chargeTime: 0.3, chargeMode: "standard" },
+  // wiki Module Charged Shot ChargeTime + Fire Rate list: Drakgoon 0.5 s, Kuva Drakgoon 0.3 s
+  // (Kuva Drakgoon's catalog trigger reads "Shotgun", so charge timing is forced on).
+  drakgoon: { chargeTime: 0.5, chargeMode: "standard" },
+  kuva_drakgoon: { chargeTime: 0.3, chargeMode: "standard", chargeTimingAlways: true },
+  // wiki Module:Weapons/data/archwing Charged Shot ChargeTime: Corvas / Corvas Prime 0.5 s, Velocitus 1.0 s.
+  corvas: { chargeTime: 0.5, chargeMode: "standard" },
+  corvas_prime: { chargeTime: 0.5, chargeMode: "standard" },
+  velocitus: { chargeTime: 1.0, chargeMode: "standard" },
   // wiki Module:Weapons + fandom infobox: Class/Type "Bow", Charged Shot CT 0.4s → bow cycle.
   kuva_bramma: { chargeTime: 0.4, chargeMode: "bow" },
   // wiki Module:Weapons (both wikis): Class "Bow" → bow cycle 1 / (CT + reload) per Fire Rate.

@@ -203,7 +203,8 @@ export function scaleRadialAttacksWithDps(
   const efr = shotsPerSecond(stats);
   // Bow cycle already includes reload in effective FR (calculateSustainedDps returns
   // burst for bows) — radials must not apply the mag/reload factor a second time.
-  const isBow = baseWeapon.chargeMode === "bow" || baseWeapon.triggerType === "Bow";
+  const isBow =
+    (baseWeapon.chargeMode === "bow" || baseWeapon.triggerType === "Bow") && baseWeapon.chargeTime != null;
   if (!isMelee && !isBow && stats.magazine > 0 && efr > 0) {
     // Match direct sustained: ammo-restore + instant-reload (one opportunity / mag).
     const restoreP = stats.ammoRestoreChance ?? 0;

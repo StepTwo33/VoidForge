@@ -2821,8 +2821,9 @@ function calculateSustainedDps(
   const efr = dpsFireRate(stats);
   if (efr <= 0) return 0;
   const burstDps = calculateBurstDps(stats);
-  // Bow cycle already includes reload in effective FR — don't double-count.
-  if (baseWeapon?.chargeMode === "bow" || baseWeapon?.triggerType === "Bow") {
+  // Bow cycle already includes reload in effective FR — don't double-count. Only when a bow
+  // cycle is actually used (a charge time is set): Nagantaka is "bow" for fire-rate mods only.
+  if ((baseWeapon?.chargeMode === "bow" || baseWeapon?.triggerType === "Bow") && baseWeapon?.chargeTime != null) {
     return burstDps;
   }
   // Ammo: expected ammo per shot = ammoCost × (1 − min(AE, 75%)) × (1 − Infinite Ammo uptime)

@@ -40,7 +40,7 @@ describe("Damage sim: Viral amplifies Heat / Toxin DoT ticks (wiki Viral Damage,
 });
 
 describe("Bows: sustained DPS = burst DPS including radial explosions (reload is in the bow cycle)", () => {
-  for (const id of ["lenz", "prisma_lenz", "kuva_bramma", "proboscis_cernos", "evensong", "epitaph"]) {
+  for (const id of ["lenz", "prisma_lenz", "kuva_bramma", "proboscis_cernos", "evensong"]) {
     it(`${id}: sustained === burst (radial no longer re-applies mag/reload factor)`, () => {
       const s = build(id);
       expect(s.radialBurstDps ?? 0).toBeGreaterThan(0);
