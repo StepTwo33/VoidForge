@@ -874,6 +874,82 @@ describe("ALT FIRE: Batch 5 thrown spears, hand-worked against wiki.warframe.com
   });
 });
 
+describe("ALT FIRE: Batch 6a glaive-style throws, hand-worked against wiki.warframe.com", () => {
+  // Module:Weapons/data/melee attacks 2 (Throw) and 5 (Charged Throw): [total damage, CC, CM, fire rate,
+  // bounce explosion, recall explosion]. Wolf Sledge has a Throw only.
+  const want: Record<string, Record<string, [number, number, number, number, number, number]>> = {
+    glaive: { "Throw": [116, 0.14, 2.1, 1, 190, 380], "Charged Throw": [231, 0.16, 2.2, 0.833, 378, 756] },
+    pathocyst: { "Throw": [288, 0.17, 2.3, 0.667, 393, 786], "Charged Throw": [576, 0.21, 2.5, 0.833, 786, 1572] },
+    coda_pathocyst: { "Throw": [297, 0.22, 2.4, 0.667, 405, 810], "Charged Throw": [594, 0.24, 2.5, 0.833, 810, 1620] },
+    orvius: { "Throw": [215, 0.2, 2.2, 0.75, 293, 586], "Charged Throw": [429, 0.22, 2.4, 0.833, 585, 1170] },
+    cerata: { "Throw": [201, 0.19, 2.1, 1, 333, 666], "Charged Throw": [402, 0.21, 2.3, 0.833, 666, 1318] },
+    falcor: { "Throw": [250, 0.14, 1.8, 0.833, 345, 690], "Charged Throw": [506, 0.16, 2.0, 0.833, 690, 1380] },
+    halikar: { "Throw": [163, 0.19, 2.1, 1.17, 450, 450], "Charged Throw": [327, 0.21, 2.3, 0.833, 447, 894] },
+    halikar_wraith: { "Throw": [263.1, 0.21, 2.3, 1.17, 329, 658], "Charged Throw": [497, 0.21, 2.5, 0.833, 657, 1314] },
+    kestrel: { "Throw": [92, 0.12, 2.1, 1.08, 126, 252], "Charged Throw": [184, 0.14, 2.2, 0.833, 252, 504] },
+    kestrel_prime: { "Throw": [230, 0.22, 2.1, 1, 315, 630], "Charged Throw": [460, 0.24, 2.2, 1, 630, 1260] },
+    xoris: { "Throw": [120, 0.2, 2.4, 1.17, 250, 500], "Charged Throw": [120, 0.22, 2.4, 0.833, 500, 1000] },
+    wolf_sledge: { "Throw": [777, 0.19, 2.1, 1, 777, 1554] },
+  };
+
+  it("each throw: direct-hit DPS from the wiki row, and only its own two explosions at the wiki's numbers", () => {
+    for (const [id, modes] of Object.entries(want)) {
+      const rows = computeAltFire(byId(id), calcWith([]));
+      for (const [label, [total, cc, cm, fr, bounce, recall]] of Object.entries(modes)) {
+        const r = rows.find((x) => x.label === label)!;
+        expect(r, `${id} ${label}`).toBeDefined();
+        expect(r.showDps, `${id} ${label}`).not.toBe(false);
+        const s = r.stats;
+        near(s.arsenalDamage!.totalDamage, total);
+        expect(s.criticalChance, id).toBeCloseTo(cc, 6);
+        expect(s.criticalMultiplier, id).toBeCloseTo(cm, 2);
+        near(s.effectiveFireRate, fr, 1e-6);
+        // DPS runs on the engine's quantised damage (as the primary does), so use it here.
+        near(s.burstDps, s.totalDamage * (1 + cc * (s.criticalMultiplier - 1)) * fr, 1e-6);
+        const scale = (s.arsenalDamage!.totalDamage / s.totalDamage) || 1;
+        const rad = (s.radialAttacks ?? []).map((x) => [x.name, Math.round(x.totalDamage * scale)]);
+        expect(rad, `${id} ${label}`).toEqual([[`${label} Bounce Explosion`, bounce], [`${label} Recall Explosion`, recall]]);
+      }
+    }
+  });
+
+  it("hand check: Glaive Throw 116 x (1 + 0.14 x 1.1) x 1/s = 133.9; Wolf Sledge Throw 777 x (1 + 0.19 x 1.1) = 939.4", () => {
+    near(computeAltFire(byId("glaive"), calcWith([]))[0]!.stats.burstDps, 116 * (1 + 0.14 * 1.1), 0.003);
+    near(computeAltFire(byId("wolf_sledge"), calcWith([]))[0]!.stats.burstDps, 777 * (1 + 0.19 * 1.1), 0.003);
+  });
+
+  it("damage mods apply to the throw and its explosions (Pressure Point +120%)", () => {
+    const s = computeAltFire(byId("wolf_sledge"), calcWith(["pressure_point_r3"]))[0]!.stats;
+    near(s.arsenalDamage!.totalDamage, 777 * 2.2);
+    const scale = s.arsenalDamage!.totalDamage / s.totalDamage;
+    near(s.radialAttacks![0]!.totalDamage * scale, 777 * 2.2);
+  });
+
+  it("Orvius Hover Attack: Cold 75, 60% status, no DPS", () => {
+    const r = computeAltFire(byId("orvius"), calcWith([])).find((x) => x.label === "Hover Attack")!;
+    expect(r.showDps).toBe(false);
+    near(r.stats.arsenalDamage!.totalDamage, 75);
+    expect(r.stats.arsenalDamage!.elements.map((e) => e.type)).toEqual(["cold"]);
+    expect(r.stats.statusChance).toBeCloseTo(0.6, 6);
+    expect(r.stats.radialAttacks ?? []).toEqual([]);
+  });
+
+  it("the primaries are untouched: wiki attack 1 damage and fire rate, explosions still on the primary", () => {
+    const prim: Record<string, [number, number]> = {
+      glaive: [105, 1], pathocyst: [262, 0.667], coda_pathocyst: [270, 0.667], orvius: [195, 0.75], cerata: [183, 1],
+      falcor: [230, 0.833], halikar: [149, 1.167], halikar_wraith: [225, 1.167], kestrel: [84, 1.083],
+      kestrel_prime: [210, 1.25], xoris: [120, 1.167], wolf_sledge: [259, 1],
+    };
+    for (const [id, [d, fr]] of Object.entries(prim)) {
+      const w = byId(id);
+      expect(w.damage, id).toBeCloseTo(d, 1);
+      expect(w.fireRate, id).toBeCloseTo(fr, 2);
+      const names = (calculateWeaponBuild(w, [], modsMap).radialAttacks ?? []).map((r) => r.name);
+      expect(names, id).toContain("Throw Recall Explosion");
+    }
+  });
+});
+
 describe("ALT FIRE: radial stand-in verdicts", () => {
   it("real wiki explosions on the primary stay (Cyanex, Glaive Prime, Staticor, Zarr)", () => {
     const names = (id: string) => (calculateWeaponBuild(byId(id), [], modsMap).radialAttacks ?? []).map((r) => r.name);

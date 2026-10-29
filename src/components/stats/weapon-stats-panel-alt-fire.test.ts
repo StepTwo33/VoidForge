@@ -49,6 +49,9 @@ const EXPECTED = [
   "aeolak", "tenet_plinx", "tenet_tetra", "coda_bassocyst", "stug",
   // Batch 5: thrown spears
   "afentis", "afentis_prime", "ferrox", "tenet_ferrox", "javlok", "scourge", "scourge_prime",
+  // Batch 6a: glaive-style throws
+  "glaive", "pathocyst", "coda_pathocyst", "orvius", "cerata", "falcor", "halikar", "halikar_wraith", "kestrel",
+  "kestrel_prime", "xoris", "wolf_sledge",
   // Former toggle weapons (legacy alternateModeStats)
   "nunchasa", "hind", "bubonico", "coda_bubonico", "kuva_hind", "kuva_quartakk", "tiberon_prime", "quatz",
   "staticor", "corufell_prime", "talons_thrown",
