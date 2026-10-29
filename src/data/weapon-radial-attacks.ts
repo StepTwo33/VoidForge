@@ -5502,36 +5502,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "radius": 1.0
     }
   ],
-  "ballistica": [
-    {
-      "name": "Charged Shot",
-      "impact": 10.0,
-      "puncture": 80.0,
-      "slash": 10.0,
-      "totalDamage": 100.0,
-      "radius": 1.0
-    }
-  ],
-  "ballistica_prime": [
-    {
-      "name": "Charged Shot",
-      "impact": 3.8,
-      "puncture": 41.8,
-      "slash": 30.4,
-      "totalDamage": 76.0,
-      "radius": 1.0
-    }
-  ],
-  "rakta_ballistica": [
-    {
-      "name": "Charged Shot",
-      "impact": 15.0,
-      "puncture": 270.0,
-      "slash": 15.0,
-      "totalDamage": 300.0,
-      "radius": 1.0
-    }
-  ],
   "fusilai": [
     {
       "name": "Semi-Auto Mode",

@@ -37,7 +37,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       label: "Uncharged Shot",
       ...dmg({ impact: 171, puncture: 9.5, slash: 9.5 }),
       fireRate: 1, criticalChance: 0.36, criticalMultiplier: 2, statusChance: 0.18,
-      chargeTime: 0, chargeMode: "standard", ammoCost: 1,
+      chargeTime: 0, chargeMode: "bow", ammoCost: 1,
       note: "Wiki Cernos attack 1. Quick tap: half the damage of the charged shot, no charge wait.",
     },
   ],
@@ -167,6 +167,228 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       fireRate: 2, criticalChance: 0.18, criticalMultiplier: 2, statusChance: 0.1,
       multishot: 10, ammoCost: 1,
       note: `Wiki Tenet Detron attack 2. 10 pellets of 26; the wiki lists no ammo cost for this mode (1 per shot assumed). ${MAG_DUMP}`,
+    },
+  ],
+  // ---- Batch 2: tap vs hold ------------------------------------------------------------
+  // Where the calculator's primary mode is the charged shot, the quick tap is the alt
+  // (chargeTime 0, as for Cernos). Where the primary is the normal / burst shot (Ballistica
+  // family), the charged shot is the alt, timed with the Fire Rate page rule 1 / (charge + 1 / FR).
+  // Bow modes that still need a partial charge (Perfect Shot, Daikyu quick shot, Lanka partial)
+  // keep the primary's own charge timing so the rows stay comparable. Bow quick shots stay bows
+  // (chargeMode "bow", chargeTime 0): fire-rate mods get the "x2 for Bows" bonus, and each shot is
+  // followed by the reload. Epitaph (a pistol) uses the wiki's "Semi-Auto" trigger.
+  ballistica: [
+    {
+      label: "Charged Shot",
+      ...dmg({ impact: 10, puncture: 80, slash: 10 }),
+      fireRate: 3.33, criticalChance: 0.15, criticalMultiplier: 1.5, statusChance: 0.1,
+      chargeTime: 1, chargeMode: "standard", triggerType: "Charge", burstCount: 1, ammoCost: 1, forcedProcs: [],
+      note: "Wiki Ballistica attack 2. One bolt instead of the 4-round burst. DPS uses 1 / (1 s charge + 1 / fire rate).",
+    },
+  ],
+  ballistica_prime: [
+    {
+      label: "Charged Shot",
+      ...dmg({ impact: 3.8, puncture: 41.8, slash: 30.4 }),
+      fireRate: 3.33, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.15,
+      multishot: 4, chargeTime: 0.8, chargeMode: "standard", triggerType: "Charge", ammoCost: 4, forcedProcs: [],
+      note: "Wiki Ballistica Prime attack 2. 4 bolts of 76, 1 m punch-through. DPS uses 1 / (0.8 s charge + 1 / fire rate).",
+    },
+  ],
+  rakta_ballistica: [
+    {
+      label: "Charged Shot",
+      ...dmg({ impact: 15, puncture: 270, slash: 15 }),
+      fireRate: 3.33, criticalChance: 0.2, criticalMultiplier: 1.5, statusChance: 0.1,
+      chargeTime: 1, chargeMode: "standard", triggerType: "Charge", burstCount: 1, ammoCost: 1, forcedProcs: [],
+      note: "Wiki Rakta Ballistica attack 2. One bolt instead of the 4-round burst. DPS uses 1 / (1 s charge + 1 / fire rate).",
+    },
+  ],
+  cinta: [
+    {
+      label: "Quick Shot",
+      ...dmg({ puncture: 360, slash: 90 }),
+      fireRate: 0.667, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.3,
+      chargeTime: 0, chargeMode: "bow", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Cinta attack 1. Quick tap, no charge wait. The wiki lists no ammo cost (1 arrow assumed).",
+    },
+    {
+      label: "Perfect Shot",
+      ...dmg({ heat: 600 }),
+      fireRate: 0.667, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.34,
+      chargeTime: 1.05, ammoCost: 1, forcedProcs: [],
+      note: "Wiki Cinta attack 3. Release at 70-90% charge: pure Heat, knockdown, infinite body punch-through. Uses the same bow charge timing as the charged shot.",
+    },
+  ],
+  daikyu_prime: [
+    {
+      label: "Quick Shot",
+      ...dmg({ impact: 112.5, puncture: 150, slash: 112.5 }),
+      fireRate: 1, criticalChance: 0.4, criticalMultiplier: 2.4, statusChance: 0.5,
+      chargeTime: 0.25, ammoCost: 1, forcedProcs: ["Impact"],
+      note: "Wiki Daikyu Prime attack 1. Fired at 25% charge for half damage. Uses the same bow charge timing as the charged shot.",
+    },
+  ],
+  drakgoon: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 8, puncture: 8, slash: 24 }),
+      fireRate: 3.33, criticalChance: 0.05, criticalMultiplier: 2, statusChance: 0.063,
+      multishot: 10, chargeTime: 0, chargeMode: "standard", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Drakgoon attack 1. 10 pellets of 40, no charge wait, 1.5 m punch-through.",
+    },
+  ],
+  kuva_drakgoon: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 4.6, puncture: 4.6, slash: 13.8 }),
+      fireRate: 3.33, criticalChance: 0.19, criticalMultiplier: 2.1, statusChance: 0.09,
+      multishot: 10, chargeTime: 0, chargeMode: "standard", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Kuva Drakgoon attack 1. 10 pellets of 23, no charge wait. Progenitor bonus not included.",
+    },
+  ],
+  dread: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 16.8, puncture: 16.8, slash: 134.4 }),
+      fireRate: 1, criticalChance: 0.5, criticalMultiplier: 2, statusChance: 0.2,
+      chargeTime: 0, chargeMode: "bow", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Dread attack 1. Quick tap: half the damage of the charged shot, no charge wait.",
+    },
+  ],
+  // Epitaph: the primary is the charged shot; the "Uncharged AoE" row (a real wiki explosion,
+  // attack 3, child of attack 2) belongs to this mode, so it is kept here and stays in the panel too.
+  epitaph: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 40, puncture: 30, slash: 30 }),
+      fireRate: 1.5, criticalChance: 0.02, criticalMultiplier: 1.2, statusChance: 0.5,
+      chargeTime: 0, chargeMode: "standard", triggerType: "Semi-Auto", ammoCost: 1, forcedProcs: ["Impact"],
+      radialsKeep: ["Uncharged AoE"],
+      note: "Wiki Epitaph attack 2. DPS covers the direct hit only; its Blast explosion (attack 3) is listed below it.",
+    },
+  ],
+  epitaph_prime: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 40, puncture: 30, slash: 30 }),
+      fireRate: 1.75, criticalChance: 0.04, criticalMultiplier: 1.8, statusChance: 0.5,
+      chargeTime: 0, chargeMode: "standard", triggerType: "Semi-Auto", ammoCost: 1, forcedProcs: ["Impact"],
+      radialsKeep: ["Uncharged AoE"],
+      note: "Wiki Epitaph Prime attack 2. DPS covers the direct hit only; its Blast explosion (attack 3) is listed below it.",
+    },
+  ],
+  // Evensong: the 4 m explosion only happens on a full charge, so it stays with the primary.
+  evensong: [
+    {
+      label: "Quick Shot",
+      ...dmg({ puncture: 97.5, slash: 227.5 }),
+      fireRate: 1, criticalChance: 0.25, criticalMultiplier: 2.2, statusChance: 0.38,
+      chargeTime: 0, chargeMode: "bow", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Evensong attack 1. Quick tap, no charge wait and no explosion (that needs a full charge).",
+    },
+  ],
+  // Lanka: the wiki's fire rate is a 1,000,000,000 placeholder, so timing comes from the charge alone (same rule as its charged shot).
+  lanka: [
+    {
+      label: "Partially Charged Shot",
+      ...dmg({ electricity: 200 }),
+      criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.25,
+      chargeTime: 0.33, ammoCost: 1, forcedProcs: [],
+      note: "Wiki Lanka attack 1. Released at 33% charge, 1.5 m punch-through. DPS uses the charge time alone, like the full charge (the wiki has no real fire rate for Lanka).",
+    },
+  ],
+  miter: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 20, puncture: 10, slash: 70 }),
+      fireRate: 2.5, criticalChance: 0.05, criticalMultiplier: 2, statusChance: 0.2,
+      chargeTime: 0, chargeMode: "standard", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Miter attack 1. Quick tap: 100 per blade, no charge wait.",
+    },
+  ],
+  mk1_paris: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 5.75, puncture: 86.25, slash: 23 }),
+      fireRate: 1, criticalChance: 0.3, criticalMultiplier: 2, statusChance: 0.15,
+      chargeTime: 0, chargeMode: "bow", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Mk1-Paris attack 1. Quick tap: half the damage of the charged shot, no charge wait.",
+    },
+  ],
+  // Mutalist Cernos: the wiki attaches the Toxin Cloud to the charged shot (attack 3, parent 2), so it stays with the primary.
+  mutalist_cernos: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 184.5, puncture: 10.25, slash: 10.25 }),
+      fireRate: 1, criticalChance: 0.15, criticalMultiplier: 2, statusChance: 0.49,
+      chargeTime: 0, chargeMode: "bow", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Mutalist Cernos attack 1. Quick tap: half the damage of the charged shot, no charge wait.",
+    },
+  ],
+  nataruk: [
+    {
+      label: "Quick Shot",
+      ...dmg({ puncture: 405, slash: 45 }),
+      fireRate: 0.667, criticalChance: 0.2, criticalMultiplier: 1.8, statusChance: 0.3,
+      chargeTime: 0, chargeMode: "bow", ammoCost: 1, forcedProcs: ["Impact"],
+      note: "Wiki Nataruk attack 1. Quick tap with a forced Impact proc, no charge wait.",
+    },
+    {
+      label: "Perfect Shot",
+      ...dmg({ puncture: 648, slash: 252 }),
+      fireRate: 0.667, criticalChance: 0.6, criticalMultiplier: 2.4, statusChance: 0.5,
+      chargeTime: 0.7, ammoCost: 1, forcedProcs: [],
+      note: "Wiki Nataruk attack 3. Release just after 70% charge: same damage as a full charge, higher crit. Uses the same bow charge timing as the charged shot.",
+    },
+  ],
+  // Opticor: both explosions are real wiki AoE attacks and stay in the panel; the quick shot keeps its own.
+  // The wiki's Quick Shot attack has no charge time (the 40% minimum is page text only), so none is modelled.
+  opticor: [
+    {
+      label: "Quick Shot",
+      ...dmg({ impact: 50, puncture: 425, slash: 25 }),
+      fireRate: 1, criticalChance: 0.2, criticalMultiplier: 2.5, statusChance: 0.2,
+      chargeTime: 0, chargeMode: "standard", ammoCost: 1, forcedProcs: [],
+      radialsKeep: ["Quick Shot AoE"],
+      note: "Wiki Opticor attack 3. Half-damage shot fired from 40% charge (that wait is not modelled, as for the charged shot here). DPS covers the direct hit only; its explosion (attack 4) is listed below it.",
+    },
+  ],
+  opticor_vandal: [
+    {
+      label: "Quick Shot",
+      ...dmg({ impact: 20, puncture: 140, slash: 40 }),
+      fireRate: 2, criticalChance: 0.24, criticalMultiplier: 2.6, statusChance: 0.3,
+      chargeTime: 0, chargeMode: "standard", ammoCost: 1, forcedProcs: [],
+      radialsKeep: ["Quick Shot AoE"],
+      note: "Wiki Opticor Vandal attack 3. Half-damage shot fired from 40% charge (that wait is not modelled, as for the charged shot here). DPS covers the direct hit only; its explosion (attack 4) is listed below it.",
+    },
+  ],
+  paris: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 8, puncture: 120, slash: 32 }),
+      fireRate: 1, criticalChance: 0.3, criticalMultiplier: 2, statusChance: 0.1,
+      chargeTime: 0, chargeMode: "bow", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Paris attack 1. Quick tap: half the damage of the charged shot, no charge wait.",
+    },
+  ],
+  paris_prime: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 9, puncture: 153, slash: 18 }),
+      fireRate: 1, criticalChance: 0.45, criticalMultiplier: 2, statusChance: 0.2,
+      chargeTime: 0, chargeMode: "bow", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Paris Prime attack 1. Quick tap: half the damage of the charged shot, no charge wait.",
+    },
+  ],
+  rakta_cernos: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 211.5, puncture: 11.75, slash: 11.75 }),
+      fireRate: 1, criticalChance: 0.35, criticalMultiplier: 2, statusChance: 0.15,
+      chargeTime: 0, chargeMode: "bow", ammoCost: 1, forcedProcs: [],
+      note: "Wiki Rakta Cernos attack 1. Quick tap: half the damage of the charged shot, no charge wait.",
     },
   ],
 };

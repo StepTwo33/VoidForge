@@ -65,36 +65,6 @@ MANUAL_RADIAL_ATTACKS: dict[str, list[dict]] = {
         },
     ],
     # Alt-fire / charged profiles not flagged as AoE in Module:Weapons/data (per-shot contact radius).
-    "ballistica": [
-        {
-            "name": "Charged Shot",
-            "impact": 10.0,
-            "puncture": 80.0,
-            "slash": 10.0,
-            "totalDamage": 100.0,
-            "radius": 1.0,
-        },
-    ],
-    "ballistica_prime": [
-        {
-            "name": "Charged Shot",
-            "impact": 3.8,
-            "puncture": 41.8,
-            "slash": 30.4,
-            "totalDamage": 76.0,
-            "radius": 1.0,
-        },
-    ],
-    "rakta_ballistica": [
-        {
-            "name": "Charged Shot",
-            "impact": 15.0,
-            "puncture": 270.0,
-            "slash": 15.0,
-            "totalDamage": 300.0,
-            "radius": 1.0,
-        },
-    ],
     "fusilai": [
         {
             "name": "Semi-Auto Mode",
@@ -121,26 +91,6 @@ MANUAL_RADIAL_ATTACKS: dict[str, list[dict]] = {
             "puncture": 39.56,
             "slash": 3.68,
             "totalDamage": 46.0,
-            "radius": 1.0,
-        },
-    ],
-    "pandero": [
-        {
-            "name": "Alt-Fire",
-            "impact": 18.0,
-            "puncture": 18.0,
-            "slash": 36.0,
-            "totalDamage": 72.0,
-            "radius": 1.0,
-        },
-    ],
-    "pandero_prime": [
-        {
-            "name": "Alt-Fire",
-            "impact": 26.0,
-            "puncture": 26.0,
-            "slash": 52.0,
-            "totalDamage": 104.0,
             "radius": 1.0,
         },
     ],

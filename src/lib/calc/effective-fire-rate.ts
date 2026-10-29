@@ -109,6 +109,15 @@ export function resolveEffectiveFireRate(input: FireTimingInput): number {
     return 1 / (ct + 1 / fr);
   }
 
+  // —— Bow quick shot (ALT FIRE uncharged tap: chargeMode "bow", chargeTime 0) ——
+  // One arrow, then the reload, so the reload is part of the cycle (bows hold one arrow).
+  // moddedFireRate already carries the "x2 for Bows" fire-rate mod bonus.
+  if (chargeMode === "bow" && chargeTime === 0) {
+    const fr = Math.max(0, moddedFireRate);
+    const cycle = (fr > 0 ? 1 / fr : 0) + Math.max(0, reloadTime);
+    return cycle > 0 ? 1 / cycle : 0;
+  }
+
   // —— Burst ——
   if (burstCount != null && burstCount > 1 && usesBurstTiming(triggerType)) {
     const fr = Math.max(1e-6, moddedFireRate);

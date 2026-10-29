@@ -28,9 +28,13 @@ const hasSection = (html: string) => html.includes(">ALT FIRE<");
  * its alt is a stance-form switch that stays a button.
  */
 const EXPECTED = [
-  // Round 30 data table (batches 0 and 1)
+  // Round 30 data table (batches 0, 1 and 2)
   "cernos", "zarr", "quellor", "glaive_prime", "pandero", "pandero_prime", "nagantaka", "nagantaka_prime",
   "athodai", "athodai_prime", "cyanex", "kuva_kraken", "tenet_detron",
+  // Batch 2: tap vs hold
+  "ballistica", "ballistica_prime", "rakta_ballistica", "cinta", "daikyu_prime", "drakgoon", "kuva_drakgoon", "dread",
+  "epitaph", "epitaph_prime", "evensong", "lanka", "miter", "mk1_paris", "mutalist_cernos", "nataruk", "opticor",
+  "opticor_vandal", "paris", "paris_prime", "rakta_cernos",
   // Former toggle weapons (legacy alternateModeStats)
   "nunchasa", "hind", "bubonico", "coda_bubonico", "kuva_hind", "kuva_quartakk", "tiberon_prime", "quatz",
   "staticor", "corufell_prime", "talons_thrown",

@@ -106,13 +106,14 @@ describe("ALT FIRE: Batch 0, hand-worked against wiki.warframe.com", () => {
     const prim = calc(byId("cernos"));
     const s = alt("cernos");
     expect(s.totalDamage / prim.totalDamage).toBeCloseTo(0.5, 6);
-    expect(s.effectiveFireRate).toBeCloseTo(1, 6);
+    // Still a bow: one arrow then the 0.6 s reload -> 1 shot per (1/1 + 0.6) = 1.6 s, reload in the cycle.
+    expect(s.effectiveFireRate).toBeCloseTo(1 / 1.6, 6);
     expect(prim.effectiveFireRate).toBeCloseTo(1 / (0.5 + 0.6), 6); // existing bow cycle, unchanged
     // 190 quantises to 195.9375 (29 + 2 + 2 steps of 190/32, the same rule as the charged shot);
-    // x (1 + 0.36 x 1) x 1/s = 266.5. Mag 1 + 0.6 s reload -> 1 shot per 1.6 s.
+    // x (1 + 0.36 x 1) / 1.6 s = 166.6 burst = sustained (as for the primary bow).
     expect(s.totalDamage).toBeCloseTo(195.9375, 6);
-    near(s.burstDps, 195.9375 * 1.36);
-    near(s.sustainedDps / s.burstDps, 1 / 1.6);
+    near(s.burstDps, (195.9375 * 1.36) / 1.6);
+    near(s.sustainedDps, s.burstDps);
   });
 
   // Quellor Alt-Fire: 1,400, 40% / 2.2x, 50 ammo, 1.20 s charge, FR 1.0. Fire Rate page: 1/(1.2 + 1/1) = 0.4545/s.
@@ -207,6 +208,168 @@ describe("ALT FIRE: Batch 1 magazine dump, hand-worked against wiki.warframe.com
     near(s.burstDps, 26 * 10 * 1.18 * 2);
     near(s.sustainedDps, (6 * 26 * 10 * 1.18) / (6 / 2 + 1.05));
     near(s.sustainedDps * 1.6, 727.22);
+  });
+});
+
+describe("ALT FIRE: Batch 2 tap vs hold, hand-worked against wiki.warframe.com", () => {
+  const prim = (id: string, mods: string[] = []) => calcWith(mods)(byId(id));
+  const names = (rows?: { name: string }[]) => (rows ?? []).map((r) => r.name);
+
+  // Paris family / Cernos family / Dread: the quick tap is half the charged hit, fired at the wiki fire rate with no charge wait.
+  // Still bows: one arrow then the reload, so shots/s = 1 / (1 / FR + reload) and burst = sustained (as for the primary).
+  it("bow quick taps: half the charged hit; DPS = dmg x (1 + cc x (cm - 1)) / (1 / FR + reload)", () => {
+    const rows: [string, number, number, number, number, number][] = [
+      // id, wiki dmg, cc, cm, fire rate, reload
+      ["paris", 160, 0.3, 2, 1, 0.65],
+      ["paris_prime", 180, 0.45, 2, 1, 0.7],
+      ["mk1_paris", 115, 0.3, 2, 1, 0.55],
+      ["dread", 168, 0.5, 2, 1, 0.7],
+      ["mutalist_cernos", 205, 0.15, 2, 1, 0.6],
+      ["rakta_cernos", 235, 0.35, 2, 1, 0.6],
+      ["evensong", 325, 0.25, 2.2, 1, 0.6],
+      ["cinta", 450, 0.2, 2, 0.667, 0.6],
+    ];
+    for (const [id, d, cc, cm, fr, reload] of rows) {
+      const s = alt(id);
+      near(s.totalDamage, d, 0.06); // engine quantises splits to 1/32 of the total
+      expect(s.effectiveFireRate, id).toBeCloseTo(1 / (1 / fr + reload), 6);
+      near(s.burstDps, (s.totalDamage * (1 + cc * (cm - 1))) / (1 / fr + reload));
+      near(s.sustainedDps, s.burstDps);
+    }
+    // Paris 160 = 8 / 120 / 32 sits exactly on the grid: 160 x 1.3 = 208 per second of firing, / 1.65 s cycle = 126.06.
+    near(alt("paris").burstDps, 208 / 1.65);
+    near(alt("paris").sustainedDps, 208 / 1.65);
+  });
+
+  it("primary (charged) results for the bows are untouched", () => {
+    expect(prim("paris").effectiveFireRate).toBeCloseTo(1 / (0.5 + 0.65), 6);
+    expect(prim("paris").totalDamage).toBeCloseTo(330, 6);
+  });
+
+  // Ballistica: primary is the 4-round burst; the charged bolt is the alt. Fire Rate page: 1 / (1 + 1 / 3.33) = 0.769/s.
+  it("Ballistica Charged Shot: 100 x 1.075 x 0.769 = 82.7 burst; 16 mag / 2 s reload -> 75.4 sustained", () => {
+    const s = alt("ballistica");
+    const eff = 1 / (1 + 1 / 3.33);
+    expect(s.effectiveFireRate).toBeCloseTo(eff, 6);
+    expect(s.totalDamage).toBe(100);
+    near(s.burstDps, 100 * (1 + 0.15 * 0.5) * eff);
+    near(s.sustainedDps, s.burstDps * (16 / eff) / (16 / eff + 2));
+    expect(prim("ballistica").effectiveFireRate).toBeCloseTo(4 / (1 / 6.67 + 3 * 0.05), 6); // burst primary unchanged
+  });
+
+  it("Ballistica Prime Charged Shot: 4 bolts of 76 (78.375 on the grid), 4 ammo, 1 / (0.8 + 1 / 3.33)/s", () => {
+    const s = alt("ballistica_prime");
+    const eff = 1 / (0.8 + 1 / 3.33);
+    expect(s.multishot).toBe(4);
+    expect(s.ammoCost).toBe(4);
+    expect(s.totalDamage).toBeCloseTo(78.375, 6);
+    near(s.burstDps, 78.375 * 4 * 1.2 * eff); // 341.9 (wiki paper 76 x 4 x 1.2 x eff = 331.5)
+  });
+
+  it("Rakta Ballistica Charged Shot: 300 (309.375 on the grid) x 1.1 x 0.769 = 261.7", () => {
+    near(alt("rakta_ballistica").burstDps, 309.375 * 1.1 * (1 / (1 + 1 / 3.33)));
+  });
+
+  it("the Ballistica 'Charged Shot' stand-in radial rows are gone (wiki: a projectile, not an explosion)", () => {
+    for (const id of ["ballistica", "ballistica_prime", "rakta_ballistica"]) {
+      expect(prim(id).radialAttacks ?? [], id).toEqual([]);
+      expect(prim(id).radialBurstDps ?? 0, id).toBe(0);
+      expect(alt(id).radialAttacks ?? [], id).toEqual([]);
+    }
+  });
+
+  // Shotguns: 10 pellets, Fire Rate 3.33, no charge.
+  it("Drakgoon / Kuva Drakgoon uncharged: 10 pellets of 40 / 23 at 3.33/s", () => {
+    const d = alt("drakgoon");
+    expect(d.multishot).toBe(10);
+    expect(d.effectiveFireRate).toBeCloseTo(3.33, 6);
+    near(d.burstDps, d.totalDamage * 10 * (1 + 0.05) * 3.33);
+    near(d.totalDamage, 40, 0.04);
+    const k = alt("kuva_drakgoon");
+    near(k.burstDps, k.totalDamage * 10 * (1 + 0.19 * 1.1) * 3.33);
+    near(k.totalDamage, 23, 0.04);
+  });
+
+  it("Miter uncharged: 100 per blade (96.875 on the grid) x 1.05 x 2.5 = 254.3; the Incarnon radial stays with the primary", () => {
+    const s = alt("miter");
+    near(s.burstDps, 96.875 * 1.05 * 2.5);
+    expect(names(s.radialAttacks)).toEqual([]);
+    expect(names(prim("miter").radialAttacks)).toEqual(["Incarnon Form Radial Attack"]);
+  });
+
+  // Perfect Shot and partial charges keep the bow's own cycle (charge + reload), same rule as the primary.
+  it("Nataruk: Quick Shot 450 x 1.16 / (1 / 0.667 + 0.6); Perfect Shot 900 x 1.84 / (0.7 + 0.6)", () => {
+    const [quick, perfect] = computeAltFire(byId("nataruk"), calcWith([]));
+    expect(quick!.label).toBe("Quick Shot");
+    expect(perfect!.label).toBe("Perfect Shot");
+    near(quick!.stats.burstDps, (450 * (1 + 0.2 * 0.8)) / (1 / 0.667 + 0.6));
+    expect(quick!.stats.forcedProcs).toContain("Impact");
+    expect(perfect!.stats.effectiveFireRate).toBeCloseTo(1 / 1.3, 6);
+    near(perfect!.stats.burstDps, 900 * (1 + 0.6 * 1.4) / 1.3);
+  });
+
+  it("Cinta Perfect Shot: 600 pure Heat, 600 x 1.2 / (1.05 + 0.6)", () => {
+    const [, perfect] = computeAltFire(byId("cinta"), calcWith([]));
+    expect(perfect!.stats.elements).toEqual([{ type: "heat", value: 600 }]);
+    expect(perfect!.stats.puncture).toBe(0);
+    near(perfect!.stats.burstDps, 600 * 1.2 / 1.65);
+  });
+
+  it("Daikyu Prime Quick Shot: 375 (386.7 on the grid) at 25% charge -> 1 / (0.25 + 0.6)/s", () => {
+    const s = alt("daikyu_prime");
+    expect(s.effectiveFireRate).toBeCloseTo(1 / 0.85, 6);
+    near(s.burstDps, s.totalDamage * (1 + 0.4 * 1.4) / 0.85);
+    near(s.totalDamage, 375, 0.04);
+  });
+
+  // Lanka: wiki fire rate is a 1e9 placeholder; like the full charge, timing comes from the charge alone.
+  it("Lanka Partially Charged Shot: 200 Electricity x 1.2 / 0.33 s = 727.3", () => {
+    const s = alt("lanka");
+    expect(s.effectiveFireRate).toBeCloseTo(1 / 0.33, 6);
+    near(s.burstDps, 200 * 1.2 / 0.33);
+    expect(prim("lanka").effectiveFireRate).toBeCloseTo(1, 6);
+  });
+
+  // Real explosions: the quick / uncharged shot keeps only its own explosion row.
+  it("Epitaph / Prime and Opticor / Vandal: the alt keeps only its own explosion; the primary rows are unchanged", () => {
+    expect(names(alt("epitaph").radialAttacks)).toEqual(["Uncharged AoE"]);
+    expect(names(alt("epitaph_prime").radialAttacks)).toEqual(["Uncharged AoE"]);
+    expect(names(alt("opticor").radialAttacks)).toEqual(["Quick Shot AoE"]);
+    expect(names(alt("opticor_vandal").radialAttacks)).toEqual(["Quick Shot AoE"]);
+    expect(names(prim("opticor").radialAttacks)).toEqual(["Charged Shot AoE", "Quick Shot AoE"]);
+    expect(names(prim("epitaph").radialAttacks)).toEqual(["Uncharged AoE"]);
+    expect(names(alt("evensong").radialAttacks)).toEqual([]);
+    expect(names(prim("evensong").radialAttacks)).toEqual(["Charged Radial Attack"]);
+    expect(names(alt("mutalist_cernos").radialAttacks)).toEqual([]);
+    expect(names(prim("mutalist_cernos").radialAttacks)).toEqual(["Toxin Cloud"]);
+  });
+
+  it("Opticor Quick Shot direct hit: 500 x 1.3 x 1/s = 650 (explosion DPS added separately)", () => {
+    const s = alt("opticor");
+    expect(s.totalDamage).toBe(500);
+    expect(s.effectiveFireRate).toBeCloseTo(1, 6);
+    expect(s.burstDps).toBeGreaterThan(650);
+    near(s.burstDps - (s.radialBurstDps ?? 0), 650, 0.01);
+  });
+
+  it("Sirocco has no ALT FIRE (wiki: it lacks an Alternate Fire function)", () => {
+    expect(getAltFireModes(byId("sirocco"))).toEqual([]);
+  });
+
+  // Shred: +30% Fire Rate (x2 for Bows) -> +60% on a bow, quick tap included (same as the charged primary).
+  it("bow quick taps keep the x2 for Bows fire-rate bonus: Paris + Shred -> 1 / (1 / 1.6 + 0.65)", () => {
+    expect(modsMap.get("shred")!.description).toMatch(/x2 for Bows/);
+    const q = alt("paris", ["shred"]);
+    const p = prim("paris", ["shred"]);
+    expect(q.effectiveFireRate).toBeCloseTo(1 / (1 / 1.6 + 0.65), 4);
+    expect(p.effectiveFireRate).toBeCloseTo(1 / (0.5 / 1.6 + 0.65), 4);
+    const c = alt("cernos", ["shred"]);
+    expect(c.effectiveFireRate).toBeCloseTo(1 / (1 / 1.6 + 0.6), 4);
+  });
+
+  it("mods apply: Serration scales the Paris quick tap by the same factor as the charged shot", () => {
+    const p = prim("paris", PRIMARY_MODS), q = alt("paris", PRIMARY_MODS);
+    expect(q.totalDamage / 160).toBeCloseTo(p.totalDamage / 330, 2);
   });
 });
 
