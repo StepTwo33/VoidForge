@@ -759,6 +759,13 @@ describe("ALT FIRE: Batch 4c, the five that each needed one decision (wiki.warfr
     expect(radNames(primOf("stug"))).toContain("Blob Explosion");
   });
 
+  it("Stug primary blob: the wiki's real 70% falloff, 4 x 4/s + 75 x (1 - 0.7 / 2) x 4/s, crit 1.025", () => {
+    const p = primOf("stug");
+    expect(p.radialAttacks?.find((r) => r.name === "Blob Explosion")?.falloffReduction).toBe(0.7);
+    near(p.burstDps, (4 + 75 * 0.65) * (1 + 0.05 * 0.5) * 4); // 216.3 (was 277.8 at the listed 30%)
+    expect(p.radialAttacks?.find((r) => r.name === "Incarnon Form Blob Explosion")?.falloffReduction).toBe(0.3);
+  });
+
   it("ignoreMultishotMods: Barrel Diffusion adds nothing to the full Stug blob or the Buzlok beacon", () => {
     const a = altOf("stug", "Charged Blob").stats, b = altOf("stug", "Charged Blob", ["barrel_diffusion_r3"]).stats;
     expect(b.multishot).toBeCloseTo(1, 6);

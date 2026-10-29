@@ -1108,7 +1108,7 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "corrosive": 75.0,
       "totalDamage": 75.0,
       "radius": 0.3,
-      "falloffReduction": 0.3,
+      "falloffReduction": 0.7,
       "explosionDelay": 1.5
     },
     {

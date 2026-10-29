@@ -398,6 +398,11 @@ def main() -> None:
     # with its 25 m projectile range read as a radius (the wiki lists no explosion).
     for wid in ("aeolak", "coda_bassocyst", "tenet_plinx", "tenet_tetra"):
         merged.pop(wid, None)
+    # Stug: the wiki says the blob explosion's falloff is really 70% (100% to 30% at the edge),
+    # despite the 30% the game lists. The Incarnon Form rows have no wiki note, so they stay.
+    for a in merged.get("stug", []):
+        if a.get("name") == "Blob Explosion":
+            a["falloffReduction"] = 0.7
 
     for wid, attacks in MANUAL_RADIAL_ATTACKS.items():
         if wid in known_ids:
