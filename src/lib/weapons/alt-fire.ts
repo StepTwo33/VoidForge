@@ -37,9 +37,10 @@ export interface AltFireMode extends WeaponAlternateModeStats {
    */
   radialBonusPerRound?: number;
   /**
-   * Base-damage mods (Pressure Point, Spoiled Strike...) add nothing to this attack; elemental,
-   * faction, crit and status mods still do (wiki: Tatsu Soul Swarm, Tenet Grigori Energy Disk,
-   * the Incarnon spectral attacks). Undoes the whole base-damage multiplier, measured on a probe.
+   * Melee damage mods (Pressure Point, Spoiled Strike, Incarnon +damage) add nothing to this attack;
+   * elemental, faction, crit and status mods and general boosts (Vex Armor, Condition Overload)
+   * still do (wiki: Tatsu Soul Swarm, Tenet Grigori Energy Disk, the Incarnon spectral attacks).
+   * Arcanes are never in the shown per-type damage, so they aren't handled here.
    */
   ignoreBaseDamageMods?: boolean;
 }
@@ -104,11 +105,12 @@ function calcAltMode(weapon: Weapon, mode: AltFireMode, calc: (w: Weapon) => Cal
   const perRound = mode.radialBonusPerRound;
   if (perRound) w = { ...w, radialAttacks: w.radialAttacks?.map((r) => times(r, 1 + perRound * mag)) };
   if (mode.ignoreBaseDamageMods) {
-    // Probe: 100 Tau only (no mod adds Tau), so modded Tau / 100 is the base-damage multiplier.
+    // Probe: 100 Tau only (no mod adds Tau), so modded Tau / 100 is the shown base-damage multiplier
+    // (1 + all bonuses, before arcanes). Scale so it runs at (1 + all - melee mods) instead.
     const zero = Object.fromEntries(DMG_KEYS.map((k) => [k, 0]));
     const probe = calc({ ...w, ...zero, tau: 100, damage: 100, radialAttacks: [] });
-    const tau = (probe.arsenalDamage?.elements ?? probe.elements).find((e) => e.type === "tau")?.value ?? 100;
-    const k = tau > 0 ? 100 / tau : 1;
+    const all = ((probe.arsenalDamage?.elements ?? probe.elements).find((e) => e.type === "tau")?.value ?? 100) / 100;
+    const k = all > 0 ? Math.max(0, all - (first.meleeModDamageBonus ?? 0)) / all : 1;
     if (k !== 1) w = { ...times(w, k), radialAttacks: w.radialAttacks?.map((r) => times(r, k)) };
   }
   return calc(w);

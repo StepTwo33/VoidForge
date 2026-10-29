@@ -978,6 +978,10 @@ describe("ALT FIRE: Batch 6b melee modes, hand-worked against wiki.warframe.com"
     tenet_grigori: [["Energy Disk", 4080, 0.24, 1.6, 1, []]],
     tatsu: [["Soul Swarm", 96, 0.11, 1.9, 1, ["radiation"]]],
     tatsu_prime: [["Soul Swarm", 96, 0.11, 1.9, 1, ["radiation"]]],
+    vinquibus_melee: [["Gunshot", 260, 0.4, 3.2, 1, []]],
+    zenistar: [["Heavy Attack (Disc)", 75, 0.1, 2, 1, []]],
+    shattered_lash: [["Arcing Damage (Hold Cast)", 400, 0.2, 2, 1, []]],
+    shattered_lash_prime: [["Arcing Damage (Hold Cast)", 400, 0.2, 2, 1, []]],
   };
 
   it("each mode: the wiki's damage, crit and multishot; Manual (no DPS) except Corufell", () => {
@@ -1029,6 +1033,8 @@ describe("ALT FIRE: Batch 6b melee modes, hand-worked against wiki.warframe.com"
       "ack_&_brunt": [["Spectral Axe Explosion", 303]], "argo_&_vel": [["Heavy Attack Glaive AoE", 100]],
       hate: [["Spectral Blade Explosion", 130]], okina: [["Spectral Dagger Explosion", 140]],
       okina_prime: [["Spectral Dagger Explosion", 184]], "sigma_&_octantis": [["Shield Throw Explosion", 50]],
+      vinquibus_melee: [["Gunshot Explosion", 400]], zenistar: [["Disc Explosion", 350], ["Disc Aura (per tick)", 50]],
+      shattered_lash: [], shattered_lash_prime: [],
       redeemer: [], redeemer_prime: [], sarpa: [], stropha: [], vastilok: [], tatsu: [], quassus: [],
     };
     for (const [id, rows] of Object.entries(rad)) {
@@ -1038,15 +1044,42 @@ describe("ALT FIRE: Batch 6b melee modes, hand-worked against wiki.warframe.com"
     }
   });
 
+  it("melee damage mods are stripped but general boosts stay: Tatsu with Pressure Point + Vex Armor = 96 x 3.75", () => {
+    // Vex Armor max Fury (+275%, additive with base damage mods) is a general boost: the Tenet Grigori
+    // page lists it as still applying. Pressure Point doesn't (Tatsu page).
+    const vex = { id: "ability:Vex Armor", label: "Vex Armor", category: "ability" as const, damageBonus: 2.75 };
+    const withVex = (mods: string[]) => (w: Weapon) =>
+      calculateWeaponBuild(w, slots(mods), modsMap, undefined, undefined, { externalBuffs: [vex] });
+    const tatsu = (mods: string[]) => computeAltFire(byId("tatsu"), withVex(mods))[0]!.stats;
+    near(tatsu([]).arsenalDamage!.totalDamage, 96 * 3.75);
+    near(tatsu(["pressure_point_r3"]).arsenalDamage!.totalDamage, 96 * 3.75);
+    near(tatsu(["pressure_point_r3", "spoiled_strike_r3"]).arsenalDamage!.totalDamage, 96 * 3.75);
+    // Elementals still add on the stripped base: + Molten Impact 90% Heat.
+    near(tatsu(["pressure_point_r3", "molten_impact_r3"]).arsenalDamage!.totalDamage, 96 * 3.75 * 1.9);
+    // The explosion follows: Okina 140 Cold x 3.75 with Pressure Point + Vex Armor.
+    const o = computeAltFire(byId("okina"), withVex(["pressure_point_r3"]))[0]!.stats;
+    const scale = o.arsenalDamage!.totalDamage / o.totalDamage;
+    near(o.radialAttacks!.find((x) => x.name === "Spectral Dagger Explosion")!.totalDamage * scale, 140 * 3.75);
+    // Other melee modes take both: Edun throw 480 x (1 + 1.2 + 2.75).
+    near(computeAltFire(byId("edun"), withVex(["pressure_point_r3"]))[0]!.stats.arsenalDamage!.totalDamage, 480 * 4.95);
+  });
+
+  it("Shattered Lash hold cast: Ability Strength and mods both scale it (wiki ability page), 400 x 2 x 2.2", () => {
+    const s = computeAltFire(byId("shattered_lash"), (w) =>
+      calculateWeaponBuild(w, slots(["pressure_point_r3"]), modsMap, undefined, undefined, { abilityStrength: 2 }))[0]!.stats;
+    near(s.arsenalDamage!.totalDamage, 400 * 2 * 2.2);
+  });
+
   it("the primaries are untouched, and Redeemer loses its 'Ranged Attack' stand-in radial (the hit-scan shot)", () => {
-    const prim: Record<string, number> = { redeemer: 180, "ack_&_brunt": 149, "argo_&_vel": 300, "sigma_&_octantis": 174 };
+    const prim: Record<string, number> = { redeemer: 180, "ack_&_brunt": 149, "argo_&_vel": 300, "sigma_&_octantis": 174,
+      vinquibus_melee: 260, zenistar: 298, shattered_lash: 400, shattered_lash_prime: 400 };
     for (const [id, d] of Object.entries(prim)) expect(byId(id).damage, id).toBeCloseTo(d, 1);
     for (const id of ["redeemer", "redeemer_prime"]) {
       const names = (calculateWeaponBuild(byId(id), [], modsMap).radialAttacks ?? []).map((r) => r.name);
       expect(names, id).not.toContain("Ranged Attack");
     }
     for (const [id, name] of [["ceramic_dagger", "Spectral Dagger Explosion"], ["edun", "Polearm Explosion"],
-      ["hate", "Spectral Blade Explosion"], ["okina", "Spectral Dagger Explosion"]] as const) {
+      ["hate", "Spectral Blade Explosion"], ["okina", "Spectral Dagger Explosion"], ["zenistar", "Disc Explosion"]] as const) {
       const names = (calculateWeaponBuild(byId(id), [], modsMap).radialAttacks ?? []).map((r) => r.name);
       expect(names, id).toContain(name);
     }

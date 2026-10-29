@@ -542,6 +542,48 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       note: "Wiki Tatsu Prime attack 2. Kills store up to 5 charges; a slide attack releases one seeking projectile per charge (30 m) that stuns. Melee damage mods like Pressure Point don't apply to it (wiki); elemental, crit and status mods do. No DPS is shown.",
     },
   ],
+  // ---- Batch 6b, part 2 (Round 38): the weapons first held back for Jason.
+  vinquibus_melee: [
+    {
+      label: "Gunshot",
+      ...dmg({ puncture: 182, slash: 78 }),
+      fireRate: 1, criticalChance: 0.4, criticalMultiplier: 3.2, statusChance: 0.2,
+      forcedProcs: ["Impact"], showDps: false,
+      radialAttacks: [{ name: "Gunshot Explosion", blast: 400, totalDamage: 400, radius: 4, falloffReduction: 0.3 }],
+      note: "Wiki Vinquibus (Melee) attacks 2-3. A shot with the same damage as a melee hit, then a 400 Blast explosion 0.8 s later (below). The wiki doesn't say what fires it or how often, so no DPS is shown.",
+    },
+  ],
+  zenistar: [
+    {
+      label: "Heavy Attack (Disc)",
+      ...dmg({ impact: 75 }),
+      fireRate: 0.909, criticalChance: 0.1, criticalMultiplier: 2, statusChance: 0.15,
+      forcedProcs: [], showDps: false,
+      radialAttacks: [
+        { name: "Disc Explosion", heat: 350, totalDamage: 350, radius: 4, falloffReduction: 0 },
+        { name: "Disc Aura (per tick)", heat: 50, totalDamage: 50, radius: 4, falloffReduction: 0 },
+      ],
+      note: "Wiki Zenistar attacks 3-5. Heavy attack throws the disc (75 Impact on contact), which explodes, then lands and burns everything within 4 m: 50 Heat with 50% status every 0.8 s for 10 s (longer with combo). The disc gets no combo bonus. No DPS is shown.",
+    },
+  ],
+  shattered_lash: [
+    {
+      label: "Arcing Damage (Hold Cast)",
+      ...dmg({ slash: 400 }),
+      fireRate: 1, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.3,
+      forcedProcs: [], showDps: false,
+      note: "Wiki Shattered Lash attack 2. Holding the cast sweeps the blade in a 225° arc. Like the thrust, it scales with Ability Strength and the mods on Shattered Lash (wiki); the ability combo (up to 12x) isn't applied. Ability casts, so no DPS is shown.",
+    },
+  ],
+  shattered_lash_prime: [
+    {
+      label: "Arcing Damage (Hold Cast)",
+      ...dmg({ slash: 400 }),
+      fireRate: 1, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.3,
+      forcedProcs: [], showDps: false,
+      note: "Wiki Shattered Lash Prime attack 2. Holding the cast sweeps the blade in a 225° arc. Like the thrust, it scales with Ability Strength and the mods on Shattered Lash (wiki); the ability combo (up to 12x) isn't applied. Ability casts, so no DPS is shown.",
+    },
+  ],
 
 
   // ---- Batch 1: magazine dump ("Mag Burst") --------------------------------------------

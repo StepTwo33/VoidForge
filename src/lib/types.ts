@@ -982,6 +982,12 @@ export interface CalculatedStats {
   appliedBaseDamageBonus?: number;
   /** Komorex-style "Zoom Radial Attack": 0 = zoom not active (explosion off), else damage ×. */
   sniperZoomRadialMult?: number;
+  /**
+   * Part of appliedBaseDamageBonus from mods (riven included) and Incarnon evolutions, as a fraction,
+   * before arcanes. Not set when 0. Lets ALT FIRE ignoreBaseDamageMods strip just these and keep
+   * ability boosts (Vex Armor, Condition Overload...).
+   */
+  meleeModDamageBonus?: number;
   /** Part of appliedBaseDamageBonus that only applies to direct hits (CO / Galvanized per-status). */
   directOnlyDamageBonus?: number;
   /** Weak point damage bonus (fraction; Acuity, Pain Points, spliced WP) — adds to the weak point multiplier, ×1.5 on heads. */

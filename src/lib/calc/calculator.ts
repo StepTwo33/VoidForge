@@ -1060,6 +1060,9 @@ export function calculateWeaponBuild(
   const externalDamageMult = { product: 1 };
   const externalExtraHit = { fraction: 0, guaranteedToxin: false };
   const parallelElementals: { type: string; bonusFraction: number }[] = [];
+  // Mod-only part of the base-damage bonus, before ability buffs (Vex Armor...) join it. Read by
+  // ALT FIRE ignoreBaseDamageMods; not used by the primary calc.
+  const modOnlyDamageBonus = weaponModAcc.damageBonus;
   applyWeaponExternalBuffs(
     weaponModAcc,
     calcOptions?.externalBuffs,
@@ -1338,6 +1341,8 @@ export function calculateWeaponBuild(
   const dmgMult = 1 + damageBonus;
   stats.appliedBaseDamageBonus = damageBonus;
   stats.directOnlyDamageBonus = directOnlyDamageBonus;
+  const meleeModDamageBonus = modOnlyDamageBonus + (incarnonStatChanges?.additiveBaseDamage ?? 0);
+  if (meleeModDamageBonus) stats.meleeModDamageBonus = meleeModDamageBonus;
   stats.totalDamage *= dmgMult;
   stats.impact *= dmgMult;
   stats.puncture *= dmgMult;
