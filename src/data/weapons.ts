@@ -9330,6 +9330,9 @@ export const allWeapons: Weapon[] = [
     "reloadTime": 1.7,
     "multishot": 1,
     "triggerType": "Pistol",
+    // wiki Module:Weapons/data/secondary Poison Quill ForcedProcs { "Toxin" }: a guaranteed Toxin
+    // status every hit, on top of normal status chance (wiki Status Effect, Forced Procs).
+    "forcedProcs": ["Toxin"],
     "modSlots": 8,
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
@@ -9352,6 +9355,9 @@ export const allWeapons: Weapon[] = [
     "reloadTime": 1.6,
     "multishot": 1,
     "triggerType": "Pistol",
+    // wiki Module:Weapons/data/secondary Poison Quill ForcedProcs { "Toxin" }: a guaranteed Toxin
+    // status every hit, on top of normal status chance (wiki Status Effect, Forced Procs).
+    "forcedProcs": ["Toxin"],
     "modSlots": 8,
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
