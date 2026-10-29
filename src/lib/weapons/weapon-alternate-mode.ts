@@ -15,6 +15,11 @@ export function weaponHasAlternateMode(weapon: Weapon | null | undefined): boole
   return getAlternateModes(weapon).length > 0;
 }
 
+/** Melee stance-form swap (Dual Swords <-> Heavy Blade): the only alternate mode still selected in the builder. */
+export function weaponHasStanceFormMode(weapon: Weapon | null | undefined): boolean {
+  return getAlternateModes(weapon).some((m) => !!m.stanceType);
+}
+
 /**
  * Merge alternate-mode overrides into the weapon's default catalog paper.
  * `index` selects the mode (0 = `alternateModeStats`); out-of-range → unchanged.

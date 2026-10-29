@@ -11509,7 +11509,7 @@ export const allWeapons: Weapon[] = [
       "fireRate": 0.833,
       "criticalChance": 0.3,
       "criticalMultiplier": 2.5,
-      "statusChance": 0.2,
+      "statusChance": 0.14,
       "triggerType": "Charge"
     },
     "modSlots": 8,

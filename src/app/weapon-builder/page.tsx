@@ -31,7 +31,8 @@ import { mergeIncarnonStatChanges, mergeRivenStatChanges } from "@/lib/calc/weap
 import { resolveIncarnonActiveWeapon, isIncarnonFormActive } from "@/lib/calc/incarnon-active-weapon";
 import { Weapon, Mod, CalculatedStats, EquippedMod, SimulationParams, DEFAULT_SIM_PARAMS, WeaponCalculationOptions } from "@/lib/types";
 import { applyGravimagMode, weaponHasGravimagMode } from "@/lib/weapons/weapon-gravimag";
-import { applyAlternateMode, getAlternateModes, weaponHasAlternateMode } from "@/lib/weapons/weapon-alternate-mode";
+import { applyAlternateMode, getAlternateModes, weaponHasStanceFormMode } from "@/lib/weapons/weapon-alternate-mode";
+import { computeAltFire } from "@/lib/weapons/alt-fire";
 import { applyArbucepAttackMode } from "@/lib/weapons/weapon-arbucep-mode";
 import {
   weaponSupportsProgenitor,
@@ -133,7 +134,8 @@ export default function WeaponBuilderPage() {
   const [progenitorElement, setProgenitorElement] = useState<string>("heat");
   const [progenitorBonusPercent, setProgenitorBonusPercent] = useState(PROGENITOR_BONUS_DEFAULT);
   const [gravimagMode, setGravimagMode] = useState(false);
-  /** -1 = catalog default; 0..n-1 = index into getAlternateModes(). */
+  /** Stance-form swap only (Dark Split-Sword). -1 = catalog default; 0..n-1 = index into getAlternateModes().
+   *  Other alternate fire modes are no longer selectable: they show under ALT FIRE in the stats panel. */
   const [alternateModeIndex, setAlternateModeIndex] = useState(-1);
   const alternateMode = alternateModeIndex >= 0;
 
@@ -142,7 +144,7 @@ export default function WeaponBuilderPage() {
     if (!selectedWeapon) return null;
     let w = selectedWeapon;
     if (gravimagMode && weaponHasGravimagMode(selectedWeapon)) w = applyGravimagMode(selectedWeapon);
-    if (alternateMode && weaponHasAlternateMode(w)) w = applyAlternateMode(w, alternateModeIndex);
+    if (alternateMode && getAlternateModes(w)[alternateModeIndex]?.stanceType) w = applyAlternateMode(w, alternateModeIndex);
     if (w.id === "arbucep") {
       w = applyArbucepAttackMode(w, simParams.arbucepAttackMode, { atmosphere: gravimagMode });
     }
@@ -517,6 +519,17 @@ export default function WeaponBuilderPage() {
       return calculateWeaponBuildWithArcanes(activeWeapon, modSlots, modsMap, activeArcanes, incarnonStatChanges, simParams, weaponCalcOptions, undefined, rivenStatChanges);
     }
     return calculateWeaponBuild(activeWeapon, modSlots, modsMap, incarnonStatChanges, simParams, weaponCalcOptions, undefined, rivenStatChanges);
+  }, [activeWeapon, equippedMods, equippedArcanes, incarnonStatChanges, rivenStatChanges, simParams, weaponCalcOptions]);
+
+  // ALT FIRE: other firing modes, shown read-only in the stats panel (never selected, never summed into DPS).
+  const altFireResults = useMemo(() => {
+    const modSlots = equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
+    const activeArcanes = equippedArcanes.filter((a): a is Mod => a !== null);
+    return computeAltFire(activeWeapon, (w) =>
+      activeArcanes.length > 0
+        ? calculateWeaponBuildWithArcanes(w, modSlots, modsMap, activeArcanes, incarnonStatChanges, simParams, weaponCalcOptions, undefined, rivenStatChanges)
+        : calculateWeaponBuild(w, modSlots, modsMap, incarnonStatChanges, simParams, weaponCalcOptions, undefined, rivenStatChanges),
+    );
   }, [activeWeapon, equippedMods, equippedArcanes, incarnonStatChanges, rivenStatChanges, simParams, weaponCalcOptions]);
 
   const contributionContext = useMemo(() => {
@@ -903,7 +916,7 @@ export default function WeaponBuilderPage() {
                       <span className="inline">Gravimag</span>
                     </button>
                   )}
-                  {weaponHasAlternateMode(selectedWeapon) && (() => {
+                  {weaponHasStanceFormMode(selectedWeapon) && (() => {
                     const modes = getAlternateModes(selectedWeapon);
                     const multi = modes.length > 1;
                     const nextIndex = alternateModeIndex + 1 >= modes.length ? -1 : alternateModeIndex + 1;
@@ -1174,6 +1187,7 @@ export default function WeaponBuilderPage() {
                   simParams={simParams}
                   onSimParamsChange={setSimParams}
                   contributionContext={contributionContext}
+                  altFire={altFireResults}
                 />
               </div>
             </div>

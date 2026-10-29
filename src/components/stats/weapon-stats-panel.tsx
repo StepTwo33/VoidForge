@@ -15,6 +15,7 @@ import {
 } from "@/lib/calc/dps-contributions";
 import { avgCritMultiplier, critTierDamage, critTiersToShow, critTierLabel, critTierColorClass, exceedsWarframeInt32 } from "@/lib/calc/crit-utils";
 import { CollapsibleSection, StatRow, toLightSafeTextColor } from "./stat-primitives";
+import type { AltFireResult } from "@/lib/weapons/alt-fire";
 import { TTKSection } from "./ttk-section";
 import { WeaponStatsGlossary } from "./weapon-stats-glossary";
 import { WeaponSimPanel } from "./weapon-sim-panel";
@@ -61,13 +62,15 @@ const CONTRIBUTION_CATEGORY_COLORS: Record<DpsContributionCategory, string> = {
   other: "text-muted-foreground",
 };
 
-export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEvolutions, allEvolutions, simParams, onSimParamsChange, contributionContext, heading }: {
+export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEvolutions, allEvolutions, simParams, onSimParamsChange, contributionContext, heading, altFire }: {
   stats: CalculatedStats | null; baseStats?: CalculatedStats | null; weapon?: Weapon | null; isMelee?: boolean;
   selectedEvolutions?: Record<number, number>; allEvolutions?: IncarnonEvolution[];
   simParams?: SimulationParams; onSimParamsChange?: (p: SimulationParams) => void;
   contributionContext?: WeaponDpsCalcContext | null;
   /** Panel heading override (e.g. "Build A stats" on Compare, so the two panels are distinct). */
   heading?: string;
+  /** Read-only alt-fire modes (never added to the DPS above). */
+  altFire?: AltFireResult[];
 }) {
   const dpsContributions = useMemo(
     () => (contributionContext ? computeDpsContributions(contributionContext) : []),
@@ -712,6 +715,48 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
               )}
             </div>
           ))}
+        </CollapsibleSection>
+      )}
+
+      {altFire && altFire.length > 0 && (
+        <CollapsibleSection title="ALT FIRE" defaultOpen>
+          <p className="text-[10px] text-muted-foreground mb-2">
+            Same mods, other firing mode. Shown for reference; not added to the DPS above.
+            {weapon?.defaultModeLabel ? ` The stats above are for ${weapon.defaultModeLabel}.` : ""}
+          </p>
+          {altFire.map((mode, idx) => {
+            const a = mode.stats;
+            const extraElements = a.elements.filter((e) => e.value > 0);
+            return (
+              <div key={`${mode.label}-${idx}`} className={idx > 0 ? "mt-2 pt-2 border-t border-border/50" : ""}>
+                <div className="text-[10px] font-medium text-muted-foreground mb-1">{mode.label}</div>
+                <StatRow label={a.multishot > 1 ? "Damage / pellet" : "Damage / shot"} value={a.totalDamage.toFixed(1)} highlighted />
+                {a.impact > 0 && <StatRow label="Impact" value={a.impact.toFixed(1)} color={ELEMENT_COLORS.impact} />}
+                {a.puncture > 0 && <StatRow label="Puncture" value={a.puncture.toFixed(1)} color={ELEMENT_COLORS.puncture} />}
+                {a.slash > 0 && <StatRow label="Slash" value={a.slash.toFixed(1)} color={ELEMENT_COLORS.slash} />}
+                {extraElements.map((e) => (
+                  <StatRow key={e.type} label={ELEMENT_LABELS[e.type] || e.type} value={e.value.toFixed(1)} color={ELEMENT_COLORS[e.type]} />
+                ))}
+                <StatRow label="Crit Chance" value={`${(a.criticalChance * 100).toFixed(1)}%`} />
+                <StatRow label="Crit Multiplier" value={`${a.criticalMultiplier.toFixed(2)}x`} />
+                <StatRow label="Status Chance" value={`${(a.statusChance * 100).toFixed(1)}%`} />
+                <StatRow label={isMelee ? "Attack Speed" : "Fire Rate"} value={(a.effectiveFireRate ?? a.fireRate).toFixed(2)} />
+                {a.multishot > 1 && <StatRow label="Multishot" value={a.multishot.toFixed(2)} />}
+                {!isMelee && (a.ammoCost ?? 1) !== 1 && <StatRow label="Ammo / shot" value={String(a.ammoCost)} />}
+                {mode.showDps && (
+                  <>
+                    <StatRow label={isMelee ? "DPS (direct hit)" : "Burst DPS"} value={a.burstDps.toFixed(0)} tooltip={isMelee ? "Direct hit only, if you used only this attack. Explosions are listed below. Not part of the headline DPS." : "If you used only this mode. Not part of the headline DPS."} />
+                    {!isMelee && <StatRow label="Sustained DPS" value={a.sustainedDps.toFixed(0)} tooltip="Includes reloads. If you used only this mode." />}
+                  </>
+                )}
+                {!mode.showDps && <StatRow label="DPS" value="Manual" tooltip="Player-triggered special attack; not counted in weapon DPS." />}
+                {a.radialAttacks?.map((r, ri) => (
+                  <StatRow key={`${r.name}-${ri}`} label={r.name} value={`${r.totalDamage.toFixed(0)} · ${r.radius.toFixed(1)}m`} />
+                ))}
+                {mode.note && <p className="text-[10px] text-muted-foreground/80 mt-1 leading-snug">{mode.note}</p>}
+              </div>
+            );
+          })}
         </CollapsibleSection>
       )}
 

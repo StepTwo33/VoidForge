@@ -5561,26 +5561,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "radius": 1.0
     }
   ],
-  "pandero": [
-    {
-      "name": "Alt-Fire",
-      "impact": 18.0,
-      "puncture": 18.0,
-      "slash": 36.0,
-      "totalDamage": 72.0,
-      "radius": 1.0
-    }
-  ],
-  "pandero_prime": [
-    {
-      "name": "Alt-Fire",
-      "impact": 26.0,
-      "puncture": 26.0,
-      "slash": 52.0,
-      "totalDamage": 104.0,
-      "radius": 1.0
-    }
-  ],
   "tenet_diplos": [
     {
       "name": "Lock-on Mode",
