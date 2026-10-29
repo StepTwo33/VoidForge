@@ -33,7 +33,7 @@ export default function PrivacyPage() {
                 <li><strong>Build Data:</strong> Weapon, warframe, companion, modular, archwing, and railjack builds you save to the cloud are stored in our database, linked to your account. Public builds and upvote activity may be visible to other users.</li>
                 <li><strong>Public Profile Data:</strong> If you set a username, bio, avatar, or publish builds, that information may be visible on your public profile page and in community features such as Discover. Your email address is not displayed on public profile pages.</li>
                 <li><strong>Issue Reports:</strong> If you submit a data report, we store the details you provide (item name, issue flags, comments, and optional reporter name). Reports may be linked to your account when you are signed in.</li>
-                <li><strong>Email Preferences:</strong> Whether you want to receive the Voidforge newsletter. You can change this at any time (see section 2).</li>
+                <li><strong>Email Preferences:</strong> Whether you want to receive the Voidforge newsletter. It is off unless you tick the newsletter box when you sign up or turn it on in Profile → Settings, and you can change it at any time (see section 2).</li>
                 <li><strong>Discord Link (optional):</strong> If you link your Discord account to use the Voidforge Discord bot, we store your Discord user ID, username, and avatar, plus the Discord access and refresh tokens needed to list the servers you manage (Discord scopes <code>identify</code> and <code>guilds</code>). Bot settings you choose for a server (alert channels, roles, platform, time zone) are stored with that server.</li>
                 <li><strong>Supporter Donations:</strong> If you donate through Buy Me a Coffee, Buy Me a Coffee sends us the supporter email address, the amount, and the event type so we can show a Supporter badge on a matching account.</li>
                 <li><strong>Player Sync:</strong> If you use Player Sync, the in-game name and platform you enter are sent to Digital Extremes&apos; public Warframe Arsenal service to fetch your loadout. We do not store the name or the result on our servers; the imported loadout is saved in your browser.</li>
@@ -52,7 +52,7 @@ export default function PrivacyPage() {
                 <li>To review and respond to data issue reports you submit</li>
                 <li>To enforce community standards, including moderation actions such as hiding public content or banning accounts that violate our Terms</li>
                 <li>To send you emails about your account: sign-up verification codes and, when a moderator chooses to notify you, a notice that one of your builds was removed or an update on a report you filed</li>
-                <li>To send the Voidforge newsletter (site news and updates). Every newsletter includes a one-click unsubscribe link, and you can turn it off in Profile → Settings</li>
+                <li>To send the Voidforge newsletter (site news and updates), only if you opted in. Every newsletter includes a one-click unsubscribe link, and you can turn it off in Profile → Settings</li>
                 <li>To run the Discord bot features you set up, if you link Discord</li>
               </ul>
               <p className="mt-2">We do not sell, rent, or share your personal information with third parties for marketing purposes.</p>
@@ -65,7 +65,7 @@ export default function PrivacyPage() {
 
               <h3 className={h3}>What we access</h3>
               <p>
-                We request only the basic sign-in scopes <code>openid</code>, <code>email</code> and <code>profile</code>. From
+                We request only the basic sign-in scopes <code>openid</code>, <code>email</code> and <code>profile</code>, and we do not request offline access. From
                 Google we receive your Google account ID, your name, your email address, and the URL of your Google profile
                 picture. We do not request access to your Gmail, Google Drive, Calendar, Contacts, or any other Google service.
               </p>
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
               <h3 className={h3}>How we use it</h3>
               <ul className="list-inside list-disc space-y-1">
                 <li>Your Google account ID links your Google sign-in to your Voidforge account so you can sign in again.</li>
-                <li>Your email address identifies your account and is used for the account emails and the newsletter described in section 2 (you can opt out of the newsletter at any time).</li>
+                <li>Your email address identifies your account and is used for the account emails and, only if you opt in, the newsletter described in section 2 (it is off by default and you can opt out at any time).</li>
                 <li>Your name and profile picture are used as your display name and avatar if you have not set your own. Your email address is never shown publicly.</li>
               </ul>
 
@@ -130,7 +130,7 @@ export default function PrivacyPage() {
                 (cloud builds and linked Discord data are removed; local browser builds are not).
               </p>
               <ul className="mt-2 list-inside list-disc space-y-1">
-                <li>Deleting your account also deletes your Google or other sign-in links, your sessions, and your upvotes.</li>
+                <li>Deleting your account also deletes your uploaded avatar image, your Google or other sign-in links, your sessions, and your upvotes.</li>
                 <li>Issue reports you filed and donation records are kept after account deletion but are no longer linked to your account. Donation records keep the email address Buy Me a Coffee sent us.</li>
                 <li>Email verification codes expire after 10 minutes and are deleted when used.</li>
                 <li>Rate-limiting data (such as IP addresses) is held only in server memory for the length of the limit window and is not written to our database.</li>
