@@ -12,7 +12,7 @@ import type { WeaponAlternateModeStats } from "@/lib/types";
  */
 const DMG_KEYS = [
   "impact", "puncture", "slash", "heat", "cold", "toxin", "electricity",
-  "radiation", "viral", "corrosive", "blast", "gas", "magnetic",
+  "radiation", "viral", "corrosive", "blast", "gas", "magnetic", "tau",
 ] as const;
 
 function dmg(parts: Partial<Record<(typeof DMG_KEYS)[number], number>>): Partial<WeaponAlternateModeStats> {
@@ -389,6 +389,172 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       fireRate: 1, criticalChance: 0.35, criticalMultiplier: 2, statusChance: 0.15,
       chargeTime: 0, chargeMode: "bow", ammoCost: 1, forcedProcs: [],
       note: "Wiki Rakta Cernos attack 1. Quick tap: half the damage of the charged shot, no charge wait.",
+    },
+  ],
+  // ---- Batch 3: fire-mode toggles (pattern B) -------------------------------------------
+  // The primary is the wiki's first attack (the mode the weapon starts in); the other mode is the alt.
+  // Stats are per shot / pellet from Module:Weapons/data/{primary,secondary}; anything the alt does
+  // not set (magazine, reload, ...) is the weapon's own value, as on the wiki.
+  kuva_zarr: [
+    {
+      label: "Barrage Mode",
+      ...dmg({ impact: 15, puncture: 25, slash: 10 }),
+      fireRate: 2.17, criticalChance: 0.37, criticalMultiplier: 2.5, statusChance: 0.097,
+      multishot: 10, ammoCost: 1,
+      note: "Wiki Kuva Zarr attack 5. 10 pellets of 50 each; multishot adds pellets. Falloff to 2% from 20 m to 40 m is not modelled.",
+    },
+  ],
+  // Ambassador: switching to Charge mode reloads; the charge is automatic. The 800 explosion
+  // (wiki attack 3) belongs to the charged shot, so it lives here and not on the Auto primary.
+  ambassador: [
+    {
+      label: "Charge Mode",
+      ...dmg({ electricity: 600 }),
+      fireRate: 1, criticalChance: 0.16, criticalMultiplier: 2.8, statusChance: 0.32,
+      chargeTime: 1, chargeMode: "standard", triggerType: "Charge", ammoCost: 16,
+      radialAttacks: [{ name: "Charged AoE", electricity: 800, totalDamage: 800, radius: 6, falloffReduction: 0.5 }],
+      note: "Wiki Ambassador attacks 2 and 3. 1 s automatic charge, 16 ammo a shot (6 shots a magazine); the 6 m explosion is listed below it. DPS uses 1 / (charge time + 1 / fire rate).",
+    },
+  ],
+  argonak: [
+    {
+      label: "Full Auto Mode",
+      ...dmg({ impact: 24.51, puncture: 6.27, slash: 26.22 }),
+      fireRate: 6, criticalChance: 0.09, criticalMultiplier: 1.5, statusChance: 0.27,
+      triggerType: "Auto", ammoCost: 1,
+      note: "Wiki Argonak attack 2. Same damage as semi-auto, faster but with lower crit.",
+    },
+  ],
+  fulmin: [
+    {
+      label: "Semi-Auto Mode",
+      ...dmg({ impact: 100, electricity: 400 }),
+      fireRate: 2.17, criticalChance: 0.3, criticalMultiplier: 2.2, statusChance: 0.16,
+      triggerType: "Semi-Auto", ammoCost: 10, forcedProcs: ["Impact"],
+      note: "Wiki Fulmin attack 2. Costs 10 ammo a shot. Forced Impact only up to 9 m, falloff to 33% from 10 m to 20 m and the 1x headshot multiplier are not modelled.",
+    },
+  ],
+  fulmin_prime: [
+    {
+      label: "Semi-Auto Mode",
+      ...dmg({ impact: 110, electricity: 440 }),
+      fireRate: 2.17, criticalChance: 0.3, criticalMultiplier: 2.2, statusChance: 0.22,
+      triggerType: "Semi-Auto", ammoCost: 10, forcedProcs: ["Impact"],
+      note: "Wiki Fulmin Prime attack 2. Costs 10 ammo a shot. Forced Impact only up to 9 m, falloff to 33% from 12 m to 24 m and the 1x headshot multiplier are not modelled.",
+    },
+  ],
+  stradavar: [
+    {
+      label: "Semi-Auto Mode",
+      ...dmg({ impact: 7.5, puncture: 30, slash: 12.5 }),
+      fireRate: 5, criticalChance: 0.28, criticalMultiplier: 2, statusChance: 0.16,
+      triggerType: "Semi-Auto", ammoCost: 1,
+      note: "Wiki Stradavar attack 2.",
+    },
+  ],
+  stradavar_prime: [
+    {
+      label: "Semi-Auto Mode",
+      ...dmg({ impact: 8, puncture: 24, slash: 48 }),
+      fireRate: 3.33, criticalChance: 0.3, criticalMultiplier: 2.8, statusChance: 0.22,
+      triggerType: "Semi-Auto", ammoCost: 2,
+      note: "Wiki Stradavar Prime attack 2. Costs 2 ammo a shot.",
+    },
+  ],
+  zenith: [
+    {
+      label: "Semi-Auto Mode",
+      ...dmg({ impact: 15, puncture: 120, slash: 15 }),
+      fireRate: 3, criticalChance: 0.35, criticalMultiplier: 2.5, statusChance: 0.08,
+      triggerType: "Semi-Auto", ammoCost: 3, reloadTime: 1.4,
+      note: "Wiki Zenith attack 2. Costs 3 ammo a shot; the wiki lists a 1.4 s reload for this mode. Infinite punch through and the head-highlighting disc are not modelled.",
+    },
+  ],
+  fusilai: [
+    {
+      label: "Semi-Auto Mode",
+      ...dmg({ puncture: 30.8, slash: 46.2 }),
+      fireRate: 1.5, criticalChance: 0.03, criticalMultiplier: 1.5, statusChance: 0.123,
+      multishot: 3, triggerType: "Semi-Auto", ammoCost: 3,
+      note: "Wiki Fusilai attack 2. Throws 3 knives of 77 in a wide fan (3 ammo); multishot adds knives.",
+    },
+  ],
+  // Hystrix: alt-fire cycles the quill element; each quill forces its own status (wiki ForcedProcs).
+  hystrix: [
+    {
+      label: "Fire Quill",
+      ...dmg({ impact: 2.4, puncture: 34.4, slash: 3.2 }),
+      fireRate: 7, criticalChance: 0.24, criticalMultiplier: 2.2, statusChance: 0.1,
+      ammoCost: 1, forcedProcs: ["Heat"],
+      note: "Wiki Hystrix attack 2. Guaranteed Heat status on every hit.",
+    },
+    {
+      label: "Electric Quill",
+      ...dmg({ impact: 2.4, puncture: 34.4, slash: 3.2 }),
+      fireRate: 7, criticalChance: 0.24, criticalMultiplier: 2.2, statusChance: 0.1,
+      ammoCost: 1, forcedProcs: ["Electricity"],
+      note: "Wiki Hystrix attack 3. Guaranteed Electricity status on every hit.",
+    },
+    {
+      label: "Ice Quill",
+      ...dmg({ impact: 2.16, puncture: 30.96, slash: 2.88 }),
+      fireRate: 7, criticalChance: 0.24, criticalMultiplier: 2.2, statusChance: 0.1,
+      ammoCost: 1, forcedProcs: ["Cold"],
+      note: "Wiki Hystrix attack 4. Guaranteed Cold status on every hit.",
+    },
+  ],
+  hystrix_prime: [
+    {
+      label: "Fire Quill",
+      ...dmg({ impact: 2.76, puncture: 39.56, slash: 3.68 }),
+      fireRate: 7, criticalChance: 0.28, criticalMultiplier: 2.2, statusChance: 0.2,
+      ammoCost: 1, forcedProcs: ["Heat"],
+      note: "Wiki Hystrix Prime attack 2. Guaranteed Heat status on every hit.",
+    },
+    {
+      label: "Electric Quill",
+      ...dmg({ impact: 2.76, puncture: 39.56, slash: 3.68 }),
+      fireRate: 7, criticalChance: 0.28, criticalMultiplier: 2.2, statusChance: 0.2,
+      ammoCost: 1, forcedProcs: ["Electricity"],
+      note: "Wiki Hystrix Prime attack 3. Guaranteed Electricity status on every hit.",
+    },
+    {
+      label: "Ice Quill",
+      ...dmg({ impact: 2.76, puncture: 39.56, slash: 3.68 }),
+      fireRate: 7, criticalChance: 0.28, criticalMultiplier: 2.2, statusChance: 0.2,
+      ammoCost: 1, forcedProcs: ["Cold"],
+      note: "Wiki Hystrix Prime attack 4. Guaranteed Cold status on every hit.",
+    },
+  ],
+  // Sepulcrum lock-on uses no ammo but needs a gauge filled by 5 primary-fire kills, so it has no
+  // steady DPS: stats are shown with DPS hidden. Its explosion (wiki attack 4) is listed below it.
+  sepulcrum: [
+    {
+      label: "Lock-On Mode",
+      ...dmg({ impact: 19.2, puncture: 53.76, slash: 23.04 }),
+      fireRate: 1, criticalChance: 0.38, criticalMultiplier: 3, statusChance: 0.26,
+      triggerType: "Semi-Auto", burstCount: 1, burstDelay: 0, ammoCost: 0, forcedProcs: ["Impact"],
+      showDps: false,
+      radialAttacks: [{ name: "Lock-On Radial Attack", heat: 480, totalDamage: 480, radius: 3, falloffReduction: 0.2 }],
+      note: "Wiki Sepulcrum attacks 3 and 4. Seeking missiles at up to 5 locked targets; no ammo, but each volley needs 5 primary-fire kills, so no DPS is shown.",
+    },
+  ],
+  tenet_diplos: [
+    {
+      label: "Lock-on Mode",
+      ...dmg({ impact: 11.2, puncture: 9, slash: 7.8 }),
+      fireRate: 1, criticalChance: 0.36, criticalMultiplier: 2.2, statusChance: 0.14,
+      triggerType: "Burst", burstCount: 2, burstDelay: 0.06, ammoCost: 2,
+      note: "Wiki Tenet Diplos attack 2. While aiming: 2 seeking shots per locked target (up to 8), 4 ammo per target. DPS is per target.",
+    },
+  ],
+  haalvu: [
+    {
+      label: "Alt-Fire (burst mode)",
+      ...dmg({ tau: 34 }),
+      fireRate: 12, criticalChance: 0.2, criticalMultiplier: 1.8, statusChance: 0.26,
+      triggerType: "Burst", burstCount: 2, burstDelay: 0.05, ammoCost: 1.5,
+      note: "Wiki Haalvu attack 2. Split barrels fire 2-shot bursts at up to 4 targets within 10 m, 1.5 ammo a shot. DPS is per target.",
     },
   ],
 };

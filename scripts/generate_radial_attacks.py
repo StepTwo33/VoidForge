@@ -64,46 +64,6 @@ MANUAL_RADIAL_ATTACKS: dict[str, list[dict]] = {
             "radius": 1.0,
         },
     ],
-    # Alt-fire / charged profiles not flagged as AoE in Module:Weapons/data (per-shot contact radius).
-    "fusilai": [
-        {
-            "name": "Semi-Auto Mode",
-            "puncture": 30.8,
-            "slash": 46.2,
-            "totalDamage": 77.0,
-            "radius": 1.0,
-        },
-    ],
-    "hystrix": [
-        {
-            "name": "Poison Quill",
-            "impact": 2.16,
-            "puncture": 30.96,
-            "slash": 2.88,
-            "totalDamage": 36.0,
-            "radius": 1.0,
-        },
-    ],
-    "hystrix_prime": [
-        {
-            "name": "Poison Quill",
-            "impact": 2.76,
-            "puncture": 39.56,
-            "slash": 3.68,
-            "totalDamage": 46.0,
-            "radius": 1.0,
-        },
-    ],
-    "tenet_diplos": [
-        {
-            "name": "Lock-on Mode",
-            "impact": 11.2,
-            "puncture": 9.0,
-            "slash": 7.8,
-            "totalDamage": 28.0,
-            "radius": 1.0,
-        },
-    ],
     # Primary is the charged shot: only the charged explosion. The Quick Shot AoE (wiki attack 4,
     # child of the quick shot) is attached to the ALT FIRE Quick Shot in weapon-alt-fire.ts.
     "opticor": [
@@ -134,7 +94,7 @@ MANUAL_RADIAL_ATTACKS: dict[str, list[dict]] = {
             "falloffReduction": 1.0,
         },
     ],
-    # Primary-fire radial only — lock-on mode remains dual-mode deferred for DPS.
+    # Primary-fire radial only; the Lock-On Radial Attack is on the ALT FIRE Lock-On Mode.
     "sepulcrum": [
         {
             "name": "Radial Attack",
@@ -412,6 +372,9 @@ def main() -> None:
     # the uncharged shot and is attached to its ALT FIRE mode in weapon-alt-fire.ts.
     for wid in ("epitaph", "epitaph_prime"):
         merged.pop(wid, None)
+    # Ambassador: the primary is the Auto mode; the Charged AoE (wiki attack 3) belongs to the
+    # Charge mode and is attached to its ALT FIRE mode in weapon-alt-fire.ts.
+    merged.pop("ambassador", None)
 
     for wid, attacks in MANUAL_RADIAL_ATTACKS.items():
         if wid in known_ids:

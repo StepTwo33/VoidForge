@@ -618,15 +618,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "explosionDelay": 10.0
     }
   ],
-  "ambassador": [
-    {
-      "name": "Charged AoE",
-      "electricity": 800.0,
-      "totalDamage": 800.0,
-      "radius": 6.0,
-      "falloffReduction": 0.5
-    }
-  ],
   "astilla": [
     {
       "name": "Glass Explosion",
@@ -5467,45 +5458,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "name": "Spherical Blast",
       "toxin": 35.0,
       "totalDamage": 35.0,
-      "radius": 1.0
-    }
-  ],
-  "fusilai": [
-    {
-      "name": "Semi-Auto Mode",
-      "puncture": 30.8,
-      "slash": 46.2,
-      "totalDamage": 77.0,
-      "radius": 1.0
-    }
-  ],
-  "hystrix": [
-    {
-      "name": "Poison Quill",
-      "impact": 2.16,
-      "puncture": 30.96,
-      "slash": 2.88,
-      "totalDamage": 36.0,
-      "radius": 1.0
-    }
-  ],
-  "hystrix_prime": [
-    {
-      "name": "Poison Quill",
-      "impact": 2.76,
-      "puncture": 39.56,
-      "slash": 3.68,
-      "totalDamage": 46.0,
-      "radius": 1.0
-    }
-  ],
-  "tenet_diplos": [
-    {
-      "name": "Lock-on Mode",
-      "impact": 11.2,
-      "puncture": 9.0,
-      "slash": 7.8,
-      "totalDamage": 28.0,
       "radius": 1.0
     }
   ]

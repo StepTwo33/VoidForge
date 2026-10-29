@@ -69,7 +69,7 @@ describe("ALT FIRE: structure", () => {
     for (const [id, modes] of Object.entries(WEAPON_ALT_FIRE)) {
       expect(byId(id), id).toBeDefined();
       for (const m of modes) {
-        const sum = ["impact", "puncture", "slash", "heat", "cold", "toxin", "electricity", "radiation", "viral", "corrosive", "blast", "gas", "magnetic"]
+        const sum = ["impact", "puncture", "slash", "heat", "cold", "toxin", "electricity", "radiation", "viral", "corrosive", "blast", "gas", "magnetic", "tau"]
           .reduce((a, k) => a + ((m as unknown as Record<string, number>)[k] ?? 0), 0);
         expect(sum, `${id} ${m.label}`).toBeCloseTo(m.damage!, 6);
         expect(m.label.length).toBeGreaterThan(0);
@@ -370,6 +370,103 @@ describe("ALT FIRE: Batch 2 tap vs hold, hand-worked against wiki.warframe.com",
   it("mods apply: Serration scales the Paris quick tap by the same factor as the charged shot", () => {
     const p = prim("paris", PRIMARY_MODS), q = alt("paris", PRIMARY_MODS);
     expect(q.totalDamage / 160).toBeCloseTo(p.totalDamage / 330, 2);
+  });
+});
+
+describe("ALT FIRE: Batch 3 fire-mode toggles, hand-worked against wiki.warframe.com", () => {
+  const altOf = (id: string, label: string, mods: string[] = []) =>
+    computeAltFire(byId(id), calcWith(mods)).find((r) => r.label === label)!;
+  const primOf = (id: string) => calculateWeaponBuild(byId(id), [], modsMap);
+  const radNames = (s: { radialAttacks?: { name: string }[] }) => (s.radialAttacks ?? []).map((r) => r.name);
+
+  it("Kuva Zarr Barrage: 10 pellets x 50 x (1 + 0.37 x 1.5) x 2.17/s = 1,687", () => {
+    const s = altOf("kuva_zarr", "Barrage Mode").stats;
+    expect(s.multishot).toBeCloseTo(10, 6);
+    near(s.burstDps, 500 * (1 + 0.37 * 1.5) * 2.17);
+  });
+
+  it("Ambassador Charge: 1 / (1 s + 1 / 1) = 0.5/s; 600 direct + 800 explosion; primary keeps no explosion", () => {
+    const s = altOf("ambassador", "Charge Mode").stats;
+    expect(s.effectiveFireRate).toBeCloseTo(0.5, 6);
+    expect(s.ammoCost).toBe(16);
+    expect(radNames(s)).toEqual(["Charged AoE"]);
+    near(s.burstDps - (s.radialBurstDps ?? 0), 600 * (1 + 0.16 * 1.8) * 0.5);
+    expect(radNames(primOf("ambassador"))).toEqual([]);
+  });
+
+  it("Argonak Full Auto: 57 x (1 + 0.09 x 0.5) x 6/s; semi-auto stays the primary", () => {
+    const s = altOf("argonak", "Full Auto Mode").stats;
+    expect(s.effectiveFireRate).toBeCloseTo(6, 6);
+    expect(s.criticalChance).toBeCloseTo(0.09, 6);
+    expect(primOf("argonak").fireRate).toBeCloseTo(4.33, 2);
+  });
+
+  it("Fulmin / Prime Semi-Auto: 500 / 550 x (1 + 0.3 x 1.2) x 2.17/s, 10 ammo, forced Impact", () => {
+    const f = altOf("fulmin", "Semi-Auto Mode").stats;
+    near(f.burstDps, 500 * 1.36 * 2.17);
+    expect(f.ammoCost).toBe(10);
+    expect(f.forcedProcs).toEqual(["Impact"]);
+    near(altOf("fulmin_prime", "Semi-Auto Mode").stats.burstDps, 550 * 1.36 * 2.17);
+  });
+
+  it("Stradavar / Prime Semi-Auto: 50 x 1.28 x 5 = 320; 80 x 1.54 x 3.33 = 410.2", () => {
+    near(altOf("stradavar", "Semi-Auto Mode").stats.burstDps, 320);
+    const p = altOf("stradavar_prime", "Semi-Auto Mode").stats;
+    near(p.burstDps, 80 * 1.54 * 3.33);
+    expect(p.ammoCost).toBe(2);
+  });
+
+  it("Zenith Semi-Auto: 150 x (1 + 0.35 x 1.5) x 3 = 686.25, 3 ammo, 1.4 s reload", () => {
+    const s = altOf("zenith", "Semi-Auto Mode").stats;
+    near(s.burstDps, 686.25);
+    expect(s.reloadTime).toBeCloseTo(1.4, 6);
+    expect(s.ammoCost).toBe(3);
+  });
+
+  it("Fusilai Semi-Auto: 3 knives x 77 x (1 + 0.03 x 0.5) x 1.5/s = 351.7", () => {
+    const s = altOf("fusilai", "Semi-Auto Mode").stats;
+    expect(s.multishot).toBeCloseTo(3, 6);
+    near(s.burstDps, 3 * 77 * 1.015 * 1.5);
+    expect(radNames(primOf("fusilai"))).toEqual([]);
+  });
+
+  it("Hystrix / Prime: three alt quills, each forcing its own element; the primary loses its stand-in row", () => {
+    for (const id of ["hystrix", "hystrix_prime"]) {
+      const modes = computeAltFire(byId(id), calcWith([]));
+      expect(modes.map((m) => m.label)).toEqual(["Fire Quill", "Electric Quill", "Ice Quill"]);
+      expect(modes.map((m) => m.stats.forcedProcs)).toEqual([["Heat"], ["Electricity"], ["Cold"]]);
+      expect(radNames(primOf(id))).toEqual([]);
+    }
+    // Fire Quill 40 (2.4 / 34.4 / 3.2) quantises to 41.25 (32nds of the total), like the primary's 36 -> 37.125.
+    const fire = altOf("hystrix", "Fire Quill").stats;
+    near(fire.totalDamage, 41.25);
+    near(fire.burstDps, 41.25 * (1 + 0.24 * 1.2) * 7);
+  });
+
+  it("Sepulcrum Lock-On: stats shown, DPS hidden (kill gauge, no ammo); explosion listed with it", () => {
+    const r = altOf("sepulcrum", "Lock-On Mode");
+    expect(r.showDps).toBe(false);
+    expect(r.stats.totalDamage).toBeCloseTo(96, 6);
+    expect(radNames(r.stats)).toEqual(["Lock-On Radial Attack"]);
+    expect(radNames(primOf("sepulcrum"))).toEqual(["Radial Attack"]);
+  });
+
+  it("Tenet Diplos Lock-on: 2-shot burst, 2 / (1 / 1 + 0.06) = 1.887 shots/s per target", () => {
+    const s = altOf("tenet_diplos", "Lock-on Mode").stats;
+    expect(s.effectiveFireRate).toBeCloseTo(2 / 1.06, 4);
+    near(s.burstDps, 28 * (1 + 0.36 * 1.2) * (2 / 1.06));
+    expect(radNames(primOf("tenet_diplos"))).toEqual([]);
+  });
+
+  it("Haalvu burst mode: Tau 34, 2 / (1 / 12 + 0.05) = 15 shots/s per target", () => {
+    const s = altOf("haalvu", "Alt-Fire (burst mode)").stats;
+    expect(s.effectiveFireRate).toBeCloseTo(15, 4);
+    near(s.burstDps, 34 * (1 + 0.2 * 0.8) * 15);
+  });
+
+  it("mods apply: Serration-style damage mods scale the Stradavar semi mode like the primary", () => {
+    const p = calcWith(PRIMARY_MODS)(byId("stradavar")), q = altOf("stradavar", "Semi-Auto Mode", PRIMARY_MODS).stats;
+    expect(q.totalDamage / 50).toBeCloseTo(p.totalDamage / 28, 2);
   });
 });
 
