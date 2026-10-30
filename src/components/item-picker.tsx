@@ -230,7 +230,8 @@ export function ItemPickerScreen({
         ref={listRootRef}
         className="overflow-hidden rounded-xl border border-border/60 bg-card/40 ring-1 ring-border/30"
       >
-        <ScrollArea className="h-[min(60vh,32rem)] sm:h-[60vh]">
+        {/* Phones: no fixed height, so the list runs with the page instead of a short nested scroll box. */}
+        <ScrollArea className="sm:h-[60vh]">
           <div className="space-y-2 p-2 pr-3">
             {onSaved ? (
               savedPanel

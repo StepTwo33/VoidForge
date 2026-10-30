@@ -318,8 +318,21 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
     onClose();
   };
 
+  // Escape / tapping outside while the rank card is open equips the mod at the shown rank instead of
+  // silently dropping it (Back still returns to the list without equipping). A riven with no
+  // stats yet has nothing to equip, so it just closes as before.
+  const dismissEquips =
+    !!selectedMod && !(isRivenMod(selectedMod) && onSelectRiven && Object.keys(rivenStats).length === 0);
+  const handleDismiss = () => {
+    if (dismissEquips) {
+      handleConfirm();
+      return;
+    }
+    handleClose();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
+    <Dialog open={open} onOpenChange={(v) => !v && handleDismiss()}>
       <DialogContent className="flex max-h-[85vh] min-h-0 w-full max-w-[calc(100%-2rem)] flex-col overflow-hidden p-0 sm:max-w-2xl max-lg:top-auto max-lg:bottom-0 max-lg:max-h-[85dvh] max-lg:max-w-none! max-lg:translate-y-0 max-lg:rounded-b-none max-lg:border-x-0 max-lg:border-b-0 max-lg:pb-[env(safe-area-inset-bottom)] max-lg:data-[state=closed]:zoom-out-100 max-lg:data-[state=open]:zoom-in-100 max-lg:data-[state=open]:slide-in-from-bottom-8 max-lg:data-[state=closed]:slide-out-to-bottom-8">
         <div aria-hidden className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-muted-foreground/40 lg:hidden" />
         <DialogHeader className="p-6 pb-0 sm:pl-6 sm:pr-12 lg:pl-6 lg:pr-12">
@@ -644,7 +657,12 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
               </div>
             )}
 
-            <div className="flex gap-2 justify-end mt-4">
+            {dismissEquips && (
+              <p className="mt-4 text-right text-[11px] text-muted-foreground">
+                Closing this card equips it at the rank shown. Use Back to cancel.
+              </p>
+            )}
+            <div className={cn("flex gap-2 justify-end", dismissEquips ? "mt-2" : "mt-4")}>
               <Button
                 variant="outline"
                 onClick={() => setSelectedMod(null)}

@@ -149,8 +149,8 @@ describe("explosion rows show the wiki's unrounded damage (display only, like th
     expect(radialBlock("tenet_ferrox")).toMatch(/>Puncture<.*?>42\.0</);
   });
   it("ALT FIRE explosion rows: Ferrox / Tenet Ferrox Attraction Field 150, Javlok 660", () => {
-    for (const id of ["ferrox", "tenet_ferrox"]) expect(altBlock(id), id).toContain("150 · 10.0m");
-    expect(altBlock("javlok")).toContain("660 · 6.0m");
+    for (const id of ["ferrox", "tenet_ferrox"]) expect(altBlock(id), id).toContain("150 dmg · 10.0 m");
+    expect(altBlock("javlok")).toContain("660 dmg · 6.0 m");
   });
   it("the calculator still holds the quantized value (DPS unchanged): Ferrox radial 96.875", () => {
     const r = calc(byId("ferrox")).radialAttacks!.find((a) => a.name === "Radial Attack")!;

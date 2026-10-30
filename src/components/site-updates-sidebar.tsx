@@ -102,6 +102,10 @@ export function SiteUpdatesSidebar({
 
   const isSidebar = variant === "sidebar";
 
+  // Nothing posted: hide the card rather than end the landing page on an empty box. Admins still
+  // see it so they can reach "Manage updates".
+  if (!loading && updates.length === 0 && !isAdmin) return null;
+
   return (
     <ContentPanel
       padding={false}

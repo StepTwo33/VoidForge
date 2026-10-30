@@ -68,6 +68,7 @@ import { snapshotFromBuild } from "@/lib/builds/compare-build";
 import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
+import { hasBuildLinkParam, hrefForCatalogPick, hrefWithWeaponParam, weaponIdFromParams, WEAPON_URL_PARAM } from "@/lib/builds/weapon-url-param";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
@@ -577,6 +578,68 @@ export default function WeaponBuilderPage() {
     setShowWeaponList(false);
   }, []);
 
+  // ?weapon=<id>: a catalog pick pushes it (so Back returns to the list and refresh keeps the
+  // weapon); it is restored on load and on Back/Forward. Build links (?build=, ?buildId=,
+  // ?localBuild=, ?loadout=) always win and are never rewritten here.
+  const weaponParamSeenRef = useRef<string | null>(null);
+  const handlePickWeaponFromCatalog = useCallback((weapon: Weapon) => {
+    handleSelectWeapon(weapon);
+    const next = hrefForCatalogPick(window.location.pathname + window.location.search + window.location.hash, weapon.id);
+    if (hasBuildLinkParam(new URL(next, window.location.origin).searchParams)) return; // loadout edit: leave URL alone
+    clearCloudBuildInUrl();
+    weaponParamSeenRef.current = weapon.id;
+    if (next !== window.location.pathname + window.location.search + window.location.hash) {
+      window.history.pushState(null, "", next);
+    }
+  }, [handleSelectWeapon]);
+
+  // Keep ?weapon= in step when the weapon changes another way (saved build, import), so a stale
+  // id never sits in the address bar. Skipped while a build link param is present.
+  const selectedWeaponId = selectedWeapon?.id ?? null;
+  useEffect(() => {
+    if (!selectedWeaponId) return;
+    const params = new URLSearchParams(window.location.search);
+    if (hasBuildLinkParam(params)) return;
+    if (params.get(WEAPON_URL_PARAM) === selectedWeaponId) return;
+    weaponParamSeenRef.current = selectedWeaponId;
+    window.history.replaceState(window.history.state, "", hrefWithWeaponParam(window.location.pathname + window.location.search + window.location.hash, selectedWeaponId));
+  }, [selectedWeaponId]);
+
+  const selectedWeaponRef = useRef<Weapon | null>(selectedWeapon);
+  useEffect(() => {
+    selectedWeaponRef.current = selectedWeapon;
+  }, [selectedWeapon]);
+  useEffect(() => {
+    if (allWeapons.length === 0) return;
+    const params = new URLSearchParams(searchParams.toString());
+    if (hasBuildLinkParam(params)) {
+      // A build link loads the weapon itself; drop a leftover ?weapon= so it can't disagree.
+      if (params.has(WEAPON_URL_PARAM)) {
+        window.history.replaceState(window.history.state, "", hrefWithWeaponParam(window.location.pathname + window.location.search + window.location.hash, null));
+      }
+      weaponParamSeenRef.current = null;
+      return;
+    }
+    const id = weaponIdFromParams(params);
+    if (id === weaponParamSeenRef.current) return; // unchanged (e.g. our own replaceState)
+    const previous = weaponParamSeenRef.current;
+    weaponParamSeenRef.current = id;
+    const current = selectedWeaponRef.current;
+    if (!id) {
+      // Back from ?weapon=<id> to the bare builder URL: show the catalog again.
+      if (previous && current) setShowWeaponList(true);
+      return;
+    }
+    if (current?.id === id) {
+      setShowWeaponList(false);
+      return;
+    }
+    const weapon = allWeapons.find((w) => w.id === id);
+    if (!weapon || isCompanionWeaponCategory(weapon.category)) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from the URL (an external system) on load and Back/Forward
+    handleSelectWeapon(weapon);
+  }, [allWeapons, searchParams, handleSelectWeapon]);
+
   const handleOpenModPicker = useCallback((slotIndex: number) => {
     setActiveSlotIndex(slotIndex);
     const w = selectedWeapon;
@@ -755,7 +818,7 @@ export default function WeaponBuilderPage() {
               <ItemPickerRow
                 key={weapon.id}
                 accent="blue"
-                onClick={() => handleSelectWeapon(weapon)}
+                onClick={() => handlePickWeaponFromCatalog(weapon)}
                 image={
                   <GameAssetImage
                     src={getWeaponImage(weapon.name, { category: weapon.category })}

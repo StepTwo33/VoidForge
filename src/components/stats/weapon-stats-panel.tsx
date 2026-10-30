@@ -16,6 +16,7 @@ import {
 import { avgCritMultiplier, critTierDamage, critTiersToShow, critTierLabel, critTierColorClass, exceedsWarframeInt32 } from "@/lib/calc/crit-utils";
 import { CollapsibleSection, StatRow, toLightSafeTextColor } from "./stat-primitives";
 import type { AltFireResult } from "@/lib/weapons/alt-fire";
+import { altFireNoteForDisplay } from "@/lib/display/alt-fire-note";
 import { TTKSection } from "./ttk-section";
 import { WeaponStatsGlossary } from "./weapon-stats-glossary";
 import { WeaponSimPanel } from "./weapon-sim-panel";
@@ -51,6 +52,11 @@ const RADIAL_DAMAGE_KEYS = [
 export function radialDisplayScale(s: Pick<CalculatedStats, "totalDamage" | "arsenalDamage">): number {
   const arsenal = s.arsenalDamage?.totalDamage;
   return arsenal != null && arsenal > 0 && s.totalDamage > 0 ? arsenal / s.totalDamage : 1;
+}
+
+/** Whole-number display with thousands separators (2200 → "2,200"); same rounding as toFixed(0). */
+function formatWholeNumber(n: number): string {
+  return Number(n.toFixed(0)).toLocaleString("en-US");
 }
 
 const ELEMENT_LABELS: Record<string, string> = {
@@ -301,7 +307,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
       })()}
 
       {weapon?.passive && (
-        <CollapsibleSection title="PASSIVE" defaultOpen>
+        <CollapsibleSection title="PASSIVE" defaultOpen={false}>
           <p className="text-[11px] text-muted-foreground leading-relaxed py-1">{weapon.passive}</p>
         </CollapsibleSection>
       )}
@@ -348,7 +354,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
         ];
         const showOverflow = hitValues.some(exceedsWarframeInt32);
         return (
-          <CollapsibleSection title="HIT DAMAGE" defaultOpen>
+          <CollapsibleSection title="HIT DAMAGE" defaultOpen={false}>
             <p className="text-[10px] text-muted-foreground mb-1 leading-snug">
               Per pellet / swing — not DPS (no multishot or fire rate). Orange/red+ rows are tier hit values; Avg hit only blends tiers your crit chance can roll.
             </p>
@@ -399,7 +405,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
       <CollapsibleSection title="CORE" defaultOpen>
         <StatRow
           label={isMelee ? "Attack Speed" : "Fire Rate"}
-          value={(stats.effectiveFireRate ?? stats.fireRate).toFixed(2)}
+          value={`${(stats.effectiveFireRate ?? stats.fireRate).toFixed(2)}${isMelee ? "" : "/s"}`}
           changed={flash.has("fireRate")}
           tooltip={
             isMelee
@@ -713,6 +719,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                 <StatRow
                   label="Burst DPS"
                   value="Manual"
+                  muted
                   tooltip="Slam radials are player-triggered; not included in weapon burst/sustained DPS totals."
                 />
               )}
@@ -740,6 +747,13 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             // calculator still uses the quantized hit for DPS, exactly as for the primary.
             const dmg = a.arsenalDamage ?? a;
             const extraElements = dmg.elements.filter((e) => e.value > 0);
+            // Display only: a radial row is in this mode's DPS when the calculator gave it a DPS
+            // (burstDps > 0) or folded it into the hit (includedInDirect). If none is, the DPS
+            // shown is the direct hit alone, so say so instead of letting it read as the mode's total.
+            const radials = a.radialAttacks ?? [];
+            const radialCounted = (r: (typeof radials)[number]) => (r.burstDps ?? 0) > 0 || r.includedInDirect === true;
+            const directHitOnly = radials.length > 0 && !radials.some(radialCounted);
+            const note = altFireNoteForDisplay(mode.note);
             return (
               <div key={`${mode.label}-${idx}`} className={idx > 0 ? "mt-2 pt-2 border-t border-border/50" : ""}>
                 <div className="text-[10px] font-medium text-muted-foreground mb-1">{mode.label}</div>
@@ -753,20 +767,49 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
                 <StatRow label="Crit Chance" value={`${(a.criticalChance * 100).toFixed(1)}%`} />
                 <StatRow label="Crit Multiplier" value={`${a.criticalMultiplier.toFixed(2)}x`} />
                 <StatRow label="Status Chance" value={`${(a.statusChance * 100).toFixed(1)}%`} />
-                <StatRow label={isMelee ? "Attack Speed" : "Fire Rate"} value={(a.effectiveFireRate ?? a.fireRate).toFixed(2)} />
+                <StatRow label={isMelee ? "Attack Speed" : "Fire Rate"} value={`${(a.effectiveFireRate ?? a.fireRate).toFixed(2)}${isMelee ? "" : "/s"}`} />
                 {a.multishot > 1 && <StatRow label="Multishot" value={a.multishot.toFixed(2)} />}
                 {!isMelee && (a.ammoCost ?? 1) !== 1 && <StatRow label="Ammo / shot" value={String(a.ammoCost)} />}
                 {mode.showDps && (
                   <>
-                    <StatRow label={isMelee ? "DPS (direct hit)" : "Burst DPS"} value={a.burstDps.toFixed(0)} tooltip={isMelee ? "Direct hit only, if you used only this attack. Explosions are listed below. Not part of the headline DPS." : "If you used only this mode. Not part of the headline DPS."} />
-                    {!isMelee && <StatRow label="Sustained DPS" value={a.sustainedDps.toFixed(0)} tooltip="Includes reloads. If you used only this mode." />}
+                    <StatRow
+                      label={isMelee ? "Direct hit DPS" : directHitOnly ? "Direct hit DPS (burst)" : "Burst DPS"}
+                      value={a.burstDps.toFixed(0)}
+                      tooltip={
+                        isMelee
+                          ? "Direct hit only, if you used only this attack. Explosions are listed below. Not part of the headline DPS."
+                          : directHitOnly
+                            ? "Direct hit only, if you used only this mode. The explosion listed below is not counted in it. Not part of the headline DPS."
+                            : "If you used only this mode. Not part of the headline DPS."
+                      }
+                    />
+                    {!isMelee && (
+                      <StatRow
+                        label={directHitOnly ? "Direct hit DPS (sustained)" : "Sustained DPS"}
+                        value={a.sustainedDps.toFixed(0)}
+                        tooltip={directHitOnly ? "Direct hit only, including reloads. The explosion listed below is not counted in it." : "Includes reloads. If you used only this mode."}
+                      />
+                    )}
                   </>
                 )}
-                {!mode.showDps && <StatRow label="DPS" value="Manual" tooltip="Player-triggered special attack; not counted in weapon DPS." />}
-                {a.radialAttacks?.map((r, ri) => (
-                  <StatRow key={`${r.name}-${ri}`} label={r.name} value={`${(r.totalDamage * radialDisplayScale(a)).toFixed(0)} · ${r.radius.toFixed(1)}m`} />
+                {!mode.showDps && <StatRow label="DPS" value="Manual" muted tooltip="Player-triggered special attack; not counted in weapon DPS." />}
+                {radials.map((r, ri) => (
+                  <StatRow
+                    key={`${r.name}-${ri}`}
+                    label={r.name}
+                    value={`${formatWholeNumber(r.totalDamage * radialDisplayScale(a))} dmg · ${r.radius.toFixed(1)} m`}
+                    tooltip={
+                      r.includedInDirect === true
+                        ? `${r.name}: already part of the hit damage above.`
+                        : (r.burstDps ?? 0) > 0
+                          ? `${r.name}: counted in this mode's DPS above.`
+                          : `${r.name}: damage per explosion and its radius. Not counted in the DPS above.`
+                    }
+                  />
                 ))}
-                {mode.note && <p className="text-[10px] text-muted-foreground/80 mt-1 leading-snug">{mode.note}</p>}
+                {note.text && (
+                  <p className="text-[10px] text-muted-foreground/80 mt-1 leading-snug" title={note.source}>{note.text}</p>
+                )}
               </div>
             );
           })}

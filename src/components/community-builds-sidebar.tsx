@@ -128,7 +128,7 @@ export function CommunityBuildsSidebar({
             icon={Users}
             title="No public builds yet"
             description={<>Save a build and check &quot;List in Community&quot; to share it.</>}
-            action={{ href: "/discover", label: "Browse Discover" }}
+            action={{ href: "/weapon-builder", label: "Create a build" }}
           />
         ) : (
           builds.map((build) => (

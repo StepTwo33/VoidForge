@@ -51,8 +51,10 @@ export function toLightSafeTextColor(color?: string): string | undefined {
     .join(" ");
 }
 
-export function StatRow({ label, value, highlighted, color, tooltip, changed }: {
+export function StatRow({ label, value, highlighted, color, tooltip, changed, muted }: {
   label: string; value: string; highlighted?: boolean; color?: string; tooltip?: string; changed?: boolean;
+  /** Non-numeric status (e.g. "Manual"): shown as a small muted chip instead of a number. */
+  muted?: boolean;
 }) {
   const safeColor = toLightSafeTextColor(color);
   return (
@@ -66,15 +68,21 @@ export function StatRow({ label, value, highlighted, color, tooltip, changed }: 
       <span className={cn("min-w-0 flex-1 break-words text-xs leading-snug", safeColor || "text-muted-foreground", changed && "text-amber-900 dark:text-amber-200")}>
         {label}
       </span>
-      <span
-        className={cn(
-          "stat-readable shrink-0 text-xs font-mono tabular-nums",
-          highlighted ? "font-bold text-primary" : safeColor || "text-foreground",
-          changed && "font-semibold text-amber-950 dark:text-amber-100",
-        )}
-      >
-        {value}
-      </span>
+      {muted ? (
+        <span className="shrink-0 rounded border border-border/70 bg-muted/40 px-1.5 py-px text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+          {value}
+        </span>
+      ) : (
+        <span
+          className={cn(
+            "stat-readable shrink-0 text-xs font-mono tabular-nums",
+            highlighted ? "font-bold text-primary" : safeColor || "text-foreground",
+            changed && "font-semibold text-amber-950 dark:text-amber-100",
+          )}
+        >
+          {value}
+        </span>
+      )}
     </div>
   );
 }

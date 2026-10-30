@@ -137,12 +137,15 @@ export function BuilderSectionNav({ sections }: { sections: BuilderSection[] }) 
     <nav
       aria-label="Builder sections"
       data-builder-section-nav=""
-      className="fixed inset-x-0 bottom-0 z-40 flex justify-center [body[data-scroll-locked]_&]:hidden px-3 pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] pt-2 pointer-events-none lg:hidden"
+      // Docked to the bottom edge with a solid background (not a floating pill), so it reads as
+      // page chrome and never sits over slot cards or forma buttons; body gets matching bottom
+      // padding in globals.css so the last row can always scroll clear of it.
+      className="fixed inset-x-0 bottom-0 z-40 flex justify-center [body[data-scroll-locked]_&]:hidden border-t border-border/70 bg-background px-3 pb-[max(0.375rem,env(safe-area-inset-bottom,0px))] pt-1.5 shadow-[0_-4px_12px_-6px_var(--shadow-color)] lg:hidden"
     >
       <div
         role="tablist"
         aria-label="Builder sections"
-        className="pointer-events-auto flex max-w-full gap-1 overflow-x-auto rounded-full border border-border/70 bg-card/95 p-1 shadow-lg shadow-[var(--shadow-color)] backdrop-blur-md supports-[backdrop-filter]:bg-card/85"
+        className="flex max-w-full gap-1 overflow-x-auto rounded-full border border-border/70 bg-card p-1"
       >
         {present.map((s) => {
           const isActive = active === s.id;
