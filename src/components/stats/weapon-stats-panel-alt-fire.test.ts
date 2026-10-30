@@ -59,6 +59,8 @@ const EXPECTED = [
   "vinquibus_melee", "zenistar", "shattered_lash", "shattered_lash_prime",
   // Batch 7: detonation and ability alt-fires
   "castanas", "sancti_castanas", "glory", "grimoire", "neutralizer", "noctua",
+  // Batch 8: archguns (Archwing numbers, Gravimag numbers with Gravimag on)
+  "cortege", "corvas", "corvas_prime", "larkspur", "larkspur_prime", "mandonel", "mausolon", "morgha", "velocitus",
   // Former toggle weapons (legacy alternateModeStats)
   "nunchasa", "hind", "bubonico", "coda_bubonico", "kuva_hind", "kuva_quartakk", "tiberon_prime", "quatz",
   "staticor", "corufell_prime", "talons_thrown",

@@ -529,8 +529,10 @@ export default function WeaponBuilderPage() {
       activeArcanes.length > 0
         ? calculateWeaponBuildWithArcanes(w, modSlots, modsMap, activeArcanes, incarnonStatChanges, simParams, weaponCalcOptions, undefined, rivenStatChanges)
         : calculateWeaponBuild(w, modSlots, modsMap, incarnonStatChanges, simParams, weaponCalcOptions, undefined, rivenStatChanges),
+      // Archguns: Gravimag on means the alt-fire modes use their atmosphere numbers too.
+      { atmosphere: gravimagMode && weaponHasGravimagMode(selectedWeapon) },
     );
-  }, [activeWeapon, equippedMods, equippedArcanes, incarnonStatChanges, rivenStatChanges, simParams, weaponCalcOptions]);
+  }, [activeWeapon, selectedWeapon, gravimagMode, equippedMods, equippedArcanes, incarnonStatChanges, rivenStatChanges, simParams, weaponCalcOptions]);
 
   const contributionContext = useMemo(() => {
     if (!activeWeapon) return null;

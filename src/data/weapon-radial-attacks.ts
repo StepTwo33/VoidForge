@@ -4964,15 +4964,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "falloffReduction": 1.0
     }
   ],
-  "cortege": [
-    {
-      "name": "Alt-Fire Explosion",
-      "blast": 1000.0,
-      "totalDamage": 1000.0,
-      "radius": 4.0,
-      "falloffReduction": 0.3
-    }
-  ],
   "grattler": [
     {
       "name": "Explosion",
@@ -5000,26 +4991,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "falloffReduction": 0.7
     }
   ],
-  "larkspur": [
-    {
-      "name": "Alt-Fire Explosion",
-      "blast": 400.0,
-      "radiation": 400.0,
-      "totalDamage": 800.0,
-      "radius": 9.6,
-      "falloffReduction": 0.6
-    }
-  ],
-  "larkspur_prime": [
-    {
-      "name": "Alt-Fire Explosion",
-      "blast": 400.0,
-      "radiation": 400.0,
-      "totalDamage": 800.0,
-      "radius": 9.6,
-      "falloffReduction": 0.6
-    }
-  ],
   "mausolon": [
     {
       "name": "Auto Radial Attack",
@@ -5027,13 +4998,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 48.0,
       "radius": 1.8,
       "falloffReduction": 0.1
-    },
-    {
-      "name": "Charged Shot Explosion",
-      "heat": 3000.0,
-      "totalDamage": 3000.0,
-      "radius": 8.0,
-      "falloffReduction": 0.4
     }
   ],
   "morgha": [
@@ -5043,16 +5007,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 164.0,
       "radius": 3.0,
       "falloffReduction": 0.3
-    },
-    {
-      "name": "Charged Shot Explosion",
-      "blast": 1200.0,
-      "impact": 600.0,
-      "puncture": 800.0,
-      "slash": 1000.0,
-      "totalDamage": 3600.0,
-      "radius": 20.0,
-      "falloffReduction": 0.6
     }
   ],
   "arquebex": [

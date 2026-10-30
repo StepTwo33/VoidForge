@@ -6,6 +6,7 @@ import { calculateWeaponBuild } from "@/lib/calc/calculator";
 import { resolveEffectiveFireRate } from "@/lib/calc/effective-fire-rate";
 import { computeAltFire, getAltFireModes } from "@/lib/weapons/alt-fire";
 import { applyAlternateMode, getAlternateModes, weaponHasStanceFormMode } from "@/lib/weapons/weapon-alternate-mode";
+import { applyGravimagMode, weaponHasGravimagMode } from "@/lib/weapons/weapon-gravimag";
 import type { Weapon } from "@/lib/types";
 
 const weapons = getEffectiveWeapons();
@@ -1169,6 +1170,113 @@ describe("ALT FIRE: Batch 7 detonation and ability alt-fires, hand-worked agains
   it("trigger-only detonations and the Balefire Charger get no ALT FIRE", () => {
     for (const id of ["aegrit", "penta", "carmine_penta", "secura_penta", "kulstar", "kuva_bramma", "simulor", "synoid_simulor", "balefire", "balefire_prime"])
       expect(getAltFireModes(byId(id)), id).toEqual([]);
+  });
+});
+
+describe("ALT FIRE: Batch 8 archguns, hand-worked against wiki.warframe.com (Module:Weapons/data/archwing)", () => {
+  const IDS = ["cortege", "corvas", "corvas_prime", "larkspur", "larkspur_prime", "mandonel", "mausolon", "morgha", "velocitus"];
+  const tot = (s: ReturnType<typeof alt>) => s.arsenalDamage!.totalDamage;
+  const atm = (id: string, mods: string[] = []) => computeAltFire(applyGravimagMode(byId(id)), calcWith(mods), { atmosphere: true })[0]!.stats;
+  /** The explosion rows as data (the engine quantises radial totals against the direct hit). */
+  const rows = (id: string, gravimag = false) => {
+    const m = WEAPON_ALT_FIRE[id]![0]!;
+    return ((gravimag && m.atmosphere?.radialAttacks) || m.radialAttacks || []).map((r) => [r.name, r.totalDamage, r.radius, r.falloffReduction]);
+  };
+
+  it("each mode, Archwing numbers: the wiki's damage, crit, status and multishot; gauge alt-fires are Manual", () => {
+    const want: Record<string, [string, number, number, number, number, number, boolean]> = {
+      cortege: ["Grenade Barrage", 10, 0.3, 2.4, 0.167, 3, false],
+      corvas: ["Uncharged Shot", 440, 0.4, 2.6, 0.13, 1, true],
+      corvas_prime: ["Uncharged Shot", 560, 0.44, 3, 0.2, 1, true],
+      larkspur: ["Charged Grenade", 420, 0.26, 2.2, 0.34, 1, true],
+      larkspur_prime: ["Charged Grenade", 420, 0.28, 2.2, 0.38, 1, true],
+      mandonel: ["Charged Shot", 900, 0.3, 2.5, 0.2, 1, true],
+      mausolon: ["Charged Laser", 1000, 0.5, 3.5, 0.5, 1, false],
+      morgha: ["Mortar", 100, 0.4, 3, 0.5, 1, false],
+      velocitus: ["Uncharged Shot", 600, 0.3, 2, 0.25, 1, true],
+    };
+    for (const id of IDS) {
+      const [label, d, cc, cm, sc, ms, dps] = want[id]!;
+      const [r] = computeAltFire(byId(id), calcWith([]));
+      expect(r!.label, id).toBe(label);
+      expect(r!.showDps, id).toBe(dps);
+      expect(r!.note, id).toMatch(/^Wiki .*\(archgun/);
+      near(tot(r!.stats), d);
+      expect(r!.stats.criticalChance, id).toBeCloseTo(cc, 6);
+      expect(r!.stats.criticalMultiplier, id).toBeCloseTo(cm, 2); // the engine quantises crit multipliers
+      expect(r!.stats.statusChance, id).toBeCloseTo(sc, 6);
+      expect(r!.stats.multishot, id).toBeCloseTo(ms, 6);
+    }
+    // Unquantised per-type values shown in the panel.
+    const el = (id: string, type: string) => alt(id).arsenalDamage!.elements.find((e) => e.type === type)!.value;
+    near(el("mandonel", "radiation"), 400);
+    near(el("velocitus", "magnetic"), 150);
+    near(alt("velocitus").arsenalDamage!.slash, 150);
+  });
+
+  it("Gravimag on: the wiki's (Atmosphere) numbers (Corvas turns into an 11-pellet shotgun)", () => {
+    const want: Record<string, number> = { cortege: 20, corvas: 80, larkspur: 840, larkspur_prime: 840, mandonel: 1800, mausolon: 1500, morgha: 200, velocitus: 1200 };
+    for (const [id, d] of Object.entries(want)) near(tot(atm(id)), d);
+    const c = atm("corvas");
+    expect(c.multishot).toBeCloseTo(11, 6);
+    expect(c.statusChance).toBeCloseTo(0.013, 6);
+    expect(c.criticalMultiplier).toBeCloseTo(3, 2);
+    // Corvas Prime has no Gravimag toggle in the builder (wiki atmosphere numbers equal Archwing).
+    expect(weaponHasGravimagMode(byId("corvas_prime"))).toBe(false);
+    // Without the option the Archwing numbers stay, even on a Gravimag-merged weapon.
+    near(tot(computeAltFire(applyGravimagMode(byId("mandonel")), calcWith([]))[0]!.stats), 900);
+  });
+
+  it("explosions are their own rows, Archwing and Gravimag (wiki radius and falloff)", () => {
+    expect(rows("cortege")).toEqual([["Grenade Explosion", 1000, 4, 0.3]]);
+    expect(rows("cortege", true)).toEqual([["Grenade Explosion", 2000, 4, 0.3]]);
+    expect(rows("larkspur")).toEqual([["Explosion", 800, 9.6, 0.6]]);
+    expect(rows("larkspur_prime", true)).toEqual([["Explosion", 1600, 9.6, 0.6]]);
+    expect(rows("mausolon")).toEqual([["Charged Shot Explosion", 3000, 8, 0.4]]);
+    expect(rows("mausolon", true)).toEqual([["Charged Shot Explosion", 4500, 8, 0.4]]);
+    expect(rows("morgha")).toEqual([["Charged Shot Explosion", 3600, 20, 0.6]]);
+    expect(rows("morgha", true)).toEqual([["Charged Shot Explosion", 7200, 12, 0.6]]);
+    for (const id of ["corvas", "corvas_prime", "mandonel", "velocitus"]) expect(alt(id).radialAttacks ?? [], id).toEqual([]);
+    // The primary's own Auto explosion is not carried into the alt mode.
+    expect((alt("mausolon").radialAttacks ?? []).map((r) => r.name)).toEqual(["Charged Shot Explosion"]);
+  });
+
+  it("charged modes: DPS uses 1 / (charge + 1 / fire rate); taps use the fire rate", () => {
+    expect(alt("larkspur").effectiveFireRate).toBeCloseTo(1 / (0.5 + 1), 6);
+    expect(alt("larkspur_prime").effectiveFireRate).toBeCloseTo(1 / (0.5 + 0.5), 6);
+    expect(alt("mandonel").effectiveFireRate).toBeCloseTo(1 / (1.5 + 1 / 3), 6);
+    expect(alt("velocitus").effectiveFireRate).toBeCloseTo(5, 6);
+    expect(alt("corvas").effectiveFireRate).toBeCloseTo(2, 6);
+  });
+
+  it("damage mods apply normally: Serration x2.65 on the hit and the explosion", () => {
+    near(tot(alt("velocitus", ["serration_r3"])), 600 * 2.65);
+    near(tot(atm("larkspur", ["serration_r3"])), 840 * 2.65);
+    const m = alt("mausolon", ["serration_r3"]);
+    near(tot(m), 1000 * 2.65);
+    near(m.radialAttacks![0]!.totalDamage, 3000 * 2.65);
+  });
+
+  it("stand-in rows move off the primaries (Archwing and Gravimag); primary numbers unchanged", () => {
+    const names = (w: Weapon) => (calculateWeaponBuild(w, [], modsMap).radialAttacks ?? []).map((r) => r.name);
+    for (const id of ["cortege", "larkspur", "larkspur_prime"]) {
+      expect(names(byId(id)), id).toEqual([]);
+      expect(names(applyGravimagMode(byId(id))), id).toEqual([]);
+    }
+    expect(names(byId("mausolon"))).toEqual(["Auto Radial Attack"]);
+    expect(names(applyGravimagMode(byId("mausolon")))).toEqual(["Auto Radial Attack"]);
+    expect(names(byId("morgha"))).toEqual(["Auto Burst Explosion"]);
+    expect(names(applyGravimagMode(byId("morgha")))).toEqual(["Auto Burst Explosion"]);
+    const prim: Record<string, [number, number]> = { cortege: [90, 12], corvas: [880, 2], corvas_prime: [960, 2], larkspur: [90, 12],
+      larkspur_prime: [90, 12], mandonel: [90, 3], mausolon: [120, 8.33], morgha: [32, 3], velocitus: [1600, 5] };
+    for (const [id, [d, fr]] of Object.entries(prim)) {
+      expect(byId(id).damage, id).toBeCloseTo(d, 1);
+      expect(byId(id).fireRate, id).toBeCloseTo(fr, 2);
+    }
+  });
+
+  it("Arbucep gets no ALT FIRE: its six element attacks cycle per shot (the Arbucep attack picker)", () => {
+    expect(getAltFireModes(byId("arbucep"))).toEqual([]);
   });
 });
 

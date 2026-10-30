@@ -49,6 +49,11 @@ export interface AltFireMode extends WeaponAlternateModeStats {
    * Strength still scales an exalted weapon, as it does the primary.
    */
   ignoreAllBaseDamageBonuses?: boolean;
+  /**
+   * Archguns only: the Gravimag (atmosphere) numbers for this mode, laid over the Archwing (space)
+   * numbers when the builder's Gravimag toggle is on (wiki `* (Atmosphere)` attacks).
+   */
+  atmosphere?: Partial<Omit<AltFireMode, "atmosphere" | "label">>;
 }
 
 export interface AltFireResult {
@@ -68,7 +73,7 @@ export function getAltFireModes(weapon: Weapon | null | undefined): AltFireMode[
 /** Overlay one alt-fire mode on a copy of the weapon (same merge rule as applyAlternateMode). */
 export function applyAltFireMode(weapon: Weapon, mode: AltFireMode): Weapon {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { radialAttacks, radialsKeep, label, note, showDps, damageTimesMagazine, usesWholeMagazine, ignoreMultishotMods, radialBonusPerRound, ignoreBaseDamageMods, ignoreAllBaseDamageBonuses, ...overrides } = mode;
+  const { radialAttacks, radialsKeep, label, note, showDps, atmosphere, damageTimesMagazine, usesWholeMagazine, ignoreMultishotMods, radialBonusPerRound, ignoreBaseDamageMods, ignoreAllBaseDamageBonuses, ...overrides } = mode;
   const merged: Weapon = { ...weapon, ...overrides };
   if (radialAttacks) merged.radialAttacks = radialAttacks;
   else if (radialsKeep) {
@@ -82,14 +87,13 @@ export function applyAltFireMode(weapon: Weapon, mode: AltFireMode): Weapon {
 export function computeAltFire(
   weapon: Weapon | null | undefined,
   calc: (w: Weapon) => CalculatedStats,
+  opts?: { atmosphere?: boolean },
 ): AltFireResult[] {
   if (!weapon) return [];
-  return getAltFireModes(weapon).map((mode) => ({
-    label: mode.label,
-    note: mode.note,
-    showDps: mode.showDps !== false,
-    stats: calcAltMode(weapon, mode, calc),
-  }));
+  return getAltFireModes(weapon).map((m) => {
+    const mode: AltFireMode = opts?.atmosphere && m.atmosphere ? { ...m, ...m.atmosphere } : m;
+    return { label: mode.label, note: mode.note, showDps: mode.showDps !== false, stats: calcAltMode(weapon, mode, calc) };
+  });
 }
 
 /** One calc, or two when a flag needs the modded result first (magazine or multishot). */

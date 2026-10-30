@@ -1629,4 +1629,126 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       note: "Wiki Noctua attack 2. Needs a full meter (60 s, faster with primary-fire hits) and 2 energy. Throws a wide wave that passes through every enemy (1.4 m through walls); damage falls off from 10 m to 13.8% at 20 m. Ability Strength scales it; multishot doesn't add waves. No DPS is shown.",
     },
   ],
+  // Batch 8 (Round 40): ARCHGUNS. Kept as their own block. Every mode holds the Archwing (space) numbers
+  // from wiki Module:Weapons/data/archwing, and `atmosphere` holds the Gravimag numbers from the same
+  // weapon's "(Atmosphere)" entry, used when the builder's Gravimag toggle is on. Arbucep is left out:
+  // its six element attacks cycle shot by shot (already the Arbucep attack picker), not an alt-fire.
+  cortege: [
+    {
+      label: "Grenade Barrage",
+      ...dmg({ impact: 10 }),
+      fireRate: 0.25, criticalChance: 0.3, criticalMultiplier: 2.4, statusChance: 0.167,
+      multishot: 3, chargeTime: 0, triggerType: "Semi", ammoCost: 0, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [{ name: "Grenade Explosion", blast: 1000, totalDamage: 1000, radius: 4, falloffReduction: 0.3 }],
+      atmosphere: {
+        ...dmg({ impact: 20 }),
+        radialAttacks: [{ name: "Grenade Explosion", blast: 2000, totalDamage: 2000, radius: 4, falloffReduction: 0.3 }],
+      },
+      note: "Wiki Cortege attacks 2 and 3 (archgun: Archwing numbers, or Gravimag numbers with Gravimag on). Needs 5 primary-fire kills to fill the gauge, uses no ammo. Fires 3 grenades; each explodes in 4 m (listed below it, falling off to 70%) and leaves flames for 11 s (wiki notes: 1000 Heat per second, not modelled). No DPS is shown.",
+    },
+  ],
+  corvas: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 200, heat: 240 }),
+      fireRate: 2, criticalChance: 0.4, criticalMultiplier: 2.6, statusChance: 0.13,
+      multishot: 1, chargeTime: 0, chargeMode: "standard", triggerType: "Semi", ammoCost: 1, forcedProcs: ["Impact"],
+      atmosphere: {
+        ...dmg({ impact: 64, puncture: 8, slash: 8 }),
+        criticalMultiplier: 3, statusChance: 0.013, multishot: 11,
+      },
+      note: "Wiki Corvas attack 1 (archgun: Archwing numbers, or Gravimag numbers with Gravimag on). Quick tap, no charge wait, guaranteed Impact proc. With Gravimag it is a shotgun: 11 pellets of 80, 2.4 m punch-through.",
+    },
+  ],
+  corvas_prime: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 230, heat: 330 }),
+      fireRate: 2, criticalChance: 0.44, criticalMultiplier: 3, statusChance: 0.2,
+      multishot: 1, chargeTime: 0, chargeMode: "standard", triggerType: "Semi", ammoCost: 1, forcedProcs: ["Impact"],
+      note: "Wiki Corvas Prime attack 1 (archgun: Archwing numbers; the wiki's Gravimag numbers are the same). Quick tap, no charge wait, guaranteed Impact proc.",
+    },
+  ],
+  larkspur: [
+    {
+      label: "Charged Grenade",
+      ...dmg({ impact: 140, blast: 180, radiation: 100 }),
+      fireRate: 1, criticalChance: 0.26, criticalMultiplier: 2.2, statusChance: 0.34,
+      multishot: 1, chargeTime: 0.5, chargeMode: "standard", triggerType: "Charge", ammoCost: 10, forcedProcs: ["Knockdown"],
+      radialAttacks: [{ name: "Explosion", blast: 400, radiation: 400, totalDamage: 800, radius: 9.6, falloffReduction: 0.6 }],
+      atmosphere: {
+        ...dmg({ impact: 280, blast: 360, radiation: 200 }),
+        forcedProcs: [],
+        radialAttacks: [{ name: "Explosion", blast: 800, radiation: 800, totalDamage: 1600, radius: 9.6, falloffReduction: 0.6 }],
+      },
+      note: "Wiki Larkspur attacks 2 and 3 (archgun: Archwing numbers, or Gravimag numbers with Gravimag on). Charged alt-fire grenade for 10 ammo; it explodes in 9.6 m (listed below it, falling off to 40%). Guaranteed Knockdown in Archwing only. DPS covers the direct hit only and uses 1 / (0.5 s charge + 1 / fire rate).",
+    },
+  ],
+  larkspur_prime: [
+    {
+      label: "Charged Grenade",
+      ...dmg({ impact: 140, blast: 180, radiation: 100 }),
+      fireRate: 2, criticalChance: 0.28, criticalMultiplier: 2.2, statusChance: 0.38,
+      multishot: 1, chargeTime: 0.5, chargeMode: "standard", triggerType: "Charge", ammoCost: 10, forcedProcs: ["Knockdown"],
+      radialAttacks: [{ name: "Explosion", blast: 400, radiation: 400, totalDamage: 800, radius: 9.6, falloffReduction: 0.6 }],
+      atmosphere: {
+        ...dmg({ impact: 280, blast: 360, radiation: 200 }),
+        forcedProcs: ["Impact", "Knockdown"],
+        radialAttacks: [{ name: "Explosion", blast: 800, radiation: 800, totalDamage: 1600, radius: 9.6, falloffReduction: 0.6 }],
+      },
+      note: "Wiki Larkspur Prime attacks 2 and 3 (archgun: Archwing numbers, or Gravimag numbers with Gravimag on). Charged alt-fire grenade for 10 ammo; it explodes in 9.6 m (listed below it, falling off to 40%). Guaranteed Knockdown (with Gravimag also Impact, and the explosion a Ragdoll). DPS covers the direct hit only and uses 1 / (0.5 s charge + 1 / fire rate).",
+    },
+  ],
+  mandonel: [
+    {
+      label: "Charged Shot",
+      ...dmg({ puncture: 200, heat: 300, radiation: 400 }),
+      fireRate: 3, criticalChance: 0.3, criticalMultiplier: 2.5, statusChance: 0.2,
+      multishot: 1, chargeTime: 1.5, chargeMode: "standard", triggerType: "Charge", ammoCost: 1, forcedProcs: [],
+      atmosphere: { ...dmg({ puncture: 400, heat: 600, radiation: 800 }) },
+      note: "Wiki Mandonel attack 2 (archgun: Archwing numbers, or Gravimag numbers with Gravimag on). Fully charged laser, 2.4 m punch-through, instead of the 8-pellet spread. It leaves a radiation field for 8 s that boosts shots passing through it (not modelled). DPS uses 1 / (1.5 s charge + 1 / fire rate).",
+    },
+  ],
+  mausolon: [
+    {
+      label: "Charged Laser",
+      ...dmg({ impact: 100, puncture: 400, heat: 500 }),
+      fireRate: 0.5, criticalChance: 0.5, criticalMultiplier: 3.5, statusChance: 0.5,
+      multishot: 1, chargeTime: 0.8, chargeMode: "standard", triggerType: "Charge", ammoCost: 0, forcedProcs: ["Ragdoll"],
+      showDps: false,
+      radialAttacks: [{ name: "Charged Shot Explosion", heat: 3000, totalDamage: 3000, radius: 8, falloffReduction: 0.4 }],
+      atmosphere: {
+        ...dmg({ impact: 150, puncture: 600, heat: 750 }),
+        forcedProcs: ["Lifted"],
+        radialAttacks: [{ name: "Charged Shot Explosion", heat: 4500, totalDamage: 4500, radius: 8, falloffReduction: 0.4 }],
+      },
+      note: "Wiki Mausolon attacks 3 and 4 (archgun: Archwing numbers, or Gravimag numbers with Gravimag on). Needs 5 primary-fire kills to fill the gauge, uses no ammo (but needs some in the magazine). 0.8 s charge; the laser explodes in 8 m (listed below it, falling off to 60%). No DPS is shown.",
+    },
+  ],
+  morgha: [
+    {
+      label: "Mortar",
+      ...dmg({ impact: 100 }),
+      fireRate: 0.833, criticalChance: 0.4, criticalMultiplier: 3, statusChance: 0.5,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", burstCount: 1, ammoCost: 0, forcedProcs: [],
+      showDps: false,
+      radialAttacks: [{ name: "Charged Shot Explosion", impact: 600, puncture: 800, slash: 1000, blast: 1200, totalDamage: 3600, radius: 20, falloffReduction: 0.6 }],
+      atmosphere: {
+        ...dmg({ impact: 200 }),
+        radialAttacks: [{ name: "Charged Shot Explosion", impact: 1200, puncture: 1600, slash: 2000, blast: 2400, totalDamage: 7200, radius: 12, falloffReduction: 0.6 }],
+      },
+      note: "Wiki Morgha attacks 3 and 4 (archgun: Archwing numbers, or Gravimag numbers with Gravimag on). Needs 5 primary-fire kills to fill the gauge, uses no ammo. One bouncing mortar that explodes after 14 m of flight, in 20 m (12 m with Gravimag), listed below it, falling off to 40%. No DPS is shown.",
+    },
+  ],
+  velocitus: [
+    {
+      label: "Uncharged Shot",
+      ...dmg({ impact: 150, puncture: 150, slash: 150, magnetic: 150 }),
+      fireRate: 5, criticalChance: 0.3, criticalMultiplier: 2, statusChance: 0.25,
+      multishot: 1, chargeTime: 0, chargeMode: "standard", triggerType: "Semi", ammoCost: 1, forcedProcs: [],
+      atmosphere: { ...dmg({ impact: 300, puncture: 300, slash: 300, magnetic: 300 }) },
+      note: "Wiki Velocitus attack 1 (archgun: Archwing numbers, or Gravimag numbers with Gravimag on). Quick tap, no charge wait; any shot short of full charge does this damage.",
+    },
+  ],
 };

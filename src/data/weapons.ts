@@ -14931,17 +14931,7 @@ export const allWeapons: Weapon[] = [
       "damage": 180,
       "impact": 20,
       "radiation": 160,
-      "reloadTime": 2.5,
-      "radialAttacks": [
-        {
-          "name": "Alt-Fire Explosion",
-          "blast": 800.0,
-          "radiation": 800.0,
-          "totalDamage": 1600.0,
-          "radius": 9.6,
-          "falloffReduction": 0.6
-        }
-      ]
+      "reloadTime": 2.5
     },
     "triggerType": "Auto",
     "modSlots": 8,
@@ -15339,17 +15329,7 @@ export const allWeapons: Weapon[] = [
       "damage": 180,
       "impact": 20,
       "radiation": 160,
-      "reloadTime": 2.5,
-      "radialAttacks": [
-        {
-          "name": "Alt-Fire Explosion",
-          "blast": 800.0,
-          "radiation": 800.0,
-          "totalDamage": 1600.0,
-          "radius": 9.6,
-          "falloffReduction": 0.6
-        }
-      ]
+      "reloadTime": 2.5
     },
     "triggerType": "Auto",
     "modSlots": 8,
@@ -15387,13 +15367,6 @@ export const allWeapons: Weapon[] = [
           "totalDamage": 72.0,
           "radius": 1.8,
           "falloffReduction": 0.1
-        },
-        {
-          "name": "Charged Shot Explosion",
-          "heat": 4500.0,
-          "totalDamage": 4500.0,
-          "radius": 8.0,
-          "falloffReduction": 0.4
         }
       ]
     },
@@ -15429,16 +15402,6 @@ export const allWeapons: Weapon[] = [
           "totalDamage": 328.0,
           "radius": 3.0,
           "falloffReduction": 0.3
-        },
-        {
-          "name": "Charged Shot Explosion",
-          "blast": 2400.0,
-          "impact": 1200.0,
-          "puncture": 1600.0,
-          "slash": 2000.0,
-          "totalDamage": 7200.0,
-          "radius": 20.0,
-          "falloffReduction": 0.6
         }
       ]
     },
@@ -15518,16 +15481,7 @@ export const allWeapons: Weapon[] = [
     "atmosphereStats": {
       "damage": 180,
       "heat": 180,
-      "reloadTime": 2.5,
-      "radialAttacks": [
-        {
-          "name": "Alt-Fire Explosion",
-          "blast": 2000.0,
-          "totalDamage": 2000.0,
-          "radius": 4.0,
-          "falloffReduction": 0.3
-        }
-      ]
+      "reloadTime": 2.5
     },
     "triggerType": "Auto",
     "modSlots": 8,
