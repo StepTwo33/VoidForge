@@ -6,7 +6,7 @@ import { getWeaponRadialAttacks } from "@/lib/weapons/weapon-radial-utils";
 export interface ScaledRadialAttack extends WeaponRadialAttack {
   /** Average damage after linear radius falloff (center = full, edge = 1 − falloffReduction). */
   avgDamage: number;
-  /** Estimated burst DPS when the radial procs at the inferred rate; 0 for manual slams. */
+  /** Estimated single-target burst DPS (full damage on the direct-hit enemy); 0 for manual slams. */
   burstDps: number;
   /** True when this explosion is already part of the weapon's damage stat (launchers) — not re-added to DPS. */
   includedInDirect?: boolean;
@@ -27,15 +27,68 @@ function isManualSlam(name: string): boolean {
  * fire modes, manual detonations, reload/turret/headshot triggers, deployed
  * cubes, ramping attack stages. Shown in the panel but excluded from auto DPS
  * (counting them at primary fire rate massively overstates DPS).
+ *
+ * Exact names (case-insensitive), not substrings: a substring match on
+ * "charged" once caught Staticor's "Uncharged Explosion" and dropped its
+ * normal-fire AoE from DPS. A radial whose name is not listed here counts.
  */
-const SITUATIONAL_RADIAL =
-  /alt[- ]?fire|alternate fire|secondary fire|semi-auto mode|lock[- ]?on|shot by player|\bcube\b|reload|turret|headshot|homing|mid-flight|embedded|buckshot|expiry|orb merging|attraction field|bounce|recall|\b\d(?:st|nd|rd|th) attack\b|poison quill|plasma bomb|cluster bombs |infested orb|orb explosion|grenade aoe|air burst/i;
+const SITUATIONAL_RADIAL_NAMES = new Set(
+  [
+    "1st Attack Radial Attack",
+    "2nd Attack Radial Attack",
+    "3rd Attack Radial Attack",
+    "4th Attack Radial Attack",
+    "5th Attack Radial Attack",
+    "6th Attack Radial Attack",
+    "Air Burst Explosion",
+    "Alt-Fire AoE",
+    "Alt-Fire Damage over Time",
+    "Alt-Fire Explosion",
+    "Alt-Fire Radial Attack",
+    "Attraction Field",
+    "Charged Throw Bounce Explosion",
+    "Charged Throw Recall Explosion",
+    "Cluster Bombs Explosion",
+    "Cube (shot by player)",
+    "Cube Explosion",
+    "Embedded Detonation",
+    "Grenade AoE",
+    "Grenade Bounce AoE",
+    "Headshot Explosion",
+    "Homing Spore Explosion",
+    "Incarnon Form Bounce Explosion",
+    "Incarnon Form Headshot AoE",
+    "Lock-On Radial Attack",
+    "Mid-Flight Detonation",
+    "Orb Explosion",
+    "Orb Merging Damage",
+    "Partial Reload Explosion",
+    "Plasma Bomb Explosion",
+    "Reload From Empty Explosion",
+    "Secondary Fire AoE",
+    "Throw Bounce Explosion",
+    "Throw Recall Explosion",
+  ].map((n) => n.toLowerCase()),
+);
 
-function isSituationalRadial(name: string, chargeIsPrimary: boolean): boolean {
-  if (SITUATIONAL_RADIAL.test(name)) return true;
-  // "Charged …" modes are alt-fire on regular weapons, but the primary fire on
-  // bows/charge weapons (e.g. Proboscis Cernos Charged Shot Explosion).
-  if (/charged/i.test(name) && !chargeIsPrimary) return true;
+/**
+ * Charged-shot radials: alt-fire on regular weapons, but the primary fire on
+ * bows/charge weapons (e.g. Proboscis Cernos Charged Shot Explosion).
+ */
+const CHARGED_RADIAL_NAMES = new Set(
+  [
+    "Charged AoE",
+    "Charged Radial Attack",
+    "Charged Shot AoE",
+    "Charged Shot Explosion",
+    "Fully Charged Explosion",
+  ].map((n) => n.toLowerCase()),
+);
+
+export function isSituationalRadial(name: string, chargeIsPrimary: boolean): boolean {
+  const key = name.trim().toLowerCase();
+  if (SITUATIONAL_RADIAL_NAMES.has(key)) return true;
+  if (CHARGED_RADIAL_NAMES.has(key) && !chargeIsPrimary) return true;
   return false;
 }
 
@@ -195,7 +248,10 @@ export function scaleRadialAttacksWithDps(
       gatedOut || includedInDirect
         ? 0
         : radialAttacksPerSecond(scaledAttack, stats, isMelee, chargeIsPrimary);
-    const burstDps = rate > 0 ? avgDamage * rate * avgCrit : 0;
+    // wiki: falloff scales with distance from the blast centre, so the directly hit
+    // enemy takes the full radial — single-target DPS uses full damage; avgDamage
+    // (area average) stays for the panel.
+    const burstDps = rate > 0 ? totalDamage * rate * avgCrit : 0;
     radialBurstDps += burstDps;
 
     return { ...scaledAttack, avgDamage, burstDps, includedInDirect };

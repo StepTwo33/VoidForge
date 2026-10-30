@@ -27,7 +27,7 @@ describe("Beam multishot: status DoT scales with the per-beam multishot factor (
     // Unlimited ammo for the DoT check; with the R14-7 reserve (Amprex 100 mag + 700) it runs dry first.
     const s = build("amprex", ["split_chamber_r3", "vigilante_armaments"]);
     expect(calculateTTK({ ...s, ammoReserveModelled: false }, gunner, 100).ttk)
-      .toBeCloseTo(280.17, 1); // 295.53 before Heavy Gunner BaseLevel 8 (accuracy-15 R7-4)
+      .toBeCloseTo(246.37, 1); // 295.53 before Heavy Gunner BaseLevel 8 (accuracy-15 R7-4); 280.17 before R43 beam 0.5 ammo per tick
     expect(calculateTTK(s, gunner, 100).outOfAmmo).toBe(true);
   });
   it("unmodded beam (factor 1) unchanged: Amprex vs lancer L30", () => {
@@ -72,9 +72,9 @@ describe("Heat armor strip: proc-rate landing, 0.5 s ramp, Status Duration (wiki
   });
   it("Ignis Wraith unmodded vs heavy_gunner L100: 271.4 → 67.4 s", () => {
     const s = build("ignis_wraith");
-    expect(calculateTTK({ ...s, ammoReserveModelled: false }, gunner, 100).ttk).toBeCloseTo(65.4, 1); // 67.4 before BaseLevel 8 (R7-4)
-    // R14-7: 200 mag + 200 reserve (wiki) runs dry before the 65 s kill.
-    expect(calculateTTK(s, gunner, 100).outOfAmmo).toBe(true);
+    expect(calculateTTK({ ...s, ammoReserveModelled: false }, gunner, 100).ttk).toBeCloseTo(64.45, 1); // 67.4 before BaseLevel 8 (R7-4); 65.4 before R43 beam 0.5 ammo per tick
+    // R14-7: 200 mag + 200 reserve (wiki). R43: at the wiki 0.5 ammo per tick that is 800 ticks, enough for the kill.
+    expect(calculateTTK(s, gunner, 100).outOfAmmo).toBe(false);
   });
 });
 

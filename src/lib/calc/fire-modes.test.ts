@@ -58,10 +58,11 @@ describe("Bubonico: Viral explosion belongs to the alt-fire burst only", () => {
     const s = calc(w("bubonico"));
     expect(s.radialBurstDps ?? 0).toBe(0);
   });
-  it("alt-fire burst: 3 / (1/5 + 2 x 0.23) = 4.545 shots/s, 143 Viral (x0.75 falloff avg) per shot", () => {
+  it("alt-fire burst: 3 / (1/5 + 2 x 0.23) = 4.545 shots/s, 143 Viral per shot (full on the direct hit, R43)", () => {
     const s = calc(applyAlternateMode(w("bubonico")));
     const efr = 3 / 0.66;
     expect(s.effectiveFireRate).toBeCloseTo(efr, 6);
-    expect(s.radialBurstDps).toBeCloseTo(143 * 0.75 * efr * avgCrit(0.03, 3.5), 0);
+    expect(s.radialBurstDps).toBeCloseTo(143 * efr * avgCrit(0.03, 3.5), 0);
+    expect(s.radialAttacks![0]!.avgDamage).toBeCloseTo(143 * 0.75, 0); // panel area average kept
   });
 });

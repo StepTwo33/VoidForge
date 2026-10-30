@@ -129,7 +129,7 @@ describe("Round 22: Tombfinger primary charge (wiki grip notes)", () => {
     });
   }
 
-  it("Brash unmodded: EFR = 1/(0.5 + 1/3.77) = 1.3068, radial avg = 412 x (1 - 0.7/2) = 267.8", () => {
+  it("Brash unmodded: EFR = 1/(0.5 + 1/3.77) = 1.3068, radial avg = 412 x (1 - 0.7/2) = 267.8 (panel); DPS uses the full 412 (R43)", () => {
     const w = kit("tombfinger", "brash");
     expect(w.fireRate).toBe(3.77);
     const s = calc(w);
@@ -137,7 +137,7 @@ describe("Round 22: Tombfinger primary charge (wiki grip notes)", () => {
     const rad = s.radialAttacks![0];
     expect(rad.avgDamage).toBeCloseTo(267.8, 1);
     const avgCrit = 1 + s.criticalChance * (s.criticalMultiplier - 1);
-    expect(rad.burstDps).toBeCloseTo(267.8 * (1 / (0.5 + 1 / 3.77)) * avgCrit, 0);
+    expect(rad.burstDps).toBeCloseTo(412 * (1 / (0.5 + 1 / 3.77)) * avgCrit, 0);
   });
 
   it("Tremor is the slowest: EFR = 1/(1.4 + 1/2.13) = 0.5349", () => {

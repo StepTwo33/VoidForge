@@ -756,15 +756,16 @@ describe("ALT FIRE: Batch 4c, the five that each needed one decision (wiki.warfr
     expect(a.ammoCost).toBe(10);
     expect(a.radialAttacks?.[0]).toMatchObject({ name: "Blob Explosion", totalDamage: 750, radius: 2.8, falloffReduction: 0.7 });
     // the engine counts the explosion at its average falloff: 750 x (1 - 0.7 / 2)
-    near(a.burstDps, (36 + 750 * 0.65) * (1 + 0.05 * 0.5) / 2.25);
+    near(a.burstDps, (36 + 750) * (1 + 0.05 * 0.5) / 2.25);
     // the primary keeps its own small blob explosion row
     expect(radNames(primOf("stug"))).toContain("Blob Explosion");
   });
 
-  it("Stug primary blob: the wiki's real 70% falloff, 4 x 4/s + 75 x (1 - 0.7 / 2) x 4/s, crit 1.025", () => {
+  it("Stug primary blob: the wiki's real 70% falloff (area only); single target 4 x 4/s + 75 x 4/s, crit 1.025", () => {
     const p = primOf("stug");
     expect(p.radialAttacks?.find((r) => r.name === "Blob Explosion")?.falloffReduction).toBe(0.7);
-    near(p.burstDps, (4 + 75 * 0.65) * (1 + 0.05 * 0.5) * 4); // 216.3 (was 277.8 at the listed 30%)
+    near(p.burstDps, (4 + 75) * (1 + 0.05 * 0.5) * 4); // 323.9: R43 full damage on the direct hit (was 216.3 area average)
+    expect(p.radialAttacks?.find((r) => r.name === "Blob Explosion")?.avgDamage).toBeCloseTo(75 * 0.65, 6); // panel average kept
     expect(p.radialAttacks?.find((r) => r.name === "Incarnon Form Blob Explosion")?.falloffReduction).toBe(0.3);
   });
 
@@ -854,12 +855,12 @@ describe("ALT FIRE: Batch 5 thrown spears, hand-worked against wiki.warframe.com
   });
 
   it("primary DPS no longer counts the throw's explosion: Javlok, Scourge, Scourge Prime (wiki attack 1 + its own explosion)", () => {
-    // Javlok: 160 Heat x 1.2 crit x 1 / (0.3 s + 1 / 3.33), plus the 2.4 m explosion at average falloff (1 - 0.3 / 2)
+    // Javlok: 160 Heat x 1.2 crit x 1 / (0.3 s + 1 / 3.33), plus the 2.4 m explosion at full damage (R43: direct hit)
     const jfr = 1 / (0.3 + 1 / 3.3333335);
-    near(primOf("javlok").burstDps, (160 + 120 * 0.85) * 1.2 * jfr);
+    near(primOf("javlok").burstDps, (160 + 120) * 1.2 * jfr);
     expect(radNames(primOf("javlok"))).toEqual(["Projectile Explosion"]);
-    near(primOf("scourge").burstDps, (70 + 55 * 0.85) * (1 + 0.02 * 0.5) * (8 / 3));
-    near(primOf("scourge_prime").burstDps, (80 + 60 * 0.85) * (1 + 0.1 * 1) * (8 / 3));
+    near(primOf("scourge").burstDps, (70 + 55) * (1 + 0.02 * 0.5) * (8 / 3));
+    near(primOf("scourge_prime").burstDps, (80 + 60) * (1 + 0.1 * 1) * (8 / 3));
     for (const id of ["scourge", "scourge_prime"]) expect(radNames(primOf(id))).toEqual(["Explosion"]);
   });
 
@@ -1154,8 +1155,8 @@ describe("ALT FIRE: Batch 7 detonation and ability alt-fires, hand-worked agains
     expect(names("glory")).toEqual(["Normal Attack"]);
     expect(names("grimoire")).toEqual(["Normal Radial Attack"]);
     expect(names("neutralizer")).toEqual([]);
-    // Grimoire: 100 x 1.5/s x 1.2 crit + 50 x (1 - 0.8 / 2) x 1.5/s x 1.2 = 180 + 54 (was 504 with the alt-fire explosion).
-    near(calculateWeaponBuild(byId("grimoire"), [], modsMap).burstDps, 234);
+    // Grimoire: 100 x 1.5/s x 1.2 crit + 50 x 1.5/s x 1.2 = 180 + 90 (R43 full radial on the direct hit; was 234 area average, 504 with the alt-fire explosion).
+    near(calculateWeaponBuild(byId("grimoire"), [], modsMap).burstDps, 270);
     // Neutralizer: 255 x 1.25 x 1/s x 1.9 crit = 605.6 (R41: Neutralize's 1.25x; was 484.5 without it).
     near(calculateWeaponBuild(byId("neutralizer"), [], modsMap).burstDps, 255 * 1.25 * 1.9);
   });

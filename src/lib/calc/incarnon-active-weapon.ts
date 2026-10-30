@@ -438,6 +438,9 @@ export function applyIncarnonFormToWeapon(base: Weapon, form: IncarnonForm): Wea
   for (const k of ELEM_KEYS) {
     delete (next as unknown as Record<string, unknown>)[k];
   }
+  // The base attack's ammo per shot (beam 0.5, Ballistica Prime 4) is not the form's:
+  // wiki Incarnon Form rows cost 1 (Ballistica Prime, Gammacor, Synoid Gammacor).
+  delete next.ammoCost;
 
   let appliedElem = false;
   for (const k of ELEM_KEYS) {

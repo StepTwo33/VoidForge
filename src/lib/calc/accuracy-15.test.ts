@@ -199,7 +199,7 @@ describe("R7-10: bosses take at most 4 Cold stacks (wiki Cold Damage, both wikis
     const boss = calculateTTK(s, vor, 20).ttk;
     const unit = calculateTTK(s, { ...vor, kind: "unit" }, 20).ttk;
     expect(boss).toBeGreaterThan(unit);
-    expect(boss).toBeCloseTo(31.93, 1); // 31.10 s before (10-stack Cold crit + freeze)
+    expect(boss).toBeCloseTo(27.53, 1); // 31.10 s before (10-stack Cold crit + freeze); 31.93 before R43 beam 0.5 ammo per tick
   });
 });
 

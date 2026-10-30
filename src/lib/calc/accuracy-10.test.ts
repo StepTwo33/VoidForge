@@ -47,7 +47,7 @@ describe("Bows: sustained DPS = burst DPS including radial explosions (reload is
       expect(s.sustainedDps).toBeCloseTo(s.burstDps, 6);
     });
   }
-  it("Lenz: 411.8 burst = sustained (sustained was 321.5)", () => {
-    expect(build("lenz").sustainedDps).toBeCloseTo(411.8, 0);
+  it("Lenz: 606.3 burst = sustained (sustained was 321.5; 411.8 before R43 full radial on the direct hit)", () => {
+    expect(build("lenz").sustainedDps).toBeCloseTo(606.3, 0);
   });
 });

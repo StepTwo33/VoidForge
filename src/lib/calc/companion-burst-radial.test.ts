@@ -37,15 +37,15 @@ describe("companion explosion / radial damage counted in DPS", () => {
     expect(s.burstDps).toBeCloseTo(39 * avgCrit(0.05, 1.5) * efr, 1); // 37.19, was 9.99
   });
 
-  // Existing radial model: 50% falloff to edge -> average multiplier 1 - 0.5/2 = 0.75.
-  it("Vulcax: 500 Heat hitscan + 100 Blast radial (x0.75 falloff avg), x avgCrit(20%, 2.5x)", () => {
+  // R43: the directly hit enemy takes the full radial (wiki Damage Falloff); the 0.75 area average stays on the panel row.
+  it("Vulcax: 500 Heat hitscan + 100 Blast radial (full on the direct hit), x avgCrit(20%, 2.5x)", () => {
     const s = calc("vulcax");
     expect(customWeapons.find((w) => w.id === "vulcax")!.heat).toBe(500);
-    expect(s.radialBurstDps).toBeCloseTo(75 * avgCrit(0.2, 2.5), 1); // 97.5
-    expect(s.burstDps).toBeCloseTo(575 * avgCrit(0.2, 2.5), 0); // 747.5, was 650
+    expect(s.radialBurstDps).toBeCloseTo(100 * avgCrit(0.2, 2.5), 1); // 130 (97.5 at the 0.75 area average)
+    expect(s.burstDps).toBeCloseTo(600 * avgCrit(0.2, 2.5), 0); // 780 (747.5 before R43, 650 before that)
   });
 
-  it("Multron radial is per dart: 100 Blast x 0.75 falloff avg x 2.5/s x avgCrit(15%, 2x)", () => {
-    expect(calc("multron").radialBurstDps).toBeCloseTo(75 * 2.5 * avgCrit(0.15, 2), 1);
+  it("Multron radial is per dart: 100 Blast (full on the direct hit, R43) x 2.5/s x avgCrit(15%, 2x)", () => {
+    expect(calc("multron").radialBurstDps).toBeCloseTo(100 * 2.5 * avgCrit(0.15, 2), 1);
   });
 });
