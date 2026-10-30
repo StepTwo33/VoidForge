@@ -155,13 +155,16 @@ export function exaltedIgnoresAbilityStrength(weapon: Pick<Weapon, "isExalted" |
 }
 
 /**
- * Temple Lizzie / Exalted Solo: damage multiplier 1.25× is Serration-additive and
- * scales with Strength → paper bonus = 1.25×STR − 1 (at 100% STR → +25%).
+ * Temple Lizzie / Exalted Solo and Cyte-09 Neutralizer / Neutralize: damage multiplier
+ * 1.25× is Serration-additive and scales with Strength → paper bonus = 1.25×STR − 1
+ * (at 100% STR → +25%). Wiki (both ability pages): "Damage multiplier is additive to
+ * base damage mods such as Serration and Galvanized Aptitude."
  */
 export function exaltedUsesAdditiveStrengthBonus(weapon: Pick<Weapon, "id" | "abilityName">): boolean {
   const id = weapon.id ?? "";
-  if (id === "lizzie") return true;
-  return normalizeLabel(weapon.abilityName ?? "") === "exalted solo";
+  if (id === "lizzie" || id === "neutralizer") return true;
+  const ability = normalizeLabel(weapon.abilityName ?? "");
+  return ability === "exalted solo" || ability === "neutralize";
 }
 
 /** Multiply exalted IPS / elements / damage by Ability Strength (1 = 100%). */

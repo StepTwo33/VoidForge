@@ -596,7 +596,8 @@ describe("ALT FIRE: Batch 4b alt-fire shots, hand-worked against wiki.warframe.c
     expect(p.ammoCost).toBe(4);
     near(p.burstDps, 100 * 1.024 * 0.667);
     expect(p.radialAttacks?.[0]?.totalDamage).toBeCloseTo(2200, 6);
-    for (const id of ["corinth", "corinth_prime"]) expect(radNames(primOf(id))).toEqual(["Buckshot"]);
+    // R41: the primary's "Buckshot" stand-in row (pellet falloff 18-36 m, not an AoE) is gone.
+    for (const id of ["corinth", "corinth_prime"]) expect(radNames(primOf(id))).toEqual([]);
   });
 
   it("Basmu twin beams: 2 x 12 x (1 + 0.02 x 3.8) x 12/s = 309.9; heat radial stays on the primary", () => {
@@ -1097,7 +1098,7 @@ describe("ALT FIRE: Batch 7 detonation and ability alt-fires, hand-worked agains
       sancti_castanas: ["Embedded Detonation", 300, 0.24, 2, 0.1, false],
       glory: ["Judgment Detonation", 1500, 0.15, 2, 0.2, false],
       grimoire: ["Voltaic Orb", 350, 0.2, 2, 0.26, false],
-      neutralizer: ["Cryo Grenade", 20, 0.3, 2, 0, true],
+      neutralizer: ["Cryo Grenade", 25, 0.3, 2, 0, true], // 20 x 1.25 (Neutralize max-rank multiplier, R41)
       noctua: ["Active Attack", 2750, 0.45, 3, 0.45, false],
     };
     for (const id of IDS) {
@@ -1116,7 +1117,8 @@ describe("ALT FIRE: Batch 7 detonation and ability alt-fires, hand-worked agains
   it("damage mods apply normally: Hornet Strike x3.2 on Castanas, Grimoire (and its 250 explosion), Noctua, Neutralizer", () => {
     near(tot(alt("sancti_castanas", ["hornet_strike_r3"])), 300 * 3.2);
     near(tot(alt("noctua", ["hornet_strike_r3"])), 2750 * 3.2);
-    near(tot(alt("neutralizer", ["serration_r3"])), 20 * 2.65);
+    near(tot(alt("neutralizer", ["serration_r3"])), 20 * (1 + 1.65 + 0.25)); // 1.25x is Serration-additive (R41)
+    near(calculateWeaponBuild(byId("neutralizer"), slots(["serration_r3"]), modsMap).moddedBaseDamage, 255 * (1 + 1.65 + 0.25)); // 739.5
     const g = alt("grimoire", ["hornet_strike_r3"]);
     near(tot(g), 350 * 3.2);
     const scale = tot(g) / g.totalDamage;
@@ -1154,8 +1156,8 @@ describe("ALT FIRE: Batch 7 detonation and ability alt-fires, hand-worked agains
     expect(names("neutralizer")).toEqual([]);
     // Grimoire: 100 x 1.5/s x 1.2 crit + 50 x (1 - 0.8 / 2) x 1.5/s x 1.2 = 180 + 54 (was 504 with the alt-fire explosion).
     near(calculateWeaponBuild(byId("grimoire"), [], modsMap).burstDps, 234);
-    // Neutralizer: 255 x 1/s x 1.9 crit = 484.5 (was 522.5 with the 20 Cold grenade added to every shot).
-    near(calculateWeaponBuild(byId("neutralizer"), [], modsMap).burstDps, 484.5);
+    // Neutralizer: 255 x 1.25 x 1/s x 1.9 crit = 605.6 (R41: Neutralize's 1.25x; was 484.5 without it).
+    near(calculateWeaponBuild(byId("neutralizer"), [], modsMap).burstDps, 255 * 1.25 * 1.9);
   });
 
   it("primary numbers unchanged: wiki attack 1 for every Batch 7 weapon", () => {

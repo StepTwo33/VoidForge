@@ -118,17 +118,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "explosionDelay": 0.9
     }
   ],
-  "corinth_prime": [
-    {
-      "name": "Buckshot",
-      "impact": 25.2,
-      "puncture": 37.8,
-      "slash": 27.0,
-      "totalDamage": 90.0,
-      "radius": 36.0,
-      "falloffReduction": 0.64444
-    }
-  ],
   "gorgon_wraith": [
     {
       "name": "Incarnon Form AoE",
@@ -494,17 +483,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 3.0,
       "radius": 2.0,
       "falloffReduction": 0.0
-    }
-  ],
-  "corinth": [
-    {
-      "name": "Buckshot",
-      "impact": 25.2,
-      "puncture": 37.8,
-      "slash": 27.0,
-      "totalDamage": 90.0,
-      "radius": 36.0,
-      "falloffReduction": 0.6667
     }
   ],
   "evensong": [
@@ -943,7 +921,8 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "heat": 150.0,
       "totalDamage": 150.0,
       "radius": 2.0,
-      "falloffReduction": 1.0
+      "falloffReduction": 1.0,
+      "includedInDirect": true
     }
   ],
   "grimoire": [
@@ -4960,8 +4939,7 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "name": "1st Attack Radial Attack",
       "blast": 114.0,
       "totalDamage": 114.0,
-      "radius": 6.0,
-      "falloffReduction": 1.0
+      "radius": 4.0
     }
   ],
   "grattler": [

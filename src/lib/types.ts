@@ -219,6 +219,11 @@ export interface WeaponRadialAttack {
    * attack rate; not affected by the melee combo multiplier.
    */
   perSwing?: boolean;
+  /**
+   * Data flag: this explosion IS the weapon's listed damage (wiki: the shot is a single AoE,
+   * e.g. Glory primary), so it is shown but not added to DPS again.
+   */
+  includedInDirect?: boolean;
   /** Populated by build calculator for innate radial profiles. */
   burstDps?: number;
   avgDamage?: number;

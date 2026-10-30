@@ -14833,8 +14833,7 @@ export const allWeapons: Weapon[] = [
           "name": "1st Attack Radial Attack",
           "blast": 228.0,
           "totalDamage": 228.0,
-          "radius": 6.0,
-          "falloffReduction": 1.0
+          "radius": 4.0
         }
       ]
     },
@@ -14933,7 +14932,7 @@ export const allWeapons: Weapon[] = [
       "radiation": 160,
       "reloadTime": 2.5
     },
-    "triggerType": "Auto",
+    "triggerType": "Held",
     "modSlots": 8,
     "hasPrimaryArcaneSlot": true,
     "hasSecondaryArcaneSlot": true,
@@ -14964,7 +14963,7 @@ export const allWeapons: Weapon[] = [
       "radiation": 80,
       "reloadTime": 2
     },
-    "triggerType": "Auto",
+    "triggerType": "Charge",
     "modSlots": 8,
     "hasPrimaryArcaneSlot": true,
     "hasSecondaryArcaneSlot": true,
@@ -15331,7 +15330,7 @@ export const allWeapons: Weapon[] = [
       "radiation": 160,
       "reloadTime": 2.5
     },
-    "triggerType": "Auto",
+    "triggerType": "Held",
     "modSlots": 8,
     "hasPrimaryArcaneSlot": true,
     "hasSecondaryArcaneSlot": true,
@@ -15483,7 +15482,7 @@ export const allWeapons: Weapon[] = [
       "heat": 180,
       "reloadTime": 2.5
     },
-    "triggerType": "Auto",
+    "triggerType": "Held",
     "modSlots": 8,
     "hasPrimaryArcaneSlot": true,
     "hasSecondaryArcaneSlot": true,

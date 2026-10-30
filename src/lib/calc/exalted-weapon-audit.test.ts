@@ -518,9 +518,9 @@ describe("exalted bare wiki goldens", () => {
       } else if (g.electricity != null) {
         expect(stats.elements.some((e) => e.type === "electricity")).toBe(true);
         expect(stats.totalDamage).toBeCloseTo(g.damage, 3);
-      } else if (g.id === "lizzie") {
-        // Exalted Solo: +25% Serration-additive at 100% STR on bare paper
-        expect(stats.elements.some((e) => e.type === "heat")).toBe(true);
+      } else if (g.id === "lizzie" || g.id === "neutralizer") {
+        // Exalted Solo / Neutralize: +25% Serration-additive at 100% STR on bare paper
+        if (g.heat != null) expect(stats.elements.some((e) => e.type === "heat")).toBe(true);
         expect(stats.moddedBaseDamage).toBeCloseTo(g.damage * 1.25, 3);
       } else if (g.heat != null) {
         expect(stats.elements.some((e) => e.type === "heat")).toBe(true);
@@ -598,6 +598,12 @@ describe("exalted Ability Strength wiring", () => {
     // +25% vs +150% Serration-additive
     expect(at1.moddedBaseDamage).toBeCloseTo(85 * 1.25, 3);
     expect(at2.moddedBaseDamage).toBeCloseTo(85 * 2.5, 3);
+  });
+
+  it("Neutralizer / Neutralize: wiki 1.25x is additive with Serration (R41)", () => {
+    // wiki Neutralize: "Damage multiplier is additive to base damage mods such as Serration".
+    expect(bare("neutralizer", 1).moddedBaseDamage).toBeCloseTo(255 * 1.25, 3); // 318.75
+    expect(bare("neutralizer", 2).moddedBaseDamage).toBeCloseTo(255 * 2.5, 3); // 1.25 x 2 - 1 = +150%
   });
 
   it("Garuda Talons (Passive) ignore Ability Strength", () => {

@@ -176,8 +176,10 @@ export function scaleRadialAttacksWithDps(
     const gatedOut = (isIncarnonFormAttack(scaledAttack) && !incarnonActive) || zoomMult === 0;
     // Match this radial against the weapon's residual damage: if the residual
     // roughly equals the explosion, it's already counted in direct DPS.
-    let includedInDirect = false;
+    // Data-flagged rows (Glory) are the direct hit itself — never re-added to DPS.
+    let includedInDirect = !gatedOut && attack.includedInDirect === true;
     if (
+      !includedInDirect &&
       !gatedOut &&
       directResidual > 0 &&
       attack.totalDamage > 0 &&

@@ -50,8 +50,8 @@ export function applyArbucepAttackMode(
   const radial: WeaponRadialAttack = {
     name: `${ordinalLabel(meta.mode)} Attack Radial Attack`,
     totalDamage: paper.radial,
-    radius: 6.0,
-    falloffReduction: 1.0,
+    // wiki module: 4 m; its Falloff (1500–2003 m Space / 200–270 m Atmosphere) is shot range, not AoE falloff.
+    radius: 4.0,
     [meta.element]: paper.radial,
   };
 

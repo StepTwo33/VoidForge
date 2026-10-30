@@ -1616,7 +1616,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       ...dmg({ cold: 20 }),
       fireRate: 1.33, criticalChance: 0.3, criticalMultiplier: 2, statusChance: 0,
       multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 3, forcedProcs: ["Cold"],
-      note: "Wiki Neutralizer attack 2. Lobs a grenade for 3 ammo and 20 energy. It explodes in 10 m, puts 10 Cold stacks on enemies (fully freezing them) and leaves a field for 5 s. 0% status chance; the Cold comes from the forced stacks. The Neutralize ability page lists 60% damage falloff; the weapon data lists none.",
+      note: "Wiki Neutralizer attack 2. Lobs a grenade for 3 ammo and 20 energy. It explodes in 10 m, puts 10 Cold stacks on enemies (fully freezing them) and leaves a field for 5 s. 0% status chance; the Cold comes from the forced stacks. The Neutralize ability page lists 60% damage falloff; the weapon data lists none. The ability's 1.25x damage multiplier (scaled by Ability Strength) is added to Serration here, as on the main shot.",
     },
   ],
   noctua: [
