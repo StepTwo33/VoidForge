@@ -590,14 +590,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "falloffReduction": 0.2
     }
   ],
-  "neutralizer": [
-    {
-      "name": "Cryo Grenade",
-      "cold": 20.0,
-      "totalDamage": 20.0,
-      "radius": 10.0
-    }
-  ],
   "ogris": [
     {
       "name": "Rocket Explosion",
@@ -817,13 +809,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 300.0,
       "radius": 3.6,
       "falloffReduction": 0.4
-    },
-    {
-      "name": "Embedded Detonation",
-      "electricity": 300.0,
-      "totalDamage": 300.0,
-      "radius": 3.6,
-      "falloffReduction": 0.4
     }
   ],
   "synoid_gammacor": [
@@ -906,13 +891,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 160.0,
       "radius": 3.6,
       "falloffReduction": 0.4
-    },
-    {
-      "name": "Embedded Detonation",
-      "electricity": 160.0,
-      "totalDamage": 160.0,
-      "radius": 3.6,
-      "falloffReduction": 0.4
     }
   ],
   "catabolyst": [
@@ -966,12 +944,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "totalDamage": 150.0,
       "radius": 2.0,
       "falloffReduction": 1.0
-    },
-    {
-      "name": "Alternate Fire",
-      "heat": 1500.0,
-      "totalDamage": 1500.0,
-      "radius": 4.0
     }
   ],
   "grimoire": [
@@ -980,13 +952,6 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "electricity": 50.0,
       "totalDamage": 50.0,
       "radius": 1.0,
-      "falloffReduction": 0.8
-    },
-    {
-      "name": "Active Radial Attack",
-      "electricity": 250.0,
-      "totalDamage": 250.0,
-      "radius": 6.0,
       "falloffReduction": 0.8
     }
   ],

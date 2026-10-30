@@ -1563,4 +1563,70 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       note: "Wiki Scourge Prime attacks 3 and 4. Throws the spear for 1 ammo, then reloads. It impales, explodes for 55 Corrosive in 7 m (listed below it, 100% to 40% falloff), and puts a 2 m Bullet Attractor on the heads of enemies within 14 m. One field at a time. No DPS is shown.",
     },
   ],
+  // Batch 7 (Round 39): detonation and ability-driven alt-fires. Trigger-only detonations (Penta family,
+  // Aegrit, Kulstar, Kuva Bramma, Simulor family) are left out: their alt-fire only sets off an explosion
+  // already listed under RADIAL ATTACK. Balefire Charger's alt-fire needs the Aegis Gale augment and scales
+  // with max shields, which the builder doesn't model, so it's left out too.
+  castanas: [
+    {
+      label: "Embedded Detonation",
+      ...dmg({ electricity: 160 }),
+      fireRate: 3.33, criticalChance: 0.08, criticalMultiplier: 1.5, statusChance: 0.22,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 0, forcedProcs: ["Electricity"],
+      showDps: false,
+      note: "Wiki Castanas attack 2. Alt-fire detonates your thrown mines (up to 6). A mine stuck to a surface or enemy explodes in 3.6 m for these numbers, with a guaranteed Electricity proc, falling off to 60% at the edge. The main stats are the mid-flight detonation. No DPS is shown.",
+    },
+  ],
+  sancti_castanas: [
+    {
+      label: "Embedded Detonation",
+      ...dmg({ electricity: 300 }),
+      fireRate: 3.33, criticalChance: 0.24, criticalMultiplier: 2, statusChance: 0.1,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 0, forcedProcs: ["Electricity"],
+      showDps: false,
+      note: "Wiki Sancti Castanas attack 2. Alt-fire detonates your thrown mines (up to 6). A mine stuck to a surface or enemy explodes in 3.6 m for these numbers, with a guaranteed Electricity proc and 10% status chance (34% mid-flight), falling off to 60% at the edge. The main stats are the mid-flight detonation. No DPS is shown.",
+    },
+  ],
+  // Glory: the wiki says base damage bonuses (Hornet Strike, Merciless, Deathbringer) and multishot do not
+  // apply; crit, elemental, faction and status mods do. Ability Strength scales it.
+  glory: [
+    {
+      label: "Judgment Detonation",
+      ...dmg({ heat: 1500 }),
+      fireRate: 1.67, criticalChance: 0.15, criticalMultiplier: 2, statusChance: 0.2,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 0, forcedProcs: [],
+      ignoreAllBaseDamageBonuses: true, ignoreMultishotMods: true, showDps: false,
+      note: "Wiki Glory attack 2 (Alternate Fire). Costs 25 energy and blows up every enemy marked by Judgment, each in a 4 m blast; needs at least one marked enemy in sight and has a fixed 1.5 s cooldown. Ability Strength scales it. Base damage mods (Hornet Strike) and multishot don't affect it (wiki); crit, elemental, faction and status mods do. No DPS is shown.",
+    },
+  ],
+  grimoire: [
+    {
+      label: "Voltaic Orb",
+      ...dmg({ electricity: 350 }),
+      fireRate: 1, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.26,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 0, forcedProcs: ["Electricity"],
+      ignoreMultishotMods: true, showDps: false,
+      radialAttacks: [{ name: "Active Radial Attack", electricity: 250, totalDamage: 250, radius: 6, falloffReduction: 0.8 }],
+      note: "Wiki Grimoire attacks 3 and 4. Needs a full meter (45 s, faster with primary-fire hits). The slow orb zaps 1 enemy within 6 m every second (fire rate doesn't change this), chaining to 2 more, each hit with a guaranteed Electricity proc; it explodes at the end (listed below it, falling off to 20%). Multishot adds 1 chain per 33.3% instead of more damage. The wiki lists 350 but says the real in-game bolt is 280. No DPS is shown.",
+    },
+  ],
+  neutralizer: [
+    {
+      label: "Cryo Grenade",
+      ...dmg({ cold: 20 }),
+      fireRate: 1.33, criticalChance: 0.3, criticalMultiplier: 2, statusChance: 0,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 3, forcedProcs: ["Cold"],
+      note: "Wiki Neutralizer attack 2. Lobs a grenade for 3 ammo and 20 energy. It explodes in 10 m, puts 10 Cold stacks on enemies (fully freezing them) and leaves a field for 5 s. 0% status chance; the Cold comes from the forced stacks. The Neutralize ability page lists 60% damage falloff; the weapon data lists none.",
+    },
+  ],
+  noctua: [
+    {
+      label: "Active Attack",
+      ...dmg({ impact: 1100, radiation: 1650 }),
+      fireRate: 1, criticalChance: 0.45, criticalMultiplier: 3, statusChance: 0.45,
+      multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 0, forcedProcs: [],
+      ignoreMultishotMods: true, showDps: false,
+      note: "Wiki Noctua attack 2. Needs a full meter (60 s, faster with primary-fire hits) and 2 energy. Throws a wide wave that passes through every enemy (1.4 m through walls); damage falls off from 10 m to 13.8% at 20 m. Ability Strength scales it; multishot doesn't add waves. No DPS is shown.",
+    },
+  ],
 };

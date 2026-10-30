@@ -1086,6 +1086,92 @@ describe("ALT FIRE: Batch 6b melee modes, hand-worked against wiki.warframe.com"
   });
 });
 
+describe("ALT FIRE: Batch 7 detonation and ability alt-fires, hand-worked against wiki.warframe.com", () => {
+  const IDS = ["castanas", "sancti_castanas", "glory", "grimoire", "neutralizer", "noctua"];
+  const tot = (s: ReturnType<typeof alt>) => s.arsenalDamage!.totalDamage;
+
+  it("each mode: the wiki's damage, crit and status; Manual except the Cryo Grenade", () => {
+    const want: Record<string, [string, number, number, number, number, boolean]> = {
+      castanas: ["Embedded Detonation", 160, 0.08, 1.5, 0.22, false],
+      sancti_castanas: ["Embedded Detonation", 300, 0.24, 2, 0.1, false],
+      glory: ["Judgment Detonation", 1500, 0.15, 2, 0.2, false],
+      grimoire: ["Voltaic Orb", 350, 0.2, 2, 0.26, false],
+      neutralizer: ["Cryo Grenade", 20, 0.3, 2, 0, true],
+      noctua: ["Active Attack", 2750, 0.45, 3, 0.45, false],
+    };
+    for (const id of IDS) {
+      const [label, d, cc, cm, sc, dps] = want[id]!;
+      const [r] = computeAltFire(byId(id), calcWith([]));
+      expect(r!.label, id).toBe(label);
+      expect(r!.showDps, id).toBe(dps);
+      near(tot(r!.stats), d);
+      expect(r!.stats.criticalChance, id).toBeCloseTo(cc, 6);
+      expect(r!.stats.criticalMultiplier, id).toBeCloseTo(cm, 2); // the engine quantises crit multipliers
+      expect(r!.stats.statusChance, id).toBeCloseTo(sc, 6);
+    }
+    near(alt("noctua").arsenalDamage!.impact, 1100); // unquantised split shown in the panel
+  });
+
+  it("damage mods apply normally: Hornet Strike x3.2 on Castanas, Grimoire (and its 250 explosion), Noctua, Neutralizer", () => {
+    near(tot(alt("sancti_castanas", ["hornet_strike_r3"])), 300 * 3.2);
+    near(tot(alt("noctua", ["hornet_strike_r3"])), 2750 * 3.2);
+    near(tot(alt("neutralizer", ["serration_r3"])), 20 * 2.65);
+    const g = alt("grimoire", ["hornet_strike_r3"]);
+    near(tot(g), 350 * 3.2);
+    const scale = tot(g) / g.totalDamage;
+    near(g.radialAttacks!.find((x) => x.name === "Active Radial Attack")!.totalDamage * scale, 250 * 3.2);
+  });
+
+  it("Glory ignoreAllBaseDamageBonuses: Hornet Strike and Vex Armor add nothing, Heated Charge adds 90%, Ability Strength scales it", () => {
+    const vex = { id: "ability:Vex Armor", label: "Vex Armor", category: "ability" as const, damageBonus: 2.75 };
+    const glory = (mods: string[], str?: number) => computeAltFire(byId("glory"), (w) =>
+      calculateWeaponBuild(w, slots(mods), modsMap, undefined, undefined, { externalBuffs: [vex], ...(str ? { abilityStrength: str } : {}) }))[0]!.stats;
+    near(tot(glory([])), 1500);
+    near(tot(glory(["hornet_strike_r3"])), 1500);
+    near(tot(glory(["hornet_strike_r3", "heated_charge_r3"])), 1500 * 1.9);
+    near(tot(glory(["hornet_strike_r3"], 2)), 3000);
+    // Multishot adds nothing either (wiki).
+    expect(glory(["barrel_diffusion_r3"]).multishot).toBeCloseTo(1, 6);
+  });
+
+  it("ignoreMultishotMods: Barrel Diffusion adds nothing to the Glory, Grimoire or Noctua alt-fire", () => {
+    for (const id of ["glory", "grimoire", "noctua"]) expect(alt(id, ["barrel_diffusion_r3"]).multishot, id).toBeCloseTo(1, 6);
+  });
+
+  it("Noctua is exalted: Ability Strength 200% doubles the wave, 2750 x 2", () => {
+    const s = computeAltFire(byId("noctua"), (w) =>
+      calculateWeaponBuild(w, [], modsMap, undefined, undefined, { abilityStrength: 2 }))[0]!.stats;
+    near(tot(s), 5500);
+  });
+
+  it("stand-in rows move off the primaries; primary DPS drops only for Grimoire and Neutralizer", () => {
+    const names = (id: string) => (calculateWeaponBuild(byId(id), [], modsMap).radialAttacks ?? []).map((r) => r.name);
+    expect(names("castanas")).toEqual(["Mid-Flight Detonation"]);
+    expect(names("sancti_castanas")).toEqual(["Mid-Flight Detonation"]);
+    expect(names("glory")).toEqual(["Normal Attack"]);
+    expect(names("grimoire")).toEqual(["Normal Radial Attack"]);
+    expect(names("neutralizer")).toEqual([]);
+    // Grimoire: 100 x 1.5/s x 1.2 crit + 50 x (1 - 0.8 / 2) x 1.5/s x 1.2 = 180 + 54 (was 504 with the alt-fire explosion).
+    near(calculateWeaponBuild(byId("grimoire"), [], modsMap).burstDps, 234);
+    // Neutralizer: 255 x 1/s x 1.9 crit = 484.5 (was 522.5 with the 20 Cold grenade added to every shot).
+    near(calculateWeaponBuild(byId("neutralizer"), [], modsMap).burstDps, 484.5);
+  });
+
+  it("primary numbers unchanged: wiki attack 1 for every Batch 7 weapon", () => {
+    const prim: Record<string, [number, number]> = { castanas: [160, 3.33], sancti_castanas: [300, 3.33], glory: [150, 1.67],
+      grimoire: [100, 1.5], neutralizer: [255, 1], noctua: [250, 1.5] };
+    for (const [id, [d, fr]] of Object.entries(prim)) {
+      expect(byId(id).damage, id).toBeCloseTo(d, 1);
+      expect(byId(id).fireRate, id).toBeCloseTo(fr, 1);
+    }
+  });
+
+  it("trigger-only detonations and the Balefire Charger get no ALT FIRE", () => {
+    for (const id of ["aegrit", "penta", "carmine_penta", "secura_penta", "kulstar", "kuva_bramma", "simulor", "synoid_simulor", "balefire", "balefire_prime"])
+      expect(getAltFireModes(byId(id)), id).toEqual([]);
+  });
+});
+
 describe("ALT FIRE: radial stand-in verdicts", () => {
   it("real wiki explosions on the primary stay (Cyanex, Glaive Prime, Staticor, Zarr)", () => {
     const names = (id: string) => (calculateWeaponBuild(byId(id), [], modsMap).radialAttacks ?? []).map((r) => r.name);

@@ -43,6 +43,12 @@ export interface AltFireMode extends WeaponAlternateModeStats {
    * Arcanes are never in the shown per-type damage, so they aren't handled here.
    */
   ignoreBaseDamageMods?: boolean;
+  /**
+   * No base damage bonus at all applies: mods, Vex Armor-style boosts and Condition Overload are all
+   * stripped (wiki Glory alt-fire: not affected by Hornet Strike, Merciless or Deathbringer). Ability
+   * Strength still scales an exalted weapon, as it does the primary.
+   */
+  ignoreAllBaseDamageBonuses?: boolean;
 }
 
 export interface AltFireResult {
@@ -62,7 +68,7 @@ export function getAltFireModes(weapon: Weapon | null | undefined): AltFireMode[
 /** Overlay one alt-fire mode on a copy of the weapon (same merge rule as applyAlternateMode). */
 export function applyAltFireMode(weapon: Weapon, mode: AltFireMode): Weapon {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { radialAttacks, radialsKeep, label, note, showDps, damageTimesMagazine, usesWholeMagazine, ignoreMultishotMods, radialBonusPerRound, ignoreBaseDamageMods, ...overrides } = mode;
+  const { radialAttacks, radialsKeep, label, note, showDps, damageTimesMagazine, usesWholeMagazine, ignoreMultishotMods, radialBonusPerRound, ignoreBaseDamageMods, ignoreAllBaseDamageBonuses, ...overrides } = mode;
   const merged: Weapon = { ...weapon, ...overrides };
   if (radialAttacks) merged.radialAttacks = radialAttacks;
   else if (radialsKeep) {
@@ -89,7 +95,7 @@ export function computeAltFire(
 /** One calc, or two when a flag needs the modded result first (magazine or multishot). */
 function calcAltMode(weapon: Weapon, mode: AltFireMode, calc: (w: Weapon) => CalculatedStats): CalculatedStats {
   let w = applyAltFireMode(weapon, mode);
-  if (!mode.damageTimesMagazine && !mode.usesWholeMagazine && !mode.ignoreMultishotMods && !mode.radialBonusPerRound && !mode.ignoreBaseDamageMods) return calc(w);
+  if (!mode.damageTimesMagazine && !mode.usesWholeMagazine && !mode.ignoreMultishotMods && !mode.radialBonusPerRound && !mode.ignoreBaseDamageMods && !mode.ignoreAllBaseDamageBonuses) return calc(w);
   const first = calc(w);
   const base = w.multishot ?? 1;
   // Undo the multishot bonus: base x base / modded comes back out as base.
@@ -104,13 +110,15 @@ function calcAltMode(weapon: Weapon, mode: AltFireMode, calc: (w: Weapon) => Cal
   if (mode.damageTimesMagazine) w = { ...times(w, mag), ammoCost: mag, radialAttacks: w.radialAttacks?.map((r) => times(r, mag)) };
   const perRound = mode.radialBonusPerRound;
   if (perRound) w = { ...w, radialAttacks: w.radialAttacks?.map((r) => times(r, 1 + perRound * mag)) };
-  if (mode.ignoreBaseDamageMods) {
+  if (mode.ignoreBaseDamageMods || mode.ignoreAllBaseDamageBonuses) {
     // Probe: 100 Tau only (no mod adds Tau), so modded Tau / 100 is the shown base-damage multiplier
-    // (1 + all bonuses, before arcanes). Scale so it runs at (1 + all - melee mods) instead.
+    // (1 + all bonuses, before arcanes). Scale so it runs at (1 + all - melee mods) instead, or at 1
+    // for ignoreAllBaseDamageBonuses (probed as non-exalted so Ability Strength stays in).
     const zero = Object.fromEntries(DMG_KEYS.map((k) => [k, 0]));
-    const probe = calc({ ...w, ...zero, tau: 100, damage: 100, radialAttacks: [] });
+    const probe = calc({ ...w, ...zero, tau: 100, damage: 100, radialAttacks: [], ...(mode.ignoreAllBaseDamageBonuses ? { isExalted: false } : {}) });
     const all = ((probe.arsenalDamage?.elements ?? probe.elements).find((e) => e.type === "tau")?.value ?? 100) / 100;
-    const k = all > 0 ? Math.max(0, all - (first.meleeModDamageBonus ?? 0)) / all : 1;
+    const keep = mode.ignoreAllBaseDamageBonuses ? 1 : Math.max(0, all - (first.meleeModDamageBonus ?? 0));
+    const k = all > 0 ? keep / all : 1;
     if (k !== 1) w = { ...times(w, k), radialAttacks: w.radialAttacks?.map((r) => times(r, k)) };
   }
   return calc(w);
