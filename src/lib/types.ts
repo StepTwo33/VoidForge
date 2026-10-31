@@ -1072,6 +1072,8 @@ export interface WarframeCalculatedStats {
   totalArmor: number;
   totalEnergy: number;
   totalSprint: number;
+  /** Catalyzing Shields max-shield multiplier (0.80 at R0 … 0.20 at R3). */
+  catalyzingShieldsMult?: number;
   effectiveHealth: number;
   /**
    * Always-on DR vs health, percent: armor ÷ (armor + 300) combined multiplicatively with

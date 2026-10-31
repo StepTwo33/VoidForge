@@ -40,9 +40,6 @@ export const MOD_BEHAVIORS_SECONDARY: Record<string, VerifiedModBehavior> = {
     line("health", "mod_panel", "multiplicative_percent", "wiki: Calculated Victory — on-kill health orb effect"),
     line("shield", "mod_panel", "multiplicative_percent", "wiki: Calculated Victory — on-kill shield recharge"),
   ]),
-  cannonade: mod("cannonade", [
-    line("explosionChance", "mod_panel", "multiplicative_percent", "Cannonade: explosionChance \u2014 +30% Chance to Explode (Use with Caution)"),
-  ]),
   carnis_stinger: mod("carnis_stinger", [
     line("slash", "weapon_dps", "multiplicative_percent", "Carnis Stinger: slash \u2014 +90% <DT_SLASH_COLOR>Slash, +60% Status Chance"),
     line("statusChance", "weapon_dps", "multiplicative_percent", "Carnis Stinger: statusChance \u2014 +90% <DT_SLASH_COLOR>Slash, +60% Status Chance"),
@@ -336,9 +333,6 @@ export const MOD_BEHAVIORS_SECONDARY: Record<string, VerifiedModBehavior> = {
   ]),
   slip_magazine_r3: mod("slip_magazine_r3", [
     line("magazine", "weapon_dps", "multiplicative_percent", "Slip Magazine: magazine \u2014 +30% Magazine Capacity"),
-  ]),
-  soaring_truth: mod("soaring_truth", [
-    line("criticalChance", "weapon_dps", "multiplicative_percent", "Soaring Truth: criticalChance \u2014 +200% Critical Chance, +1 'Purity'"),
   ]),
   spry_sights: mod("spry_sights", [
     line("sprintSpeed", "mod_panel", "multiplicative_percent", "wiki: Spry Sights — aiming-gated movement"),

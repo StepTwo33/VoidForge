@@ -511,14 +511,12 @@ export function buildWarframeSetBonusSummary(
       label: "Amar",
       pieces: amar,
       required: 3,
-      // Highlight when any pieces are equipped (set bonus itself needs 3)
+      // wiki.warframe.com Amar's Set: 10m Heavy Attack teleport per piece (1/2/3 = 10/20/30m).
       active: amar >= 1,
       description:
-        amar >= 3
-          ? "Teleport to a target within 10m on using a Heavy Attack"
-          : amar >= 1
-            ? `${amar}/3 equipped — need ${3 - amar} more for Heavy Attack teleport`
-            : "3-piece: Teleport to a target within 10m on using a Heavy Attack",
+        amar >= 1
+          ? `${amar}/3 equipped: Teleport to a target within ${10 * Math.min(amar, 3)}m on using a Heavy Attack (10m per piece, 30m at 3/3)`
+          : "Teleport to a target within 10m per piece on using a Heavy Attack (1/2/3 = 10/20/30m)",
     },
     {
       setId: "boreal",
@@ -538,12 +536,11 @@ export function buildWarframeSetBonusSummary(
       pieces: nira,
       required: 3,
       active: nira >= 1,
+      // wiki.warframe.com Nira's Set (Update 39): +150% Slam Attack damage per piece (1/2/3 = 150/300/450%).
       description:
-        nira >= 3
-          ? "Increase damage from Slam Attacks by +100%"
-          : nira >= 1
-            ? `${nira}/3 equipped — need ${3 - nira} more for +100% Slam Attack damage`
-            : "3-piece: Increase damage from Slam Attacks by +100%",
+        nira >= 1
+          ? `${nira}/3 equipped: Increase damage from Slam Attacks by +${150 * Math.min(nira, 3)}% (+150% per piece, +450% at 3/3)`
+          : "Increase damage from Slam Attacks by +150% per piece (1/2/3 = +150%/+300%/+450%)",
     },
   ];
 }

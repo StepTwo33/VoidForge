@@ -1135,14 +1135,6 @@ describe("gun leftovers (wiki max rank, Phase M13)", () => {
   it("Toxic Sequence R3: +200% status duration", () => {
     expect(withMod("lex", "toxic_sequence").statusDurationBonus).toBeCloseTo(2, 8);
   });
-
-  it("Soaring Truth R3: +200% crit chance", () => {
-    const weapon = requireWeapon("lex");
-    expect(withMod("lex", "soaring_truth").criticalChance).toBeCloseTo(
-      weapon.criticalChance * 3,
-      8,
-    );
-  });
 });
 
 describe("syndicate exclusive paper (wiki max rank, Phase Sim6)", () => {

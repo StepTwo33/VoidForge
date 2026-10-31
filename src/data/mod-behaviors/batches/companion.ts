@@ -297,8 +297,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("statusDuration", "mod_panel", "multiplicative_percent", "Mecha Overdrive: statusDuration \u2014 +60% Primary Weapon Status Chance added to Companion, +90% Status Duration"),
   ]),
   mecha_recharge: mod("mecha_recharge", [
-    line("shield", "warframe_totals", "multiplicative_percent", "Mecha Recharge: shield \u2014 +15% Shield Recharge when Kubrow attacks per rank"),
-    line("shieldRechargeLink", "mod_panel", "multiplicative_percent", "Mecha Recharge: shieldRechargeLink \u2014 +15% Shield Recharge when Kubrow attacks per rank"),
+    line("shieldRecharge", "companion_totals", "multiplicative_percent", "wiki: Mecha Recharge — +90% Shield Recharge"),
   ]),
   medi_pet_kit: mod("medi_pet_kit", [
     line("healthRegen", "mod_panel", "flat", "wiki: Medi-Pet Kit — +12 Companion Health Regen/s"),

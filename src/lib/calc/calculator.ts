@@ -1012,23 +1012,11 @@ export function calculateWeaponBuild(
       if (statName === "criticalChance" && /x2 for Heavy Attack/i.test(mod.description ?? "")) {
         heavyCritExtra += modValue;
       }
-      // wiki Killing Blow: +120% heavy damage (additive with Pressure Point) and +60%
-      // wind-up speed (stored as heavyAttackEfficiency in mod data; it is not efficiency).
-      // wiki Amalgam Organ Shatter: "+60% Heavy Attack Wind Up Speed" (also stored as
-      // heavyAttackEfficiency in mod data; the heavyWindUp line is panel-only).
-      if (modSlot.modId === "amalgam_organ_shatter" && statName === "heavyAttackEfficiency") {
-        weaponModAcc.heavyAttackWindUpBonus += modValue;
+      // wiki Killing Blow: +120% heavy damage (additive with Pressure Point).
+      // Wind-up speed on Killing Blow & Amalgam Organ Shatter is read from heavyWindUp via mod-behavior-registry.
+      if (modSlot.modId === "killing_blow" && statName === "heavyAttackDamage") {
+        heavyDamageBonus += modValue;
         continue;
-      }
-      if (modSlot.modId === "killing_blow") {
-        if (statName === "heavyAttackDamage") {
-          heavyDamageBonus += modValue;
-          continue;
-        }
-        if (statName === "heavyAttackEfficiency") {
-          weaponModAcc.heavyAttackWindUpBonus += modValue;
-          continue;
-        }
       }
       applyVerifiedModStatToWeapon(stats, {
         modId: modSlot.modId,
@@ -1326,12 +1314,24 @@ export function calculateWeaponBuild(
 
   // Melee Elementalist / wind-up speed mods: +N% shortens windup time.
   const meleeData = MELEE_ATTACK_DATA[baseWeapon.id];
-  if (meleeData?.windUp != null && meleeData.windUp > 0) {
-    stats.heavyAttackWindUp = meleeData.windUp;
+  const baseHeavyAttackWindUp =
+    meleeData?.windUp != null && meleeData.windUp > 0 ? meleeData.windUp : stats.heavyAttackWindUp;
+  stats.heavyAttackWindUp = baseHeavyAttackWindUp;
+  let extraHeavyAttackWindUpBonus = 0;
+  // Linked Warframe Swift Momentum aura: +5% per rank (+30% at R5) Heavy Attack Wind Up Speed,
+  // +1s per rank (+6s at R5) Melee Combo Duration (wiki Swift Momentum).
+  if (isMelee && linkage?.warframeMods) {
+    const swiftSlot = linkage.warframeMods.find((s) => s.modId === "swift_momentum");
+    if (swiftSlot) {
+      const swiftMod = allMods.get("swift_momentum");
+      const r = Math.min(Math.max(swiftSlot.rank ?? 0, 0), swiftMod?.maxRank ?? 5);
+      extraHeavyAttackWindUpBonus += 0.05 * (r + 1);
+      stats.comboDuration += 1 * (r + 1);
+    }
   }
-  const windUpBonus = weaponModAcc.heavyAttackWindUpBonus;
-  if (windUpBonus > -1 && windUpBonus !== 0) {
-    stats.heavyAttackWindUp /= 1 + windUpBonus;
+  const initialWindUpBonus = weaponModAcc.heavyAttackWindUpBonus + extraHeavyAttackWindUpBonus;
+  if (initialWindUpBonus > -1 && initialWindUpBonus !== 0) {
+    stats.heavyAttackWindUp = baseHeavyAttackWindUp / (1 + initialWindUpBonus);
   }
 
   // Apply IPS bonuses additively, then global damage multiplier
@@ -1647,8 +1647,12 @@ export function calculateWeaponBuild(
           stats.punctureArmorStripPerStack = value;
           break;
         case 'heavyAttackWindUp':
-          // Wiki "+N% Heavy Attack Wind Up Speed" shortens windup time.
-          if (value > -1) stats.heavyAttackWindUp /= 1 + value;
+          // Wiki "+N% Heavy Attack Wind Up Speed" shortens windup time (additive with Melee Elementalist / Killing Blow).
+          extraHeavyAttackWindUpBonus += value;
+          if (weaponModAcc.heavyAttackWindUpBonus + extraHeavyAttackWindUpBonus > -1) {
+            stats.heavyAttackWindUp =
+              baseHeavyAttackWindUp / (1 + weaponModAcc.heavyAttackWindUpBonus + extraHeavyAttackWindUpBonus);
+          }
           break;
         case 'heavyAttackEfficiencySet':
           // Wiki Overhand: set base heavy efficiency (absolute), not additive.
@@ -2353,9 +2357,18 @@ export function calculateWarframeBuild(
     stats.sprintSpeedBonus += sumSprintSpeedBonusFromModSlots(linkage.meleeMods, allMods);
   }
 
+  // Catalyzing Shields (wiki: x0.80 / x0.60 / x0.40 / x0.20 Max Shield Capacity at R0–R3)
+  const catalyzingSlot = equippedMods.find((s) => s.modId === "catalyzing_shields");
+  if (catalyzingSlot) {
+    const catMaxRank = allMods.get("catalyzing_shields")?.maxRank ?? 3;
+    const catRank = Math.min(Math.max(Math.round(catalyzingSlot.rank ?? 0), 0), catMaxRank);
+    stats.catalyzingShieldsMult = Number((1 - 0.2 * (catRank + 1)).toFixed(2));
+  }
+
   // Calculate derived stats
+  const shieldCapMult = stats.catalyzingShieldsMult ?? 1;
   stats.totalHealth = stats.baseHealth * (1 + stats.healthBonus);
-  stats.totalShield = stats.baseShield * (1 + stats.shieldBonus);
+  stats.totalShield = stats.baseShield * (1 + stats.shieldBonus) * shieldCapMult;
   stats.totalArmor = stats.baseArmor * (1 + stats.armorBonus);
   stats.totalEnergy = stats.baseEnergy * (1 + stats.energyBonus + stats.flowBonus);
   stats.totalSprint = stats.baseSprint * (1 + stats.sprintSpeedBonus);
@@ -2519,9 +2532,10 @@ export function applyArcaneToWarframe(
   stacks: number = 1,
   rank?: number,
 ): void {
+  const shieldCapMult = stats.catalyzingShieldsMult ?? 1;
   const ctx = {
     totalHealth: stats.baseHealth * (1 + stats.healthBonus) + stats.flatHealthBonus,
-    totalShield: stats.baseShield * (1 + stats.shieldBonus) + stats.flatShieldBonus,
+    totalShield: (stats.baseShield * (1 + stats.shieldBonus) + stats.flatShieldBonus) * shieldCapMult,
     totalArmor: stats.baseArmor * (1 + stats.armorBonus) + stats.flatArmorBonus,
   };
   applyArcaneToWarframeFromMod(stats, arcane, stacks, rank, ctx);
@@ -2658,8 +2672,9 @@ export function applyWarframeShardsAndArcanes(
   else delete stats.pureDamageReductionSources;
 
   // Recalculate derived stats after shard + arcane bonuses (flat shards add after percentage scaling)
+  const shieldCapMult = stats.catalyzingShieldsMult ?? 1;
   stats.totalHealth = stats.baseHealth * (1 + stats.healthBonus) + stats.flatHealthBonus;
-  stats.totalShield = stats.baseShield * (1 + stats.shieldBonus) + stats.flatShieldBonus;
+  stats.totalShield = (stats.baseShield * (1 + stats.shieldBonus) + stats.flatShieldBonus) * shieldCapMult;
   stats.totalArmor = stats.baseArmor * (1 + stats.armorBonus) + stats.flatArmorBonus;
   stats.totalEnergy = stats.baseEnergy * (1 + stats.energyBonus + stats.flowBonus) + stats.flatEnergyBonus;
   stats.totalSprint = stats.baseSprint * (1 + stats.sprintSpeedBonus);

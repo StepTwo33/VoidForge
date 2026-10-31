@@ -75,8 +75,6 @@ const SHOTGUN_ONLY_MOD_IDS = new Set([
   "cleanse_the_murmur",
   "contagious_spread_r3",
   "crash_shot",
-  "critical_meltdown",
-  "cryo_coating",
   "disruptor",
   "fatal_acceleration",
   "flechette",
@@ -86,7 +84,6 @@ const SHOTGUN_ONLY_MOD_IDS = new Set([
   "loaded_capacity",
   "loose_chamber",
   "magnetic_strafe",
-  "magnetized_core",
   "nano_applicator",
   "primed_ammo_stock",
   "primed_cleanse_corpus",
@@ -308,6 +305,23 @@ const NON_SHOTGUN_PRIMARY_MOD_CATEGORIES = new Set([
 ]);
 
 /**
+ * Primary mods with wiki `Type = "Primary"` — equippable on ALL primary weapons
+ * including Shotguns, Rifles, Bows, and Snipers.
+ */
+export const UNIVERSAL_PRIMARY_MOD_IDS = new Set([
+  "aero_periphery",
+  "combustion_beam",
+  "hunter_munitions",
+  "hunter_track",
+  "shivering_contagion",
+  "sinister_reach",
+  "vigilante_armaments",
+  "vigilante_fervor",
+  "vigilante_offense",
+  "vigilante_supplies",
+]);
+
+/**
  * Effective weapon class for primary builders.
  * Some shotguns are stored as `category: "primary"` with `triggerType: "Shotgun"`.
  */
@@ -323,14 +337,15 @@ export function resolvePrimaryWeaponClass(
 }
 
 /**
- * After builder-category match: shotgun weapons deny rifle/primary/bow/launcher mods;
- * non-shotgun primaries deny shotgun-class mods (typed category or known shotgun ids).
+ * After builder-category match: shotgun weapons deny rifle/primary/bow/launcher mods
+ * (except universal `Type = "Primary"` mods); non-shotgun primaries deny shotgun-class mods.
  */
 export function modMatchesPrimaryWeaponClass(
   mod: Pick<Mod, "id" | "name" | "category">,
   weaponClass: string,
 ): boolean {
   if (weaponClass === "shotgun") {
+    if (UNIVERSAL_PRIMARY_MOD_IDS.has(mod.id)) return true;
     if (NON_SHOTGUN_PRIMARY_MOD_CATEGORIES.has(mod.category)) return false;
     return true;
   }
@@ -437,22 +452,14 @@ export function modEligibleForWeaponSlot(
   if (!tomeModEligibleForWeaponSlot(mod, weaponId, slotType)) return false;
 
   if (slotType === "weapon_exilus_primary") {
-    if (!isPrimaryWeaponExilusMod(mod)) return false;
-    if (weaponProfile && !modCompatibleWithWeaponProfile(mod.id, weaponProfile)) return false;
-    return true;
-  }
-  if (slotType === "weapon_exilus_secondary") {
+    if (!isPrimaryWeaponExilusMod(mod) || builderCategory !== "primary") return false;
+  } else if (slotType === "weapon_exilus_secondary") {
     if (isTomeWeapon(weaponId)) {
       return isTomeCanticleMod(mod);
     }
-    if (!isSecondaryWeaponExilusMod(mod)) return false;
-    if (weaponProfile && !modCompatibleWithWeaponProfile(mod.id, weaponProfile)) return false;
-    return true;
-  }
-  if (slotType === "weapon_exilus_melee") {
-    if (!isMeleeWeaponExilusMod(mod)) return false;
-    if (weaponProfile && !modCompatibleWithWeaponProfile(mod.id, weaponProfile)) return false;
-    return true;
+    if (!isSecondaryWeaponExilusMod(mod) || builderCategory !== "secondary") return false;
+  } else if (slotType === "weapon_exilus_melee") {
+    if (!isMeleeWeaponExilusMod(mod) || builderCategory !== "melee") return false;
   }
 
   if (!modMatchesExclusiveWeapon(mod.id, weaponId)) return false;
@@ -467,10 +474,6 @@ export function modEligibleForWeaponSlot(
     !isWeaponExclusiveMod(mod.id)
   ) {
     if (!modMatchesPrimaryWeaponClass(mod, effectiveWeaponClass)) return false;
-  }
-
-  if (isPrimaryWeaponExilusMod(mod) || isSecondaryWeaponExilusMod(mod) || isMeleeWeaponExilusMod(mod)) {
-    return false;
   }
 
   if (effectiveWeaponClass && mod.category === "general") {

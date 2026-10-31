@@ -454,8 +454,8 @@ const ELEMENTAL_INFUSION_BY_ABILITY: Record<
   },
 };
 
-/** Wiki Teeming Virulence CC ranks (non-linear; catalog R3 matches 120%). */
-const TEEMING_VIRULENCE_CC_BY_RANK = [0.7, 0.85, 1.0, 1.2] as const;
+/** Wiki Teeming Virulence CC ranks (non-linear; catalog R3 matches 200%). */
+const TEEMING_VIRULENCE_CC_BY_RANK = [1.25, 1.5, 1.75, 2.0] as const;
 const TEEMING_VIRULENCE_MOD_ID = "teeming_virulence";
 const THRALL_PACT_MOD_ID = "thrall_pact";
 const SMOKE_SHADOW_MOD_ID = "augment_ash_smoke_shadow";
@@ -474,7 +474,7 @@ function resolveTeemingVirulenceBuff(
   const slot = (ctx.warframeModSlots ?? []).find((s) => s.modId === TEEMING_VIRULENCE_MOD_ID);
   if (!slot) return null;
   const rank = Math.min(Math.max(slot.rank ?? 0, 0), TEEMING_VIRULENCE_CC_BY_RANK.length - 1);
-  const base = TEEMING_VIRULENCE_CC_BY_RANK[rank] ?? 1.2;
+  const base = TEEMING_VIRULENCE_CC_BY_RANK[rank] ?? 2.0;
   const bonus = base * strength;
   if (bonus <= 0) return null;
   return {

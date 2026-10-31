@@ -126,7 +126,7 @@ describe("cross-builder mod isolation", () => {
       expect(
         modEligibleForWeaponSlot(mod, "primary", weapon.category, "regular", profile),
         `${weaponId} regular`,
-      ).toBe(false);
+      ).toBe(true);
     }
 
     const lex = allWeapons.find((w) => w.id === "lex")!;

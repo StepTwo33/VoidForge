@@ -15,13 +15,10 @@ function mod(modId: string, stats: VerifiedItemStatLine[], descriptionOnly?: str
 
 export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
 
-  air_martial: mod("air_martial", [
-    line("channelingDamage", "mod_panel", "multiplicative_percent", "Air Martial: channelingDamage \u2014 With Melee equipped, lock onto targets within +5m while Airborne, -100% Channeli\u2026"),
-  ]),
   amalgam_organ_shatter: mod("amalgam_organ_shatter", [
-    line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "Amalgam Organ Shatter: criticalMultiplier \u2014 +85% Critical Damage\\\\n+60% Heavy Attack Wind Up Speed"),
-    line("heavyAttackEfficiency", "weapon_dps", "multiplicative_percent", "Amalgam Organ Shatter: heavyAttackEfficiency \u2014 +85% Critical Damage\\\\n+60% Heavy Attack Wind Up Speed"),
-    line("heavyWindUp", "mod_panel", "multiplicative_percent", "Amalgam Organ Shatter: heavyWindUp \u2014 +85% Critical Damage\\\\n+60% Heavy Attack Wind Up Speed"),
+    line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "wiki: Amalgam Organ Shatter — +85% Critical Damage"),
+    line("heavyAttackEfficiency", "mod_panel", "multiplicative_percent", "wiki: Amalgam Organ Shatter — legacy wind-up alias (panel only)"),
+    line("heavyWindUp", "weapon_dps", "multiplicative_percent", "wiki: Amalgam Organ Shatter — +60% Heavy Attack Wind Up Speed"),
   ]),
   amanata_pressure: mod("amanata_pressure", [
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Amanata Pressure — 8x combo / heavy conditional"),
@@ -161,9 +158,6 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
   guardian_derision: mod("guardian_derision", [
     line("comboCountChance", "mod_panel", "multiplicative_percent", "Guardian Derision: comboCountChance \u2014 Blocking taunts enemies within 15 meters to target you instead of allies., +30% \u2026"),
   ]),
-  harrowed_hook: mod("harrowed_hook", [
-    line("duration", "mod_panel", "multiplicative_percent", "Harrowed Hook: duration \u2014 With Melee Weapon equipped, unchanneled hits slow target and disable jump for +2\u2026"),
-  ]),
   healing_return: mod("healing_return", [
     line("healthOnStatus", "mod_panel", "multiplicative_percent", "Healing Return: healthOnStatus \u2014 Restores 11 Health per Status Type affecting the target"),
   ]),
@@ -185,10 +179,10 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("statusChance", "weapon_dps", "multiplicative_percent", "Jugulus Barbs: statusChance \u2014 +90% <DT_PUNCTURE_COLOR>Puncture, +60% Status Chance"),
   ]),
   killing_blow: mod("killing_blow", [
-    // Wiki: +120% Melee Damage On Heavy Attack only — not light/paper DPS.
-    line("damage", "mod_panel", "multiplicative_percent", "Killing Blow: damage \u2014 +120% Melee Damage On Heavy Attack\\\\n+60% Heavy Attack Wind Up Speed"),
-    line("heavyAttackDamage", "mod_panel", "multiplicative_percent", "Killing Blow: heavyAttackDamage \u2014 +120% Melee Damage On Heavy Attack\\\\n+60% Heavy Attack Wind Up Speed"),
-    line("heavyAttackEfficiency", "mod_panel", "multiplicative_percent", "Killing Blow: heavyAttackEfficiency \u2014 +120% Melee Damage On Heavy Attack\\\\n+60% Heavy Attack Wind Up Speed (wind-up; panel until heavy DPS model)"),
+    line("damage", "mod_panel", "multiplicative_percent", "wiki: Killing Blow — legacy damage alias (heavy-attack only)"),
+    line("heavyAttackDamage", "mod_panel", "multiplicative_percent", "wiki: Killing Blow — +120% Melee Damage On Heavy Attack"),
+    line("heavyWindUp", "weapon_dps", "multiplicative_percent", "wiki: Killing Blow — +60% Heavy Attack Wind Up Speed"),
+    line("heavyAttackEfficiency", "mod_panel", "multiplicative_percent", "wiki: Killing Blow — legacy wind-up alias"),
   ]),
   lasting_sting: mod("lasting_sting", [
     line("statusDuration", "weapon_dps", "multiplicative_percent", "Lasting Sting: statusDuration \u2014 +110% Status Duration (extends DoT ticks)"),

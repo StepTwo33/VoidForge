@@ -12,7 +12,7 @@ describe("Round 25: Necramech Stamina removed", () => {
     expect(allMods.some((m) => m.name === "Necramech Stamina")).toBe(false);
     expect(VERIFIED_MOD_BEHAVIORS["necramech_stamina"]).toBeUndefined();
     expect(allMods.filter((m) => m.category === "necramech")).toHaveLength(27);
-    expect(allMods).toHaveLength(1523);
+    expect(allMods).toHaveLength(1512);
   });
 
   it("is a retired mod, so saved builds and share links drop it on load", () => {

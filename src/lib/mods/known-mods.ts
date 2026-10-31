@@ -115,6 +115,17 @@ export const RETIRED_MODS: Readonly<Record<string, { name: string; reason: Retir
   void_stalker: { name: "Void Stalker", reason: "focus_2" },
   void_static: { name: "Void Static", reason: "focus_2" },
   voltaic_blast: { name: "Voltaic Blast", reason: "focus_2" },
+  cannonade: { name: "Cannonade", reason: "unreleased" },
+  resilient_focus: { name: "Resilient Focus", reason: "unreleased" },
+  divebomb_vortex: { name: "Divebomb Vortex", reason: "archived" },
+  iron_vault: { name: "Iron Vault", reason: "archived" },
+  shield_transference: { name: "Shield Transference", reason: "archived" },
+  soaring_truth: { name: "Soaring Truth", reason: "no_source" },
+  air_martial: { name: "Air Martial", reason: "no_source" },
+  harrowed_hook: { name: "Harrowed Hook", reason: "no_source" },
+  evolution_incarnon_rifle: { name: "Incarnon Evolution - Rifle", reason: "no_source" },
+  evolution_incarnon_pistol: { name: "Incarnon Evolution - Pistol", reason: "no_source" },
+  evolution_incarnon_melee: { name: "Incarnon Evolution - Melee", reason: "no_source" },
 };
 
 export interface MigratedMod {

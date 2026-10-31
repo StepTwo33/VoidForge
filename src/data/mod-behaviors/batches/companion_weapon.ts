@@ -18,9 +18,8 @@ export const MOD_BEHAVIORS_COMPANION_WEAPON: Record<string, VerifiedModBehavior>
     line("healthPerSlashStack", "mod_panel", "multiplicative_percent", "Bloodthirst: healthPerSlashStack \u2014 Health stolen per stack of Slash Damage on the target (+25 per rank, max 100)"),
   ]),
   claw_bite: mod("claw_bite", [
-    line("criticalChance", "weapon_dps", "multiplicative_percent", "wiki: Bite (Claws) — +330% CC / +220% CM at max (legacy criticalDamage key is panel)"),
-    line("criticalDamage", "mod_panel", "multiplicative_percent", "wiki: Bite (Claws) — duplicate criticalDamage catalog key (CM via criticalMultiplier)"),
-    line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "wiki: Bite (Claws) — +330% CC / +220% CM at max"),
+    line("criticalChance", "weapon_dps", "multiplicative_percent", "wiki: Bite (Claws) — +330% CC at max"),
+    line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "wiki: Bite (Claws) — +220% CM at max"),
   ]),
   claw_cold: mod("claw_cold", [
     line("cold", "weapon_dps", "elemental_from_base_damage", "Frost Claws: cold \u2014 +90% Cold Damage"),
@@ -58,8 +57,7 @@ export const MOD_BEHAVIORS_COMPANION_WEAPON: Record<string, VerifiedModBehavior>
     line("damage", "weapon_dps", "multiplicative_percent", "Precision Conditioning: damage \u2014 +35% Damage per rank (max +385%). Converts all base Physical Damage to Slash"),
   ]),
   radon_claws: mod("radon_claws", [
-    line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "Radon Claws: criticalMultiplier \u2014 +15% Damage and +20% Critical Damage per rank"),
-    line("damage", "weapon_dps", "multiplicative_percent", "Radon Claws: damage \u2014 +15% Damage and +20% Critical Damage per rank"),
-    line("radiation", "weapon_dps", "elemental_from_base_damage", "Radon Claws: radiation \u2014 +15% Damage and +20% Critical Damage per rank"),
+    line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "wiki: Radon Claws — +80% Critical Damage at max"),
+    line("radiation", "weapon_dps", "elemental_from_base_damage", "wiki: Radon Claws — +60% Radiation at max"),
   ]),
 };

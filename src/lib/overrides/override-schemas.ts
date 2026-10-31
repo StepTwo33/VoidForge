@@ -288,6 +288,12 @@ export const FIELD_LABELS: Record<string, string> = {
   reckoningArmorGrace: "Armor Bonus Grace Period",
   retaliationElectricity: "Electricity Damage",
   headshotRecoveryTimeReduction: "Companion Recovery Time (headshot kill)",
+  heavyAttackSpeed: "Heavy Attack Wind Up Speed",
+  heavyWindUp: "Heavy Attack Wind Up Speed",
+  heavyAttackDamage: "Melee Damage On Heavy Attack",
+  aimGlideDuration: "Aim Glide/Wall Latch Duration",
+  maxShieldMultiplier: "Max Shield Capacity",
+  shieldGateDuration: "Full Shield Gate Duration",
 };
 
 /** Help text for StatRowsEditor — mod vs arcane catalog stats use different scaling. */

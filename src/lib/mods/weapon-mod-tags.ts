@@ -36,6 +36,36 @@ const KITGUN_CHAMBER_WIKI_TAGS: Record<string, readonly string[]> = {
   tombfinger_chamber: ["MODULAR_GUN", "AOE"],
 };
 
+const STANCE_TYPE_TO_TAG: Record<string, string> = {
+  blade_whip: "BLADE_AND_WHIP_STANCE",
+  bladesaw: "BLADESAW_STANCE",
+  claw: "CLAWS_STANCE_STANCE",
+  dagger: "DAGGERS_STANCE",
+  dual_daggers: "DUAL_DAGGERS_STANCE",
+  dual_nikana: "DUAL_KATANAS_STANCE",
+  dual_swords: "DUAL_SWORDS_STANCE",
+  fist: "FIST_STANCE",
+  glaive: "GLAIVES_STANCE",
+  gunblade: "GUNBLADE_STANCE",
+  hammer: "HAMMERS_STANCE",
+  heavy_blade: "HEAVY_BLADE_STANCE",
+  heavy_scythe: "HEAVY SCYTHE_STANCE",
+  machete: "MACHETES_STANCE",
+  nikana: "NIKANAS_STANCE",
+  nunchaku: "NUNCHAKU_STANCE",
+  polearm: "POLEARMS_STANCE",
+  rapier: "RAPIER_STANCE",
+  scythe: "SCYTHES_STANCE",
+  sparring: "SPARRING_STANCE",
+  staff: "STAVES_STANCE",
+  sword: "SWORDS_STANCE",
+  sword_shield: "SWORDS_AND_SHIELD_STANCE",
+  tonfa: "TONFA_STANCE",
+  two_handed_nikana: "LONG_KATANA_STANCE",
+  warfan: "WARFAN_STANCE",
+  whip: "WHIPS_STANCE",
+};
+
 function isKitgunWeapon(weapon: Pick<Weapon, "category" | "id"> & Partial<Pick<Weapon, "kitgunChamberCategory">>): boolean {
   return (
     weapon.kitgunChamberCategory != null ||
@@ -51,12 +81,23 @@ function kitgunChamberId(weaponId: string): string | undefined {
 
 /** Infer wiki-style weapon tags from arsenal data. */
 export function getWeaponModProfile(
-  weapon: Pick<Weapon, "category" | "triggerType" | "id" | "name"> & Partial<Pick<Weapon, "kitgunChamberCategory">>,
+  weapon: Pick<Weapon, "category" | "triggerType" | "id" | "name"> &
+    Partial<Pick<Weapon, "kitgunChamberCategory" | "stanceType">>,
 ): WeaponModProfile {
   const tags = new Set<WeaponModProfileTag>();
 
   const trigger = (weapon.triggerType || "").toLowerCase();
   const category = (weapon.category || "").toLowerCase();
+
+  if (category === "sentinel_weapon") {
+    tags.add("SENTINEL_WEAPON");
+  } else if (category === "hound_weapon") {
+    tags.add("HOUND_WEAPON");
+  }
+
+  if (weapon.stanceType && STANCE_TYPE_TO_TAG[weapon.stanceType]) {
+    tags.add(STANCE_TYPE_TO_TAG[weapon.stanceType]);
+  }
 
   if (trigger === "held" || isKnownBeamWeapon(weapon.id)) {
     tags.add("POWER_WEAPON");
@@ -89,6 +130,10 @@ export function getWeaponModProfile(
     tags.add("MODULAR_GUN");
     const chamber = kitgunChamberId(weapon.id);
     for (const tag of chamber ? KITGUN_CHAMBER_WIKI_TAGS[chamber] : []) tags.add(tag);
+    if ((category === "rifle" || category === "primary") && trigger !== "shotgun") {
+      tags.add("CLASS_ASSAULT_RIFLE");
+      tags.add("ASSAULT_AMMO");
+    }
   }
 
   return {

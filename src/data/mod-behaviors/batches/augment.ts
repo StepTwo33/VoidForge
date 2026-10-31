@@ -632,9 +632,6 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
   discharge_strike: mod("discharge_strike", [
     line("energyLeech", "mod_panel", "multiplicative_percent", "Discharge Strike: energyLeech \u2014 Soul Punch Augment: Depletes up to 25 Energy from the target."),
   ]),
-  divebomb_vortex: mod("divebomb_vortex", [
-    line("range", "mod_panel", "multiplicative_percent", "Divebomb Vortex: range \u2014 Dive Bomb Augment - Enemies within 12 meters of the point of impact are dragged into it."),
-  ]),
   divine_retribution: mod("divine_retribution", [
     line("range", "mod_panel", "multiplicative_percent", "Divine Retribution: range \u2014 Divine Spears Augment: Status Effects spread to all speared enemies. Spear explo\u2026"),
   ]),
@@ -745,10 +742,6 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("overguardAlly", "mod_panel", "multiplicative_percent", "Intrepid Stand: overguardAlly \u2014 Final Stand Augment: Each javelin that damages an enemy grants 60 Overguard to S\u2026"),
     line("overguardCap", "mod_panel", "multiplicative_percent", "Intrepid Stand: overguardCap \u2014 Final Stand Augment: Each javelin that damages an enemy grants 60 Overguard to S\u2026"),
     line("overguardSelf", "mod_panel", "multiplicative_percent", "Intrepid Stand: overguardSelf \u2014 Final Stand Augment: Each javelin that damages an enemy grants 60 Overguard to S\u2026"),
-  ]),
-  iron_vault: mod("iron_vault", [
-    line("damage", "mod_panel", "multiplicative_percent", "Iron Vault: damage \u2014 Iron Jab Augment: Aiming Iron Jab at the ground launches Wukong into the air. Ex\u2026"),
-    line("range", "mod_panel", "multiplicative_percent", "Iron Vault: range \u2014 Iron Jab Augment: Aiming Iron Jab at the ground launches Wukong into the air. Ex\u2026"),
   ]),
   ironclad_flight: mod("ironclad_flight", [
     line("airborneDamageReduction", "mod_panel", "multiplicative_percent", "wiki: Ironclad Flight \u2014 10% airborne damage reduction per rank (40% R3), applied in the Airborne DR rows"),
@@ -882,9 +875,6 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
   shield_overload: mod("shield_overload", [
     line("duration", "mod_panel", "multiplicative_percent", "Shield Overload: duration \u2014 Polarize Augment: Increases the time for the target's Shields to regenerate by 9\u2026"),
   ]),
-  shield_transference: mod("shield_transference", [
-    line("shield", "mod_panel", "multiplicative_percent", "Shield Transference: shield \u2014 Shield Polarize Augment - Mag gains 50% overshields from depleted enemy shields."),
-  ]),
   signal_flare: mod("signal_flare", [
     line("duration", "mod_panel", "multiplicative_percent", "Signal Flare: duration \u2014 Radial Blind Augment: Blinded enemies are marked on the Minimap for 12s."),
   ]),
@@ -930,8 +920,8 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "Tear Gas: range \u2014 Smoke Screen Augment: Blinds enemies within 4m for 3s."),
   ]),
   teeming_virulence: mod("teeming_virulence", [
-    line("criticalChance", "mod_panel", "multiplicative_percent", "wiki: Teeming Virulence — Virulence-gated primary CC × Strength (not always-on)"),
-    line("duration", "mod_panel", "multiplicative_percent", "Teeming Virulence: duration \u2014 Virulence Augment: Hitting 4 enemies with Virulence grants 120% Primary Weapon C\u2026"),
+    line("criticalChance", "mod_panel", "multiplicative_percent", "wiki: Teeming Virulence — 200% Primary CC (applied via weapon-external-buffs)"),
+    line("duration", "mod_panel", "multiplicative_percent", "wiki: Teeming Virulence — 15s buff duration"),
   ]),
   teleport_rush: mod("teleport_rush", [
     line("duration", "mod_panel", "multiplicative_percent", "Teleport Rush: duration \u2014 Teleport Augment: Using Teleport increases Parkour Velocity by 30% for 12s. Exec\u2026"),

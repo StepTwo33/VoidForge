@@ -2524,11 +2524,6 @@
     "isAugment": false,
     "wikiName": "Calculated Victory"
   },
-  "cannonade": {
-    "wikiType": "Pistol",
-    "isAugment": false,
-    "wikiName": "Cannonade"
-  },
   "carnis_stinger": {
     "wikiType": "Pistol",
     "isAugment": false,
@@ -4273,11 +4268,6 @@
     "wikiType": "Protea",
     "isAugment": true,
     "wikiName": "Repair Dispensary"
-  },
-  "resilient_focus": {
-    "wikiType": "Warframe",
-    "isAugment": false,
-    "wikiName": "Resilient Focus"
   },
   "retribution": {
     "wikiType": "Warframe",
@@ -6969,11 +6959,6 @@
     "isAugment": true,
     "wikiName": "Corroding Barrage"
   },
-  "divebomb_vortex": {
-    "wikiType": "Zephyr",
-    "isAugment": true,
-    "wikiName": "Divebomb Vortex"
-  },
   "enduring_bastille": {
     "wikiType": "Vauban",
     "isAugment": true,
@@ -6983,15 +6968,5 @@
     "wikiType": "Ash",
     "isAugment": true,
     "wikiName": "Fatal Teleport"
-  },
-  "iron_vault": {
-    "wikiType": "Wukong",
-    "isAugment": true,
-    "wikiName": "Iron Vault"
-  },
-  "shield_transference": {
-    "wikiType": "Mag",
-    "isAugment": true,
-    "wikiName": "Shield Transference"
   }
 }

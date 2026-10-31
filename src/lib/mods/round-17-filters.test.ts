@@ -19,7 +19,7 @@ describe("filters: resistance / DR stats are Survivability, not Damage", () => {
     const ids = new Set(resistMods.map((m) => m.id));
     for (const id of [
       "adaptation", "aerodynamic", "agility_drift", "antitoxin", "aura_toxin_resistance", "aviator", "diamond_skin",
-      "flame_repellent_r3", "insulation_r3", "lightning_rod_r3", "shock_absorbers", "resilient_focus", "fortitude",
+      "flame_repellent_r3", "insulation_r3", "lightning_rod_r3", "shock_absorbers", "fortitude",
       "power_drift", "sure_footed_r5", "primed_sure_footed", "umbra_vitality", "umbra_fiber", "umbra_intensify",
       "warding_thurible", "immolated_radiance", "ironclad_flight", "necramech_aviator", "armored_evade",
       "armored_acrobatics", "armored_recovery", "stand_ground", "anti_flak_plating", "augment_nekros_shield_of_shadows",

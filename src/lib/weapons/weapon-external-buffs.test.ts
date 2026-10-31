@@ -783,7 +783,7 @@ describe("resolveWeaponExternalBuffs", () => {
     expect(weaponDamageBuffAbilities([enthrall]).map((a) => a.name)).toContain("Enthrall");
     expect(weaponDamageBuffAbilities([smoke]).map((a) => a.name)).toContain("Smoke Screen");
 
-    // Teeming Virulence — R3 @ 100% STR → +120% primary CC
+    // Teeming Virulence — R3 @ 100% STR → +200% primary CC
     const teemingCtx = {
       warframeId: "nidus",
       warframeStats: { ...wfStats, abilityStrength: 1 },
@@ -811,14 +811,14 @@ describe("resolveWeaponExternalBuffs", () => {
     const teeming = resolveWeaponExternalBuffs(testRifle, teemingCtx, simVir).find(
       (b) => b.id === "ability:Teeming Virulence",
     );
-    expect(teeming?.critChanceBonus).toBeCloseTo(1.2, 8);
+    expect(teeming?.critChanceBonus).toBeCloseTo(2.0, 8);
 
     const teemingStr2 = resolveWeaponExternalBuffs(
       testRifle,
       { ...teemingCtx, warframeStats: { ...wfStats, abilityStrength: 2 } },
       simVir,
     ).find((b) => b.id === "ability:Teeming Virulence");
-    expect(teemingStr2?.critChanceBonus).toBeCloseTo(2.4, 8);
+    expect(teemingStr2?.critChanceBonus).toBeCloseTo(4.0, 8);
 
     // Secondary / archgun / exalted → no Teeming
     expect(
@@ -847,8 +847,8 @@ describe("resolveWeaponExternalBuffs", () => {
       externalBuffs: [teeming!],
     });
     const bareRifle = calculateWeaponBuild(testRifle, [], new Map(), undefined, simVir);
-    // base 25% CC × (1 + 1.2) = 55%
-    expect(withTeeming.criticalChance).toBeCloseTo(bareRifle.criticalChance * (1 + 1.2), 5);
+    // base 25% CC × (1 + 2.0) = 75%
+    expect(withTeeming.criticalChance).toBeCloseTo(bareRifle.criticalChance * (1 + 2.0), 5);
 
     // Thrall Pact — R3, 4 thralls, STR 1.3 → 0.25 × 4 × 1.3 = 1.3
     const thrallCtx = {

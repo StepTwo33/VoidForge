@@ -14,13 +14,4 @@ function mod(modId: string, stats: VerifiedItemStatLine[], descriptionOnly?: str
 }
 
 export const MOD_BEHAVIORS_EVOLUTION: Record<string, VerifiedModBehavior> = {
-  evolution_incarnon_melee: mod("evolution_incarnon_melee", [
-    line("evolutionBonus", "mod_panel", "multiplicative_percent", "Incarnon Melee Evolution: evolutionBonus \u2014 Incarnon weapon evolution bonuses"),
-  ]),
-  evolution_incarnon_pistol: mod("evolution_incarnon_pistol", [
-    line("evolutionBonus", "mod_panel", "multiplicative_percent", "Incarnon Pistol Evolution: evolutionBonus \u2014 Incarnon weapon evolution bonuses"),
-  ]),
-  evolution_incarnon_rifle: mod("evolution_incarnon_rifle", [
-    line("evolutionBonus", "mod_panel", "multiplicative_percent", "Incarnon Rifle Evolution: evolutionBonus \u2014 Incarnon weapon evolution bonuses"),
-  ]),
 };

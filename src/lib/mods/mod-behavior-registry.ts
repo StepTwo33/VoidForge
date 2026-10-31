@@ -176,6 +176,7 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
           return true;
         case "heavyAttackSpeed":
         case "heavyAttackWindUp":
+        case "heavyWindUp":
           acc.heavyAttackWindUpBonus += modValue;
           return true;
         default: {

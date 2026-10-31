@@ -472,6 +472,9 @@ export const MOD_WIKI_RANK_TABLES: Record<string, Record<string, WikiRankTable>>
   stalk: {
     range: { unit: "m", values: [14, 16, 18, 20, 22, 24] },
   },
+  stealth_drift: {
+    enemyRadar: { unit: "m", values: [3, 6, 9, 12, 15, 18] },
+  },
   synth_deconstruct: {
     healthOrbChance: { unit: "%", values: [2, 5, 10, 15, 20, 25] },
   },
@@ -499,6 +502,8 @@ export const MOD_WIKI_RANK_TABLES: Record<string, Record<string, WikiRankTable>>
 /** Stat keys that cards must not show (wiki has no stat by that name). */
 export const PANEL_ONLY_MOD_STATS: Record<string, readonly string[]> = {
   afterburner: ["duration"],
+  amalgam_javlok_magazine_warp: ["shield"],
+  amalgam_organ_shatter: ["heavyAttackEfficiency"],
   augment_ash_smoke_shadow: ["allyStealth"],
   augment_banshee_resonating_quake: ["channeled"],
   augment_baruuk_elusive_retribution: ["evasionToDamage"],
@@ -564,21 +569,21 @@ export const PANEL_ONLY_MOD_STATS: Record<string, readonly string[]> = {
   axios_javelineers: ["duration"],
   blast_shield: ["damage"],
   cats_eye: ["critBuff"],
-  claw_bite: ["criticalDamage"],
   coolant_leak: ["coldDamage", "slow", "cooldown"],
+  cull_the_weak: ["damage"],
   dig: ["digCooldown"],
+  drifting_contact_r3: ["duration"],
+  endurance_drift: ["energy"],
   energy_generator: ["energyOnAssist"],
-  evolution_incarnon_melee: ["evolutionBonus"],
-  evolution_incarnon_pistol: ["evolutionBonus"],
-  evolution_incarnon_rifle: ["evolutionBonus"],
   ferocity: ["attackSpeed"],
   fetch: ["pickupRange"],
   guardian: ["cooldown"],
+  heavy_warhead: ["blast"],
   howl: ["fearDuration"],
   hunt: ["finisherChance"],
   hunter_command: ["commandOnStatus"],
   hunter_synergy: ["criticalChance"],
-  hunter_track: ["radarOnBleed"],
+  killing_blow: ["damage", "heavyAttackEfficiency"],
   manifold_bond: ["abilityDuration"],
   mecha_empowered: ["armorOnMarkKill"],
   medi_ray: ["range", "health"],
@@ -600,12 +605,17 @@ export const PANEL_ONLY_MOD_STATS: Record<string, readonly string[]> = {
   seismic_bond: ["knockdownDuration"],
   shield_charger: ["range"],
   stalk: ["stealthDuration", "cooldown"],
+  static_alacrity: ["blast"],
   synth_deconstruct: ["health"],
   targeting_receptor: ["targetRange"],
   transfusion: ["reviveChance", "health"],
+  turret_velocity: ["range"],
   unleashed: ["vipCapture"],
   vacuum: ["pickupRange"],
+  vicious_spread: ["spread"],
+  vigilante_pursuit: ["range"],
   vigilante_supplies: ["ammoPickup"],
+  vigilante_vigor: ["shield"],
 };
 
 export function isPanelOnlyModStat(modId: string, statKey: string): boolean {

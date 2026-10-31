@@ -78,7 +78,6 @@ describe("wiki.warframe.com max-rank text", () => {
     ["fortitude", ["+40% Knockdown Resistance", "+100% Shield Recharge"]],
     ["power_drift", ["+15% Ability Strength", "+30% Knockdown Resistance"]],
     ["primed_sure_footed", ["+100% Knockdown Resistance"]],
-    ["resilient_focus", ["+20% Stun Damage Resistance"]],
     ["warding_thurible", ["+50% Ally Damage Reduction"]],
     ["immolated_radiance", ["+50% Shared Damage Reduction"]],
     // Round 17: the wiki calls the penalty Mobility, and Armored Recovery's is Slide only.

@@ -85,16 +85,15 @@ describe("beast claw cores (wiki max rank, Phase M11)", () => {
     );
   });
 
-  it("Radon Claws R3: +60% damage / +80% CM / +60% radiation", () => {
+  it("Radon Claws R3: +80% CM / +60% radiation", () => {
     const weapon = requireClaws("chesa_claws");
     const cmq = quantizeBaseCritMultiplier(weapon.criticalMultiplier);
     const stats = withMod("radon_claws");
-    expect(stats.moddedBaseDamage).toBeCloseTo(weapon.damage * 1.6, 5);
+    expect(stats.moddedBaseDamage).toBeCloseTo(weapon.damage, 5);
     expect(stats.criticalMultiplier).toBeCloseTo(cmq * 1.8, 8);
     const scale = stats.moddedBaseDamage / 32;
-    // Elemental % is of pre-mod base; IPS quantize uses modded base as scale.
     expect(stats.elements.find((e) => e.type === "radiation")?.value).toBeCloseTo(
-      quantizeDamageValue(weapon.damage * 0.6 * 1.6, scale),
+      quantizeDamageValue(weapon.damage * 0.6, scale),
       8,
     );
   });

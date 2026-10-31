@@ -23,7 +23,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 5,
-    "category": "rifle",
+    "category": "primary",
     "subCategory": "",
     "stats": {
       "multishot": 10
@@ -156,12 +156,12 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "rifle",
+    "category": "primary",
     "subCategory": "",
     "stats": {
       "fireRate": 7.5
     },
-    "description": "+7.5% Fire Rate per rank (Set)",
+    "description": "+45% Fire Rate (x2 for Bows)",
     "rarity": "uncommon"
   },
   {
@@ -248,7 +248,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "rifle",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "fireRate": 15,
@@ -339,7 +339,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 5,
-    "category": "rifle",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "reloadSpeed": 2.5,
@@ -363,7 +363,6 @@ const RAW_MODS: Mod[] = [
     "description": "+165% Damage, -55% Accuracy at max rank",
     "rarity": "rare"
   },
-
   {
     "id": "primed_pistol_gambit",
     "name": "Primed Pistol Gambit",
@@ -423,7 +422,6 @@ const RAW_MODS: Mod[] = [
     "description": "+110% Critical Damage at max rank (Primed)",
     "rarity": "legendary"
   },
-
   {
     "id": "embedded_catalyzer",
     "name": "Embedded Catalyzer",
@@ -513,7 +511,6 @@ const RAW_MODS: Mod[] = [
     "description": "+15% Fire Rate, -2.5% Damage per rank",
     "rarity": "rare"
   },
-
   {
     "id": "pistol_ammo_mutation",
     "name": "Pistol Ammo Mutation",
@@ -601,7 +598,6 @@ const RAW_MODS: Mod[] = [
     "description": "+110% Critical Damage at max rank (Primed)",
     "rarity": "legendary"
   },
-
   {
     "id": "primed_charged_shell",
     "name": "Primed Charged Shell",
@@ -734,7 +730,6 @@ const RAW_MODS: Mod[] = [
     "description": "+220% Critical Chance (x2 for Heavy Attacks)\\nx1.33 Damage to Sentients",
     "rarity": "legendary"
   },
-
   {
     "id": "condition_overload",
     "name": "Condition Overload",
@@ -860,8 +855,9 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "heavyAttackDamage": 20,
-      "damage": 20.0,
-      "heavyAttackEfficiency": 10.0
+      "heavyWindUp": 10,
+      "damage": 20,
+      "heavyAttackEfficiency": 10
     },
     "description": "+120% Melee Damage On Heavy Attack\\n+60% Heavy Attack Wind Up Speed",
     "rarity": "uncommon"
@@ -925,8 +921,6 @@ const RAW_MODS: Mod[] = [
     "description": "Restores 11 Health per Status Type affecting the target",
     "rarity": "rare"
   },
-
-
   {
     "id": "covert_lethality",
     "name": "Covert Lethality",
@@ -1345,8 +1339,8 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "coactionBonus": 2.5,
-      "sprintSpeed": 2
+      "sprintSpeed": 2,
+      "castSpeed": 2.5
     },
     "description": "+12% Sprint Speed\\n+15% Casting Speed",
     "rarity": "rare"
@@ -2423,11 +2417,10 @@ const RAW_MODS: Mod[] = [
     "subCategory": "beast_weapon",
     "stats": {
       "criticalChance": 30,
-      "criticalDamage": 60,
-      "criticalMultiplier": 20.0
+      "criticalMultiplier": 20
     },
     "description": "+330% Critical Chance\n+220% Critical Damage",
-    "rarity": "uncommon"
+    "rarity": "rare"
   },
   {
     "id": "claw_maul",
@@ -2438,22 +2431,22 @@ const RAW_MODS: Mod[] = [
     "category": "companion_weapon",
     "subCategory": "beast_weapon",
     "stats": {
-      "damage": 30.0
+      "damage": 30
     },
     "description": "+330% Melee Damage",
-    "rarity": "common"
+    "rarity": "uncommon"
   },
   {
     "id": "claw_shred",
     "name": "Shred (Claws)",
-    "polarity": "naramon",
+    "polarity": "madurai",
     "drain": 6,
     "maxRank": 5,
     "category": "companion_weapon",
     "subCategory": "beast_weapon",
     "stats": {
       "punchThrough": 0.2,
-      "fireRate": 5.0
+      "fireRate": 5
     },
     "description": "+30% Fire Rate (x2 for Bows)\\n+1.2 Punch Through",
     "rarity": "rare"
@@ -2500,8 +2493,6 @@ const RAW_MODS: Mod[] = [
     "description": "+90% Cold Damage",
     "rarity": "uncommon"
   },
-
-
   {
     "id": "claw_fury",
     "name": "Fury (Claws)",
@@ -2511,10 +2502,10 @@ const RAW_MODS: Mod[] = [
     "category": "companion_weapon",
     "subCategory": "beast_weapon",
     "stats": {
-      "attackSpeed": 5.0
+      "attackSpeed": 5
     },
     "description": "+30% Attack Speed",
-    "rarity": "common"
+    "rarity": "uncommon"
   },
   {
     "id": "claw_magnetic",
@@ -2531,7 +2522,6 @@ const RAW_MODS: Mod[] = [
     "description": "+60% Magnetic\\n+40% Status Duration",
     "rarity": "rare"
   },
-
   {
     "id": "bloodthirst",
     "name": "Bloodthirst",
@@ -2544,7 +2534,7 @@ const RAW_MODS: Mod[] = [
       "healthPerSlashStack": 25
     },
     "description": "Health stolen per stack of Slash Damage on the target (+25 per rank, max 100)",
-    "rarity": "rare"
+    "rarity": "common"
   },
   {
     "id": "cull_the_weak",
@@ -2557,10 +2547,10 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "damagePerStatus": 10,
       "nonCritDamage": 40,
-      "damage": 40.0
+      "damage": 40
     },
     "description": "+10% Melee Damage per Status type on the target, +40% Damage on non-Critical Hits per rank",
-    "rarity": "rare"
+    "rarity": "uncommon"
   },
   {
     "id": "precision_conditioning",
@@ -2585,14 +2575,12 @@ const RAW_MODS: Mod[] = [
     "category": "companion_weapon",
     "subCategory": "beast_weapon",
     "stats": {
-      "damage": 15,
-      "criticalMultiplier": 20,
-      "radiation": 15.0
+      "radiation": 15,
+      "criticalMultiplier": 20
     },
-    "description": "+15% Damage and +20% Critical Damage per rank",
-    "rarity": "uncommon"
+    "description": "+60% Radiation\n+80% Critical Damage",
+    "rarity": "rare"
   },
-
   {
     "id": "augment_excalibur_radiant_finish",
     "name": "Radiant Finish",
@@ -2833,7 +2821,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare",
     "warframeId": "saryn"
   },
-
   {
     "id": "augment_saryn_venom_dose",
     "name": "Venom Dose",
@@ -3008,18 +2995,17 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare",
     "warframeId": "trinity"
   },
-
   {
     "id": "augment_trinity_pool_of_life",
     "name": "Pool of Life",
-    "polarity": "naramon",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
     "subCategory": "",
     "stats": {
       "healthOrbChance": 25,
-      "energy": 25.0
+      "energy": 25
     },
     "description": "Well of Life Augment: On death, marked enemies will drop 4 Health Orbs with a 100% chance of dropping an Energy Orb.",
     "rarity": "rare",
@@ -3138,14 +3124,14 @@ const RAW_MODS: Mod[] = [
   {
     "id": "augment_khora_venari_bodyguard",
     "name": "Venari Bodyguard",
-    "polarity": "vazarin",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
     "subCategory": "",
     "stats": {
       "deathPrevention": 100,
-      "duration": 1.0
+      "duration": 1
     },
     "description": "Venari Augment: Venari dies in Khora's place. Recovery timer increased to 150s. Killing enemies decreases the timer by 4s.",
     "rarity": "rare",
@@ -3298,7 +3284,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "augment_octavia_conductor",
     "name": "Conductor",
-    "polarity": "exilus",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
@@ -3346,7 +3332,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "augment_ember_exothermic",
     "name": "Exothermic",
-    "polarity": "naramon",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
@@ -3455,7 +3441,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare",
     "warframeId": "loki"
   },
-
   {
     "id": "augment_loki_irradiating_disarm",
     "name": "Irradiating Disarm",
@@ -3630,7 +3615,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "augment_frost_cold_front",
     "name": "Cold Front",
-    "polarity": "exilus",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
@@ -3784,7 +3769,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "augment_nekros_shield_of_shadows",
     "name": "Shield of Shadows",
-    "polarity": "vazarin",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
@@ -3797,7 +3782,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare",
     "warframeId": "nekros"
   },
-
   {
     "id": "augment_hydroid_tidal_impunity",
     "name": "Tidal Impunity",
@@ -3817,7 +3801,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "augment_hydroid_curative_undertow",
     "name": "Curative Undertow",
-    "polarity": "vazarin",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
@@ -4101,7 +4085,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "augment_atlas_path_of_statues",
     "name": "Path of Statues",
-    "polarity": "naramon",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
@@ -4261,7 +4245,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare",
     "warframeId": "nezha"
   },
-
   {
     "id": "augment_inaros_elemental_sandstorm",
     "name": "Elemental Sandstorm",
@@ -4281,7 +4264,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "augment_inaros_negation_swarm",
     "name": "Negation Swarm",
-    "polarity": "vazarin",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
@@ -4297,7 +4280,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "augment_inaros_desiccation_curse",
     "name": "Desiccation's Curse",
-    "polarity": "naramon",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
@@ -4401,8 +4384,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare",
     "warframeId": "hildryn"
   },
-
-
   {
     "id": "augment_garuda_blood_forge",
     "name": "Blood Forge",
@@ -4418,18 +4399,17 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare",
     "warframeId": "garuda"
   },
-
   {
     "id": "augment_garuda_dread_ward",
     "name": "Dread Ward",
-    "polarity": "vazarin",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
     "subCategory": "weapon",
     "stats": {
       "invulnerability": 2,
-      "duration": 2.0
+      "duration": 2
     },
     "description": "Dread Mirror Augment: Become unkillable for 8s when Dread Mirror kills a target by ripping its life force.",
     "rarity": "rare",
@@ -4520,7 +4500,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "augment_grendel_gourmand",
     "name": "Gourmand",
-    "polarity": "vazarin",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
@@ -4532,7 +4512,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare",
     "warframeId": "grendel"
   },
-
   {
     "id": "augment_yareli_merulina_guardian",
     "name": "Merulina Guardian",
@@ -4553,7 +4532,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "augment_yareli_surging_blades",
     "name": "Surging Blades",
-    "polarity": "naramon",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
@@ -4566,10 +4545,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare",
     "warframeId": "yareli"
   },
-
-
-
-
   {
     "id": "augment_wisp_critical_surge",
     "name": "Critical Surge",
@@ -4587,12 +4562,10 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare",
     "warframeId": "wisp"
   },
-
-
   {
     "id": "augment_universal_health_conversion",
     "name": "Health Conversion",
-    "polarity": "unairu",
+    "polarity": "vazarin",
     "drain": 10,
     "maxRank": 5,
     "category": "warframe",
@@ -4625,14 +4598,13 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 5,
-    "category": "augment",
+    "category": "melee",
     "subCategory": "",
     "stats": {
       "armorReduction": 5
     },
     "description": "Impact Damage reduces enemy Armor by 6.",
-    "rarity": "common",
-    "warframeId": "valkyr"
+    "rarity": "common"
   },
   {
     "id": "augur_message",
@@ -4752,7 +4724,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "rifle",
+    "category": "primary",
     "subCategory": "",
     "stats": {
       "slashOnCrit": 5
@@ -4766,13 +4738,12 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "warframe",
+    "category": "primary",
     "subCategory": "",
     "stats": {
-      "radarOnBleed": 10,
-      "statusDuration": 15.0
+      "statusDuration": 15
     },
-    "description": "+10m Enemy Radar vs bleeding per rank",
+    "description": "+90% Status Duration",
     "rarity": "rare"
   },
   {
@@ -4843,13 +4814,11 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "shieldRechargeLink": 15,
-      "shield": 15.0
+      "shieldRecharge": 15
     },
-    "description": "+15% Shield Recharge when Kubrow attacks per rank",
+    "description": "+90% Shield Recharge",
     "rarity": "rare"
   },
-
   {
     "id": "melee_prowess_sentinel",
     "name": "Assault Mode",
@@ -4879,10 +4848,6 @@ const RAW_MODS: Mod[] = [
     "description": "Dethcube drops an Energy Orb after assisting in 10 kills.",
     "rarity": "rare"
   },
-
-
-
-
   {
     "id": "scan_aquatic",
     "name": "Scan Aquatic Lifeforms",
@@ -4956,7 +4921,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "energyToShields": 40
     },
-    "description": "6-piece: Spent Energy becomes Shields (40%)",
+    "description": "40% of Energy spent on abilities per piece is converted to Shields (40–240%).",
     "rarity": "legendary"
   },
   {
@@ -4970,7 +4935,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "critPerCombo": 15
     },
-    "description": "6-piece: +15% Crit Chance per Combo Multiplier",
+    "description": "+10% Melee Critical Chance per Combo Multiplier per piece (10–60%).",
     "rarity": "legendary"
   },
   {
@@ -4984,7 +4949,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "companionDamageToStatus": 150
     },
-    "description": "6-piece: Companion deals +150% damage to status enemies",
+    "description": "+25% Companion Damage per piece on enemies affected by Slash Status (25–150%).",
     "rarity": "legendary"
   },
   {
@@ -4998,7 +4963,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "markExplosion": 150
     },
-    "description": "4-piece: Marked enemies explode for 150% damage",
+    "description": "Companion marks a target every 60/45/30/15s for 3/6/9/12s; killing it spreads Status Effects within 7.5/15/22.5/30m.",
     "rarity": "legendary"
   },
   {
@@ -5012,7 +4977,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "pistolReloadSpeed": 15
     },
-    "description": "4-piece: +15% Pistol Reload Speed, Companion reloads 5%/s",
+    "description": "Holstering Primary and Secondary weapons reloads 5% of Magazine/s per piece (5–20%/s).",
     "rarity": "legendary"
   },
   {
@@ -5026,7 +4991,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "markDuration": 10
     },
-    "description": "4-piece: Kavat marks for 10s, +60% damage to marked",
+    "description": "Kavat marks a 3m zone every 60/45/30/15s that inflicts 50/100/150/200 Damage/s to enemies.",
     "rarity": "legendary"
   },
   {
@@ -5040,7 +5005,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "critEnhanceChance": 30
     },
-    "description": "6-piece: 30% chance to enhance primary crit hits",
+    "description": "5% chance per piece to enhance Critical Hits from Primary weapons (5–30%).",
     "rarity": "legendary"
   },
   {
@@ -5479,48 +5444,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
-    "id": "evolution_incarnon_rifle",
-    "name": "Incarnon Rifle Evolution",
-    "polarity": "zenurik",
-    "drain": 0,
-    "maxRank": 3,
-    "category": "evolution",
-    "subCategory": "",
-    "stats": {
-      "evolutionBonus": 25
-    },
-    "description": "Incarnon weapon evolution bonuses",
-    "rarity": "legendary"
-  },
-  {
-    "id": "evolution_incarnon_pistol",
-    "name": "Incarnon Pistol Evolution",
-    "polarity": "zenurik",
-    "drain": 0,
-    "maxRank": 3,
-    "category": "evolution",
-    "subCategory": "",
-    "stats": {
-      "evolutionBonus": 25
-    },
-    "description": "Incarnon weapon evolution bonuses",
-    "rarity": "legendary"
-  },
-  {
-    "id": "evolution_incarnon_melee",
-    "name": "Incarnon Melee Evolution",
-    "polarity": "zenurik",
-    "drain": 0,
-    "maxRank": 3,
-    "category": "evolution",
-    "subCategory": "",
-    "stats": {
-      "evolutionBonus": 25
-    },
-    "description": "Incarnon weapon evolution bonuses",
-    "rarity": "legendary"
-  },
-  {
     "id": "adhesive_blast",
     "name": "Adhesive Blast",
     "polarity": "madurai",
@@ -5589,7 +5512,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "amalgam_argonak_metal_auger",
     "name": "Amalgam Argonak Metal Auger",
-    "polarity": "naramon",
+    "polarity": "madurai",
     "drain": 6,
     "maxRank": 5,
     "category": "augment",
@@ -5619,7 +5542,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "amalgam_javlok_magazine_warp",
     "name": "Amalgam Javlok Magazine Warp",
-    "polarity": "naramon",
+    "polarity": "madurai",
     "drain": 6,
     "maxRank": 5,
     "category": "augment",
@@ -5690,7 +5613,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "bane_of_corpus",
-    "name": "Bane Of Corpus",
+    "name": "Bane of Corpus",
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
@@ -5704,7 +5627,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "bane_of_grineer",
-    "name": "Bane Of Grineer",
+    "name": "Bane of Grineer",
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
@@ -5718,7 +5641,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "bane_of_infested",
-    "name": "Bane Of Infested",
+    "name": "Bane of Infested",
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
@@ -5732,7 +5655,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "bane_of_orokin",
-    "name": "Bane Of Orokin",
+    "name": "Bane of Orokin",
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
@@ -5746,7 +5669,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "bane_of_the_murmur",
-    "name": "Bane Of The Murmur",
+    "name": "Bane of The Murmur",
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
@@ -6259,7 +6182,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {
       "accuracy": 15
@@ -6540,12 +6463,12 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 3,
-    "category": "primary",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
-      "criticalChance": 25.0,
-      "statusChance": 25.0,
-      "duration": 1.0
+      "criticalChance": 25,
+      "statusChance": 25,
+      "duration": 1
     },
     "description": "100% Critical and Status Chance for 4s after landing from a Double or Bullet Jump.",
     "rarity": "rare"
@@ -6726,7 +6649,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "primed_bane_of_corpus",
-    "name": "Primed Bane Of Corpus",
+    "name": "Primed Bane of Corpus",
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
@@ -6740,7 +6663,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "primed_bane_of_grineer",
-    "name": "Primed Bane Of Grineer",
+    "name": "Primed Bane of Grineer",
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
@@ -6754,7 +6677,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "primed_bane_of_infested",
-    "name": "Primed Bane Of Infested",
+    "name": "Primed Bane of Infested",
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
@@ -6768,7 +6691,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "primed_bane_of_orokin",
-    "name": "Primed Bane Of Orokin",
+    "name": "Primed Bane of Orokin",
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
@@ -6782,7 +6705,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "primed_bane_of_the_murmur",
-    "name": "Primed Bane Of The Murmur",
+    "name": "Primed Bane of The Murmur",
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
@@ -6945,7 +6868,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 2.5,
@@ -7363,7 +7286,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "primary",
+    "category": "conclave",
     "subCategory": "weapon",
     "stats": {
       "magazine": -15
@@ -7862,20 +7785,6 @@ const RAW_MODS: Mod[] = [
       "health": -6.25
     },
     "description": "On Kill:\\n-100% Shield Recharge Delay for 10s, -25% from Health Orbs",
-    "rarity": "rare"
-  },
-  {
-    "id": "cannonade",
-    "name": "Cannonade",
-    "polarity": "madurai",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "secondary",
-    "subCategory": "",
-    "stats": {
-      "explosionChance": 7.5
-    },
-    "description": "+30% Chance to Explode (Use with Caution)",
     "rarity": "rare"
   },
   {
@@ -8698,7 +8607,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 10,
     "maxRank": 3,
-    "category": "secondary",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "duration": 2.5,
@@ -8868,20 +8777,6 @@ const RAW_MODS: Mod[] = [
       "duration": 0.5
     },
     "description": "On Headshot:\\n40% chance for Infinite Ammo for 2s",
-    "rarity": "rare"
-  },
-  {
-    "id": "soaring_truth",
-    "name": "Soaring Truth",
-    "polarity": "vazarin",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "secondary",
-    "subCategory": "",
-    "stats": {
-      "criticalChance": 50
-    },
-    "description": "+200% Critical Chance, +1 'Purity'",
     "rarity": "rare"
   },
   {
@@ -9064,7 +8959,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "winds_of_purity",
-    "name": "Winds Of Purity",
+    "name": "Winds of Purity",
     "polarity": "vazarin",
     "drain": 4,
     "maxRank": 3,
@@ -9072,7 +8967,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "weapon",
     "stats": {
       "lifeSteal": 5,
-      "syndicatePower": 1.0
+      "syndicatePower": 1
     },
     "description": "+20% Life Steal, +1 'Purity'",
     "rarity": "rare"
@@ -9419,20 +9314,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "common"
   },
   {
-    "id": "air_martial",
-    "name": "Air Martial",
-    "polarity": "madurai",
-    "drain": 10,
-    "maxRank": 3,
-    "category": "melee",
-    "subCategory": "",
-    "stats": {
-      "channelingDamage": -25
-    },
-    "description": "With Melee equipped, lock onto targets within +5m while Airborne, -100% Channeling Damage",
-    "rarity": "rare"
-  },
-  {
     "id": "amalgam_furax_body_count",
     "name": "Amalgam Furax Body Count",
     "polarity": "naramon",
@@ -9499,11 +9380,11 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "stance",
-    "subCategory": "weapon",
+    "category": "melee",
+    "subCategory": "",
     "stats": {
-      "damage": 15.0,
-      "slash": 5.0
+      "damage": 15,
+      "slash": 5
     },
     "description": "+90% Melee Damage\\n+30% Slash",
     "rarity": "rare"
@@ -9569,7 +9450,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "blade_of_truth",
-    "name": "Blade Of Truth",
+    "name": "Blade of Truth",
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
@@ -9577,7 +9458,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "weapon",
     "stats": {
       "damage": 25,
-      "syndicatePower": 1.0
+      "syndicatePower": 1
     },
     "description": "+100% Melee Damage, +1 'Truth'",
     "rarity": "rare"
@@ -9603,11 +9484,11 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "stance",
-    "subCategory": "weapon",
+    "category": "melee",
+    "subCategory": "",
     "stats": {
-      "damage": 15.0,
-      "statusDamage": 10.0
+      "damage": 15,
+      "statusDamage": 10
     },
     "description": "+90% Melee Damage\\n+60% Status Damage",
     "rarity": "rare"
@@ -9750,10 +9631,10 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "melee",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
-      "damage": 5.0
+      "damage": 5
     },
     "description": "20% of Damage converted into <DT_IMPACT_COLOR>Impact",
     "rarity": "uncommon"
@@ -9993,26 +9874,12 @@ const RAW_MODS: Mod[] = [
     "rarity": "rare"
   },
   {
-    "id": "harrowed_hook",
-    "name": "Harrowed Hook",
-    "polarity": "naramon",
-    "drain": 10,
-    "maxRank": 3,
-    "category": "melee",
-    "subCategory": "",
-    "stats": {
-      "duration": 0.5
-    },
-    "description": "With Melee Weapon equipped, unchanneled hits slow target and disable jump for +2s.",
-    "rarity": "rare"
-  },
-  {
     "id": "heartseeker",
     "name": "Heartseeker",
     "polarity": "madurai",
     "drain": 10,
     "maxRank": 3,
-    "category": "melee",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "damageBlock": -12.5,
@@ -10152,7 +10019,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "mark_of_the_beast",
-    "name": "Mark Of The Beast",
+    "name": "Mark of the Beast",
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 5,
@@ -10160,8 +10027,8 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "statusChance": 20,
-      "duration": 4.0,
-      "criticalChance": 20.0
+      "duration": 4,
+      "criticalChance": 20
     },
     "description": "On 6 Melee Kills within 6s:\\n\\n+120% Status and Critical Chance for Secondary Weapon for 24s",
     "rarity": "rare"
@@ -10286,11 +10153,11 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "stance",
-    "subCategory": "weapon",
+    "category": "melee",
+    "subCategory": "",
     "stats": {
-      "damage": 15.0,
-      "statusChance": 10.0
+      "damage": 15,
+      "statusChance": 10
     },
     "description": "+90% Melee Damage\\n+60% Status Chance",
     "rarity": "rare"
@@ -11313,10 +11180,10 @@ const RAW_MODS: Mod[] = [
     "polarity": "penjaga",
     "drain": 6,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "companion",
     "subCategory": "",
     "stats": {
-      "damage": 60.0,
+      "damage": 60,
       "duration": 0.75
     },
     "description": "When Ghost invisibility is broken, Shade's owner is granted +240% Weapon Damage for 3s.",
@@ -11325,7 +11192,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "anchored_glide",
     "name": "Anchored Glide",
-    "polarity": "exilus",
+    "polarity": "zenurik",
     "drain": 2,
     "maxRank": 5,
     "category": "augment",
@@ -11437,7 +11304,7 @@ const RAW_MODS: Mod[] = [
       "duration": 0.909091
     },
     "description": "+30% Ability Strength\\nRestoring health with abilities grants +30% Ability Strength for 10s.",
-    "rarity": "rare"
+    "rarity": "legendary"
   },
   {
     "id": "archon_stretch",
@@ -11453,7 +11320,7 @@ const RAW_MODS: Mod[] = [
       "energyOnKill": 0.181818
     },
     "description": "Abilities that deal <DT_ELECTRICITY_COLOR>Electricity Damage restore +2 Energy/s over 5s.",
-    "rarity": "rare"
+    "rarity": "legendary"
   },
   {
     "id": "archon_vitality",
@@ -11531,7 +11398,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "axios_javelineers",
     "name": "Axios Javelineers",
-    "polarity": "naramon",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
@@ -11554,10 +11421,11 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "impact": 10,
-      "bulletJump": 10.0
+      "bulletJump": 3,
+      "aimGlideDuration": 3,
+      "impact": 10
     },
-    "description": "+18% to Parkour Velocity, +18% Aim Glide/Wall Latch Duration, +60% <DT_IMPACT_COLOR>Impact on Bullet Jump",
+    "description": "+18% to Bullet Jump, +18% Aim Glide/Wall Latch Duration, +60% <DT_IMPACT_COLOR>Impact on Bullet Jump",
     "rarity": "uncommon"
   },
   {
@@ -11660,7 +11528,8 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "duration": 0.3325
+      "maxShieldMultiplier": 0.2,
+      "shieldGateDuration": 0.3325
     },
     "description": "x0.20 Max Shield Capacity, 1.33s Full Shield Gate immunity duration",
     "rarity": "rare"
@@ -11951,7 +11820,7 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "energyMax": 1.67,
+      "energyMax": 1.666667,
       "parkourVelocity": 2,
       "energy": 1.666667
     },
@@ -12043,10 +11912,11 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "heat": 25,
-      "bulletJump": 25.0
+      "bulletJump": 2.2,
+      "aimGlideDuration": 2.2,
+      "heat": 25
     },
-    "description": "+24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_FIRE_COLOR>Heat on Bullet Jump",
+    "description": "+24.2% to Bullet Jump, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_FIRE_COLOR>Heat on Bullet Jump",
     "rarity": "rare"
   },
   {
@@ -12301,10 +12171,11 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "cold": 25,
-      "bulletJump": 25.0
+      "bulletJump": 2.2,
+      "aimGlideDuration": 2.2,
+      "cold": 25
     },
-    "description": "+24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_FREEZE_COLOR>Cold on Bullet Jump",
+    "description": "+24.2% to Bullet Jump, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_FREEZE_COLOR>Cold on Bullet Jump",
     "rarity": "rare"
   },
   {
@@ -12340,7 +12211,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "intrepid_stand",
     "name": "Intrepid Stand",
-    "polarity": "vazarin",
+    "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
     "category": "augment",
@@ -12360,10 +12231,10 @@ const RAW_MODS: Mod[] = [
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
-    "category": "warframe",
+    "category": "parazon",
     "subCategory": "",
     "stats": {
-      "duration": 2.0
+      "duration": 2
     },
     "description": "+8s to Hacking",
     "rarity": "common"
@@ -12498,10 +12369,11 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "electricity": 25,
-      "bulletJump": 25.0
+      "bulletJump": 2.2,
+      "aimGlideDuration": 2.2,
+      "electricity": 25
     },
-    "description": "+24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_ELECTRICITY_COLOR>Electricity on Bullet Jump",
+    "description": "+24.2% to Bullet Jump, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_ELECTRICITY_COLOR>Electricity on Bullet Jump",
     "rarity": "rare"
   },
   {
@@ -12698,7 +12570,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 10,
     "maxRank": 5,
-    "category": "warframe",
+    "category": "conclave",
     "subCategory": "",
     "stats": {
       "overshieldConversion": 16.666667,
@@ -12777,10 +12649,11 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "puncture": 10,
-      "bulletJump": 10.0
+      "bulletJump": 3,
+      "aimGlideDuration": 3,
+      "puncture": 10
     },
-    "description": "+18% to Parkour Velocity, +18% Aim Glide/Wall Latch Duration, +60% <DT_PUNCTURE_COLOR>Puncture on Bullet Jump",
+    "description": "+18% to Bullet Jump, +18% Aim Glide/Wall Latch Duration, +60% <DT_PUNCTURE_COLOR>Puncture on Bullet Jump",
     "rarity": "uncommon"
   },
   {
@@ -12812,7 +12685,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "power_of_three",
-    "name": "Power Of Three",
+    "name": "Power of Three",
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
@@ -12842,7 +12715,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "prey_of_dynar",
-    "name": "Prey Of Dynar",
+    "name": "Prey of Dynar",
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
@@ -12852,7 +12725,7 @@ const RAW_MODS: Mod[] = [
       "damageVulnerability": 12.5,
       "spreadRadiusBonus": 37.5
     },
-    "description": "Shroud of Dynar Augment: Increase an enemy\u2019s Damage Vulnerability by 50%. Using Fang of Raksh on that enemy increases its spread radius by 150%.",
+    "description": "Shroud of Dynar Augment: Increase an enemy’s Damage Vulnerability by 50%. Using Fang of Raksh on that enemy increases its spread radius by 150%.",
     "rarity": "rare",
     "warframeId": "voruna"
   },
@@ -13128,10 +13001,11 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "slash": 10,
-      "bulletJump": 10.0
+      "bulletJump": 3,
+      "aimGlideDuration": 3,
+      "slash": 10
     },
-    "description": "+18% to Parkour Velocity, +18% Aim Glide/Wall Latch Duration, +60% <DT_SLASH_COLOR>Slash on Bullet Jump",
+    "description": "+18% to Bullet Jump, +18% Aim Glide/Wall Latch Duration, +60% <DT_SLASH_COLOR>Slash on Bullet Jump",
     "rarity": "uncommon"
   },
   {
@@ -13149,20 +13023,6 @@ const RAW_MODS: Mod[] = [
     "description": "Dispensary Augment: Dispensary also creates pick ups that heal companions for 20% of their maximum health and reduce their incapacitation timer by 12 sec.",
     "rarity": "rare",
     "warframeId": "protea"
-  },
-  {
-    "id": "resilient_focus",
-    "name": "Resilient Focus",
-    "polarity": "vazarin",
-    "drain": 4,
-    "maxRank": 3,
-    "category": "warframe",
-    "subCategory": "",
-    "stats": {
-      "stunDamageResistance": 5
-    },
-    "description": "+20% Damage Resistance on Stun",
-    "rarity": "rare"
   },
   {
     "id": "retribution",
@@ -13499,7 +13359,8 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "range": 3.0
+      "enemyRadar": 3,
+      "aimGlideDuration": 2
     },
     "description": "+18m Enemy Radar, +12% Aim Glide/Wall Latch Duration",
     "rarity": "rare"
@@ -13571,8 +13432,8 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "duration": 1.0,
-      "heavyAttackEfficiency": 5.0
+      "comboDuration": 1,
+      "heavyAttackSpeed": 5
     },
     "description": "Squad receives +30% Heavy Attack Wind Up Speed and +6s Melee Combo Duration",
     "rarity": "rare"
@@ -13647,10 +13508,10 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
-      "criticalChance": 30.0,
+      "criticalChance": 50,
       "duration": 3.75
     },
-    "description": "Virulence Augment: Hitting 4 enemies with Virulence grants 120% Primary Weapon Critical Chance for 15s.",
+    "description": "Virulence Augment: Hitting 4 enemies with Virulence grants 200% Primary Weapon Critical Chance for 15s.",
     "rarity": "rare",
     "warframeId": "nidus"
   },
@@ -13797,10 +13658,11 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "toxin": 25,
-      "bulletJump": 25.0
+      "bulletJump": 2.2,
+      "aimGlideDuration": 2.2,
+      "toxin": 25
     },
-    "description": "+24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_POISON_COLOR>Toxin on Bullet Jump",
+    "description": "+24.2% to Bullet Jump, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_POISON_COLOR>Toxin on Bullet Jump",
     "rarity": "rare"
   },
   {
@@ -14050,7 +13912,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "wrath_of_ukko",
-    "name": "Wrath Of Ukko",
+    "name": "Wrath of Ukko",
     "polarity": "zenurik",
     "drain": 6,
     "maxRank": 3,
@@ -14245,7 +14107,8 @@ const RAW_MODS: Mod[] = [
     "category": "warframe",
     "subCategory": "",
     "stats": {
-      "parkourVelocity": 5.0
+      "parkourVelocity": 5,
+      "aimGlideDuration": 5
     },
     "description": "+20% to Parkour Velocity, +20% Aim Glide/Wall Latch Duration",
     "rarity": "uncommon"
@@ -14271,10 +14134,10 @@ const RAW_MODS: Mod[] = [
     "polarity": "vazarin",
     "drain": 2,
     "maxRank": 5,
-    "category": "warframe",
+    "category": "melee",
     "subCategory": "",
     "stats": {
-      "finisherChance": 16.0
+      "finisherChance": 16
     },
     "description": "+96% chance to open enemies to Finisher Attacks after Warframe blocks Melee",
     "rarity": "common"
@@ -14453,7 +14316,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "tek_collateral_r3",
     "name": "Tek Collateral",
-    "polarity": "naramon",
+    "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
     "category": "warframe",
@@ -16416,7 +16279,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 5,
-    "category": "primary",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "zoom": -10
@@ -16450,7 +16313,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "byteryte",
-    "name": "Byteryte",
+    "name": "ByteRyte",
     "polarity": "universal",
     "drain": 0,
     "maxRank": 3,
@@ -16638,7 +16501,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 5,
-    "category": "melee",
+    "category": "archmelee",
     "subCategory": "",
     "stats": {
       "electricity": 20
@@ -16708,7 +16571,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 3,
-    "category": "primary",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "recoil": -15
@@ -16802,11 +16665,11 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "shotgun",
+    "category": "archmelee",
     "subCategory": "",
     "stats": {
       "criticalChance": 15,
-      "radiation": 15.0
+      "radiation": 15
     },
     "description": "+60% <DT_RADIATION_COLOR>Radiation, +60% Critical Chance",
     "rarity": "rare"
@@ -16844,7 +16707,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "shotgun",
+    "category": "archmelee",
     "subCategory": "",
     "stats": {
       "cold": 15,
@@ -17289,7 +17152,6 @@ const RAW_MODS: Mod[] = [
     "description": "Reduces damage by 75% while hacking",
     "rarity": "uncommon"
   },
-
   {
     "id": "flak_shot",
     "name": "Flak Shot",
@@ -17993,7 +17855,6 @@ const RAW_MODS: Mod[] = [
     "description": "Grinding builds up a charge that is released when landing the trick, dealing 400 <DT_ELECTRICITY_COLOR>Electricity Damage to enemies within 4m.",
     "rarity": "uncommon"
   },
-
   {
     "id": "laser_sight",
     "name": "Laser Sight",
@@ -18106,7 +17967,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 6,
     "maxRank": 3,
-    "category": "primary",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "holsterRate": 5
@@ -18289,7 +18150,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "shotgun",
+    "category": "archmelee",
     "subCategory": "",
     "stats": {
       "magnetic": 15,
@@ -19504,7 +19365,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 10,
-    "category": "primary",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "recoil": -7.7273
@@ -19999,7 +19860,6 @@ const RAW_MODS: Mod[] = [
     "description": "",
     "rarity": "common"
   },
-
   {
     "id": "scarlet_hurricane",
     "name": "Scarlet Hurricane",
@@ -20275,10 +20135,10 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
-    "category": "primary",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
-      "noiseReduction": 25.0
+      "noiseReduction": 25
     },
     "description": "Reduces the chance an enemy will hear gunfire by 100%.",
     "rarity": "uncommon"
@@ -20339,7 +20199,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "primary",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
       "sprintSpeed": 5
@@ -20353,11 +20213,11 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 3,
-    "category": "primary",
+    "category": "shotgun",
     "subCategory": "",
     "stats": {
-      "accuracy": -10.0,
-      "duration": 2.0
+      "accuracy": -10,
+      "duration": 2
     },
     "description": "On Equip: \\n<LOWER_IS_BETTER>-40% Weapon Recoil and +40% Accuracy for 8s",
     "rarity": "uncommon"
@@ -20748,7 +20608,6 @@ const RAW_MODS: Mod[] = [
     "description": "Powerful arcs with frenzied combo.",
     "rarity": "rare"
   },
-
   {
     "id": "trojan_tracker",
     "name": "Trojan Tracker",
@@ -20813,7 +20672,6 @@ const RAW_MODS: Mod[] = [
     "description": "100% chance to summon an Unairu Wisp per enemy hit by Caustic Strike. The Wisp will seek out the nearest ally within Affinity Range, increasing Operator damage by 100% for 20s.",
     "rarity": "rare"
   },
-
   {
     "id": "untraceable",
     "name": "Untraceable",
@@ -21455,7 +21313,7 @@ const RAW_MODS: Mod[] = [
     "polarity": "naramon",
     "drain": 4,
     "maxRank": 5,
-    "category": "rifle",
+    "category": "primary",
     "stats": {
       "punchThrough": 0.25
     },
@@ -21558,7 +21416,7 @@ const RAW_MODS: Mod[] = [
   },
   {
     "id": "kaal_zidi",
-    "name": "Kaal-Zidi",
+    "name": "Kaal-zidi",
     "polarity": "universal",
     "drain": 0,
     "maxRank": 5,
@@ -21762,21 +21620,6 @@ const RAW_MODS: Mod[] = [
     "warframeId": "hydroid"
   },
   {
-    "id": "divebomb_vortex",
-    "name": "Divebomb Vortex",
-    "polarity": "zenurik",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "augment",
-    "subCategory": "",
-    "stats": {
-      "range": 3.0
-    },
-    "description": "Dive Bomb Augment - Enemies within 12 meters of the point of impact are dragged into it.",
-    "rarity": "rare",
-    "warframeId": "zephyr"
-  },
-  {
     "id": "enduring_bastille",
     "name": "Enduring Bastille",
     "polarity": "zenurik",
@@ -21806,37 +21649,6 @@ const RAW_MODS: Mod[] = [
     "description": "Teleport Augment: Teleport will perform a Finisher on the target, dealing 200% Extra Damage. 50% of Energy cost is refunded on a kill.",
     "rarity": "rare",
     "warframeId": "ash"
-  },
-  {
-    "id": "iron_vault",
-    "name": "Iron Vault",
-    "polarity": "zenurik",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "augment",
-    "subCategory": "",
-    "stats": {
-      "damage": 75.0,
-      "range": 3.75
-    },
-    "description": "Iron Jab Augment: Aiming Iron Jab at the ground launches Wukong into the air. Executing a slam attack increases range by 15m and applies 300% extra damage.",
-    "rarity": "rare",
-    "warframeId": "wukong"
-  },
-  {
-    "id": "shield_transference",
-    "name": "Shield Transference",
-    "polarity": "zenurik",
-    "drain": 6,
-    "maxRank": 3,
-    "category": "augment",
-    "subCategory": "",
-    "stats": {
-      "shield": 12.5
-    },
-    "description": "Shield Polarize Augment - Mag gains 50% overshields from depleted enemy shields.",
-    "rarity": "rare",
-    "warframeId": "mag"
   }
 ];
 

@@ -31,13 +31,13 @@ export const SET_BONUS_DEFINITIONS: Record<
   set_bonus_amar: {
     label: "Amar Set Bonus",
     pieces: 3,
-    description: "3-piece: Teleport to a target within 10m on using a Heavy Attack.",
+    description: "Teleport to a target within 10m per piece on using a Heavy Attack: 1/2/3 pieces = 10/20/30m.",
   },
   set_bonus_aero: {
     label: "Aero Set Bonus",
     pieces: 3,
     description:
-      "3-piece: Damage enemies while Aim Gliding and put up to 5 of them to Sleep for 3s on landing.",
+      "Damage enemies while Aim Gliding and put up to 5 of them to Sleep on landing for 3s per piece: 1/2/3 pieces = 3/6/9s.",
   },
   set_bonus_boreal: {
     label: "Boreal Set Bonus",
@@ -48,28 +48,28 @@ export const SET_BONUS_DEFINITIONS: Record<
     label: "Carnis Set Bonus",
     pieces: 3,
     description:
-      "3-piece: Killing an enemy with a Heavy Attack grants 10% Evasion and immunity to Status Effects for 2s.",
+      "Killing an enemy with a Heavy Attack grants 10% Evasion and immunity to Status Effects for 2s per piece: 1/2/3 pieces = 10/20/30% for 2/4/6s.",
   },
   set_bonus_jugulus: {
     label: "Jugulus Set Bonus",
     pieces: 3,
     description:
-      "3-piece: Slam attacks manifest Tendrils to lash enemies within 3m for 25 Puncture Damage (12s cooldown).",
+      "Slam attacks manifest Tendrils to lash enemies within 3/4/5m for 25/50/75 Puncture Damage (12/9/6s cooldown).",
   },
   set_bonus_motus: {
     label: "Motus Set Bonus",
     pieces: 3,
-    description: "3-piece: +33% chance to become immune to Knockdown effects while airborne.",
+    description: "+33% chance per piece to become immune to Knockdown effects while airborne: 1/2/3 pieces = 33/67/100%.",
   },
   set_bonus_nira: {
     label: "Nira Set Bonus",
     pieces: 3,
-    description: "3-piece: Increase damage from Slam Attacks by +100%.",
+    description: "Increase damage from Slam Attacks by +150% per piece: 1/2/3 pieces = +150%/+300%/+450%.",
   },
   set_bonus_proton: {
     label: "Proton Set Bonus",
     pieces: 3,
-    description: "3-piece: During a Wall Latch, gain +17% Damage Reduction.",
+    description: "During a Wall Latch, gain +17% Damage Reduction per piece: 1/2/3 pieces = 17/33/50%.",
   },
   set_bonus_sacrificial: {
     label: "Sacrificial Set Bonus",
@@ -80,12 +80,12 @@ export const SET_BONUS_DEFINITIONS: Record<
     label: "Saxum Set Bonus",
     pieces: 3,
     description:
-      "3-piece: Lifted enemies explode on death for 10% of their max Health as Impact Damage in a 4m radius (6s cooldown).",
+      "Lifted enemies explode on death for 10/20/30% of their max Health as Impact Damage in a 4/8/12m radius (6s cooldown).",
   },
   set_bonus_strain: {
     label: "Strain Set Bonus",
     pieces: 4,
-    description: "4-piece: Grows up to 2 Cysts over 6s that erupt every 25s to spawn a maggot.",
+    description: "Grows up to 2/4/6/8 Cysts over 6/12/18/24s that erupt every 25s to spawn a maggot.",
   },
   set_bonus_umbral: {
     label: "Umbral Set Bonus",

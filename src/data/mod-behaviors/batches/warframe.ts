@@ -170,8 +170,9 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("abilityEfficiency", "warframe_totals", "multiplicative_percent", "Boreal's Hatred: abilityEfficiency \u2014 +65% Shield Capacity\\n+15% Ability Efficiency"),
   ]),
   battering_maneuver: mod("battering_maneuver", [
-    line("bulletJump", "mod_panel", "multiplicative_percent", "Battering Maneuver: bulletJump \u2014 +18% to Parkour Velocity, +18% Aim Glide/Wall Latch Duration, +60% <DT_IMPACT_CO\u2026"),
-    line("impact", "mod_panel", "multiplicative_percent", "Battering Maneuver: impact \u2014 +18% to Parkour Velocity, +18% Aim Glide/Wall Latch Duration, +60% <DT_IMPACT_CO\u2026"),
+    line("bulletJump", "mod_panel", "multiplicative_percent", "wiki: Battering Maneuver — +18% to Bullet Jump"),
+    line("aimGlideDuration", "mod_panel", "multiplicative_percent", "wiki: Battering Maneuver — +18% Aim Glide/Wall Latch Duration"),
+    line("impact", "mod_panel", "multiplicative_percent", "wiki: Battering Maneuver — +60% Impact on Bullet Jump"),
   ]),
   blind_rage: mod("blind_rage", [
     line("abilityEfficiency", "warframe_totals", "multiplicative_percent", "Blind Rage: abilityEfficiency \u2014 +99% Ability Strength\\\\n-55% Ability Efficiency"),
@@ -192,7 +193,8 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Cataclysmic Gate: duration \u2014 Sol Gate Augment : Wisp and 2 spectral images cast a single blast of Sol Gate, l\u2026"),
   ]),
   catalyzing_shields: mod("catalyzing_shields", [
-    line("duration", "mod_panel", "multiplicative_percent", "Catalyzing Shields: duration \u2014 x0.20 Max Shield Capacity, 1.33s Full Shield Gate immunity duration"),
+    line("maxShieldMultiplier", "warframe_totals", "multiplicative_percent", "wiki: Catalyzing Shields — x0.20 Max Shield Capacity"),
+    line("shieldGateDuration", "mod_panel", "multiplicative_percent", "wiki: Catalyzing Shields — 1.33s Full Shield Gate Duration"),
   ]),
   champions_blessing: mod("champions_blessing", [
     line("duration", "mod_panel", "multiplicative_percent", "Champion's Blessing: duration \u2014 Blessing Augment: Gain Primary and Secondary Critical Chance for 30s for each pe\u2026"),
@@ -235,8 +237,8 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("abilityDuration", "mod_panel", "multiplicative_percent", "Endless Lullaby: abilityDuration \u2014 Lull Augment: Performing a finisher on or killing a sleeping enemy will retrigge\u2026"),
   ]),
   endurance_drift: mod("endurance_drift", [
-    line("energy", "warframe_totals", "multiplicative_percent", "wiki: Endurance Drift — +10% Energy Max"),
-    line("energyMax", "mod_panel", "multiplicative_percent", "wiki: Endurance Drift — energyMax catalog duplicate of energy (panel; avoid double-count)"),
+    line("energy", "mod_panel", "multiplicative_percent", "wiki: Endurance Drift — energy catalog duplicate of energyMax (panel; avoid double-count)"),
+    line("energyMax", "warframe_totals", "multiplicative_percent", "wiki: Endurance Drift — +10% Energy Max"),
     line("parkourVelocity", "warframe_totals", "multiplicative_percent", "wiki: Endurance Drift — +12% Parkour Velocity"),
   ]),
   enemy_sense_r3: mod("enemy_sense_r3", [
@@ -258,8 +260,9 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Final Act: duration \u2014 On Low Health:\\\\n+30% Ability Strength\\\\n+30% Casting Speed for 8s"),
   ]),
   firewalker: mod("firewalker", [
-    line("bulletJump", "mod_panel", "multiplicative_percent", "Firewalker: bulletJump \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_FIRE\u2026"),
-    line("heat", "mod_panel", "multiplicative_percent", "Firewalker: heat \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_FIRE\u2026"),
+    line("bulletJump", "mod_panel", "multiplicative_percent", "wiki: Firewalker — +24.2% to Bullet Jump"),
+    line("aimGlideDuration", "mod_panel", "multiplicative_percent", "wiki: Firewalker — +24.2% Aim Glide/Wall Latch Duration"),
+    line("heat", "mod_panel", "multiplicative_percent", "wiki: Firewalker — +275% Heat on Bullet Jump"),
   ]),
   flame_repellent_r3: mod("flame_repellent_r3", [
     line("heatDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Flame Repellent \u2014 10% Heat damage resistance per rank (60% R5), applied in the Heat resistance row"),
@@ -315,12 +318,12 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("energyOnHealthDamage", "mod_panel", "multiplicative_percent", "Hunter Adrenaline: energyOnHealthDamage \u2014 Convert +45% of Damage on Health to Energy. Without Shields, ally Overguard imit\u2026"),
   ]),
   hunter_track: mod("hunter_track", [
-    line("radarOnBleed", "mod_panel", "multiplicative_percent", "Hunter Track: radarOnBleed \u2014 +10m Enemy Radar vs bleeding per rank"),
-    line("statusDuration", "mod_panel", "multiplicative_percent", "Hunter Track: statusDuration \u2014 +10m Enemy Radar vs bleeding per rank"),
+    line("statusDuration", "weapon_dps", "multiplicative_percent", "wiki: Hunter Track — +90% Status Duration"),
   ]),
   ice_spring: mod("ice_spring", [
-    line("bulletJump", "mod_panel", "multiplicative_percent", "Ice Spring: bulletJump \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_FREE\u2026"),
-    line("cold", "mod_panel", "multiplicative_percent", "Ice Spring: cold \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_FREE\u2026"),
+    line("bulletJump", "mod_panel", "multiplicative_percent", "wiki: Ice Spring — +24.2% to Bullet Jump"),
+    line("aimGlideDuration", "mod_panel", "multiplicative_percent", "wiki: Ice Spring — +24.2% Aim Glide/Wall Latch Duration"),
+    line("cold", "mod_panel", "multiplicative_percent", "wiki: Ice Spring — +275% Cold on Bullet Jump"),
   ]),
   insulation_r3: mod("insulation_r3", [
     line("coldDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Insulation \u2014 10% Cold damage resistance per rank (60% R5), applied in the Cold resistance row"),
@@ -343,8 +346,9 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("hardLandingReduction", "mod_panel", "multiplicative_percent", "Kavat's Grace: hardLandingReduction \u2014 Falling is 100% less likely to result in a hard landing."),
   ]),
   lightning_dash: mod("lightning_dash", [
-    line("bulletJump", "mod_panel", "multiplicative_percent", "Lightning Dash: bulletJump \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_ELEC\u2026"),
-    line("electricity", "mod_panel", "multiplicative_percent", "Lightning Dash: electricity \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_ELEC\u2026"),
+    line("bulletJump", "mod_panel", "multiplicative_percent", "wiki: Lightning Dash — +24.2% to Bullet Jump"),
+    line("aimGlideDuration", "mod_panel", "multiplicative_percent", "wiki: Lightning Dash — +24.2% Aim Glide/Wall Latch Duration"),
+    line("electricity", "mod_panel", "multiplicative_percent", "wiki: Lightning Dash — +275% Electricity on Bullet Jump"),
   ]),
   lightning_rod_r3: mod("lightning_rod_r3", [
     line("electricityDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Lightning Rod \u2014 10% Electricity damage resistance per rank (60% R5), applied in the Electricity resistance row"),
@@ -374,7 +378,8 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Melee Guidance: duration \u2014 You lose <LOWER_IS_BETTER>6s Melee Combo Duration\\\\nSquadmates gain 12s Melee Co\u2026"),
   ]),
   mobilize_r3: mod("mobilize_r3", [
-    line("parkourVelocity", "warframe_totals", "multiplicative_percent", "Mobilize: parkourVelocity \u2014 +20% to Parkour Velocity, +20% Aim Glide/Wall Latch Duration"),
+    line("parkourVelocity", "warframe_totals", "multiplicative_percent", "wiki: Mobilize — +20% to Parkour Velocity"),
+    line("aimGlideDuration", "mod_panel", "multiplicative_percent", "wiki: Mobilize — +20% Aim Glide/Wall Latch Duration"),
   ]),
   motus_signal: mod("motus_signal", [
     line("bulletJump", "mod_panel", "multiplicative_percent", "Motus Signal: bulletJump \u2014 Increase Double Jump strength by +200%."),
@@ -422,8 +427,9 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("wallLatch", "mod_panel", "multiplicative_percent", "wiki: Patagium — +15% Aim Glide/Wall Latch Duration per rank (+90% max)"),
   ]),
   piercing_step: mod("piercing_step", [
-    line("bulletJump", "mod_panel", "multiplicative_percent", "Piercing Step: bulletJump \u2014 +18% to Parkour Velocity, +18% Aim Glide/Wall Latch Duration, +60% <DT_PUNCTURE_\u2026"),
-    line("puncture", "mod_panel", "multiplicative_percent", "Piercing Step: puncture \u2014 +18% to Parkour Velocity, +18% Aim Glide/Wall Latch Duration, +60% <DT_PUNCTURE_\u2026"),
+    line("bulletJump", "mod_panel", "multiplicative_percent", "wiki: Piercing Step — +18% to Bullet Jump"),
+    line("aimGlideDuration", "mod_panel", "multiplicative_percent", "wiki: Piercing Step — +18% Aim Glide/Wall Latch Duration"),
+    line("puncture", "mod_panel", "multiplicative_percent", "wiki: Piercing Step — +60% Puncture on Bullet Jump"),
   ]),
   pistol_scavenger: mod("pistol_scavenger", [], "wiki: Pistol Scavenger \u2014 Squad receives +150% Pistol Ammo Recovery"),
   power_donation_r5: mod("power_donation_r5", [
@@ -490,11 +496,9 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("comboCountChance", "mod_panel", "multiplicative_percent", "Reflex Guard: comboCountChance \u2014 +100% Combo Count Chance while Blocking"),
   ]),
   rending_turn: mod("rending_turn", [
-    line("bulletJump", "mod_panel", "multiplicative_percent", "Rending Turn: bulletJump \u2014 +18% to Parkour Velocity, +18% Aim Glide/Wall Latch Duration, +60% <DT_SLASH_COL\u2026"),
-    line("slash", "mod_panel", "multiplicative_percent", "Rending Turn: slash \u2014 +18% to Parkour Velocity, +18% Aim Glide/Wall Latch Duration, +60% <DT_SLASH_COL\u2026"),
-  ]),
-  resilient_focus: mod("resilient_focus", [
-    line("stunDamageResistance", "mod_panel", "multiplicative_percent", "wiki: Resilient Focus \u2014 5% damage resistance while stunned per rank (20% R3)"),
+    line("bulletJump", "mod_panel", "multiplicative_percent", "wiki: Rending Turn — +18% to Bullet Jump"),
+    line("aimGlideDuration", "mod_panel", "multiplicative_percent", "wiki: Rending Turn — +18% Aim Glide/Wall Latch Duration"),
+    line("slash", "mod_panel", "multiplicative_percent", "wiki: Rending Turn — +60% Slash on Bullet Jump"),
   ]),
   retribution: mod("retribution", [
     line("retaliationChance", "mod_panel", "multiplicative_percent", "wiki: Retribution \u2014 15% chance per rank (60% R3) to retaliate with Electricity when shields are struck by melee (not a damage bonus)"),
@@ -528,14 +532,15 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
   shotgun_scavenger: mod("shotgun_scavenger", [], "wiki: Shotgun Scavenger \u2014 Squad receives +150% Shotgun Ammo Recovery"),
   sniper_scavenger: mod("sniper_scavenger", [], "wiki: Sniper Scavenger \u2014 Squad receives +150% Sniper Rifle Ammo Recovery"),
   speed_drift: mod("speed_drift", [
-    line("coactionBonus", "mod_panel", "multiplicative_percent", "Speed Drift: coactionBonus \u2014 +12% Sprint Speed\\\\n+15% Casting Speed"),
-    line("sprintSpeed", "warframe_totals", "multiplicative_percent", "Speed Drift: sprintSpeed \u2014 +12% Sprint Speed\\\\n+15% Casting Speed"),
+    line("sprintSpeed", "warframe_totals", "multiplicative_percent", "wiki: Speed Drift — +12% Sprint Speed"),
+    line("castSpeed", "mod_panel", "multiplicative_percent", "wiki: Speed Drift — +15% Casting Speed"),
   ]),
   stand_united: mod("stand_united", [
     line("armor", "warframe_totals", "multiplicative_percent", "Stand United: armor \u2014 Squad receives +25% Armor"),
   ]),
   stealth_drift: mod("stealth_drift", [
-    line("range", "mod_panel", "multiplicative_percent", "Stealth Drift: range \u2014 +18m Enemy Radar, +12% Aim Glide/Wall Latch Duration (arsenal display only)"),
+    line("enemyRadar", "mod_panel", "multiplicative_percent", "wiki: Stealth Drift — +18m Enemy Radar"),
+    line("aimGlideDuration", "mod_panel", "multiplicative_percent", "wiki: Stealth Drift — +12% Aim Glide/Wall Latch Duration"),
   ]),
   steel_fiber_r3: mod("steel_fiber_r3", [
     line("armor", "warframe_totals", "multiplicative_percent", "Steel Fiber: armor \u2014 +100% Armor"),
@@ -571,8 +576,8 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("cooldown", "mod_panel", "multiplicative_percent", "Swift Bite: cooldown \u2014 Ophidian Bite Augment: Reduce Ability Cooldowns by 4s when at least 4 enemies ar\u2026"),
   ]),
   swift_momentum: mod("swift_momentum", [
-    line("duration", "mod_panel", "multiplicative_percent", "Swift Momentum: duration \u2014 Squad receives +30% Heavy Attack Wind Up Speed and +6s Melee Combo Duration"),
-    line("heavyAttackEfficiency", "mod_panel", "multiplicative_percent", "Swift Momentum: heavyAttackEfficiency \u2014 Squad receives +30% Heavy Attack Wind Up Speed and +6s Melee Combo Duration"),
+    line("comboDuration", "mod_panel", "multiplicative_percent", "wiki: Swift Momentum — +6s Melee Combo Duration (applied via warframe linkage)"),
+    line("heavyAttackSpeed", "mod_panel", "multiplicative_percent", "wiki: Swift Momentum — +30% Heavy Attack Wind Up Speed (applied via warframe linkage)"),
   ]),
   synth_reflex_r3: mod("synth_reflex_r3", [
     line("bulletJump", "mod_panel", "multiplicative_percent", "Synth Reflex: bulletJump \u2014 On Equip:\\\\n+40% Bullet Jump for 2s"),
@@ -602,8 +607,9 @@ export const MOD_BEHAVIORS_WARFRAME: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Thrall Pact — Enthrall-gated primary damage × thralls × Strength (not always-on)"),
   ]),
   toxic_flight: mod("toxic_flight", [
-    line("bulletJump", "mod_panel", "multiplicative_percent", "Toxic Flight: bulletJump \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_POIS\u2026"),
-    line("toxin", "mod_panel", "multiplicative_percent", "Toxic Flight: toxin \u2014 +24.2% to Parkour Velocity, +24.2% Aim Glide/Wall Latch Duration, +275% <DT_POIS\u2026"),
+    line("bulletJump", "mod_panel", "multiplicative_percent", "wiki: Toxic Flight — +24.2% to Bullet Jump"),
+    line("aimGlideDuration", "mod_panel", "multiplicative_percent", "wiki: Toxic Flight — +24.2% Aim Glide/Wall Latch Duration"),
+    line("toxin", "mod_panel", "multiplicative_percent", "wiki: Toxic Flight — +275% Toxin on Bullet Jump"),
   ]),
   transient_fortitude: mod("transient_fortitude", [
     line("abilityDuration", "warframe_totals", "multiplicative_percent", "Transient Fortitude: abilityDuration \u2014 +55% Ability Strength\\\\n-27.5% Ability Duration"),

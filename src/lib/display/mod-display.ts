@@ -178,6 +178,7 @@ const PERCENT_LIKE_KEYS = new Set([
 const FLAT_STAT_KEYS_BY_MOD: Record<string, ReadonlySet<string>> = {
   stinging_truth: new Set(["magazine"]),
   augment_universal_shattering_impact: new Set(["armorReduction"]),
+  vile_discharge: new Set(["storedDamage"]),
 };
 
 /**
@@ -267,10 +268,20 @@ const MOD_RANK_VALUE_TABLES: Record<string, Record<string, readonly number[]>> =
   // Flux Overdrive oscillation 5 s, Momentous Bond buff 30 s.
   flux_overdrive: { duration: [5, 5, 5, 5, 5, 5] },
   momentous_bond: { duration: [30, 30, 30, 30, 30, 30] },
+  teeming_virulence: { criticalChance: [125, 150, 175, 200], duration: [9, 11, 13, 15] },
 };
 
 /** Card text for a stat that has a wiki rank table or a cap, else null (use the per-rank formula). */
 export function formatModStatSpecial(modId: string, statKey: string, perRank: number, rank: number): string | null {
+  if (modId === "catalyzing_shields") {
+    const label = getModStatLabel(statKey);
+    if (statKey === "maxShieldMultiplier") {
+      return `x${(1 - perRank * (rank + 1)).toFixed(2)} ${label}`;
+    }
+    if (statKey === "shieldGateDuration") {
+      return `${Number((perRank * (rank + 1)).toFixed(2))}s ${label}`;
+    }
+  }
   const wikiTable = MOD_RANK_VALUE_TABLES[modId]?.[statKey] ? undefined : MOD_WIKI_RANK_TABLES[modId]?.[statKey];
   if (wikiTable) {
     const value = wikiTable.values[Math.min(Math.max(Math.round(rank), 0), wikiTable.values.length - 1)];
@@ -304,6 +315,7 @@ export function formatModStatSpecial(modId: string, statKey: string, perRank: nu
 const SECONDS_PER_RANK_KEYS = new Set([
   "aimGlideTime",
   "wallLatchTime",
+  "comboDuration",
   // Aerial / Momentous Bond: Companion Recovery Time -0.5 / -1.5 / -3 s per rank (wiki.warframe.com).
   "recoveryTimeReduction",
   "headshotRecoveryTimeReduction",

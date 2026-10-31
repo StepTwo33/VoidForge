@@ -58,6 +58,7 @@ export const WIKI_INCOMPATIBLE_MOD_PAIRS: readonly (readonly [string, string])[]
   ["augment_atlas_rumbled", "titanic_rumbler"],
   ["augment_ember_healing_flame", "purifying_flames"],
   ["augment_excalibur_surging_dash", "purging_slash"],
+  ["augment_frost_chilling_globe", "augment_frost_cold_front"],
   ["augment_ivar_empowered_quiver", "power_of_three"],
   ["augment_loki_savior_decoy", "deceptive_bond"],
   ["augment_nyx_assimilate", "singularity"],
