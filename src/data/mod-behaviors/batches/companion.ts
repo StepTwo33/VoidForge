@@ -240,7 +240,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("lifestealToOwner", "mod_panel", "multiplicative_percent", "wiki: Hunter Recovery \u2014 Warframe healed for 5% of companion damage dealt per rank (+30% R5; life steal, not damage)"),
   ]),
   hunter_synergy: mod("hunter_synergy", [
-    line("critLink", "mod_panel", "multiplicative_percent", "wiki: Hunter Synergy — links primary CC to companion (not weapon paper)"),
+    line("critLink", "mod_panel", "multiplicative_percent", "wiki: Hunter Synergy — +5% per rank (R5 +30%) of Primary Critical Chance added to the claws (card only)"),
     line("criticalChance", "mod_panel", "multiplicative_percent", "wiki: Hunter Synergy — companion receives linked CC"),
   ]),
   iatric_mycelium: mod("iatric_mycelium", [
@@ -276,7 +276,7 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("pickupDoubleChance", "companion_totals", "multiplicative_percent", "Loyal Retriever: pickupDoubleChance \u2014 13% chance to double Credit and Resource pickups"),
   ]),
   magnetic_strike: mod("magnetic_strike", [
-    line("impact", "mod_panel", "multiplicative_percent", "wiki: Magnetic Strike — Impact→Magnetic on companion melee (not IPS)"),
+    line("magneticProcChance", "mod_panel", "multiplicative_percent", "wiki: Magnetic Strike — 25/50/75/100% chance to add Magnetic when inflicting Impact at R0-R3 (card only)"),
   ]),
   manifold_bond: mod("manifold_bond", [
     line("abilityDuration", "mod_panel", "multiplicative_percent", "wiki: Manifold Bond — precept duration (not WF ability duration)"),

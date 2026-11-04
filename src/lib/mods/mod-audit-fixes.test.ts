@@ -169,7 +169,7 @@ describe("Mod Audit Fixes (Calculator, Card Text, Equip Rules, Metadata, Retired
   });
 
   it("Mod card text fixes: Claw Bite shows +220% Crit Damage (not +660%), Drift/Parkour cards show exact wiki stats", () => {
-    expect(cardLines("claw_bite", 10)).toEqual([
+    expect(cardLines("bite", 10)).toEqual([
       "+330% Crit chance",
       "+220% Crit multiplier",
     ]);
@@ -337,7 +337,7 @@ describe("Mod Audit Fixes (Calculator, Card Text, Equip Rules, Metadata, Retired
     expect(modsMap.get("byteryte")?.name).toBe("ByteRyte");
     expect(modsMap.get("kaal_zidi")?.name).toBe("Kaal-zidi");
 
-    expect(modsMap.get("claw_bite")?.rarity).toBe("rare");
+    expect(modsMap.get("bite")?.rarity).toBe("rare");
     expect(modsMap.get("archon_intensify")?.rarity).toBe("legendary");
     expect(modsMap.get("archon_stretch")?.rarity).toBe("legendary");
     expect(modsMap.get("augment_universal_health_conversion")?.polarity).toBe("vazarin");

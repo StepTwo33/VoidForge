@@ -285,7 +285,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("statusChance", "weapon_dps", "conditional_stat_on_trigger", "wiki: Proton Snap — Hold Wall Latch for 2s: +50% Status Chance for 20s"),
   ]),
   quick_return: mod("quick_return", [
-    line("ricochetBounces", "mod_panel", "multiplicative_percent", "Quick Return: ricochetBounces \u2014 -4 Bounce"),
+    line("ricochetBounces", "mod_panel", "flat", "wiki: Quick Return \u2014 -1/-2/-3/-4 Bounces at R0-R3 (card only)"),
   ]),
   quickening_r3: mod("quickening_r3", [
     line("attackSpeed", "weapon_dps", "multiplicative_percent", "Quickening: attackSpeed \u2014 +40% Attack Speed, +20% Combo Count Chance"),
@@ -295,7 +295,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("range", "mod_panel", "multiplicative_percent", "wiki: Reach \u2014 +1.5 m melee range at infobox Max Rank 5 (0.25 m/rank) (arsenal display only)"),
   ]),
   rebound: mod("rebound", [
-    line("ricochetBounces", "mod_panel", "multiplicative_percent", "Rebound: ricochetBounces \u2014 +4 Bounce"),
+    line("ricochetBounces", "mod_panel", "flat", "wiki: Rebound \u2014 +1/+2/+3/+4 Bounces at R0-R3 (card only)"),
   ]),
   reflex_coil_r3: mod("reflex_coil_r3", [
     line("heavyAttackEfficiency", "weapon_dps", "additive_percent", "wiki: Reflex Coil — +60% Heavy Attack Efficiency"),

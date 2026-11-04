@@ -28,6 +28,18 @@ export const MOD_WIKI_RANK_TABLES: Record<string, Record<string, WikiRankTable>>
     ricochetBounces: { unit: "", values: [-1, -2, -3, -4] },
     blastRadius: { unit: "m", values: [0.8, 1.5, 2.3, 3] },
   },
+  // Round 49 (wiki.warframe.com Quick Return / Rebound stat tables): 1 bounce per rank, cost 4-7.
+  quick_return: {
+    ricochetBounces: { unit: "", values: [-1, -2, -3, -4] },
+  },
+  rebound: {
+    ricochetBounces: { unit: "", values: [1, 2, 3, 4] },
+  },
+  // Round 49 (wiki.warframe.com Protector Posture): 15 m range at every rank, +1..+4 Puncture procs.
+  protector_posture: {
+    range: { unit: "m", values: [15, 15, 15, 15] },
+    punctureProcs: { unit: "", values: [1, 2, 3, 4] },
+  },
   // Round 44b (wiki.warframe.com mod pages): card lines that need a unit or a non-linear rank table.
   augment_nokko_reroot_rampage: {
     toxinDamage: { unit: "", values: [175, 200, 225, 250] },

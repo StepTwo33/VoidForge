@@ -345,6 +345,8 @@ export const MOD_FILTER_TAGS_BY_ID: Record<string, readonly ModStatFilterId[]> =
   // --- Companion weapons (weapon chip set; wiki Claws mods) ---
   bloodthirst: ["utility"], // health stolen per Slash stack on the target
   bell_ringer: ["status"], // knockdown + 4 Impact Status Effects
+  magnetic_strike: ["status"], // 25-100% chance to add Magnetic when inflicting Impact
+  assassin_posture: ["damage"], // +75-300% Damage to Overguard
 };
 
 const WEAPON_CATEGORIES = new Set([

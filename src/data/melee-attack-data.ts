@@ -10,6 +10,11 @@ export interface MeleeSlamData {
   elements: Record<string, number>;
   radius?: number;
   falloffReduction?: number;
+  /**
+   * Base crit chance of this attack when Module:Weapons gives it its own CritChance that differs
+   * from the weapon's normal attack (Rumblejack: Normal 0.13, Slam / Heavy Slam 0.14).
+   */
+  criticalChance?: number;
 }
 export interface MeleeAttackData {
   heavyAttack?: number;
@@ -198,7 +203,7 @@ export const MELEE_ATTACK_DATA: Record<string, MeleeAttackData> = {
   "redeemer": {"followThrough": 0.5, "heavyAttack": 900, "heavySlam": {"damage": 540, "elements": {"Blast": 540}, "falloffReduction": 0.3, "radius": 6}, "meleeRange": 2, "slam": {"damage": 360, "elements": {"Impact": 360}, "falloffReduction": 0.5, "radius": 5}, "slideAttack": 360, "windUp": 0.4},
   "redeemer_prime": {"followThrough": 0.5, "heavyAttack": 3200, "heavySlam": {"damage": 636, "elements": {"Blast": 636}, "falloffReduction": 0.3, "radius": 6}, "meleeRange": 2, "slam": {"damage": 424, "elements": {"Impact": 424}, "falloffReduction": 0.5, "radius": 5}, "slideAttack": 424, "windUp": 0.4},
   "ripkas": {"followThrough": 0.8, "heavyAttack": 865, "heavySlam": {"damage": 519, "elements": {"Blast": 519}, "falloffReduction": 0.3, "radius": 7}, "meleeRange": 1.75, "slam": {"damage": 346, "elements": {"Impact": 346}, "falloffReduction": 0.5, "radius": 6}, "slideAttack": 519, "windUp": 0.6},
-  "rumblejack": {"followThrough": 0.9, "heavyAttack": 600, "heavySlam": {"damage": 900, "elements": {"Electricity": 900}, "falloffReduction": 0.3, "radius": 6}, "meleeRange": 1.8, "slam": {"damage": 600, "elements": {"Electricity": 600}, "falloffReduction": 0.5, "radius": 4}, "slideAttack": 600, "windUp": 0.4},
+  "rumblejack": {"followThrough": 0.9, "heavyAttack": 600, "heavySlam": {"criticalChance": 0.14, "damage": 900, "elements": {"Electricity": 900}, "falloffReduction": 0.3, "radius": 6}, "meleeRange": 1.8, "slam": {"criticalChance": 0.14, "damage": 600, "elements": {"Electricity": 600}, "falloffReduction": 0.5, "radius": 4}, "slideAttack": 600, "windUp": 0.4},
   "ruvox": {"followThrough": 0.9, "heavyAttack": 850, "heavySlam": {"damage": 510, "elements": {"Blast": 510}, "falloffReduction": 0.3, "radius": 9}, "meleeRange": 1.25, "slam": {"damage": 340, "elements": {"Impact": 340}, "falloffReduction": 0.5, "radius": 8}, "slideAttack": 510, "windUp": 0.6},
   "sampotes": {"followThrough": 0.4, "heavyAttack": 1488, "heavySlam": {"damage": 744, "elements": {"Blast": 744}, "falloffReduction": 0.3, "radius": 8}, "meleeRange": 2.5, "slam": {"damage": 496, "elements": {"Impact": 496}, "falloffReduction": 0.5, "radius": 6}, "slideAttack": 496, "windUp": 1.4},
   "sancti_magistar": {"followThrough": 0.4, "heavyAttack": 1440, "heavySlam": {"damage": 720, "elements": {"Blast": 720}, "falloffReduction": 0.3, "radius": 10}, "meleeRange": 2.6, "slam": {"damage": 480, "elements": {"Impact": 480}, "falloffReduction": 0.5, "radius": 9}, "slideAttack": 480, "windUp": 1.2},

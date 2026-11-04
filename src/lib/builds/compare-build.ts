@@ -183,7 +183,7 @@ function companionSnapshot(label: string, data: CompanionBuildData): CompareSnap
       ? resolveDefaultCompanionWeapon(companion, getEffectiveWeapons())?.id
       : undefined);
   const weapon = weaponId
-    ? moddedWeaponStats(weaponId, data.weaponMods ?? [], undefined, { companionMods: data.mods ?? [] })
+    ? moddedWeaponStats(weaponId, data.weaponMods ?? [], undefined, { companionMods: data.mods ?? [], companionWeaponMods: data.weaponMods ?? [] })
     : null;
   const weaponName = weaponId ? getEffectiveWeaponsMap().get(weaponId)?.name ?? null : null;
   return { kind: "companion", label, body, weapon, weaponName, equipment: companionEquipment(data) };

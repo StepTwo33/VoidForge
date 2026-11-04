@@ -37,13 +37,28 @@ export function companionWeaponModClass(weapon: { id: string; category: string }
   return "rifle";
 }
 
+/**
+ * Beast Claws mods that only fit some families (wiki.warframe.com Module:Mods/data Type):
+ * Swipe "Kavat Claws", Mecha Overdrive "Kubrow Claws", Strain Fever "Helminth Charger".
+ * Vulpaphyla page: "Beast and Kavat mods may be equipped on Vulpaphylas"; Predasite page: "Beast and
+ * Kubrow mods may be equipped on Predasites"; Helminth Charger page: "Though classed as a Kubrow,
+ * the Helminth Charger cannot be equipped with Mecha Overdrive."
+ */
+const CLAW_MOD_FAMILY_RULES: Readonly<Record<string, (clawId: string, family: string | undefined) => boolean>> = {
+  swipe: (_id, family) => family === "kavat" || family === "vulpaphyla",
+  mecha_overdrive: (id, family) => (family === "kubrow" || family === "predasite") && id !== "helminth_claws",
+  strain_fever: (id) => id === "helminth_claws",
+};
+
 /** True when this mod belongs on the companion's weapon, not the companion itself. */
 export function modFitsCompanionWeapon(
   mod: Pick<Mod, "id" | "category" | "subCategory" | "name" | "description" | "polarity">,
-  weapon: Pick<Weapon, "id" | "category" | "triggerType" | "name">,
+  weapon: Pick<Weapon, "id" | "category" | "triggerType" | "name" | "companionType">,
 ): boolean {
   const modClass = companionWeaponModClass(weapon);
   if (modClass === "beast_claw") {
+    const familyRule = CLAW_MOD_FAMILY_RULES[mod.id];
+    if (familyRule && !familyRule(weapon.id, weapon.companionType)) return false;
     return (
       mod.category === "companion_weapon" &&
       (mod.subCategory === "beast_weapon" || mod.subCategory === "riven")
@@ -197,3 +212,97 @@ export function migratePostureToPostureSlot<T extends { modId: string; slotIndex
   return next;
 }
 
+
+/**
+ * Round 49: mods that wiki.warframe.com lists under "Beast Claws Mods" (Module:Mods/data Type
+ * "Claws" / "Kavat Claws" / "Kubrow Claws" / "Helminth Charger"). Update 37 (Companion Rework
+ * Phase 2) moved Bite, Maul, Hunter Synergy, Swipe, Mecha Overdrive (and the rest) from the beast
+ * onto its claws; older saved builds still have them in the companion's own slots.
+ */
+export const CLAW_MODS_FORMERLY_ON_COMPANION: ReadonlySet<string> = new Set([
+  "bite",
+  "maul",
+  "swipe",
+  "brute_conditioning",
+  "disabling_conditioning",
+  "hunter_synergy",
+  "immunity_resistance",
+  "magnetic_strike",
+  "mecha_overdrive",
+  "strain_fever",
+  "assassin_posture",
+  "balanced_posture",
+  "elusive_posture",
+  "frenzied_posture",
+  "persistent_posture",
+  "protector_posture",
+]);
+
+/**
+ * Load migration: move Beast Claws mods out of a beast's own mod slots into free claw slots
+ * (postures to the Posture slot, the rest to the first free regular slot 0-7). A mod is left where
+ * it is when the claws have no free slot or the claws can't take it (Swipe on a Kubrow); a copy
+ * already on the claws drops the companion-slot copy. Returns the same arrays when nothing changes.
+ */
+export function migrateClawModsFromCompanion<
+  C extends { modId: string; slotIndex: number },
+  W extends { modId: string; slotIndex: number },
+>(
+  mods: readonly C[],
+  weaponMods: readonly W[],
+  companion: Pick<Companion, "id" | "name" | "type"> | null | undefined,
+): { mods: C[]; weaponMods: W[]; moved: string[]; droppedDuplicates: string[] } {
+  const unchanged = { mods: mods as C[], weaponMods: weaponMods as W[], moved: [], droppedDuplicates: [] };
+  if (!companion || !companionHasFixedWeapon(companion)) return unchanged;
+  if (!mods.some((m) => m && CLAW_MODS_FORMERLY_ON_COMPANION.has(m.modId))) return unchanged;
+  const clawId = resolveCompanionClawId(companion as Companion) ?? "";
+  const used = new Set(weaponMods.map((m) => m.slotIndex));
+  const onClaws = new Set(weaponMods.map((m) => m.modId));
+  const keptMods: C[] = [];
+  const nextWeapon: W[] = [...weaponMods];
+  const moved: string[] = [];
+  const droppedDuplicates: string[] = [];
+  for (const m of [...mods].sort((a, b) => a.slotIndex - b.slotIndex)) {
+    if (!m || !CLAW_MODS_FORMERLY_ON_COMPANION.has(m.modId)) {
+      keptMods.push(m);
+      continue;
+    }
+    if (onClaws.has(m.modId)) {
+      droppedDuplicates.push(m.modId);
+      continue;
+    }
+    const familyRule = CLAW_MOD_FAMILY_RULES[m.modId];
+    if (familyRule && !familyRule(clawId, companion.type)) {
+      keptMods.push(m);
+      continue;
+    }
+    let slot: number | undefined;
+    if (isCompanionPostureMod({ id: m.modId })) {
+      if (!used.has(COMPANION_WEAPON_POSTURE_SLOT_INDEX)) slot = COMPANION_WEAPON_POSTURE_SLOT_INDEX;
+    } else {
+      for (let i = 0; i < COMPANION_WEAPON_REGULAR_SLOT_COUNT; i++) {
+        if (!used.has(i)) {
+          slot = i;
+          break;
+        }
+      }
+    }
+    if (slot == null) {
+      keptMods.push(m);
+      continue;
+    }
+    used.add(slot);
+    onClaws.add(m.modId);
+    nextWeapon.push({ ...(m as unknown as W), slotIndex: slot });
+    moved.push(m.modId);
+  }
+  if (!moved.length && !droppedDuplicates.length) return unchanged;
+  // Keep the original order of the companion's remaining mods.
+  const keptSet = new Set(keptMods);
+  return {
+    mods: mods.filter((m) => keptSet.has(m)),
+    weaponMods: nextWeapon.sort((a, b) => a.slotIndex - b.slotIndex),
+    moved,
+    droppedDuplicates,
+  };
+}

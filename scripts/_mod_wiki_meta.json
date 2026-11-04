@@ -794,21 +794,6 @@
     "isAugment": false,
     "wikiName": "Transfusion"
   },
-  "claw_bite": {
-    "wikiType": "Claws",
-    "isAugment": false,
-    "wikiName": "Bite"
-  },
-  "claw_maul": {
-    "wikiType": "Claws",
-    "isAugment": false,
-    "wikiName": "Maul"
-  },
-  "claw_swipe": {
-    "wikiType": "Kavat Claws",
-    "isAugment": false,
-    "wikiName": "Swipe"
-  },
   "claw_magnetic": {
     "wikiType": "Claws",
     "isAugment": false,

@@ -139,6 +139,8 @@ export function countHunterSetPieces(linkage: SetBonusLinkage | undefined, warfr
       linkage?.secondaryMods,
       linkage?.meleeMods,
       linkage?.companionMods,
+      // Round 49: Hunter Synergy goes on the beast's claws since Update 37.
+      linkage?.companionWeaponMods,
     ),
     HUNTER_SET,
   );
@@ -162,8 +164,13 @@ export function hunterCompanionDamageMultiplier(pieces: number): number {
   return 1 + Math.min(pieces, 6) * 0.25;
 }
 
-export function countMechaSetPieces(warframeMods: ModSlot[], companionMods?: ModSlot[]): number {
-  return countSetModsInSlots(concatSlots(warframeMods, companionMods), MECHA_SET);
+export function countMechaSetPieces(
+  warframeMods: ModSlot[],
+  companionMods?: ModSlot[],
+  /** Round 49: Mecha Overdrive goes on Kubrow / Predasite claws since Update 37. */
+  companionWeaponMods?: ModSlot[],
+): number {
+  return countSetModsInSlots(concatSlots(warframeMods, companionMods, companionWeaponMods), MECHA_SET);
 }
 
 export interface MechaSetMarkStats {
@@ -358,7 +365,7 @@ export function buildWeaponSetBonusSummary(
     : countTekSetPieces(undefined, localMods) + (sim.extraTekSetPiecesOffWeapon ?? 0);
 
   const hunterPieces = countHunterSetPieces(linkage, linkage?.warframeMods ?? []);
-  const mechaPieces = countMechaSetPieces(linkage?.warframeMods ?? [], linkage?.companionMods);
+  const mechaPieces = countMechaSetPieces(linkage?.warframeMods ?? [], linkage?.companionMods, linkage?.companionWeaponMods);
   const primaryStyle = weaponSupportsPrimaryStyleSets(weapon);
   const companionStyle = weaponSupportsHunterCompanionSet(weapon);
   const hunterMult = hunterCompanionDamageMultiplier(hunterPieces);
@@ -435,7 +442,7 @@ export function buildWarframeSetBonusSummary(
   const umbral = countUmbralSetPieces(warframeMods);
   const augur = countAugurSetPieces(warframeMods, linkage?.secondaryMods);
   const hunter = countHunterSetPieces(linkage, warframeMods);
-  const mecha = countMechaSetPieces(warframeMods, linkage?.companionMods);
+  const mecha = countMechaSetPieces(warframeMods, linkage?.companionMods, linkage?.companionWeaponMods);
   const synth = countSynthSetPieces(linkage, warframeMods);
   const tek = countTekSetPieces(linkage, warframeMods);
   const amar = countArchonSetPieces(AMAR_SET, warframeMods, linkage?.meleeMods);

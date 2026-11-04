@@ -90,6 +90,8 @@ import {
   companionHasFixedWeapon,
   getCompanionWeapons,
   isCompanionPostureMod,
+  migrateClawModsFromCompanion,
+  migratePostureToPostureSlot,
   modFitsCompanionWeapon,
   resolveCompanionClawId,
   resolveDefaultCompanionWeapon,
@@ -272,9 +274,21 @@ export default function CompanionBuilderPage() {
 
   const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
     const build = cleanLoadedBuild(rawBuild);
-    const d = build.data as CompanionBuildData;
-    const comp = allCompanions.find((c) => c.id === d.companionId);
+    const d0 = build.data as CompanionBuildData;
+    const comp = allCompanions.find((c) => c.id === d0.companionId);
     if (!comp) { toast.error("Companion not found"); return; }
+    // Round 49 (Update 37): Beast Claws mods saved in the beast's own slots move onto the claws.
+    const claws = migrateClawModsFromCompanion(d0.mods ?? [], d0.weaponMods ?? [], comp);
+    const d: CompanionBuildData = claws.moved.length || claws.droppedDuplicates.length
+      ? { ...d0, mods: claws.mods, weaponMods: migratePostureToPostureSlot(claws.weaponMods, comp) }
+      : d0;
+    if (claws.moved.length) {
+      toast.info(`Moved ${claws.moved.length === 1 ? "1 mod" : `${claws.moved.length} mods`} to the claws`, {
+        id: "claw-mods-moved",
+        description: `${claws.moved.map((id) => modsMap.get(id)?.name ?? id).join(", ")} now go on the claws (Update 37).`,
+        duration: 9000,
+      });
+    }
     markClean();
     setSelectedCompanion(comp);
     const loadedParts = d.parts ?? defaultPartsForCompanion(comp) ?? null;
@@ -451,6 +465,8 @@ export default function CompanionBuilderPage() {
         rank: m.rank,
         slotIndex: m.slotIndex,
       })),
+      // Round 49: Hunter Synergy / Mecha Overdrive sit on the claws since Update 37.
+      companionWeaponMods: weaponMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
     };
     return calculateWeaponBuild(
       selectedWeapon,

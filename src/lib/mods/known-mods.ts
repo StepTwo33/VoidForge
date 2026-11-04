@@ -40,6 +40,12 @@ export const RENAMED_MOD_IDS: Readonly<Record<string, string>> = {
   helminth_ferocity: "proboscis",
   augment_volt_reactive_storm: "augment_baruuk_reactive_storm",
   augment_vauban_repelling_bastille: "enduring_bastille",
+  // Round 49: claw-only copies of the real Bite / Maul / Swipe. Update 37 (Companion Rework Phase 2,
+  // wiki.warframe.com Bite / Swipe patch history) moved these mods from the beast onto its claws, so
+  // the one real mod now lives on the claws and the "(Claws)" copies fold into it (same stats).
+  claw_bite: "bite",
+  claw_maul: "maul",
+  claw_swipe: "swipe",
 };
 
 /** Display names of the old ids (they are no longer in the catalog). */
@@ -51,6 +57,9 @@ export const RENAMED_MOD_OLD_NAMES: Readonly<Record<string, string>> = {
   helminth_ferocity: "Helminth Ferocity",
   augment_volt_reactive_storm: "ReactivStorm (Volt)",
   augment_vauban_repelling_bastille: "Repelling Bastille",
+  claw_bite: "Bite (Claws)",
+  claw_maul: "Maul (Claws)",
+  claw_swipe: "Swipe (Claws)",
 };
 
 /** Game update that renamed / replaced each old id (shown in the load toast). */
@@ -131,6 +140,10 @@ export const RETIRED_MODS: Readonly<Record<string, { name: string; reason: Retir
   // Module:Mods/data types Shred as Rifle and Fury as Melee, so neither goes on Beast Claws.
   claw_shred: { name: "Shred (Claws)", reason: "no_source" },
   claw_fury: { name: "Fury (Claws)", reason: "no_source" },
+  // Round 49: "Flame Claws" / "Frost Claws" have no wiki.warframe.com page, no Module:Mods/data
+  // entry and are not on the Beast Claws Mods list; the real claw mods are Flame Gland and Frost Jaw.
+  claw_heat: { name: "Flame Claws", reason: "no_source" },
+  claw_cold: { name: "Frost Claws", reason: "no_source" },
 };
 
 export interface MigratedMod {

@@ -45,6 +45,9 @@ describe("old builds migrate instead of dropping", () => {
       helminth_ferocity: "proboscis",
       augment_volt_reactive_storm: "augment_baruuk_reactive_storm",
       augment_vauban_repelling_bastille: "enduring_bastille",
+      claw_bite: "bite",
+      claw_maul: "maul",
+      claw_swipe: "swipe",
     });
     const { mods, migrated } = migrateRenamedMods(
       [{ modId: "link_shields", rank: 5, slotIndex: 2 }, { modId: "link_armor", rank: 3, slotIndex: 3 }, { modId: "bite", rank: 10, slotIndex: 4 }],

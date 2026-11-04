@@ -188,8 +188,13 @@ export function applyMeleeComboToStats(
     stats.heavyAttackComboMultiplier *
     avgCritMultiplier(heavyCC, stats.criticalMultiplier);
   const avg = avgCritMultiplier(stats.criticalChance, stats.criticalMultiplier);
+  // Crit = Base × (1 + mods + combo bonuses), so a slam with its own wiki base CC scales by the ratio.
+  const slamAvg =
+    stats.slamCritChanceRatio != null
+      ? avgCritMultiplier(stats.criticalChance * stats.slamCritChanceRatio, stats.criticalMultiplier)
+      : avg;
   stats.slamAttackDamage =
-    stats.slamBaseMultiplier != null ? stats.totalDamage * stats.slamBaseMultiplier * avg : undefined;
+    stats.slamBaseMultiplier != null ? stats.totalDamage * stats.slamBaseMultiplier * slamAvg : undefined;
   stats.slideAttackDamage =
     stats.slideBaseMultiplier != null ? stats.totalDamage * stats.slideBaseMultiplier * avg : undefined;
 }

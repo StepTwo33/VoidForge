@@ -37,34 +37,27 @@ function withMod(modId: string) {
 }
 
 describe("beast claw cores (wiki max rank, Phase M11)", () => {
-  it("Maul (Claws) R10: +330% damage", () => {
+  // Round 49: Maul (Claws) / Bite (Claws) folded into the real Maul / Bite (now claw mods).
+  it("Maul R10: +330% damage", () => {
     const weapon = requireClaws("chesa_claws");
-    expect(withMod("claw_maul").moddedBaseDamage).toBeCloseTo(weapon.damage * 4.3, 5);
+    expect(withMod("maul").moddedBaseDamage).toBeCloseTo(weapon.damage * 4.3, 5);
   });
 
-  it("Bite (Claws) R10: +330% CC / +220% CM", () => {
+  it("Bite R10: +330% CC / +220% CM", () => {
     const weapon = requireClaws("chesa_claws");
     const cmq = quantizeBaseCritMultiplier(weapon.criticalMultiplier);
-    const stats = withMod("claw_bite");
+    const stats = withMod("bite");
     expect(stats.criticalChance).toBeCloseTo(weapon.criticalChance * 4.3, 8);
     expect(stats.criticalMultiplier).toBeCloseTo(cmq * 3.2, 8);
   });
 
   // Round 48: Fury (Claws) / Shred (Claws) were retired (not Beast Claws mods on wiki.warframe.com).
 
-  it("Flame / Frost Claws R5: +90% heat / cold from base", () => {
-    const weapon = requireClaws("chesa_claws");
-    for (const [modId, type] of [
-      ["claw_heat", "heat"],
-      ["claw_cold", "cold"],
-    ] as const) {
-      const stats = withMod(modId);
-      const scale = stats.moddedBaseDamage / 32;
-      expect(stats.elements.find((e) => e.type === type)?.value).toBeCloseTo(
-        quantizeDamageValue(weapon.damage * 0.9, scale),
-        8,
-      );
-    }
+  // Round 49: Flame Claws / Frost Claws were retired (no wiki.warframe.com source); the real
+  // claw elementals Flame Gland / Frost Jaw stay.
+  it("Flame Gland / Frost Jaw stay on the claws; Flame / Frost Claws are gone", () => {
+    for (const id of ["flame_gland", "frost_jaw"]) expect(allMods.some((m) => m.id === id), id).toBe(true);
+    for (const id of ["claw_heat", "claw_cold"]) expect(allMods.some((m) => m.id === id), id).toBe(false);
   });
 
   it("Magnetic Claws R3: +60% magnetic from base", () => {

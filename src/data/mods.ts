@@ -2134,8 +2134,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 10,
-    "category": "companion",
-    "subCategory": "beast",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "criticalChance": 30.0,
       "criticalMultiplier": 20.0
@@ -2149,8 +2149,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "companion",
-    "subCategory": "beast",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "damage": 30.0
     },
@@ -2404,77 +2404,6 @@ const RAW_MODS: Mod[] = [
     },
     "description": "When its Master is bleeding out, the Vasca Kavat sacrifices 20% of its Health to raise them.",
     "rarity": "rare"
-  },
-  {
-    "id": "claw_bite",
-    "name": "Bite (Claws)",
-    "polarity": "madurai",
-    "drain": 6,
-    "maxRank": 10,
-    "category": "companion_weapon",
-    "subCategory": "beast_weapon",
-    "stats": {
-      "criticalChance": 30,
-      "criticalMultiplier": 20
-    },
-    "description": "+330% Critical Chance\n+220% Critical Damage",
-    "rarity": "rare"
-  },
-  {
-    "id": "claw_maul",
-    "name": "Maul (Claws)",
-    "polarity": "madurai",
-    "drain": 4,
-    "maxRank": 10,
-    "category": "companion_weapon",
-    "subCategory": "beast_weapon",
-    "stats": {
-      "damage": 30
-    },
-    "description": "+330% Melee Damage",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "claw_swipe",
-    "name": "Swipe (Claws)",
-    "polarity": "madurai",
-    "drain": 2,
-    "maxRank": 3,
-    "category": "companion_weapon",
-    "subCategory": "beast_weapon",
-    "stats": {
-      "range": 0.5
-    },
-    "description": "Strikes 4 additional enemies and increases Attack Range by 2m.",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "claw_heat",
-    "name": "Flame Claws",
-    "polarity": "naramon",
-    "drain": 6,
-    "maxRank": 5,
-    "category": "companion_weapon",
-    "subCategory": "beast_weapon",
-    "stats": {
-      "heat": 15
-    },
-    "description": "+90% Heat Damage",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "claw_cold",
-    "name": "Frost Claws",
-    "polarity": "naramon",
-    "drain": 6,
-    "maxRank": 5,
-    "category": "companion_weapon",
-    "subCategory": "beast_weapon",
-    "stats": {
-      "cold": 15
-    },
-    "description": "+90% Cold Damage",
-    "rarity": "uncommon"
   },
   {
     "id": "claw_magnetic",
@@ -4751,10 +4680,10 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 5,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
-      "critLink": 7.5,
+      "critLink": 5.0,
       "criticalChance": 5.0
     },
     "description": "+30% Primary Weapon Critical Chance added to Companion",
@@ -10287,7 +10216,7 @@ const RAW_MODS: Mod[] = [
     "category": "melee",
     "subCategory": "",
     "stats": {
-      "ricochetBounces": -4.0
+      "ricochetBounces": -1.0
     },
     "description": "-4 Bounce",
     "rarity": "common"
@@ -10301,7 +10230,7 @@ const RAW_MODS: Mod[] = [
     "category": "melee",
     "subCategory": "",
     "stats": {
-      "ricochetBounces": 4.0
+      "ricochetBounces": 1.0
     },
     "description": "+4 Bounce",
     "rarity": "common"
@@ -14470,8 +14399,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "damage": 35
     },
@@ -14601,8 +14530,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 10,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "damage": 35
     },
@@ -14823,8 +14752,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 4,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "statusDamage": 12.5
     },
@@ -14895,10 +14824,10 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
-      "impact": 25.0
+      "magneticProcChance": 25.0
     },
     "description": "100% Chance to apply a <DT_MAGNETIC_COLOR>Magnetic status effect when inflicting an <DT_IMPACT_COLOR>Impact status effect",
     "rarity": "common"
@@ -14924,8 +14853,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 5,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "statusDuration": 15,
       "statusChance": 10.0
@@ -15217,8 +15146,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 6,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "damage": 10
     },
@@ -15246,8 +15175,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "madurai",
     "drain": 2,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "range": 0.5
     },
@@ -15867,10 +15796,10 @@ const RAW_MODS: Mod[] = [
     "polarity": "penjaga",
     "drain": -2,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
-      "damage": 75.0
+      "overguardDamage": 75.0
     },
     "description": "The companion will prioritize Eximus and other high-ranking enemies. +300% Overguard Damage",
     "rarity": "common"
@@ -15986,8 +15915,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "penjaga",
     "drain": -2,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "range": 0.5
     },
@@ -16933,9 +16862,11 @@ const RAW_MODS: Mod[] = [
     "polarity": "penjaga",
     "drain": -2,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
-    "stats": {},
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
+    "stats": {
+      "evasion": 12.5
+    },
     "description": "The companion will avoid attacking. +50% Evasion",
     "rarity": "common"
   },
@@ -17269,8 +17200,8 @@ const RAW_MODS: Mod[] = [
     "polarity": "penjaga",
     "drain": -2,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
       "statusDuration": 20.0
     },
@@ -19048,10 +18979,10 @@ const RAW_MODS: Mod[] = [
     "polarity": "penjaga",
     "drain": -2,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
-      "damage": 10.0
+      "impact": 10.0
     },
     "description": "The companion will pick a target and then attack it relentlessly. +40% Impact Damage",
     "rarity": "common"
@@ -19490,10 +19421,11 @@ const RAW_MODS: Mod[] = [
     "polarity": "penjaga",
     "drain": -2,
     "maxRank": 3,
-    "category": "companion",
-    "subCategory": "",
+    "category": "companion_weapon",
+    "subCategory": "beast_weapon",
     "stats": {
-      "range": 3.75
+      "range": 3.75,
+      "punctureProcs": 1.0
     },
     "description": "The companion will prioritize attacking enemies within 15m of the Warframe. Attacks inflict +4 <DT_PUNCTURE_COLOR> Puncture Status Effects",
     "rarity": "common"

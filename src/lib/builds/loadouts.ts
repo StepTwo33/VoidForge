@@ -1,7 +1,7 @@
 import { Loadout, ModularBuildData, ModSlot } from "../types";
 import { inferModularLoadoutSlot } from "./modular-resolve";
 import { companionsMap } from "@/data/companions";
-import { migratePostureToPostureSlot } from "@/lib/weapons/companion-weapons";
+import { migrateClawModsFromCompanion, migratePostureToPostureSlot } from "@/lib/weapons/companion-weapons";
 import type { SavedBuild } from "./build-storage";
 import { modsMap } from "@/data/mods";
 import { clampModRanksDeep, dropRetiredModsDeep, migrateRenamedModsDeep } from "@/lib/mods/known-mods";
@@ -238,13 +238,20 @@ function normalizeLoadout(raw: Loadout): Loadout {
   return cleanLoadoutMods(migrateCompanionPosture(out));
 }
 
+const NO_SLOTS: ModSlot[] = [];
+
 /** Older imports: beast posture mod sat in a regular claw slot (see migratePostureToPostureSlot). */
 export function migrateCompanionPosture<T extends Pick<Loadout, "companionBuild">>(loadout: T): T {
   const cb = loadout.companionBuild;
-  if (!cb?.weaponMods?.length) return loadout;
-  const weaponMods = migratePostureToPostureSlot(cb.weaponMods, companionsMap.get(cb.companionId));
-  if (weaponMods === cb.weaponMods) return loadout;
-  return { ...loadout, companionBuild: { ...cb, weaponMods } };
+  if (!cb) return loadout;
+  const companion = companionsMap.get(cb.companionId);
+  // Round 49 (Update 37): Beast Claws mods saved in the beast's own slots move onto the claws.
+  const mods0 = cb.mods ?? NO_SLOTS;
+  const weapon0 = cb.weaponMods ?? NO_SLOTS;
+  const claws = migrateClawModsFromCompanion(mods0, weapon0, companion);
+  const weaponMods = migratePostureToPostureSlot(claws.weaponMods, companion);
+  if (claws.mods === mods0 && weaponMods === weapon0) return loadout;
+  return { ...loadout, companionBuild: { ...cb, mods: claws.mods, weaponMods } };
 }
 
 export function getLoadouts(): Loadout[] {

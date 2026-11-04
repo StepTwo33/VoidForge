@@ -40,7 +40,7 @@ const FOCUS_TREES: Record<string, string[]> = {
 describe("removed mods", () => {
   it("are gone from the catalog, behaviors and incompatibility data", () => {
     const ids = [...Object.keys(RETIRED_MODS), "shotgun_spazz", "aura_speed_holster", "helminth_ferocity"];
-    expect(ids).toHaveLength(55);
+    expect(ids).toHaveLength(57); // Round 49: +2 (Flame Claws, Frost Claws)
     for (const id of ids) {
       expect(modsMap.has(id)).toBe(false);
       expect(VERIFIED_MOD_BEHAVIORS[id]).toBeUndefined();
@@ -50,7 +50,9 @@ describe("removed mods", () => {
 
   it("keeps the claw-slot companion mods the tied claws use", () => {
     const claws = { id: "chesa_claws", name: "Chesa Claws", category: "beast_claw", triggerType: "Melee" } as Weapon;
-    for (const id of ["claw_bite", "claw_maul", "claw_swipe", "claw_heat", "claw_cold"]) {
+    // Round 49: the "(Claws)" copies folded into the real Bite / Maul / Swipe (Swipe is Kavat-only);
+    // Flame / Frost Claws retired.
+    for (const id of ["bite", "maul", "hunter_synergy", "flame_gland", "frost_jaw"]) {
       expect(modsMap.has(id)).toBe(true);
       expect(modFitsCompanionWeapon(modsMap.get(id)!, claws)).toBe(true);
     }

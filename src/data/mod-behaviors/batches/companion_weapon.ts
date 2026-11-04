@@ -1,5 +1,5 @@
 /**
- * Per-mod verified behaviors — category: companion_weapon (16 mods).
+ * Per-mod verified behaviors — category: companion_weapon (11 mods).
  * Generated: python scripts/generate_mod_behavior_batch.py companion_weapon
  * Each mod has its own entry; edit lines after individual wiki review.
  */
@@ -17,28 +17,10 @@ export const MOD_BEHAVIORS_COMPANION_WEAPON: Record<string, VerifiedModBehavior>
   bloodthirst: mod("bloodthirst", [
     line("healthPerSlashStack", "mod_panel", "multiplicative_percent", "Bloodthirst: healthPerSlashStack \u2014 Health stolen per stack of Slash Damage on the target (+25 per rank, max 100)"),
   ]),
-  claw_bite: mod("claw_bite", [
-    line("criticalChance", "weapon_dps", "multiplicative_percent", "wiki: Bite (Claws) — +330% CC at max"),
-    line("criticalMultiplier", "weapon_dps", "multiplicative_percent", "wiki: Bite (Claws) — +220% CM at max"),
-  ]),
-  claw_cold: mod("claw_cold", [
-    line("cold", "weapon_dps", "elemental_from_base_damage", "Frost Claws: cold \u2014 +90% Cold Damage"),
-  ]),
-
-  claw_heat: mod("claw_heat", [
-    line("heat", "weapon_dps", "elemental_from_base_damage", "Flame Claws: heat \u2014 +90% Heat Damage"),
-  ]),
   claw_magnetic: mod("claw_magnetic", [
     line("magnetic", "weapon_dps", "elemental_from_base_damage", "Magnetic Claws: magnetic \u2014 +60% Magnetic\\\\n+40% Status Duration"),
     line("statusDuration", "mod_panel", "multiplicative_percent", "Magnetic Claws: statusDuration \u2014 +60% Magnetic\\\\n+40% Status Duration"),
   ]),
-  claw_maul: mod("claw_maul", [
-    line("damage", "weapon_dps", "multiplicative_percent", "Maul (Claws): damage \u2014 +330% Melee Damage"),
-  ]),
-  claw_swipe: mod("claw_swipe", [
-    line("range", "mod_panel", "multiplicative_percent", "Swipe (Claws): range \u2014 Strikes 4 additional enemies and increases Attack Range by 2m. (arsenal display only)"),
-  ]),
-
 
   cull_the_weak: mod("cull_the_weak", [
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Cull the Weak — status/non-crit conditional (not always-on paper)"),

@@ -2068,6 +2068,7 @@ export function calculateWeaponBuild(
   const mechaPiecesForMark = countMechaSetPieces(
     linkage?.warframeMods ?? [],
     linkage?.companionMods,
+    linkage?.companionWeaponMods,
   );
   if (
     sim.applyMechaEmpoweredVsMarkedDamage &&
@@ -2141,6 +2142,10 @@ export function calculateWeaponBuild(
     if (baseWeapon.damage > 0) {
       const aoe = dmgMult > 0 ? (dmgMult - directOnlyDamageBonus) / dmgMult : 1;
       stats.slamBaseMultiplier = md?.slam ? (md.slam.damage / baseWeapon.damage) * aoe : undefined;
+      stats.slamCritChanceRatio =
+        md?.slam?.criticalChance != null && baseWeapon.criticalChance > 0
+          ? md.slam.criticalChance / baseWeapon.criticalChance
+          : undefined;
       stats.slideBaseMultiplier = md?.slideAttack ? md.slideAttack / baseWeapon.damage : undefined;
     }
     stats.heavyCritChanceBonus = heavyCritExtra;

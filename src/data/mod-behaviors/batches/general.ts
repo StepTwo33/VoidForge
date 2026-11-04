@@ -31,7 +31,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   artillery_cheap_shot: mod("artillery_cheap_shot", [], "wiki: Artillery Cheap Shot \u2014 Forward Artillery has a +60% chance to not consume Dome Charges"),
   ashensetmod: mod("ashensetmod", [], "wiki: Ashensetmod \u2014 catalog entry (stats in ability logic)"),
   assassin_posture: mod("assassin_posture", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Assassin Posture — overguard damage / priority (not base DPS)"),
+    line("overguardDamage", "mod_panel", "multiplicative_percent", "wiki: Assassin Posture — +75/150/225/300% Damage to Overguard at R0-R3 (card only)"),
   ]),
   argent_scourge: mod("argent_scourge", [], "wiki: Argent Scourge \u2014 Fighting form devised for Conclave."),
   atlantis_vulcan: mod("atlantis_vulcan", [], "wiki: Atlantis Vulcan \u2014 Rapid strikes, deceptive movements."),
@@ -173,7 +173,9 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
   downpour: mod("downpour", [], "wiki: Downpour \u2014 Rain of Arrows will also target 4 additional enemies within 10m."),
   drive_duster: mod("drive_duster", [], "wiki: Drive-Duster \u2014 Your digital virus buster"),
   eleventh_storm: mod("eleventh_storm", [], "wiki: Eleventh Storm \u2014 Rapid attacks using sword and shield."),
-  elusive_posture: mod("elusive_posture", [], "wiki: Elusive Posture \u2014 The companion will avoid attacking. +50% Evasion"),
+  elusive_posture: mod("elusive_posture", [
+    line("evasion", "mod_panel", "multiplicative_percent", "wiki: Elusive Posture \u2014 +12.5/25/37.5/50% Evasion at R0-R3 (card only)"),
+  ]),
   energy_pulse: mod("energy_pulse", [], "wiki: Energy Pulse \u2014 Energy pickups grant 50% additional Energy over 5s."),
   eroding_rapids: mod("eroding_rapids", [], "wiki: Eroding Rapids \u2014 Vortex applies 100% status vulnerability to all enemies within it."),
   failsafe: mod("failsafe", [], "wiki: Failsafe \u2014 +50% to retry on Hacking failure"),
@@ -387,7 +389,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("duration", "mod_panel", "multiplicative_percent", "Peculiar Growth: duration \u2014 Damaging an enemy will inflate the body part hit for 6s."),
   ]),
   persistent_posture: mod("persistent_posture", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Persistent Posture — impact bias / AI (not always-on base damage)"),
+    line("impact", "mod_panel", "multiplicative_percent", "wiki: Persistent Posture — +10/20/30/40% added Impact Damage at R0-R3 (card only)"),
   ]),
   phoenix_blaze: mod("phoenix_blaze", [], "wiki: Phoenix Blaze \u2014 Wreathes the Railjack in fire, increasing Turret Damage and Speed."),
   piercing_fury: mod("piercing_fury", [], "wiki: Piercing Fury \u2014 Fighting form devised for Conclave."),
@@ -437,7 +439,8 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("damage", "mod_panel", "multiplicative_percent", "wiki: Protective Shots — shield-gated (railjack sim)"),
   ]),
   protector_posture: mod("protector_posture", [
-    line("range", "mod_panel", "multiplicative_percent", "Protector Posture: range \u2014 The companion will prioritize attacking enemies within 15m of the Warframe. Atta\u2026 (arsenal display only)"),
+    line("range", "mod_panel", "multiplicative_percent", "wiki: Protector Posture \u2014 15m priority range at every rank (card only)"),
+    line("punctureProcs", "mod_panel", "flat", "wiki: Protector Posture \u2014 +1/2/3/4 Puncture Status Effects at R0-R3 (card only)"),
   ]),
   quaking_hand: mod("quaking_hand", [], "wiki: Quaking Hand \u2014 Fighting form devised for Conclave."),
   quick_correct: mod("quick_correct", [], "wiki: Quick Correct \u2014 Gain 10% Disinfection and 10% chance to drop a Live Heartcell "),

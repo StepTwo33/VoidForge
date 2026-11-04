@@ -832,6 +832,12 @@ export interface CalculatedStats {
   /** Slide attack damage (avg crit, no combo multiplier); undefined when no wiki data. */
   slideAttackDamage?: number;
   slamBaseMultiplier?: number;
+  /**
+   * Slam base crit chance / normal-attack base crit chance when the wiki gives the slam its own
+   * CritChance (Rumblejack 0.14 / 0.13). Crit mods scale base CC, so the slam's modded CC is the
+   * weapon's modded CC times this ratio. Undefined = same as the normal attack.
+   */
+  slamCritChanceRatio?: number;
   slideBaseMultiplier?: number;
   /** Heavy base / normal base × Killing Blow factor (wiki Module:Weapons HeavyAttack). */
   heavyAttackBaseMultiplier?: number;

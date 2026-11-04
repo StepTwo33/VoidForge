@@ -94,7 +94,7 @@ describe("Round 48: Shred (Claws) / Fury (Claws) retired", () => {
       expect(modsMap.has(id), id).toBe(false);
       expect(RETIRED_MODS[id]?.reason, id).toBe("no_source");
     }
-    const { dropped } = dropRetiredMods([{ modId: "claw_shred" }, { modId: "claw_fury" }, { modId: "claw_bite" }], modsMap);
+    const { dropped } = dropRetiredMods([{ modId: "claw_shred" }, { modId: "claw_fury" }, { modId: "bite" }], modsMap);
     expect(dropped.map((d) => d.modId)).toEqual(["claw_shred", "claw_fury"]);
   });
   it("regular Shred and Fury still don't fit Beast Claws; real claw mods still do", () => {
@@ -104,7 +104,7 @@ describe("Round 48: Shred (Claws) / Fury (Claws) retired", () => {
     const fury = allMods.find((m) => m.name === "Fury" && m.category === "melee")!;
     expect(fury).toBeDefined();
     expect(modFitsCompanionWeapon(fury, claws)).toBe(false);
-    for (const id of ["claw_bite", "claw_maul", "burning_claws"]) expect(modFitsCompanionWeapon(modsMap.get(id)!, claws), id).toBe(true);
+    for (const id of ["bite", "maul", "burning_claws"]) expect(modFitsCompanionWeapon(modsMap.get(id)!, claws), id).toBe(true);
   });
 });
 
