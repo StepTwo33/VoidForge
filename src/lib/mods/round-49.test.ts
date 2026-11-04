@@ -53,7 +53,8 @@ describe("Round 49: Rumblejack slam / heavy slam crit 14%", () => {
     const others = Object.entries(MELEE_ATTACK_DATA).filter(
       ([id, d]) => id !== "rumblejack" && (d.slam?.criticalChance != null || d.heavySlam?.criticalChance != null),
     );
-    expect(others).toEqual([]);
+    // Round 50 added the five other wiki weapons with their own slam / heavy slam crit.
+    expect(others.map(([id]) => id).sort()).toEqual(["amphis", "kestrel_prime", "prisma_machete", "syam", "vinquibus_melee"]);
     expect(calculateWeaponBuild(weapon("skana"), [], modsMap).slamCritChanceRatio).toBeUndefined();
   });
 });
