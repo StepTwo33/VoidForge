@@ -311,7 +311,7 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
   ]),
   recover: mod("recover", [
     line("duration", "mod_panel", "multiplicative_percent", "wiki: Recover — on-kill heal rate"),
-    line("health", "mod_panel", "multiplicative_percent", "wiki: Recover — on-kill heal (not max health)"),
+    line("healthOrbHealth", "mod_panel", "multiplicative_percent", "wiki: Recover — -25% Health from Health Orbs (not max health)"),
   ]),
   rifle_ammo_mutation: mod("rifle_ammo_mutation", [
     line("ammoConversion", "mod_panel", "multiplicative_percent", "Rifle Ammo Mutation: ammoConversion \u2014 Converts Secondary ammo pickups to 50% of Ammo Pick Up."),

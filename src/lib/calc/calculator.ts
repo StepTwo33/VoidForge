@@ -49,7 +49,6 @@ import {
   buildWarframeSetBonusSummary,
   buildWeaponSetBonusSummary,
   countSynthSetPieces,
-  countTekSetPieces,
   countUmbralSetPieces,
   getUmbralSetBonusMultiplier,
   weaponAcceptsSynthReloadBonus,
@@ -505,7 +504,7 @@ function quantizeStatsDamage(stats: CalculatedStats, moddedBaseDamage: number): 
 // Implemented: Umbral (×stats on Vit/Fiber/Int; Tau unscaled), Sacrificial (1.5× on both mods when 2),
 // Gladiator (+10% crit/(CM−1) per piece, incl. sim.wf pieces; 6 pieces = +60%), Vigilante (5%/mod, primary only;
 //   also counts Vigilante on linked Warframe or sim.extraVigilanteModsFromWarframe; folded into avg crit for DPS).
-// Cross-slot: Synth 4pc +15% pistol reload; Tek 4pc optional ×1.6 vs marked (primary); loadout linkage in set-bonuses.ts.
+// Cross-slot: Synth 4pc +15% pistol reload; loadout linkage in set-bonuses.ts.
 // Warframe panel: Augur/Hunter/Mecha/Synth/Tek + Augur shields/cast + Mecha mark timing.
 // Hunter vs Slash / Mecha Empowered vs marked are optional DPS toggles.
 // Mecha mark-kill status-spread DoT is sim-gated via applyMechaSpreadDps (not in TTK).
@@ -2005,22 +2004,8 @@ export function calculateWeaponBuild(
     }
   }
 
-  // Tek 4-set: +60% damage vs marked enemies (primary-style weapons; optional sim)
-  const tekPieces = linkage
-    ? countTekSetPieces(linkage, equippedMods)
-    : countTekSetPieces(undefined, equippedMods) + (sim.extraTekSetPiecesOffWeapon ?? 0);
-  if (tekPieces >= 4 && sim.applyTekSetVsMarkedDamage && weaponSupportsPrimaryStyleSets(baseWeapon)) {
-    const tm = 1.6;
-    stats.tekSetVsMarkedDamageMultiplier = tm;
-    stats.impact *= tm;
-    stats.puncture *= tm;
-    stats.slash *= tm;
-    for (const e of stats.elements) e.value *= tm;
-    for (const e of stats.rawElements) e.value *= tm;
-    const physTek = stats.impact + stats.puncture + stats.slash;
-    const eleTek = stats.elements.reduce((sum, e) => sum + e.value, 0);
-    stats.totalDamage = physTek + eleTek;
-  }
+  // Tek set: no weapon damage multiplier. wiki.warframe.com/w/Tek_Set describes a companion damage
+  // zone (3/6/9/12m, 50-200 dmg/s); the old optional "+60% vs marked" had no wiki source (Round 44b).
 
   // Hunter set: +25%/piece companion damage vs Slash-status (beast claws / sentinel weapons; optional sim)
   const hunterPieces = countHunterSetPieces(linkage, linkage?.warframeMods ?? []);

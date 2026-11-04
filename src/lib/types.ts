@@ -497,8 +497,6 @@ export interface SimulationParams {
   extraSynthSetPiecesOffWeapon?: number;
   /** When no SetBonusLinkage: Tek set pieces outside this weapon (0–3). Data may cap at 3 until Tek Enhance exists. */
   extraTekSetPiecesOffWeapon?: number;
-  /** If Tek 4-set is complete and this is enabled, apply +60% damage vs marked enemies to primary DPS. */
-  applyTekSetVsMarkedDamage?: boolean;
   /**
    * If Hunter set pieces are equipped and this is enabled, apply +25%/piece companion
    * weapon damage vs Slash-status targets (beast claws / sentinel weapons only).
@@ -674,7 +672,6 @@ export const DEFAULT_SIM_PARAMS: SimulationParams = {
   extraVigilanteModsFromWarframe: 0,
   extraSynthSetPiecesOffWeapon: 0,
   extraTekSetPiecesOffWeapon: 0,
-  applyTekSetVsMarkedDamage: false,
   applyHunterSetVsSlashDamage: false,
   applyMechaEmpoweredVsMarkedDamage: false,
   targetFaction: undefined,
@@ -928,10 +925,8 @@ export interface CalculatedStats {
   punctureArmorStripPerStack?: number;
   /** Synth 4-set: +0.15 reload speed bonus applied to secondaries when complete. */
   synthSetReloadBonusApplied?: number;
-  /** Tek 4-set: damage multiplier vs marked when sim + set complete (primary only). */
   /** Sniper Shot Combo Counter damage multiplier applied (1 = off). */
   sniperComboMultiplier?: number;
-  tekSetVsMarkedDamageMultiplier?: number;
   /** Hunter set: companion weapon damage multiplier vs Slash-status when sim toggle on. */
   hunterSetVsSlashDamageMultiplier?: number;
   /** Mecha Empowered: damage multiplier vs marked when sim toggle on (+150% → 2.5). */

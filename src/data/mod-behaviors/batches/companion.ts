@@ -220,7 +220,8 @@ export const MOD_BEHAVIORS_COMPANION: Record<string, VerifiedModBehavior> = {
     line("spinDamage", "mod_panel", "multiplicative_percent", "Hard Engage: spinDamage \u2014 Engages enemies within 10m with melee attacks, dealing 90 Impact Damage. Melee a\u2026"),
   ]),
   hastened_deflection: mod("hastened_deflection", [
-    line("shield", "mod_panel", "multiplicative_percent", "wiki: Hastened Deflection — shield recharge/delay (not capacity)"),
+    line("shieldRecharge", "mod_panel", "multiplicative_percent", "wiki: Hastened Deflection — +90% Shield Recharge (not capacity)"),
+    line("shieldRechargeDelay", "mod_panel", "multiplicative_percent", "wiki: Hastened Deflection — -45% Shield Recharge Delay"),
   ]),
   howl: mod("howl", [
     line("duration", "mod_panel", "multiplicative_percent", "Howl: duration \u2014 The kubrow cries out with a blood-curdling howl that strikes fear into 15 enemie\u2026"),

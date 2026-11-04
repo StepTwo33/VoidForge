@@ -855,9 +855,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "heavyAttackDamage": 20,
-      "heavyWindUp": 10,
-      "damage": 20,
-      "heavyAttackEfficiency": 10
+      "heavyWindUp": 10
     },
     "description": "+120% Melee Damage On Heavy Attack\\n+60% Heavy Attack Wind Up Speed",
     "rarity": "uncommon"
@@ -939,8 +937,8 @@ const RAW_MODS: Mod[] = [
   {
     "id": "riven_rifle",
     "name": "Riven Mod (Rifle)",
-    "polarity": "zenurik",
-    "drain": 18,
+    "polarity": "universal",
+    "drain": 10,
     "maxRank": 8,
     "category": "rifle",
     "subCategory": "riven",
@@ -951,8 +949,8 @@ const RAW_MODS: Mod[] = [
   {
     "id": "riven_shotgun",
     "name": "Riven Mod (Shotgun)",
-    "polarity": "zenurik",
-    "drain": 18,
+    "polarity": "universal",
+    "drain": 10,
     "maxRank": 8,
     "category": "shotgun",
     "subCategory": "riven",
@@ -963,8 +961,8 @@ const RAW_MODS: Mod[] = [
   {
     "id": "riven_pistol",
     "name": "Riven Mod (Pistol)",
-    "polarity": "zenurik",
-    "drain": 18,
+    "polarity": "universal",
+    "drain": 10,
     "maxRank": 8,
     "category": "pistol",
     "subCategory": "riven",
@@ -975,8 +973,8 @@ const RAW_MODS: Mod[] = [
   {
     "id": "riven_melee",
     "name": "Riven Mod (Melee)",
-    "polarity": "zenurik",
-    "drain": 18,
+    "polarity": "universal",
+    "drain": 10,
     "maxRank": 8,
     "category": "melee",
     "subCategory": "riven",
@@ -3684,6 +3682,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "",
     "stats": {
+      "toxinDamage": 62.5,
       "range": 2
     },
     "description": "Reroot Augment: Collecting Reroot orbs summons additional Sprodlings inflicting 250 Toxin Damage in an 8m radius, with 20% more Critical Chance each bounce.",
@@ -4933,7 +4932,7 @@ const RAW_MODS: Mod[] = [
     "category": "set",
     "subCategory": "",
     "stats": {
-      "critPerCombo": 15
+      "critPerCombo": 10
     },
     "description": "+10% Melee Critical Chance per Combo Multiplier per piece (10–60%).",
     "rarity": "legendary"
@@ -4961,7 +4960,7 @@ const RAW_MODS: Mod[] = [
     "category": "set",
     "subCategory": "",
     "stats": {
-      "markExplosion": 150
+      "markDuration": 3
     },
     "description": "Companion marks a target every 60/45/30/15s for 3/6/9/12s; killing it spreads Status Effects within 7.5/15/22.5/30m.",
     "rarity": "legendary"
@@ -4975,7 +4974,7 @@ const RAW_MODS: Mod[] = [
     "category": "set",
     "subCategory": "",
     "stats": {
-      "pistolReloadSpeed": 15
+      "holsterReloadPerSecond": 5
     },
     "description": "Holstering Primary and Secondary weapons reloads 5% of Magazine/s per piece (5–20%/s).",
     "rarity": "legendary"
@@ -4989,9 +4988,9 @@ const RAW_MODS: Mod[] = [
     "category": "set",
     "subCategory": "",
     "stats": {
-      "markDuration": 10
+      "zoneDamagePerSecond": 50
     },
-    "description": "Kavat marks a 3m zone every 60/45/30/15s that inflicts 50/100/150/200 Damage/s to enemies.",
+    "description": "Companion marks a 3/6/9/12m zone every 60/45/30/15s that inflicts 50/100/150/200 Damage/s to enemies inside.",
     "rarity": "legendary"
   },
   {
@@ -6872,7 +6871,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "duration": 2.5,
-      "health": -6.25
+      "healthOrbHealth": -6.25
     },
     "description": "On Kill:\\n+15 Heal Rate for 10s, -25% from Health Orbs",
     "rarity": "rare"
@@ -8611,7 +8610,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "duration": 2.5,
-      "health": -6.25
+      "healthOrbHealth": -6.25
     },
     "description": "On Kill:\\n+15 Heal Rate for 10s, -25% from Health Orbs",
     "rarity": "rare"
@@ -9838,7 +9837,8 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "duration": 1.818182,
-      "heavyAttackEfficiency": 4.545455
+      "heavyAttackEfficiency": 4.545455,
+      "initialCombo": 1.818182
     },
     "description": "+50% Heavy Attack Efficiency\\nOn Melee Kill:\\n+20 Initial Combo for 20s. Stacks up to 4x.",
     "rarity": "rare"
@@ -10633,7 +10633,8 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "explosionChance": 25.0,
-      "ricochetBounces": -4.0
+      "ricochetBounces": -4.0,
+      "blastRadius": 0.75
     },
     "description": "-4 Bounce, +3 Blast Radius, +100% Chance to explode on Bounce (Disables Punch Through)",
     "rarity": "uncommon"
@@ -14825,7 +14826,8 @@ const RAW_MODS: Mod[] = [
     "category": "companion",
     "subCategory": "",
     "stats": {
-      "shield": -7.5
+      "shieldRecharge": 15,
+      "shieldRechargeDelay": -7.5
     },
     "description": "+90% Shield Recharge, -45% Shield Recharge Delay",
     "rarity": "uncommon"
@@ -17023,7 +17025,8 @@ const RAW_MODS: Mod[] = [
     "category": "archmelee",
     "subCategory": "",
     "stats": {
-      "range": 25
+      "range": 0.75,
+      "attractionRange": 25
     },
     "description": "+100 Attraction Range (In Space), +3 Melee Range",
     "rarity": "common"

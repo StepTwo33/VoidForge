@@ -18,19 +18,19 @@ export const MOD_BEHAVIORS_SET: Record<string, VerifiedModBehavior> = {
     line("energyToShields", "mod_panel", "multiplicative_percent", "Augur Set Bonus: energyToShields \u2014 6-piece: Spent Energy becomes Shields (40%)"),
   ]),
   set_bonus_gladiator: mod("set_bonus_gladiator", [
-    line("critPerCombo", "mod_panel", "multiplicative_percent", "Gladiator Set Bonus: critPerCombo \u2014 6-piece: +15% Crit Chance per Combo Multiplier"),
+    line("critPerCombo", "mod_panel", "multiplicative_percent", "Gladiator Set Bonus: critPerCombo \u2014 +10% Crit Chance per Combo Multiplier per piece"),
   ]),
   set_bonus_hunter: mod("set_bonus_hunter", [
     line("companionDamageToStatus", "mod_panel", "multiplicative_percent", "Hunter Set Bonus: companionDamageToStatus \u2014 6-piece: Companion deals +150% damage to status enemies"),
   ]),
   set_bonus_mecha: mod("set_bonus_mecha", [
-    line("markExplosion", "mod_panel", "multiplicative_percent", "Mecha Set Bonus: markExplosion \u2014 4-piece: Marked enemies explode for 150% damage"),
+    line("markDuration", "mod_panel", "flat", "Mecha Set Bonus: markDuration \u2014 3s mark per piece (wiki set page)"),
   ]),
   set_bonus_synth: mod("set_bonus_synth", [
-    line("pistolReloadSpeed", "mod_panel", "multiplicative_percent", "Synth Set Bonus: pistolReloadSpeed \u2014 4-piece: +15% Pistol Reload Speed, Companion reloads 5%/s"),
+    line("holsterReloadPerSecond", "mod_panel", "multiplicative_percent", "Synth Set Bonus: holsterReloadPerSecond \u2014 holstered weapons reload 5% of magazine/s per piece"),
   ]),
   set_bonus_tek: mod("set_bonus_tek", [
-    line("markDuration", "mod_panel", "multiplicative_percent", "Tek Set Bonus: markDuration \u2014 4-piece: Kavat marks for 10s, +60% damage to marked"),
+    line("zoneDamagePerSecond", "mod_panel", "flat", "Tek Set Bonus: zoneDamagePerSecond \u2014 marked zone deals 50 damage/s per piece"),
   ]),
   set_bonus_vigilante: mod("set_bonus_vigilante", [
     line("critEnhanceChance", "mod_panel", "multiplicative_percent", "Vigilante Set Bonus: critEnhanceChance \u2014 6-piece: 30% chance to enhance primary crit hits"),

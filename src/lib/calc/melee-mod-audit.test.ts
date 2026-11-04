@@ -211,7 +211,8 @@ describe("melee cores (wiki max rank, Phase M5)", () => {
   it("Killing Blow: heavy-attack damage is panel-only (no light paper DPS)", () => {
     const weapon = requireWeapon("skana");
     const beh = VERIFIED_MOD_BEHAVIORS.killing_blow;
-    expect(beh?.stats.find((s) => s.statKey === "damage")?.target).toBe("mod_panel");
+    // Round 44b: the wiki card is only +120% Heavy Attack Damage / +60% Wind Up (no generic damage line).
+    expect(beh?.stats.find((s) => s.statKey === "damage")).toBeUndefined();
     expect(beh?.stats.find((s) => s.statKey === "heavyAttackDamage")?.target).toBe("mod_panel");
     const stats = withMod("killing_blow");
     expect(stats.moddedBaseDamage).toBeCloseTo(weapon.damage, 8);

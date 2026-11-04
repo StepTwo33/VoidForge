@@ -284,7 +284,7 @@ export const MOD_BEHAVIORS_SECONDARY: Record<string, VerifiedModBehavior> = {
   ]),
   recuperate: mod("recuperate", [
     line("duration", "mod_panel", "multiplicative_percent", "wiki: Recuperate — on-kill heal rate"),
-    line("health", "mod_panel", "multiplicative_percent", "wiki: Recuperate — on-kill heal (not max health)"),
+    line("healthOrbHealth", "mod_panel", "multiplicative_percent", "wiki: Recuperate — -25% Health from Health Orbs (not max health)"),
   ]),
   reflex_draw: mod("reflex_draw", [
     line("accuracy", "mod_panel", "multiplicative_percent", "Reflex Draw: accuracy \u2014 On Equip: \\\\n<LOWER_IS_BETTER>-40% Weapon Recoil and +40% Accuracy for 8s (arsenal display only)"),

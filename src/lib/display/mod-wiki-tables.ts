@@ -21,6 +21,16 @@ export interface WikiRankTable {
 }
 
 export const MOD_WIKI_RANK_TABLES: Record<string, Record<string, WikiRankTable>> = {
+  // Round 44b (wiki.warframe.com mod pages): card lines that need a unit or a non-linear rank table.
+  augment_nokko_reroot_rampage: {
+    toxinDamage: { unit: "", values: [175, 200, 225, 250] },
+  },
+  recover: {
+    healthOrbHealth: { unit: "%", values: [-6.25, -12.5, -18.75, -25] },
+  },
+  recuperate: {
+    healthOrbHealth: { unit: "%", values: [-6.25, -12.5, -18.75, -25] },
+  },
   afterburner: {
     igniteDuration: { unit: "s", values: [6, 8, 10, 12] },
     heatDamage: { unit: "", values: [200, 300, 400, 500] },
@@ -445,19 +455,20 @@ export const MOD_WIKI_RANK_TABLES: Record<string, Record<string, WikiRankTable>>
     energyToShields: { unit: "%", values: [40, 40, 40, 40, 40, 40, 40] },
   },
   set_bonus_gladiator: {
-    critPerCombo: { unit: "%", values: [15, 15, 15, 15, 15, 15, 15] },
+    critPerCombo: { unit: "%", values: [0, 10, 20, 30, 40, 50, 60] },
   },
   set_bonus_hunter: {
     companionDamageToStatus: { unit: "%", values: [150, 150, 150, 150, 150, 150, 150] },
   },
+  // Round 44b: set pseudo-mods, index = pieces equipped (wiki set pages).
   set_bonus_mecha: {
-    markExplosion: { unit: "%", values: [150, 150, 150, 150, 150] },
+    markDuration: { unit: "s", values: [0, 3, 6, 9, 12] },
   },
   set_bonus_synth: {
-    pistolReloadSpeed: { unit: "%", values: [15, 15, 15, 15, 15] },
+    holsterReloadPerSecond: { unit: "%", values: [0, 5, 10, 15, 20] },
   },
   set_bonus_tek: {
-    markDuration: { unit: "s", values: [10, 10, 10, 10, 10] },
+    zoneDamagePerSecond: { unit: "", values: [0, 50, 100, 150, 200] },
   },
   set_bonus_vigilante: {
     critEnhanceChance: { unit: "%", values: [30, 30, 30, 30, 30, 30, 30] },
@@ -583,7 +594,6 @@ export const PANEL_ONLY_MOD_STATS: Record<string, readonly string[]> = {
   hunt: ["finisherChance"],
   hunter_command: ["commandOnStatus"],
   hunter_synergy: ["criticalChance"],
-  killing_blow: ["damage", "heavyAttackEfficiency"],
   manifold_bond: ["abilityDuration"],
   mecha_empowered: ["armorOnMarkKill"],
   medi_ray: ["range", "health"],

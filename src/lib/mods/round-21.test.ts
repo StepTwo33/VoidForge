@@ -114,8 +114,8 @@ describe("Round 21: card values match the wiki stat tables", () => {
     expect([0, 3].map((r) => card("augment_mag_sgreedy_pull", r))).toEqual([["+40% Loot Pull"], ["+100% Loot Pull"]]);
     // Sonic Fracture: Armor cap 1500 at every rank (was +6000).
     expect(card("augment_banshee_sonic_fracture", 3)[1]).toBe("+1500 Armor Cap");
-    // Synth set bonus: +15% pistol reload at every rank (was +75%).
-    expect([0, 4].map((r) => card("set_bonus_synth", r))).toEqual([["+15% Pistol Reload Speed"], ["+15% Pistol Reload Speed"]]);
+    // Synth set bonus (round 44b, wiki Synth Set): holstered weapons reload 5% of magazine/s per piece.
+    expect([0, 4].map((r) => card("set_bonus_synth", r))).toEqual([["0% Holstered magazine reload/s"], ["+20% Holstered magazine reload/s"]]);
   });
 
   it("faction mods read as the wiki multiplier: x1.3 / x1.55 Damage to <faction>, x1.33 to Sentients", () => {

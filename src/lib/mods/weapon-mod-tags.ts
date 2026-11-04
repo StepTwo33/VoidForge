@@ -6,6 +6,7 @@ import {
   MOD_WEAPON_SPECIFIC_INCOMPAT_TAGS,
   WEAPON_WIKI_SPECIFIC_TAGS,
 } from "@/data/mod-weapon-tags";
+import { WEAPON_WIKI_BASE_TAGS, WEAPON_WIKI_TRIGGERS } from "@/data/wiki-weapon-base-tags";
 import { getWeaponRadialAttacks } from "@/lib/weapons/weapon-radial-utils";
 
 /** Tags weapons carry for mod compatibility (mirrors wiki weapon tags). */
@@ -99,27 +100,44 @@ export function getWeaponModProfile(
     tags.add(STANCE_TYPE_TO_TAG[weapon.stanceType]);
   }
 
-  if (trigger === "held" || isKnownBeamWeapon(weapon.id)) {
-    tags.add("POWER_WEAPON");
-    tags.add("BEAM");
-  }
-
-  if (getWeaponRadialAttacks(weapon as Weapon).length > 0) {
-    tags.add("AOE");
-  }
-
-  if (category === "bow" || category === "launcher") {
-    tags.add("SINGLESHOT");
-  } else if (trigger.startsWith("semi") || trigger === "charge") {
-    tags.add("SINGLESHOT");
+  // Round 44b: SEMI_AUTO (Semi-Auto trigger on every fire mode) drives the Cannonade mods (wiki mod
+  // pages). It used to be folded into SINGLESHOT, which is a different wiki tag (Vectis, Tigris,
+  // Lenz, …) and blocked e.g. Synth Charge on Lex. Wiki-known guns with a wiki Trigger get SEMI_AUTO
+  // from WEAPON_WIKI_BASE_TAGS only (our triggerType often holds the class, e.g. Bronco "Pistol").
+  if (WEAPON_WIKI_TRIGGERS[weapon.id] !== undefined) {
+    // decided by the wiki base tags below
+  } else if (trigger.startsWith("semi")) {
+    tags.add("SEMI_AUTO");
   } else if (trigger === "sniper" && !NON_SEMI_SNIPER_IDS.has(weapon.id)) {
-    // Sniper class uses triggerType "Sniper" in arsenal data; most are semi-auto
-    // (Rubico, Vectis, …) and need SINGLESHOT for Semi-Rifle Cannonade etc.
-    tags.add("SINGLESHOT");
+    // Sniper class uses triggerType "Sniper" in arsenal data; most are semi-auto (Rubico, Vectis, …).
+    tags.add("SEMI_AUTO");
   }
 
-  if (!tags.has("POWER_WEAPON")) {
-    tags.add("PROJECTILE");
+  const wikiBaseTags = WEAPON_WIKI_BASE_TAGS[weapon.id];
+  if (wikiBaseTags || WEAPON_WIKI_SPECIFIC_TAGS[weapon.id]) {
+    // Wiki-known weapon: AOE / BEAM / POWER_WEAPON / PROJECTILE / SINGLESHOT come from the wiki only.
+    for (const tag of wikiBaseTags ?? []) tags.add(tag);
+  } else {
+    if (trigger === "held" || isKnownBeamWeapon(weapon.id)) {
+      tags.add("POWER_WEAPON");
+      tags.add("BEAM");
+    }
+
+    if (getWeaponRadialAttacks(weapon as Weapon).length > 0) {
+      tags.add("AOE");
+    }
+
+    if (category === "bow" || category === "launcher") {
+      tags.add("SINGLESHOT");
+    } else if (trigger.startsWith("semi") || trigger === "charge") {
+      tags.add("SINGLESHOT");
+    } else if (trigger === "sniper" && !NON_SEMI_SNIPER_IDS.has(weapon.id)) {
+      tags.add("SINGLESHOT");
+    }
+
+    if (!tags.has("POWER_WEAPON")) {
+      tags.add("PROJECTILE");
+    }
   }
 
   for (const tag of WEAPON_WIKI_SPECIFIC_TAGS[weapon.id] ?? []) {
@@ -214,7 +232,6 @@ function normalizeRequiredTags(tags: readonly string[]): string[] {
   return tags.map((t) => {
     if (t === "PROJECTILE") return "PROJECTILE";
     if (t === "BEAM") return "BEAM";
-    if (t === "SEMI_AUTO") return "SINGLESHOT";
     return t;
   });
 }

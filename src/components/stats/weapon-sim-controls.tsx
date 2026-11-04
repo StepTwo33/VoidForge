@@ -135,15 +135,7 @@ export function WeaponSimControls({
                 min={0}
                 max={3}
                 onChange={(v) => onSimParamsChange({ ...simParams, extraTekSetPiecesOffWeapon: v })}
-                tooltip="Tek mods on other slots (Collateral on frame, Gravity on melee, Assault/Enhance on Kavat). In-game set needs 4 pieces."
-              />
-              <SimSlider
-                label="Tek vs marked (DPS)"
-                value={simParams.applyTekSetVsMarkedDamage ? 1 : 0}
-                min={0}
-                max={1}
-                onChange={(v) => onSimParamsChange({ ...simParams, applyTekSetVsMarkedDamage: v >= 1 })}
-                tooltip="When Tek 4-set is complete, apply +60% damage vs Kavat-marked enemies to this primary's paper DPS."
+                tooltip="Tek mods on other slots (Collateral on frame, Gravity on melee, Assault/Enhance on Kavat). Each piece grows the companion's damage zone (set summary only, no weapon DPS)."
               />
             </>
           )}
@@ -741,11 +733,6 @@ export function WeaponSimControls({
             {stats.synthSetReloadBonusApplied != null && stats.synthSetReloadBonusApplied > 0 && (
               <div className="text-[10px] text-cyan-700 dark:text-cyan-400">
                 Synth 4-set: +{(stats.synthSetReloadBonusApplied * 100).toFixed(0)}% reload speed
-              </div>
-            )}
-            {stats.tekSetVsMarkedDamageMultiplier != null && stats.tekSetVsMarkedDamageMultiplier > 1 && (
-              <div className="text-[10px] text-fuchsia-700 dark:text-fuchsia-400">
-                Tek 4-set vs marked: ×{stats.tekSetVsMarkedDamageMultiplier.toFixed(2)} damage (optional)
               </div>
             )}
           </div>

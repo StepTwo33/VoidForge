@@ -31,7 +31,8 @@ export const MOD_BEHAVIORS_ARCHMELEE: Record<string, VerifiedModBehavior> = {
     line("damage", "weapon_dps", "multiplicative_percent", "Cutting Edge: damage \u2014 +110% Melee Damage"),
   ]),
   extend: mod("extend", [
-    line("range", "mod_panel", "multiplicative_percent", "Extend: range \u2014 +100 Attraction Range (In Space), +3 Melee Range (arsenal display only)"),
+    line("range", "mod_panel", "flat", "wiki: Extend — +3m Melee Range (0.75m per rank; arsenal display only)"),
+    line("attractionRange", "mod_panel", "flat", "wiki: Extend — +100m Attraction Range in space (25m per rank; arsenal display only)"),
   ]),
   furor: mod("furor", [
     line("attackSpeed", "weapon_dps", "multiplicative_percent", "Furor: attackSpeed \u2014 +10% Attack Speed"),

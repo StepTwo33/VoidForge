@@ -139,6 +139,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
   galvanized_reflex: mod("galvanized_reflex", [
     line("duration", "mod_panel", "multiplicative_percent", "Galvanized Reflex: duration \u2014 +50% Heavy Attack Efficiency\\\\nOn Melee Kill:\\\\n+20 Initial Combo for 20s. Stack\u2026"),
     line("heavyAttackEfficiency", "weapon_dps", "additive_percent", "wiki: Galvanized Reflex — +50% Heavy Attack Efficiency (base; stacks conditional)"),
+    line("initialCombo", "mod_panel", "flat", "wiki: Galvanized Reflex — On Melee Kill: +20 Initial Combo for 20s, stacks up to 4x (card only)"),
   ]),
   galvanized_steel: mod("galvanized_steel", [
     line("criticalChance", "weapon_dps", "multiplicative_percent", "wiki: Galvanized Steel — +110% Critical Chance (x2 for Heavy Attacks)"),
@@ -179,10 +180,8 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("statusChance", "weapon_dps", "multiplicative_percent", "Jugulus Barbs: statusChance \u2014 +90% <DT_PUNCTURE_COLOR>Puncture, +60% Status Chance"),
   ]),
   killing_blow: mod("killing_blow", [
-    line("damage", "mod_panel", "multiplicative_percent", "wiki: Killing Blow — legacy damage alias (heavy-attack only)"),
     line("heavyAttackDamage", "mod_panel", "multiplicative_percent", "wiki: Killing Blow — +120% Melee Damage On Heavy Attack"),
     line("heavyWindUp", "weapon_dps", "multiplicative_percent", "wiki: Killing Blow — +60% Heavy Attack Wind Up Speed"),
-    line("heavyAttackEfficiency", "mod_panel", "multiplicative_percent", "wiki: Killing Blow — legacy wind-up alias"),
   ]),
   lasting_sting: mod("lasting_sting", [
     line("statusDuration", "weapon_dps", "multiplicative_percent", "Lasting Sting: statusDuration \u2014 +110% Status Duration (extends DoT ticks)"),
@@ -401,6 +400,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
     line("explosionChance", "mod_panel", "multiplicative_percent", "Volatile Quick Return: explosionChance \u2014 -4 Bounce, +3 Blast Radius, +100% Chance to explode on Bounce (Disables Punch Th\u2026"),
     line("punchThrough", "mod_panel", "multiplicative_percent", "Volatile Quick Return: punchThrough \u2014 -4 Bounce, +3 Blast Radius, +100% Chance to explode on Bounce (Disables Punch Th\u2026 (arsenal display only)"),
     line("ricochetBounces", "mod_panel", "multiplicative_percent", "Volatile Quick Return: ricochetBounces \u2014 -4 Bounce, +3 Blast Radius, +100% Chance to explode on Bounce (Disables Punch Th\u2026"),
+    line("blastRadius", "mod_panel", "flat", "wiki: Volatile Quick Return — +0.8/1.5/2.3/3m Blast Radius (card only)"),
   ]),
   volatile_rebound: mod("volatile_rebound", [
     line("explosionChance", "mod_panel", "multiplicative_percent", "Volatile Rebound: explosionChance \u2014 +100% Chance to explode on Bounce (Disables Punch Through)"),

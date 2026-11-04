@@ -324,6 +324,14 @@ export function weaponAcceptsSynthReloadBonus(weapon: { category: string }): boo
   return c === "pistol" || c === "secondary" || c === "dual_pistols";
 }
 
+/** wiki.warframe.com/w/Tek_Set (1/2/3/4 pieces). */
+const TEK_SET_DESCRIPTION =
+  "Each piece: companion marks a 3/6/9/12m zone every 60/45/30/15s that deals 50/100/150/200 damage per second";
+
+/** wiki.warframe.com/w/Synth_Set (1/2/3/4 pieces). */
+const SYNTH_SET_DESCRIPTION =
+  "Each piece: holstered Primary and Secondary weapons reload 5% of their magazine per second (20% at 4/4)";
+
 export function buildWeaponSetBonusSummary(
   weapon: { category: string; triggerType?: string },
   localMods: ModSlot[],
@@ -332,7 +340,6 @@ export function buildWeaponSetBonusSummary(
     extraVigilanteModsFromWarframe?: number;
     extraSynthSetPiecesOffWeapon?: number;
     extraTekSetPiecesOffWeapon?: number;
-    applyTekSetVsMarkedDamage?: boolean;
     applyHunterSetVsSlashDamage?: boolean;
     applyMechaEmpoweredVsMarkedDamage?: boolean;
   },
@@ -375,18 +382,16 @@ export function buildWeaponSetBonusSummary(
       pieces: synthPieces,
       required: 4,
       active: synthPieces >= 4 && weaponAcceptsSynthReloadBonus(weapon),
-      description: "4-piece: +15% Pistol Reload Speed",
+      description: SYNTH_SET_DESCRIPTION,
     },
     {
       setId: "tek",
       label: "Tek",
       pieces: tekPieces,
       required: 4,
-      active:
-        tekPieces >= 4 &&
-        !!sim.applyTekSetVsMarkedDamage &&
-        primaryStyle,
-      description: "4-piece: +60% damage to marked enemies (optional DPS toggle)",
+      // wiki.warframe.com/w/Tek_Set: a damage zone, not a damage bonus vs marked enemies.
+      active: tekPieces >= 1,
+      description: TEK_SET_DESCRIPTION,
     },
     {
       setId: "hunter",
@@ -496,15 +501,15 @@ export function buildWarframeSetBonusSummary(
       pieces: synth,
       required: 4,
       active: synth >= 4,
-      description: "4-piece: +15% Pistol Reload Speed; companion reloads secondary",
+      description: SYNTH_SET_DESCRIPTION,
     },
     {
       setId: "tek",
       label: "Tek",
       pieces: tek,
       required: 4,
-      active: tek >= 4,
-      description: "4-piece: Kavat marks +10s; +60% damage to marked enemies",
+      active: tek >= 1,
+      description: TEK_SET_DESCRIPTION,
     },
     {
       setId: "amar",

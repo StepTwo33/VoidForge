@@ -356,36 +356,6 @@ function enumerateSources(ctx: WeaponDpsCalcContext): OmitSource[] {
     });
   }
 
-  if ((sim.extraTekSetPiecesOffWeapon ?? 0) > 0) {
-    sources.push({
-      id: "wf-tek-pieces",
-      label: "Off-weapon Tek set",
-      category: "external",
-      nominal: `${sim.extraTekSetPiecesOffWeapon} Tek piece(s) elsewhere`,
-      tooltip: "Tek mods on other loadout slots toward the 4-piece set.",
-      apply: (base) => {
-        const next = cloneCtx(base);
-        next.simParams = { ...(next.simParams ?? DEFAULT_SIM_PARAMS), extraTekSetPiecesOffWeapon: 0 };
-        return next;
-      },
-    });
-  }
-
-  if (sim.applyTekSetVsMarkedDamage) {
-    sources.push({
-      id: "tek-marked",
-      label: "Tek vs marked",
-      category: "external",
-      nominal: "+60% damage vs marked",
-      tooltip: "Tek 4-set bonus vs Kavat-marked enemies.",
-      apply: (base) => {
-        const next = cloneCtx(base);
-        next.simParams = { ...(next.simParams ?? DEFAULT_SIM_PARAMS), applyTekSetVsMarkedDamage: false };
-        return next;
-      },
-    });
-  }
-
   if (sim.applyHunterSetVsSlashDamage) {
     sources.push({
       id: "hunter-slash",

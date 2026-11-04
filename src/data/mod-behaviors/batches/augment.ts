@@ -129,6 +129,7 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
   ]),
   augment_nokko_reroot_rampage: mod("augment_nokko_reroot_rampage", [
     line("range", "mod_panel", "flat", "Reroot Rampage: range \u2014 Reroot Augment: Sprodlings deal 250 Toxin in an 8m radius."),
+    line("toxinDamage", "mod_panel", "flat", "wiki: Reroot Rampage — 175/200/225/250 Toxin Damage per bounce (card only)"),
   ]),
   augment_koumei_kumihimo_loading: mod("augment_koumei_kumihimo_loading", [
     line("killsRequired", "mod_panel", "flat", "Kumihimo Loading: killsRequired \u2014 Kumihimo Augment: 6 passive-weapon kills grant a loaded die that always rolls 6."),
