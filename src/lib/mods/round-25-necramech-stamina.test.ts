@@ -12,7 +12,7 @@ describe("Round 25: Necramech Stamina removed", () => {
     expect(allMods.some((m) => m.name === "Necramech Stamina")).toBe(false);
     expect(VERIFIED_MOD_BEHAVIORS["necramech_stamina"]).toBeUndefined();
     expect(allMods.filter((m) => m.category === "necramech")).toHaveLength(27);
-    expect(allMods).toHaveLength(1512);
+    expect(allMods).toHaveLength(1510); // Round 48: -2 (Shred (Claws), Fury (Claws) retired)
   });
 
   it("is a retired mod, so saved builds and share links drop it on load", () => {

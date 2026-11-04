@@ -399,7 +399,7 @@ export const MOD_BEHAVIORS_MELEE: Record<string, VerifiedModBehavior> = {
   volatile_quick_return: mod("volatile_quick_return", [
     line("explosionChance", "mod_panel", "multiplicative_percent", "Volatile Quick Return: explosionChance \u2014 -4 Bounce, +3 Blast Radius, +100% Chance to explode on Bounce (Disables Punch Th\u2026"),
     line("punchThrough", "mod_panel", "multiplicative_percent", "Volatile Quick Return: punchThrough \u2014 -4 Bounce, +3 Blast Radius, +100% Chance to explode on Bounce (Disables Punch Th\u2026 (arsenal display only)"),
-    line("ricochetBounces", "mod_panel", "multiplicative_percent", "Volatile Quick Return: ricochetBounces \u2014 -4 Bounce, +3 Blast Radius, +100% Chance to explode on Bounce (Disables Punch Th\u2026"),
+    line("ricochetBounces", "mod_panel", "flat", "wiki/in-game: Volatile Quick Return \u2014 -1/-2/-3/-4 Bounces at R0-R3 (card only)"),
     line("blastRadius", "mod_panel", "flat", "wiki: Volatile Quick Return — +0.8/1.5/2.3/3m Blast Radius (card only)"),
   ]),
   volatile_rebound: mod("volatile_rebound", [

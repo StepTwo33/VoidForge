@@ -40,7 +40,7 @@ const FOCUS_TREES: Record<string, string[]> = {
 describe("removed mods", () => {
   it("are gone from the catalog, behaviors and incompatibility data", () => {
     const ids = [...Object.keys(RETIRED_MODS), "shotgun_spazz", "aura_speed_holster", "helminth_ferocity"];
-    expect(ids).toHaveLength(53);
+    expect(ids).toHaveLength(55);
     for (const id of ids) {
       expect(modsMap.has(id)).toBe(false);
       expect(VERIFIED_MOD_BEHAVIORS[id]).toBeUndefined();
@@ -50,7 +50,7 @@ describe("removed mods", () => {
 
   it("keeps the claw-slot companion mods the tied claws use", () => {
     const claws = { id: "chesa_claws", name: "Chesa Claws", category: "beast_claw", triggerType: "Melee" } as Weapon;
-    for (const id of ["claw_bite", "claw_maul", "claw_shred", "claw_swipe", "claw_heat", "claw_cold", "claw_fury"]) {
+    for (const id of ["claw_bite", "claw_maul", "claw_swipe", "claw_heat", "claw_cold"]) {
       expect(modsMap.has(id)).toBe(true);
       expect(modFitsCompanionWeapon(modsMap.get(id)!, claws)).toBe(true);
     }

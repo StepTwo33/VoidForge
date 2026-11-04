@@ -25,9 +25,6 @@ export const MOD_BEHAVIORS_COMPANION_WEAPON: Record<string, VerifiedModBehavior>
     line("cold", "weapon_dps", "elemental_from_base_damage", "Frost Claws: cold \u2014 +90% Cold Damage"),
   ]),
 
-  claw_fury: mod("claw_fury", [
-    line("attackSpeed", "weapon_dps", "multiplicative_percent", "Fury (Claws): attackSpeed \u2014 +30% Attack Speed"),
-  ]),
   claw_heat: mod("claw_heat", [
     line("heat", "weapon_dps", "elemental_from_base_damage", "Flame Claws: heat \u2014 +90% Heat Damage"),
   ]),
@@ -37,10 +34,6 @@ export const MOD_BEHAVIORS_COMPANION_WEAPON: Record<string, VerifiedModBehavior>
   ]),
   claw_maul: mod("claw_maul", [
     line("damage", "weapon_dps", "multiplicative_percent", "Maul (Claws): damage \u2014 +330% Melee Damage"),
-  ]),
-  claw_shred: mod("claw_shred", [
-    line("fireRate", "weapon_dps", "multiplicative_percent", "Shred (Claws): fireRate \u2014 +30% Fire Rate (duplicate attackSpeed key removed)"),
-    line("punchThrough", "mod_panel", "multiplicative_percent", "Shred (Claws): punchThrough \u2014 +1.2 Punch Through (arsenal display only)"),
   ]),
   claw_swipe: mod("claw_swipe", [
     line("range", "mod_panel", "multiplicative_percent", "Swipe (Claws): range \u2014 Strikes 4 additional enemies and increases Attack Range by 2m. (arsenal display only)"),

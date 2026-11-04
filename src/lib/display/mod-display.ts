@@ -285,6 +285,7 @@ export function formatModStatSpecial(modId: string, statKey: string, perRank: nu
   const wikiTable = MOD_RANK_VALUE_TABLES[modId]?.[statKey] ? undefined : MOD_WIKI_RANK_TABLES[modId]?.[statKey];
   if (wikiTable) {
     const value = wikiTable.values[Math.min(Math.max(Math.round(rank), 0), wikiTable.values.length - 1)];
+    if (statKey === "ricochetBounces") return `${formatStatNumber(value)} bounces`;
     return `${formatStatNumber(value)}${wikiTable.unit} ${getModStatLabel(statKey)}`;
   }
   if (FACTION_MULTIPLIER_KEYS.has(statKey) && !MOD_RANK_VALUE_TABLES[modId]?.[statKey]) {

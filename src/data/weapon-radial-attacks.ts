@@ -618,7 +618,7 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "name": "Orb Merging Damage",
       "magnetic": 100.0,
       "totalDamage": 100.0,
-      "radius": 12.0
+      "radius": 4.0
     },
     {
       "name": "Orb Explosion",

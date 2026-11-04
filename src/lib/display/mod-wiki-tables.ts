@@ -21,6 +21,13 @@ export interface WikiRankTable {
 }
 
 export const MOD_WIKI_RANK_TABLES: Record<string, Record<string, WikiRankTable>> = {
+  // Round 48 (Jason's in-game rank table, matches wiki.warframe.com Volatile Quick Return): bounces
+  // -1/-2/-3/-4 and blast radius +0.8/+1.5/+2.3/+3 m at R0-R3 (explosion chance 25/50/75/100% and
+  // cost 2/3/4/5 already follow the linear per-rank values).
+  volatile_quick_return: {
+    ricochetBounces: { unit: "", values: [-1, -2, -3, -4] },
+    blastRadius: { unit: "m", values: [0.8, 1.5, 2.3, 3] },
+  },
   // Round 44b (wiki.warframe.com mod pages): card lines that need a unit or a non-linear rank table.
   augment_nokko_reroot_rampage: {
     toxinDamage: { unit: "", values: [175, 200, 225, 250] },

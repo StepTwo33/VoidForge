@@ -1961,7 +1961,7 @@ export const MELEE_BARE_GOLDENS: Array<{
     "damage": 300.0,
     "impact": 120.0,
     "electricity": 180.0,
-    "criticalChance": 0.14,
+    "criticalChance": 0.13,
     "criticalMultiplier": 1.8,
     "statusChance": 0.39999998,
     "fireRate": 0.66666669,

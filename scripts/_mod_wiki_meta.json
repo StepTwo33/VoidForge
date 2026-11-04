@@ -804,20 +804,10 @@
     "isAugment": false,
     "wikiName": "Maul"
   },
-  "claw_shred": {
-    "wikiType": "Rifle",
-    "isAugment": false,
-    "wikiName": "Shred"
-  },
   "claw_swipe": {
     "wikiType": "Kavat Claws",
     "isAugment": false,
     "wikiName": "Swipe"
-  },
-  "claw_fury": {
-    "wikiType": "Melee",
-    "isAugment": false,
-    "wikiName": "Fury"
   },
   "claw_magnetic": {
     "wikiType": "Claws",

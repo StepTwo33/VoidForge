@@ -126,6 +126,11 @@ export const RETIRED_MODS: Readonly<Record<string, { name: string; reason: Retir
   evolution_incarnon_rifle: { name: "Incarnon Evolution - Rifle", reason: "no_source" },
   evolution_incarnon_pistol: { name: "Incarnon Evolution - Pistol", reason: "no_source" },
   evolution_incarnon_melee: { name: "Incarnon Evolution - Melee", reason: "no_source" },
+  // Round 48: catalog copies of the rifle mod Shred and the melee mod Fury in the Beast Claws slot.
+  // wiki.warframe.com "Beast Claws Mods" (the claw slot's full mod list) has neither, and
+  // Module:Mods/data types Shred as Rifle and Fury as Melee, so neither goes on Beast Claws.
+  claw_shred: { name: "Shred (Claws)", reason: "no_source" },
+  claw_fury: { name: "Fury (Claws)", reason: "no_source" },
 };
 
 export interface MigratedMod {

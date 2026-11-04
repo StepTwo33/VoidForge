@@ -49,7 +49,8 @@ export const MOD_INCOMPATIBILITY_TAGS: Record<string, readonly string[]> = {
   "eject_magazine": ["AOE","POWER_WEAPON"],
   "electromagnetic_shielding": ["POWER_WEAPON"],
   "enduring_strike": ["HOUND_WEAPON","SENTINEL_WEAPON"],
-  "energizing_shot": ["AOE","POWER_WEAPON"],
+  // Update 38.6: exalted weapons can equip it; AOE still blocks Glory, Balefire and Noctua.
+  "energizing_shot": ["AOE"],
   "energy_channel_r10": ["HOUND_WEAPON","SENTINEL_WEAPON"],
   "exposing_harpoon": ["POWER_WEAPON"],
   "feathered_arrows": ["AOE"],

@@ -2435,21 +2435,6 @@ const RAW_MODS: Mod[] = [
     "rarity": "uncommon"
   },
   {
-    "id": "claw_shred",
-    "name": "Shred (Claws)",
-    "polarity": "madurai",
-    "drain": 6,
-    "maxRank": 5,
-    "category": "companion_weapon",
-    "subCategory": "beast_weapon",
-    "stats": {
-      "punchThrough": 0.2,
-      "fireRate": 5
-    },
-    "description": "+30% Fire Rate (x2 for Bows)\\n+1.2 Punch Through",
-    "rarity": "rare"
-  },
-  {
     "id": "claw_swipe",
     "name": "Swipe (Claws)",
     "polarity": "madurai",
@@ -2489,20 +2474,6 @@ const RAW_MODS: Mod[] = [
       "cold": 15
     },
     "description": "+90% Cold Damage",
-    "rarity": "uncommon"
-  },
-  {
-    "id": "claw_fury",
-    "name": "Fury (Claws)",
-    "polarity": "madurai",
-    "drain": 4,
-    "maxRank": 5,
-    "category": "companion_weapon",
-    "subCategory": "beast_weapon",
-    "stats": {
-      "attackSpeed": 5
-    },
-    "description": "+30% Attack Speed",
     "rarity": "uncommon"
   },
   {
@@ -5511,7 +5482,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "amalgam_argonak_metal_auger",
     "name": "Amalgam Argonak Metal Auger",
-    "polarity": "madurai",
+    "polarity": "naramon",
     "drain": 6,
     "maxRank": 5,
     "category": "augment",
@@ -5541,7 +5512,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "amalgam_javlok_magazine_warp",
     "name": "Amalgam Javlok Magazine Warp",
-    "polarity": "madurai",
+    "polarity": "naramon",
     "drain": 6,
     "maxRank": 5,
     "category": "augment",
@@ -10633,7 +10604,7 @@ const RAW_MODS: Mod[] = [
     "subCategory": "",
     "stats": {
       "explosionChance": 25.0,
-      "ricochetBounces": -4.0,
+      "ricochetBounces": -1.0,
       "blastRadius": 0.75
     },
     "description": "-4 Bounce, +3 Blast Radius, +100% Chance to explode on Bounce (Disables Punch Through)",
@@ -14317,7 +14288,7 @@ const RAW_MODS: Mod[] = [
   {
     "id": "tek_collateral_r3",
     "name": "Tek Collateral",
-    "polarity": "madurai",
+    "polarity": "naramon",
     "drain": 2,
     "maxRank": 3,
     "category": "warframe",

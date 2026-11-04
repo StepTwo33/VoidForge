@@ -50,15 +50,7 @@ describe("beast claw cores (wiki max rank, Phase M11)", () => {
     expect(stats.criticalMultiplier).toBeCloseTo(cmq * 3.2, 8);
   });
 
-  it("Fury (Claws) R5: +30% attack speed", () => {
-    const weapon = requireClaws("chesa_claws");
-    expect(withMod("claw_fury").fireRate).toBeCloseTo(weapon.fireRate * 1.3, 8);
-  });
-
-  it("Shred (Claws) R5: +30% fire rate (AS)", () => {
-    const weapon = requireClaws("chesa_claws");
-    expect(withMod("claw_shred").fireRate).toBeCloseTo(weapon.fireRate * 1.3, 8);
-  });
+  // Round 48: Fury (Claws) / Shred (Claws) were retired (not Beast Claws mods on wiki.warframe.com).
 
   it("Flame / Frost Claws R5: +90% heat / cold from base", () => {
     const weapon = requireClaws("chesa_claws");

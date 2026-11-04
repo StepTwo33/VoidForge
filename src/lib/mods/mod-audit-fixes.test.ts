@@ -341,7 +341,6 @@ describe("Mod Audit Fixes (Calculator, Card Text, Equip Rules, Metadata, Retired
     expect(modsMap.get("archon_intensify")?.rarity).toBe("legendary");
     expect(modsMap.get("archon_stretch")?.rarity).toBe("legendary");
     expect(modsMap.get("augment_universal_health_conversion")?.polarity).toBe("vazarin");
-    expect(modsMap.get("claw_shred")?.polarity).toBe("madurai");
 
     const retired = [
       "cannonade",

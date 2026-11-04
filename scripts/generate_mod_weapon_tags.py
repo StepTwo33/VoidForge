@@ -41,6 +41,14 @@ MOD_EXCLUSIVE_WEAPON_OVERRIDES: dict[str, list[str]] = {
     "prototype_shock_coils": ["efv_8_mars"],
 }
 
+# Incompatibility tags the wiki data module still lists but a later patch lifted.
+# Energizing Shot: wiki.warframe.com Energizing Shot patch history, Update 38.6: "Exalted Weapons can
+# now equip Energizing Shot (excluding Jade's Glory, Hildryn's Balefire and Dante's Noctua since they
+# are AOE weapons)." Module:Mods/data still has { "POWER_WEAPON", "AOE" }; AOE alone blocks those three.
+MOD_INCOMPAT_TAG_REMOVALS: dict[str, frozenset[str]] = {
+    "energizing_shot": frozenset({"POWER_WEAPON"}),
+}
+
 # Stances mis-parsed as weapon-exclusive when wiki Type is a weapon name.
 MOD_EXCLUSIVE_WEAPON_BLOCKLIST = frozenset({"atlantis_vulcan", "mafic_rain"})
 
@@ -181,7 +189,7 @@ def main() -> None:
         entry = find_wiki_entry(wiki, mod)
         if not entry:
             continue
-        inc = entry.get("incompatibilityTags") or []
+        inc = [t for t in (entry.get("incompatibilityTags") or []) if t not in MOD_INCOMPAT_TAG_REMOVALS.get(mod["id"], frozenset())]
         comp = entry.get("compatibilityTags") or []
         profile_tags = sorted(t for t in inc if t in PROFILE_INCOMPAT_TAGS)
         weapon_tags = sorted(t for t in inc if t not in PROFILE_INCOMPAT_TAGS)

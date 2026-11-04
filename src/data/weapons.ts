@@ -13690,7 +13690,7 @@ export const allWeapons: Weapon[] = [
     "slash": 0,
     "electricity": 180,
     "fireRate": 0.66666669,
-    "criticalChance": 0.14,
+    "criticalChance": 0.13,
     "criticalMultiplier": 1.8,
     "statusChance": 0.39999998,
     "magazine": 0,
