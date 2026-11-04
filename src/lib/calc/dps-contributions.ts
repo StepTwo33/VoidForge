@@ -16,10 +16,7 @@ import {
 import { mergeWeaponCalcOptions, resolveWeaponExternalBuffs, type WeaponBuffContext } from "@/lib/weapons/weapon-external-buffs";
 import {
   countSetModsInSlots,
-  countSynthSetPieces,
-  SYNTH_SET_MOD_IDS,
   VIGILANTE_MOD_IDS,
-  weaponAcceptsSynthReloadBonus,
   weaponSupportsPrimaryStyleSets,
 } from "@/lib/calc/set-bonuses";
 
@@ -389,21 +386,6 @@ function enumerateSources(ctx: WeaponDpsCalcContext): OmitSource[] {
     });
   }
 
-  if ((sim.extraSynthSetPiecesOffWeapon ?? 0) > 0) {
-    sources.push({
-      id: "wf-synth-pieces",
-      label: "Off-weapon Synth set",
-      category: "external",
-      nominal: `${sim.extraSynthSetPiecesOffWeapon} Synth piece(s) elsewhere`,
-      tooltip: "Synth set pieces on companion/warframe — mainly affects sustained DPS via reload.",
-      apply: (base) => {
-        const next = cloneCtx(base);
-        next.simParams = { ...(next.simParams ?? DEFAULT_SIM_PARAMS), extraSynthSetPiecesOffWeapon: 0 };
-        return next;
-      },
-    });
-  }
-
   if (ctx.linkage?.warframeMods && weaponSupportsPrimaryStyleSets(ctx.baseWeapon)) {
     const vigSet = new Set<string>(VIGILANTE_MOD_IDS);
     const vigFromWf = countSetModsInSlots(ctx.linkage.warframeMods, vigSet);
@@ -420,36 +402,6 @@ function enumerateSources(ctx: WeaponDpsCalcContext): OmitSource[] {
           next.linkage = {
             ...next.linkage,
             warframeMods: next.linkage.warframeMods.filter((s) => !vigSet.has(s.modId)),
-          };
-          return next;
-        },
-      });
-    }
-  }
-
-  if (ctx.linkage && weaponAcceptsSynthReloadBonus(ctx.baseWeapon)) {
-    const synthSet = new Set<string>(SYNTH_SET_MOD_IDS);
-    const totalSynth = countSynthSetPieces(ctx.linkage, ctx.modSlots);
-    const onWeaponSynth = countSetModsInSlots(ctx.modSlots, synthSet);
-    const offWeaponSynth = totalSynth - onWeaponSynth;
-    if (offWeaponSynth > 0 && totalSynth >= 4) {
-      sources.push({
-        id: "linkage-synth-reload",
-        label: "Synth 4-set reload (loadout)",
-        category: "set",
-        nominal: `${offWeaponSynth} off-weapon Synth piece(s)`,
-        tooltip: "Synth 4-set grants +15% reload speed on pistols when complete across the loadout.",
-        apply: (base) => {
-          const next = cloneCtx(base);
-          if (!next.linkage) return null;
-          const stripSynth = (slots?: ModSlot[]) =>
-            slots?.filter((s) => !synthSet.has(s.modId) || next.modSlots.some((w) => w.modId === s.modId && w.slotIndex === s.slotIndex));
-          next.linkage = {
-            warframeMods: stripSynth(next.linkage.warframeMods),
-            primaryMods: stripSynth(next.linkage.primaryMods),
-            secondaryMods: stripSynth(next.linkage.secondaryMods),
-            meleeMods: stripSynth(next.linkage.meleeMods),
-            companionMods: stripSynth(next.linkage.companionMods),
           };
           return next;
         },

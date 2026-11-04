@@ -923,8 +923,6 @@ export interface CalculatedStats {
   devouringAttritionBonus?: number;
   /** Latron Flensing Spikes: fraction of original armor removed per Puncture status stack. */
   punctureArmorStripPerStack?: number;
-  /** Synth 4-set: +0.15 reload speed bonus applied to secondaries when complete. */
-  synthSetReloadBonusApplied?: number;
   /** Sniper Shot Combo Counter damage multiplier applied (1 = off). */
   sniperComboMultiplier?: number;
   /** Hunter set: companion weapon damage multiplier vs Slash-status when sim toggle on. */

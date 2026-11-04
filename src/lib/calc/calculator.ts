@@ -48,10 +48,8 @@ import {
   sumClawElementalBonuses,
   buildWarframeSetBonusSummary,
   buildWeaponSetBonusSummary,
-  countSynthSetPieces,
   countUmbralSetPieces,
   getUmbralSetBonusMultiplier,
-  weaponAcceptsSynthReloadBonus,
 } from './set-bonuses';
 import { WARFRAME_ENERGY_RANK30 } from '@/data/warframe-energy-rank30';
 import { WARFRAME_HEALTH_RANK30, WARFRAME_SHIELD_RANK30 } from '@/data/warframe-health-shield-rank30';
@@ -504,7 +502,7 @@ function quantizeStatsDamage(stats: CalculatedStats, moddedBaseDamage: number): 
 // Implemented: Umbral (×stats on Vit/Fiber/Int; Tau unscaled), Sacrificial (1.5× on both mods when 2),
 // Gladiator (+10% crit/(CM−1) per piece, incl. sim.wf pieces; 6 pieces = +60%), Vigilante (5%/mod, primary only;
 //   also counts Vigilante on linked Warframe or sim.extraVigilanteModsFromWarframe; folded into avg crit for DPS).
-// Cross-slot: Synth 4pc +15% pistol reload; loadout linkage in set-bonuses.ts.
+// Cross-slot: Synth set is holster reload only (wiki Synth_Set) — summary text, no weapon stat change.
 // Warframe panel: Augur/Hunter/Mecha/Synth/Tek + Augur shields/cast + Mecha mark timing.
 // Hunter vs Slash / Mecha Empowered vs marked are optional DPS toggles.
 // Mecha mark-kill status-spread DoT is sim-gated via applyMechaSpreadDps (not in TTK).
@@ -1432,14 +1430,9 @@ export function calculateWeaponBuild(
     stats.magazine = Math.round(stats.magazine + weaponModAcc.flatMagazineBonus);
   }
 
-  // Synth 4-set: +15% reload speed on pistols when full set across linked loadout
-  const synthPieces = linkage
-    ? countSynthSetPieces(linkage, equippedMods)
-    : countSynthSetPieces(undefined, equippedMods) + (sim.extraSynthSetPiecesOffWeapon ?? 0);
-  if (synthPieces >= 4 && weaponAcceptsSynthReloadBonus(baseWeapon)) {
-    reloadBonus += 0.15;
-    stats.synthSetReloadBonusApplied = 0.15;
-  }
+  // Synth set (wiki.warframe.com/w/Synth_Set): the only bonus is holstered Primary/Secondary
+  // weapons reloading 5% of their magazine per second per piece. There is no reload-speed bonus
+  // on the equipped weapon, so the old +15% pistol reload at 4 pieces is gone (Jason-approved, round 44b).
 
   // Reload: positive bonus = faster, negative bonus = slower (Burdened Magazine etc.)
   // Wiki Reload: Total Reload Time = Reload Time / (1 + Reload Speed Bonus), for

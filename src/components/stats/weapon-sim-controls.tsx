@@ -146,7 +146,7 @@ export function WeaponSimControls({
               min={0}
               max={3}
               onChange={(v) => onSimParamsChange({ ...simParams, extraSynthSetPiecesOffWeapon: v })}
-              tooltip="Synth Fiber + Deconstruct on companion and Synth Reflex on Warframe (max 3 off this pistol). At 4 total with Synth Charge here, +15% reload speed applies."
+              tooltip="Synth Fiber + Deconstruct on companion and Synth Reflex on Warframe (max 3 off this pistol). Each piece makes holstered weapons reload 5% of their magazine per second (set summary only, no weapon DPS)."
             />
           )}
           {weapon && weaponSupportsHunterCompanionSet(weapon) && (
@@ -728,11 +728,6 @@ export function WeaponSimControls({
             {(stats.slashOnImpactProcChance ?? 0) > 0 && (
               <div className="text-[10px] text-red-700 dark:text-red-400">
                 Internal Bleeding: {((stats.slashOnImpactProcChance ?? 0) * 100).toFixed(0)}% Slash on Impact procs{stats.fireRate < 2.5 ? " (x2 — fire rate < 2.5)" : ""}
-              </div>
-            )}
-            {stats.synthSetReloadBonusApplied != null && stats.synthSetReloadBonusApplied > 0 && (
-              <div className="text-[10px] text-cyan-700 dark:text-cyan-400">
-                Synth 4-set: +{(stats.synthSetReloadBonusApplied * 100).toFixed(0)}% reload speed
               </div>
             )}
           </div>
