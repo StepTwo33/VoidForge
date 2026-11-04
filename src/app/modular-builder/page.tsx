@@ -12,7 +12,7 @@ import { useMods, useArcanes, useWeapons } from "@/lib/weapons/use-data";
 import { calculateWeaponBuild, calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
 import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
 import { Weapon, Mod, EquippedMod, SimulationParams, DEFAULT_SIM_PARAMS, ModularBuildData } from "@/lib/types";
-import { getWeaponArcanes } from "@/lib/weapons/weapon-arcane-config";
+import { getWeaponArcanes, arcanesForSlot, arcaneSlotLabel, type WeaponArcaneConfig } from "@/lib/weapons/weapon-arcane-config";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import type { SlotType } from "@/components/mod-picker";
 import { Zap, Wrench, ChevronRight, Save, FolderOpen, Gem, ArrowLeftRight } from "lucide-react";
@@ -144,7 +144,7 @@ export default function ModularBuilderPage() {
       ? assembledWeapon.modSlots + (isSecondaryKitgun ? 1 : 0)
       : 0;
 
-  const arcaneConfig = assembledWeapon ? getWeaponArcanes(assembledWeapon) : { slots: 0, arcanes: [], label: "" };
+  const arcaneConfig: WeaponArcaneConfig = assembledWeapon ? getWeaponArcanes(assembledWeapon) : { slots: 0, arcanes: [], label: "" };
 
   const [slotPolarities, setSlotPolarities] = useState<Record<number, string>>({});
   const capacity = hasOrokinCatalyst ? 60 : 30;
@@ -871,7 +871,7 @@ export default function ModularBuilderPage() {
                           key={i}
                           arcane={equippedArcanes[i]}
                           rank={equippedArcanes[i]?.maxRank ?? 0}
-                          label={`${arcaneConfig.label} ${arcaneConfig.slots > 1 ? i + 1 : ""}`}
+                          label={arcaneSlotLabel(arcaneConfig, i)}
                           onAdd={() => { setActiveArcaneSlot(i); setArcanePickerOpen(true); }}
                           onRemove={() => setEquippedArcanes((prev) => { const next = [...prev]; next[i] = null; return next; })}
                         />
@@ -1036,7 +1036,7 @@ export default function ModularBuilderPage() {
         <ArcanePicker
           open={arcanePickerOpen}
           onOpenChange={setArcanePickerOpen}
-          arcanes={arcaneConfig.arcanes}
+          arcanes={arcanesForSlot(arcaneConfig, activeArcaneSlot)}
           equippedArcaneIds={equippedArcanes.filter(Boolean).map((a) => a!.id)}
           onSelect={(arcane) => {
             setEquippedArcanes((prev) => {
@@ -1046,7 +1046,7 @@ export default function ModularBuilderPage() {
             });
             setArcanePickerOpen(false);
           }}
-          title={`Select ${arcaneConfig.label}`}
+          title={`Select ${arcaneSlotLabel(arcaneConfig, activeArcaneSlot)}`}
         />
       )}
 

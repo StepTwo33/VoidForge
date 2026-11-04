@@ -509,7 +509,7 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
     expect(withArc.ammoEfficiency).toBeCloseTo(0.65, 4);
   });
 
-  it("Primary Overcharge R5: +350% multishot (paper assumes Energy >90% at cap)", () => {
+  it("Primary Overcharge R5: 35% of Max Energy as multishot, cap +350% (Round 45)", () => {
     const braton = allWeapons.find((w) => w.id === "braton")!;
     const over = allArcanes.find((a) => a.id === "primary_overcharge")!;
     const def = getArcaneEffectDef("primary_overcharge")!;
@@ -524,9 +524,18 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
       undefined,
       { ...DEFAULT_SIM_PARAMS, arcaneStacks: 0 },
     );
-    // wiki R5 cap +350% MS
-    expect(withArc.multishot).toBeCloseTo(bare.multishot + braton.multishot * 3.5, 4);
-    expect(withArc.burstDps).toBeGreaterThan(bare.burstDps);
+    // No max energy known → no bonus (wiki: Hildryn/Lavos get nothing; bonus scales with Max Energy).
+    expect(withArc.multishot).toBeCloseTo(bare.multishot, 6);
+    expect(withArc.usesWarframeMaxEnergy).toBe(true);
+    const at = (warframeMaxEnergy: number) =>
+      calculateWeaponBuildWithArcanes(braton, [], new Map(), [over], undefined, {
+        ...DEFAULT_SIM_PARAMS,
+        warframeMaxEnergy,
+      }).multishot;
+    // wiki table: 1000 Max Energy reaches the R5 cap; 500 → 175%; above 1000 stays capped.
+    expect(at(1000)).toBeCloseTo(bare.multishot + braton.multishot * 3.5, 4);
+    expect(at(500)).toBeCloseTo(bare.multishot + braton.multishot * 1.75, 4);
+    expect(at(2000)).toBeCloseTo(bare.multishot + braton.multishot * 3.5, 4);
   });
 
   it("Primary Deadhead: 3 stacks R5 → +360% damage and +30% headshot mult (passive)", () => {
@@ -831,7 +840,7 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
     expect(full.reloadTime).toBeCloseTo(bare.reloadTime / 1.75, 4);
   });
 
-  it("Secondary Surge: stacks>0 → +700% damage at R5 cap (×8)", () => {
+  it("Secondary Surge: next shot ×8 at R5 cap, averaged as one surged shot per magazine (Round 45)", () => {
     const lex = allWeapons.find((w) => w.id === "lex")!;
     const surge = allArcanes.find((a) => a.id === "secondary_surge")!;
     const bare = calculateWeaponBuild(lex, [], new Map());
@@ -843,7 +852,10 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
       undefined,
       { ...DEFAULT_SIM_PARAMS, arcaneStacks: 1 },
     );
-    expect(full.totalDamage).toBeCloseTo(bare.totalDamage * 8, 4);
+    // Per-shot damage is unchanged; only the next shot is ×8 (wiki: bonus consumed on firing).
+    expect(full.totalDamage).toBeCloseTo(bare.totalDamage, 4);
+    expect(full.nextShotDamageMultiplier).toBeCloseTo(8, 6);
+    expect(full.burstDps).toBeCloseTo(bare.burstDps * (1 + 7 / lex.magazine), 2);
   });
 
   it("Arcane Pistoleer: stacks>0 → 60% chance for Infinite Ammo for 12s at R5 (uptime 1 − 0.4^12), AE stat unchanged", () => {
@@ -1166,7 +1178,7 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
     expect(getWeaponArcanes(artemis).arcanes.some((a) => a.id === "longbow_sharpshot")).toBe(true);
   });
 
-  it("Theorem Demulcent: 0 stacks = no buff; 15 stacks R5 → +180% damage", () => {
+  it("Theorem Demulcent: 0 stacks = no buff; 15 stacks R5 → +180% in the paired Residual's element", () => {
     const braton = allWeapons.find((w) => w.id === "braton")!;
     const demulcent = allArcanes.find((a) => a.id === "theorem_demulcent")!;
     const def = getArcaneEffectDef("theorem_demulcent")!;
@@ -1191,7 +1203,20 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
       undefined,
       { ...DEFAULT_SIM_PARAMS, arcaneStacks: 15 },
     );
-    expect(full.totalDamage).toBeCloseTo(bare.totalDamage * 2.8, 4);
+    // No Residual paired → no zone → no bonus.
+    expect(full.totalDamage).toBeCloseTo(bare.totalDamage, 4);
+    const boils = allArcanes.find((a) => a.id === "residual_boils")!;
+    const paired = calculateWeaponBuildWithArcanes(
+      braton,
+      [],
+      new Map(),
+      [demulcent, boils],
+      undefined,
+      { ...DEFAULT_SIM_PARAMS, arcaneStacks: 15 },
+    );
+    // Bare Braton: +180% of base damage (24) as Heat (Residual Boils' element).
+    expect(paired.elements.find((e) => e.type === "heat")?.value).toBeCloseTo(braton.damage * 1.8, 4);
+    expect(paired.totalDamage).toBeCloseTo(bare.totalDamage + braton.damage * 1.8, 4);
   });
 
   it("Secondary Shiver: 0 stacks = no buff; 10 Cold stacks R5 → +450% damage", () => {
@@ -2090,9 +2115,9 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
     expect(full.criticalChance).toBeCloseTo(bare.criticalChance, 5);
     expect(full.burstDps).toBeCloseTo(bare.burstDps, 2);
     expect(full.arcaneBonuses?.criticalChance).toBeCloseTo(420, 4);
-    // heavy uses CC+4.2 absolute
+    // wiki: additive with True Steel → heavy CC = base × (1 + 4.2) (Round 45; was base + 4.2)
     const oldAvg = avgCritMultiplier(bare.criticalChance, bare.criticalMultiplier);
-    const newAvg = avgCritMultiplier(bare.criticalChance + 4.2, bare.criticalMultiplier);
+    const newAvg = avgCritMultiplier(bare.criticalChance + skana.criticalChance * 4.2, bare.criticalMultiplier);
     expect(full.heavyAttackDamage).toBeCloseTo(bare.heavyAttackDamage * (newAvg / oldAvg), 4);
   });
 

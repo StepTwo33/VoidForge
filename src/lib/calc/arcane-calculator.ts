@@ -7,7 +7,7 @@ import {
   applyCustomArcaneToWeapon,
   WarframeArcaneContext,
 } from "@/lib/calc/arcane-handlers";
-import { getPersistenceDamageCap, scaleArcaneEffectLine } from "@/lib/calc/arcane-utils";
+import { arcaneStackCap, getPersistenceDamageCap, scaleArcaneEffectLine } from "@/lib/calc/arcane-utils";
 import {
   estimateEnervateCritStacks,
   isArcaneMetadataStat,
@@ -18,11 +18,17 @@ import {
 import { CalculatedStats, Mod, WarframeCalculatedStats, Weapon } from "@/lib/types";
 import { addStatusResistance, ARCANE_STATUS_RESIST } from "@/lib/calc/status-resistance";
 
-/** Effective stack count for arcane effect scaling. */
+/**
+ * Effective stack count for arcane effect scaling.
+ * `rank` picks a per-rank stack cap (`stackCapByRank`). `stackOverride` lets a Warframe
+ * arcane use a user-chosen stack count (Impetus / Camisado sliders, Intention ability count).
+ */
 export function effectiveArcaneStacks(
   def: ArcaneEffectDef,
   simStacks: number,
   isWeapon: boolean,
+  rank?: number,
+  stackOverride?: number,
 ): number {
   const isStacking = def.trigger === "stacks";
 
@@ -33,13 +39,19 @@ export function effectiveArcaneStacks(
     if (def.trigger === "passive") return 1;
     if (simStacks <= 0) return 0;
     if (!isStacking) return 1;
-    const cap = def.stackCap ?? def.maxRank + 1;
+    const cap = arcaneStackCap(def, rank ?? def.maxRank) ?? def.maxRank + 1;
     return Math.min(simStacks, cap);
   }
 
-  // Warframe: always active when equipped; stacking arcanes assume full stack cap.
+  // Warframe: always active when equipped; stacking arcanes assume full stack cap
+  // unless a stack count is supplied.
   if (!isStacking) return 1;
-  return def.stackCap ?? 1;
+  const cap = arcaneStackCap(def, rank ?? def.maxRank);
+  if (stackOverride != null && Number.isFinite(stackOverride)) {
+    const n = Math.max(0, Math.floor(stackOverride));
+    return cap != null ? Math.min(n, cap) : n;
+  }
+  return cap ?? 1;
 }
 
 export type { WarframeArcaneContext } from "@/lib/calc/arcane-handlers";
@@ -236,18 +248,27 @@ function applyWarframeStatToBuild(
   }
 }
 
+/** Sim / build context the weapon arcane handlers read. */
+export interface ArcaneWeaponOpts {
+  applyHeadshots?: boolean;
+  warframeArmor?: number;
+  warframeMaxEnergy?: number;
+  /** Other arcane ids on the same weapon (Demulcent's paired Residual). */
+  coArcaneIds?: string[];
+}
+
 export function applyArcaneEffectsToWeapon(
   stats: CalculatedStats,
   arcaneId: string,
   rank: number,
   simStacks: number,
   baseWeapon?: Weapon,
-  opts?: { applyHeadshots?: boolean; warframeArmor?: number },
+  opts?: ArcaneWeaponOpts,
 ): void {
   const def = getArcaneEffectDef(arcaneId);
   if (!def || def.effects.length === 0) return;
 
-  const stacks = effectiveArcaneStacks(def, simStacks, true);
+  const stacks = effectiveArcaneStacks(def, simStacks, true, rank);
   // Zid-An Haras amp AE is always-on even at 0 sim stacks.
   if (stacks <= 0 && arcaneId !== "zid_an_haras") return;
 
@@ -260,6 +281,8 @@ export function applyArcaneEffectsToWeapon(
     simStacks,
     applyHeadshots: opts?.applyHeadshots,
     warframeArmor: opts?.warframeArmor,
+    warframeMaxEnergy: opts?.warframeMaxEnergy,
+    coArcaneIds: opts?.coArcaneIds,
   };
   if (applyCustomArcaneToWeapon(stats, handlerCtx)) return;
 
@@ -293,11 +316,12 @@ export function applyArcaneEffectsToWarframe(
   rank: number,
   simStacks: number,
   ctx?: WarframeArcaneContext,
+  stackOverride?: number,
 ): void {
   const def = getArcaneEffectDef(arcaneId);
   if (!def || def.effects.length === 0) return;
 
-  const stacks = effectiveArcaneStacks(def, simStacks, false);
+  const stacks = effectiveArcaneStacks(def, simStacks, false, rank, stackOverride);
   if (stacks <= 0) return;
 
   const context: WarframeArcaneContext = ctx ?? {
@@ -327,7 +351,7 @@ export function applyArcaneToWeaponFromMod(
   arcane: Mod,
   stacks: number = 1,
   baseWeapon?: Weapon,
-  opts?: { applyHeadshots?: boolean; warframeArmor?: number },
+  opts?: ArcaneWeaponOpts,
 ): void {
   const rank = arcane.maxRank;
   if (getArcaneEffectDef(arcane.id)) {
@@ -351,10 +375,11 @@ export function applyArcaneToWarframeFromMod(
   stacks: number = 1,
   rank?: number,
   ctx?: WarframeArcaneContext,
+  stackOverride?: number,
 ): void {
   const r = rank ?? arcane.maxRank;
   if (getArcaneEffectDef(arcane.id)) {
-    applyArcaneEffectsToWarframe(stats, arcane.id, r, stacks, ctx);
+    applyArcaneEffectsToWarframe(stats, arcane.id, r, stacks, ctx, stackOverride);
     return;
   }
   for (const [stat, value] of Object.entries(arcane.stats)) {

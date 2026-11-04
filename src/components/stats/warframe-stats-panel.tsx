@@ -2059,6 +2059,20 @@ function AdaptationSurvivability({ stats }: { stats: WarframeCalculatedStats }) 
   );
 }
 
+/** Warframe arcanes with a stack-count input (Round 45). Defaults = the slider max. */
+const WF_ARCANE_STACK_SLIDERS: Record<string, { label: string; tooltip: string }> = {
+  arcane_impetus: {
+    label: "Impetus: unique ability statuses",
+    tooltip:
+      "One stack per unique status type your abilities have applied (20 s, refreshed by any ability damage). Default 14 = the wiki's maximum realistic count (13 without Helminth).",
+  },
+  arcane_camisado: {
+    label: "Camisado: summon hit stacks",
+    tooltip:
+      "Stacks from your summons' attacks; the bonus applies to your next ability cast. Default 10 = full stacks (wiki max +60% at R5), i.e. the strength of a cast made at full stacks.",
+  },
+};
+
 export function WarframeStatsPanel({
   stats,
   warframe,
@@ -2072,6 +2086,8 @@ export function WarframeStatsPanel({
   onEmberImmolationHeatPctChange,
   gaussBatteryPct: gaussBatteryPctProp,
   onGaussBatteryPctChange,
+  arcaneStacksById,
+  onArcaneStacksChange,
 }: {
   stats: WarframeCalculatedStats | null;
   warframe?: Warframe | null;
@@ -2088,6 +2104,9 @@ export function WarframeStatsPanel({
   /** Controlled Gauss battery gauge (builder wires into ability cards + passive). */
   gaussBatteryPct?: number;
   onGaussBatteryPctChange?: (n: number) => void;
+  /** Warframe arcane stack inputs (Arcane Impetus / Arcane Camisado), keyed by arcane id. */
+  arcaneStacksById?: Record<string, number>;
+  onArcaneStacksChange?: (arcaneId: string, n: number) => void;
 }) {
   const [frostColdEnemiesLocal, setFrostColdEnemiesLocal] = useState(5);
   const frostColdEnemies = frostColdEnemiesProp ?? frostColdEnemiesLocal;
@@ -2105,10 +2124,13 @@ export function WarframeStatsPanel({
       .map((arcane, i) => {
         if (!arcane) return null;
         const rank = arcaneRanks?.[i] ?? arcane.maxRank;
-        return getArcaneDisplayInfo(arcane, rank, {
-          totalArmor: stats.totalArmor,
-          persistenceActive: stats.persistenceActive,
-        });
+        return {
+          ...getArcaneDisplayInfo(arcane, rank, {
+            totalArmor: stats.totalArmor,
+            persistenceActive: stats.persistenceActive,
+          }),
+          id: arcane.id,
+        };
       })
       .filter(Boolean);
   }, [equippedArcanes, arcaneRanks, stats]);
@@ -2416,18 +2438,40 @@ export function WarframeStatsPanel({
               <div className="flex justify-between items-center">
                 <span className="text-xs font-medium text-purple-300">{info.name}</span>
                 <span className="flex items-center gap-1.5">
-                  {info.fullStacks != null && (
-                    <span
-                      className="rounded border border-purple-500/40 px-1 text-[9px] text-purple-700 dark:text-purple-300"
-                      title={`Warframe stats assume this arcane is at full stacks (${info.fullStacks}). There is no stack input for Warframe arcanes.`}
-                      data-testid="arcane-full-stacks"
-                    >
-                      Full stacks ×{info.fullStacks}
-                    </span>
-                  )}
+                  {info.fullStacks != null && (() => {
+                    const used = stats.arcaneStackCounts?.[info.id] ?? info.fullStacks;
+                    const full = used >= info.fullStacks;
+                    const title =
+                      info.id === "arcane_intention"
+                        ? `Stacks = this build's channeled abilities on the wiki's eligible list (Helminth and augments included), max ${info.fullStacks}.`
+                        : WF_ARCANE_STACK_SLIDERS[info.id]
+                          ? `Applied at ${used} of ${info.fullStacks} stacks. Set the count with the slider below.`
+                          : `Warframe stats assume this arcane is at full stacks (${info.fullStacks}).`;
+                    return (
+                      <span
+                        className="rounded border border-purple-500/40 px-1 text-[9px] text-purple-700 dark:text-purple-300"
+                        title={title}
+                        data-testid="arcane-full-stacks"
+                      >
+                        {full ? `Full stacks ×${info.fullStacks}` : `Stacks ×${used}/${info.fullStacks}`}
+                      </span>
+                    );
+                  })()}
                   <span className="text-[10px] text-muted-foreground font-mono">R{info.rank}/{info.maxRank}</span>
                 </span>
               </div>
+              {WF_ARCANE_STACK_SLIDERS[info.id] && info.fullStacks != null && onArcaneStacksChange && (
+                <div className="py-1" data-testid={`arcane-stack-slider-${info.id}`}>
+                  <SimSlider
+                    label={WF_ARCANE_STACK_SLIDERS[info.id].label}
+                    value={Math.min(arcaneStacksById?.[info.id] ?? info.fullStacks, info.fullStacks)}
+                    min={0}
+                    max={info.fullStacks}
+                    onChange={(v) => onArcaneStacksChange(info.id, v)}
+                    tooltip={WF_ARCANE_STACK_SLIDERS[info.id].tooltip}
+                  />
+                </div>
+              )}
               {info.applied.map((line, i) => (
                 <div key={`a-${i}`} className="py-0.5">
                   <StatRow

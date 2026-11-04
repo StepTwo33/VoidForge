@@ -45,7 +45,7 @@ import {
 import { Zap, Flag, Flame, Plus, X, Gem, Save, FolderOpen, Share2, Check, Upload, Crosshair, Orbit, Swords, ArrowLeftRight } from "lucide-react";
 import { isPrimaryWeaponCategory } from "@/lib/mods/mod-weapon-eligibility";
 import { isTomeWeapon } from "@/lib/weapons/tome-weapons";
-import { getWeaponArcanes } from "@/lib/weapons/weapon-arcane-config";
+import { getWeaponArcanes, arcanesForSlot, arcaneSlotLabel } from "@/lib/weapons/weapon-arcane-config";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import { incarnonDataMap } from "@/data/incarnon";
 import { cn } from "@/lib/utils";
@@ -1209,7 +1209,7 @@ export default function WeaponBuilderPage() {
                             key={i}
                             arcane={equippedArcanes[i]}
                             rank={equippedArcanes[i]?.maxRank ?? 0}
-                            label={`${arcaneConfig.label} ${arcaneConfig.slots > 1 ? i + 1 : ""}`}
+                            label={arcaneSlotLabel(arcaneConfig, i)}
                             onAdd={() => { setActiveArcaneSlot(i); setArcanePickerOpen(true); }}
                             onRemove={() => setEquippedArcanes((prev) => { const next = [...prev]; next[i] = null; return next; })}
                           />
@@ -1283,7 +1283,7 @@ export default function WeaponBuilderPage() {
         <ArcanePicker
           open={arcanePickerOpen}
           onOpenChange={setArcanePickerOpen}
-          arcanes={getWeaponArcanes(selectedWeapon).arcanes}
+          arcanes={arcanesForSlot(getWeaponArcanes(selectedWeapon), activeArcaneSlot)}
           equippedArcaneIds={equippedArcanes.filter(Boolean).map((a) => a!.id)}
           onSelect={(arcane) => {
             setEquippedArcanes((prev) => {
@@ -1293,7 +1293,7 @@ export default function WeaponBuilderPage() {
             });
             setArcanePickerOpen(false);
           }}
-          title={`Select ${getWeaponArcanes(selectedWeapon).label}`}
+          title={`Select ${arcaneSlotLabel(getWeaponArcanes(selectedWeapon), activeArcaneSlot)}`}
         />
       )}
 

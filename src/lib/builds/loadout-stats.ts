@@ -34,6 +34,7 @@ import {
   type WeaponBuffContext,
 } from "@/lib/weapons/weapon-external-buffs";
 import type {
+  Ability,
   CalculatedStats,
   Companion,
   CompanionCalculatedStats,
@@ -322,7 +323,7 @@ function calcModularSlotStats(
 }
 
 export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOptions = {}): LoadoutStatsResult {
-  const simParams = options.simParams ?? scenarioSimParams("midFight");
+  let simParams = options.simParams ?? scenarioSimParams("midFight");
   const enemy = options.enemy ?? null;
   const enemyLevel = options.enemyLevel ?? 100;
   const steelPath = !!options.steelPath;
@@ -352,6 +353,13 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
       const wb = loadout.warframeBuild as NonNullable<Loadout["warframeBuild"]> &
         Pick<WarframeBuildData, "arcaneRanks">;
       const shards = wb.shards;
+      // Arcane Intention: this build's abilities (Helminth slot substituted) + mod names.
+      const warframeArcaneCtx = (abilities: Ability[] | undefined, mods: ModSlot[]) => ({
+        abilities: resolveAbilitiesWithHelminth(abilities, wb.helminthAbilityId, wb.helminthSlot),
+        equippedModNames: mods
+          .map((m) => modsMap.get(m.modId)?.name)
+          .filter((n): n is string => !!n),
+      });
       const dualConfig = getDualFormConfig(loadout.warframeBuild.warframeId);
       if (dualConfig) {
         const formStats = dualConfig.forms.map((form) => {
@@ -364,7 +372,8 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
             | undefined;
           const arcaneIds = isDefault ? wb.arcaneIds : sliceWithArcanes?.arcaneIds;
           const arcaneRanks = isDefault ? wb.arcaneRanks : sliceWithArcanes?.arcaneRanks;
-          const stats = calculateWarframeBuild(warframeForDualForm(wf, form.id), mods, modsMap, setLinkage);
+          const formWf = warframeForDualForm(wf, form.id);
+          const stats = calculateWarframeBuild(formWf, mods, modsMap, setLinkage);
           return {
             id: form.id,
             label: form.label,
@@ -373,6 +382,7 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
               shards,
               resolveSavedArcaneSlots(arcaneIds, 2),
               arcaneRanks,
+              warframeArcaneCtx(formWf.abilities, mods),
             ),
           };
         });
@@ -390,6 +400,7 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
           shards,
           resolveSavedArcaneSlots(wb.arcaneIds, 2),
           wb.arcaneRanks,
+          warframeArcaneCtx(wf.abilities, wb.mods || []),
         );
         result.warframe = { name: wf.name, stats };
       }
@@ -423,6 +434,10 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
         warframeModSlots: setLinkage.warframeMods,
         allMods: modsMap,
       };
+      // Primary Overcharge scales with this frame's real max energy.
+      if (simParams.warframeMaxEnergy == null) {
+        simParams = { ...simParams, warframeMaxEnergy: result.warframe!.stats.totalEnergy };
+      }
 
       const wfStr = result.warframe?.stats.abilityStrength ?? 1;
       const calcExaltedSlot = (

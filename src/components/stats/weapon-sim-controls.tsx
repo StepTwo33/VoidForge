@@ -112,6 +112,16 @@ export function WeaponSimControls({
               ))}
             </div>
           )}
+          {stats.usesWarframeMaxEnergy && (
+            <SimSlider
+              label="WF Max Energy (Overcharge)"
+              value={simParams.warframeMaxEnergy ?? 0}
+              min={0}
+              max={1000}
+              onChange={(v) => onSimParamsChange({ ...simParams, warframeMaxEnergy: v })}
+              tooltip="Primary Overcharge: Multishot = 35% of your Warframe's Max Energy while energy is above 90%, capped by rank (R5 +350% at 1000 Max Energy). 0 = not set (no bonus). Loadouts fill this from the equipped Warframe."
+            />
+          )}
           {isMelee && (
             <SimSlider
               label="WF Gladiator" value={simParams.extraGladiatorMods} min={0} max={3}

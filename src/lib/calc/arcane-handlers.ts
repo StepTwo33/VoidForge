@@ -25,6 +25,10 @@ export interface ArcaneHandlerContext {
   applyHeadshots?: boolean;
   /** From sim — Primary Bulwark armor input. */
   warframeArmor?: number;
+  /** From sim / loadout — Primary Overcharge max-energy input. */
+  warframeMaxEnergy?: number;
+  /** Other arcanes on the same weapon (Theorem Demulcent reads the paired Residual). */
+  coArcaneIds?: string[];
 }
 
 function trackBonus(stats: { arcaneBonuses?: Record<string, number> }, stat: string, value: number): void {
@@ -67,6 +71,110 @@ function applyAdditiveBaseDamage(stats: CalculatedStats, pct: number): void {
     applyWeaponDamageMult(stats, (add / before) * 100);
   }
   stats.appliedBaseDamageBonus = db + add;
+}
+
+/**
+ * Fire-rate arcanes add into the fire-rate mod sum (wiki Arcane Acceleration: "Additively
+ * stacks with mods that increase fire rate (e.g. Speed Trigger)"; same note on Tempo,
+ * Velocity, Strike). Rescales fireRate from (1 + modFR) to (1 + modFR + arcane).
+ */
+export function applyAdditiveFireRate(stats: CalculatedStats, pct: number): void {
+  if (pct === 0 || stats.fireRateLocked) return;
+  const bonus = stats.fireRateBonus ?? 0;
+  const add = pct / 100;
+  const before = Math.max(0.01, 1 + bonus);
+  const after = Math.max(0.01, 1 + bonus + add);
+  stats.fireRate *= after / before;
+  stats.fireRateBonus = bonus + add;
+}
+
+/**
+ * Reload arcanes add into the reload-speed sum (wiki Fractalized Reset / Arcane Momentum:
+ * "Stacks additively with other sources of reload speed bonus such as Fast Hands").
+ * Reload time = base / (1 + Σ reload speed).
+ */
+export function applyAdditiveReloadSpeed(stats: CalculatedStats, pct: number): void {
+  if (pct === 0) return;
+  const bonus = stats.reloadSpeedBonus ?? 0;
+  const add = pct / 100;
+  const before = Math.max(0.01, 1 + bonus);
+  const after = Math.max(0.01, 1 + bonus + add);
+  stats.reloadTime *= before / after;
+  stats.reloadSpeedBonus = bonus + add;
+}
+
+/**
+ * One additive pool for Amp / Operator damage arcanes (wiki Eternal Eradicate: "additive
+ * to other Operator and Amp damage bonuses, such as … Virtuos Fury").
+ */
+function applyAmpDamagePool(stats: CalculatedStats, pct: number): void {
+  if (pct === 0) return;
+  const pool = stats.ampDamageArcaneBonus ?? 0;
+  const add = pct / 100;
+  applyWeaponDamageMult(stats, ((1 + pool + add) / (1 + pool) - 1) * 100);
+  stats.ampDamageArcaneBonus = pool + add;
+}
+
+/** wiki Secondary Shiver Notes: multiplicative with Hornet Strike on these weapons only. */
+const SHIVER_MULTIPLICATIVE_IDS = new Set([
+  "cyanex",
+  "epitaph",
+  "epitaph_prime",
+  "seer",
+  "kuva_seer",
+  "sepulcrum",
+  "tenet_spirex",
+]);
+
+function shiverIsMultiplicative(weapon?: Weapon): boolean {
+  const id = weapon?.id ?? "";
+  return SHIVER_MULTIPLICATIVE_IDS.has(id) || /catchmoon/.test(id);
+}
+
+/** Residual Arcane element (wiki: Boils Heat, Malodor Cold, Shock Electricity, Viremia Toxin). */
+export const RESIDUAL_ELEMENT: Record<string, "heat" | "cold" | "electricity" | "toxin"> = {
+  residual_boils: "heat",
+  residual_malodor: "cold",
+  residual_shock: "electricity",
+  residual_viremia: "toxin",
+};
+
+const COMBINED_ELEMENT_PARTS: Record<string, [string, string]> = {
+  blast: ["heat", "cold"],
+  corrosive: ["electricity", "toxin"],
+  gas: ["heat", "toxin"],
+  magnetic: ["cold", "electricity"],
+  radiation: ["heat", "electricity"],
+  viral: ["cold", "toxin"],
+};
+
+/**
+ * Add `amount` of a base element to the element bucket: into the same element if present,
+ * else into a combined element that contains it (wiki Demulcent: Cryo Rounds Cold + Viremia
+ * Toxin → Viral), else as its own element.
+ */
+function addToElementBucket(stats: CalculatedStats, element: string, amount: number): void {
+  if (amount <= 0) return;
+  const lists = [stats.elements, stats.rawElements].filter(Boolean) as { type: string; value: number }[][];
+  const touched = new Set<object>();
+  const comboWith = (a: string) =>
+    Object.entries(COMBINED_ELEMENT_PARTS).find(
+      ([, parts]) => parts.includes(a) && parts.includes(element) && a !== element,
+    )?.[0];
+  for (const list of lists) {
+    const same = list.find((e) => e.type === element);
+    const combined = same ? undefined : list.find((e) => COMBINED_ELEMENT_PARTS[e.type]?.includes(element));
+    // A lone modded base element combines with the new one (Cold + Toxin → Viral).
+    const lone = same || combined ? undefined : list.find((e) => comboWith(e.type) && !list.some((x) => x.type === comboWith(e.type)));
+    const target = same ?? combined ?? lone;
+    if (target && touched.has(target)) continue;
+    if (target) {
+      if (lone) target.type = comboWith(lone.type)!;
+      target.value += amount;
+      touched.add(target);
+    } else list.push({ type: element, value: amount } as never);
+  }
+  stats.totalDamage += amount;
 }
 
 /** Virtuos Forge/Spike/Surge/Trojan: convert a fraction of amp (Void-proxy) damage to an element/IPS type. */
@@ -205,6 +313,8 @@ export const WEAPON_CUSTOM_ARCANE_IDS = new Set([
   "secondary_cryogenic",
   "virtuos_null",
   "conjunction_voltage",
+  "secondary_shiver",
+  "theorem_demulcent",
 ]);
 
 /** Wiki Primary Compression: continuous/beam AoE — no bonus despite radial data. */
@@ -318,7 +428,7 @@ function applyStackingDamageHandler(
     // Merciless reload is a Rank-5 passive (wiki), not per-stack — apply once at rank value.
     const reloadLine = findEffect(def, "reloadSpeed");
     const reload = reloadLine ? scaleArcaneEffectLine(reloadLine, rank, def.maxRank) : 0;
-    if (reload > 0) stats.reloadTime /= 1 + reload / 100;
+    if (reload > 0) applyAdditiveReloadSpeed(stats, reload); // additive with Quickdraw / Fast Hands
   }
   trackBonus(stats, opts?.bonusKey ?? "stackingDamageStacks", stacks);
   for (const line of def.effects ?? []) {
@@ -383,10 +493,19 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
     }
 
     case "primary_overcharge": {
-      const ms = scaledLine(def, findEffect(def, "multishot"), rank, stacks);
-      const baseMs = ctx.baseWeapon?.multishot ?? 1;
-      stats.multishot += baseMs * (ms / 100);
+      // wiki: "35% of Max Energy as Multishot" while energy > 90%, capped per rank (R5 +350%,
+      // reached at 1000 Max Energy). Paper: energy above 90%. No max energy known = no bonus.
+      const cap = scaledLine(def, findEffect(def, "multishot"), rank, 1);
+      const perEnergy = findEffect(def, "multishotPerMaxEnergy")?.maxValue ?? 0.35;
+      const maxEnergy = Math.max(0, ctx.warframeMaxEnergy ?? 0);
+      const ms = Math.min(cap, perEnergy * maxEnergy);
+      stats.usesWarframeMaxEnergy = true;
+      if (ms > 0 && !stats.multishotLocked) {
+        const baseMs = ctx.baseWeapon?.multishot ?? 1;
+        stats.multishot += baseMs * (ms / 100);
+      }
       trackBonus(stats, "multishot", ms);
+      trackBonus(stats, "multishotCap", cap);
       return true;
     }
 
@@ -396,7 +515,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       const perCastLine = findEffect(def, "corrosiveDamage");
       const capLine = findEffect(def, "meleeDamageBonus");
       const perCast = perCastLine ? scaleArcaneEffectLine(perCastLine, rank, def.maxRank) : 0;
-      const cap = capLine?.maxValue ?? 240;
+      const cap = capLine ? scaleArcaneEffectLine(capLine, rank, def.maxRank) : 240;
       const totalPct = Math.min(cap, perCast * Math.max(stacks, 0));
       if (totalPct > 0 && ctx.baseWeapon) {
         const base = ctx.baseWeapon.damage;
@@ -439,7 +558,10 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
     case "melee_doughty": {
       // wiki: round1(PunctureStatusChance% × 0.1 × CM_bonus), cap +50x flat CM
       // R5 CM_bonus = 1.0x per 10% puncture status chance
-      const cmPerTen = 0.5 + (rank / Math.max(def.maxRank, 1)) * 0.5;
+      const cmLine = findEffect(def, "critPerPunctureTen");
+      const cmPerTen = cmLine
+        ? scaleArcaneEffectLine(cmLine, rank, def.maxRank) / 100
+        : 0.5 + (rank / Math.max(def.maxRank, 1)) * 0.5;
       const totalDmg = Math.max(stats.totalDamage, 1e-6);
       const punctureFrac = Math.max(0, stats.puncture) / totalDmg;
       const punctureStatusPct = Math.max(0, stats.statusChance) * punctureFrac * 100;
@@ -470,7 +592,8 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       const { def, rank, baseWeapon, simStacks = 0 } = ctx;
       const ccLine = findEffect(def, "criticalChance");
       const perHitPct = ccLine ? scaleArcaneEffectLine(ccLine, rank, def.maxRank) : 0;
-      const threshold = findEffect(def, "bigCritThreshold")?.maxValue ?? 6;
+      const thresholdLine = findEffect(def, "bigCritThreshold");
+      const threshold = thresholdLine ? scaleArcaneEffectLine(thresholdLine, rank, def.maxRank) : 6;
       const hitStacks = Math.max(0, simStacks);
       if (hitStacks > 0 && perHitPct > 0) {
         stats.criticalChance += (perHitPct / 100) * hitStacks;
@@ -518,7 +641,8 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
     case "melee_crescendo": {
       // wiki: +1…+6 initial combo per finisher (R5 +6); accumulates for the mission.
       // Paper: simStacks = finisher count; cap initial combo contribution at 220 (12×).
-      const perFinisher = rank + 1;
+      const perLine = findEffect(def, "meleeComboInitial");
+      const perFinisher = perLine ? scaleArcaneEffectLine(perLine, rank, def.maxRank) : rank + 1;
       const finishers = Math.max(ctx.simStacks ?? 0, 0);
       const added = Math.min(220, perFinisher * finishers);
       if (added > 0) stats.comboCount += added;
@@ -530,7 +654,12 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // wiki: after shield break, +150% heavy damage at R5 for 20s. Paper: stacks>0 = buff up.
       const heavyLine = findEffect(def, "meleeHeavyDamage");
       const heavy = heavyLine ? scaleArcaneEffectLine(heavyLine, rank, def.maxRank) : 0;
-      if (heavy > 0) stats.heavyAttackDamage *= 1 + heavy / 100;
+      // wiki: "Melee Damage bonus is additive to mods like Pressure Point" — heavy attack only.
+      if (heavy > 0 && (stats.heavyAttackDamage ?? 0) > 0) {
+        const db = stats.appliedBaseDamageBonus ?? 0;
+        const before = 1 + db;
+        stats.heavyAttackDamage *= before > 0 ? (before + heavy / 100) / before : 1 + heavy / 100;
+      }
       trackBonus(stats, "meleeHeavyDamage", heavy);
       const shieldLine = findEffect(def, "shieldRestorePercent");
       if (shieldLine) {
@@ -541,7 +670,10 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
 
     case "melee_careen": {
       // wiki: ×1.25…×2.50 damage vs fully frozen (10 Cold). Paper: stacks>0 = vs frozen.
-      const mult = 1.25 + (rank / Math.max(def.maxRank, 1)) * 1.25;
+      const bonusLine = findEffect(def, "meleeDamageBonus");
+      const mult = bonusLine
+        ? 1 + scaleArcaneEffectLine(bonusLine, rank, def.maxRank) / 100
+        : 1.25 + (rank / Math.max(def.maxRank, 1)) * 1.25;
       if (mult > 1) applyWeaponDamageMult(stats, (mult - 1) * 100);
       trackBonus(stats, "meleeDamageBonus", (mult - 1) * 100);
       return true;
@@ -565,9 +697,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       const frLine = findEffect(def, "fireRate");
       const fr = frLine ? scaleArcaneEffectLine(frLine, rank, def.maxRank) : 0;
       const isShotgun = ctx.baseWeapon?.category === "shotgun";
-      if (fr > 0 && !isShotgun && !stats.fireRateLocked) {
-        stats.fireRate *= 1 + fr / 100;
-      }
+      if (fr > 0 && !isShotgun) applyAdditiveFireRate(stats, fr); // additive with Speed Trigger
       trackBonus(stats, "fireRate", isShotgun ? 0 : fr);
       const chanceLine = findEffect(def, "fireRateOnCrit");
       if (chanceLine) {
@@ -580,7 +710,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // wiki R5: +60% melee attack speed for 18s on hit. Paper: stacks>0 = buff up.
       const asLine = findEffect(def, "attackSpeed");
       const as = asLine ? scaleArcaneEffectLine(asLine, rank, def.maxRank) : 0;
-      if (as > 0) stats.fireRate *= 1 + as / 100;
+      if (as > 0) applyAdditiveFireRate(stats, as); // wiki: additive with Fury
       trackBonus(stats, "attackSpeed", as);
       const chanceLine = findEffect(def, "attackSpeedChance");
       if (chanceLine) {
@@ -621,7 +751,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
         /sniper/i.test(ctx.baseWeapon?.category ?? "");
       const reloadLine = findEffect(def, "reloadSpeedBonus") ?? findEffect(def, "reloadSpeed");
       const reload = reloadLine ? scaleArcaneEffectLine(reloadLine, rank, def.maxRank) : 0;
-      if (isSniper && reload > 0) stats.reloadTime /= 1 + reload / 100;
+      if (isSniper && reload > 0) applyAdditiveReloadSpeed(stats, reload);
       trackBonus(stats, "reloadSpeedBonus", isSniper ? reload : 0);
       const chanceLine = findEffect(def, "reloadSpeedChance");
       if (chanceLine) {
@@ -634,7 +764,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // wiki R5: +240% reload for 5s on ability cast. Paper: stacks>0 = buff up (skip proc uptime).
       const reloadLine = findEffect(def, "reloadSpeed");
       const reload = reloadLine ? scaleArcaneEffectLine(reloadLine, rank, def.maxRank) : 0;
-      if (reload > 0) stats.reloadTime /= 1 + reload / 100;
+      if (reload > 0) applyAdditiveReloadSpeed(stats, reload); // additive with Fast Hands
       trackBonus(stats, "reloadSpeed", reload);
       return true;
     }
@@ -652,14 +782,13 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // wiki: Damage% = min(max(Armor−1000,0), 500) × (0.5%…1%/armor). Cap at 1500 armor for all ranks.
       const armor = ctx.warframeArmor ?? 0;
       const threshold = findEffect(def, "damagePerArmorThreshold")?.maxValue ?? 1000;
-      const armorPtsTowardCap = 500;
-      const perArmorPct = scaleArcaneEffectLine(
-        { maxValue: 1, baseValue: 0.5 },
-        rank,
-        def.maxRank,
-      );
-      const armorPts = Math.min(Math.max(armor - threshold, 0), armorPtsTowardCap);
-      const dmgPct = armorPts * perArmorPct;
+      const rateLine = findEffect(def, "damagePerArmorOver");
+      const capLine = findEffect(def, "damagePerArmorCap");
+      const perArmorPct = rateLine
+        ? scaleArcaneEffectLine(rateLine, rank, def.maxRank)
+        : scaleArcaneEffectLine({ maxValue: 1, baseValue: 0.5 }, rank, def.maxRank);
+      const capPct = capLine ? scaleArcaneEffectLine(capLine, rank, def.maxRank) : perArmorPct * 500;
+      const dmgPct = Math.min(capPct, Math.max(armor - threshold, 0) * perArmorPct);
       if (dmgPct > 0) applyAdditiveBaseDamage(stats, dmgPct); // wiki: additive with Serration
       trackBonus(stats, "damagePerArmorOver", dmgPct);
       trackBonus(stats, "damagePerArmorThreshold", threshold);
@@ -696,7 +825,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // wiki R5: +60% amp damage for 8s after Operator ability. Paper: stacks>0 = buff up.
       const dmgLine = findEffect(def, "ampDamage") ?? findEffect(def, "damage");
       const dmg = dmgLine ? scaleArcaneEffectLine(dmgLine, rank, def.maxRank) : 0;
-      if (dmg > 0) applyWeaponDamageMult(stats, dmg);
+      if (dmg > 0) applyAmpDamagePool(stats, dmg); // wiki: additive with Virtuos Fury
       trackBonus(stats, "ampDamage", dmg);
       const durLine = findEffect(def, "buffDuration");
       if (durLine) {
@@ -788,7 +917,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // wiki R3: +30% amp damage for 4s on status (20% chance). Paper: stacks>0 = buff up.
       const dmgLine = findEffect(def, "damage");
       const dmg = dmgLine ? scaleArcaneEffectLine(dmgLine, rank, def.maxRank) : 0;
-      if (dmg > 0) applyWeaponDamageMult(stats, dmg);
+      if (dmg > 0) applyAmpDamagePool(stats, dmg); // wiki Eternal Eradicate: same additive pool
       trackBonus(stats, "damage", dmg);
       const chanceLine = findEffect(def, "healthRegenChance");
       if (chanceLine) {
@@ -814,7 +943,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       // wiki R3: +60% FR for 8s on kill (60% chance). Paper: stacks>0 = buff up.
       const frLine = findEffect(def, "ampFireRate");
       const frPct = frLine ? scaleArcaneEffectLine(frLine, rank, def.maxRank) : 0;
-      if (frPct > 0 && !stats.fireRateLocked) stats.fireRate *= 1 + frPct / 100;
+      if (frPct > 0) applyAdditiveFireRate(stats, frPct);
       trackBonus(stats, "ampFireRate", frPct);
       const chanceLine = findEffect(def, "healthRegenChance");
       if (chanceLine) {
@@ -927,11 +1056,13 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
     }
 
     case "arcane_melee_animosity": {
-      // wiki R5: +42% absolute CC per stack (cap 10 → +420%) on the next heavy only.
+      // wiki R5: +42% CC per stack (cap 10 → +420%) on the next heavy only.
       // Light-attack CC / DPS unchanged. Paper: sim stacks = built stacks.
       const ccLine = findEffect(def, "criticalChance");
       const perStackPct = ccLine ? scaleArcaneEffectLine(ccLine, rank, def.maxRank) : 0;
-      const bonusCc = (perStackPct / 100) * stacks;
+      // wiki: "Critical Chance bonus is additive to mods like True Steel" → % of base CC.
+      const baseCc = ctx.baseWeapon?.criticalChance ?? stats.criticalChance;
+      const bonusCc = baseCc * (perStackPct / 100) * stacks;
       const cm = stats.criticalMultiplier;
       const oldAvg = avgCritMultiplier(stats.criticalChance, cm);
       const newAvg = avgCritMultiplier(stats.criticalChance + bonusCc, cm);
@@ -1058,9 +1189,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       const frLine = findEffect(def, "fireRate");
       const fr = frLine ? scaleArcaneEffectLine(frLine, rank, def.maxRank) : 0;
       const isShotgun = ctx.baseWeapon?.category === "shotgun";
-      if (fr > 0 && isShotgun && !stats.fireRateLocked) {
-        stats.fireRate *= 1 + fr / 100;
-      }
+      if (fr > 0 && isShotgun) applyAdditiveFireRate(stats, fr); // additive with Shotgun Barrage
       trackBonus(stats, "fireRate", isShotgun ? fr : 0);
       return true;
     }
@@ -1070,9 +1199,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       const frLine = findEffect(def, "fireRate");
       const fr = frLine ? scaleArcaneEffectLine(frLine, rank, def.maxRank) : 0;
       const isSecondary = /secondary|pistol|kitgun/i.test(ctx.baseWeapon?.category ?? "");
-      if (fr > 0 && isSecondary && !stats.fireRateLocked) {
-        stats.fireRate *= 1 + fr / 100;
-      }
+      if (fr > 0 && isSecondary) applyAdditiveFireRate(stats, fr); // additive with Gunslinger
       trackBonus(stats, "fireRate", isSecondary ? fr : 0);
       return true;
     }
@@ -1088,7 +1215,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       trackBonus(stats, "multishot", ms);
       const reloadLine = findEffect(def, "reloadSpeed");
       const reload = reloadLine ? scaleArcaneEffectLine(reloadLine, rank, def.maxRank) : 0;
-      if (reload > 0) stats.reloadTime /= 1 + reload / 100;
+      if (reload > 0) applyAdditiveReloadSpeed(stats, reload);
       trackBonus(stats, "reloadSpeed", reload);
       return true;
     }
@@ -1112,11 +1239,20 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
     }
 
     case "secondary_surge": {
-      // wiki: +0.5% dmg / energy after cast; R5 cap +700% (×8). Paper: stacks>0 = at damage cap.
-      const caps = [200, 300, 400, 500, 600, 700];
-      const cap = caps[Math.min(rank, caps.length - 1)] ?? 700;
-      if (cap > 0) applyWeaponDamageMult(stats, cap);
-      trackBonus(stats, "damagePerEnergy", cap);
+      // wiki: each cast adds +0.5% per energy left, up to the rank cap (R5 +700% = ×8); the
+      // bonus is consumed by the NEXT shot (all multishot pellets), multiplicative with Hornet
+      // Strike. Paper: casts have filled the buff to the cap, and one surged shot per magazine
+      // (re-cast during the reload) — averaged into DPS like Charged Chamber (1 + B / magazine).
+      const capLine = findEffect(def, "maxDamageBonus");
+      const cap = capLine
+        ? scaleArcaneEffectLine(capLine, rank, def.maxRank)
+        : ([200, 300, 400, 500, 600, 700][Math.min(rank, 5)] ?? 700);
+      if (cap > 0) {
+        stats.firstShotDamageBonus = (stats.firstShotDamageBonus ?? 0) + cap / 100;
+        stats.nextShotDamageMultiplier = (stats.nextShotDamageMultiplier ?? 1) * (1 + cap / 100);
+      }
+      trackBonus(stats, "damagePerEnergy", scaleArcaneEffectLine(findEffect(def, "damagePerEnergy") ?? { maxValue: 0.5, constantAtAllRanks: true }, rank, def.maxRank));
+      trackBonus(stats, "maxDamageBonus", cap);
       return true;
     }
 
@@ -1469,6 +1605,36 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       return true;
     }
 
+    case "secondary_shiver": {
+      // wiki R5: +45% damage per Cold stack on the target (cap 10). "Provides additive damage
+      // to Hornet Strike on most weapons"; multiplicative on Cyanex, Catchmoon, Epitaph, Seer,
+      // Sepulcrum, Tenet Spirex. Not on radial damage.
+      const dmg = scaledLine(def, findEffect(def, "damage"), rank, stacks);
+      if (dmg > 0) {
+        if (shiverIsMultiplicative(ctx.baseWeapon)) applyWeaponDamageMult(stats, dmg);
+        else applyAdditiveBaseDamage(stats, dmg);
+      }
+      trackBonus(stats, "damage", dmg);
+      return true;
+    }
+
+    case "theorem_demulcent": {
+      // wiki R5: +12% per Residual tick stack (cap 15 → +180%). "Damage bonus is additive with
+      // elemental mods with the element of the paired Residual Arcane, and combines with modded
+      // elements" — e.g. Battacor 66 × (1 + Serration) × (1 + Cryo Rounds + 180%).
+      // The paired Residual is read from this weapon's arcanes; no Residual = no zone = no bonus.
+      const residual = (ctx.coArcaneIds ?? []).find((id) => RESIDUAL_ELEMENT[id]);
+      const element = residual ? RESIDUAL_ELEMENT[residual] : undefined;
+      const pct = scaledLine(def, findEffect(def, "damage"), rank, stacks);
+      if (element && pct > 0 && ctx.baseWeapon) {
+        // Like an elemental mod: base damage × (1 + Serration-type bonus) × pct.
+        const dmgMult = 1 + (stats.appliedBaseDamageBonus ?? 0);
+        addToElementBucket(stats, element, ctx.baseWeapon.damage * (pct / 100) * dmgMult);
+      }
+      trackBonus(stats, "damage", element ? pct : 0);
+      return true;
+    }
+
     case "conjunction_voltage": {
       // wiki R5: +1.5% reload / +3% MS per Electricity stack (cap 40); 12s duration (not × stacks).
       const reloadLine = findEffect(def, "reloadSpeed");
@@ -1476,7 +1642,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       const durLine = findEffect(def, "buffDuration");
       const reload = (reloadLine ? scaleArcaneEffectLine(reloadLine, rank, def.maxRank) : 0) * stacks;
       const ms = (msLine ? scaleArcaneEffectLine(msLine, rank, def.maxRank) : 0) * stacks;
-      if (reload > 0) stats.reloadTime /= 1 + reload / 100;
+      if (reload > 0) applyAdditiveReloadSpeed(stats, reload);
       if (ms > 0) stats.multishot *= 1 + ms / 100;
       trackBonus(stats, "reloadSpeed", reload);
       trackBonus(stats, "multishot", ms);

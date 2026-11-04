@@ -93,13 +93,14 @@ function resolveExaltedWeaponPreview(
   arcaneIds: (string | null)[] | undefined,
   abilityStrength: number,
   labelPrefix = "Exalted",
+  warframeMaxEnergy?: number,
 ): PublicBuildWeaponPreview | null {
   const exaltedArcanes = resolveSavedArcaneSlots(arcaneIds, 2).filter((m): m is Mod => m != null);
   if (mods.length === 0 && exaltedArcanes.length === 0) return null;
   const modsMap = getEffectiveModsMap();
   const base = enrichWeapon(weapon);
   const calcOptions = { abilityStrength };
-  const sim = scenarioSimParams("midFight");
+  const sim = { ...scenarioSimParams("midFight"), warframeMaxEnergy };
   const stats =
     exaltedArcanes.length > 0
       ? calculateWeaponBuildWithArcanes(base, mods, modsMap, exaltedArcanes, undefined, sim, calcOptions)
@@ -118,6 +119,7 @@ function resolveExaltedPreview(
   data: WarframeBuildData,
   allWeapons: Weapon[],
   abilityStrength = 1,
+  warframeMaxEnergy?: number,
 ): PublicBuildWeaponPreview | null {
   const exaltedWeapon = getPrimaryExaltedWeapon(data.warframeId, allWeapons);
   if (!exaltedWeapon) return null;
@@ -126,6 +128,8 @@ function resolveExaltedPreview(
     data.exaltedMods ?? [],
     data.exaltedArcaneIds,
     abilityStrength,
+    "Exalted",
+    warframeMaxEnergy,
   );
 }
 
@@ -133,6 +137,7 @@ function resolveExaltedMeleePreview(
   data: WarframeBuildData,
   allWeapons: Weapon[],
   abilityStrength = 1,
+  warframeMaxEnergy?: number,
 ): PublicBuildWeaponPreview | null {
   const meleeWeapon = getMeleeExaltedWeapon(data.warframeId, allWeapons);
   if (!meleeWeapon) return null;
@@ -142,6 +147,7 @@ function resolveExaltedMeleePreview(
     data.exaltedMeleeArcaneIds,
     abilityStrength,
     "Exalted Melee",
+    warframeMaxEnergy,
   );
 }
 
@@ -157,14 +163,20 @@ export function resolvePublicBuildWarframePreview(
   const modSlots = d.mods ?? [];
   const modsMap = getEffectiveModsMap();
   const baseStats = calculateWarframeBuild(wf, modSlots, modsMap);
+  const abilityRows = resolveBuildAbilities(d);
   const stats = applyWarframeShardsAndArcanes(
     baseStats,
     d.shards,
     resolveSavedArcaneSlots(d.arcaneIds, 2),
     d.arcaneRanks,
+    {
+      abilities: abilityRows.map((r) => r.ability),
+      equippedModNames: modSlots
+        .map((m) => modsMap.get(m.modId)?.name)
+        .filter((n): n is string => !!n),
+    },
   );
 
-  const abilityRows = resolveBuildAbilities(d);
   const abilityEntries = buildAbilityTTKEntries(abilityRows, stats);
 
   return {
@@ -175,8 +187,8 @@ export function resolvePublicBuildWarframePreview(
     arcanes: resolveSavedArcaneSlots(d.arcaneIds, 2),
     arcaneRanks: d.arcaneRanks ?? [],
     abilityEntries,
-    exalted: resolveExaltedPreview(d, allWeapons, stats.abilityStrength),
-    exaltedMelee: resolveExaltedMeleePreview(d, allWeapons, stats.abilityStrength),
+    exalted: resolveExaltedPreview(d, allWeapons, stats.abilityStrength, stats.totalEnergy),
+    exaltedMelee: resolveExaltedMeleePreview(d, allWeapons, stats.abilityStrength, stats.totalEnergy),
   };
 }
 

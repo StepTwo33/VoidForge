@@ -55,6 +55,21 @@ export function scaleArcaneEffectLine(
   });
 }
 
+/**
+ * Max stacks at a rank. wiki: some arcanes raise their stack cap with rank
+ * (Ice Storm 10→20, Magus Melt 2→7, Zid-An Uskos 625→105 kills).
+ */
+export function arcaneStackCap(
+  def: { stackCap?: number; stackCapByRank?: number[]; maxRank: number },
+  rank?: number,
+): number | undefined {
+  if (def.stackCapByRank?.length && rank != null) {
+    const r = Math.max(0, Math.min(def.stackCapByRank.length - 1, Math.round(rank)));
+    return def.stackCapByRank[r];
+  }
+  return def.stackCap;
+}
+
 /** Values at each rank for preview / editor. */
 export function arcaneEffectValuesByRank(
   line: Pick<ArcaneEffectLine, "maxValue" | "baseValue" | "constantAtAllRanks" | "valuesByRank">,

@@ -661,6 +661,11 @@ export interface SimulationParams {
    * Undefined / 0 = no Bulwark bonus on paper DPS.
    */
   warframeArmor?: number;
+  /**
+   * Warframe max energy used by Primary Overcharge (wiki: 35% of Max Energy as Multishot,
+   * capped by rank). Undefined / 0 = no Overcharge bonus on paper DPS.
+   */
+  warframeMaxEnergy?: number;
 }
 
 export const DEFAULT_SIM_PARAMS: SimulationParams = {
@@ -916,6 +921,14 @@ export interface CalculatedStats {
   slashOnImpactProcChance?: number;
   /** Bonus damage on first shot of each magazine (Charged/Primed Chamber), averaged into DPS. */
   firstShotDamageBonus?: number;
+  /** Total mod reload-speed bonus (Fast Hands etc.); reload arcanes add into this sum. */
+  reloadSpeedBonus?: number;
+  /** Additive Amp/Operator arcane damage pool (Eternal Eradicate + Virtuos Fury). */
+  ampDamageArcaneBonus?: number;
+  /** Secondary Surge: damage multiplier of the one surged shot (DPS uses the magazine average). */
+  nextShotDamageMultiplier?: number;
+  /** Primary Overcharge equipped — show the Warframe max energy input. */
+  usesWarframeMaxEnergy?: boolean;
   berserkerFuryBonus: number; // per-stack attack speed bonus
   weepingWoundsBonus: number; // status chance bonus per combo tier
   vigilanteCritBonus?: number; // Vigilante set: chance to enhance crit tier (0.05 per mod)
@@ -1139,6 +1152,8 @@ export interface WarframeCalculatedStats {
   persistenceDamageCapPerSecond?: number;
   /** True when Persistence is equipped and armor ≥ 700. */
   persistenceActive?: boolean;
+  /** Stack count each stacking Warframe arcane was applied at (Impetus, Camisado, Intention…). */
+  arcaneStackCounts?: Record<string, number>;
   /** Accumulated arcane stat values for display / future modeling. */
   arcaneBonuses?: Record<string, number>;
   /** Unverified or panel-only mod stat values keyed as `modId::statKey`. */

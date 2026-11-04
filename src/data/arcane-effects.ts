@@ -40,6 +40,8 @@ export interface ArcaneEffectDef {
   trigger: ArcaneTrigger;
   maxRank: number;
   stackCap?: number;
+  /** wiki per-rank max stacks (R0..Rmax); `stackCap` is the max-rank value. */
+  stackCapByRank?: number[];
   effects: ArcaneEffectLine[];
 }
 
@@ -51,10 +53,10 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "ammoEfficiency",
-        "maxValue": 65.0,
+        "maxValue": 65,
         "flat": false,
         "stacking": false,
-        "baseValue": 10.833333
+        "valuesByRank": [15, 25, 35, 45, 55, 65]
       }
     ]
   },
@@ -472,8 +474,8 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "abilityStrengthToShield",
-        "maxValue": 100.0,
-        "baseValue": 16.666667
+        "maxValue": 100,
+        "valuesByRank": [50, 60, 70, 80, 90, 100]
       }
     ]
   },
@@ -600,7 +602,8 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
         "constantAtAllRanks": true
       }
     ],
-    "stackCap": 20
+    "stackCap": 20,
+    "stackCapByRank": [10, 12, 14, 16, 18, 20]
   },
   "arcane_impetus": {
     "name": "Arcane Impetus",
@@ -632,7 +635,7 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
         "maxValue": 250,
         "flat": true,
         "stacking": true,
-        "baseValue": 40
+        "valuesByRank": [40, 80, 120, 160, 200, 250]
       }
     ],
     "stackCap": 4
@@ -744,7 +747,7 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
         "stat": "abilityStrength",
         "maxValue": 9,
         "stacking": true,
-        "baseValue": 2
+        "valuesByRank": [2, 3, 4.5, 6, 7.5, 9]
       }
     ],
     "stackCap": 4
@@ -1104,9 +1107,9 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "bonusDamageOnStatus",
-        "maxValue": 750.0,
+        "maxValue": 750,
         "flat": true,
-        "baseValue": 125.0
+        "valuesByRank": [250, 350, 450, 550, 650, 750]
       }
     ]
   },
@@ -1508,8 +1511,8 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "enemyResistanceReduction",
-        "maxValue": 65.0,
-        "baseValue": 10.833333
+        "maxValue": 65,
+        "valuesByRank": [12, 25, 37, 50, 60, 65]
       }
     ]
   },
@@ -1595,8 +1598,8 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "enemyResistanceReduction",
-        "maxValue": 65.0,
-        "baseValue": 10.833333
+        "maxValue": 65,
+        "valuesByRank": [12, 25, 37, 50, 60, 65]
       }
     ]
   },
@@ -1695,7 +1698,7 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
         "stat": "voidTrapRadius",
         "maxValue": 15,
         "flat": true,
-        "constantAtAllRanks": true
+        "valuesByRank": [3, 6, 9, 12, 13, 15]
       },
       {
         "stat": "voidTrapTetherCount",
@@ -1715,9 +1718,10 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
         "stat": "operatorHeatDamage",
         "maxValue": 30.0,
         "stacking": true,
-        "baseValue": 5.0
+        "constantAtAllRanks": true
       }
-    ]
+    ],
+    "stackCapByRank": [2, 3, 4, 5, 6, 7]
   },
   "magus_nourish": {
     "name": "Magus Nourish",
@@ -1739,8 +1743,8 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "damage",
-        "maxValue": 80.0,
-        "baseValue": 13.333333
+        "maxValue": 80,
+        "valuesByRank": [15, 30, 45, 60, 75, 80]
       }
     ]
   },
@@ -1751,8 +1755,8 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "operatorToWarframeHeal",
-        "maxValue": 25.0,
-        "baseValue": 5.0
+        "maxValue": 25,
+        "valuesByRank": [5, 10, 15, 20, 22, 25]
       },
       {
         "stat": "repairRadius",
@@ -1852,7 +1856,7 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
       {
         "stat": "shieldRestorePercent",
         "maxValue": 30,
-        "constantAtAllRanks": true
+        "valuesByRank": [5, 10, 15, 20, 25, 30]
       }
     ]
   },
@@ -1863,8 +1867,8 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "meleeDamageBonus",
-        "maxValue": 250.0,
-        "baseValue": 41.666667
+        "maxValue": 150,
+        "valuesByRank": [25, 50, 75, 100, 125, 150]
       }
     ]
   },
@@ -1878,7 +1882,7 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
         "maxValue": 6,
         "flat": true,
         "stacking": false,
-        "constantAtAllRanks": true
+        "valuesByRank": [1, 2, 3, 4, 5, 6]
       }
     ]
   },
@@ -1889,10 +1893,10 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "critPerPunctureTen",
-        "maxValue": 100.0,
+        "maxValue": 100,
         "flat": false,
         "stacking": false,
-        "baseValue": 16.666667
+        "valuesByRank": [50, 60, 70, 80, 90, 100]
       }
     ]
   },
@@ -1916,8 +1920,8 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
       {
         "stat": "meleeDamageBonus",
         "maxValue": 240.0,
-        "stacking": true,
-        "baseValue": 40.0
+        "stacking": false,
+        "constantAtAllRanks": true
       },
       {
         "stat": "corrosiveDamage",
@@ -2191,14 +2195,19 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "damagePerArmorOver",
-        "maxValue": 500.0,
-        "baseValue": 83.333333
+        "maxValue": 1.0,
+        "valuesByRank": [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
       },
       {
         "stat": "damagePerArmorThreshold",
         "maxValue": 1000,
         "flat": true,
         "constantAtAllRanks": true
+      },
+      {
+        "stat": "damagePerArmorCap",
+        "maxValue": 500,
+        "valuesByRank": [250, 300, 350, 400, 450, 500]
       }
     ]
   },
@@ -2210,12 +2219,12 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
       {
         "stat": "ammoEfficiency",
         "maxValue": 5.5,
-        "baseValue": 0.916667
+        "valuesByRank": [3.0, 3.5, 4.0, 4.5, 5.0, 5.5]
       },
       {
         "stat": "damage",
-        "maxValue": 100.0,
-        "baseValue": 16.666667
+        "maxValue": 100,
+        "valuesByRank": [50, 60, 70, 80, 90, 100]
       }
     ]
   },
@@ -2386,8 +2395,13 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "multishot",
-        "maxValue": 350.0,
-        "baseValue": 58.333333
+        "maxValue": 350,
+        "valuesByRank": [100, 150, 200, 250, 300, 350]
+      },
+      {
+        "stat": "multishotPerMaxEnergy",
+        "maxValue": 0.35,
+        "constantAtAllRanks": true
       }
     ]
   },
@@ -2405,7 +2419,7 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
         "stat": "buffDuration",
         "maxValue": 10,
         "flat": true,
-        "constantAtAllRanks": true
+        "valuesByRank": [3, 4, 5, 6, 8, 10]
       }
     ]
   },
@@ -2638,13 +2652,13 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
       {
         "stat": "criticalChance",
         "maxValue": 10.0,
-        "baseValue": 1.666667
+        "constantAtAllRanks": true
       },
       {
         "stat": "bigCritThreshold",
         "maxValue": 6,
         "flat": true,
-        "constantAtAllRanks": true
+        "valuesByRank": [1, 2, 3, 4, 5, 6]
       }
     ]
   },
@@ -2655,9 +2669,9 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "overguardDamage",
-        "maxValue": 8.0,
+        "maxValue": 8,
         "flat": true,
-        "baseValue": 1.333333
+        "valuesByRank": [3, 4, 5, 6, 7, 8]
       }
     ]
   },
@@ -2668,14 +2682,14 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "procDamageMultiplier",
-        "maxValue": 180.0,
-        "baseValue": 30.0
+        "maxValue": 180,
+        "valuesByRank": [80, 100, 120, 140, 160, 180]
       },
       {
         "stat": "procAuraRadius",
         "maxValue": 7,
         "flat": true,
-        "constantAtAllRanks": true
+        "valuesByRank": [4.5, 5, 5.5, 6, 6.5, 7]
       }
     ]
   },
@@ -2749,8 +2763,13 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "damagePerEnergy",
-        "maxValue": 800.0,
-        "baseValue": 133.333333
+        "maxValue": 0.5,
+        "constantAtAllRanks": true
+      },
+      {
+        "stat": "maxDamageBonus",
+        "maxValue": 700,
+        "valuesByRank": [200, 300, 400, 500, 600, 700]
       }
     ]
   },
@@ -2778,8 +2797,8 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
     "effects": [
       {
         "stat": "vulnerability",
-        "maxValue": 200.0,
-        "baseValue": 25.0
+        "maxValue": 200,
+        "valuesByRank": [25, 50, 75, 100, 150, 200]
       },
       {
         "stat": "contagionGlobeRange",
@@ -3091,6 +3110,7 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
         "baseValue": 0.4
       }
     ],
-    "stackCap": 105
+    "stackCap": 105,
+    "stackCapByRank": [625, 313, 209, 157, 125, 105]
   }
 };

@@ -42,7 +42,9 @@ import {
   EquippedArchonShard,
   ArchonShard,
   WeaponCalculationOptions,
+  SimulationParams,
 } from "@/lib/types";
+import { DEFAULT_SIM_PARAMS } from "@/lib/types";
 import { Zap, Flag, Gem, Save, FolderOpen, Share2, Check, Upload, Shield, ArrowLeftRight } from "lucide-react";
 import { warframeArcanes } from "@/data/arcanes";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
@@ -159,6 +161,8 @@ export default function WarframeBuilderPage() {
   const [helminthSlot, setHelminthSlot] = useState<number | null>(null); // which ability slot (0-3) is replaced
   const [helminthAbility, setHelminthAbility] = useState<HelminthAbility | null>(null);
   const [helminthPickerOpen, setHelminthPickerOpen] = useState(false);
+  // Warframe arcane stack inputs (Arcane Impetus / Camisado); not saved with the build.
+  const [wfArcaneStacksById, setWfArcaneStacksById] = useState<Record<string, number>>({});
   const [helminthPickerSlot, setHelminthPickerSlot] = useState(0);
   /** Fortifying Freeze sim — shared with Snow Globe Initial Health. */
   const [frostColdEnemies, setFrostColdEnemies] = useState(5);
@@ -542,8 +546,25 @@ export default function WarframeBuilderPage() {
     // Dual-form frames (Orion) can have their own stat block per form.
     const statsWarframe = dualFormConfig ? warframeForDualForm(selectedWarframe, activeDualFormId) : selectedWarframe;
     const stats = calculateWarframeBuild(statsWarframe, modSlots, modsMap);
-    return applyWarframeShardsAndArcanes(stats, equippedShards, equippedArcanes, equippedArcaneRanks);
-  }, [selectedWarframe, dualFormConfig, activeDualFormId, equippedMods, equippedShards, equippedArcanes, equippedArcaneRanks, modsMap]);
+    // Arcane Intention counts this build's channeled abilities (Helminth slot substituted).
+    const abilities = (statsWarframe.abilities ?? []).map((a, i) =>
+      helminthSlot === i && helminthAbility ? helminthToAbility(helminthAbility) : a,
+    );
+    const equippedModNames = equippedMods
+      .map((m) => modsMap.get(m.modId)?.name)
+      .filter((n): n is string => !!n);
+    return applyWarframeShardsAndArcanes(stats, equippedShards, equippedArcanes, equippedArcaneRanks, {
+      arcaneStacksById: wfArcaneStacksById,
+      abilities,
+      equippedModNames,
+    });
+  }, [selectedWarframe, dualFormConfig, activeDualFormId, equippedMods, equippedShards, equippedArcanes, equippedArcaneRanks, modsMap, helminthSlot, helminthAbility, wfArcaneStacksById]);
+
+  /** Primary Overcharge on an exalted weapon reads the host frame's max energy. */
+  const exaltedSimParams = useMemo<SimulationParams>(
+    () => ({ ...DEFAULT_SIM_PARAMS, warframeMaxEnergy: calculatedStats?.totalEnergy }),
+    [calculatedStats?.totalEnergy],
+  );
 
   /** Exalted DPS scales with host Ability Strength (wiki). */
   const exaltedCalcOptions = useMemo<WeaponCalculationOptions>(
@@ -564,7 +585,7 @@ export default function WarframeBuilderPage() {
         modsMap,
         activeArcanes,
         undefined,
-        undefined,
+        exaltedSimParams,
         exaltedCalcOptions,
       );
     }
@@ -576,7 +597,7 @@ export default function WarframeBuilderPage() {
       undefined,
       exaltedCalcOptions,
     );
-  }, [exaltedWeapon, exaltedMods, exaltedArcanes, exaltedArcaneConfig.slots, modsMap, exaltedCalcOptions]);
+  }, [exaltedWeapon, exaltedMods, exaltedArcanes, exaltedArcaneConfig.slots, modsMap, exaltedCalcOptions, exaltedSimParams]);
 
   const exaltedMeleeStats = useMemo<CalculatedStats | null>(() => {
     if (!exaltedMeleeWeapon) return null;
@@ -591,7 +612,7 @@ export default function WarframeBuilderPage() {
         modsMap,
         activeArcanes,
         undefined,
-        undefined,
+        exaltedSimParams,
         exaltedCalcOptions,
       );
     }
@@ -610,6 +631,7 @@ export default function WarframeBuilderPage() {
     exaltedMeleeArcaneConfig.slots,
     modsMap,
     exaltedCalcOptions,
+    exaltedSimParams,
   ]);
 
   const exaltedBaseStats = useMemo<CalculatedStats | null>(() => {
@@ -1522,6 +1544,8 @@ export default function WarframeBuilderPage() {
                   onEmberImmolationHeatPctChange={setEmberImmolationHeatPct}
                   gaussBatteryPct={gaussBatteryPct}
                   onGaussBatteryPctChange={setGaussBatteryPct}
+                  arcaneStacksById={wfArcaneStacksById}
+                  onArcaneStacksChange={(id, n) => setWfArcaneStacksById((prev) => ({ ...prev, [id]: n }))}
                 />
                 {abilityTTKEntries.length > 0 && (
                   <AbilityTTKPanel entries={abilityTTKEntries} />

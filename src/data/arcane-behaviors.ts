@@ -980,6 +980,7 @@ export const VERIFIED_ARCANE_BEHAVIORS: Record<string, VerifiedArcaneBehavior> =
     customHandler: "primary_bulwark",
     effects: [
       {"statKey": "damagePerArmorOver", "target": "weapon_dps", "mode": "custom", "source": "wiki: Primary Bulwark — +1%/armor over 1000 at R5 (cap +500% at 1500 armor; uses sim.warframeArmor)"},
+      {"statKey": "damagePerArmorCap", "target": "arcane_panel", "mode": "custom", "source": "wiki: Primary Bulwark — damage cap +250%…+500% (R0…R5)"},
       {"statKey": "damagePerArmorThreshold", "target": "arcane_panel", "mode": "custom", "source": "wiki: Primary Bulwark — armor threshold 1000"},
     ],
   },
@@ -1032,7 +1033,8 @@ export const VERIFIED_ARCANE_BEHAVIORS: Record<string, VerifiedArcaneBehavior> =
     arcaneId: "primary_overcharge",
     customHandler: "primary_overcharge",
     effects: [
-      {"statKey": "multishot", "target": "weapon_dps", "mode": "custom", "source": "wiki: Primary Overcharge — up to +350% Multishot at R5 while Energy >90% (paper assumes cap)"},
+      {"statKey": "multishot", "target": "weapon_dps", "mode": "custom", "source": "wiki: Primary Overcharge — Multishot cap +100%…+350% (R0…R5) while Energy >90%"},
+      {"statKey": "multishotPerMaxEnergy", "target": "arcane_panel", "mode": "custom", "source": "wiki: Primary Overcharge — 35% of Max Energy as Multishot (1000 Max Energy reaches the R5 cap; uses sim.warframeMaxEnergy)"},
     ],
   },
   "primary_plated_round": {
@@ -1141,15 +1143,17 @@ export const VERIFIED_ARCANE_BEHAVIORS: Record<string, VerifiedArcaneBehavior> =
   },
   "secondary_shiver": {
     arcaneId: "secondary_shiver",
+    customHandler: "secondary_shiver",
     effects: [
-      {"statKey": "damage", "target": "weapon_dps", "mode": "multiplicative_percent", "source": "wiki: Secondary Shiver — +45% damage / Cold stack on target at R5 (cap 10 → +450%; applies at sim stack count)"},
+      {"statKey": "damage", "target": "weapon_dps", "mode": "custom", "source": "wiki: Secondary Shiver — +45% damage / Cold stack on target at R5 (cap 10 → +450%); additive with Hornet Strike except Cyanex/Catchmoon/Epitaph/Seer/Sepulcrum/Tenet Spirex"},
     ],
   },
   "secondary_surge": {
     arcaneId: "secondary_surge",
     customHandler: "secondary_surge",
     effects: [
-      {"statKey": "damagePerEnergy", "target": "weapon_dps", "mode": "custom", "source": "wiki: Secondary Surge — +0.5% dmg/energy after cast; R5 cap +700% (paper: stacks>0 = at cap)"},
+      {"statKey": "damagePerEnergy", "target": "arcane_panel", "mode": "custom", "source": "wiki: Secondary Surge — +0.5% dmg per energy left after a cast"},
+      {"statKey": "maxDamageBonus", "target": "weapon_dps", "mode": "custom", "source": "wiki: Secondary Surge — next-shot cap +200%…+700% (R0…R5); paper: one surged shot per magazine"},
     ],
   },
   "shotgun_vendetta": {
@@ -1171,8 +1175,9 @@ export const VERIFIED_ARCANE_BEHAVIORS: Record<string, VerifiedArcaneBehavior> =
   },
   "theorem_demulcent": {
     arcaneId: "theorem_demulcent",
+    customHandler: "theorem_demulcent",
     effects: [
-      {"statKey": "damage", "target": "weapon_dps", "mode": "multiplicative_percent", "source": "wiki: Theorem Demulcent — +12% weapon damage / Residual tick stack at R5 (cap 15 → +180%; applies at sim stack count)"},
+      {"statKey": "damage", "target": "weapon_dps", "mode": "custom", "source": "wiki: Theorem Demulcent — +12% / Residual tick stack at R5 (cap 15 → +180%); additive with elemental mods of the paired Residual's element"},
     ],
   },
   "theorem_infection": {

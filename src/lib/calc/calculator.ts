@@ -11,7 +11,7 @@ export { PLAYER_SHIELD_DAMAGE_TAKEN, playerEffectiveHealth } from './player-ehp'
 import { SNIPER_DATA, sniperComboMultiplier } from "@/data/sniper-zoom";
 import { CONTINUOUS_WEAPON_IDS } from "@/data/continuous-weapons";
 import { MELEE_ATTACK_DATA } from "@/data/melee-attack-data";
-import { Mod, Weapon, Warframe, ModSlot, CalculatedStats, WarframeCalculatedStats, ElementalDamage, StatusProc, SimulationParams, KillStackSource, StackSourceInfo, DEFAULT_SIM_PARAMS, WeaponCalculationOptions, SetBonusLinkage, EquippedArchonShard, WeaponExternalBuff } from '../types';
+import { Mod, Weapon, Warframe, ModSlot, CalculatedStats, WarframeCalculatedStats, ElementalDamage, StatusProc, SimulationParams, KillStackSource, StackSourceInfo, DEFAULT_SIM_PARAMS, WeaponCalculationOptions, SetBonusLinkage, EquippedArchonShard, WeaponExternalBuff, Ability } from '../types';
 import { avgCritMultiplier, quantizeBaseCritMultiplier } from './crit-utils';
 import { resolveEffectiveFireRate } from './effective-fire-rate';
 import { evolutionExtraRadials, scaleRadialAttacksWithDps } from './weapon-radial-dps';
@@ -32,7 +32,10 @@ import {
   applyArcaneToWeaponFromMod,
   effectiveArcaneStacks,
   getArcaneEffectDef,
+  type ArcaneWeaponOpts,
 } from './arcane-calculator';
+import { arcaneStackCap } from './arcane-utils';
+import { countIntentionAbilities } from './arcane-intention';
 export { getPersistenceDamageCap, PERSISTENCE_DAMAGE_CAP_BY_RANK } from './arcane-utils';
 import {
   VIGILANTE_MOD_IDS,
@@ -1440,6 +1443,7 @@ export function calculateWeaponBuild(
   if (reloadBonus !== 0) {
     stats.reloadTime /= Math.max(0.01, 1 + reloadBonus);
   }
+  stats.reloadSpeedBonus = reloadBonus; // arcanes add into this sum (wiki Fractalized Reset)
 
   // Scale mod-sourced elemental damage by the total damage multiplier (Serration/etc.)
   for (const e of elementalMods) {
@@ -2498,7 +2502,7 @@ export function applyArcaneToWeapon(
   arcane: Mod,
   stacks: number = 1,
   baseWeapon?: Weapon,
-  opts?: { applyHeadshots?: boolean; warframeArmor?: number },
+  opts?: ArcaneWeaponOpts,
 ): void {
   applyArcaneToWeaponFromMod(stats, arcane, stacks, baseWeapon, opts);
 }
@@ -2509,6 +2513,7 @@ export function applyArcaneToWarframe(
   arcane: Mod,
   stacks: number = 1,
   rank?: number,
+  stackOverride?: number,
 ): void {
   const shieldCapMult = stats.catalyzingShieldsMult ?? 1;
   const ctx = {
@@ -2516,7 +2521,29 @@ export function applyArcaneToWarframe(
     totalShield: (stats.baseShield * (1 + stats.shieldBonus) + stats.flatShieldBonus) * shieldCapMult,
     totalArmor: stats.baseArmor * (1 + stats.armorBonus) + stats.flatArmorBonus,
   };
-  applyArcaneToWarframeFromMod(stats, arcane, stacks, rank, ctx);
+  applyArcaneToWarframeFromMod(stats, arcane, stacks, rank, ctx, stackOverride);
+}
+
+/** Build context for Warframe arcanes with a real stack count (Round 45). */
+export interface WarframeArcaneBuildContext {
+  /** User stack counts by arcane id (Arcane Impetus / Arcane Camisado sliders). */
+  arcaneStacksById?: Record<string, number>;
+  /** The frame's abilities with the Helminth slot substituted (Arcane Intention). */
+  abilities?: readonly Pick<Ability, "name">[];
+  /** Names of equipped Warframe mods (augment gates for Arcane Intention). */
+  equippedModNames?: readonly string[];
+}
+
+/** Stack count a Warframe arcane uses in this build; undefined = full stacks. */
+export function warframeArcaneStackOverride(
+  arcaneId: string,
+  ctx?: WarframeArcaneBuildContext,
+): number | undefined {
+  if (!ctx) return undefined;
+  if (arcaneId === "arcane_intention" && ctx.abilities) {
+    return countIntentionAbilities(ctx.abilities, ctx.equippedModNames);
+  }
+  return ctx.arcaneStacksById?.[arcaneId];
 }
 
 /** wiki Archon Shard (Violet): the melee crit bonus doubles when Max Energy is over 500 (501+). */
@@ -2533,6 +2560,7 @@ export function applyWarframeShardsAndArcanes(
   shards?: (EquippedArchonShard | null)[],
   arcanes?: (Mod | null)[],
   arcaneRanks?: number[],
+  arcaneCtx?: WarframeArcaneBuildContext,
 ): WarframeCalculatedStats {
   let violetEnergyMeleeCrit = 0;
   for (const shard of shards ?? []) {
@@ -2640,7 +2668,13 @@ export function applyWarframeShardsAndArcanes(
     const arcane = arcaneList[i];
     if (!arcane) continue;
     const drBefore = stats.arcaneBonuses?.damageReduction ?? 0;
-    applyArcaneToWarframe(stats, arcane, 1, arcaneRanks?.[i] ?? arcane.maxRank);
+    const rank = arcaneRanks?.[i] ?? arcane.maxRank;
+    const override = warframeArcaneStackOverride(arcane.id, arcaneCtx);
+    applyArcaneToWarframe(stats, arcane, 1, rank, override);
+    const def = getArcaneEffectDef(arcane.id);
+    if (def?.trigger === "stacks") {
+      (stats.arcaneStackCounts ??= {})[arcane.id] = effectiveArcaneStacks(def, 1, false, rank, override);
+    }
     // Each arcane is its own DR source; sources multiply (stacks within one arcane stay additive,
     // e.g. Arcane Double Back 3 × 25% = 75%).
     const drDelta = (stats.arcaneBonuses?.damageReduction ?? 0) - drBefore;
@@ -2701,7 +2735,7 @@ export function calculateWeaponBuildWithArcanes(
       arcaneStackSources.push({
         id: arcane.id,
         label: arcane.name,
-        cap: arcaneDef.stackCap ?? arcaneDef.maxRank + 1,
+        cap: arcaneStackCap(arcaneDef, arcane.maxRank) ?? arcaneDef.maxRank + 1,
       });
     }
     // Pass raw sim stacks (per-arcane override, else the shared slider) — applyArcaneEffectsToWeapon
@@ -2710,6 +2744,8 @@ export function calculateWeaponBuildWithArcanes(
     applyArcaneToWeapon(stats, arcane, simArcaneStacks, baseWeapon, {
       applyHeadshots: sim.applyHeadshots,
       warframeArmor: sim.warframeArmor,
+      warframeMaxEnergy: sim.warframeMaxEnergy,
+      coArcaneIds: arcanes.map((a) => a.id),
     });
   }
   if (arcaneStackSources.length > 0) stats.arcaneStackSources = arcaneStackSources;

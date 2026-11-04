@@ -1,6 +1,11 @@
 import { Mod } from "@/lib/types";
 import { ARCANE_EFFECTS, ArcaneEffectDef, ArcaneTrigger } from "@/data/arcane-effects";
-import { getPersistenceDamageCap, scaleArcaneEffectLine, scaleArcaneEffectValue } from "@/lib/calc/arcane-utils";
+import {
+  arcaneStackCap,
+  getPersistenceDamageCap,
+  scaleArcaneEffectLine,
+  scaleArcaneEffectValue,
+} from "@/lib/calc/arcane-utils";
 
 export interface ArcaneEffectLine {
   label: string;
@@ -338,7 +343,8 @@ function buildLinesFromDef(
 ): Pick<ArcaneDisplayInfo, "applied" | "conditional"> {
   const applied: ArcaneEffectLine[] = [];
   const conditional: ArcaneEffectLine[] = [];
-  const note = triggerNote(def.trigger, def.stackCap);
+  const stackCap = arcaneStackCap(def, rank);
+  const note = triggerNote(def.trigger, stackCap);
 
   if (arcaneId === "arcane_persistence") {
     const cap = getPersistenceDamageCap(rank, def.maxRank);
@@ -378,7 +384,7 @@ function buildLinesFromDef(
         label,
         value,
         active: true,
-        note: def.trigger === "stacks" && def.stackCap ? `Per stack (max ${def.stackCap})` : note,
+        note: def.trigger === "stacks" && stackCap ? `Per stack (max ${stackCap})` : note,
       });
     }
   }
@@ -404,7 +410,7 @@ export function getArcaneDisplayInfo(
       description: cleanDesc,
       applied,
       conditional,
-      ...(def.trigger === "stacks" ? { fullStacks: def.stackCap ?? 1 } : {}),
+      ...(def.trigger === "stacks" ? { fullStacks: arcaneStackCap(def, rank) ?? 1 } : {}),
     };
   }
 

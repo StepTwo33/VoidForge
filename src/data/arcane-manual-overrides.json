@@ -7,7 +7,8 @@
         "stat": "ammoEfficiency",
         "maxValue": 65,
         "flat": false,
-        "stacking": false
+        "stacking": false,
+        "valuesByRank": [15, 25, 35, 45, 55, 65]
       }
     ]
   },
@@ -1021,7 +1022,7 @@
       {
         "stat": "enemyResistanceReduction",
         "maxValue": 65,
-        "baseValue": 12
+        "valuesByRank": [12, 25, 37, 50, 60, 65]
       }
     ]
   },
@@ -1078,7 +1079,7 @@
       {
         "stat": "enemyResistanceReduction",
         "maxValue": 65,
-        "baseValue": 12
+        "valuesByRank": [12, 25, 37, 50, 60, 65]
       }
     ]
   },
@@ -1170,7 +1171,7 @@
         "stat": "voidTrapRadius",
         "maxValue": 15,
         "flat": true,
-        "constantAtAllRanks": true
+        "valuesByRank": [3, 6, 9, 12, 13, 15]
       },
       {
         "stat": "voidTrapTetherCount",
@@ -1187,12 +1188,12 @@
     "effects": [
       {
         "stat": "operatorHeatDamage",
-        "maxValue": 30,
-        "baseValue": 30,
-        "constantAtAllRanks": true,
-        "stacking": true
+        "maxValue": 30.0,
+        "stacking": true,
+        "constantAtAllRanks": true
       }
-    ]
+    ],
+    "stackCapByRank": [2, 3, 4, 5, 6, 7]
   },
   "magus_nourish": {
     "replace": true,
@@ -1213,7 +1214,7 @@
       {
         "stat": "damage",
         "maxValue": 80,
-        "baseValue": 15
+        "valuesByRank": [15, 30, 45, 60, 75, 80]
       }
     ]
   },
@@ -1224,7 +1225,7 @@
       {
         "stat": "operatorToWarframeHeal",
         "maxValue": 25,
-        "baseValue": 5
+        "valuesByRank": [5, 10, 15, 20, 22, 25]
       },
       {
         "stat": "repairRadius",
@@ -1300,12 +1301,13 @@
     "effects": [
       {
         "stat": "meleeHeavyDamage",
-        "maxValue": 150
+        "maxValue": 150.0,
+        "baseValue": 25.0
       },
       {
         "stat": "shieldRestorePercent",
         "maxValue": 30,
-        "baseValue": 5
+        "valuesByRank": [5, 10, 15, 20, 25, 30]
       }
     ]
   },
@@ -1315,8 +1317,8 @@
     "effects": [
       {
         "stat": "meleeDamageBonus",
-        "maxValue": 250,
-        "baseValue": 125
+        "maxValue": 150,
+        "valuesByRank": [25, 50, 75, 100, 125, 150]
       }
     ]
   },
@@ -1328,7 +1330,8 @@
         "stat": "meleeComboInitial",
         "maxValue": 6,
         "flat": true,
-        "stacking": false
+        "stacking": false,
+        "valuesByRank": [1, 2, 3, 4, 5, 6]
       }
     ]
   },
@@ -1340,7 +1343,8 @@
         "stat": "critPerPunctureTen",
         "maxValue": 100,
         "flat": false,
-        "stacking": false
+        "stacking": false,
+        "valuesByRank": [50, 60, 70, 80, 90, 100]
       }
     ]
   },
@@ -1362,14 +1366,14 @@
     "effects": [
       {
         "stat": "meleeDamageBonus",
-        "maxValue": 240,
-        "stacking": true,
-        "baseValue": 240
+        "maxValue": 240.0,
+        "stacking": false,
+        "constantAtAllRanks": true
       },
       {
         "stat": "corrosiveDamage",
-        "maxValue": 60,
-        "baseValue": 10
+        "maxValue": 60.0,
+        "baseValue": 10.0
       }
     ]
   },
@@ -1583,14 +1587,19 @@
     "effects": [
       {
         "stat": "damagePerArmorOver",
-        "maxValue": 500,
-        "baseValue": 250
+        "maxValue": 1.0,
+        "valuesByRank": [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
       },
       {
         "stat": "damagePerArmorThreshold",
         "maxValue": 1000,
         "flat": true,
-        "baseValue": 1000
+        "constantAtAllRanks": true
+      },
+      {
+        "stat": "damagePerArmorCap",
+        "maxValue": 500,
+        "valuesByRank": [250, 300, 350, 400, 450, 500]
       }
     ]
   },
@@ -1601,12 +1610,12 @@
       {
         "stat": "ammoEfficiency",
         "maxValue": 5.5,
-        "baseValue": 3
+        "valuesByRank": [3.0, 3.5, 4.0, 4.5, 5.0, 5.5]
       },
       {
         "stat": "damage",
         "maxValue": 100,
-        "baseValue": 50
+        "valuesByRank": [50, 60, 70, 80, 90, 100]
       }
     ]
   },
@@ -1707,7 +1716,12 @@
       {
         "stat": "multishot",
         "maxValue": 350,
-        "baseValue": 100
+        "valuesByRank": [100, 150, 200, 250, 300, 350]
+      },
+      {
+        "stat": "multishotPerMaxEnergy",
+        "maxValue": 0.35,
+        "constantAtAllRanks": true
       }
     ]
   },
@@ -1717,13 +1731,14 @@
     "effects": [
       {
         "stat": "reloadDamageRamp",
-        "maxValue": 100
+        "maxValue": 100.0,
+        "baseValue": 16.666667
       },
       {
         "stat": "buffDuration",
         "maxValue": 10,
         "flat": true,
-        "baseValue": 3
+        "valuesByRank": [3, 4, 5, 6, 8, 10]
       }
     ]
   },
@@ -1903,14 +1918,14 @@
     "effects": [
       {
         "stat": "criticalChance",
-        "maxValue": 10,
-        "baseValue": 10
+        "maxValue": 10.0,
+        "constantAtAllRanks": true
       },
       {
         "stat": "bigCritThreshold",
         "maxValue": 6,
         "flat": true,
-        "baseValue": 1
+        "valuesByRank": [1, 2, 3, 4, 5, 6]
       }
     ]
   },
@@ -1922,7 +1937,7 @@
         "stat": "overguardDamage",
         "maxValue": 8,
         "flat": true,
-        "baseValue": 3
+        "valuesByRank": [3, 4, 5, 6, 7, 8]
       }
     ]
   },
@@ -1933,13 +1948,13 @@
       {
         "stat": "procDamageMultiplier",
         "maxValue": 180,
-        "baseValue": 80
+        "valuesByRank": [80, 100, 120, 140, 160, 180]
       },
       {
         "stat": "procAuraRadius",
         "maxValue": 7,
         "flat": true,
-        "baseValue": 4.5
+        "valuesByRank": [4.5, 5, 5.5, 6, 6.5, 7]
       }
     ]
   },
@@ -1989,8 +2004,13 @@
     "effects": [
       {
         "stat": "damagePerEnergy",
-        "maxValue": 800,
-        "baseValue": 200
+        "maxValue": 0.5,
+        "constantAtAllRanks": true
+      },
+      {
+        "stat": "maxDamageBonus",
+        "maxValue": 700,
+        "valuesByRank": [200, 300, 400, 500, 600, 700]
       }
     ]
   },
@@ -2017,7 +2037,7 @@
       {
         "stat": "vulnerability",
         "maxValue": 200,
-        "baseValue": 25
+        "valuesByRank": [25, 50, 75, 100, 150, 200]
       },
       {
         "stat": "contagionGlobeRange",
@@ -2311,7 +2331,8 @@
         "stacking": true,
         "baseValue": 0.4
       }
-    ]
+    ],
+    "stackCapByRank": [625, 313, 209, 157, 125, 105]
   },
   "arcane_blade_charger": {
     "replace": true,
@@ -2346,7 +2367,7 @@
         "stat": "abilityStrength",
         "maxValue": 9,
         "stacking": true,
-        "baseValue": 2
+        "valuesByRank": [2, 3, 4.5, 6, 7.5, 9]
       }
     ]
   },
@@ -2470,7 +2491,7 @@
       {
         "stat": "abilityStrengthToShield",
         "maxValue": 100,
-        "baseValue": 50
+        "valuesByRank": [50, 60, 70, 80, 90, 100]
       }
     ]
   },
@@ -2501,19 +2522,20 @@
     "effects": [
       {
         "stat": "abilityDuration",
-        "maxValue": 2,
-        "baseValue": 2,
+        "maxValue": 2.0,
+        "baseValue": 2.0,
         "stacking": true,
         "constantAtAllRanks": true
       },
       {
         "stat": "abilityStrength",
-        "maxValue": 2,
+        "maxValue": 2.0,
         "stacking": true,
-        "baseValue": 2,
+        "baseValue": 2.0,
         "constantAtAllRanks": true
       }
-    ]
+    ],
+    "stackCapByRank": [10, 12, 14, 16, 18, 20]
   },
   "arcane_intention": {
     "replace": true,
@@ -2525,7 +2547,7 @@
         "maxValue": 250,
         "flat": true,
         "stacking": true,
-        "baseValue": 40
+        "valuesByRank": [40, 80, 120, 160, 200, 250]
       }
     ]
   },
@@ -2609,7 +2631,7 @@
         "stat": "bonusDamageOnStatus",
         "maxValue": 750,
         "flat": true,
-        "baseValue": 250
+        "valuesByRank": [250, 350, 450, 550, 650, 750]
       }
     ]
   },
