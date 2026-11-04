@@ -112,7 +112,7 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
     { tier: 2, slot: 0, name: "Daring Reverie", description: "Increase Base Damage by +24 (Braton) / +28 (MK1) / +12 (Vandal) / +4 (Prime). With Channeled Ability active: Increase Base Damage by +30 / +22 / +34 / +38. +50% Ammo Efficiency", statChanges: {"flatBaseDamage":54,"ammoEfficiency":0.5}, variantStatChanges: {"braton":{"flatBaseDamage":54,"ammoEfficiency":0.5},"mk1_braton":{"flatBaseDamage":50,"ammoEfficiency":0.5},"braton_vandal":{"flatBaseDamage":46,"ammoEfficiency":0.5},"braton_prime":{"flatBaseDamage":42,"ammoEfficiency":0.5}} },
     // capacityMsDamageMult: unique × on capacity-MS pellets only (wiki); Y% per variant
     { tier: 2, slot: 1, name: "Munitions Grit", description: "Increase Base Damage by +14 (Braton) / +20 (MK1) / +8 (Vandal) / +2 (Prime). Multishot consumes ammo directly from Capacity and does +60% / +48% / +58% / +54% Damage. +20% Multishot.", statChanges: {"flatBaseDamage":14,"multishot":0.2,"capacityMsDamageMult":0.6}, variantStatChanges: {"braton":{"flatBaseDamage":14,"multishot":0.2,"capacityMsDamageMult":0.6},"mk1_braton":{"flatBaseDamage":20,"multishot":0.2,"capacityMsDamageMult":0.48},"braton_vandal":{"flatBaseDamage":8,"multishot":0.2,"capacityMsDamageMult":0.58},"braton_prime":{"flatBaseDamage":2,"multishot":0.2,"capacityMsDamageMult":0.54}} },
-    { tier: 3, slot: 0, name: "Mercenary Chamber", description: "Increase Base Ammo Capacity to X.", statChanges: {"ammoMaxSet":675}, variantStatChanges: {"braton":{"ammoMaxSet":675},"mk1_braton":{"ammoMaxSet":600},"braton_vandal":{"ammoMaxSet":750},"braton_prime":{"ammoMaxSet":1125}} },
+    { tier: 3, slot: 0, name: "Mercenary Chamber", description: "Increase Base Ammo Capacity to 675 (Braton) / 600 (MK1) / 750 (Vandal) / 1125 (Prime).", statChanges: {"ammoMaxSet":675}, variantStatChanges: {"braton":{"ammoMaxSet":675},"mk1_braton":{"ammoMaxSet":600},"braton_vandal":{"ammoMaxSet":750},"braton_prime":{"ammoMaxSet":1125}} },
     { tier: 3, slot: 1, name: "Void's Guidance", description: "+60% Accuracy -60% Recoil", statChanges: {"accuracy":0.6,"recoil":-0.6} },
     { tier: 3, slot: 2, name: "Gunsmoke Pick Up", description: "On Punch Through Hit: 20% chance for 10% Ammo restored.", statChanges: {"ammoRestoreChance":0.2,"ammoRestoreMagFraction":0.1} },
     { tier: 4, slot: 0, name: "Critical Parallel", description: "Increase Base Critical Chance by +16. Increase Base Critical Damage Multiplier by +0.4x.", statChanges: {"criticalChance":0.16,"criticalMultiplier":0.4}, variantStatChanges: {"braton":{"criticalChance":0.16,"criticalMultiplier":0.4},"mk1_braton":{"criticalChance":0.18,"criticalMultiplier":0.5},"braton_vandal":{"criticalChance":0.16,"criticalMultiplier":0.4},"braton_prime":{"criticalChance":0.18,"criticalMultiplier":0.2}} },
@@ -140,7 +140,8 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
     // Assumes Armor ≥450 for paper panel PT
     { tier: 2, slot: 1, name: "Fortress Salvo", description: "Increase Base Damage by +42. With Armor Over 450: +2 Punch Through.", statChanges: {"flatBaseDamage":42,"punchThrough":2} },
     { tier: 3, slot: 0, name: "Extended Volley", description: "Increase Base Magazine Capacity by +21.", statChanges: {"flatMagazine":21} },
-    { tier: 3, slot: 1, name: "Kinetic Battle", description: "-50% Weapon Recoil.", statChanges: {"recoil":-0.5} },
+    { tier: 3, slot: 1, name: "Ready Retaliation", description: "On Reload From Empty: +100% Reload Speed.", statChanges: {"reloadSpeed":1} },
+    { tier: 3, slot: 2, name: "Kinetic Battle", description: "-50% Weapon Recoil.", statChanges: {"recoil":-0.5} },
     // Max stacks assumed for paper DPS (5× → +100%); additive with Serration
     { tier: 4, slot: 0, name: "Reaver's Rapture", description: "On Full Burst Hit: +20% Damage, resets on Reload.", statChanges: {"additiveBaseDamage":1} },
     { tier: 4, slot: 1, name: "Absolute Valor", description: "Increase Base Critical Chance by +22%.", statChanges: {"criticalChance":0.22} },
@@ -201,7 +202,7 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
     { tier: 4, slot: 2, name: "Critical Parallel", description: "Increase Base Critical Chance by +18% Increase Base Critical Damage Multiplier by +0.4x", statChanges: {"criticalChance":0.18,"criticalMultiplier":0.4} },
   ],
   "destreza_incarnon": [
-    { tier: 1, slot: 0, name: "Incarnon Form", description: "Reach 6x Combo and then Heavy Attack to activate Incarnon Form. Heavy Attacks spawn ghostly rapiers +100% Melee Damage +20% Sprint Speed +20% Parkour Velocity +10% Puncture Damage per Heavy Attack kill, up to 300% while transformed", statChanges: {"additiveBaseDamage":1,"heavyKillPuncturePerStack":0.1} },
+    { tier: 1, slot: 0, name: "Incarnon Form", description: "Reach 6x Combo and then Heavy Attack to activate Incarnon Form. Heavy Attacks summon 5 spectral rapiers that fly forward for 2 seconds. +100% Melee Damage +20% Sprint Speed +20% Parkour Velocity +10% Puncture Damage per Heavy Attack kill, up to 300% while transformed", statChanges: {"additiveBaseDamage":1,"heavyKillPuncturePerStack":0.1} },
     // Assumes HA-kill windup buff up for paper DPS
     { tier: 2, slot: 0, name: "Weighted Impetus", description: "Increase Base Damage by +50 On Heavy Attack Kill: +100% Heavy Attack Wind Up Speed for 8s", statChanges: {"flatBaseDamage":50,"heavyAttackWindUp":1}, variantStatChanges: {"destreza":{"flatBaseDamage":50,"heavyAttackWindUp":1},"destreza_prime":{"flatBaseDamage":40,"heavyAttackWindUp":1}} },
     // Max stacks assumed for paper DPS (+20% SC × 5)
@@ -261,9 +262,11 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
     { tier: 3, slot: 0, name: "Evolved Autoloader", description: "+50% Magazine Reloaded/s when Holstered", statChanges: {"holsterReloadPerSec":0.5} },
     // Paper: one full base mag (6 shells) reload → +60% FR (not infinite 99-stack)
     { tier: 3, slot: 1, name: "Mounting Momentum", description: "Reload increases Fire Rate by +10% per shell. Resets on reload.", statChanges: {"fireRate":0.6} },
-    { tier: 4, slot: 0, name: "Brutal Edge", description: "+10% Critical Chance +10% Status Chance", statChanges: {"criticalChance":0.1,"statusChance":0.1} },
+    // wiki: added after mods as a flat value; status bonus is divided by base multishot (4 → +2.5%/pellet)
+    { tier: 4, slot: 0, name: "Brutal Edge", description: "+10% Critical Chance +10% Status Chance", statChanges: {"criticalChanceFlat":0.1,"statusChanceFlatPerPellet":0.1} },
     { tier: 4, slot: 1, name: "Incarnon Catalyst", description: "Headshots Build +50% more Incarnon Transmutation charge.", statChanges: {"incarnonHeadshotChargeBonus":0.5} },
-    { tier: 4, slot: 2, name: "Racking Wrath", description: "+20% Status Chance -10% Critical Chance", statChanges: {"statusChance":0.2,"criticalChance":-0.1} },
+    // wiki: added after mods as a flat value; status bonus is divided by base multishot (4 → +5%/pellet)
+    { tier: 4, slot: 2, name: "Racking Wrath", description: "+20% Status Chance -10% Critical Chance", statChanges: {"statusChanceFlatPerPellet":0.2,"criticalChanceFlat":-0.1} },
     { tier: 5, slot: 0, name: "Devastating Attrition", description: "50% chance to deal +2000% damage on non-critical hits", statChanges: {"devouringAttrition":20} },
     // Assumes PT-3 buff up for paper DPS
     { tier: 5, slot: 1, name: "Ruptured Plentitude", description: "On Punch Through 3 enemies: +70% Ammo Efficiency for 20s", statChanges: {"ammoEfficiency":0.7} },
@@ -271,7 +274,7 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
     { tier: 5, slot: 2, name: "Agile Executor", description: "Gain 50% Ammo Efficiency while Aim Gliding and Sliding", statChanges: {"ammoEfficiency":0.5} },
   ],
   "furax_incarnon": [
-    { tier: 1, slot: 0, name: "Incarnon Form", description: "Reach 6x Combo and then Heavy Attack to activate Incarnon Form. Incarnon Form gains Heavy Slam Efficiency and leaves behind Heat Damage fields after Heavy Slams. +100% Melee Damage +25% Sprint Speed +25% to Bullet Jump", statChanges: {"additiveBaseDamage":1} },
+    { tier: 1, slot: 0, name: "Incarnon Form", description: "Reach 6x Combo and then Heavy Attack to activate Incarnon Form. Incarnon Form gains 90% Heavy Slam Efficiency and leaves behind Heat Damage fields after Heavy Slams. +100% Melee Damage +25% Sprint Speed +25% to Bullet Jump", statChanges: {"additiveBaseDamage":1} },
     { tier: 2, slot: 0, name: "Swordsman's Flourish", description: "Increase Base Damage by +110. With Melee Weapon Equipped: +100% Combo Count Chance", statChanges: {"flatBaseDamage":110}, variantStatChanges: {"furax":{"flatBaseDamage":110},"mk1_furax":{"flatBaseDamage":100},"furax_wraith":{"flatBaseDamage":65}} },
     // Max stacks assumed for paper DPS (+10% × 5)
     { tier: 2, slot: 1, name: "Kill Joy", description: "Increase Base Damage by +90. +10% Attack Speed per enemy within 6m, stacks up to 5x.", statChanges: {"flatBaseDamage":90,"fireRate":0.5}, variantStatChanges: {"furax":{"flatBaseDamage":90,"fireRate":0.5},"mk1_furax":{"flatBaseDamage":80,"fireRate":0.5},"furax_wraith":{"flatBaseDamage":55,"fireRate":0.5}} },
@@ -368,7 +371,8 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
     { tier: 4, slot: 0, name: "Deathtrap Trigger", description: "On equip from Primary: Increase Base Critical Chance by +40% for 4s. Increase Base Critical Damage Multiplier by +1.4x for 4s.", statChanges: {"criticalChance":0.4,"criticalMultiplier":1.4}, variantStatChanges: {"kunai":{"criticalChance":0.4,"criticalMultiplier":1.4},"mk1_kunai":{"criticalChance":0.42,"criticalMultiplier":1}} },
     // Max stacks assumed for paper DPS (+20% × 5)
     { tier: 4, slot: 1, name: "Accelerating Volley", description: "On Fire: +20% Fire Rate for 0.5s. Stacks up to 5x.", statChanges: {"fireRate":1} },
-    { tier: 4, slot: 2, name: "Survivor's Edge", description: "Increase Base Critical Chance by +12%. Increase Base Status Chance by +12%.", statChanges: {"criticalChance":0.12,"statusChance":0.12} },
+    // wiki: in Incarnon Form the status bonus is divided among the 2 projectiles (+6% each)
+    { tier: 4, slot: 2, name: "Survivor's Edge", description: "Increase Base Critical Chance by +12%. Increase Base Status Chance by +12% (+6% per projectile in Incarnon Form).", statChanges: {"criticalChance":0.12,"statusChance":0.12}, formStatChanges: {"statusChance":-0.06} },
   ],
   "laetum": [
     { tier: 1, slot: 0, name: "Incarnon Form", description: "Weakpoint Hits charge Incarnon Transmutation; Alt Fire transmutes. Switching back will expend any remaining charge.", statChanges: {} },
@@ -570,7 +574,7 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
     { tier: 5, slot: 2, name: "Universal Readiness", description: "Collecting ammo grants 5 Melee Combo counter", statChanges: {"comboOnAmmoPickup":5} },
   ],
   "ruvox": [
-    { tier: 1, slot: 0, name: "Incarnon Form", description: "Reach 6x Combo and then Heavy Attack to activate Incarnon Form. Heavy Slam attacks impale nearby enemies on Void Spikes. +3 Range -35% Max Melee Attack Speed +100% of Impact Damage converted to Puncture Damage", statChanges: {"range":3,"fireRate":-0.35} },
+    { tier: 1, slot: 0, name: "Incarnon Form", description: "Reach 6x Combo and then Heavy Attack to activate Incarnon Form. Heavy Slam attacks impale nearby enemies on Void Spikes. +3 Range -35% Max Melee Attack Speed +100% of Impact Damage converted to Puncture Damage", statChanges: {"range":3,"fireRateMultiplier":-0.35} },
     { tier: 2, slot: 0, name: "Orokin Reach", description: "+1 Range", statChanges: {"range":1} },
     // Max stacks assumed for paper DPS (+15% × 3)
     { tier: 2, slot: 1, name: "Lethal Impetus", description: "On Kill: +15% Attack Speed for 15s. Stacks up to 3x.", statChanges: {"fireRate":0.45} },
@@ -686,7 +690,7 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
   ],
   "thalys": [
     // wiki: form embeds shards; shardTriggerMult 75% base (PP/stance, not CO/IPS/elem)
-    { tier: 1, slot: 0, name: "Incarnon Form", description: "Reach 6x Combo and then Heavy Attack to activate Incarnon Form. Attacks embed a damaging shard in enemies. +3 Range +40% Attack Speed", statChanges: {"fireRate":0.4,"range":3,"shardTriggerMult":0.75} },
+    { tier: 1, slot: 0, name: "Incarnon Form", description: "Reach 6x Combo and then Heavy Attack to activate Incarnon Form. Attacks embed a damaging shard in enemies. Each time a new shard is created, existing shards deal 75% of weapon damage to embedded foes. +3 Range +40% Attack Speed", statChanges: {"fireRate":0.4,"range":3,"shardTriggerMult":0.75} },
     // Max stacks assumed for paper DPS (+0.1m × 20)
     { tier: 2, slot: 0, name: "Dreadful Reach", description: "On Weapon Status Effect: Gain +0.1 Range for 8 Seconds. Stacks 20x.", statChanges: {"range":2} },
     { tier: 2, slot: 1, name: "Whirling Flurry", description: "+20% Attack Speed", statChanges: {"fireRate":0.2} },
@@ -727,7 +731,8 @@ export const WIKI_INCARNON_EVOLUTIONS: Record<string, IncarnonEvolution[]> = {
     { tier: 3, slot: 1, name: "Marksman's Hand", description: "-50% Weapon Recoil.", statChanges: {"recoil":-0.5} },
     { tier: 3, slot: 2, name: "Awakened Readiness", description: "+20% Magazine Reloaded per second when Holstered.", statChanges: {"holsterReloadPerSec":0.2} },
     { tier: 4, slot: 0, name: "Commodore's Fortune", description: "Increase Base Critical Chance by +16%.", statChanges: {"criticalChance":0.16}, variantStatChanges: {"vasto":{"criticalChance":0.16},"vasto_prime":{"criticalChance":0.18}} },
-    { tier: 4, slot: 1, name: "Survivor's Edge", description: "Increase Base Critical Chance by +10%. Increase Base Status Chance by +10%.", statChanges: {"criticalChance":0.1,"statusChance":0.1} },
+    // wiki: "Status Chance increase for Incarnon Form is divided by the innate multishot" (6): 0.1/6 − 0.1
+    { tier: 4, slot: 1, name: "Survivor's Edge", description: "Increase Base Critical Chance by +10%. Increase Base Status Chance by +10% (divided by the 6 pellets in Incarnon Form).", statChanges: {"criticalChance":0.1,"statusChance":0.1}, formStatChanges: {"statusChance":-0.083333} },
     // Assumes the headshot Infinite Ammo buff is up for paper DPS (Hotfix 44.1.3; uptime 1 = never reloads)
     { tier: 4, slot: 2, name: "Reaper's Plenty", description: "On Headshot: Infinite Ammo for 2s.", statChanges: {"infiniteAmmoUptime":1} },
   ],

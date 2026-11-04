@@ -192,8 +192,14 @@ export function resolvePublicBuildWarframePreview(
   };
 }
 
-function baseWeaponStats(weapon: Weapon, incarnonEvolutions?: Record<number, number>): CalculatedStats {
-  const incarnonChanges = getIncarnonStatChangesForWeapon(weapon.id, incarnonEvolutions);
+function baseWeaponStats(
+  weapon: Weapon,
+  incarnonEvolutions?: Record<number, number>,
+  incarnonConditionals?: Record<string, boolean>,
+): CalculatedStats {
+  const incarnonChanges = getIncarnonStatChangesForWeapon(weapon.id, incarnonEvolutions, {
+    conditionalsOn: incarnonConditionals,
+  });
   return calculateWeaponBuild(
     enrichWeapon(weapon),
     [],
@@ -223,6 +229,7 @@ export function resolvePublicBuildWeaponPreview(
         progenitorElement: d.progenitorElement,
         progenitorBonusPercent: d.progenitorBonusPercent,
         incarnonEvolutions: d.incarnonEvolutions,
+        incarnonConditionals: d.incarnonConditionals,
       });
       if (!entry) return null;
       const weapon = weaponsMap.get(d.weaponId);
@@ -231,7 +238,7 @@ export function resolvePublicBuildWeaponPreview(
         label: entry.name,
         weapon: enrichWeapon(weapon),
         stats: entry.stats,
-        baseStats: baseWeaponStats(weapon, d.incarnonEvolutions),
+        baseStats: baseWeaponStats(weapon, d.incarnonEvolutions, d.incarnonConditionals),
         isMelee: entry.isMelee,
       };
     }

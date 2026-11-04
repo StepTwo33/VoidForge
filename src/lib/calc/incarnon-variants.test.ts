@@ -1,13 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { incarnonDataMap } from "@/data/incarnon";
-import { mergeIncarnonStatChanges } from "@/lib/calc/weapon-stat-merges";
+import { mergeIncarnonStatChanges, allIncarnonConditionalsOn } from "@/lib/calc/weapon-stat-merges";
+
+/** Round 47: these paper tests check the perk encoding with every conditional perk's condition met. */
+const mergeOn: typeof mergeIncarnonStatChanges = (d, sel, w, o) =>
+  mergeIncarnonStatChanges(d, sel, w, { ...o, conditionalsOn: allIncarnonConditionalsOn(d) });
 
 // Per-variant values hand-read from each wiki "<Weapon> Incarnon Genesis" evolution table.
 // Conditional bonuses follow the existing convention (assumed active, max stacks).
 function evoStat(genesis: string, weaponId: string, name: string, stat: string): number | undefined {
   const data = incarnonDataMap.get(genesis) ?? incarnonDataMap.get(weaponId);
   const evo = data!.evolutions.find((e) => e.name === name)!;
-  return mergeIncarnonStatChanges(data, { [evo.tier]: evo.slot }, weaponId)?.[stat];
+  return mergeOn(data, { [evo.tier]: evo.slot }, weaponId)?.[stat];
 }
 
 describe("Incarnon per-variant values (wiki)", () => {

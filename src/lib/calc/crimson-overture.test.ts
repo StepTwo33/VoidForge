@@ -5,7 +5,11 @@ import { incarnonDataMap } from "@/data/incarnon";
 import { MAX_AMMO_EFFICIENCY } from "@/lib/calc/ammo-efficiency";
 import { calculateWeaponBuild } from "@/lib/calc/calculator";
 import { resolveIncarnonActiveWeapon } from "@/lib/calc/incarnon-active-weapon";
-import { mergeIncarnonStatChanges } from "@/lib/calc/weapon-stat-merges";
+import { mergeIncarnonStatChanges, allIncarnonConditionalsOn } from "@/lib/calc/weapon-stat-merges";
+
+/** Round 47: these paper tests check the perk encoding with every conditional perk's condition met. */
+const mergeOn: typeof mergeIncarnonStatChanges = (d, sel, w, o) =>
+  mergeIncarnonStatChanges(d, sel, w, { ...o, conditionalsOn: allIncarnonConditionalsOn(d) });
 import { WIKI_INCARNON_EVOLUTIONS } from "@/data/incarnon-genesis-evolutions";
 
 /**
@@ -23,7 +27,7 @@ const dataFor = (id: string) => [...incarnonDataMap.values()].find((d) => d.vari
 function build(id: string, evo: Record<number, number>, ae?: number) {
   const data = dataFor(id);
   const weapon = resolveIncarnonActiveWeapon(find(id), data, evo);
-  const sc = { ...mergeIncarnonStatChanges(data, evo, id) };
+  const sc = { ...mergeOn(data, evo, id) };
   if (ae != null) sc.ammoEfficiency = ae;
   const formActive = evo[1] != null;
   return calculateWeaponBuild(weapon, [], mods, sc, undefined, formActive ? { incarnonFormActive: true } : undefined);
@@ -40,7 +44,7 @@ describe("Crimson Overture: wiki text and per-variant values", () => {
       expect(evo.statChanges.ammoEfficiency).toBeCloseTo(3 * 0.25, 10);
       expect(evo.statChanges.ammoEfficiency).toBe(MAX_AMMO_EFFICIENCY);
     }
-    const dmg = (id: string, slot: number) => mergeIncarnonStatChanges(dataFor(id), { 2: slot }, id)?.flatBaseDamage;
+    const dmg = (id: string, slot: number) => mergeOn(dataFor(id), { 2: slot }, id)?.flatBaseDamage;
     expect([dmg("boltor", 1), dmg("telos_boltor", 1), dmg("boltor_prime", 1)]).toEqual([12, 0, 0]);
     expect([dmg("dera", 0), dmg("dera_vandal", 0)]).toEqual([8, 6]);
   });

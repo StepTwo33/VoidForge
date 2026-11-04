@@ -7,7 +7,11 @@ import {
   isIncarnonFormActive,
   resolveIncarnonActiveWeapon,
 } from "@/lib/calc/incarnon-active-weapon";
-import { mergeIncarnonStatChanges } from "@/lib/calc/weapon-stat-merges";
+import { mergeIncarnonStatChanges, allIncarnonConditionalsOn } from "@/lib/calc/weapon-stat-merges";
+
+/** Round 47: these paper tests check the perk encoding with every conditional perk's condition met. */
+const mergeOn: typeof mergeIncarnonStatChanges = (d, sel, w, o) =>
+  mergeIncarnonStatChanges(d, sel, w, { ...o, conditionalsOn: allIncarnonConditionalsOn(d) });
 import { DEFAULT_SIM_PARAMS } from "@/lib/types";
 
 const modsMap = () => new Map();
@@ -50,21 +54,23 @@ describe("Torid Incarnon Form", () => {
     expect(stats.totalDamage).toBeCloseTo(51, 0);
   });
 
-  it("Extended Volley adds +9 magazine", () => {
+  it("Extended Volley adds +9 magazine to the normal form only (wiki: not the Incarnon Form)", () => {
     const base = resolveIncarnonActiveWeapon(torid, data, { 1: 0 });
-    const changes = mergeIncarnonStatChanges(data, { 1: 0, 3: 2 }, "torid");
+    const changes = mergeOn(data, { 1: 0, 3: 2 }, "torid");
     expect(changes?.flatMagazine).toBe(9);
-    const stats = calculateWeaponBuild(base, [], modsMap(), changes, undefined, {
+    const formChanges = mergeOn(data, { 1: 0, 3: 2 }, "torid", { formActive: true });
+    expect(formChanges?.flatMagazine).toBeUndefined();
+    const stats = calculateWeaponBuild(base, [], modsMap(), formChanges, undefined, {
       incarnonFormActive: true,
     });
-    expect(stats.magazine).toBe(179);
+    expect(stats.magazine).toBe(170);
   });
 
   it("Plentiful Mayhem papers +31 flat + capacity-MS pellet % (form boosts MS bonuses)", () => {
-    const changes = mergeIncarnonStatChanges(data, { 2: 1 }, "torid");
+    const changes = mergeOn(data, { 2: 1 }, "torid");
     expect(changes?.flatBaseDamage).toBe(31);
     expect(changes?.capacityMsDamageMult).toBeCloseTo(0.6, 5);
-    const form = mergeIncarnonStatChanges(data, { 2: 1 }, "torid", { formActive: true });
+    const form = mergeOn(data, { 2: 1 }, "torid", { formActive: true });
     expect(form?.capacityMsDamageMult).toBe(0);
     expect(form?.capacityMsBonusMult).toBeCloseTo(0.6, 5);
 
@@ -87,7 +93,7 @@ describe("Torid Incarnon Form", () => {
   });
 
   it("Final Fusillade papers last-shot base MS EV (3/mag)", () => {
-    const changes = mergeIncarnonStatChanges(data, { 2: 0 }, "torid");
+    const changes = mergeOn(data, { 2: 0 }, "torid");
     expect(changes?.flatBaseDamage).toBe(51);
     expect(changes?.lastShotBaseMultishot).toBe(3);
     const stats = calculateWeaponBuild(torid, [], modsMap(), changes);
@@ -568,38 +574,38 @@ describe("wiki-shaped Incarnon forms", () => {
 describe("evolution numeric fixes", () => {
   it("Despair Fatal Affliction / Elemental Balance / Survivor's Edge", () => {
     const data = incarnonDataMap.get("despair")!;
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "despair")?.flatBaseDamage).toBe(50);
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "despair")?.fatalAfflictionPerStatus).toBe(0.4);
-    expect(mergeIncarnonStatChanges(data, { 4: 0 }, "despair")?.statusChance).toBe(0.24);
-    expect(mergeIncarnonStatChanges(data, { 4: 1 }, "despair")?.criticalChance).toBe(0.12);
+    expect(mergeOn(data, { 2: 0 }, "despair")?.flatBaseDamage).toBe(50);
+    expect(mergeOn(data, { 2: 0 }, "despair")?.fatalAfflictionPerStatus).toBe(0.4);
+    expect(mergeOn(data, { 4: 0 }, "despair")?.statusChance).toBe(0.24);
+    expect(mergeOn(data, { 4: 1 }, "despair")?.criticalChance).toBe(0.12);
   });
 
   it("Vasto Lone Gun papers no-primary +40 flat / +14 mag", () => {
     const data = incarnonDataMap.get("vasto")!;
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "vasto")?.flatBaseDamage).toBe(106);
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "vasto")?.flatMagazine).toBe(14);
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "vasto_prime")?.flatBaseDamage).toBe(64);
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "vasto_prime")?.flatMagazine).toBe(14);
+    expect(mergeOn(data, { 2: 0 }, "vasto")?.flatBaseDamage).toBe(106);
+    expect(mergeOn(data, { 2: 0 }, "vasto")?.flatMagazine).toBe(14);
+    expect(mergeOn(data, { 2: 0 }, "vasto_prime")?.flatBaseDamage).toBe(64);
+    expect(mergeOn(data, { 2: 0 }, "vasto_prime")?.flatMagazine).toBe(14);
   });
 
   it("Vasto Prime Deathtrap papers +0.8× CM (not Vasto +2.2×)", () => {
     const data = incarnonDataMap.get("vasto")!;
-    expect(mergeIncarnonStatChanges(data, { 2: 1 }, "vasto")?.criticalMultiplier).toBe(2.2);
-    expect(mergeIncarnonStatChanges(data, { 2: 1 }, "vasto_prime")?.criticalMultiplier).toBe(0.8);
-    expect(mergeIncarnonStatChanges(data, { 2: 1 }, "vasto_prime")?.flatBaseDamage).toBe(24);
+    expect(mergeOn(data, { 2: 1 }, "vasto")?.criticalMultiplier).toBe(2.2);
+    expect(mergeOn(data, { 2: 1 }, "vasto_prime")?.criticalMultiplier).toBe(0.8);
+    expect(mergeOn(data, { 2: 1 }, "vasto_prime")?.flatBaseDamage).toBe(24);
   });
 
   it("Sybaris Extended Volley +8 / Well Rehearsed max stacks", () => {
     const data = incarnonDataMap.get("sybaris")!;
-    expect(mergeIncarnonStatChanges(data, { 3: 0 }, "sybaris")?.flatMagazine).toBe(8);
+    expect(mergeOn(data, { 3: 0 }, "sybaris")?.flatMagazine).toBe(8);
     // Base X + (+5 × 3) consecutive weakpoint stacks
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "sybaris")?.flatBaseDamage).toBe(35);
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "dex_sybaris")?.flatBaseDamage).toBe(30);
+    expect(mergeOn(data, { 2: 0 }, "sybaris")?.flatBaseDamage).toBe(35);
+    expect(mergeOn(data, { 2: 0 }, "dex_sybaris")?.flatBaseDamage).toBe(30);
   });
 
   it("Despair Vendetta papers +60 flat +30% MS +100% capacity-MS pellet mult (Dread+Hate set)", () => {
     const data = incarnonDataMap.get("despair")!;
-    const changes = mergeIncarnonStatChanges(data, { 2: 1 }, "despair");
+    const changes = mergeOn(data, { 2: 1 }, "despair");
     expect(changes?.flatBaseDamage).toBe(60);
     expect(changes?.multishot).toBeCloseTo(0.3, 5);
     expect(changes?.capacityMsDamageMult).toBeCloseTo(1, 5);
@@ -607,7 +613,7 @@ describe("evolution numeric fixes", () => {
 
   it("Paris Vicious Promise papers undamaged +40% CC / +2× CM", () => {
     const data = incarnonDataMap.get("paris")!;
-    expect(mergeIncarnonStatChanges(data, { 4: 0 }, "paris")).toMatchObject({
+    expect(mergeOn(data, { 4: 0 }, "paris")).toMatchObject({
       criticalChance: 0.4,
       criticalMultiplier: 2,
     });
@@ -615,58 +621,58 @@ describe("evolution numeric fixes", () => {
 
   it("Paris Striking Succession assumes max stacks (+60)", () => {
     const data = incarnonDataMap.get("paris")!;
-    expect(mergeIncarnonStatChanges(data, { 4: 2 }, "paris")?.flatBaseDamage).toBe(60);
+    expect(mergeOn(data, { 4: 2 }, "paris")?.flatBaseDamage).toBe(60);
   });
 
   it("Soma Fresh Havoc assumes max stacks (+12)", () => {
     const data = incarnonDataMap.get("soma")!;
-    expect(mergeIncarnonStatChanges(data, { 4: 0 }, "soma")?.flatBaseDamage).toBe(12);
+    expect(mergeOn(data, { 4: 0 }, "soma")?.flatBaseDamage).toBe(12);
   });
 
   it("Orokin Reach / Mercenary Chamber / Hitman's Hoard encode range and ammo", () => {
     const ack = incarnonDataMap.get("ack_&_brunt") ?? incarnonDataMap.get("ack_brunt")!;
-    expect(mergeIncarnonStatChanges(ack, { 3: 0 }, "ack_brunt")?.range).toBe(0.7);
+    expect(mergeOn(ack, { 3: 0 }, "ack_brunt")?.range).toBe(0.7);
     const atomos = incarnonDataMap.get("atomos")!;
-    expect(mergeIncarnonStatChanges(atomos, { 3: 1 }, "atomos")?.ammoMaxSet).toBe(560);
+    expect(mergeOn(atomos, { 3: 1 }, "atomos")?.ammoMaxSet).toBe(560);
     const angstrum = incarnonDataMap.get("angstrum")!;
-    expect(mergeIncarnonStatChanges(angstrum, { 3: 2 }, "angstrum")?.flatAmmoMax).toBe(9);
+    expect(mergeOn(angstrum, { 3: 2 }, "angstrum")?.flatAmmoMax).toBe(9);
     const braton = incarnonDataMap.get("braton")!;
-    expect(mergeIncarnonStatChanges(braton, { 3: 0 }, "braton_prime")?.ammoMaxSet).toBe(1125);
+    expect(mergeOn(braton, { 3: 0 }, "braton_prime")?.ammoMaxSet).toBe(1125);
   });
 
   it("Sybaris Elemental Dominance doubles status in form (Prime wiki +23%)", () => {
     const data = incarnonDataMap.get("sybaris")!;
-    expect(mergeIncarnonStatChanges(data, { 4: 0 }, "sybaris")?.statusChance).toBe(0.15);
+    expect(mergeOn(data, { 4: 0 }, "sybaris")?.statusChance).toBe(0.15);
     expect(
-      mergeIncarnonStatChanges(data, { 4: 0 }, "sybaris", { formActive: true })?.statusChance,
+      mergeOn(data, { 4: 0 }, "sybaris", { formActive: true })?.statusChance,
     ).toBeCloseTo(0.3, 5);
-    expect(mergeIncarnonStatChanges(data, { 4: 0 }, "sybaris_prime")?.statusChance).toBe(0.08);
+    expect(mergeOn(data, { 4: 0 }, "sybaris_prime")?.statusChance).toBe(0.08);
     expect(
-      mergeIncarnonStatChanges(data, { 4: 0 }, "sybaris_prime", { formActive: true })?.statusChance,
+      mergeOn(data, { 4: 0 }, "sybaris_prime", { formActive: true })?.statusChance,
     ).toBeCloseTo(0.23, 5);
   });
 
   it("Strun Elemental Balance uses form SC total ~132%", () => {
     const data = incarnonDataMap.get("strun")!;
-    expect(mergeIncarnonStatChanges(data, { 4: 0 }, "strun")?.statusChance).toBeCloseTo(0.11, 5);
+    expect(mergeOn(data, { 4: 0 }, "strun")?.statusChance).toBeCloseTo(0.11, 5);
     expect(
-      mergeIncarnonStatChanges(data, { 4: 0 }, "strun", { formActive: true })?.statusChance,
+      mergeOn(data, { 4: 0 }, "strun", { formActive: true })?.statusChance,
     ).toBeCloseTo(1.32, 5);
   });
 
   it("range and ammoMax appear on CalculatedStats", () => {
     const atomos = allWeapons.find((w) => w.id === "atomos")!;
-    const ammo = mergeIncarnonStatChanges(incarnonDataMap.get("atomos")!, { 3: 1 }, "atomos");
+    const ammo = mergeOn(incarnonDataMap.get("atomos")!, { 3: 1 }, "atomos");
     expect(calculateWeaponBuild(atomos, [], modsMap(), ammo).ammoMax).toBe(560);
 
     const gammacor = allWeapons.find((w) => w.id === "gammacor")!;
-    const range = mergeIncarnonStatChanges(incarnonDataMap.get("gammacor")!, { 3: 1 }, "gammacor");
+    const range = mergeOn(incarnonDataMap.get("gammacor")!, { 3: 1 }, "gammacor");
     expect(calculateWeaponBuild(gammacor, [], modsMap(), range).range).toBe(8);
   });
 
   it("punchThrough and projectileSpeed appear on CalculatedStats", () => {
     const despair = allWeapons.find((w) => w.id === "despair")!;
-    const despairSpeed = mergeIncarnonStatChanges(
+    const despairSpeed = mergeOn(
       incarnonDataMap.get("despair")!,
       { 3: 1 },
       "despair",
@@ -675,7 +681,7 @@ describe("evolution numeric fixes", () => {
     expect(calculateWeaponBuild(despair, [], modsMap(), despairSpeed).projectileSpeed).toBe(0.5);
 
     const phenmor = allWeapons.find((w) => w.id === "phenmor")!;
-    const phenmorSpeed = mergeIncarnonStatChanges(
+    const phenmorSpeed = mergeOn(
       incarnonDataMap.get("phenmor")!,
       { 2: 2 },
       "phenmor",
@@ -684,102 +690,102 @@ describe("evolution numeric fixes", () => {
     expect(calculateWeaponBuild(phenmor, [], modsMap(), phenmorSpeed).projectileSpeed).toBe(0.8);
 
     const boar = allWeapons.find((w) => w.id === "boar")!;
-    const fortress = mergeIncarnonStatChanges(incarnonDataMap.get("boar")!, { 2: 1 }, "boar");
+    const fortress = mergeOn(incarnonDataMap.get("boar")!, { 2: 1 }, "boar");
     expect(fortress?.flatBaseDamage).toBe(16);
     expect(fortress?.punchThrough).toBe(4);
     expect(calculateWeaponBuild(boar, [], modsMap(), fortress).punchThrough).toBe(4);
 
     const boltor = allWeapons.find((w) => w.id === "boltor")!;
-    expect(mergeIncarnonStatChanges(incarnonDataMap.get("boltor")!, { 2: 0 }, "boltor")?.punchThrough).toBe(4);
+    expect(mergeOn(incarnonDataMap.get("boltor")!, { 2: 0 }, "boltor")?.punchThrough).toBe(4);
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("boltor")!, { 2: 0 }, "boltor_prime")?.punchThrough,
+      mergeOn(incarnonDataMap.get("boltor")!, { 2: 0 }, "boltor_prime")?.punchThrough,
     ).toBe(4);
 
     const strun = allWeapons.find((w) => w.id === "strun")!;
-    expect(mergeIncarnonStatChanges(incarnonDataMap.get("strun")!, { 2: 0 }, "strun")?.punchThrough).toBe(4);
-    expect(calculateWeaponBuild(strun, [], modsMap(), mergeIncarnonStatChanges(incarnonDataMap.get("strun")!, { 2: 0 }, "strun")).punchThrough).toBe(4);
+    expect(mergeOn(incarnonDataMap.get("strun")!, { 2: 0 }, "strun")?.punchThrough).toBe(4);
+    expect(calculateWeaponBuild(strun, [], modsMap(), mergeOn(incarnonDataMap.get("strun")!, { 2: 0 }, "strun")).punchThrough).toBe(4);
 
     const vectis = allWeapons.find((w) => w.id === "vectis")!;
-    expect(mergeIncarnonStatChanges(incarnonDataMap.get("vectis")!, { 2: 0 }, "vectis")?.punchThrough).toBe(2);
+    expect(mergeOn(incarnonDataMap.get("vectis")!, { 2: 0 }, "vectis")?.punchThrough).toBe(2);
 
     const bronco = allWeapons.find((w) => w.id === "bronco")!;
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("bronco")!, { 2: 0 }, "bronco")?.projectileSpeed,
+      mergeOn(incarnonDataMap.get("bronco")!, { 2: 0 }, "bronco")?.projectileSpeed,
     ).toBe(0.6);
     expect(
       calculateWeaponBuild(
         bronco,
         [],
         modsMap(),
-        mergeIncarnonStatChanges(incarnonDataMap.get("bronco")!, { 2: 0 }, "bronco"),
+        mergeOn(incarnonDataMap.get("bronco")!, { 2: 0 }, "bronco"),
       ).projectileSpeed,
     ).toBe(0.6);
   });
 
   it("holster reload and instant-reload chances appear on CalculatedStats", () => {
     const dera = allWeapons.find((w) => w.id === "dera")!;
-    const auto = mergeIncarnonStatChanges(incarnonDataMap.get("dera")!, { 3: 2 }, "dera");
+    const auto = mergeOn(incarnonDataMap.get("dera")!, { 3: 2 }, "dera");
     expect(auto?.holsterReloadPerSec).toBe(0.5);
     expect(calculateWeaponBuild(dera, [], modsMap(), auto).holsterReloadPerSec).toBe(0.5);
 
     const laetum = allWeapons.find((w) => w.id === "laetum")!;
-    const ready = mergeIncarnonStatChanges(incarnonDataMap.get("laetum")!, { 3: 1 }, "laetum");
+    const ready = mergeOn(incarnonDataMap.get("laetum")!, { 3: 1 }, "laetum");
     expect(ready?.holsterReloadPerSec).toBe(0.3);
     expect(calculateWeaponBuild(laetum, [], modsMap(), ready).holsterReloadPerSec).toBe(0.3);
 
     const lato = allWeapons.find((w) => w.id === "lato")!;
-    const penance = mergeIncarnonStatChanges(incarnonDataMap.get("lato")!, { 3: 2 }, "lato");
+    const penance = mergeOn(incarnonDataMap.get("lato")!, { 3: 2 }, "lato");
     expect(penance?.instantReloadOnKillChance).toBe(0.5);
     expect(calculateWeaponBuild(lato, [], modsMap(), penance).instantReloadOnKillChance).toBe(0.5);
 
     const furis = allWeapons.find((w) => w.id === "furis")!;
-    const fortune = mergeIncarnonStatChanges(incarnonDataMap.get("furis")!, { 3: 2 }, "furis");
+    const fortune = mergeOn(incarnonDataMap.get("furis")!, { 3: 2 }, "furis");
     expect(fortune?.instantReloadOnHeadshotChance).toBe(0.1);
     expect(calculateWeaponBuild(furis, [], modsMap(), fortune).instantReloadOnHeadshotChance).toBe(0.1);
 
     const phenmor = allWeapons.find((w) => w.id === "phenmor")!;
-    const hsKill = mergeIncarnonStatChanges(incarnonDataMap.get("phenmor")!, { 3: 2 }, "phenmor");
+    const hsKill = mergeOn(incarnonDataMap.get("phenmor")!, { 3: 2 }, "phenmor");
     expect(hsKill?.instantReloadOnHeadshotChance).toBe(0.2);
     expect(calculateWeaponBuild(phenmor, [], modsMap(), hsKill).instantReloadOnHeadshotChance).toBe(0.2);
 
     const vasto = allWeapons.find((w) => w.id === "vasto")!;
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("vasto")!, { 3: 2 }, "vasto")?.holsterReloadPerSec,
+      mergeOn(incarnonDataMap.get("vasto")!, { 3: 2 }, "vasto")?.holsterReloadPerSec,
     ).toBe(0.2);
   });
 
   it("accuracy and recoil appear on CalculatedStats (aim-feel Genesis)", () => {
     const boltor = allWeapons.find((w) => w.id === "boltor")!;
-    const mantra = mergeIncarnonStatChanges(incarnonDataMap.get("boltor")!, { 2: 0 }, "boltor");
+    const mantra = mergeOn(incarnonDataMap.get("boltor")!, { 2: 0 }, "boltor");
     expect(mantra?.punchThrough).toBe(4);
     expect(mantra?.accuracy).toBe(0.4);
     expect(calculateWeaponBuild(boltor, [], modsMap(), mantra).accuracy).toBe(0.4);
 
     const ballistica = allWeapons.find((w) => w.id === "ballistica")!;
-    const voids = mergeIncarnonStatChanges(incarnonDataMap.get("ballistica")!, { 3: 2 }, "ballistica");
+    const voids = mergeOn(incarnonDataMap.get("ballistica")!, { 3: 2 }, "ballistica");
     expect(voids).toMatchObject({ accuracy: 0.4, recoil: -0.4 });
     const voidsStats = calculateWeaponBuild(ballistica, [], modsMap(), voids);
     expect(voidsStats.accuracy).toBe(0.4);
     expect(voidsStats.recoil).toBe(-0.4);
 
     const bronco = allWeapons.find((w) => w.id === "bronco")!;
-    const kinetic = mergeIncarnonStatChanges(incarnonDataMap.get("bronco")!, { 3: 0 }, "bronco");
+    const kinetic = mergeOn(incarnonDataMap.get("bronco")!, { 3: 0 }, "bronco");
     expect(kinetic?.recoil).toBe(-0.5);
     expect(calculateWeaponBuild(bronco, [], modsMap(), kinetic).recoil).toBe(-0.5);
 
     const boar = allWeapons.find((w) => w.id === "boar")!;
-    const grip = mergeIncarnonStatChanges(incarnonDataMap.get("boar")!, { 3: 2 }, "boar");
+    const grip = mergeOn(incarnonDataMap.get("boar")!, { 3: 2 }, "boar");
     expect(grip?.accuracy).toBe(0.5);
     expect(calculateWeaponBuild(boar, [], modsMap(), grip).accuracy).toBe(0.5);
 
     const felarx = allWeapons.find((w) => w.id === "felarx")!;
-    const baffle = mergeIncarnonStatChanges(incarnonDataMap.get("felarx")!, { 2: 1 }, "felarx");
+    const baffle = mergeOn(incarnonDataMap.get("felarx")!, { 2: 1 }, "felarx");
     expect(baffle?.recoil).toBe(-0.5);
     expect(calculateWeaponBuild(felarx, [], modsMap(), baffle).recoil).toBe(-0.5);
 
     // Max-stack paper: Slayer's Nerve 10× / Lex Talionis 4×
     const cestra = allWeapons.find((w) => w.id === "cestra")!;
-    const nerve = mergeIncarnonStatChanges(incarnonDataMap.get("cestra")!, { 3: 1 }, "cestra");
+    const nerve = mergeOn(incarnonDataMap.get("cestra")!, { 3: 1 }, "cestra");
     expect(nerve).toMatchObject({ accuracy: 0.6, recoil: -0.6 });
     expect(calculateWeaponBuild(cestra, [], modsMap(), nerve)).toMatchObject({
       accuracy: 0.6,
@@ -787,7 +793,7 @@ describe("evolution numeric fixes", () => {
     });
 
     const lex = allWeapons.find((w) => w.id === "lex")!;
-    const talionis = mergeIncarnonStatChanges(incarnonDataMap.get("lex")!, { 3: 0 }, "lex");
+    const talionis = mergeOn(incarnonDataMap.get("lex")!, { 3: 0 }, "lex");
     expect(talionis).toMatchObject({ accuracy: 0.8, recoil: -0.8 });
     expect(calculateWeaponBuild(lex, [], modsMap(), talionis)).toMatchObject({
       accuracy: 0.8,
@@ -797,17 +803,17 @@ describe("evolution numeric fixes", () => {
 
   it("kill punch-through and Vicious Promise undamaged paper", () => {
     const dual = allWeapons.find((w) => w.id === "dual_toxocyst")!;
-    const ripper = mergeIncarnonStatChanges(incarnonDataMap.get("dual_toxocyst")!, { 4: 2 }, "dual_toxocyst");
+    const ripper = mergeOn(incarnonDataMap.get("dual_toxocyst")!, { 4: 2 }, "dual_toxocyst");
     expect(ripper?.punchThrough).toBe(3);
     expect(calculateWeaponBuild(dual, [], modsMap(), ripper).punchThrough).toBe(3);
 
     const onos = allWeapons.find((w) => w.id === "onos")!;
-    const lance = mergeIncarnonStatChanges(incarnonDataMap.get("onos")!, { 4: 0 }, "onos");
+    const lance = mergeOn(incarnonDataMap.get("onos")!, { 4: 0 }, "onos");
     expect(lance?.punchThrough).toBe(2.5);
     expect(calculateWeaponBuild(onos, [], modsMap(), lance).punchThrough).toBe(2.5);
 
     const paris = allWeapons.find((w) => w.id === "paris")!;
-    const promise = mergeIncarnonStatChanges(incarnonDataMap.get("paris")!, { 4: 0 }, "paris");
+    const promise = mergeOn(incarnonDataMap.get("paris")!, { 4: 0 }, "paris");
     expect(promise).toMatchObject({ criticalChance: 0.4, criticalMultiplier: 2 });
     const bare = calculateWeaponBuild(paris, [], modsMap());
     const withPromise = calculateWeaponBuild(paris, [], modsMap(), promise);
@@ -820,87 +826,87 @@ describe("evolution numeric fixes", () => {
 
   it("combo generators / shard / Renewed Horror panel leftovers", () => {
     const innodem = allWeapons.find((w) => w.id === "innodem")!;
-    const hawk = mergeIncarnonStatChanges(incarnonDataMap.get("innodem")!, { 3: 0 }, "innodem");
+    const hawk = mergeOn(incarnonDataMap.get("innodem")!, { 3: 0 }, "innodem");
     expect(hawk).toMatchObject({ comboPerSlideMeters: 5, comboSlideMeterInterval: 10 });
     expect(calculateWeaponBuild(innodem, [], modsMap(), hawk).comboPerSlideMeters).toBe(5);
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("innodem")!, { 4: 2 }, "innodem")?.comboOnFinisher,
+      mergeOn(incarnonDataMap.get("innodem")!, { 4: 2 }, "innodem")?.comboOnFinisher,
     ).toBe(20);
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("innodem")!, { 5: 1 }, "innodem")
+      mergeOn(incarnonDataMap.get("innodem")!, { 5: 1 }, "innodem")
         ?.stunRadiusOnFinisher,
     ).toBe(10);
 
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("praedos")!, { 3: 0 }, "praedos")?.comboPerSlamHit,
+      mergeOn(incarnonDataMap.get("praedos")!, { 3: 0 }, "praedos")?.comboPerSlamHit,
     ).toBe(4);
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("ruvox")!, { 3: 0 }, "ruvox")?.comboPerSlamHit,
+      mergeOn(incarnonDataMap.get("ruvox")!, { 3: 0 }, "ruvox")?.comboPerSlamHit,
     ).toBe(4);
 
     const thalys = allWeapons.find((w) => w.id === "thalys")!;
-    const scythe = mergeIncarnonStatChanges(incarnonDataMap.get("thalys")!, { 3: 0 }, "thalys");
+    const scythe = mergeOn(incarnonDataMap.get("thalys")!, { 3: 0 }, "thalys");
     expect(scythe?.comboPerSlideHit).toBe(5);
     expect(calculateWeaponBuild(thalys, [], modsMap(), scythe).comboPerSlideHit).toBe(5);
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("thalys")!, { 3: 1 }, "thalys")?.comboOnShardDamage,
+      mergeOn(incarnonDataMap.get("thalys")!, { 3: 1 }, "thalys")?.comboOnShardDamage,
     ).toBe(1);
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("thalys")!, { 4: 2 }, "thalys")
+      mergeOn(incarnonDataMap.get("thalys")!, { 4: 2 }, "thalys")
         ?.knockdownRadiusOnFinisher,
     ).toBe(6);
-    const splinters = mergeIncarnonStatChanges(incarnonDataMap.get("thalys")!, { 5: 2 }, "thalys");
+    const splinters = mergeOn(incarnonDataMap.get("thalys")!, { 5: 2 }, "thalys");
     expect(splinters).toMatchObject({
       shardDuration: 30,
       shardWeakSpotCritBonus: 1,
       shardDamageMult: -0.5,
     });
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("thalys")!, { 5: 0 }, "thalys")
+      mergeOn(incarnonDataMap.get("thalys")!, { 5: 0 }, "thalys")
         ?.shardFullyGrownDamageMult,
     ).toBe(2);
 
     const torid = allWeapons.find((w) => w.id === "torid")!;
-    const horror = mergeIncarnonStatChanges(incarnonDataMap.get("torid")!, { 3: 1 }, "torid");
+    const horror = mergeOn(incarnonDataMap.get("torid")!, { 3: 1 }, "torid");
     expect(horror?.lingeringFieldDurationMult).toBe(2);
     expect(calculateWeaponBuild(torid, [], modsMap(), horror).lingeringFieldDurationMult).toBe(2);
   });
 
   it("ruvox / praedos / ichor leftover utility panel + SC vulnerability", () => {
     const ruvox = allWeapons.find((w) => w.id === "ruvox")!;
-    const gather = mergeIncarnonStatChanges(incarnonDataMap.get("ruvox")!, { 2: 2 }, "ruvox");
+    const gather = mergeOn(incarnonDataMap.get("ruvox")!, { 2: 2 }, "ruvox");
     expect(gather?.movementSpeed).toBe(0.6);
     expect(calculateWeaponBuild(ruvox, [], modsMap(), gather).movementSpeedBonus).toBe(0.6);
 
-    expect(mergeIncarnonStatChanges(incarnonDataMap.get("ruvox")!, { 4: 1 }, "ruvox")?.extraJumps).toBe(
+    expect(mergeOn(incarnonDataMap.get("ruvox")!, { 4: 1 }, "ruvox")?.extraJumps).toBe(
       1,
     );
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("ruvox")!, { 4: 2 }, "ruvox")
+      mergeOn(incarnonDataMap.get("ruvox")!, { 4: 2 }, "ruvox")
         ?.finisherComboCountChance,
     ).toBe(0.3);
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("ruvox")!, { 5: 2 }, "ruvox")
+      mergeOn(incarnonDataMap.get("ruvox")!, { 5: 2 }, "ruvox")
         ?.punctureStatusOnImpale,
     ).toBe(5);
 
-    const serum = mergeIncarnonStatChanges(incarnonDataMap.get("ruvox")!, { 5: 1 }, "ruvox");
+    const serum = mergeOn(incarnonDataMap.get("ruvox")!, { 5: 1 }, "ruvox");
     expect(serum?.statusChanceVulnerability).toBe(0.35);
     const bare = calculateWeaponBuild(ruvox, [], modsMap());
     const withSerum = calculateWeaponBuild(ruvox, [], modsMap(), serum);
     expect(withSerum.statusChance).toBeCloseTo(bare.statusChance * 1.35, 5);
 
     const praedos = allWeapons.find((w) => w.id === "praedos")!;
-    const leap = mergeIncarnonStatChanges(incarnonDataMap.get("praedos")!, { 4: 2 }, "praedos");
+    const leap = mergeOn(incarnonDataMap.get("praedos")!, { 4: 2 }, "praedos");
     expect(leap?.jumpStrength).toBe(1);
     expect(calculateWeaponBuild(praedos, [], modsMap(), leap).jumpStrength).toBe(1);
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("praedos")!, { 5: 2 }, "praedos")
+      mergeOn(incarnonDataMap.get("praedos")!, { 5: 2 }, "praedos")
         ?.comboOnAmmoPickup,
     ).toBe(5);
 
     const ichor = allWeapons.find((w) => w.id === "dual_ichor")!;
-    const parasite = mergeIncarnonStatChanges(
+    const parasite = mergeOn(
       incarnonDataMap.get("dual_ichor")!,
       { 4: 1 },
       "dual_ichor",
@@ -911,50 +917,50 @@ describe("evolution numeric fixes", () => {
 
   it("melee utility / ammo restore / charge / silent Genesis panel", () => {
     const innodem = allWeapons.find((w) => w.id === "innodem")!;
-    const twister = mergeIncarnonStatChanges(incarnonDataMap.get("innodem")!, { 3: 2 }, "innodem");
+    const twister = mergeOn(incarnonDataMap.get("innodem")!, { 3: 2 }, "innodem");
     expect(twister?.finisherDamage).toBe(0.6);
     expect(calculateWeaponBuild(innodem, [], modsMap(), twister).finisherDamage).toBe(0.6);
 
     const magistar = allWeapons.find((w) => w.id === "magistar")!;
-    const slam = mergeIncarnonStatChanges(incarnonDataMap.get("magistar")!, { 3: 0 }, "magistar");
+    const slam = mergeOn(incarnonDataMap.get("magistar")!, { 3: 0 }, "magistar");
     expect(slam?.slamRadius).toBe(1);
     expect(calculateWeaponBuild(magistar, [], modsMap(), slam).slamRadius).toBe(1);
-    expect(mergeIncarnonStatChanges(incarnonDataMap.get("praedos")!, { 2: 0 }, "praedos")?.slamRadius).toBe(
+    expect(mergeOn(incarnonDataMap.get("praedos")!, { 2: 0 }, "praedos")?.slamRadius).toBe(
       0.5,
     );
-    expect(mergeIncarnonStatChanges(incarnonDataMap.get("ruvox")!, { 3: 1 }, "ruvox")?.slamRadius).toBe(
+    expect(mergeOn(incarnonDataMap.get("ruvox")!, { 3: 1 }, "ruvox")?.slamRadius).toBe(
       0.6,
     );
 
     const anku = allWeapons.find((w) => w.id === "anku")!;
-    const celerity = mergeIncarnonStatChanges(incarnonDataMap.get("anku")!, { 3: 1 }, "anku");
+    const celerity = mergeOn(incarnonDataMap.get("anku")!, { 3: 1 }, "anku");
     expect(celerity?.movementSpeed).toBe(0.2);
     expect(calculateWeaponBuild(anku, [], modsMap(), celerity).movementSpeedBonus).toBe(0.2);
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("okina")!, { 3: 2 }, "okina")?.movementSpeed,
+      mergeOn(incarnonDataMap.get("okina")!, { 3: 2 }, "okina")?.movementSpeed,
     ).toBe(0.3);
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("laetum")!, { 2: 2 }, "laetum")?.movementSpeed,
+      mergeOn(incarnonDataMap.get("laetum")!, { 2: 2 }, "laetum")?.movementSpeed,
     ).toBe(0.5);
 
-    const standoff = mergeIncarnonStatChanges(incarnonDataMap.get("anku")!, { 3: 0 }, "anku");
+    const standoff = mergeOn(incarnonDataMap.get("anku")!, { 3: 0 }, "anku");
     expect(standoff?.comboTimerPauseWhenHolstered).toBe(1);
     expect(calculateWeaponBuild(anku, [], modsMap(), standoff).comboTimerPauseWhenHolstered).toBe(
       true,
     );
     const ack =
       incarnonDataMap.get("ack_&_brunt") ?? incarnonDataMap.get("ack_brunt")!;
-    expect(mergeIncarnonStatChanges(ack, { 3: 1 }, "ack_brunt")?.comboTimerPauseWhenHolstered).toBe(
+    expect(mergeOn(ack, { 3: 1 }, "ack_brunt")?.comboTimerPauseWhenHolstered).toBe(
       1,
     );
 
     const obex = allWeapons.find((w) => w.id === "obex")!;
-    const rapid = mergeIncarnonStatChanges(incarnonDataMap.get("obex")!, { 3: 0 }, "obex");
+    const rapid = mergeOn(incarnonDataMap.get("obex")!, { 3: 0 }, "obex");
     expect(rapid?.parkourVelocity).toBe(0.4);
     expect(calculateWeaponBuild(obex, [], modsMap(), rapid).parkourVelocityBonus).toBe(0.4);
 
     const braton = allWeapons.find((w) => w.id === "braton")!;
-    const gunsmoke = mergeIncarnonStatChanges(incarnonDataMap.get("braton")!, { 3: 2 }, "braton");
+    const gunsmoke = mergeOn(incarnonDataMap.get("braton")!, { 3: 2 }, "braton");
     expect(gunsmoke).toMatchObject({ ammoRestoreChance: 0.2, ammoRestoreMagFraction: 0.1 });
     expect(calculateWeaponBuild(braton, [], modsMap(), gunsmoke)).toMatchObject({
       ammoRestoreChance: 0.2,
@@ -962,77 +968,77 @@ describe("evolution numeric fixes", () => {
     });
 
     const onos = allWeapons.find((w) => w.id === "onos")!;
-    const rearm = mergeIncarnonStatChanges(incarnonDataMap.get("onos")!, { 3: 2 }, "onos");
+    const rearm = mergeOn(incarnonDataMap.get("onos")!, { 3: 2 }, "onos");
     expect(rearm).toMatchObject({ ammoRestoreChance: 0.1, ammoRestoreFlat: 10 });
     expect(calculateWeaponBuild(onos, [], modsMap(), rearm).ammoRestoreFlat).toBe(10);
 
     const strun = allWeapons.find((w) => w.id === "strun")!;
-    const galvanic = mergeIncarnonStatChanges(incarnonDataMap.get("strun")!, { 3: 1 }, "strun");
+    const galvanic = mergeOn(incarnonDataMap.get("strun")!, { 3: 1 }, "strun");
     expect(galvanic).toMatchObject({ ammoRestoreChance: 0.4, ammoRestoreFlat: 1 });
     expect(calculateWeaponBuild(strun, [], modsMap(), galvanic).ammoRestoreChance).toBe(0.4);
 
     const felarx = allWeapons.find((w) => w.id === "felarx")!;
-    const catalyst = mergeIncarnonStatChanges(incarnonDataMap.get("felarx")!, { 4: 1 }, "felarx");
+    const catalyst = mergeOn(incarnonDataMap.get("felarx")!, { 4: 1 }, "felarx");
     expect(catalyst?.incarnonHeadshotChargeBonus).toBe(0.5);
     expect(calculateWeaponBuild(felarx, [], modsMap(), catalyst).incarnonHeadshotChargeBonus).toBe(
       0.5,
     );
 
     const vectis = allWeapons.find((w) => w.id === "vectis")!;
-    const silent = mergeIncarnonStatChanges(incarnonDataMap.get("vectis")!, { 3: 2 }, "vectis");
+    const silent = mergeOn(incarnonDataMap.get("vectis")!, { 3: 2 }, "vectis");
     expect(silent?.silentWeapon).toBe(1);
     expect(calculateWeaponBuild(vectis, [], modsMap(), silent).silentWeapon).toBe(true);
   });
 
   it("zoom and movement Genesis appear on CalculatedStats", () => {
     const despair = allWeapons.find((w) => w.id === "despair")!;
-    const focus = mergeIncarnonStatChanges(incarnonDataMap.get("despair")!, { 3: 0 }, "despair");
+    const focus = mergeOn(incarnonDataMap.get("despair")!, { 3: 0 }, "despair");
     expect(focus?.zoom).toBe(-0.3);
     expect(calculateWeaponBuild(despair, [], modsMap(), focus).zoom).toBe(-0.3);
-    expect(mergeIncarnonStatChanges(incarnonDataMap.get("dread")!, { 3: 1 }, "dread")?.zoom).toBe(
+    expect(mergeOn(incarnonDataMap.get("dread")!, { 3: 1 }, "dread")?.zoom).toBe(
       -0.3,
     );
-    expect(mergeIncarnonStatChanges(incarnonDataMap.get("latron")!, { 3: 2 }, "latron")?.zoom).toBe(
+    expect(mergeOn(incarnonDataMap.get("latron")!, { 3: 2 }, "latron")?.zoom).toBe(
       -0.3,
     );
-    expect(mergeIncarnonStatChanges(incarnonDataMap.get("paris")!, { 3: 1 }, "paris")?.zoom).toBe(
+    expect(mergeOn(incarnonDataMap.get("paris")!, { 3: 1 }, "paris")?.zoom).toBe(
       -0.3,
     );
 
     const innodem = allWeapons.find((w) => w.id === "innodem")!;
-    const swift = mergeIncarnonStatChanges(incarnonDataMap.get("innodem")!, { 2: 2 }, "innodem");
+    const swift = mergeOn(incarnonDataMap.get("innodem")!, { 2: 2 }, "innodem");
     expect(swift?.sprintSpeed).toBe(0.3);
     expect(calculateWeaponBuild(innodem, [], modsMap(), swift).sprintSpeedBonus).toBe(0.3);
 
     const praedos = allWeapons.find((w) => w.id === "praedos")!;
-    const grace = mergeIncarnonStatChanges(incarnonDataMap.get("praedos")!, { 2: 2 }, "praedos");
+    const grace = mergeOn(incarnonDataMap.get("praedos")!, { 2: 2 }, "praedos");
     expect(grace).toMatchObject({ sprintSpeed: 0.2, slideSpeed: 0.2 });
     expect(calculateWeaponBuild(praedos, [], modsMap(), grace)).toMatchObject({
       sprintSpeedBonus: 0.2,
       slideSpeedBonus: 0.2,
     });
-    const ascension = mergeIncarnonStatChanges(incarnonDataMap.get("praedos")!, { 4: 1 }, "praedos");
+    const ascension = mergeOn(incarnonDataMap.get("praedos")!, { 4: 1 }, "praedos");
     expect(ascension?.parkourVelocity).toBe(0.3);
     expect(calculateWeaponBuild(praedos, [], modsMap(), ascension).parkourVelocityBonus).toBe(0.3);
 
     const thalys = allWeapons.find((w) => w.id === "thalys")!;
-    const drift = mergeIncarnonStatChanges(incarnonDataMap.get("thalys")!, { 2: 2 }, "thalys");
+    const drift = mergeOn(incarnonDataMap.get("thalys")!, { 2: 2 }, "thalys");
     expect(drift).toMatchObject({ fireRate: 0.8, slideSpeed: 0.2 });
     expect(calculateWeaponBuild(thalys, [], modsMap(), drift).slideSpeedBonus).toBe(0.2);
   });
 
   it("melee followThrough panel: Crushing Verdict / Lone Blade", () => {
     const magistar = allWeapons.find((w) => w.id === "magistar")!;
-    const verdict = mergeIncarnonStatChanges(incarnonDataMap.get("magistar")!, { 2: 0 }, "magistar");
+    const verdict = mergeOn(incarnonDataMap.get("magistar")!, { 2: 0 }, "magistar");
     expect(verdict?.followThrough).toBe(0.4);
     expect(calculateWeaponBuild(magistar, [], modsMap(), verdict).followThrough).toBe(0.4);
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("magistar")!, { 2: 0 }, "sancti_magistar")
+      mergeOn(incarnonDataMap.get("magistar")!, { 2: 0 }, "sancti_magistar")
         ?.followThrough,
     ).toBe(0.4);
 
     const nami = allWeapons.find((w) => w.id === "nami_solo")!;
-    const lone = mergeIncarnonStatChanges(incarnonDataMap.get("nami_solo")!, { 3: 0 }, "nami_solo");
+    const lone = mergeOn(incarnonDataMap.get("nami_solo")!, { 3: 0 }, "nami_solo");
     expect(lone?.followThrough).toBe(0.6);
     expect(calculateWeaponBuild(nami, [], modsMap(), lone).followThrough).toBe(0.6);
   });
@@ -1040,21 +1046,21 @@ describe("evolution numeric fixes", () => {
   it("Braton Daring Reverie / Munitions Grit variant flats", () => {
     const data = incarnonDataMap.get("braton")!;
     // Channel-active paper: X+Y (24+30)
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "braton")?.flatBaseDamage).toBe(54);
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "braton_prime")?.flatBaseDamage).toBe(42);
-    expect(mergeIncarnonStatChanges(data, { 2: 1 }, "braton_prime")?.flatBaseDamage).toBe(2);
-    expect(mergeIncarnonStatChanges(data, { 2: 1 }, "braton")?.multishot).toBe(0.2);
+    expect(mergeOn(data, { 2: 0 }, "braton")?.flatBaseDamage).toBe(54);
+    expect(mergeOn(data, { 2: 0 }, "braton_prime")?.flatBaseDamage).toBe(42);
+    expect(mergeOn(data, { 2: 1 }, "braton_prime")?.flatBaseDamage).toBe(2);
+    expect(mergeOn(data, { 2: 1 }, "braton")?.multishot).toBe(0.2);
     // Capacity-MS pellet unique mult Y% (paper assumes clause up)
-    expect(mergeIncarnonStatChanges(data, { 2: 1 }, "braton")?.capacityMsDamageMult).toBeCloseTo(0.6, 5);
-    expect(mergeIncarnonStatChanges(data, { 2: 1 }, "mk1_braton")?.capacityMsDamageMult).toBeCloseTo(
+    expect(mergeOn(data, { 2: 1 }, "braton")?.capacityMsDamageMult).toBeCloseTo(0.6, 5);
+    expect(mergeOn(data, { 2: 1 }, "mk1_braton")?.capacityMsDamageMult).toBeCloseTo(
       0.48,
       5,
     );
-    expect(mergeIncarnonStatChanges(data, { 2: 1 }, "braton_vandal")?.capacityMsDamageMult).toBeCloseTo(
+    expect(mergeOn(data, { 2: 1 }, "braton_vandal")?.capacityMsDamageMult).toBeCloseTo(
       0.58,
       5,
     );
-    expect(mergeIncarnonStatChanges(data, { 2: 1 }, "braton_prime")?.capacityMsDamageMult).toBeCloseTo(
+    expect(mergeOn(data, { 2: 1 }, "braton_prime")?.capacityMsDamageMult).toBeCloseTo(
       0.54,
       5,
     );
@@ -1062,14 +1068,14 @@ describe("evolution numeric fixes", () => {
 
   it("Overwhelming Attrition / King's Gambit / Swift form / Seeing Red family", () => {
     const laetumData = incarnonDataMap.get("laetum")!;
-    expect(mergeIncarnonStatChanges(laetumData, { 5: 2 }, "laetum")?.additiveBaseDamage).toBe(12);
+    expect(mergeOn(laetumData, { 5: 2 }, "laetum")?.additiveBaseDamage).toBe(12);
     const laetum = allWeapons.find((w) => w.id === "laetum")!;
     const bareLaetum = calculateWeaponBuild(laetum, [], modsMap());
     const attrition = calculateWeaponBuild(laetum, [], modsMap(), { additiveBaseDamage: 12 });
     expect(attrition.totalDamage).toBeCloseTo(bareLaetum.totalDamage * 13, 5);
 
     const sicarus = allWeapons.find((w) => w.id === "sicarus")!;
-    const gambit = mergeIncarnonStatChanges(incarnonDataMap.get("sicarus")!, { 2: 1 }, "sicarus");
+    const gambit = mergeOn(incarnonDataMap.get("sicarus")!, { 2: 1 }, "sicarus");
     const body = calculateWeaponBuild(
       sicarus,
       [],
@@ -1088,20 +1094,20 @@ describe("evolution numeric fixes", () => {
     expect(weakpoint.criticalChance).toBeCloseTo(sicarus.criticalChance * 2.5, 5);
 
     const kunaiData = incarnonDataMap.get("kunai")!;
-    expect(mergeIncarnonStatChanges(kunaiData, { 2: 0 }, "kunai")?.halfHealthAdditiveDamage).toBe(2);
-    const formSwift = mergeIncarnonStatChanges(kunaiData, { 2: 0 }, "kunai", { formActive: true });
+    expect(mergeOn(kunaiData, { 2: 0 }, "kunai")?.halfHealthAdditiveDamage).toBe(2);
+    const formSwift = mergeOn(kunaiData, { 2: 0 }, "kunai", { formActive: true });
     expect(formSwift?.halfHealthAdditiveDamage).toBe(0);
     expect(formSwift?.damage).toBe(2);
 
-    expect(mergeIncarnonStatChanges(incarnonDataMap.get("okina")!, { 2: 0 }, "okina")?.comboOnSlashStatus).toBe(5);
+    expect(mergeOn(incarnonDataMap.get("okina")!, { 2: 0 }, "okina")?.comboOnSlashStatus).toBe(5);
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("dual_ichor")!, { 2: 0 }, "dual_ichor")
+      mergeOn(incarnonDataMap.get("dual_ichor")!, { 2: 0 }, "dual_ichor")
         ?.comboOnToxinStatus,
     ).toBe(5);
     expect(
-      mergeIncarnonStatChanges(incarnonDataMap.get("sibear")!, { 2: 0 }, "sibear")?.comboOnColdStatus,
+      mergeOn(incarnonDataMap.get("sibear")!, { 2: 0 }, "sibear")?.comboOnColdStatus,
     ).toBe(10);
-    expect(mergeIncarnonStatChanges(incarnonDataMap.get("skana")!, { 2: 1 }, "skana")?.comboOnUndamaged).toBe(
+    expect(mergeOn(incarnonDataMap.get("skana")!, { 2: 1 }, "skana")?.comboOnUndamaged).toBe(
       9,
     );
     const okina = allWeapons.find((w) => w.id === "okina")!;
@@ -1112,7 +1118,7 @@ describe("evolution numeric fixes", () => {
 
   it("Miter Sawblade Storm papers 1400 Blast / 5m radial (base form only)", () => {
     const data = incarnonDataMap.get("miter")!;
-    const storm = mergeIncarnonStatChanges(data, { 4: 0 }, "miter");
+    const storm = mergeOn(data, { 4: 0 }, "miter");
     expect(storm?.sawbladeStormBlast).toBe(1400);
     expect(storm?.sawbladeStormRadius).toBe(5);
 
@@ -1137,7 +1143,7 @@ describe("evolution numeric fixes", () => {
 
   it("half-HP Feigned/Hitman/Swift ignore own flat; Impaler is Serration-additive", () => {
     const sicarusData = incarnonDataMap.get("sicarus")!;
-    const feigned = mergeIncarnonStatChanges(sicarusData, { 2: 0 }, "sicarus");
+    const feigned = mergeOn(sicarusData, { 2: 0 }, "sicarus");
     expect(feigned?.flatBaseDamage).toBe(50);
     expect(feigned?.halfHealthAdditiveDamage).toBeCloseTo(0.4, 5);
     expect(feigned?.damage).toBeUndefined();
@@ -1149,8 +1155,8 @@ describe("evolution numeric fixes", () => {
     expect(withHalf.totalDamage).toBeCloseTo(flatOnly.totalDamage + sicarus.damage * 0.4, 5);
 
     const dreadData = incarnonDataMap.get("dread")!;
-    expect(mergeIncarnonStatChanges(dreadData, { 2: 0 }, "dread")?.halfHealthAdditiveDamage).toBe(1);
-    expect(mergeIncarnonStatChanges(dreadData, { 2: 0 }, "dread")?.damage).toBeUndefined();
+    expect(mergeOn(dreadData, { 2: 0 }, "dread")?.halfHealthAdditiveDamage).toBe(1);
+    expect(mergeOn(dreadData, { 2: 0 }, "dread")?.damage).toBeUndefined();
 
     const onos = allWeapons.find((w) => w.id === "onos")!;
     const bare = calculateWeaponBuild(onos, [], modsMap());
@@ -1160,7 +1166,7 @@ describe("evolution numeric fixes", () => {
 
   it("Forceful Finality / Miter Plentiful / Reaver Rapture paper correctly", () => {
     const burstonData = incarnonDataMap.get("burston")!;
-    const forceful = mergeIncarnonStatChanges(burstonData, { 2: 0 }, "burston");
+    const forceful = mergeOn(burstonData, { 2: 0 }, "burston");
     expect(forceful?.flatBaseDamage).toBe(42);
     expect(forceful?.lastShotBaseMultishot).toBe(5);
     const burston = allWeapons.find((w) => w.id === "burston")!;
@@ -1174,7 +1180,7 @@ describe("evolution numeric fixes", () => {
     expect(formStats.multishot).toBeCloseTo(1, 5);
 
     const miterData = incarnonDataMap.get("miter")!;
-    const plentiful = mergeIncarnonStatChanges(miterData, { 2: 1 }, "miter");
+    const plentiful = mergeOn(miterData, { 2: 1 }, "miter");
     expect(plentiful?.flatBaseDamage).toBe(57);
     expect(plentiful?.flatMsPelletDamage).toBe(20);
     const miter = allWeapons.find((w) => w.id === "miter")!;
@@ -1190,9 +1196,9 @@ describe("evolution numeric fixes", () => {
     expect(withMs.multishot).toBeCloseTo(2, 5);
     expect(withMs.totalDamage).toBeCloseTo(bareMiter.totalDamage + 10, 5);
 
-    expect(mergeIncarnonStatChanges(burstonData, { 4: 0 }, "burston")?.additiveBaseDamage).toBe(1);
+    expect(mergeOn(burstonData, { 4: 0 }, "burston")?.additiveBaseDamage).toBe(1);
     const sybarisData = incarnonDataMap.get("sybaris")!;
-    expect(mergeIncarnonStatChanges(sybarisData, { 4: 1 }, "sybaris")?.additiveBaseDamage).toBe(0.8);
+    expect(mergeOn(sybarisData, { 4: 1 }, "sybaris")?.additiveBaseDamage).toBe(0.8);
     const rapture = calculateWeaponBuild(burston, [], modsMap(), { additiveBaseDamage: 1 });
     const bareBurston = calculateWeaponBuild(burston, [], modsMap());
     expect(rapture.totalDamage).toBeCloseTo(bareBurston.totalDamage * 2, 5);
@@ -1200,23 +1206,23 @@ describe("evolution numeric fixes", () => {
 
   it("Latron Riddled Target / Critical Parallel", () => {
     const data = incarnonDataMap.get("latron")!;
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "latron")?.flatBaseDamage).toBe(48);
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "latron")?.multishot).toBe(1);
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "latron_prime")?.flatBaseDamage).toBe(6);
-    expect(mergeIncarnonStatChanges(data, { 2: 1 }, "latron")?.fatalAfflictionPerStatus).toBe(0.3);
-    expect(mergeIncarnonStatChanges(data, { 4: 2 }, "latron")?.criticalChance).toBe(0.3);
-    expect(mergeIncarnonStatChanges(data, { 4: 2 }, "latron")?.criticalMultiplier).toBe(0.6);
+    expect(mergeOn(data, { 2: 0 }, "latron")?.flatBaseDamage).toBe(48);
+    expect(mergeOn(data, { 2: 0 }, "latron")?.multishot).toBe(1);
+    expect(mergeOn(data, { 2: 0 }, "latron_prime")?.flatBaseDamage).toBe(6);
+    expect(mergeOn(data, { 2: 1 }, "latron")?.fatalAfflictionPerStatus).toBe(0.3);
+    expect(mergeOn(data, { 4: 2 }, "latron")?.criticalChance).toBe(0.3);
+    expect(mergeOn(data, { 4: 2 }, "latron")?.criticalMultiplier).toBe(0.6);
   });
 
   it("Furis Haven Foray overshield paper +58 / Mk1 +64", () => {
     const data = incarnonDataMap.get("furis")!;
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "furis")?.flatBaseDamage).toBe(58);
-    expect(mergeIncarnonStatChanges(data, { 2: 0 }, "mk1_furis")?.flatBaseDamage).toBe(64);
+    expect(mergeOn(data, { 2: 0 }, "furis")?.flatBaseDamage).toBe(58);
+    expect(mergeOn(data, { 2: 0 }, "mk1_furis")?.flatBaseDamage).toBe(64);
   });
 
   it("melee T1 +100% Melee Damage encodes as additiveBaseDamage (PP-additive)", () => {
     const data = incarnonDataMap.get("hate")!;
-    expect(mergeIncarnonStatChanges(data, { 1: 0 }, "hate")?.additiveBaseDamage).toBe(1);
+    expect(mergeOn(data, { 1: 0 }, "hate")?.additiveBaseDamage).toBe(1);
     const hate = allWeapons.find((w) => w.id === "hate")!;
     const bare = calculateWeaponBuild(hate, [], modsMap());
     const form = calculateWeaponBuild(
@@ -1230,30 +1236,31 @@ describe("evolution numeric fixes", () => {
 
   it("Bo T1 form encodes +100% Melee Damage, +4 Range, +50% HAE", () => {
     const data = incarnonDataMap.get("bo")!;
-    expect(mergeIncarnonStatChanges(data, { 1: 0 }, "bo")?.additiveBaseDamage).toBe(1);
-    expect(mergeIncarnonStatChanges(data, { 1: 0 }, "bo")?.range).toBe(4);
-    expect(mergeIncarnonStatChanges(data, { 1: 0 }, "bo")?.heavyAttackEfficiency).toBe(0.5);
+    expect(mergeOn(data, { 1: 0 }, "bo")?.additiveBaseDamage).toBe(1);
+    expect(mergeOn(data, { 1: 0 }, "bo")?.range).toBe(4);
+    expect(mergeOn(data, { 1: 0 }, "bo")?.heavyAttackEfficiency).toBe(0.5);
   });
 
   it("Nami Solo T1 form encodes +100% Melee Damage and +3 Range", () => {
     const data = incarnonDataMap.get("nami_solo")!;
-    expect(mergeIncarnonStatChanges(data, { 1: 0 }, "nami_solo")?.additiveBaseDamage).toBe(1);
-    expect(mergeIncarnonStatChanges(data, { 1: 0 }, "nami_solo")?.range).toBe(3);
+    expect(mergeOn(data, { 1: 0 }, "nami_solo")?.additiveBaseDamage).toBe(1);
+    expect(mergeOn(data, { 1: 0 }, "nami_solo")?.range).toBe(3);
   });
 
   it("Innodem / Praedos T1 encode +3 Range with +40% Attack Speed", () => {
     const innodem = incarnonDataMap.get("innodem")!;
-    expect(mergeIncarnonStatChanges(innodem, { 1: 0 }, "innodem")?.range).toBe(3);
-    expect(mergeIncarnonStatChanges(innodem, { 1: 0 }, "innodem")?.fireRate).toBe(0.4);
+    expect(mergeOn(innodem, { 1: 0 }, "innodem")?.range).toBe(3);
+    expect(mergeOn(innodem, { 1: 0 }, "innodem")?.fireRate).toBe(0.4);
     const praedos = incarnonDataMap.get("praedos")!;
-    expect(mergeIncarnonStatChanges(praedos, { 1: 0 }, "praedos")?.range).toBe(3);
-    expect(mergeIncarnonStatChanges(praedos, { 1: 0 }, "praedos")?.fireRate).toBe(0.4);
+    expect(mergeOn(praedos, { 1: 0 }, "praedos")?.range).toBe(3);
+    expect(mergeOn(praedos, { 1: 0 }, "praedos")?.fireRate).toBe(0.4);
   });
 
   it("Ruvox T1 encodes +3 Range and -35% Attack Speed", () => {
     const data = incarnonDataMap.get("ruvox")!;
-    expect(mergeIncarnonStatChanges(data, { 1: 0 }, "ruvox")?.range).toBe(3);
-    expect(mergeIncarnonStatChanges(data, { 1: 0 }, "ruvox")?.fireRate).toBeCloseTo(-0.35, 5);
+    expect(mergeOn(data, { 1: 0 }, "ruvox")?.range).toBe(3);
+    expect(mergeOn(data, { 1: 0 }, "ruvox")?.fireRateMultiplier).toBeCloseTo(-0.35, 5);
+    expect(mergeOn(data, { 1: 0 }, "ruvox")?.fireRate).toBeUndefined();
   });
 
   it("Thalys T1 encodes +3 Range +40% AS without swapping arsenal damage", () => {
@@ -1262,16 +1269,16 @@ describe("evolution numeric fixes", () => {
     const form = resolveIncarnonActiveWeapon(thalys, data, { 1: 0 });
     expect(form.damage).toBe(thalys.damage);
     expect(form.triggerType).toBe(thalys.triggerType);
-    expect(mergeIncarnonStatChanges(data, { 1: 0 }, "thalys")?.range).toBe(3);
-    expect(mergeIncarnonStatChanges(data, { 1: 0 }, "thalys")?.fireRate).toBe(0.4);
-    expect(mergeIncarnonStatChanges(data, { 1: 0 }, "thalys")?.shardTriggerMult).toBeCloseTo(0.75, 5);
-    expect(mergeIncarnonStatChanges(data, { 2: 1 }, "thalys")?.fireRate).toBe(0.2);
+    expect(mergeOn(data, { 1: 0 }, "thalys")?.range).toBe(3);
+    expect(mergeOn(data, { 1: 0 }, "thalys")?.fireRate).toBe(0.4);
+    expect(mergeOn(data, { 1: 0 }, "thalys")?.shardTriggerMult).toBeCloseTo(0.75, 5);
+    expect(mergeOn(data, { 2: 1 }, "thalys")?.fireRate).toBe(0.2);
   });
 
   it("Thalys Chain Shatter + form shard triggers paper sim-gated DPS", () => {
     const thalys = allWeapons.find((w) => w.id === "thalys")!;
     const data = incarnonDataMap.get("thalys")!;
-    const changes = mergeIncarnonStatChanges(data, { 1: 0, 5: 1 }, "thalys");
+    const changes = mergeOn(data, { 1: 0, 5: 1 }, "thalys");
     expect(changes?.chainShatterDetonateMult).toBe(2);
     expect(changes?.shardTriggerMult).toBeCloseTo(0.75, 5);
 
@@ -1300,7 +1307,7 @@ describe("evolution numeric fixes", () => {
   it("Thalys Explosive Growth papers fully-grown hosts at ×2 trigger", () => {
     const thalys = allWeapons.find((w) => w.id === "thalys")!;
     const data = incarnonDataMap.get("thalys")!;
-    const changes = mergeIncarnonStatChanges(data, { 1: 0, 5: 0 }, "thalys");
+    const changes = mergeOn(data, { 1: 0, 5: 0 }, "thalys");
     expect(changes?.shardFullyGrownDamageMult).toBe(2);
     expect(changes?.chainShatterDetonateMult).toBeUndefined();
 
@@ -1331,7 +1338,7 @@ describe("evolution numeric fixes", () => {
 
   it("Swooping Lunge is PP-additive per airborne stack; Destreza puncture is sim-gated", () => {
     const innodem = allWeapons.find((w) => w.id === "innodem")!;
-    const swoop = mergeIncarnonStatChanges(incarnonDataMap.get("innodem")!, { 4: 1 }, "innodem");
+    const swoop = mergeOn(incarnonDataMap.get("innodem")!, { 4: 1 }, "innodem");
     expect(swoop?.airborneKillAdditivePerStack).toBeCloseTo(0.5, 5);
     const bare = calculateWeaponBuild(innodem, [], modsMap());
     const max = calculateWeaponBuild(innodem, [], modsMap(), swoop, {
@@ -1346,7 +1353,7 @@ describe("evolution numeric fixes", () => {
     expect(zero.totalDamage).toBeCloseTo(bare.totalDamage, 5);
 
     const destreza = allWeapons.find((w) => w.id === "destreza")!;
-    const form = mergeIncarnonStatChanges(incarnonDataMap.get("destreza")!, { 1: 0 }, "destreza");
+    const form = mergeOn(incarnonDataMap.get("destreza")!, { 1: 0 }, "destreza");
     expect(form?.heavyKillPuncturePerStack).toBeCloseTo(0.1, 5);
     const noStacks = calculateWeaponBuild(destreza, [], modsMap(), form);
     const stacked = calculateWeaponBuild(destreza, [], modsMap(), form, {
@@ -1358,22 +1365,22 @@ describe("evolution numeric fixes", () => {
 
   it("Destreza Piercing Stature / Weighted Impetus and Dual Ichor Ronin paper", () => {
     const destreza = incarnonDataMap.get("destreza")!;
-    expect(mergeIncarnonStatChanges(destreza, { 2: 1 }, "destreza")?.statusChance).toBe(1);
-    expect(mergeIncarnonStatChanges(destreza, { 2: 0 }, "destreza")?.heavyAttackWindUp).toBe(1);
-    expect(mergeIncarnonStatChanges(destreza, { 2: 0 }, "destreza_prime")?.flatBaseDamage).toBe(40);
+    expect(mergeOn(destreza, { 2: 1 }, "destreza")?.statusChance).toBe(1);
+    expect(mergeOn(destreza, { 2: 0 }, "destreza")?.heavyAttackWindUp).toBe(1);
+    expect(mergeOn(destreza, { 2: 0 }, "destreza_prime")?.flatBaseDamage).toBe(40);
     const dualIchor = incarnonDataMap.get("dual_ichor")!;
-    expect(mergeIncarnonStatChanges(dualIchor, { 2: 1 }, "dual_ichor")?.fireRate).toBeCloseTo(0.3, 5);
+    expect(mergeOn(dualIchor, { 2: 1 }, "dual_ichor")?.fireRate).toBeCloseTo(0.3, 5);
   });
 
   it("Adept Reflexes / Resolute Force / Magistar T1 encode combo stats", () => {
     const ceramic = incarnonDataMap.get("ceramic_dagger")!;
-    expect(mergeIncarnonStatChanges(ceramic, { 3: 1 }, "ceramic_dagger")?.initialCombo).toBe(20);
+    expect(mergeOn(ceramic, { 3: 1 }, "ceramic_dagger")?.initialCombo).toBe(20);
     const dualIchor = incarnonDataMap.get("dual_ichor")!;
-    expect(mergeIncarnonStatChanges(dualIchor, { 3: 1 }, "dual_ichor")?.comboDuration).toBe(7);
+    expect(mergeOn(dualIchor, { 3: 1 }, "dual_ichor")?.comboDuration).toBe(7);
     const magistar = incarnonDataMap.get("magistar")!;
-    expect(mergeIncarnonStatChanges(magistar, { 1: 0 }, "magistar")?.initialCombo).toBe(30);
+    expect(mergeOn(magistar, { 1: 0 }, "magistar")?.initialCombo).toBe(30);
     const thalys = incarnonDataMap.get("thalys")!;
-    expect(mergeIncarnonStatChanges(thalys, { 3: 2 }, "thalys")?.initialCombo).toBe(20);
+    expect(mergeOn(thalys, { 3: 2 }, "thalys")?.initialCombo).toBe(20);
 
     const skana = allWeapons.find((w) => w.id === "skana")!;
     const withCombo = calculateWeaponBuild(skana, [], modsMap(), { initialCombo: 20 }, {
@@ -1388,60 +1395,60 @@ describe("evolution numeric fixes", () => {
 
   it("Sicarus Survivor's Edge / Extended Volley / Edge of Justice / Avalanche encode", () => {
     const sicarus = incarnonDataMap.get("sicarus")!;
-    expect(mergeIncarnonStatChanges(sicarus, { 4: 1 }, "sicarus")?.criticalChance).toBe(0.12);
-    expect(mergeIncarnonStatChanges(sicarus, { 4: 1 }, "sicarus")?.statusChance).toBe(0.12);
-    expect(mergeIncarnonStatChanges(sicarus, { 4: 1 }, "sicarus_prime")?.criticalChance).toBe(0.09);
-    expect(mergeIncarnonStatChanges(sicarus, { 3: 2 }, "sicarus")?.flatMagazine).toBe(9);
-    expect(mergeIncarnonStatChanges(sicarus, { 3: 2 }, "sicarus_prime")?.flatMagazine).toBe(12);
+    expect(mergeOn(sicarus, { 4: 1 }, "sicarus")?.criticalChance).toBe(0.12);
+    expect(mergeOn(sicarus, { 4: 1 }, "sicarus")?.statusChance).toBe(0.12);
+    expect(mergeOn(sicarus, { 4: 1 }, "sicarus_prime")?.criticalChance).toBe(0.09);
+    expect(mergeOn(sicarus, { 3: 2 }, "sicarus")?.flatMagazine).toBe(9);
+    expect(mergeOn(sicarus, { 3: 2 }, "sicarus_prime")?.flatMagazine).toBe(12);
 
     const anku = incarnonDataMap.get("anku")!;
-    expect(mergeIncarnonStatChanges(anku, { 2: 0 }, "anku")?.fireRate).toBe(0.4);
+    expect(mergeOn(anku, { 2: 0 }, "anku")?.fireRate).toBe(0.4);
     const magistar = incarnonDataMap.get("magistar")!;
-    expect(mergeIncarnonStatChanges(magistar, { 2: 1 }, "magistar")?.fireRate).toBe(0.4);
-    expect(mergeIncarnonStatChanges(magistar, { 2: 1 }, "sancti_magistar")?.flatBaseDamage).toBe(20);
+    expect(mergeOn(magistar, { 2: 1 }, "magistar")?.fireRate).toBe(0.4);
+    expect(mergeOn(magistar, { 2: 1 }, "sancti_magistar")?.flatBaseDamage).toBe(20);
 
     const sibear = incarnonDataMap.get("sibear")!;
-    expect(mergeIncarnonStatChanges(sibear, { 4: 0 }, "sibear")?.initialCombo).toBe(60);
+    expect(mergeOn(sibear, { 4: 0 }, "sibear")?.initialCombo).toBe(60);
 
     const kunai = incarnonDataMap.get("kunai")!;
-    expect(mergeIncarnonStatChanges(kunai, { 4: 1 }, "kunai")?.fireRate).toBe(1);
+    expect(mergeOn(kunai, { 4: 1 }, "kunai")?.fireRate).toBe(1);
     const furis = incarnonDataMap.get("furis")!;
-    expect(mergeIncarnonStatChanges(furis, { 4: 0 }, "furis")?.fireRate).toBe(0.5);
+    expect(mergeOn(furis, { 4: 0 }, "furis")?.fireRate).toBe(0.5);
     const atomos = incarnonDataMap.get("atomos")!;
-    expect(mergeIncarnonStatChanges(atomos, { 3: 2 }, "atomos")?.flatMagazine).toBe(35);
+    expect(mergeOn(atomos, { 3: 2 }, "atomos")?.flatMagazine).toBe(35);
     const gorgon = incarnonDataMap.get("gorgon")!;
-    expect(mergeIncarnonStatChanges(gorgon, { 3: 0 }, "gorgon")?.flatMagazine).toBe(45);
+    expect(mergeOn(gorgon, { 3: 0 }, "gorgon")?.flatMagazine).toBe(45);
     const stug = incarnonDataMap.get("stug")!;
-    expect(mergeIncarnonStatChanges(stug, { 3: 2 }, "stug")?.flatMagazine).toBe(30);
+    expect(mergeOn(stug, { 3: 2 }, "stug")?.flatMagazine).toBe(30);
   });
 
   it("Obex Armored Finisher / Overhand / Swift Break / Ready Retaliation encode", () => {
     const obex = incarnonDataMap.get("obex")!;
-    expect(mergeIncarnonStatChanges(obex, { 2: 1 }, "obex")).toMatchObject({
+    expect(mergeOn(obex, { 2: 1 }, "obex")).toMatchObject({
       flatBaseDamage: 50,
       finisherDamage: 0.8,
     });
-    expect(mergeIncarnonStatChanges(obex, { 2: 1 }, "prisma_obex")).toMatchObject({
+    expect(mergeOn(obex, { 2: 1 }, "prisma_obex")).toMatchObject({
       flatBaseDamage: 10,
       finisherDamage: 0.8,
     });
 
     const bo = incarnonDataMap.get("bo")!;
-    expect(mergeIncarnonStatChanges(bo, { 3: 1 }, "bo")?.heavyAttackEfficiencySet).toBe(0.2);
+    expect(mergeOn(bo, { 3: 1 }, "bo")?.heavyAttackEfficiencySet).toBe(0.2);
     const destreza = incarnonDataMap.get("destreza")!;
-    expect(mergeIncarnonStatChanges(destreza, { 3: 1 }, "destreza")?.heavyAttackEfficiencySet).toBe(
+    expect(mergeOn(destreza, { 3: 1 }, "destreza")?.heavyAttackEfficiencySet).toBe(
       0.3,
     );
 
     const ack = incarnonDataMap.get("ack_&_brunt") ?? incarnonDataMap.get("ack_brunt")!;
-    expect(mergeIncarnonStatChanges(ack, { 3: 2 }, "ack_brunt")?.heavyAttackWindUp).toBe(0.7);
+    expect(mergeOn(ack, { 3: 2 }, "ack_brunt")?.heavyAttackWindUp).toBe(0.7);
     const magistar = incarnonDataMap.get("magistar")!;
-    expect(mergeIncarnonStatChanges(magistar, { 1: 0 }, "magistar")?.heavyAttackWindUp).toBe(0.5);
+    expect(mergeOn(magistar, { 1: 0 }, "magistar")?.heavyAttackWindUp).toBe(0.5);
 
     const lex = incarnonDataMap.get("lex")!;
-    expect(mergeIncarnonStatChanges(lex, { 3: 2 }, "lex")?.reloadSpeed).toBe(1);
+    expect(mergeOn(lex, { 3: 2 }, "lex")?.reloadSpeed).toBe(1);
     const sybaris = incarnonDataMap.get("sybaris")!;
-    expect(mergeIncarnonStatChanges(sybaris, { 3: 1 }, "sybaris")?.reloadSpeed).toBe(0.6);
+    expect(mergeOn(sybaris, { 3: 1 }, "sybaris")?.reloadSpeed).toBe(0.6);
 
     const skana = allWeapons.find((w) => w.id === "skana")!;
     const wind = calculateWeaponBuild(skana, [], modsMap(), { heavyAttackWindUp: 1 });
@@ -1456,57 +1463,57 @@ describe("evolution numeric fixes", () => {
 
   it("Gorgon / Strun flat base damage tables", () => {
     const gorgon = incarnonDataMap.get("gorgon")!;
-    expect(mergeIncarnonStatChanges(gorgon, { 2: 0 }, "gorgon")?.flatBaseDamage).toBe(10);
+    expect(mergeOn(gorgon, { 2: 0 }, "gorgon")?.flatBaseDamage).toBe(10);
     const strun = incarnonDataMap.get("strun")!;
-    expect(mergeIncarnonStatChanges(strun, { 2: 0 }, "strun")?.flatBaseDamage).toBe(54);
-    expect(mergeIncarnonStatChanges(strun, { 2: 0 }, "strun_prime")?.flatBaseDamage).toBe(2);
+    expect(mergeOn(strun, { 2: 0 }, "strun")?.flatBaseDamage).toBe(54);
+    expect(mergeOn(strun, { 2: 0 }, "strun_prime")?.flatBaseDamage).toBe(2);
   });
 
   it("conditional uptime paper: Haven / Paladin / Deathtrap / Red Right / Dawn / half-HP", () => {
     const angstrum = incarnonDataMap.get("angstrum")!;
-    expect(mergeIncarnonStatChanges(angstrum, { 2: 0 }, "angstrum")?.flatBaseDamage).toBe(100);
-    expect(mergeIncarnonStatChanges(angstrum, { 2: 1 }, "angstrum")?.criticalMultiplier).toBe(0.5);
+    expect(mergeOn(angstrum, { 2: 0 }, "angstrum")?.flatBaseDamage).toBe(100);
+    expect(mergeOn(angstrum, { 2: 1 }, "angstrum")?.criticalMultiplier).toBe(0.5);
 
     const anku = incarnonDataMap.get("anku")!;
-    expect(mergeIncarnonStatChanges(anku, { 2: 1 }, "anku")?.heavyAttackEfficiency).toBe(0.8);
+    expect(mergeOn(anku, { 2: 1 }, "anku")?.heavyAttackEfficiency).toBe(0.8);
 
     const kunai = incarnonDataMap.get("kunai")!;
-    expect(mergeIncarnonStatChanges(kunai, { 4: 0 }, "kunai")?.criticalChance).toBe(0.4);
-    expect(mergeIncarnonStatChanges(kunai, { 4: 0 }, "kunai")?.criticalMultiplier).toBe(1.4);
-    expect(mergeIncarnonStatChanges(kunai, { 4: 0 }, "mk1_kunai")?.criticalChance).toBe(0.42);
-    expect(mergeIncarnonStatChanges(kunai, { 4: 0 }, "mk1_kunai")?.criticalMultiplier).toBe(1);
-    expect(mergeIncarnonStatChanges(kunai, { 2: 0 }, "kunai")?.flatBaseDamage).toBe(70);
-    expect(mergeIncarnonStatChanges(kunai, { 2: 0 }, "mk1_kunai")?.flatBaseDamage).toBe(80);
-    expect(mergeIncarnonStatChanges(kunai, { 2: 0 }, "kunai")?.halfHealthAdditiveDamage).toBe(2);
-    expect(mergeIncarnonStatChanges(kunai, { 2: 1 }, "kunai")?.multishot).toBe(1);
+    expect(mergeOn(kunai, { 4: 0 }, "kunai")?.criticalChance).toBe(0.4);
+    expect(mergeOn(kunai, { 4: 0 }, "kunai")?.criticalMultiplier).toBe(1.4);
+    expect(mergeOn(kunai, { 4: 0 }, "mk1_kunai")?.criticalChance).toBe(0.42);
+    expect(mergeOn(kunai, { 4: 0 }, "mk1_kunai")?.criticalMultiplier).toBe(1);
+    expect(mergeOn(kunai, { 2: 0 }, "kunai")?.flatBaseDamage).toBe(70);
+    expect(mergeOn(kunai, { 2: 0 }, "mk1_kunai")?.flatBaseDamage).toBe(80);
+    expect(mergeOn(kunai, { 2: 0 }, "kunai")?.halfHealthAdditiveDamage).toBe(2);
+    expect(mergeOn(kunai, { 2: 1 }, "kunai")?.multishot).toBe(1);
 
     const lato = incarnonDataMap.get("lato")!;
-    expect(mergeIncarnonStatChanges(lato, { 2: 0 }, "lato")?.flatBaseDamage).toBe(80);
-    expect(mergeIncarnonStatChanges(lato, { 4: 1 }, "lato")?.criticalMultiplier).toBe(3.2);
+    expect(mergeOn(lato, { 2: 0 }, "lato")?.flatBaseDamage).toBe(80);
+    expect(mergeOn(lato, { 4: 1 }, "lato")?.criticalMultiplier).toBe(3.2);
 
     const lex = incarnonDataMap.get("lex")!;
-    expect(mergeIncarnonStatChanges(lex, { 2: 0 }, "lex")?.flatBaseDamage).toBe(160);
-    expect(mergeIncarnonStatChanges(lex, { 4: 0 }, "lex")?.headshotDamageBonus).toBe(1);
+    expect(mergeOn(lex, { 2: 0 }, "lex")?.flatBaseDamage).toBe(160);
+    expect(mergeOn(lex, { 4: 0 }, "lex")?.headshotDamageBonus).toBe(1);
 
     const ceramic = incarnonDataMap.get("ceramic_dagger")!;
-    expect(mergeIncarnonStatChanges(ceramic, { 4: 0 }, "ceramic_dagger")?.criticalMultiplier).toBe(2);
-    expect(mergeIncarnonStatChanges(ceramic, { 2: 1 }, "ceramic_dagger")?.flatBaseDamage).toBe(200);
+    expect(mergeOn(ceramic, { 4: 0 }, "ceramic_dagger")?.criticalMultiplier).toBe(2);
+    expect(mergeOn(ceramic, { 2: 1 }, "ceramic_dagger")?.flatBaseDamage).toBe(200);
 
     const innodem = incarnonDataMap.get("innodem")!;
-    expect(mergeIncarnonStatChanges(innodem, { 4: 1 }, "innodem")?.airborneKillAdditivePerStack).toBe(
+    expect(mergeOn(innodem, { 4: 1 }, "innodem")?.airborneKillAdditivePerStack).toBe(
       0.5,
     );
-    expect(mergeIncarnonStatChanges(innodem, { 5: 0 }, "innodem")?.heavyAttackEfficiency).toBe(0.4);
+    expect(mergeOn(innodem, { 5: 0 }, "innodem")?.heavyAttackEfficiency).toBe(0.4);
 
     const onos = incarnonDataMap.get("onos")!;
-    expect(mergeIncarnonStatChanges(onos, { 5: 1 }, "onos")?.additiveBaseDamage).toBe(2);
+    expect(mergeOn(onos, { 5: 1 }, "onos")?.additiveBaseDamage).toBe(2);
 
     const paris = incarnonDataMap.get("paris")!;
-    expect(mergeIncarnonStatChanges(paris, { 2: 1 }, "paris")?.flatBaseDamage).toBe(92);
+    expect(mergeOn(paris, { 2: 1 }, "paris")?.flatBaseDamage).toBe(92);
 
     const zylok = incarnonDataMap.get("zylok")!;
-    expect(mergeIncarnonStatChanges(zylok, { 2: 0 }, "zylok")?.flatBaseDamage).toBe(136);
-    expect(mergeIncarnonStatChanges(zylok, { 2: 1 }, "zylok")?.criticalMultiplier).toBe(2);
+    expect(mergeOn(zylok, { 2: 0 }, "zylok")?.flatBaseDamage).toBe(136);
+    expect(mergeOn(zylok, { 2: 1 }, "zylok")?.criticalMultiplier).toBe(2);
 
     const skana = allWeapons.find((w) => w.id === "skana")!;
     const hae = calculateWeaponBuild(skana, [], modsMap(), { heavyAttackEfficiency: 0.8 });
@@ -1515,49 +1522,49 @@ describe("evolution numeric fixes", () => {
 
   it("max-stack Genesis paper: Kill Joy / Stormburst / Infused / Crimson / Blazing / Synergist", () => {
     const furax = incarnonDataMap.get("furax_incarnon") ?? incarnonDataMap.get("furax")!;
-    expect(mergeIncarnonStatChanges(furax, { 2: 1 }, "furax")?.fireRate).toBe(0.5);
+    expect(mergeOn(furax, { 2: 1 }, "furax")?.fireRate).toBe(0.5);
 
     const furis = incarnonDataMap.get("furis")!;
-    expect(mergeIncarnonStatChanges(furis, { 2: 1 }, "furis")?.multishot).toBe(1.2);
+    expect(mergeOn(furis, { 2: 1 }, "furis")?.multishot).toBe(1.2);
 
     const bronco = incarnonDataMap.get("bronco")!;
-    expect(mergeIncarnonStatChanges(bronco, { 2: 1 }, "bronco")?.flatBaseDamage).toBe(60);
-    expect(mergeIncarnonStatChanges(bronco, { 2: 1 }, "bronco_prime")?.flatBaseDamage).toBe(52); // wiki Bronco Prime: X = 16, Y = 9 × 4
+    expect(mergeOn(bronco, { 2: 1 }, "bronco")?.flatBaseDamage).toBe(60);
+    expect(mergeOn(bronco, { 2: 1 }, "bronco_prime")?.flatBaseDamage).toBe(52); // wiki Bronco Prime: X = 16, Y = 9 × 4
 
     const gammacor = incarnonDataMap.get("gammacor")!;
-    expect(mergeIncarnonStatChanges(gammacor, { 2: 1 }, "gammacor")?.flatBaseDamage).toBe(26);
+    expect(mergeOn(gammacor, { 2: 1 }, "gammacor")?.flatBaseDamage).toBe(26);
 
     const boltor = incarnonDataMap.get("boltor")!;
     // Hotfix 44.1.3 + wiki.warframe.com Boltor: Crimson Overture X = 12 / 0 / 0, On Kill +25% AE ×3 = 0.75.
-    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "boltor")?.flatBaseDamage).toBe(12);
-    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "boltor")?.ammoEfficiency).toBe(0.75);
-    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "boltor_prime")?.flatBaseDamage).toBe(0);
-    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "boltor_prime")?.ammoEfficiency).toBe(0.75);
-    expect(mergeIncarnonStatChanges(boltor, { 2: 1 }, "telos_boltor")?.ammoEfficiency).toBe(0.75);
+    expect(mergeOn(boltor, { 2: 1 }, "boltor")?.flatBaseDamage).toBe(12);
+    expect(mergeOn(boltor, { 2: 1 }, "boltor")?.ammoEfficiency).toBe(0.75);
+    expect(mergeOn(boltor, { 2: 1 }, "boltor_prime")?.flatBaseDamage).toBe(0);
+    expect(mergeOn(boltor, { 2: 1 }, "boltor_prime")?.ammoEfficiency).toBe(0.75);
+    expect(mergeOn(boltor, { 2: 1 }, "telos_boltor")?.ammoEfficiency).toBe(0.75);
 
     const dera = incarnonDataMap.get("dera")!;
-    expect(mergeIncarnonStatChanges(dera, { 2: 0 }, "dera")?.ammoEfficiency).toBe(0.75);
-    expect(mergeIncarnonStatChanges(dera, { 2: 1 }, "dera")?.fireRate).toBe(0.3);
+    expect(mergeOn(dera, { 2: 0 }, "dera")?.ammoEfficiency).toBe(0.75);
+    expect(mergeOn(dera, { 2: 1 }, "dera")?.fireRate).toBe(0.3);
 
     const ceramic = incarnonDataMap.get("ceramic_dagger")!;
-    expect(mergeIncarnonStatChanges(ceramic, { 2: 0 }, "ceramic_dagger")?.initialCombo).toBe(100);
+    expect(mergeOn(ceramic, { 2: 0 }, "ceramic_dagger")?.initialCombo).toBe(100);
 
     const strun = incarnonDataMap.get("strun")!;
-    expect(mergeIncarnonStatChanges(strun, { 2: 1 }, "strun")?.multishot).toBe(0.25);
+    expect(mergeOn(strun, { 2: 1 }, "strun")?.multishot).toBe(0.25);
     const stug = incarnonDataMap.get("stug")!;
-    expect(mergeIncarnonStatChanges(stug, { 2: 0 }, "stug")?.multishot).toBe(0.5);
+    expect(mergeOn(stug, { 2: 0 }, "stug")?.multishot).toBe(0.5);
     const sybaris = incarnonDataMap.get("sybaris")!;
-    expect(mergeIncarnonStatChanges(sybaris, { 2: 1 }, "sybaris")?.multishot).toBe(0.5);
+    expect(mergeOn(sybaris, { 2: 1 }, "sybaris")?.multishot).toBe(0.5);
 
     const okina = incarnonDataMap.get("okina")!;
-    expect(mergeIncarnonStatChanges(okina, { 2: 1 }, "okina")?.statusDamageBonus).toBe(0.4);
+    expect(mergeOn(okina, { 2: 1 }, "okina")?.statusDamageBonus).toBe(0.4);
 
     const onos = incarnonDataMap.get("onos")!;
-    expect(mergeIncarnonStatChanges(onos, { 5: 0 }, "onos")?.headshotDamageBonus).toBe(1.2);
+    expect(mergeOn(onos, { 5: 0 }, "onos")?.headshotDamageBonus).toBe(1.2);
 
     const paris = incarnonDataMap.get("paris")!;
-    expect(mergeIncarnonStatChanges(paris, { 2: 0 }, "paris")?.fireRate).toBe(0.8);
-    expect(mergeIncarnonStatChanges(paris, { 3: 0 }, "paris")?.fireRate).toBe(0.4);
+    expect(mergeOn(paris, { 2: 0 }, "paris")?.fireRate).toBe(0.8);
+    expect(mergeOn(paris, { 3: 0 }, "paris")?.fireRate).toBe(0.4);
 
     const braton = allWeapons.find((w) => w.id === "braton")!;
     const statusDmg = calculateWeaponBuild(braton, [], modsMap(), { statusDamageBonus: 0.4 });
@@ -1566,25 +1573,25 @@ describe("evolution numeric fixes", () => {
 
   it("Genesis P0 paper: Bo HAE / Ballistica stacks / Ruvox / Phenmor / Praedos / Templar", () => {
     const bo = incarnonDataMap.get("bo")!;
-    expect(mergeIncarnonStatChanges(bo, { 1: 0 }, "bo")?.heavyAttackEfficiency).toBe(0.5);
+    expect(mergeOn(bo, { 1: 0 }, "bo")?.heavyAttackEfficiency).toBe(0.5);
 
     const ack = incarnonDataMap.get("ack_brunt") ?? incarnonDataMap.get("ack_brunt_incarnon")!;
-    expect(mergeIncarnonStatChanges(ack, { 2: 0 }, "ack_brunt")?.heavyAttackEfficiency).toBe(0.7);
+    expect(mergeOn(ack, { 2: 0 }, "ack_brunt")?.heavyAttackEfficiency).toBe(0.7);
 
     const ballistica = incarnonDataMap.get("ballistica")!;
-    expect(mergeIncarnonStatChanges(ballistica, { 2: 0 }, "ballistica")?.fireRate).toBe(0.75);
-    expect(mergeIncarnonStatChanges(ballistica, { 2: 1 }, "ballistica")?.critChanceBonus).toBe(0.8);
+    expect(mergeOn(ballistica, { 2: 0 }, "ballistica")?.fireRate).toBe(0.75);
+    expect(mergeOn(ballistica, { 2: 1 }, "ballistica")?.critChanceBonus).toBe(0.8);
 
     const ruvox = incarnonDataMap.get("ruvox")!;
-    expect(mergeIncarnonStatChanges(ruvox, { 2: 1 }, "ruvox")?.fireRate).toBe(0.45);
-    expect(mergeIncarnonStatChanges(ruvox, { 5: 0 }, "ruvox")?.heavyAttackEfficiency).toBe(0.4);
+    expect(mergeOn(ruvox, { 2: 1 }, "ruvox")?.fireRate).toBe(0.45);
+    expect(mergeOn(ruvox, { 5: 0 }, "ruvox")?.heavyAttackEfficiency).toBe(0.4);
 
     const phenmor = incarnonDataMap.get("phenmor")!;
-    expect(mergeIncarnonStatChanges(phenmor, { 5: 1 }, "phenmor")?.critMultFlat).toBe(1);
-    expect(mergeIncarnonStatChanges(phenmor, { 5: 2 }, "phenmor")?.headshotDamageBonus).toBe(0.5);
+    expect(mergeOn(phenmor, { 5: 1 }, "phenmor")?.critMultFlat).toBe(1);
+    expect(mergeOn(phenmor, { 5: 2 }, "phenmor")?.headshotDamageBonus).toBe(0.5);
 
     const praedos = incarnonDataMap.get("praedos")!;
-    expect(mergeIncarnonStatChanges(praedos, { 5: 0 }, "praedos")?.heavyAttackEfficiency).toBe(0.5);
+    expect(mergeOn(praedos, { 5: 0 }, "praedos")?.heavyAttackEfficiency).toBe(0.5);
 
     const phenmorWpn = allWeapons.find((w) => w.id === "phenmor")!;
     const spite = calculateWeaponBuild(phenmorWpn, [], modsMap(), { critMultFlat: 1 });
@@ -1597,31 +1604,31 @@ describe("evolution numeric fixes", () => {
   it("Onos Cascade / Thalys Reach-Drift / Skyborne / Brigand / Reaching Lunge encode", () => {
     const onos = incarnonDataMap.get("onos")!;
     // Cascade is charge-blast only — absent on held / default merge
-    expect(mergeIncarnonStatChanges(onos, { 5: 2 }, "onos")?.criticalChance).toBeUndefined();
+    expect(mergeOn(onos, { 5: 2 }, "onos")?.criticalChance).toBeUndefined();
     expect(
-      mergeIncarnonStatChanges(onos, { 5: 2 }, "onos", { chargeMode: true })?.criticalChance,
+      mergeOn(onos, { 5: 2 }, "onos", { chargeMode: true })?.criticalChance,
     ).toBe(2.5);
     expect(
-      mergeIncarnonStatChanges(onos, { 5: 2 }, "onos", { chargeMode: true })?.criticalMultiplier,
+      mergeOn(onos, { 5: 2 }, "onos", { chargeMode: true })?.criticalMultiplier,
     ).toBe(2.5);
 
     const thalys = incarnonDataMap.get("thalys")!;
-    expect(mergeIncarnonStatChanges(thalys, { 2: 0 }, "thalys")?.range).toBe(2);
-    expect(mergeIncarnonStatChanges(thalys, { 2: 2 }, "thalys")?.fireRate).toBe(0.8);
+    expect(mergeOn(thalys, { 2: 0 }, "thalys")?.range).toBe(2);
+    expect(mergeOn(thalys, { 2: 2 }, "thalys")?.fireRate).toBe(0.8);
 
     const innodem = incarnonDataMap.get("innodem")!;
-    expect(mergeIncarnonStatChanges(innodem, { 3: 1 }, "innodem")?.range).toBe(0.5);
+    expect(mergeOn(innodem, { 3: 1 }, "innodem")?.range).toBe(0.5);
 
     const nami = incarnonDataMap.get("nami_solo")!;
-    expect(mergeIncarnonStatChanges(nami, { 2: 0 }, "nami_solo")?.fireRate).toBe(0.3);
+    expect(mergeOn(nami, { 2: 0 }, "nami_solo")?.fireRate).toBe(0.3);
 
     const praedos = incarnonDataMap.get("praedos")!;
-    expect(mergeIncarnonStatChanges(praedos, { 3: 1 }, "praedos")?.range).toBe(1.5);
+    expect(mergeOn(praedos, { 3: 1 }, "praedos")?.range).toBe(1.5);
   });
 
   it("Flensing Spikes / Ruptured Plentitude / Marksman's Gain encode", () => {
     const latron = incarnonDataMap.get("latron")!;
-    expect(mergeIncarnonStatChanges(latron, { 4: 0 }, "latron")?.punctureArmorStripPerStack).toBe(
+    expect(mergeOn(latron, { 4: 0 }, "latron")?.punctureArmorStripPerStack).toBe(
       0.2,
     );
     const latronWpn = allWeapons.find((w) => w.id === "latron")!;
@@ -1631,9 +1638,9 @@ describe("evolution numeric fixes", () => {
     expect(strip.punctureArmorStripPerStack).toBeCloseTo(0.2, 5);
 
     const felarx = incarnonDataMap.get("felarx")!;
-    expect(mergeIncarnonStatChanges(felarx, { 5: 1 }, "felarx")?.ammoEfficiency).toBe(0.7);
+    expect(mergeOn(felarx, { 5: 1 }, "felarx")?.ammoEfficiency).toBe(0.7);
     const lato = incarnonDataMap.get("lato")!;
-    expect(mergeIncarnonStatChanges(lato, { 3: 1 }, "lato")?.ammoEfficiency).toBe(0.5);
+    expect(mergeOn(lato, { 3: 1 }, "lato")?.ammoEfficiency).toBe(0.5);
   });
 
   it("ammoEfficiency extends sustained mag cycle (50% AE doubles shots before reload)", () => {
@@ -1652,14 +1659,14 @@ describe("evolution numeric fixes", () => {
     expect(full.sustainedDps).toBeGreaterThan(withAe.sustainedDps);
 
     const bratonInc = incarnonDataMap.get("braton")!;
-    expect(mergeIncarnonStatChanges(bratonInc, { 2: 0 }, "braton")?.ammoEfficiency).toBe(0.5);
+    expect(mergeOn(bratonInc, { 2: 0 }, "braton")?.ammoEfficiency).toBe(0.5);
     const lex = incarnonDataMap.get("lex")!;
-    expect(mergeIncarnonStatChanges(lex, { 2: 1 }, "lex")?.ammoEfficiency).toBe(0.6);
+    expect(mergeOn(lex, { 2: 1 }, "lex")?.ammoEfficiency).toBe(0.6);
     const bronco = incarnonDataMap.get("bronco")!;
-    expect(mergeIncarnonStatChanges(bronco, { 4: 0 }, "bronco")?.ammoEfficiency).toBe(0.75);
+    expect(mergeOn(bronco, { 4: 0 }, "bronco")?.ammoEfficiency).toBe(0.75);
     // Vasto Reaper's Plenty: "On Headshot: Infinite Ammo for 2s" (Hotfix 44.1.3), not +100% AE.
     const vasto = incarnonDataMap.get("vasto")!;
-    const vastoMerged = mergeIncarnonStatChanges(vasto, { 4: 2 }, "vasto");
+    const vastoMerged = mergeOn(vasto, { 4: 2 }, "vasto");
     expect(vastoMerged?.ammoEfficiency ?? 0).toBe(0);
     expect(vastoMerged?.infiniteAmmoUptime).toBe(1);
   });
@@ -1667,7 +1674,7 @@ describe("evolution numeric fixes", () => {
   it("ammo restore folds into sustained DPS (one proc per mag)", () => {
     const onos = allWeapons.find((w) => w.id === "onos")!;
     const base = calculateWeaponBuild(onos, [], modsMap());
-    const rearm = mergeIncarnonStatChanges(incarnonDataMap.get("onos")!, { 3: 2 }, "onos");
+    const rearm = mergeOn(incarnonDataMap.get("onos")!, { 3: 2 }, "onos");
     expect(rearm).toMatchObject({ ammoRestoreChance: 0.1, ammoRestoreFlat: 10 });
     const withRestore = calculateWeaponBuild(onos, [], modsMap(), rearm);
     expect(withRestore.burstDps).toBeCloseTo(base.burstDps, 5);
@@ -1679,7 +1686,7 @@ describe("evolution numeric fixes", () => {
     expect(withRestore.sustainedDps).toBeCloseTo(expected, 4);
 
     const braton = allWeapons.find((w) => w.id === "braton")!;
-    const gunsmoke = mergeIncarnonStatChanges(incarnonDataMap.get("braton")!, { 3: 2 }, "braton");
+    const gunsmoke = mergeOn(incarnonDataMap.get("braton")!, { 3: 2 }, "braton");
     const bareBraton = calculateWeaponBuild(braton, [], modsMap());
     const withGunsmoke = calculateWeaponBuild(braton, [], modsMap(), gunsmoke);
     expect(withGunsmoke.sustainedDps).toBeGreaterThan(bareBraton.sustainedDps);
@@ -1688,7 +1695,7 @@ describe("evolution numeric fixes", () => {
   it("instant reload chance folds into sustained DPS (one proc per mag)", () => {
     const lato = allWeapons.find((w) => w.id === "lato")!;
     const base = calculateWeaponBuild(lato, [], modsMap());
-    const penance = mergeIncarnonStatChanges(incarnonDataMap.get("lato")!, { 3: 2 }, "lato");
+    const penance = mergeOn(incarnonDataMap.get("lato")!, { 3: 2 }, "lato");
     expect(penance?.instantReloadOnKillChance).toBe(0.5);
     const withKill = calculateWeaponBuild(lato, [], modsMap(), penance);
     expect(withKill.burstDps).toBeCloseTo(base.burstDps, 5);
@@ -1701,7 +1708,7 @@ describe("evolution numeric fixes", () => {
     expect(withKill.sustainedDps).toBeCloseTo(expected, 4);
 
     const phenmor = allWeapons.find((w) => w.id === "phenmor")!;
-    const fortune = mergeIncarnonStatChanges(incarnonDataMap.get("phenmor")!, { 3: 2 }, "phenmor");
+    const fortune = mergeOn(incarnonDataMap.get("phenmor")!, { 3: 2 }, "phenmor");
     expect(fortune?.instantReloadOnHeadshotChance).toBe(0.2);
     const withHs = calculateWeaponBuild(phenmor, [], modsMap(), fortune);
     const barePhen = calculateWeaponBuild(phenmor, [], modsMap());
@@ -1710,28 +1717,28 @@ describe("evolution numeric fixes", () => {
 
   it("Genesis leftovers paper: Reified / Steadfast / MM / Kinetic / Lethal / OA / Sawblades / Gambit", () => {
     const boar = incarnonDataMap.get("boar")!;
-    expect(mergeIncarnonStatChanges(boar, { 2: 0 }, "boar")?.flatBaseDamage).toBe(24);
+    expect(mergeOn(boar, { 2: 0 }, "boar")?.flatBaseDamage).toBe(24);
 
     const cestra = incarnonDataMap.get("cestra")!;
-    expect(mergeIncarnonStatChanges(cestra, { 2: 0 }, "cestra")?.critMultMultiply).toBe(3);
+    expect(mergeOn(cestra, { 2: 0 }, "cestra")?.critMultMultiply).toBe(3);
 
     const felarx = incarnonDataMap.get("felarx")!;
-    expect(mergeIncarnonStatChanges(felarx, { 3: 1 }, "felarx")?.fireRate).toBe(0.6);
+    expect(mergeOn(felarx, { 3: 1 }, "felarx")?.fireRate).toBe(0.6);
 
     const furax = incarnonDataMap.get("furax_incarnon") ?? incarnonDataMap.get("furax")!;
-    expect(mergeIncarnonStatChanges(furax, { 4: 1 }, "furax")?.criticalMultiplierSet).toBe(4);
+    expect(mergeOn(furax, { 4: 1 }, "furax")?.criticalMultiplierSet).toBe(4);
 
     const laetum = incarnonDataMap.get("laetum")!;
-    expect(mergeIncarnonStatChanges(laetum, { 3: 0 }, "laetum")?.reloadSpeed).toBe(0.9);
-    expect(mergeIncarnonStatChanges(laetum, { 5: 2 }, "laetum")?.additiveBaseDamage).toBe(12);
+    expect(mergeOn(laetum, { 3: 0 }, "laetum")?.reloadSpeed).toBe(0.9);
+    expect(mergeOn(laetum, { 5: 2 }, "laetum")?.additiveBaseDamage).toBe(12);
 
     const miter = incarnonDataMap.get("miter")!;
-    expect(mergeIncarnonStatChanges(miter, { 2: 0 }, "miter")?.fireRate).toBe(0.7);
+    expect(mergeOn(miter, { 2: 0 }, "miter")?.fireRate).toBe(0.7);
 
     const sicarus = incarnonDataMap.get("sicarus")!;
-    expect(mergeIncarnonStatChanges(sicarus, { 2: 1 }, "sicarus")?.critChanceBonus).toBe(1.5);
-    expect(mergeIncarnonStatChanges(sicarus, { 2: 1 }, "sicarus")?.bodyshotCritChanceMult).toBe(0);
-    expect(mergeIncarnonStatChanges(sicarus, { 2: 1 }, "sicarus_prime")?.flatBaseDamage).toBe(40);
+    expect(mergeOn(sicarus, { 2: 1 }, "sicarus")?.critChanceBonus).toBe(1.5);
+    expect(mergeOn(sicarus, { 2: 1 }, "sicarus")?.bodyshotCritChanceMult).toBe(0);
+    expect(mergeOn(sicarus, { 2: 1 }, "sicarus_prime")?.flatBaseDamage).toBe(40);
 
     const cestraWpn = allWeapons.find((w) => w.id === "cestra")!;
     const grit = calculateWeaponBuild(cestraWpn, [], modsMap(), {
@@ -1754,40 +1761,40 @@ describe("evolution numeric fixes", () => {
 
   it("Flashing Bleed / Caput / Carnage / Alchemy / Fevered / Reaver / Neurotoxin", () => {
     const bo = incarnonDataMap.get("bo")!;
-    expect(mergeIncarnonStatChanges(bo, { 4: 0 }, "bo")?.slashOnImpactProcChance).toBe(0.4);
+    expect(mergeOn(bo, { 4: 0 }, "bo")?.slashOnImpactProcChance).toBe(0.4);
     const furax = incarnonDataMap.get("furax_incarnon") ?? incarnonDataMap.get("furax")!;
-    expect(mergeIncarnonStatChanges(furax, { 4: 0 }, "furax")?.slashOnImpactProcChance).toBe(0.4);
+    expect(mergeOn(furax, { 4: 0 }, "furax")?.slashOnImpactProcChance).toBe(0.4);
     const magistar = incarnonDataMap.get("magistar")!;
-    expect(mergeIncarnonStatChanges(magistar, { 4: 0 }, "magistar")?.slashOnImpactProcChance).toBe(
+    expect(mergeOn(magistar, { 4: 0 }, "magistar")?.slashOnImpactProcChance).toBe(
       0.5,
     );
 
     const laetum = incarnonDataMap.get("laetum")!;
-    expect(mergeIncarnonStatChanges(laetum, { 4: 0 }, "laetum")?.headshotDamageBonus).toBe(0.5);
+    expect(mergeOn(laetum, { 4: 0 }, "laetum")?.headshotDamageBonus).toBe(0.5);
     const latron = incarnonDataMap.get("latron")!;
-    expect(mergeIncarnonStatChanges(latron, { 4: 1 }, "latron")?.headshotDamageBonus).toBe(1);
+    expect(mergeOn(latron, { 4: 1 }, "latron")?.headshotDamageBonus).toBe(1);
     const vectis = incarnonDataMap.get("vectis")!;
-    expect(mergeIncarnonStatChanges(vectis, { 4: 0 }, "vectis")?.headshotDamageBonus).toBe(0.25);
+    expect(mergeOn(vectis, { 4: 0 }, "vectis")?.headshotDamageBonus).toBe(0.25);
 
     const tox = incarnonDataMap.get("dual_toxocyst")!;
-    expect(mergeIncarnonStatChanges(tox, { 2: 0 }, "dual_toxocyst")?.fatalAfflictionPerStatus).toBe(
+    expect(mergeOn(tox, { 2: 0 }, "dual_toxocyst")?.fatalAfflictionPerStatus).toBe(
       0.33,
     );
-    expect(mergeIncarnonStatChanges(tox, { 2: 1 }, "dual_toxocyst")?.multishot).toBe(1);
-    expect(mergeIncarnonStatChanges(tox, { 4: 1 }, "dual_toxocyst")?.neurotoxinToxinOnHeadshot).toBe(
+    expect(mergeOn(tox, { 2: 1 }, "dual_toxocyst")?.multishot).toBe(1);
+    expect(mergeOn(tox, { 4: 1 }, "dual_toxocyst")?.neurotoxinToxinOnHeadshot).toBe(
       0.7,
     );
     const lato = incarnonDataMap.get("lato")!;
-    expect(mergeIncarnonStatChanges(lato, { 4: 2 }, "lato")?.fatalAfflictionPerStatus).toBe(0.4);
+    expect(mergeOn(lato, { 4: 2 }, "lato")?.fatalAfflictionPerStatus).toBe(0.4);
 
     const okina = incarnonDataMap.get("okina")!;
-    expect(mergeIncarnonStatChanges(okina, { 4: 1 }, "okina")?.statusDuration).toBe(0.25);
-    expect(mergeIncarnonStatChanges(okina, { 4: 1 }, "okina_prime")?.statusDuration).toBe(0.25);
+    expect(mergeOn(okina, { 4: 1 }, "okina")?.statusDuration).toBe(0.25);
+    expect(mergeOn(okina, { 4: 1 }, "okina_prime")?.statusDuration).toBe(0.25);
 
     const burston = incarnonDataMap.get("burston")!;
-    expect(mergeIncarnonStatChanges(burston, { 4: 0 }, "burston")?.additiveBaseDamage).toBe(1);
+    expect(mergeOn(burston, { 4: 0 }, "burston")?.additiveBaseDamage).toBe(1);
     const sybaris = incarnonDataMap.get("sybaris")!;
-    expect(mergeIncarnonStatChanges(sybaris, { 4: 1 }, "sybaris")?.additiveBaseDamage).toBe(0.8);
+    expect(mergeOn(sybaris, { 4: 1 }, "sybaris")?.additiveBaseDamage).toBe(0.8);
 
     const braton = allWeapons.find((w) => w.id === "braton")!;
     const bleed = calculateWeaponBuild(braton, [], modsMap(), { slashOnImpactProcChance: 0.4 });
@@ -1828,40 +1835,40 @@ describe("evolution numeric fixes", () => {
 
   it("Fatal Affliction / Wiseman / High Ground / Prelude encode + calc", () => {
     const angstrum = incarnonDataMap.get("angstrum")!;
-    expect(mergeIncarnonStatChanges(angstrum, { 4: 2 }, "angstrum")?.fatalAfflictionPerStatus).toBe(
+    expect(mergeOn(angstrum, { 4: 2 }, "angstrum")?.fatalAfflictionPerStatus).toBe(
       0.4,
     );
     const burston = incarnonDataMap.get("burston")!;
-    expect(mergeIncarnonStatChanges(burston, { 4: 2 }, "burston")?.fatalAfflictionPerStatus).toBe(
+    expect(mergeOn(burston, { 4: 2 }, "burston")?.fatalAfflictionPerStatus).toBe(
       0.4,
     );
     const soma = incarnonDataMap.get("soma")!;
-    expect(mergeIncarnonStatChanges(soma, { 4: 1 }, "soma")?.fatalAfflictionPerStatus).toBe(0.4);
+    expect(mergeOn(soma, { 4: 1 }, "soma")?.fatalAfflictionPerStatus).toBe(0.4);
     const zylok = incarnonDataMap.get("zylok")!;
-    expect(mergeIncarnonStatChanges(zylok, { 4: 2 }, "zylok")?.fatalAfflictionPerStatus).toBe(0.4);
+    expect(mergeOn(zylok, { 4: 2 }, "zylok")?.fatalAfflictionPerStatus).toBe(0.4);
 
     const cestra = incarnonDataMap.get("cestra")!;
-    expect(mergeIncarnonStatChanges(cestra, { 4: 2 }, "cestra")?.statusFromCritFraction).toBe(0.3);
-    expect(mergeIncarnonStatChanges(cestra, { 4: 2 }, "cestra")?.statusFromCritCap).toBe(0.4);
+    expect(mergeOn(cestra, { 4: 2 }, "cestra")?.statusFromCritFraction).toBe(0.3);
+    expect(mergeOn(cestra, { 4: 2 }, "cestra")?.statusFromCritCap).toBe(0.4);
     const sicarus = incarnonDataMap.get("sicarus")!;
-    expect(mergeIncarnonStatChanges(sicarus, { 4: 2 }, "sicarus")?.statusFromCritFraction).toBe(0.3);
+    expect(mergeOn(sicarus, { 4: 2 }, "sicarus")?.statusFromCritFraction).toBe(0.3);
     const vectis = incarnonDataMap.get("vectis")!;
-    expect(mergeIncarnonStatChanges(vectis, { 4: 2 }, "vectis")?.statusFromCritFraction).toBe(0.3);
+    expect(mergeOn(vectis, { 4: 2 }, "vectis")?.statusFromCritFraction).toBe(0.3);
 
     const dera = incarnonDataMap.get("dera")!;
-    expect(mergeIncarnonStatChanges(dera, { 4: 1 }, "dera")?.critFromStatusFraction).toBe(0.25);
-    expect(mergeIncarnonStatChanges(dera, { 4: 1 }, "dera")?.critFromStatusCap).toBe(0.35);
+    expect(mergeOn(dera, { 4: 1 }, "dera")?.critFromStatusFraction).toBe(0.25);
+    expect(mergeOn(dera, { 4: 1 }, "dera")?.critFromStatusCap).toBe(0.35);
     const destreza = incarnonDataMap.get("destreza")!;
-    expect(mergeIncarnonStatChanges(destreza, { 4: 2 }, "destreza")?.critFromStatusFraction).toBe(
+    expect(mergeOn(destreza, { 4: 2 }, "destreza")?.critFromStatusFraction).toBe(
       0.25,
     );
 
     const bratonEvo = incarnonDataMap.get("braton")!;
-    expect(mergeIncarnonStatChanges(bratonEvo, { 4: 1 }, "braton")?.preludeMightBaseCm).toBe(3.4);
-    expect(mergeIncarnonStatChanges(bratonEvo, { 4: 1 }, "braton")?.preludeMightMaxCc).toBe(0.5);
+    expect(mergeOn(bratonEvo, { 4: 1 }, "braton")?.preludeMightBaseCm).toBe(3.4);
+    expect(mergeOn(bratonEvo, { 4: 1 }, "braton")?.preludeMightMaxCc).toBe(0.5);
     const furis = incarnonDataMap.get("furis")!;
-    expect(mergeIncarnonStatChanges(furis, { 4: 1 }, "furis")?.preludeMightBaseCm).toBe(3);
-    expect(mergeIncarnonStatChanges(furis, { 4: 1 }, "furis")?.preludeMightMaxCc).toBe(0.4);
+    expect(mergeOn(furis, { 4: 1 }, "furis")?.preludeMightBaseCm).toBe(3);
+    expect(mergeOn(furis, { 4: 1 }, "furis")?.preludeMightMaxCc).toBe(0.4);
 
     const braton = allWeapons.find((w) => w.id === "braton")!;
     const bare = calculateWeaponBuild(braton, [], modsMap());

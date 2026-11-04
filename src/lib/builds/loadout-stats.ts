@@ -156,12 +156,13 @@ export function setBonusLinkageFromLoadout(loadout: Loadout): SetBonusLinkage {
 function getIncarnonStatChanges(
   weaponId: string,
   evolutions?: Record<number, number>,
-  options?: { chargeMode?: boolean },
+  options?: { chargeMode?: boolean; conditionalsOn?: Record<string, boolean> },
 ): Record<string, number> | undefined {
   const data = incarnonDataMap.get(weaponId);
   return mergeIncarnonStatChanges(data, evolutions ?? {}, weaponId, {
     formActive: isIncarnonFormActive(evolutions, data),
     chargeMode: options?.chargeMode === true,
+    conditionalsOn: options?.conditionalsOn,
   });
 }
 
@@ -174,6 +175,8 @@ export type WeaponBuildPayload = {
   progenitorElement?: string;
   progenitorBonusPercent?: number;
   incarnonEvolutions?: Record<number, number>;
+  /** Conditional Incarnon perks switched on (round 47; unset = off). */
+  incarnonConditionals?: Record<string, boolean>;
 };
 
 function calcWeaponSlotStats(
@@ -212,6 +215,7 @@ function calcWeaponSlotStats(
   const calcOptions = mergeWeaponCalcOptions(progenitorOpts, externalBuffs);
   const incarnonChanges = getIncarnonStatChanges(build.weaponId, build.incarnonEvolutions, {
     chargeMode: simParams.onosIncarnonMode === "charge",
+    conditionalsOn: build.incarnonConditionals,
   });
   const arcaneMods = resolveSavedArcaneSlots(build.arcaneIds, 2).filter((m): m is Mod => m != null);
   const modSlots = build.mods || [];

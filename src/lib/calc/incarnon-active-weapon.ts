@@ -19,6 +19,34 @@ export function isIncarnonFormActive(
   return /incarnon\s*form/i.test(evo.name);
 }
 
+/** Incarnon Genesis adapter weapon (data id `*_incarnon`), as opposed to a native Incarnon. */
+export function isIncarnonGenesisData(data: IncarnonWeaponData | null | undefined): boolean {
+  return !!data && data.weaponId.endsWith("_incarnon");
+}
+
+/**
+ * Round 47 "Genesis installed" default: picking any evolution means the adapter is installed;
+ * with nothing picked we treat the weapon as a plain one. An explicit user choice wins.
+ */
+export function resolveIncarnonGenesisInstalled(
+  data: IncarnonWeaponData | null | undefined,
+  selectedEvolutions: Record<number, number> | undefined,
+  override?: boolean | null,
+): boolean {
+  if (!isIncarnonGenesisData(data)) return false;
+  if (override != null) return override;
+  return Object.keys(selectedEvolutions ?? {}).length > 0;
+}
+
+/** Form trigger for getWeaponModProfile when a Genesis adapter is installed, else undefined. */
+export function incarnonGenesisFormTrigger(
+  data: IncarnonWeaponData | null | undefined,
+  installed: boolean,
+): string | undefined {
+  if (!installed || !data || !isIncarnonGenesisData(data)) return undefined;
+  return getIncarnonFormAttack(data)?.triggerType;
+}
+
 /** Pick the Incarnon Form entry from forms[] (prefer name match). */
 export function getIncarnonFormAttack(data: IncarnonWeaponData): IncarnonForm | undefined {
   return data.forms.find((f) => /incarnon/i.test(f.name)) ?? data.forms[1];

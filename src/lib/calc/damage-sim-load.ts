@@ -63,6 +63,7 @@ export type SimWeaponBuildData = {
   progenitorElement?: string;
   progenitorBonusPercent?: number;
   incarnonEvolutions?: Record<number, number>;
+  incarnonConditionals?: Record<string, boolean>;
 };
 
 export type AppliedSimBuild = ReturnType<typeof calculatedStatsToSimInputs> & {
@@ -127,6 +128,7 @@ export function applyWeaponBuildToSim(
       progenitorElement: data.progenitorElement,
       progenitorBonusPercent: data.progenitorBonusPercent,
       incarnonEvolutions: data.incarnonEvolutions,
+      incarnonConditionals: data.incarnonConditionals,
     },
     { ...DEFAULT_SIM_PARAMS, killStacks: 5, statusTypesOnTarget: 3, arcaneStacks: 12 },
   );

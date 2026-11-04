@@ -28,7 +28,13 @@ import { useWeapons, useMods } from "@/lib/weapons/use-data";
 import { calculateWeaponBuild, calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
 import { modCapacityAtRank } from "@/lib/calc/mod-capacity";
 import { mergeIncarnonStatChanges, mergeRivenStatChanges } from "@/lib/calc/weapon-stat-merges";
-import { resolveIncarnonActiveWeapon, isIncarnonFormActive } from "@/lib/calc/incarnon-active-weapon";
+import {
+  resolveIncarnonActiveWeapon,
+  isIncarnonFormActive,
+  isIncarnonGenesisData,
+  resolveIncarnonGenesisInstalled,
+  incarnonGenesisFormTrigger,
+} from "@/lib/calc/incarnon-active-weapon";
 import { Weapon, Mod, CalculatedStats, EquippedMod, SimulationParams, DEFAULT_SIM_PARAMS, WeaponCalculationOptions } from "@/lib/types";
 import { applyGravimagMode, weaponHasGravimagMode } from "@/lib/weapons/weapon-gravimag";
 import { applyAlternateMode, getAlternateModes, weaponHasStanceFormMode } from "@/lib/weapons/weapon-alternate-mode";
@@ -85,6 +91,25 @@ import { IncarnonEvolutionsSection } from "./incarnon-evolutions-section";
 /** 9th slot (index 8) for primary / secondary / melee — in-game weapon Exilus slot. */
 const WEAPON_EXILUS_SLOT_INDEX = 8;
 
+/** Cannonade mods (Semi-Auto on every fire mode; round 47 Genesis-form check). */
+const CANNONADE_MOD_IDS = new Set([
+  "semi_rifle_cannonade",
+  "semi_pistol_cannonade",
+  "semi_shotgun_cannonade",
+]);
+
+/** Saved / shared Incarnon extras: only conditionals switched on, and an explicit Genesis choice. */
+function incarnonExtrasForSave(
+  conditionals: Record<string, boolean>,
+  genesisOverride: boolean | null,
+): { incarnonConditionals?: Record<string, boolean>; incarnonGenesisInstalled?: boolean } {
+  const on = Object.fromEntries(Object.entries(conditionals).filter(([, v]) => v === true));
+  return {
+    ...(Object.keys(on).length > 0 ? { incarnonConditionals: on } : {}),
+    ...(genesisOverride != null ? { incarnonGenesisInstalled: genesisOverride } : {}),
+  };
+}
+
 export default function WeaponBuilderPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -106,6 +131,10 @@ export default function WeaponBuilderPage() {
   const [hasOrokinCatalyst, setHasOrokinCatalyst] = useState(false);
   const [adversaryFormas, setAdversaryFormas] = useState(0);
   const [selectedEvolutions, setSelectedEvolutions] = useState<Record<number, number>>({}); // tier -> slot
+  // Round 47: conditional Incarnon perks the user marks as "condition met" (default off).
+  const [incarnonConditionals, setIncarnonConditionals] = useState<Record<string, boolean>>({});
+  // Round 47: explicit "Genesis installed" choice; null = auto (on once any evolution is picked).
+  const [genesisInstalledOverride, setGenesisInstalledOverride] = useState<boolean | null>(null);
   const [rivenStatsMap, setRivenStatsMap] = useState<Record<number, Record<string, number>>>({});
   const [equippedArcanes, setEquippedArcanes] = useState<(Mod | null)[]>([null, null]);
   const [arcanePickerOpen, setArcanePickerOpen] = useState(false);
@@ -238,6 +267,8 @@ export default function WeaponBuilderPage() {
         if (shared.slotPolarities) setSlotPolarities(shared.slotPolarities);
         const sharedIncarnon = (shared as ShareableBuild & { incarnonEvolutions?: Record<number, number> }).incarnonEvolutions;
         if (sharedIncarnon) setSelectedEvolutions(sharedIncarnon);
+        setIncarnonConditionals(shared.incarnonConditionals ?? {});
+        setGenesisInstalledOverride(shared.incarnonGenesisInstalled ?? null);
         // ?build= stays in the URL (shareable, survives refresh); remember it so a later
         // catalog update does not re-apply it over edits.
         appliedShareParamRef.current = params.get("build");
@@ -268,8 +299,9 @@ export default function WeaponBuilderPage() {
           }
         : {}),
       ...(Object.keys(selectedEvolutions).length > 0 ? { incarnonEvolutions: selectedEvolutions } : {}),
+      ...incarnonExtrasForSave(incarnonConditionals, genesisInstalledOverride),
     };
-  }, [selectedWeapon, equippedMods, stanceMod, equippedArcanes, hasOrokinCatalyst, adversaryFormas, slotPolarities, weaponCalcOptions, selectedEvolutions]);
+  }, [selectedWeapon, equippedMods, stanceMod, equippedArcanes, hasOrokinCatalyst, adversaryFormas, slotPolarities, weaponCalcOptions, selectedEvolutions, incarnonConditionals, genesisInstalledOverride]);
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildWeaponData()), [buildWeaponData]));
 
@@ -320,6 +352,8 @@ export default function WeaponBuilderPage() {
     setBuildDescription(build.description || "");
     setBuildIsPublic(build.isPublic ?? false);
     setSelectedEvolutions(d.incarnonEvolutions ?? {});
+    setIncarnonConditionals(d.incarnonConditionals ?? {});
+    setGenesisInstalledOverride(d.incarnonGenesisInstalled ?? null);
     const rivens: Record<number, Record<string, number>> = {};
     for (const m of d.mods) {
       if (m.rivenStats && Object.keys(m.rivenStats).length > 0) rivens[m.slotIndex] = m.rivenStats;
@@ -449,6 +483,7 @@ export default function WeaponBuilderPage() {
         ...(Object.keys(selectedEvolutions).length > 0
           ? { incarnonEvolutions: selectedEvolutions }
           : {}),
+        ...incarnonExtrasForSave(incarnonConditionals, genesisInstalledOverride),
       },
     });
 
@@ -465,6 +500,8 @@ export default function WeaponBuilderPage() {
     slotPolarities,
     weaponCalcOptions,
     selectedEvolutions,
+    incarnonConditionals,
+    genesisInstalledOverride,
     buildIsPublic,
     currentBuildId,
   ]);
@@ -499,9 +536,16 @@ export default function WeaponBuilderPage() {
       mergeIncarnonStatChanges(incarnonData, selectedEvolutions, selectedWeapon?.id, {
         formActive: isIncarnonFormActive(selectedEvolutions, incarnonData),
         chargeMode: simParams.onosIncarnonMode === "charge",
+        conditionalsOn: incarnonConditionals,
       }),
-    [incarnonData, selectedEvolutions, selectedWeapon?.id, simParams.onosIncarnonMode],
+    [incarnonData, selectedEvolutions, selectedWeapon?.id, simParams.onosIncarnonMode, incarnonConditionals],
   );
+  const genesisInstalled = resolveIncarnonGenesisInstalled(
+    incarnonData,
+    selectedEvolutions,
+    genesisInstalledOverride,
+  );
+  const incarnonFormTriggerType = incarnonGenesisFormTrigger(incarnonData, genesisInstalled);
 
   const rivenStatChanges = useMemo(
     () => mergeRivenStatChanges(rivenStatsMap, equippedMods),
@@ -566,6 +610,8 @@ export default function WeaponBuilderPage() {
     setHasOrokinCatalyst(false);
     setAdversaryFormas(0);
     setSelectedEvolutions({});
+    setIncarnonConditionals({});
+    setGenesisInstalledOverride(null);
     setRivenStatsMap({});
     setEquippedArcanes([null, null]);
     setStanceMod(null);
@@ -1226,6 +1272,28 @@ export default function WeaponBuilderPage() {
                     onSelectEvolution={(tier, slot) =>
                       setSelectedEvolutions((prev) => ({ ...prev, [tier]: slot }))
                     }
+                    conditionalsOn={incarnonConditionals}
+                    onToggleConditional={(key, on) =>
+                      setIncarnonConditionals((prev) => {
+                        const next = { ...prev };
+                        if (on) next[key] = true;
+                        else delete next[key];
+                        return next;
+                      })
+                    }
+                    genesis={
+                      isIncarnonGenesisData(incarnonData)
+                        ? {
+                            installed: genesisInstalled,
+                            auto: genesisInstalledOverride == null,
+                            onChange: setGenesisInstalledOverride,
+                            cannonadeEquipped: equippedMods.some((m) => CANNONADE_MOD_IDS.has(m.modId)),
+                            cannonadeBlocked:
+                              incarnonFormTriggerType != null &&
+                              !incarnonFormTriggerType.toLowerCase().startsWith("semi"),
+                          }
+                        : undefined
+                    }
                   />
                 )}
 
@@ -1271,6 +1339,7 @@ export default function WeaponBuilderPage() {
         onSelectRiven={handleSelectRiven}
         weaponCategory={selectedWeapon?.category}
         weapon={selectedWeapon ?? undefined}
+        incarnonFormTriggerType={incarnonFormTriggerType}
         slotNav={buildSlotNav(
           [...Array.from({ length: numSlots }, (_, i) => i), ...(hasWeaponExilusSlot ? [WEAPON_EXILUS_SLOT_INDEX] : [])],
           activeSlotIndex,

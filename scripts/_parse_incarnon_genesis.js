@@ -51,9 +51,12 @@ for (const file of fs.readdirSync(DIR)) {
     const evoHeader = /!\s*(?:rowspan="\d+"\s*\|\s*)?EVO(\d)/.exec(line);
     if (evoHeader) { tier = Number(evoHeader[1]); slot = 0; continue; }
     if (/^!/.test(line)) continue;
-    const nameMatch = /^\|\s*style=[^|]*\|\s*(?:'''(.+?)'''|(Incarnon Form))\s*(?:\[\[File:|$)/.exec(line);
+    // Perk names are usually bold, but some rows are not (Burston "Ready Retaliation"):
+    // accept a plain name when it is followed by the perk icon.
+    const nameMatch =
+      /^\|\s*style=[^|]*\|\s*(?:'''(.+?)'''|(Incarnon Form)|([^'\[|*]+?)(?=\s*\[\[File:))\s*(?:\[\[File:|$)/.exec(line);
     if (nameMatch && tier > 0) {
-      const name = (nameMatch[1] ?? nameMatch[2]).trim();
+      const name = (nameMatch[1] ?? nameMatch[2] ?? nameMatch[3]).trim();
       const desc = [];
       let j = i + 1;
       if (lines[j] !== undefined && /^\|\s*$/.test(lines[j])) j++;

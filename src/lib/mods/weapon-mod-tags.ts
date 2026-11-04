@@ -81,9 +81,19 @@ function kitgunChamberId(weaponId: string): string | undefined {
 }
 
 /** Infer wiki-style weapon tags from arsenal data. */
+export type WeaponModProfileOptions = {
+  /**
+   * Round 47: trigger of the Incarnon Form when an Incarnon Genesis adapter is installed. The
+   * Cannonade mods need Semi-Auto on every fire mode (wiki Semi-Rifle / Semi-Pistol / Semi-Shotgun
+   * Cannonade), so a non-semi form (Torid Held, Dual Toxocyst Auto, Vasto Burst) drops SEMI_AUTO.
+   */
+  incarnonFormTriggerType?: string;
+};
+
 export function getWeaponModProfile(
   weapon: Pick<Weapon, "category" | "triggerType" | "id" | "name"> &
     Partial<Pick<Weapon, "kitgunChamberCategory" | "stanceType">>,
+  options?: WeaponModProfileOptions,
 ): WeaponModProfile {
   const tags = new Set<WeaponModProfileTag>();
 
@@ -152,6 +162,11 @@ export function getWeaponModProfile(
       tags.add("CLASS_ASSAULT_RIFLE");
       tags.add("ASSAULT_AMMO");
     }
+  }
+
+  const formTrigger = options?.incarnonFormTriggerType?.toLowerCase();
+  if (formTrigger != null && !formTrigger.startsWith("semi")) {
+    tags.delete("SEMI_AUTO");
   }
 
   return {

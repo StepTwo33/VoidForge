@@ -20,6 +20,10 @@ export interface ShareableBuild {
   shards?: { id: string; bonus: string }[];
   // Incarnon (weapon builder share codes)
   incarnonEvolutions?: Record<number, number>;
+  /** Round 47: conditional Incarnon perks switched on. */
+  incarnonConditionals?: Record<string, boolean>;
+  /** Round 47: explicit Genesis-installed choice (Cannonade). */
+  incarnonGenesisInstalled?: boolean;
 }
 
 /** Local offline ids look like `1730000000000_abc1234`; cloud rows use Prisma cuid. */
@@ -131,6 +135,11 @@ export function packShareableBuild(build: ShareableBuild): unknown[] {
   if (build.incarnonEvolutions && Object.keys(build.incarnonEvolutions).length > 0) {
     extras.ie = build.incarnonEvolutions;
   }
+  const onConditionals = Object.keys(build.incarnonConditionals ?? {}).filter(
+    (k) => build.incarnonConditionals?.[k] === true,
+  );
+  if (onConditionals.length > 0) extras.ic = onConditionals;
+  if (build.incarnonGenesisInstalled != null) extras.ig = build.incarnonGenesisInstalled ? 1 : 0;
 
   const packed: unknown[] = [1, TYPE_TO_CODE[build.type], build.itemId, mods];
   if (Object.keys(extras).length > 0) packed.push(extras);
@@ -187,6 +196,12 @@ export function unpackShareableBuild(raw: unknown): ShareableBuild | null {
     if (e.ie && typeof e.ie === "object" && !Array.isArray(e.ie)) {
       build.incarnonEvolutions = e.ie as Record<number, number>;
     }
+    if (Array.isArray(e.ic)) {
+      const on: Record<string, boolean> = {};
+      for (const k of e.ic) if (typeof k === "string") on[k] = true;
+      build.incarnonConditionals = on;
+    }
+    if (e.ig === 0 || e.ig === 1) build.incarnonGenesisInstalled = e.ig === 1;
   }
   return build;
 }

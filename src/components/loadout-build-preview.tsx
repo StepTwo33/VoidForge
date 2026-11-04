@@ -168,6 +168,8 @@ function slotBuilderHref(loadout: Loadout | null, slotId: string): string | null
           progenitorBonusPercent: data.progenitorBonusPercent,
           adversaryFormas: data.adversaryFormas,
           incarnonEvolutions: data.incarnonEvolutions,
+          incarnonConditionals: data.incarnonConditionals,
+          incarnonGenesisInstalled: data.incarnonGenesisInstalled,
           slotPolarities: polaritiesToShare(data.slotPolarities),
         };
       }

@@ -1424,6 +1424,8 @@ export interface Loadout {
     /** Formas past rank 30 (0–5). Capacity follows the resulting rank. */
     adversaryFormas?: number;
     incarnonEvolutions?: Record<number, number>;
+    incarnonConditionals?: Record<string, boolean>;
+    incarnonGenesisInstalled?: boolean;
   };
   secondaryBuild?: {
     weaponId: string;
@@ -1437,6 +1439,8 @@ export interface Loadout {
     progenitorBonusPercent?: number;
     adversaryFormas?: number;
     incarnonEvolutions?: Record<number, number>;
+    incarnonConditionals?: Record<string, boolean>;
+    incarnonGenesisInstalled?: boolean;
   };
   meleeBuild?: {
     weaponId: string;
@@ -1450,6 +1454,8 @@ export interface Loadout {
     progenitorBonusPercent?: number;
     adversaryFormas?: number;
     incarnonEvolutions?: Record<number, number>;
+    incarnonConditionals?: Record<string, boolean>;
+    incarnonGenesisInstalled?: boolean;
   };
   companionBuild?: {
     companionId: string;

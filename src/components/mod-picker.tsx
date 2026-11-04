@@ -81,6 +81,8 @@ interface ModPickerProps {
   weaponCategory?: string; // for riven stat pool filtering
   /** When set, filters mods by beam / AoE / projectile wiki compatibility tags. */
   weapon?: Pick<Weapon, "id" | "name" | "category" | "triggerType"> & { hasRivenSlot?: boolean };
+  /** Incarnon Genesis installed: form trigger also gates Cannonade (round 47). */
+  incarnonFormTriggerType?: string;
   warframeId?: string; // When set, augment mods are filtered to this warframe + universal
   /** When set, unlocks the Helminth ability's matching "{Ability} Augment" mod. */
   helminthAbility?: HelminthAugmentContext | null;
@@ -104,7 +106,7 @@ export interface ModPickerSlotNav {
   onNext?: () => void;
 }
 
-export function ModPicker({ open, onClose, mods, category, statFilterCategory, slotType = "regular", equippedModIds, onSelect, onSelectRiven, weaponCategory, weapon, warframeId, helminthAbility, archwingId, arcaneCatalog, pickerMode = "mods", initialBrowseTab = "mods", equippedArcaneIds = [], slotNav }: ModPickerProps) {
+export function ModPicker({ open, onClose, mods, category, statFilterCategory, slotType = "regular", equippedModIds, onSelect, onSelectRiven, weaponCategory, weapon, incarnonFormTriggerType, warframeId, helminthAbility, archwingId, arcaneCatalog, pickerMode = "mods", initialBrowseTab = "mods", equippedArcaneIds = [], slotNav }: ModPickerProps) {
   const [search, setSearch] = useState("");
   const [selectedMod, setSelectedMod] = useState<Mod | null>(null);
   const [selectedRank, setSelectedRank] = useState(0);
@@ -149,8 +151,8 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
   };
 
   const weaponModProfile = useMemo(
-    () => (weapon ? getWeaponModProfile(weapon) : undefined),
-    [weapon],
+    () => (weapon ? getWeaponModProfile(weapon, { incarnonFormTriggerType }) : undefined),
+    [weapon, incarnonFormTriggerType],
   );
 
   const filteredMods = useMemo(() => {

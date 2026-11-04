@@ -251,6 +251,7 @@ export function snapshotFromBuild(
       progenitorElement: d.progenitorElement,
       progenitorBonusPercent: d.progenitorBonusPercent,
       incarnonEvolutions: d.incarnonEvolutions,
+      incarnonConditionals: d.incarnonConditionals,
     });
     if (!entry) return null;
     return { kind: "weapon", label, stats: entry.stats, equipment: weaponEquipment(d) };

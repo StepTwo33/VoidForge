@@ -1172,6 +1172,13 @@ export function calculateWeaponBuild(
 
   // King's Gambit / Prolific-style: relative CC% (paper uptime)
   critChanceBonus += incarnonStatChanges?.critChanceBonus ?? 0;
+  // Incarnon perk Fire Rate / Attack Speed and Reload Speed add into the mod buckets (wiki
+  // perk notes: "stacks additively with fire rate mods such as Speed Trigger / Gunslinger").
+  // Ruvox's −35% curse is multiplicative instead (fireRateMultiplier, applied below).
+  fireRateBonus += incarnonStatChanges?.fireRate ?? 0;
+  reloadBonus += incarnonStatChanges?.reloadSpeed ?? 0;
+  // Felarx Brutal Edge / Racking Wrath: crit bonus is a flat add after mods (wiki Felarx).
+  critChanceFlatBonus.chance += incarnonStatChanges?.criticalChanceFlat ?? 0;
   // Spiteful Defilement-style: flat CM after mods (paper <3 statuses)
   critMultFlatBonus.critEventBonus += incarnonStatChanges?.critMultFlat ?? 0;
 
@@ -1394,6 +1401,10 @@ export function calculateWeaponBuild(
   }
   stats.fireRate *= (1 + fireRateBonus);
   stats.fireRateBonus = fireRateBonus;
+  // Ruvox Incarnon Form: −35% Max Melee Attack Speed, multiplicative to all other attack speed
+  // buffs (wiki Ruvox notes).
+  const fireRateMultiplier = incarnonStatChanges?.fireRateMultiplier ?? 0;
+  if (fireRateMultiplier !== 0) stats.fireRate *= 1 + fireRateMultiplier;
   // Acuity mods: "Multishot cannot be modified" — all multishot bonuses are nulled.
   const multishotLocked = equippedMods.some(
     (s) => s.modId === "primary_acuity" || s.modId === "pistol_acuity",
@@ -1427,10 +1438,20 @@ export function calculateWeaponBuild(
   if (weaponModAcc.statusChanceFlatBonus !== 0) {
     stats.statusChance += weaponModAcc.statusChanceFlatBonus;
   }
-  stats.magazine = Math.round(stats.magazine * (1 + magBonus));
-  // Flat magazine (Stinging Truth): absolute rounds after % mag mods.
-  if (weaponModAcc.flatMagazineBonus !== 0) {
-    stats.magazine = Math.round(stats.magazine + weaponModAcc.flatMagazineBonus);
+  // Felarx Brutal Edge / Racking Wrath: flat status after mods, divided by base multishot
+  // (wiki Felarx: "+2.5% Status Chance per pellet" for +10% on 4 pellets).
+  const scFlatPerPellet = incarnonStatChanges?.statusChanceFlatPerPellet ?? 0;
+  if (scFlatPerPellet !== 0) {
+    stats.statusChance += scFlatPerPellet / Math.max(1, baseWeapon.multishot);
+  }
+  // wiki (Incarnon weapon pages): "Incarnon Form's magazine is not affected by mods".
+  const formMagazineFixed = calcOptions?.incarnonFormActive === true;
+  if (!formMagazineFixed) {
+    stats.magazine = Math.round(stats.magazine * (1 + magBonus));
+    // Flat magazine (Stinging Truth): absolute rounds after % mag mods.
+    if (weaponModAcc.flatMagazineBonus !== 0) {
+      stats.magazine = Math.round(stats.magazine + weaponModAcc.flatMagazineBonus);
+    }
   }
 
   // Synth set (wiki.warframe.com/w/Synth_Set): the only bonus is holstered Primary/Secondary
@@ -1548,6 +1569,7 @@ export function calculateWeaponBuild(
         case 'statusChance':
           if (relativeCritStatus) stats.statusChance *= (1 + value);
           break;
+        // Riven late fire rate only; Incarnon fireRate is summed into the mod bucket above.
         case 'fireRate': stats.fireRate *= (1 + value); break;
         // Devouring/Devastating Attrition: 50% chance for non-crit hits to
         // deal +value×100% damage. Store the average non-crit bonus (0.5 × value).
@@ -1578,6 +1600,9 @@ export function calculateWeaponBuild(
         case 'bodyshotCritChanceMult':
         case 'airborneKillAdditivePerStack':
         case 'heavyKillPuncturePerStack':
+        case 'fireRateMultiplier':
+        case 'criticalChanceFlat':
+        case 'statusChanceFlatPerPellet':
         case 'shardTriggerMult':
         case 'chainShatterDetonateMult':
           break;
@@ -1626,8 +1651,18 @@ export function calculateWeaponBuild(
           if (relativeCritStatus) stats.multishot += baseWeapon.multishot * value;
           else stats.multishot += value;
           break;
-        case 'magazine': stats.magazine = Math.round(stats.magazine * (1 + value)); break;
-        case 'flatMagazine': stats.magazine = Math.round(stats.magazine + value); break;
+        // Rivens are mods: no effect on the Incarnon Form magazine. Incarnon perks that the wiki
+        // says skip the form are already dropped in mergeIncarnonStatChanges.
+        case 'magazine':
+          if (!(formMagazineFixed && relativeCritStatus)) {
+            stats.magazine = Math.round(stats.magazine * (1 + value));
+          }
+          break;
+        case 'flatMagazine':
+          if (!(formMagazineFixed && relativeCritStatus)) {
+            stats.magazine = Math.round(stats.magazine + value);
+          }
+          break;
         case 'initialCombo':
           stats.incarnonInitialCombo = (stats.incarnonInitialCombo ?? 0) + value;
           break;
@@ -1883,7 +1918,13 @@ export function calculateWeaponBuild(
     const eleDmg2 = stats.elements.reduce((sum, e) => sum + e.value, 0);
     stats.totalDamage = physDmg2 + eleDmg2 + residual;
   };
-  if (incarnonStatChanges) applyStatChanges(incarnonStatChanges, false);
+  if (incarnonStatChanges) {
+    // fireRate / reloadSpeed were already added to the mod buckets above.
+    const { fireRate: _incFireRate, reloadSpeed: _incReload, ...incLate } = incarnonStatChanges;
+    void _incFireRate;
+    void _incReload;
+    applyStatChanges(incLate, false);
+  }
   if (rivenStatChanges) {
     // Pool stats and elements were folded in with the mods above; the rest apply here.
     const rivenLate: Record<string, number> = {};

@@ -170,6 +170,10 @@ export interface WeaponBuildData {
   adversaryFormas?: number;
   /** Incarnon evolution picks: tier → slot index. */
   incarnonEvolutions?: Record<number, number>;
+  /** Round 47: conditional Incarnon perks switched on (key `weaponId|tier|name`; unset = off). */
+  incarnonConditionals?: Record<string, boolean>;
+  /** Round 47: explicit "Genesis installed" choice; unset = on when any evolution is picked. */
+  incarnonGenesisInstalled?: boolean;
 }
 
 // Warframe build data
