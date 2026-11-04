@@ -64,7 +64,7 @@ export const WARFRAME_ENERGY_RANK30: Record<string, number> = {
   "mesa_prime": 190,
   "mirage": 225,
   "mirage_prime": 225,
-  "narin": 290,
+  "narin": 300, // Module:Warframes/data EnergyRank30 (Energy 200; not on Energy_Capacity)
   "nekros": 150,
   "nekros_prime": 190,
   "nezha": 225,

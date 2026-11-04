@@ -3576,7 +3576,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "channeled": 1
     },
-    "description": "Sound Quake Augment: Channel to root Banshee in place. The quake deals additional Gas damage and status. Damage and energy drain increase every second. The area lingers briefly after channeling ends.",
+    "description": "Sound Quake Augment: Channel to root Banshee in place. The quake deals additional Gas damage and status with a 2.75x Damage Multiplier. Damage and energy drain increase every second. The area lingers briefly after channeling ends.",
     "rarity": "rare",
     "warframeId": "banshee"
   },

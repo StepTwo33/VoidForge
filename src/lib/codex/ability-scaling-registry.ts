@@ -594,6 +594,38 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     sprintSpeedBonus: { scale: "strength" },
     parkourVelocityBonus: { scale: "strength" },
   },
+  // wiki: Marked For Death — 35/45/60/75% damage × STR; "Damage is capped at 150%"
+  "helminth::Marked For Death": {
+    damageSpread: { scale: "strength", cap: 1.5 },
+  },
+  // wiki: Expedite Suffering — 1× damage multiplier × STR; 45° cone and stagger are Misc
+  "helminth::Expedite Suffering": {
+    damageMultiplier: { scale: "strength" },
+  },
+  // wiki: Parasitic Armor — 25/50/75/100% max Shields → Armor × STR; duration × DUR
+  "helminth::Parasitic Armor": {
+    shieldToArmor: { scale: "strength" },
+  },
+  // wiki: Hideous Resistance — 4/6/8/10 status-immunity charges × STR
+  "helminth::Hideous Resistance": {
+    statusImmunityCharges: { scale: "strength" },
+  },
+  // wiki: Voracious Metastasis — 200/300/400/500 health × STR over 16/14/12/10 s × DUR;
+  // ally energy = energy spent (× cost, i.e. falls with Efficiency)
+  "helminth::Voracious Metastasis": {
+    healthRestored: { scale: "strength" },
+    allyEnergy: { scale: "efficiency", formula: "cast_cost" },
+  },
+  // wiki: Sickening Pulse — 5–8 m initial radius × RNG (ability.radius), 2 s × DUR;
+  // 8/12/16/20 m/s expansion and 10 / 1 status stacks are Misc (underlined)
+  "helminth::Sickening Pulse": {},
+  // wiki: Astral Shell — Blast 50/100/150/200 × STR, 5 m × RNG, 5 s clone × DUR;
+  // 30 m taunt and 5 s clone cooldown are Misc. Helminth page: STR/DUR/RNG unaltered.
+  "helminth::Astral Shell": {
+    decoyDuration: { scale: "duration" },
+    decoyDamage: { scale: "strength" },
+    decoyRadius: { scale: "range" },
+  },
   // wiki: Energized Munitions — 75% ammo efficiency Misc-fixed; duration × DUR
   // wiki: Empower — +50% next-cast STR Misc-fixed (Strength N/A)
 
@@ -815,8 +847,9 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     armorStrip: { scale: "strength", cap: 1 },
     maxHeatEnergyCost: { scale: "efficiency", formula: "cast_cost" },
   },
+  // wiki Fire Blast (Helminth): "Armor reduction per cast is capped at 75%, achievable with 100% Ability Strength"
   "helminth::Fire Blast": {
-    armorStrip: { scale: "strength", cap: 1 },
+    armorStrip: { scale: "strength", cap: 0.75 },
   },
   // wiki: Fireball — impact/area via ability; Inferno meteor/ring via ability.damage / DPS
   // wiki: Inferno — 10 energy/enemy × EFF (cast_cost), capped at maxEnergyTargets (Misc-fixed)
@@ -1456,9 +1489,12 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
   },
   // Arsenal card at 254% STR / 145% RNG: defense reduction 12.7%, explosion damage × STR,
   // explosion range × RNG. Radius is ability.radius (already × RNG).
+  // wiki Nurinarim: icy slash 20,000 / explosion 10,000 (unmarked); "2x Damage On Marked Target"
   "narin::Nurinarim": {
     defenseReduction: { scale: "strength" },
+    markedSlashDamage: { scale: "strength" },
     explosionDamage: { scale: "strength" },
+    markedExplosionDamage: { scale: "strength" },
     explosionRange: { scale: "range" },
   },
 
@@ -1744,6 +1780,38 @@ export function getVerifiedFieldScaling(
   if (!warframeId) return null;
   const key = abilityKey(warframeId, abilityName);
   return VERIFIED_FIELD_SCALING[key]?.[field] ?? null;
+}
+
+/**
+ * Core card fields (`range` / `radius`) that the wiki marks as fixed numbers
+ * (`<u>…</u>`, no Ability Range icon). The ability card shows them at base.
+ */
+const FIXED_ABILITY_FIELDS: Record<string, ReadonlyArray<"range" | "radius">> = {
+  // wiki Shuriken: "home in on enemies within <u>60</u> meters" (6 m auto-target is Misc too)
+  "ash::Shuriken": ["range"],
+  // wiki Forced Perspective: portal "within a range of <u>100</u> meters"
+  "follie::Forced Perspective": ["range"],
+  // wiki Shadowgraph: "above the reticle location within <u>50</u> meters"
+  "follie::Shadowgraph": ["range"],
+  // wiki Self Portrait: effigy "up to <u>50</u> meters away" (radius 8–20 m does scale)
+  "follie::Self Portrait": ["range"],
+  "helminth::Self Portrait": ["range"],
+  // wiki Pyrotechnics: pillars "inside a <u>20</u> meter radius around the aiming reticle"
+  "temple::Pyrotechnics": ["radius"],
+  "helminth::Pyrotechnics": ["radius"],
+};
+
+/** Whether an ability's `range` / `radius` card field is a fixed wiki value (not × Ability Range). */
+export function isFixedAbilityField(
+  warframeId: string | undefined,
+  abilityName: string,
+  field: "range" | "radius",
+  helminth?: boolean,
+): boolean {
+  const keys: string[] = [];
+  if (helminth) keys.push(`helminth::${abilityName}`);
+  if (warframeId) keys.push(abilityKey(warframeId, abilityName));
+  return keys.some((k) => FIXED_ABILITY_FIELDS[k]?.includes(field) ?? false);
 }
 
 /** Whether a subsume has its own `helminth::` row (misc or field scaling). */

@@ -4598,7 +4598,8 @@ describe("Phase 8 — ability scaling registry + sets", () => {
     });
   });
 
-  it("Nidus Larva 12m/Helminth 8m; Ravenous 20 HPS; Parasitic Link stack cost", () => {
+  // Round 46: Update 43 — Ravenous 20→75 HP/s; Parasitic Link costs 25 Energy, no Mutation stacks.
+  it("Nidus Larva 12m/Helminth 8m; Ravenous 75 HPS; Parasitic Link 25 energy", () => {
     expect(getVerifiedMiscScaling("nidus", "Larva", "mutationStackChance")).toEqual({
       scale: "strength",
       cap: 1,
@@ -4624,14 +4625,14 @@ describe("Phase 8 — ability scaling registry + sets", () => {
     expect(larva.duration).toBe(7);
     expect(larva.miscStats?.mutationStackChance).toBe(0.5);
     const link = nidus.abilities.find((a) => a.name === "Parasitic Link")!;
-    expect(link.energyCost).toBe(0);
-    expect(link.miscStats?.mutationStackCost).toBe(1);
+    expect(link.energyCost).toBe(25);
+    expect(link.miscStats?.mutationStackCost).toBeUndefined();
     expect(link.range).toBe(40);
     expect(link.miscStats?.enemyLinkRange).toBe(20);
     const ravenous = nidus.abilities.find((a) => a.name === "Ravenous")!;
     expect(ravenous.damage).toBe(150);
     expect(ravenous.range).toBe(8);
-    expect(ravenous.miscStats).toMatchObject({ healthRegen: 20, maggots: 9, explosionRadius: 4 });
+    expect(ravenous.miscStats).toMatchObject({ healthRegen: 75, maggots: 9, explosionRadius: 4 });
     const helminth = allHelminthAbilities.find((h) => h.id === "subsume_nidus")!;
     expect(helminth.range).toBe(8);
     expect(helminth.duration).toBe(7);
@@ -5445,9 +5446,10 @@ describe("Phase 8 — ability scaling registry + sets", () => {
       scale: "efficiency",
       formula: "cast_cost",
     });
+    // Round 46: wiki Helminth Fire Blast strip capped at 75% per cast.
     expect(getVerifiedMiscScaling("helminth", "Fire Blast", "armorStrip")).toEqual({
       scale: "strength",
-      cap: 1,
+      cap: 0.75,
     });
     expect(getVerifiedMiscScaling("helminth", "Fire Blast", "maxHeatEnergyCost")).toBeNull();
     const ember = allWarframes.find((w) => w.id === "ember")!;
@@ -5477,7 +5479,7 @@ describe("Phase 8 — ability scaling registry + sets", () => {
     expect(blast.miscStats?.maxHeatEnergyCost).toBe(25);
     const helminth = allHelminthAbilities.find((h) => h.id === "subsume_ember")!;
     expect(helminth.range).toBe(25);
-    expect(helminth.miscStats?.armorStrip).toBe(1);
+    expect(helminth.miscStats?.armorStrip).toBe(0.75); // Round 46: wiki Helminth cap 75%
     expect(getVerifiedFieldScaling("ember_prime", "Immolation", "damageReduction")).toEqual({
       scale: "strength",
       cap: 0.9,

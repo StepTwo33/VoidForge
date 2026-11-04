@@ -21,6 +21,7 @@ import { formatMarginalPct, type DpsContribution } from "@/lib/calc/dps-contribu
 import { ChevronDown, ChevronRight, Crosshair, Dog, Shield, Swords, Sparkles, Target, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EnemyLevelControl } from "@/components/enemy-level-control";
+import { formatAbilityEfficiencyPct } from "@/lib/display/ability-efficiency";
 
 const SCENARIO_LABELS: Record<DamageScenario, string> = {
   paper: "Paper",
@@ -335,7 +336,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
                       <MiniStat label="EHP" value={fmtDamageNum(form.stats?.effectiveHealth ?? 0)} />
                       <MiniStat label="Strength" value={`${((form.stats?.abilityStrength ?? 0) * 100).toFixed(0)}%`} />
                       <MiniStat label="Duration" value={`${((form.stats?.abilityDuration ?? 0) * 100).toFixed(0)}%`} />
-                      <MiniStat label="Efficiency" value={`${((form.stats?.abilityEfficiency ?? 0) * 100).toFixed(0)}%`} />
+                      <MiniStat label="Efficiency" value={form.stats ? formatAbilityEfficiencyPct(form.stats.abilityEfficiency) : "0%"} />
                     </div>
                   </div>
                 ))}
@@ -345,7 +346,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
                 <MiniStat label="EHP" value={fmtDamageNum(stats.warframe.stats?.effectiveHealth ?? 0)} />
                 <MiniStat label="Strength" value={`${((stats.warframe.stats?.abilityStrength ?? 0) * 100).toFixed(0)}%`} />
                 <MiniStat label="Duration" value={`${((stats.warframe.stats?.abilityDuration ?? 0) * 100).toFixed(0)}%`} />
-                <MiniStat label="Efficiency" value={`${((stats.warframe.stats?.abilityEfficiency ?? 0) * 100).toFixed(0)}%`} />
+                <MiniStat label="Efficiency" value={stats.warframe.stats ? formatAbilityEfficiencyPct(stats.warframe.stats.abilityEfficiency) : "0%"} />
               </div>
             )}
           </div>

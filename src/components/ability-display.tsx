@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { AbilityScaleAttribute } from "@/lib/codex/ability-scaling-registry";
+import { isFixedAbilityField } from "@/lib/codex/ability-scaling-registry";
 import type { Ability, WarframeCalculatedStats } from "@/lib/types";
 import {
   scaleAbilityMiscStats,
@@ -390,8 +391,10 @@ export function AbilityStatsBlock({
   const hasInfernoRingHeat =
     display.abilityName === "Inferno" && Number.isFinite(minRingDps) && minRingDps > 0;
   const hasImmolationDrHeat = display.abilityName === "Immolation";
+  // wiki: subsumed Fire Blast has no Immolation heat; its strip is a flat 75% × STR cap (registry).
   const hasFireBlastStripHeat =
     display.abilityName === "Fire Blast" &&
+    !display.helminth &&
     typeof ability.miscStats?.armorStrip === "number";
   const fireballArea = Number(ability.miscStats?.areaDamage);
   const hasFireballHeat =
@@ -670,18 +673,23 @@ export function AbilityStatsBlock({
       />,
     );
   }
+  // wiki <u>fixed</u> distances (e.g. Shuriken 60 m homing) stay at base.
+  const rangeFixed = isFixedAbilityField(display.warframeId, display.abilityName, "range", display.helminth);
+  const radiusFixed = isFixedAbilityField(display.warframeId, display.abilityName, "radius", display.helminth);
   if (ability.range != null) {
+    const rangeMult = rangeFixed ? 1 : rng;
     rows.push(
       <AbilityStatRow
         key="range"
         compact={compact}
         label="Range"
         baseValue={ability.range.toFixed(1)}
-        modifiedValue={(ability.range * rng).toFixed(1)}
+        modifiedValue={(ability.range * rangeMult).toFixed(1)}
         unit="m"
-        isModified={rng !== 1}
-        isPositive={rng > 1}
-        scaleHint="range"
+        isModified={rangeMult !== 1}
+        isPositive={rangeMult > 1}
+        scaleHint={rangeFixed ? undefined : "range"}
+        title={rangeFixed ? "Fixed distance on the wiki: not affected by Ability Range" : undefined}
       />,
     );
   }
@@ -707,11 +715,12 @@ export function AbilityStatsBlock({
         compact={compact}
         label="Radius"
         baseValue={ability.radius.toFixed(1)}
-        modifiedValue={(ability.radius * rng).toFixed(1)}
+        modifiedValue={(ability.radius * (radiusFixed ? 1 : rng)).toFixed(1)}
         unit="m"
-        isModified={rng !== 1}
+        isModified={!radiusFixed && rng !== 1}
         isPositive={rng > 1}
-        scaleHint="range"
+        scaleHint={radiusFixed ? undefined : "range"}
+        title={radiusFixed ? "Fixed distance on the wiki: not affected by Ability Range" : undefined}
       />,
     );
   }

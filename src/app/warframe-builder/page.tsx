@@ -110,6 +110,7 @@ import {
   WARFRAME_AURA_SLOT,
   WARFRAME_SECOND_AURA_SLOT,
 } from "@/lib/warframes/aura-slots";
+import { formatAbilityEfficiencyPct } from "@/lib/display/ability-efficiency";
 
 const EMPTY_SHARDS: (EquippedArchonShard | null)[] = [null, null, null, null, null];
 
@@ -1199,7 +1200,7 @@ export default function WarframeBuilderPage() {
                         <span className="hidden text-[10px] font-mono tabular-nums text-muted-foreground lg:inline">
                           STR {(calculatedStats.abilityStrength * 100).toFixed(0)}%
                           {" · "}DUR {(calculatedStats.abilityDuration * 100).toFixed(0)}%
-                          {" · "}EFF {(calculatedStats.abilityEfficiency * 100).toFixed(0)}%
+                          {" · "}EFF {formatAbilityEfficiencyPct(calculatedStats.abilityEfficiency)}
                           {" · "}RNG {(calculatedStats.abilityRange * 100).toFixed(0)}%
                         </span>
                       )}

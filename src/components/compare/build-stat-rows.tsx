@@ -5,6 +5,7 @@ import type { ArchwingCalculatedStats, CalculatedStats, CompanionCalculatedStats
 import type { CompareSnapshot } from "@/lib/builds/compare-build";
 import { CompareRow, CompareSideHeader } from "@/components/compare/stat-diff";
 import { EquipmentDiff } from "@/components/compare/equipment-diff";
+import { displayAbilityEfficiency } from "@/lib/display/ability-efficiency";
 
 export function WeaponCompareRows({
   a,
@@ -57,7 +58,7 @@ export function WarframeCompareRows({
       <CompareRow label="DR %" a={a.damageReduction} b={b.damageReduction} format={(v) => `${v.toFixed(1)}%`} />
       <CompareRow label="Strength" a={a.abilityStrength * 100} b={b.abilityStrength * 100} format={(v) => `${v.toFixed(0)}%`} />
       <CompareRow label="Duration" a={a.abilityDuration * 100} b={b.abilityDuration * 100} format={(v) => `${v.toFixed(0)}%`} />
-      <CompareRow label="Efficiency" a={a.abilityEfficiency * 100} b={b.abilityEfficiency * 100} format={(v) => `${v.toFixed(0)}%`} />
+      <CompareRow label="Efficiency" a={displayAbilityEfficiency(a.abilityEfficiency) * 100} b={displayAbilityEfficiency(b.abilityEfficiency) * 100} format={(v) => `${v.toFixed(0)}%`} />
       <CompareRow label="Range" a={a.abilityRange * 100} b={b.abilityRange * 100} format={(v) => `${v.toFixed(0)}%`} />
     </div>
   );

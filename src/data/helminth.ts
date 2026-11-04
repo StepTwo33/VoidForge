@@ -85,12 +85,14 @@ const helminthUnique: HelminthAbility[] = [
   {
     id: "helminth_marked_for_death",
     name: "Marked For Death",
-    description: "Stun an enemy; 75% of next damage dealt to it spreads to nearby enemies.",
+    // wiki Marked For Death: 7/8/9/10 m explosion and 15/20/25/30 m cast range (Range);
+    // 35/45/60/75% damage × STR, "Damage is capped at 150%"; mark lasts until triggered (∞).
+    description: "Stun an enemy; 75% of the next damage dealt to it spreads to nearby enemies (capped at 150%). The mark lasts until triggered.",
     energyCost: 50,
     source: "helminth",
-    duration: 4,
-    radius: 15,
-    miscStats: { damageSpread: 0.75 },
+    range: 30,
+    radius: 10,
+    miscStats: { damageSpread: 0.75, maxTargets: 1 },
   },
   {
     id: "helminth_golden_instinct",
@@ -98,6 +100,60 @@ const helminthUnique: HelminthAbility[] = [
     description: "Send out a pulse that highlights the nearest rare item or loot.",
     energyCost: 50,
     source: "helminth",
+  },
+  // Helminth-unique abilities unlocked by Helminth rank (wiki ability pages, max rank;
+  // energy = Module:Ability/data Cost).
+  {
+    id: "helminth_expedite_suffering",
+    name: "Expedite Suffering",
+    // wiki: 6/8/10/12 m Range, 45° cone, 1× damage multiplier × STR, stagger on hit
+    description: "Condense all Slash and Toxin Status Effects into a single damage instance. Enemies without them are staggered.",
+    energyCost: 50,
+    source: "helminth",
+    range: 12,
+    miscStats: { damageMultiplier: 1, coneAngle: 45, staggerChance: 1 },
+  },
+  {
+    id: "helminth_parasitic_armor",
+    name: "Parasitic Armor",
+    // wiki: 25/50/75/100% of max Shields → Armor × STR for 10/15/20/25 s × DUR; Shields disabled
+    description: "Sacrifice Shields to reinforce Armor for a period of time. Armor gained is a share of maximum Shields; Shields are disabled while active.",
+    energyCost: 50,
+    source: "helminth",
+    duration: 25,
+    miscStats: { shieldToArmor: 1 },
+  },
+  {
+    id: "helminth_hideous_resistance",
+    name: "Hideous Resistance",
+    // wiki: cleanse, then immunity to the next 4/6/8/10 status effects × STR
+    description: "Cleanse active Status Effects and become immune to the next Status Effects for a number of charges.",
+    energyCost: 50,
+    source: "helminth",
+    miscStats: { statusImmunityCharges: 10, statusCleanse: true },
+  },
+  {
+    id: "helminth_voracious_metastasis",
+    name: "Voracious Metastasis",
+    // wiki: heal 200/300/400/500 × STR over 16/14/12/10 s × DUR; allies in Affinity Range
+    // receive energy equal to the energy spent (falls with Efficiency)
+    description: "Consume Energy to heal yourself over time and grant matching Energy to each ally in Affinity Range.",
+    energyCost: 50,
+    source: "helminth",
+    duration: 10,
+    miscStats: { healthRestored: 500, allyEnergy: 50 },
+  },
+  {
+    id: "helminth_sickening_pulse",
+    name: "Sickening Pulse",
+    // wiki: 5/6/7/8 m initial radius × RNG, expands 8/12/16/20 m/s (fixed) for 2 s × DUR;
+    // adds 10 stacks of each active status (1 combined proc for Heat, Slash, Toxin)
+    description: "Emit a pulse that adds stacks to Status Effects already afflicting enemies, except Bleed, Heat or Toxin effects which are duplicated with fresh timers.",
+    energyCost: 50,
+    source: "helminth",
+    radius: 8,
+    duration: 2,
+    miscStats: { expansionSpeed: 20, statusStacksAdded: 10, dotStatusStacksAdded: 1 },
   },
 ];
 
@@ -134,9 +190,9 @@ const subsumedAbilities: HelminthAbility[] = [
   },
   { id: "subsume_citrine", name: "Fractured Blast", description: "Slash and stagger enemies with a crystal blast; increases Health and Energy Orb drops.", energyCost: 25, source: "citrine", sourceWarframe: "Citrine", abilitySlot: 1, damage: 250, range: 14, miscStats: { healthOrbChance: 0.25, energyOrbChance: 0.1 } },
   { id: "subsume_cyte_09", name: "Evade", description: "Jump backwards and become invisible. Weak Point kills extend duration and restore health. Helminth duration cap 25s.", energyCost: 75, source: "cyte_09", sourceWarframe: "Cyte-09", abilitySlot: 3, duration: 10, miscStats: { healthRestore: 100, durationExtend: 2, durationCap: 25, dodgeDistance: 5, cooldown: 60, statusCleanse: true } },
-  { id: "subsume_dagath", name: "Wyrd Scythes", description: "Whirl spectral sickles that inflict Viral damage and slow. Subsumed slow is reduced (26% at max rank).", energyCost: 25, source: "dagath", sourceWarframe: "Dagath", abilitySlot: 1, damage: 500, duration: 5, range: 15, miscStats: { slowPercent: 0.26, slowCap: 0.95, throwDamage: 1000, sickleCount: 7, minSpinRadius: 1, maxSpinRadius: 5 } },
+  { id: "subsume_dagath", name: "Wyrd Scythes", description: "Whirl spectral sickles that inflict Viral damage and slow. Subsumed slow is reduced (26% at max rank, capped at 71%).", energyCost: 25, source: "dagath", sourceWarframe: "Dagath", abilitySlot: 1, damage: 500, duration: 5, range: 15, miscStats: { slowPercent: 0.26, slowCap: 0.71, throwDamage: 1000, sickleCount: 7, minSpinRadius: 1, maxSpinRadius: 5 } },
   { id: "subsume_dante", name: "Dark Verse", description: "Draw blood from nearby enemies, inflicting Slash Damage in a cone.", energyCost: 25, source: "dante", sourceWarframe: "Dante", abilitySlot: 3, damage: 1250, range: 20, miscStats: { coneAngle: 50, slashStatuses: 2 } },
-  { id: "subsume_ember", name: "Fire Blast", description: "Slam the ground creating a ring of fire that expands outward, stripping armor.", energyCost: 75, source: "ember", sourceWarframe: "Ember", abilitySlot: 3, damage: 200, range: 25, miscStats: { armorStrip: 1 } },
+  { id: "subsume_ember", name: "Fire Blast", description: "Slam the ground creating a ring of fire that expands outward, stripping armor. Subsumed armor strip is capped at 75% per cast.", energyCost: 75, source: "ember", sourceWarframe: "Ember", abilitySlot: 3, damage: 200, range: 25, miscStats: { armorStrip: 0.75 } },
   { id: "subsume_equinox", name: "Rest & Rage", description: "Put enemies to sleep (Night) or enrage them with damage vulnerability and speed (Day). Form chosen by emission color.", energyCost: 25, source: "equinox", sourceWarframe: "Equinox", abilitySlot: 2, range: 50, duration: 22, radius: 5, miscStats: { damageVulnerability: 0.5, enemySpeedBonus: 0.2, wakeupHealthThreshold: 0.5 } },
   { id: "subsume_excalibur", name: "Radial Blind", description: "Emit a bright flash that blinds all nearby enemies, opening them to finishers.", energyCost: 50, source: "excalibur", sourceWarframe: "Excalibur", abilitySlot: 2, duration: 15, range: 25 },
   { id: "subsume_frost", name: "Ice Wave", description: "Send a wave of razor-sharp crystalized ice that deals Cold damage and freezes enemies.", energyCost: 50, source: "frost", sourceWarframe: "Frost", abilitySlot: 2, damage: 700, range: 20, duration: 10, miscStats: { waveAngle: 45, initialWidth: 3 } },
@@ -178,6 +234,10 @@ const subsumedAbilities: HelminthAbility[] = [
   { id: "subsume_nokko", name: "Brightbonnet", description: "Deploy a mushroom that pulses Energy and Ability Strength to allies. Helminth STR bonus 20%, energy restore 10, STR cap 100%.", energyCost: 50, source: "nokko", sourceWarframe: "Nokko", abilitySlot: 2, duration: 25, radius: 15, miscStats: { energyRestore: 10, strengthBonus: 0.2, strengthBonusDuration: 5, strengthBonusCap: 1, invigoratedStrengthBonusCap: 2, pulseInterval: 3, invigoratedPulseInterval: 1.5, maxMushrooms: 2, sproutDamage: 200, sproutRadius: 6 } },
   { id: "subsume_oraxia", name: "Webbed Embrace", description: "Throw a web that ensnares enemies and increases their damage vulnerability. Helminth radius reduced to 6.67m.", energyCost: 50, source: "oraxia", sourceWarframe: "Oraxia", abilitySlot: 2, damage: 250, duration: 25, radius: 6.67, damageType: "Toxin", miscStats: { damageVulnerability: 0.5, maxWebs: 3 } },
   { id: "subsume_sirius_orion", name: "Jade Stars", description: "Conjure Jade Light motes that regenerate over time; attacking enemies launches them for Heat damage.", energyCost: 50, source: "sirius_orion", sourceWarframe: "Sirius & Orion", abilitySlot: 2, damage: 500, duration: 35, radius: 4, statusChance: 1, damageType: "Heat", miscStats: { motes: 7, moteRecoveryPerSecond: 0.2, maxAttackRange: 50 } },
+  // wiki Astral Shell: Sirius & Orion's second subsumable (Helminth page "Jade Stars / Astral Shell");
+  // Module:Ability/data Cost 50, Key 2. Blast 50/100/150/200 × STR, 5 m × RNG, 20/25/30/35 s × DUR,
+  // 5 s clone × DUR, 30 m taunt and 5 s clone cooldown fixed. Cannot be used to swap Warframes.
+  { id: "subsume_sirius_orion_astral_shell", name: "Astral Shell", description: "Envelop yourself in an Astral Shell. Upon taking damage the shell negates the hit and leaves an invulnerable decoy that taunts enemies, then explodes for Blast damage.", energyCost: 50, source: "sirius_orion", sourceWarframe: "Sirius & Orion", abilitySlot: 2, duration: 35, damageType: "Blast", miscStats: { decoyDuration: 5, decoyDamage: 200, decoyRadius: 5, decoyCooldown: 5, tauntRadius: 30 } },
   { id: "subsume_styanax", name: "Tharros Strike", description: "Swing a fan of shields that deals Impact damage, strips 50% defenses, and restores health per hit.", energyCost: 25, source: "styanax", sourceWarframe: "Styanax", abilitySlot: 2, damage: 1000, range: 9, miscStats: { shieldStrip: 0.5, armorStrip: 0.5, healthPerHit: 100, shieldCount: 9, horizontalSpread: 135, verticalSpread: 160 } },
   { id: "subsume_temple", name: "Pyrotechnics", description: "Blast enemies with pillars of Heat damage; Backbeat timing enhances the effect.", energyCost: 25, source: "temple", sourceWarframe: "Temple", abilitySlot: 1, damage: 1000, range: 25, miscStats: { pillars: 5, reticleRadius: 20, heatStatusChance: 1 } },
   { id: "subsume_titania", name: "Spellbind", description: "Scatter dust that lifts enemies and grants status immunity to allies.", energyCost: 25, source: "titania", sourceWarframe: "Titania", abilitySlot: 1, duration: 16, range: 50, radius: 5, miscStats: { statusCleanse: true } },
@@ -203,7 +263,8 @@ export const helminthAbilitiesMap = new Map<string, HelminthAbility>(
   allHelminthAbilities.map((a) => [a.id, a])
 );
 
-// Lookup: which ability does each warframe subsume?
+// Lookup: which ability does each warframe subsume? Sirius & Orion offer two
+// (Jade Stars and Astral Shell); the first listed (Jade Stars) is kept here.
 export const subsumeMap = new Map<string, HelminthAbility>(
-  subsumedAbilities.map((a) => [a.source, a])
+  [...subsumedAbilities].reverse().map((a) => [a.source, a])
 );

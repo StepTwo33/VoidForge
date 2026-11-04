@@ -75,10 +75,13 @@ describe("R9-D2 Nurinarim (wiki: 20s max duration; 2× on marked targets)", asyn
   const { allWarframes } = await import("@/data/warframes");
   const nur = allWarframes.find((f) => f.id === "narin")!.abilities.find((a) => a.name === "Nurinarim")!;
   it("duration 20s (was 15)", () => expect(nur.duration).toBe(20));
-  it("panel note says the damage values are the marked-target 2× case", () => {
-    expect(String(nur.miscStats?.markedTarget)).toMatch(/2× marked-target/);
-    expect(nur.damage).toBe(2 * 20000);
-    expect(nur.miscStats?.explosionDamage).toBe(2 * 10000);
+  // Round 46: card shows the unmarked wiki values and the 2× marked values side by side.
+  it("damage is the unmarked 20,000 slash / 10,000 explosion; marked rows are 2×", () => {
+    expect(nur.damage).toBe(20000);
+    expect(nur.miscStats?.explosionDamage).toBe(10000);
+    expect(nur.miscStats?.markedSlashDamage).toBe(2 * 20000);
+    expect(nur.miscStats?.markedExplosionDamage).toBe(2 * 10000);
+    expect(nur.miscStats?.markedDamageMultiplier).toBe(2);
   });
 });
 

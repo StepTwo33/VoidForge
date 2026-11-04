@@ -23,6 +23,7 @@ import { dataFixesHref } from "@/lib/overrides/data-fixes-url";
 import { useStaffRole } from "@/lib/auth/use-staff";
 import type { OverrideCategory } from "@/lib/overrides/data-overrides";
 import { cn } from "@/lib/utils";
+import { formatAbilityDescription } from "@/lib/display/ability-text";
 
 export function CodexActionLinks({
   reportType,
@@ -543,7 +544,7 @@ export function WarframeDetailPanel({
         <div>
           <PanelHeading>Passive</PanelHeading>
           <p className={cn("text-muted-foreground", compact ? "text-xs leading-snug" : "text-sm")}>
-            {warframe.passive}
+            {formatAbilityDescription(warframe.passive)}
           </p>
         </div>
       )}
@@ -637,7 +638,7 @@ export function WarframeDetailPanel({
                   <p className="text-[10px] text-muted-foreground">{ab.energyCost} energy</p>
                 )}
                 <p className={cn("mt-0.5 text-muted-foreground", compact ? "text-[10px] leading-snug" : "text-xs")}>
-                  {ab.description}
+                  {formatAbilityDescription(ab.description)}
                 </p>
               </li>
             ))}

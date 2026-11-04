@@ -150,6 +150,16 @@ const LABELS: Record<string, string> = {
   stackChancePerStatus: "Stack Chance per Status",
   stackChanceCap: "Stack Chance Cap",
   explosionDamage: "Explosion Damage",
+  markedSlashDamage: "Marked Slash Damage",
+  markedExplosionDamage: "Marked Explosion Damage",
+  markedDamageMultiplier: "Marked Target Damage Mult.",
+  shieldToArmor: "Shields → Armor",
+  statusImmunityCharges: "Status Immunity Charges",
+  healthRestored: "Health Restored",
+  allyEnergy: "Ally Energy (total)",
+  expansionSpeed: "Expansion Speed (m/s)",
+  statusStacksAdded: "Status Stacks Added",
+  dotStatusStacksAdded: "Heat/Slash/Toxin Procs Added",
   explosionDamagePerStatus: "Explosion Damage per Status",
   beamRadius: "Beam Radius",
   beamTicksPerSecond: "Beam Ticks/s",
@@ -841,6 +851,7 @@ function isFractionPercentKey(key: string): boolean {
     key.endsWith("Max") ||
     key === "damageBonus" ||
     key === "abilityCritChance" ||
+    key === "shieldToArmor" ||
     key === "damageBonusPerHit" ||
     key === "extraPickupChance" ||
     key === "damageConversion" ||

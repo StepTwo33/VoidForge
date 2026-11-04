@@ -33,6 +33,7 @@ import {
 import { useWeapons } from "@/lib/weapons/use-data";
 import type { Loadout, ModularBuildData, WarframeCalculatedStats } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { formatAbilityEfficiencyPct } from "@/lib/display/ability-efficiency";
 
 const SCENARIO_LABELS: Record<DamageScenario, string> = {
   paper: "Paper",
@@ -209,7 +210,7 @@ function warframeMiniStats(s: WarframeCalculatedStats | null | undefined) {
       <MiniStat label="Energy" value={fmtDamageNum(s.totalEnergy ?? 0)} />
       <MiniStat label="Strength" value={`${((s.abilityStrength ?? 0) * 100).toFixed(0)}%`} />
       <MiniStat label="Duration" value={`${((s.abilityDuration ?? 0) * 100).toFixed(0)}%`} />
-      <MiniStat label="Efficiency" value={`${((s.abilityEfficiency ?? 0) * 100).toFixed(0)}%`} />
+      <MiniStat label="Efficiency" value={s.abilityEfficiency != null ? formatAbilityEfficiencyPct(s.abilityEfficiency) : "0%"} />
       <MiniStat label="Range" value={`${((s.abilityRange ?? 0) * 100).toFixed(0)}%`} />
       {(s.damageReduction ?? 0) > 0 && (
         <MiniStat label="DR" value={`${((s.damageReduction ?? 0) * 100).toFixed(0)}%`} />

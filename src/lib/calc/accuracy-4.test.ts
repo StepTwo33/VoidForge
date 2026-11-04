@@ -49,8 +49,9 @@ describe("accuracy-4 other data", () => {
   it("Primed Streamline is not in the catalog (wiki.warframe.com: Retrieved Content, unavailable)", () => {
     expect(mm.get("primed_streamline")).toBeUndefined();
   });
-  it("Narin rank-30 energy 290, Adarza shield 230", () => {
-    expect(calculateWarframeBuild(warframesMap.get("narin")!, [], mm).baseEnergy).toBe(290);
+  // Round 46: Module:Warframes/data Narin EnergyRank30 = 300 (Energy 200).
+  it("Narin rank-30 energy 300, Adarza shield 230", () => {
+    expect(calculateWarframeBuild(warframesMap.get("narin")!, [], mm).baseEnergy).toBe(300);
     expect(allCompanions.find((c) => c.id === "adarza")!.shield).toBe(230);
   });
 });

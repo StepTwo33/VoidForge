@@ -4758,16 +4758,18 @@ export const allWarframes: Warframe[] = [
         "name": "Nurinarim",
         "energyCost": 25,
         "description": "Requires full Ice to cast. An ancestral spirit descends and Narin sword-dances for continuous nearby damage. Press Attack on marked targets to launch icy slashes that deplete Armor and Shields. Hitting Frozen enemies makes them explode for radial Cold damage.",
-        "damage": 40000,
+        "damage": 20000,
         "aoeDamage": 500,
         "radius": 8,
         "duration": 20,
         "damageType": "Cold",
         "miscStats": {
           "defenseReduction": 0.05,
-          "explosionDamage": 20000,
+          "markedSlashDamage": 40000,
+          "explosionDamage": 10000,
+          "markedExplosionDamage": 20000,
           "explosionRange": 10,
-          "markedTarget": "Slash 40000 / explosion 20000 are the 2× marked-target values (unmarked 20000 / 10000)"
+          "markedDamageMultiplier": 2
         }
       }
     ]
@@ -5090,7 +5092,7 @@ export const allWarframes: Warframe[] = [
       },
       {
         "name": "Parasitic Link",
-        "energyCost": 0,
+        "energyCost": 25,
         "description": "Bind to a target with parasitic link. When cast on an ally or Companion, both receive Ability Strength and weapon damage bonuses. Linked enemies redirect damage to themselves. Recast to retarget or refresh duration.",
         "range": 40,
         "duration": 60,
@@ -5098,7 +5100,6 @@ export const allWarframes: Warframe[] = [
         "damageBuff": 0.25,
         "damageReduction": 0.5,
         "miscStats": {
-          "mutationStackCost": 1,
           "strengthBonus": 0.25,
           "enemyLinkRange": 20
         }
@@ -5114,7 +5115,7 @@ export const allWarframes: Warframe[] = [
         "damageType": "Blast",
         "miscStats": {
           "mutationStackCost": 3,
-          "healthRegen": 20,
+          "healthRegen": 75,
           "explosionRadius": 4,
           "maggots": 9,
           "maggotHealth": 1000,
@@ -5162,7 +5163,7 @@ export const allWarframes: Warframe[] = [
       },
       {
         "name": "Parasitic Link",
-        "energyCost": 0,
+        "energyCost": 25,
         "description": "Bind to a target with parasitic link. When cast on an ally or Companion, both receive Ability Strength and weapon damage bonuses. Linked enemies redirect damage to themselves. Recast to retarget or refresh duration.",
         "range": 40,
         "duration": 60,
@@ -5170,7 +5171,6 @@ export const allWarframes: Warframe[] = [
         "damageBuff": 0.25,
         "damageReduction": 0.5,
         "miscStats": {
-          "mutationStackCost": 1,
           "strengthBonus": 0.25,
           "enemyLinkRange": 20
         }
@@ -5186,7 +5186,7 @@ export const allWarframes: Warframe[] = [
         "damageType": "Blast",
         "miscStats": {
           "mutationStackCost": 3,
-          "healthRegen": 20,
+          "healthRegen": 75,
           "explosionRadius": 4,
           "maggots": 9,
           "maggotHealth": 1000,

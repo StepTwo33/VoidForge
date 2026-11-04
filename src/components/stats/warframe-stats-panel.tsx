@@ -94,6 +94,7 @@ import {
 import { computeMechaSetMarkStats } from "@/lib/calc/set-bonuses";
 import { cn } from "@/lib/utils";
 import { CollapsibleSection, SimSlider, StatRow } from "./stat-primitives";
+import { abilityEfficiencyCapNote, formatAbilityEfficiencyPct } from "@/lib/display/ability-efficiency";
 
 function GaussPassiveBattery({
   batteryPct,
@@ -1244,15 +1245,15 @@ function TempleBackbeatPassivePanel({ abilityEfficiency }: { abilityEfficiency: 
       />
       <StatRow
         label="EFF on Backbeat"
-        value={`${(onBeatEff * 100).toFixed(0)}%`}
+        value={formatAbilityEfficiencyPct(onBeatEff)}
         color="text-amber-800 dark:text-amber-400"
-        tooltip={`Your Ability Efficiency (${(abilityEfficiency * 100).toFixed(0)}%) + Backbeat bonus.`}
+        tooltip={`Your Ability Efficiency (${formatAbilityEfficiencyPct(abilityEfficiency)}) + Backbeat bonus.${abilityEfficiencyCapNote(onBeatEff) ? ` ${abilityEfficiencyCapNote(onBeatEff)}` : ""}`}
       />
       <StatRow
         label="EFF off Beat"
-        value={`${(abilityEfficiency * 100).toFixed(0)}%`}
+        value={formatAbilityEfficiencyPct(abilityEfficiency)}
         color="text-muted-foreground"
-        tooltip="Ability Efficiency without a Backbeat cast."
+        tooltip={abilityEfficiencyCapNote(abilityEfficiency) ?? "Ability Efficiency without a Backbeat cast."}
       />
     </div>
   );
@@ -2324,7 +2325,8 @@ export function WarframeStatsPanel({
           color={stats.abilityStrength > 1 ? "text-orange-700 dark:text-orange-400" : stats.abilityStrength < 1 ? "text-red-700 dark:text-red-400" : undefined} />
         <StatRow label="Duration" value={`${(stats.abilityDuration * 100).toFixed(0)}%`}
           color={stats.abilityDuration > 1 ? "text-cyan-700 dark:text-cyan-400" : stats.abilityDuration < 1 ? "text-red-700 dark:text-red-400" : undefined} />
-        <StatRow label="Efficiency" value={`${(stats.abilityEfficiency * 100).toFixed(0)}%`}
+        <StatRow label="Efficiency" value={formatAbilityEfficiencyPct(stats.abilityEfficiency)}
+          tooltip={abilityEfficiencyCapNote(stats.abilityEfficiency)}
           color={stats.abilityEfficiency > 1 ? "text-blue-400" : stats.abilityEfficiency < 1 ? "text-red-700 dark:text-red-400" : undefined} />
         <StatRow label="Range" value={`${(stats.abilityRange * 100).toFixed(0)}%`}
           color={stats.abilityRange > 1 ? "text-green-700 dark:text-green-400" : stats.abilityRange < 1 ? "text-red-700 dark:text-red-400" : undefined} />

@@ -32,6 +32,7 @@ import { CompareRow, CompareSideHeader } from "@/components/compare/stat-diff";
 import { SnapshotCompare, WeaponCompareRows } from "@/components/compare/build-stat-rows";
 import { EquipmentDiff } from "@/components/compare/equipment-diff";
 import { PointerVerb } from "@/components/pointer-verb";
+import { displayAbilityEfficiency } from "@/lib/display/ability-efficiency";
 
 function weaponImageForName(name: string, weapons: Weapon[]): string {
   const w = weapons.find((x) => x.name === name);
@@ -483,7 +484,7 @@ function SlotSection({ slot, a, b, weapons, loadoutA, loadoutB }: {
         <CompareRow label="DR %" a={statsA?.damageReduction ?? null} b={statsB?.damageReduction ?? null} format={(v) => `${v.toFixed(1)}%`} />
         <CompareRow label="Strength" a={statsA ? statsA.abilityStrength * 100 : null} b={statsB ? statsB.abilityStrength * 100 : null} format={(v) => `${v.toFixed(0)}%`} />
         <CompareRow label="Duration" a={statsA ? statsA.abilityDuration * 100 : null} b={statsB ? statsB.abilityDuration * 100 : null} format={(v) => `${v.toFixed(0)}%`} />
-        <CompareRow label="Efficiency" a={statsA ? statsA.abilityEfficiency * 100 : null} b={statsB ? statsB.abilityEfficiency * 100 : null} format={(v) => `${v.toFixed(0)}%`} />
+        <CompareRow label="Efficiency" a={statsA ? displayAbilityEfficiency(statsA.abilityEfficiency) * 100 : null} b={statsB ? displayAbilityEfficiency(statsB.abilityEfficiency) * 100 : null} format={(v) => `${v.toFixed(0)}%`} />
         <CompareRow label="Range" a={statsA ? statsA.abilityRange * 100 : null} b={statsB ? statsB.abilityRange * 100 : null} format={(v) => `${v.toFixed(0)}%`} />
       </>
     );
