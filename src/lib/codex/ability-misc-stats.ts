@@ -3040,11 +3040,16 @@ export function computeKoumeiFateRemaining(
 export interface BansheeSilencePassive {
   /** All equipped weapons (incl. Gunblades / Sentinel weapons) are treated as silent. */
   weaponsSilent: boolean;
+  /** Ability casts apply max Puncture status within this radius (m). */
+  punctureRadiusM: number;
 }
 
-/** wiki Banshee: equipped weapons are hushed so enemies cannot hear them. */
+/**
+ * wiki Banshee: equipped weapons are hushed so enemies cannot hear them, and
+ * ability casts apply max Puncture "within a 20m radius" (in-game tooltip).
+ */
 export function computeBansheeSilencePassive(): BansheeSilencePassive {
-  return { weaponsSilent: true };
+  return { weaponsSilent: true, punctureRadiusM: 20 };
 }
 
 export interface AtlasKnockdownPassive {

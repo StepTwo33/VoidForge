@@ -286,7 +286,7 @@ export const allWarframes: Warframe[] = [
     "energy": 175,
     "sprintSpeed": 1.1,
     "description": "Banshee emits a sonic shockwave that pushes and stuns targets in range, dealing Impact damage and reducing Armor.",
-    "passive": "Weapon noises are hushed so that enemies cannot hear them. Casting abilities applies maximum Puncture status on foes within 10m.",
+    "passive": "Weapon noises are hushed so that enemies cannot hear them. Casting abilities applies maximum Puncture status on foes within 20m.",
     "abilities": [
       {
         "name": "Sonic Boom",
@@ -354,7 +354,7 @@ export const allWarframes: Warframe[] = [
     "energy": 215,
     "sprintSpeed": 1.15,
     "description": "Banshee emits a sonic shockwave that pushes and stuns targets in range, dealing Impact damage and reducing Armor.",
-    "passive": "Weapon noises are hushed so that enemies cannot hear them. Casting abilities applies maximum Puncture status on foes within 10m.",
+    "passive": "Weapon noises are hushed so that enemies cannot hear them. Casting abilities applies maximum Puncture status on foes within 20m.",
     "abilities": [
       {
         "name": "Sonic Boom",
@@ -5296,7 +5296,7 @@ export const allWarframes: Warframe[] = [
         "name": "Null Star",
         "energyCost": 25,
         "description": "Creates antimatter particles that orbit Nova and attack nearby targets. Each active particle reduces damage to Nova's Health and Shields.",
-        "damage": 200,
+        "damage": 300,
         "range": 10,
         "castTime": 0.4,
         "damageType": "Blast",
@@ -5368,7 +5368,7 @@ export const allWarframes: Warframe[] = [
         "name": "Null Star",
         "energyCost": 25,
         "description": "Creates antimatter particles that orbit Nova and attack nearby targets. Each active particle reduces damage to Nova's Health and Shields.",
-        "damage": 200,
+        "damage": 300,
         "range": 10,
         "castTime": 0.4,
         "damageType": "Blast",

@@ -1629,7 +1629,7 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     healthShieldRestore: { scale: "strength" },
   },
 
-  // wiki: Null Star — Blast via damage (in-game base 200); particles × DUR; DR/particle × STR
+  // wiki: Null Star — Blast via damage (base 300 at max rank: in-game check + U39.0 fix); particles × DUR; DR/particle × STR
   "nova::Null Star": {
     particles: { scale: "duration" },
     damageReductionPerParticle: { scale: "strength" },

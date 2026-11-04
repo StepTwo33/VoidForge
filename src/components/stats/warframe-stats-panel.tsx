@@ -1436,9 +1436,9 @@ function BansheeSilencePassivePanel() {
       />
       <StatRow
         label="Ability Cast"
-        value="Max Puncture · 10m"
+        value={`Max Puncture · ${silence.punctureRadiusM}m`}
         color="text-violet-800 dark:text-violet-300"
-        tooltip="Casting an ability applies maximum Puncture status to enemies within 10m."
+        tooltip={`Casting an ability applies maximum Puncture status to enemies within ${silence.punctureRadiusM}m.`}
       />
     </div>
   );

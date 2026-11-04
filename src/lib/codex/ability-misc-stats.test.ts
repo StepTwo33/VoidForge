@@ -848,7 +848,7 @@ describe("Koumei Fate status passive", () => {
 
 describe("Banshee silence passive", () => {
   it("marks all equipped weapons as silent", () => {
-    expect(computeBansheeSilencePassive()).toEqual({ weaponsSilent: true });
+    expect(computeBansheeSilencePassive()).toEqual({ weaponsSilent: true, punctureRadiusM: 20 });
   });
 });
 
