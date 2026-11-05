@@ -199,6 +199,21 @@ export function modMatchesExclusiveWeapon(
   return !!weaponId && MOD_EXCLUSIVE_WEAPON_IDS[modId]!.includes(weaponId);
 }
 
+/**
+ * Update 38.5 (Techrot Encore) re-enabled Acolyte, Amalgam and Melee Combo Counter mods on all
+ * Exalted weapons (wiki "Exalted Weapon" patch history, 38.5). The generated wiki
+ * IncompatibilityTags still list POWER_WEAPON for them, so that one tag is ignored here.
+ * Other tags (e.g. NO_HEAVY_ATTACK, AOE) still apply, matching the patch note that an Exalted
+ * weapon which cannot meet a mod's condition still cannot equip it.
+ */
+export const EXALTED_REENABLED_MODS: ReadonlySet<string> = new Set([
+  "amalgam_serration", "argon_scope", "galvanized_scope", "bladed_rounds", "catalyzer_link",
+  "amalgam_barrel_diffusion", "embedded_catalyzer", "hydraulic_crosshairs", "pressurized_magazine",
+  "sharpened_bullets", "targeting_subsystem",
+  "amalgam_organ_shatter", "blood_rush", "body_count", "dispatch_overdrive", "gladiator_rush",
+  "maiming_strike", "weeping_wounds_r5",
+]);
+
 /** Whether a mod can be equipped on this weapon profile (wiki tag rules). */
 export function modCompatibleWithWeaponProfile(
   modId: string,
@@ -224,6 +239,7 @@ export function modCompatibleWithWeaponProfile(
     const profileBlocked = MOD_INCOMPATIBILITY_TAGS[modId];
     if (profileBlocked?.length) {
       for (const tag of profileBlocked) {
+        if (tag === "POWER_WEAPON" && EXALTED_REENABLED_MODS.has(modId)) continue;
         if (profile.tags.has(tag)) {
           return false;
         }

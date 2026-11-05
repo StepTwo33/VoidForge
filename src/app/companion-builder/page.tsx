@@ -1226,6 +1226,11 @@ export default function CompanionBuilderPage() {
         onSelect={handleSelectMod}
         onSelectRiven={modPickerTarget === "weapon" ? handleSelectWeaponRiven : undefined}
         weaponCategory={selectedWeapon?.category}
+        elsewhereMods={
+          modPickerTarget === "weapon"
+            ? { label: "the companion's mod panel", mods: companionPickerMods }
+            : { label: `the Companion Weapon mods${selectedWeapon ? ` (${selectedWeapon.name})` : ""}`, mods: weaponModPool }
+        }
       />
 
       <SavedBuildsDialog

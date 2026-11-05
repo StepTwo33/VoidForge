@@ -22,7 +22,6 @@ SENTINEL_UNIVERSAL = {
     "electro_pulse",
     "guardian",
     "looter",
-    "martyr_symbiosis",
     "medi_ray",
     "melee_prowess_sentinel",
     "molecular_conversion",
@@ -110,6 +109,8 @@ FAMILY: dict[str, str] = {
     "sly_devolution": "vulpaphyla",
     "survival_instinct": "vulpaphyla",
     "viral_quills": "vulpaphyla",
+    # Round 54b: wiki Martyr Symbiosis Type = "Vulpaphyla" (was wrongly listed as a sentinel universal).
+    "martyr_symbiosis": "vulpaphyla",
 }
 
 # Breed-specific sentinel precepts (overrides companion-precept string parse).

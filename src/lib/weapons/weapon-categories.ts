@@ -20,7 +20,10 @@ export function getModCategory(weaponCategory: string): string {
   if (weaponCategory === "archgun") return "archgun";
   if (["pistol", "secondary", "dual_pistols"].includes(weaponCategory)) return "secondary";
   if (weaponCategory === "archmelee") return "archmelee";
-  if (weaponCategory === "melee") return "melee";
+  // Round 54b: Zaw strikes are melee weapons (Blood Rush etc. were missing on ?weapon=zaw_*);
+  // the lone "sniper" entry is a primary.
+  if (weaponCategory === "melee" || weaponCategory === "zaw_strike") return "melee";
+  if (weaponCategory === "sniper") return "primary";
   if (weaponCategory === "tektolyst") return "tektolyst";
   return weaponCategory;
 }
