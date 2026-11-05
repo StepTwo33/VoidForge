@@ -7,7 +7,7 @@ import {
   isInnatePolarity,
 } from "@/lib/builds/innate-polarities";
 import { BuilderSectionNav } from "@/components/builder-section-nav";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { PageShell } from "@/components/page-shell";
 import { ModSlotCard } from "@/components/mod-slot";
 import { ModPicker, buildSlotNav } from "@/components/mod-picker";
@@ -80,7 +80,6 @@ export default function ArchwingBuilderPage() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- saved builds live in localStorage; read once after mount to stay hydration-safe
 
   const buildArchwingData = useCallback((): ArchwingBuildData => ({
     mode,

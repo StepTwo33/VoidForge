@@ -1,7 +1,7 @@
 "use client";
 
 import { BuilderSectionNav } from "@/components/builder-section-nav";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { PageShell } from "@/components/page-shell";
 import { ModSlotCard } from "@/components/mod-slot";
 import { ModPicker, buildSlotNav } from "@/components/mod-picker";
@@ -130,7 +130,6 @@ export default function RailjackBuilderPage() {
   // Component pickers
   const [showComponentPicker, setShowComponentPicker] = useState<string | null>(null);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- saved builds live in localStorage; read once after mount to stay hydration-safe
 
   // Current mods/polarities based on active tab
   const currentMods = plexusTab === "integrated" ? integratedMods : plexusTab === "battle" ? battleMods : tacticalMods;
@@ -264,7 +263,7 @@ export default function RailjackBuilderPage() {
     } else {
       toast.success("Build saved locally", { description: "Log in to sync builds to your account" });
     }
-  }, [selectedReactor, selectedShield, selectedEngine, selectedPlating, reactorTraitId, shieldTraitId, engineTraitId, selectedTurrets, selectedOrdnance, integratedMods, battleMods, tacticalMods, integratedPolarities, battlePolarities, tacticalPolarities, crewSlots, intrinsics, crimsonFugueStacks, cruisingSpeedActive, protectiveShotsActive, shieldsDepleted, activeBattleAbilityId, activeTacticalAbilityId, currentBuildId]);
+  }, [selectedReactor, selectedShield, selectedEngine, selectedPlating, reactorTraitId, shieldTraitId, engineTraitId, selectedTurrets, selectedOrdnance, integratedMods, battleMods, tacticalMods, integratedPolarities, battlePolarities, tacticalPolarities, crewSlots, intrinsics, crimsonFugueStacks, cruisingSpeedActive, protectiveShotsActive, shieldsDepleted, activeBattleAbilityId, activeTacticalAbilityId, currentBuildId, refreshSavedBuilds]);
 
   const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
     const build = cleanLoadedBuild(rawBuild);
@@ -328,7 +327,7 @@ export default function RailjackBuilderPage() {
     void deleteSavedBuild(id);
     if (currentBuildId === id) setCurrentBuildId(null);
     toast.success("Build deleted");
-  }, [currentBuildId]);
+  }, [currentBuildId, deleteSavedBuild]);
 
   /** Picking different parts after a loaded save should not upsert the same cloud row with a stale name. */
   const beginNewRailjackDraft = useCallback(() => {

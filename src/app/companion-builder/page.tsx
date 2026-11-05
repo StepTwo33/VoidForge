@@ -269,7 +269,7 @@ export default function CompanionBuilderPage() {
     } else {
       toast.success(currentBuildId ? "Build saved locally" : "Saved as new build", { description: currentBuildId ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
     }
-  }, [buildCompanionData, selectedCompanion, currentBuildId]);
+  }, [buildCompanionData, selectedCompanion, currentBuildId, refreshSavedBuilds]);
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildCompanionData()), [buildCompanionData]));
 
@@ -372,7 +372,7 @@ export default function CompanionBuilderPage() {
     void deleteSavedBuild(id);
     if (currentBuildId === id) setCurrentBuildId(null);
     toast.success("Build deleted");
-  }, [currentBuildId]);
+  }, [currentBuildId, deleteSavedBuild]);
 
   const filteredCompanions = useMemo(() => {
     let comps = [...allCompanions];

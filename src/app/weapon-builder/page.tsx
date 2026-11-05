@@ -427,7 +427,7 @@ export default function WeaponBuilderPage() {
     } else {
       toast.success(currentBuildId ? "Build saved locally" : "Saved as new build", { description: currentBuildId ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
     }
-  }, [buildWeaponData, selectedWeapon, currentBuildId]);
+  }, [buildWeaponData, selectedWeapon, currentBuildId, refreshSavedBuilds]);
 
   const handleLoadCommunityBuild = useCallback(async (buildId: string) => {
     const build = await fetchCloudBuild(buildId);
@@ -483,7 +483,7 @@ export default function WeaponBuilderPage() {
     void deleteSavedBuild(id);
     if (currentBuildId === id) setCurrentBuildId(null);
     toast.success("Build deleted");
-  }, [currentBuildId]);
+  }, [currentBuildId, deleteSavedBuild]);
 
   const [shareCopied, setShareCopied] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);

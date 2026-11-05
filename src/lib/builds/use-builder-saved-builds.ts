@@ -7,10 +7,11 @@ import { deleteYoursSavedBuild, mergeBuilderSavedBuilds } from "@/lib/builds/you
 /**
  * Saved builds for one builder (Saved builds tab + Load dialog). Round 55: builders used to read
  * only this device's localStorage, so account builds listed on /builds were missing here. Shows
- * device rows at once, then the full device + account merge (same source as /builds).
+ * device rows right after mount (empty on SSR and first render, so hydration matches), then the
+ * full device + account merge (same source as /builds).
  */
 export function useBuilderSavedBuilds(type: SavedBuild["type"]) {
-  const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>(() => getSavedBuilds(type));
+  const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>([]);
   const requestRef = useRef(0);
 
   const refreshSavedBuilds = useCallback(async () => {

@@ -448,7 +448,7 @@ export default function WarframeBuilderPage() {
     } else {
       toast.success(currentBuildId ? "Build saved locally" : "Saved as new build", { description: currentBuildId ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
     }
-  }, [buildWarframeData, selectedWarframe, currentBuildId]);
+  }, [buildWarframeData, selectedWarframe, currentBuildId, refreshSavedBuilds]);
 
   const handleLoadCommunityBuild = useCallback(async (buildId: string) => {
     const build = await fetchCloudBuild(buildId);
@@ -504,7 +504,7 @@ export default function WarframeBuilderPage() {
     void deleteSavedBuild(id);
     if (currentBuildId === id) setCurrentBuildId(null);
     toast.success("Build deleted");
-  }, [currentBuildId]);
+  }, [currentBuildId, deleteSavedBuild]);
 
   const allWeaponsData = useWeapons();
 
