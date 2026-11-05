@@ -37,11 +37,12 @@ describe("grader at the standard 1.2 multiplier", () => {
     // Round 23 calibration: entered values are rescaled by 1.15/1.2 = 0.958333 (reference / rolled-at), then ×1.15.
     // (1.70×1.00×0.958333 + 0.2) + (1.70×0.95×0.958333 + 0.2) = 1.829167 + 1.747708 = 3.576875; ×1.15 = 4.113406
     // curse Impact 1.0 → +0.5; two great stats and curse ≥ 0.3 → +0.5; rank 8 → no rank penalty
-    // total 4.113406 + 1.0 = 5.113406 → God Roll (≥ 4.5)
+    // Round 54: the full-shape God Roll bonus (+0.5) needs 3 positives + 1 negative; a 2+1 roll gets +0.3,
+    // so 4.113406 + 0.5 + 0.3 = 4.913406, then capped just under the God Roll band (4.49) → Excellent.
     const r = riven([pct("Damage", 170), pct("Critical Chance", 170)], pct("Impact", -50));
     expect(STANDARD_RIVEN_DISPOSITION).toBe(1.2);
-    expect(evaluateRiven(r)).toBeCloseTo(5.113406, 5);
-    expect(getRivenGrade(evaluateRiven(r))).toBe("God Roll");
+    expect(evaluateRiven(r)).toBeCloseTo(4.49, 5);
+    expect(getRivenGrade(evaluateRiven(r))).toBe("Excellent");
   });
 
   it("an omitted disposition grades exactly like an explicit 1.2", () => {

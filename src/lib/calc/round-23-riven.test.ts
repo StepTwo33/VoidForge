@@ -78,7 +78,8 @@ describe("Round 23 grader calibration", () => {
 
     expect(imp.minValue).toBeLessThan(0);
     // The 1.1-decimal rounding of pool bounds (round1) keeps this within a few thousandths.
-    expect(after).toBeCloseTo(before, 1);
+    // Round 54: a 2+1 roll now gets +0.3 (not +0.5) and caps under the God Roll band (4.49).
+    expect(after).toBeCloseTo(Math.min(before - 0.2, 4.49), 1);
     // And the uncalibrated ×1.2 would have been ~0.47 higher.
     expect(oldScore([["Damage", mid(dmg2), 1.0], ["CC", mid(cc2), 0.95]], 0.5, 0.5, 1.2) - after).toBeGreaterThan(0.4);
   });
