@@ -24,6 +24,7 @@ import {
   DEFAULT_RIVEN_POLARITY,
   clampRivenDrain,
   normalizeRivenPolarity,
+  rivenPolarityError,
   validateRivenStats,
 } from "@/lib/riven/riven-validation";
 
@@ -87,7 +88,7 @@ interface ModPickerProps {
   onSelect: (mod: Mod, rank: number) => void;
   onSelectRiven?: (mod: Mod, stats: Record<string, number>, meta?: RivenSelectMeta) => void;
   /** Open straight into the riven editor pre-filled (Edit riven). */
-  editRiven?: { mod: Mod; stats: Record<string, number>; polarity?: string; drain?: number } | null;
+  editRiven?: { mod: Mod; stats: Record<string, number>; polarity?: string; drain?: number; name?: string } | null;
   /** Signed-in user's saved rivens for this weapon (Round 54 riven library). */
   savedRivens?: SavedRivenEntry[];
   weaponCategory?: string; // for riven stat pool filtering
@@ -111,6 +112,7 @@ interface ModPickerProps {
 
 export interface RivenSelectMeta {
   polarity: string;
+  /** In-game drain at the chosen rank (10 + rank, capped at 18); the builder stores it as the rank. */
   drain: number;
   /** Saved-riven name when equipped from the riven library. */
   name?: string;
@@ -368,7 +370,11 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
     if (selectedMod) {
       if (isRivenMod(selectedMod) && onSelectRiven) {
         if (!rivenValidation.ok) return;
-        onSelectRiven(selectedMod, rivenStats, { polarity: rivenPolarity, drain: rivenDrain });
+        onSelectRiven(selectedMod, rivenStats, {
+          polarity: rivenPolarity,
+          drain: rivenDrain,
+          ...(editRiven?.name ? { name: editRiven.name } : {}),
+        });
       } else {
         onSelect(selectedMod, selectedRank);
       }
@@ -398,7 +404,8 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
   // Escape / tapping outside while the rank card is open equips the mod at the shown rank instead of
   // silently dropping it (Back still returns to the list without equipping). A riven with no
   // stats yet has nothing to equip, so it just closes as before.
-  const rivenValidation = validateRivenStats(rivenStats, rivenCategory);
+  const rivenStatValidation = validateRivenStats(rivenStats, rivenCategory);
+  const rivenValidation = rivenPolarityError(rivenPolarity) ? { ...rivenStatValidation, ok: false } : rivenStatValidation;
   const rivenBlocked = !!selectedMod && isRivenMod(selectedMod) && !!onSelectRiven && !rivenValidation.ok;
   const dismissEquips = !!selectedMod && !rivenBlocked;
   const handleDismiss = () => {

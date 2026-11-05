@@ -1,6 +1,7 @@
 import { getRivenStatsForCategory, type RivenStatDef } from "@/lib/types";
 import {
   STANDARD_RIVEN_DISPOSITION,
+  getRivenDrain,
   getNegativeStatsWithDisposition,
   getStatsWithDisposition,
 } from "@/lib/calc/riven-calculator";
@@ -19,14 +20,24 @@ import {
  * band, plus 0.1 rounding slack) is enforced; low values are allowed.
  */
 
-/** Polarities a riven can roll (wiki Riven Mods: Madurai, Naramon or Vazarin). */
-export const RIVEN_POLARITIES = ["madurai", "vazarin", "naramon"] as const;
+/**
+ * Polarities a riven can roll (wiki Riven Mods: "randomly chosen between Madurai, Naramon, or
+ * Vazarin"). No Zenurik / Umbra / Penjaga / Unairu rivens exist.
+ */
+export const RIVEN_POLARITIES = ["madurai", "naramon", "vazarin"] as const;
 export type RivenPolarity = (typeof RIVEN_POLARITIES)[number];
-/** Catalog default (universal / 10) kept for rivens saved before Round 54. */
+/** "Not chosen yet" (also what rivens saved before Round 54 carry). Not a real riven polarity. */
 export const DEFAULT_RIVEN_POLARITY = "universal";
-export const DEFAULT_RIVEN_DRAIN = 10;
-export const RIVEN_DRAIN_MIN = 0;
-export const RIVEN_DRAIN_MAX = 30;
+/**
+ * Riven drain is not rolled: every riven costs 10 at rank 0 and 18 at rank 8 (+1 per rank),
+ * the existing cap in getRivenDrain (riven-calculator.ts) and the catalog riven mods
+ * (drain 10, maxRank 8, src/data/mods.ts). The editor picks the rank; drain follows.
+ */
+export const RIVEN_MAX_RANK = 8;
+export const RIVEN_DRAIN_MIN = getRivenDrain(0);
+export const RIVEN_DRAIN_MAX = getRivenDrain(RIVEN_MAX_RANK);
+/** New rivens default to max rank (drain 18), like regular mods default to max rank in the picker. */
+export const DEFAULT_RIVEN_DRAIN = RIVEN_DRAIN_MAX;
 
 export interface RivenValidation {
   ok: boolean;
@@ -134,9 +145,25 @@ export function validateRivenStats(
   return { ok: errors.length === 0, errors, positives, negatives };
 }
 
+/** Clamp a stored / imported drain to the real 10–18 range (older saves allowed 0–30). */
 export function clampRivenDrain(n: number): number {
   if (!Number.isFinite(n)) return DEFAULT_RIVEN_DRAIN;
   return Math.min(RIVEN_DRAIN_MAX, Math.max(RIVEN_DRAIN_MIN, Math.round(n)));
+}
+
+export function rivenRankFromDrain(drain: number): number {
+  return clampRivenDrain(drain) - RIVEN_DRAIN_MIN;
+}
+
+export function rivenDrainFromRank(rank: number): number {
+  return getRivenDrain(Math.max(0, Math.min(RIVEN_MAX_RANK, Math.round(rank))));
+}
+
+/** Editor-side check: a riven always has one of the three riven polarities. */
+export function rivenPolarityError(p: string | undefined | null): string | null {
+  return p && (RIVEN_POLARITIES as readonly string[]).includes(p.toLowerCase())
+    ? null
+    : "Pick the riven's polarity (Madurai, Naramon or Vazarin).";
 }
 
 export function normalizeRivenPolarity(p: string | undefined | null): string {

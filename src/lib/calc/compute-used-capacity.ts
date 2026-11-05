@@ -10,11 +10,11 @@ export function computeUsedCapacity(
   return equippedMods.reduce((sum, m) => {
     const mod = modsMap.get(m.modId);
     if (!mod) return sum;
-    // Rivens carry their own rolled polarity / drain (Round 54); every other mod uses the catalog.
+    // Rivens carry their own rolled polarity (Round 54). Drain is not rolled: catalog 10 + rank,
+    // capped at 18 at rank 8 (Round 54b), so every mod uses the catalog drain.
     const isRiven = m.modId.startsWith("riven_");
-    const drain = isRiven && typeof m.drain === "number" ? m.drain : mod.drain;
     const polarity = isRiven && m.polarity ? m.polarity : mod.polarity;
-    const baseDrain = modCapacityAtRank(drain, m.rank);
+    const baseDrain = modCapacityAtRank(mod.drain, m.rank);
     return sum + modSlotCapacityCost(baseDrain, slotPolarities[m.slotIndex], polarity);
   }, 0);
 }

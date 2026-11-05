@@ -1,3 +1,4 @@
+import { rivenAttributeValue } from "@/lib/riven/riven-roll";
 import { describe, expect, it } from "vitest";
 import { findModByName, findWarframeByName, findWeaponByName, parseCustomItemName } from "@/lib/warframe-arsenal/catalog-match";
 import {
@@ -189,10 +190,13 @@ describe("warframe arsenal riven resolve", () => {
       ],
       curses: [],
     });
-    expect(riven?.rivenStats.damage).toBeCloseTo(0.2);
+    // Round 54b: arsenal vals are normalized rolls (0..1) → converted with the wiki formula.
+    const conv = (tag: string, u: number) =>
+      rivenAttributeValue({ type: "melee", tag, u, rank: 0, buffCount: 3, curseCount: 0, isCurse: false })!;
+    expect(riven?.rivenStats.damage).toBeCloseTo(conv("WeaponMeleeDamageMod", 0.2), 9);
     expect(riven?.unmappedTags).toEqual([]);
-    expect(riven?.rivenStats.comboGainChance).toBeCloseTo(0.1);
-    expect(riven?.rivenStats.slideAttackCritChance).toBeCloseTo(0.15);
+    expect(riven?.rivenStats.comboGainChance).toBeCloseTo(Math.abs(conv("WeaponMeleeComboPointsOnHitMod", 0.1)), 9);
+    expect(riven?.rivenStats.slideAttackCritChance).toBeCloseTo(conv("SlideAttackCritChanceMod", 0.15), 9);
   });
 
   it("resolves full riven upgrade for import", () => {
@@ -204,7 +208,11 @@ describe("warframe arsenal riven resolve", () => {
     });
     expect(riven?.modId).toBe("riven_pistol");
     expect(riven?.rank).toBe(8);
-    expect(riven?.rivenStats.damage).toBeCloseTo(0.25);
+    // Round 54b: val 0.25 is the roll quality, not +25% (wiki Riven Mods § Attribute Value Formula).
+    expect(riven?.rivenStats.damage).toBeCloseTo(
+      rivenAttributeValue({ type: "pistol", tag: "WeaponDamageAmountMod", u: 0.25, rank: 8, buffCount: 1, curseCount: 0, isCurse: false })!,
+      9,
+    );
     expect(riven?.unmappedTags).toEqual([]);
   });
 });

@@ -9,7 +9,7 @@ import { PolarityIcon } from "@/components/polarity-icon";
 import { RivenEditor } from "@/components/riven-editor";
 import { useConfirmDialog } from "@/components/confirm-dialog-provider";
 import { hasClientSession } from "@/lib/auth/client-session";
-import { DEFAULT_RIVEN_DRAIN, DEFAULT_RIVEN_POLARITY, validateRivenStats } from "@/lib/riven/riven-validation";
+import { DEFAULT_RIVEN_DRAIN, DEFAULT_RIVEN_POLARITY, rivenPolarityError, validateRivenStats } from "@/lib/riven/riven-validation";
 import { RIVEN_MOD_IDS, SAVED_RIVEN_NAME_MAX, deleteSavedRiven, getSavedRivens, saveRiven, type SavedRiven } from "@/lib/riven/saved-rivens";
 import { getRivenStatsForCategory } from "@/lib/types";
 import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
@@ -79,7 +79,7 @@ export function RivenLibrary() {
   const draftWeapon = draft?.weaponId ? weaponsById.get(draft.weaponId) : undefined;
   const draftCategory = draftWeapon ? getRivenWeaponType(draftWeapon)?.toLowerCase() ?? "rifle" : "rifle";
   const validation = draft ? validateRivenStats(draft.stats, draftCategory) : null;
-  const canSave = !!draft && !!draftWeapon && !!draft.name.trim() && !!validation?.ok && !saving;
+  const canSave = !!draft && !!draftWeapon && !!draft.name.trim() && !!validation?.ok && !rivenPolarityError(draft?.polarity) && !saving;
 
   const handleSave = async () => {
     if (!draft || !draftWeapon || !canSave) return;

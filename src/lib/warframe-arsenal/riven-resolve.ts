@@ -1,3 +1,5 @@
+import { getRivenDrain } from "@/lib/calc/riven-calculator";
+import { rivenAttributeValue, rivenRollTypeFromUniqueName, rivenValsAreRolls } from "@/lib/riven/riven-roll";
 type RivenBuff = { tag?: string; val?: number };
 
 export type RawRivenUpgrade = {
@@ -125,25 +127,52 @@ const RIVEN_TAG_VALUE_FLIP = new Set(["WeaponRecoilReductionMod"]);
 /** Tags whose stored sign varies by source; use |val| and sign it by buff (+) / curse (−). */
 const RIVEN_TAG_ABS = new Set(["WeaponMeleeComboPointsOnHitMod"]);
 
+/**
+ * Riven stat values for the builder (decimal fractions, signed by FrameHub's convention).
+ *
+ * Real arsenal exports carry each attribute's normalized roll u (0..1), not the stat value, so
+ * values are rebuilt with the wiki formula (src/lib/riven/riven-roll.ts) from the riven type,
+ * rank and buff/curse counts. Payloads whose vals are outside 0..1 (hand-built / legacy test data
+ * that already holds final values) are taken as-is.
+ */
 export function parseRivenStatsFromUpgrade(entry: RawRivenUpgrade): Record<string, number> {
   const stats: Record<string, number> = {};
+  const buffs = entry.buffs ?? [];
+  const curses = entry.curses ?? [];
+  const vals = [...buffs, ...curses].map((b) => b.val).filter((v): v is number => typeof v === "number");
+  const rollType = entry.uniqueName ? rivenRollTypeFromUniqueName(entry.uniqueName) : undefined;
+  const fromRolls = rollType != null && rivenValsAreRolls(vals);
 
-  const apply = (buffs: RivenBuff[] | undefined, sign: 1 | -1) => {
-    for (const buff of buffs ?? []) {
+  const apply = (list: RivenBuff[], isCurse: boolean) => {
+    const sign = isCurse ? -1 : 1;
+    for (const buff of list) {
       const key = buff.tag ? RIVEN_TAG_TO_STAT[buff.tag] : undefined;
-      if (!key || typeof buff.val !== "number") continue;
-      const flipped =
-        buff.tag && RIVEN_TAG_ABS.has(buff.tag)
-          ? Math.abs(buff.val)
-          : buff.tag && RIVEN_TAG_VALUE_FLIP.has(buff.tag)
-            ? -buff.val
-            : buff.val;
-      stats[key] = (stats[key] ?? 0) + sign * flipped;
+      if (!key || !buff.tag || typeof buff.val !== "number") continue;
+      let value: number | undefined;
+      if (fromRolls) {
+        const v = rivenAttributeValue({
+          type: rollType!,
+          tag: buff.tag,
+          u: buff.val,
+          rank: typeof entry.rank === "number" ? entry.rank : 0,
+          buffCount: buffs.length,
+          curseCount: curses.length,
+          isCurse,
+        });
+        if (v == null) continue;
+        // Game sign already matches FrameHub's except the curse-only combo-gain stat (shown −100v %).
+        value = RIVEN_TAG_ABS.has(buff.tag) ? sign * Math.abs(v) : v;
+      } else {
+        value = RIVEN_TAG_ABS.has(buff.tag)
+          ? sign * Math.abs(buff.val)
+          : sign * (RIVEN_TAG_VALUE_FLIP.has(buff.tag) ? -buff.val : buff.val);
+      }
+      stats[key] = (stats[key] ?? 0) + value;
     }
   };
 
-  apply(entry.buffs, 1);
-  apply(entry.curses, -1);
+  apply(buffs, false);
+  apply(curses, true);
   return stats;
 }
 
@@ -189,8 +218,8 @@ export function resolveRivenUpgrade(
   const unmappedTags = unmappedRivenTags(entry);
   const rank = typeof entry.rank === "number" ? entry.rank : 0;
   const polarity = rivenPolarityFromUpgrade(entry);
-  const rawDrain = typeof entry.drain === "number" ? entry.drain : entry.baseDrain;
-  const drain = typeof rawDrain === "number" && Number.isFinite(rawDrain) ? Math.round(rawDrain) : undefined;
+  // The arsenal export has no drain field (only rank); drain is always 10 + rank (18 at rank 8).
+  const drain = getRivenDrain(Math.max(0, Math.min(8, rank)));
   return {
     modId,
     rank,

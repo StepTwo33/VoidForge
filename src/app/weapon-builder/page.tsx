@@ -25,6 +25,7 @@ import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
 import { weaponStatSummary } from "@/lib/ui/mobile-stat-summary";
 import { ModPicker, buildSlotNav, type SlotType, type RivenSelectMeta } from "@/components/mod-picker";
 import { useSavedRivens } from "@/lib/riven/use-saved-rivens";
+import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-validation";
 import { useWeapons, useMods } from "@/lib/weapons/use-data";
 import { calculateWeaponBuild, calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
 import { modCapacityAtRank } from "@/lib/calc/mod-capacity";
@@ -111,10 +112,13 @@ function incarnonExtrasForSave(
   };
 }
 
-/** Riven slots show their rolled polarity / drain (Round 54); other mods use the catalog entry. */
+/**
+ * Riven slots show their rolled polarity and saved name (Round 54). Drain is never rolled: it is the
+ * catalog base drain (10) + rank, i.e. 18 at rank 8 (Round 54b), so the catalog drain is kept.
+ */
 function withRivenRoll(eq: EquippedMod | undefined, mod: Mod | null): Mod | null {
   if (!eq || !mod || !eq.modId.startsWith("riven_")) return mod;
-  return { ...mod, name: eq.modName || mod.name, polarity: eq.polarity ?? mod.polarity, drain: eq.drain ?? mod.drain };
+  return { ...mod, name: eq.modName || mod.name, polarity: eq.polarity ?? mod.polarity };
 }
 
 export default function WeaponBuilderPage() {
@@ -302,7 +306,7 @@ export default function WeaponBuilderPage() {
           slotIndex: m.slotIndex,
           rivenStats: riven,
           ...(m.polarity ? { rivenPolarity: m.polarity } : {}),
-          ...(typeof m.drain === "number" ? { rivenDrain: m.drain } : {}),
+          rivenDrain: rivenDrainFromRank(m.rank),
         };
       }),
       stanceModId: stanceMod?.id,
@@ -348,11 +352,14 @@ export default function WeaponBuilderPage() {
     setEquippedMods(d.mods.map((m) => {
       const mod = modsMap.get(m.modId);
       const isRiven = m.modId.startsWith("riven_");
+      // Round 54 saves stored rivens at rank 0 with a free-form drain; read that drain back as the rank.
+      const rank = isRiven && !m.rank && typeof m.rivenDrain === "number" ? rivenRankFromDrain(m.rivenDrain) : m.rank;
       return {
         ...m,
+        rank,
         modName: mod?.name ?? "",
         polarity: isRiven && m.rivenPolarity ? m.rivenPolarity : mod?.polarity,
-        drain: isRiven && typeof m.rivenDrain === "number" ? m.rivenDrain : mod?.drain,
+        drain: mod?.drain,
       };
     }));
     if (d.stanceModId) {
@@ -757,10 +764,11 @@ export default function WeaponBuilderPage() {
         {
           modId: mod.id,
           modName: meta?.name ?? mod.name,
-          rank: 0,
+          // Round 54b: keep the rank the editor chose (drain 10 + rank); was always 0 before.
+          rank: meta ? rivenRankFromDrain(meta.drain) : mod.maxRank,
           slotIndex: activeSlotIndex,
           polarity: meta?.polarity ?? mod.polarity,
-          drain: meta?.drain ?? mod.drain,
+          drain: mod.drain,
         },
       ];
     });
@@ -779,7 +787,13 @@ export default function WeaponBuilderPage() {
     const eq = equippedMods.find((m) => m.slotIndex === editRivenSlot);
     const mod = eq ? modsMap.get(eq.modId) : undefined;
     if (!eq || !mod || !eq.modId.startsWith("riven_")) return null;
-    return { mod, stats: rivenStatsMap[editRivenSlot] ?? {}, polarity: eq.polarity, drain: eq.drain };
+    return {
+      mod,
+      stats: rivenStatsMap[editRivenSlot] ?? {},
+      polarity: eq.polarity,
+      drain: rivenDrainFromRank(eq.rank),
+      name: eq.modName && eq.modName !== mod.name ? eq.modName : undefined,
+    };
   }, [editRivenSlot, modPickerOpen, equippedMods, modsMap, rivenStatsMap]);
   const modCategory = selectedWeapon ? getModCategory(selectedWeapon.category) : "primary";
   const equippedModIds = equippedMods.map((m) => m.modId);

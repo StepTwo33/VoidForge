@@ -7,10 +7,11 @@ import { cn } from "@/lib/utils";
 import { PolarityIcon } from "@/components/polarity-icon";
 import {
   DEFAULT_RIVEN_POLARITY,
-  RIVEN_DRAIN_MAX,
-  RIVEN_DRAIN_MIN,
+  RIVEN_MAX_RANK,
   RIVEN_POLARITIES,
-  clampRivenDrain,
+  rivenDrainFromRank,
+  rivenPolarityError,
+  rivenRankFromDrain,
   validateRivenStats,
 } from "@/lib/riven/riven-validation";
 
@@ -21,6 +22,7 @@ export interface RivenEditorProps {
   onStatsChange: (next: Record<string, number>) => void;
   polarity: string;
   onPolarityChange: (p: string) => void;
+  /** In-game drain at the chosen rank (10 at rank 0 … 18 at rank 8). */
   drain: number;
   onDrainChange: (n: number) => void;
   /** Show the validation list (hidden until the user has added a stat). */
@@ -45,7 +47,12 @@ export function RivenEditor({
   const [rivenStatValue, setRivenStatValue] = useState("");
   const [rivenStatSearch, setRivenStatSearch] = useState("");
   const setRivenStats = (fn: (prev: Record<string, number>) => Record<string, number>) => onStatsChange(fn(rivenStats));
-  const validation = validateRivenStats(rivenStats, poolCategory);
+  const statValidation = validateRivenStats(rivenStats, poolCategory);
+  const polErr = rivenPolarityError(polarity);
+  const validation = polErr
+    ? { ...statValidation, ok: false, errors: [...statValidation.errors, polErr] }
+    : statValidation;
+  const rank = rivenRankFromDrain(drain);
   const showValidation = showValidationProp ?? Object.keys(rivenStats).length > 0;
 
     const rivenPool = getRivenStatsForCategory(poolCategory);
@@ -250,7 +257,9 @@ export function RivenEditor({
               className="min-h-11 min-w-0 flex-1 rounded border border-border bg-background px-2 text-xs text-foreground pointer-fine:min-h-9"
               aria-label="Riven polarity"
             >
-              <option value={DEFAULT_RIVEN_POLARITY}>Not set (universal)</option>
+              {!RIVEN_POLARITIES.includes(polarity as (typeof RIVEN_POLARITIES)[number]) && (
+                <option value={DEFAULT_RIVEN_POLARITY} disabled>Choose…</option>
+              )}
               {RIVEN_POLARITIES.map((p) => (
                 <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
               ))}
@@ -258,18 +267,18 @@ export function RivenEditor({
           </div>
         </label>
         <label className="space-y-1 text-[11px] text-muted-foreground">
-          <span className="block">Drain (as shown in game)</span>
-          <input
-            type="number"
-            inputMode="numeric"
-            min={RIVEN_DRAIN_MIN}
-            max={RIVEN_DRAIN_MAX}
-            step={1}
-            value={drain}
-            onChange={(e) => onDrainChange(clampRivenDrain(parseFloat(e.target.value)))}
+          <span className="block">Rank · drain</span>
+          <select
+            value={rank}
+            onChange={(e) => onDrainChange(rivenDrainFromRank(parseInt(e.target.value, 10)))}
             className="min-h-11 w-full rounded border border-border bg-background px-2 text-xs text-foreground pointer-fine:min-h-9"
-            aria-label="Riven capacity drain"
-          />
+            aria-label="Riven rank"
+            data-testid="riven-rank"
+          >
+            {Array.from({ length: RIVEN_MAX_RANK + 1 }, (_, r) => RIVEN_MAX_RANK - r).map((r) => (
+              <option key={r} value={r}>Rank {r} · drain {rivenDrainFromRank(r)}</option>
+            ))}
+          </select>
         </label>
       </div>
       {showValidation && !validation.ok && (
