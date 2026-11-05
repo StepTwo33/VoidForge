@@ -46,7 +46,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/warframe-builder", label: "Warframe Builder", desc: "Warframe modding" },
       { href: "/companion-builder", label: "Companion Builder", desc: "Companion loadouts" },
       { href: "/modular-builder", label: "Modular Builder", desc: "Kitguns, Zaws & more" },
-      { href: "/archwing-builder", label: "Archwing Builder", desc: "Archwing & Necramech" },
+      { href: "/archwing-builder", label: "Vehicle Builder", desc: "Archwing & Necramech" },
       { href: "/railjack-builder", label: "Railjack Builder", desc: "Ship components & Plexus" },
     ],
   },

@@ -3,15 +3,19 @@ import { modCapacityAtRank, modSlotCapacityCost } from "@/lib/calc/mod-capacity"
 
 /** Sum of capacity cost for equipped mods given slot polarities. */
 export function computeUsedCapacity(
-  equippedMods: Pick<EquippedMod, "modId" | "rank" | "slotIndex">[],
+  equippedMods: (Pick<EquippedMod, "modId" | "rank" | "slotIndex"> & Partial<Pick<EquippedMod, "polarity" | "drain">>)[],
   modsMap: Map<string, Pick<Mod, "drain" | "polarity">>,
   slotPolarities: Record<number, string | undefined>,
 ): number {
   return equippedMods.reduce((sum, m) => {
     const mod = modsMap.get(m.modId);
     if (!mod) return sum;
-    const baseDrain = modCapacityAtRank(mod.drain, m.rank);
-    return sum + modSlotCapacityCost(baseDrain, slotPolarities[m.slotIndex], mod.polarity);
+    // Rivens carry their own rolled polarity / drain (Round 54); every other mod uses the catalog.
+    const isRiven = m.modId.startsWith("riven_");
+    const drain = isRiven && typeof m.drain === "number" ? m.drain : mod.drain;
+    const polarity = isRiven && m.polarity ? m.polarity : mod.polarity;
+    const baseDrain = modCapacityAtRank(drain, m.rank);
+    return sum + modSlotCapacityCost(baseDrain, slotPolarities[m.slotIndex], polarity);
   }, 0);
 }
 

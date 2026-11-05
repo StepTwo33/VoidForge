@@ -23,7 +23,8 @@ import { ModSlotCard } from "@/components/mod-slot";
 import { WeaponStatsPanel } from "@/components/stats-panel";
 import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
 import { weaponStatSummary } from "@/lib/ui/mobile-stat-summary";
-import { ModPicker, buildSlotNav, type SlotType } from "@/components/mod-picker";
+import { ModPicker, buildSlotNav, type SlotType, type RivenSelectMeta } from "@/components/mod-picker";
+import { useSavedRivens } from "@/lib/riven/use-saved-rivens";
 import { useWeapons, useMods } from "@/lib/weapons/use-data";
 import { calculateWeaponBuild, calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
 import { modCapacityAtRank } from "@/lib/calc/mod-capacity";
@@ -110,6 +111,12 @@ function incarnonExtrasForSave(
   };
 }
 
+/** Riven slots show their rolled polarity / drain (Round 54); other mods use the catalog entry. */
+function withRivenRoll(eq: EquippedMod | undefined, mod: Mod | null): Mod | null {
+  if (!eq || !mod || !eq.modId.startsWith("riven_")) return mod;
+  return { ...mod, name: eq.modName || mod.name, polarity: eq.polarity ?? mod.polarity, drain: eq.drain ?? mod.drain };
+}
+
 export default function WeaponBuilderPage() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -136,6 +143,8 @@ export default function WeaponBuilderPage() {
   // Round 47: explicit "Genesis installed" choice; null = auto (on once any evolution is picked).
   const [genesisInstalledOverride, setGenesisInstalledOverride] = useState<boolean | null>(null);
   const [rivenStatsMap, setRivenStatsMap] = useState<Record<number, Record<string, number>>>({});
+  // Round 54: Edit riven opens the riven editor pre-filled for this slot.
+  const [editRivenSlot, setEditRivenSlot] = useState<number | null>(null);
   const [equippedArcanes, setEquippedArcanes] = useState<(Mod | null)[]>([null, null]);
   const [arcanePickerOpen, setArcanePickerOpen] = useState(false);
   const [activeArcaneSlot, setActiveArcaneSlot] = useState(0);
@@ -283,7 +292,19 @@ export default function WeaponBuilderPage() {
     if (!selectedWeapon) return null;
     return {
       weaponId: selectedWeapon.id,
-      mods: equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      mods: equippedMods.map((m) => {
+        const riven = m.modId.startsWith("riven_") ? rivenStatsMap[m.slotIndex] : undefined;
+        if (!riven) return { modId: m.modId, rank: m.rank, slotIndex: m.slotIndex };
+        // Round 54: rivens keep their rolls, polarity and drain through save / load.
+        return {
+          modId: m.modId,
+          rank: m.rank,
+          slotIndex: m.slotIndex,
+          rivenStats: riven,
+          ...(m.polarity ? { rivenPolarity: m.polarity } : {}),
+          ...(typeof m.drain === "number" ? { rivenDrain: m.drain } : {}),
+        };
+      }),
       stanceModId: stanceMod?.id,
       arcaneIds: equippedArcanes.map((a) => a?.id ?? null),
       hasOrokinCatalyst,
@@ -301,7 +322,7 @@ export default function WeaponBuilderPage() {
       ...(Object.keys(selectedEvolutions).length > 0 ? { incarnonEvolutions: selectedEvolutions } : {}),
       ...incarnonExtrasForSave(incarnonConditionals, genesisInstalledOverride),
     };
-  }, [selectedWeapon, equippedMods, stanceMod, equippedArcanes, hasOrokinCatalyst, adversaryFormas, slotPolarities, weaponCalcOptions, selectedEvolutions, incarnonConditionals, genesisInstalledOverride]);
+  }, [selectedWeapon, equippedMods, rivenStatsMap, stanceMod, equippedArcanes, hasOrokinCatalyst, adversaryFormas, slotPolarities, weaponCalcOptions, selectedEvolutions, incarnonConditionals, genesisInstalledOverride]);
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildWeaponData()), [buildWeaponData]));
 
@@ -326,7 +347,13 @@ export default function WeaponBuilderPage() {
     setSelectedWeapon(weapon);
     setEquippedMods(d.mods.map((m) => {
       const mod = modsMap.get(m.modId);
-      return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
+      const isRiven = m.modId.startsWith("riven_");
+      return {
+        ...m,
+        modName: mod?.name ?? "",
+        polarity: isRiven && m.rivenPolarity ? m.rivenPolarity : mod?.polarity,
+        drain: isRiven && typeof m.rivenDrain === "number" ? m.rivenDrain : mod?.drain,
+      };
     }));
     if (d.stanceModId) {
       const sm = allMods.find((m) => m.id === d.stanceModId);
@@ -722,21 +749,22 @@ export default function WeaponBuilderPage() {
     });
   }, [activeSlotIndex]);
 
-  const handleSelectRiven = useCallback((mod: Mod, stats: Record<string, number>) => {
+  const handleSelectRiven = useCallback((mod: Mod, stats: Record<string, number>, meta?: RivenSelectMeta) => {
     setEquippedMods((prev) => {
       const filtered = prev.filter((m) => m.slotIndex !== activeSlotIndex);
       return [
         ...filtered,
         {
           modId: mod.id,
-          modName: mod.name,
+          modName: meta?.name ?? mod.name,
           rank: 0,
           slotIndex: activeSlotIndex,
-          polarity: mod.polarity,
-          drain: mod.drain,
+          polarity: meta?.polarity ?? mod.polarity,
+          drain: meta?.drain ?? mod.drain,
         },
       ];
     });
+    setEditRivenSlot(null);
     setRivenStatsMap((prev) => ({ ...prev, [activeSlotIndex]: stats }));
   }, [activeSlotIndex]);
 
@@ -745,6 +773,14 @@ export default function WeaponBuilderPage() {
     setRivenStatsMap((prev) => { const n = { ...prev }; delete n[slotIndex]; return n; });
   }, []);
 
+  const savedRivens = useSavedRivens(selectedWeapon?.id);
+  const editRivenTarget = useMemo(() => {
+    if (editRivenSlot == null || !modPickerOpen) return null;
+    const eq = equippedMods.find((m) => m.slotIndex === editRivenSlot);
+    const mod = eq ? modsMap.get(eq.modId) : undefined;
+    if (!eq || !mod || !eq.modId.startsWith("riven_")) return null;
+    return { mod, stats: rivenStatsMap[editRivenSlot] ?? {}, polarity: eq.polarity, drain: eq.drain };
+  }, [editRivenSlot, modPickerOpen, equippedMods, modsMap, rivenStatsMap]);
   const modCategory = selectedWeapon ? getModCategory(selectedWeapon.category) : "primary";
   const equippedModIds = equippedMods.map((m) => m.modId);
   const numSlots = selectedWeapon?.modSlots || 8;
@@ -1153,7 +1189,7 @@ export default function WeaponBuilderPage() {
                 <div className="grid grid-cols-2 gap-1.5 sm:gap-2.5 lg:grid-cols-4">
                   {Array.from({ length: numSlots }, (_, i) => {
                     const equipped = equippedMods.find((m) => m.slotIndex === i);
-                    const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
+                    const mod = withRivenRoll(equipped, equipped ? modsMap.get(equipped.modId) ?? null : null);
                     return (
                       <ModSlotCard
                         key={i}
@@ -1167,7 +1203,7 @@ export default function WeaponBuilderPage() {
                         onAdd={() => handleOpenModPicker(i)}
                         onRemove={() => handleRemoveMod(i)}
                         onPolarize={(p) => setSlotPolarities((prev) => applyPolarityOverride(prev, innatePolarities, i, p))}
-                        onEditRiven={() => handleOpenModPicker(i)}
+                        onEditRiven={() => { handleOpenModPicker(i); setEditRivenSlot(i); }}
                       />
                     );
                   })}
@@ -1175,7 +1211,7 @@ export default function WeaponBuilderPage() {
                 {hasWeaponExilusSlot && (() => {
                   const i = WEAPON_EXILUS_SLOT_INDEX;
                   const equipped = equippedMods.find((m) => m.slotIndex === i);
-                  const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
+                  const mod = withRivenRoll(equipped, equipped ? modsMap.get(equipped.modId) ?? null : null);
                   const exilusLabel = isTomeWeapon(selectedWeapon.id) ? "Canticle" : "Exilus";
                   return (
                     <div className="mt-2.5">
@@ -1196,7 +1232,7 @@ export default function WeaponBuilderPage() {
                           onAdd={() => handleOpenModPicker(i)}
                           onRemove={() => handleRemoveMod(i)}
                           onPolarize={(p) => setSlotPolarities((prev) => applyPolarityOverride(prev, innatePolarities, i, p))}
-                          onEditRiven={() => handleOpenModPicker(i)}
+                          onEditRiven={() => { handleOpenModPicker(i); setEditRivenSlot(i); }}
                         />
                       </div>
                     </div>
@@ -1330,9 +1366,11 @@ export default function WeaponBuilderPage() {
 
       <ModPicker
         open={modPickerOpen}
-        onClose={() => setModPickerOpen(false)}
+        onClose={() => { setModPickerOpen(false); setEditRivenSlot(null); }}
         mods={allMods}
         category={modCategory}
+        editRiven={editRivenTarget}
+        savedRivens={savedRivens}
         slotType={modPickerSlotType}
         equippedModIds={equippedModIds}
         onSelect={handleSelectMod}

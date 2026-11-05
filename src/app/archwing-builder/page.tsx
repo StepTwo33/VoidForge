@@ -323,7 +323,7 @@ export default function ArchwingBuilderPage() {
     <PageShell>
       <main className="container mx-auto px-4 pt-8 pb-24 lg:pb-8">
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-          <h1 className="text-xl sm:text-3xl font-bold">Archwing & Necramech Builder</h1>
+          <h1 className="text-xl sm:text-3xl font-bold">Vehicle Builder</h1>
           <div className="flex items-center gap-2">
             <button onClick={() => setSaveDialogOpen(true)} className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:py-1.5", hasUnsavedChanges && SAVE_DIRTY_CLASS)} title={hasUnsavedChanges ? "Save Build (unsaved changes)" : "Save Build"} data-dirty={hasUnsavedChanges ? "true" : undefined}>
               <Save className="h-3.5 w-3.5" /> <span>Save</span>

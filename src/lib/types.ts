@@ -292,6 +292,10 @@ export interface ModSlot {
   slotIndex: number;
   /** Imported riven stat rolls (decimal fractions, e.g. 0.44 = +44%). */
   rivenStats?: Record<string, number>;
+  /** User-picked riven polarity (madurai / vazarin / naramon); catalog default is universal. */
+  rivenPolarity?: string;
+  /** User-entered riven capacity drain (as shown in game); catalog default is 10. */
+  rivenDrain?: number;
 }
 
 /** Optional other loadout slots so cross-slot mod sets (Augur, Hunter, Synth, …) count correctly. */

@@ -2060,7 +2060,11 @@ function AdaptationSurvivability({ stats }: { stats: WarframeCalculatedStats }) 
   );
 }
 
-/** Warframe arcanes with a stack-count input (Round 45). Defaults = the slider max. */
+/**
+ * Custom labels for warframe arcane stack sliders (Round 45). Every other stacking warframe
+ * arcane (Molt Augmented, Arcane Sculptor, Molt Efficiency, …) gets a generic slider via
+ * `wfArcaneStackSlider` (Round 54). Defaults = full stacks, adjustable down to 0.
+ */
 const WF_ARCANE_STACK_SLIDERS: Record<string, { label: string; tooltip: string }> = {
   arcane_impetus: {
     label: "Impetus: unique ability statuses",
@@ -2073,6 +2077,17 @@ const WF_ARCANE_STACK_SLIDERS: Record<string, { label: string; tooltip: string }
       "Stacks from your summons' attacks; the bonus applies to your next ability cast. Default 10 = full stacks (wiki max +60% at R5), i.e. the strength of a cast made at full stacks.",
   },
 };
+
+/** Stack slider config for any stacking warframe arcane; Arcane Intention is derived from abilities. */
+function wfArcaneStackSlider(id: string, name: string, fullStacks: number | undefined) {
+  if (fullStacks == null || fullStacks <= 1 || id === "arcane_intention") return null;
+  return (
+    WF_ARCANE_STACK_SLIDERS[id] ?? {
+      label: `${name}: stacks`,
+      tooltip: `Stacks applied to the warframe stats. Default ${fullStacks} = full stacks (wiki maximum at this rank); drag down to see partial stacks.`,
+    }
+  );
+}
 
 export function WarframeStatsPanel({
   stats,
@@ -2446,7 +2461,7 @@ export function WarframeStatsPanel({
                     const title =
                       info.id === "arcane_intention"
                         ? `Stacks = this build's channeled abilities on the wiki's eligible list (Helminth and augments included), max ${info.fullStacks}.`
-                        : WF_ARCANE_STACK_SLIDERS[info.id]
+                        : wfArcaneStackSlider(info.id, info.name, info.fullStacks)
                           ? `Applied at ${used} of ${info.fullStacks} stacks. Set the count with the slider below.`
                           : `Warframe stats assume this arcane is at full stacks (${info.fullStacks}).`;
                     return (
@@ -2462,18 +2477,23 @@ export function WarframeStatsPanel({
                   <span className="text-[10px] text-muted-foreground font-mono">R{info.rank}/{info.maxRank}</span>
                 </span>
               </div>
-              {WF_ARCANE_STACK_SLIDERS[info.id] && info.fullStacks != null && onArcaneStacksChange && (
-                <div className="py-1" data-testid={`arcane-stack-slider-${info.id}`}>
-                  <SimSlider
-                    label={WF_ARCANE_STACK_SLIDERS[info.id].label}
-                    value={Math.min(arcaneStacksById?.[info.id] ?? info.fullStacks, info.fullStacks)}
-                    min={0}
-                    max={info.fullStacks}
-                    onChange={(v) => onArcaneStacksChange(info.id, v)}
-                    tooltip={WF_ARCANE_STACK_SLIDERS[info.id].tooltip}
-                  />
-                </div>
-              )}
+              {(() => {
+                const slider = wfArcaneStackSlider(info.id, info.name, info.fullStacks);
+                if (!slider || info.fullStacks == null || !onArcaneStacksChange) return null;
+                const full = info.fullStacks;
+                return (
+                  <div className="py-1" data-testid={`arcane-stack-slider-${info.id}`}>
+                    <SimSlider
+                      label={slider.label}
+                      value={Math.min(arcaneStacksById?.[info.id] ?? full, full)}
+                      min={0}
+                      max={full}
+                      onChange={(v) => onArcaneStacksChange(info.id, v)}
+                      tooltip={slider.tooltip}
+                    />
+                  </div>
+                );
+              })()}
               {info.applied.map((line, i) => (
                 <div key={`a-${i}`} className="py-0.5">
                   <StatRow

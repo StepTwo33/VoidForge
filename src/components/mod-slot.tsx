@@ -255,12 +255,11 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innateP
           </div>
           {mod.subCategory === "riven" && rivenStats && Object.keys(rivenStats).length > 0 ? (
             <div className="mt-0.5 space-y-0 text-[11px] leading-snug text-purple-800 dark:text-purple-300">
-              {Object.entries(rivenStats).slice(0, 3).map(([k, v]) => {
+              {Object.entries(rivenStats).map(([k, v]) => {
                 const pool = weaponCategory ? getRivenStatsForCategory(weaponCategory) : [];
                 const lbl = pool.find(s => s.key === k)?.label || k;
-                return <div key={k} className="truncate">{v >= 0 ? "+" : ""}{(v * 100).toFixed(1)}% {lbl}</div>;
+                return <div key={k} className={cn("truncate", v < 0 && "text-red-700 dark:text-red-400")}>{v >= 0 ? "+" : ""}{(v * 100).toFixed(1)}% {lbl}</div>;
               })}
-              {Object.keys(rivenStats).length > 3 && <div className="text-purple-600/70 dark:text-purple-400/60">+{Object.keys(rivenStats).length - 3} more</div>}
             </div>
           ) : statEntries.length > 0 ? (
             <div className="mt-0.5 space-y-0.5 text-[11px] leading-snug text-cyan-800/90 dark:text-cyan-300/80 max-sm:[&>*:nth-child(n+2)]:hidden">

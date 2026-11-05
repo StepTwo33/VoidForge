@@ -61,6 +61,7 @@ model User {
   siteUpdates   SiteUpdate[]
   dataOverrides DataOverride[]
   discordLink   DiscordUserLink?
+  savedRivens   SavedRiven[]
 }
 
 // ── FrameHub Discord bot (worldstate alerts config) ───────────────────
@@ -192,6 +193,26 @@ model Build {
   @@index([isPublic, type, updatedAt])
   @@index([isPublic, type, upvoteCount])
   @@index([isPublic, itemId])
+}
+
+/// A user's saved riven roll for one weapon (Round 54 riven library).
+model SavedRiven {
+  id        String   @id @default(cuid())
+  userId    String
+  weaponId  String
+  name      String
+  /** Riven catalog mod id: riven_rifle | riven_shotgun | riven_pistol | riven_melee. */
+  modId     String
+  /** JSON object of stat key → decimal roll, same shape as build rivenStats. */
+  stats     String
+  polarity  String   @default("universal")
+  drain     Int      @default(10)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, weaponId])
 }
 
 model BuildVote {

@@ -70,7 +70,7 @@ export default function Home({ counts }: { counts: CatalogCounts }) {
               <FeatureCard
                 href="/warframe-builder"
                 title="Warframe Builder"
-                description={`Mod your Warframe, install Archon Shards, and see ability stats and survivability for ${counts.warframePicker} Warframes. Necramechs are in the Archwing Builder.`}
+                description={`Mod your Warframe, install Archon Shards, and see ability stats and survivability for ${counts.warframePicker} Warframes. Necramechs are in the Vehicle Builder.`}
                 icon={Shield}
                 accent="purple"
                 badges={[`${counts.warframePicker} Warframes`, "Archon Shards"]}
@@ -101,7 +101,7 @@ export default function Home({ counts }: { counts: CatalogCounts }) {
               />
               <FeatureCard
                 href="/archwing-builder"
-                title="Archwing Builder"
+                title="Vehicle Builder"
                 description="Mod Archwing frames and Necramechs with real-time stat preview and capacity tracking."
                 icon={Plane}
                 accent="yellow"

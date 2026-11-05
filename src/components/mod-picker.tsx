@@ -18,6 +18,14 @@ import { findBlockingModId, getBlockedModIds } from "@/data/mod-exclusions";
 import { modsMap as catalogModsMap } from "@/data/mods";
 import { cleanModDescription, getModStatDisplayLines } from "@/lib/display/mod-display";
 import { getRivenWeaponType, rivenModMatchesWeapon } from "@/lib/weapons/riven-weapon-type";
+import { RivenEditor } from "@/components/riven-editor";
+import {
+  DEFAULT_RIVEN_DRAIN,
+  DEFAULT_RIVEN_POLARITY,
+  clampRivenDrain,
+  normalizeRivenPolarity,
+  validateRivenStats,
+} from "@/lib/riven/riven-validation";
 
 function isRivenMod(mod: Mod): boolean {
   return mod.subCategory === "riven" || mod.id.startsWith("riven_");
@@ -77,7 +85,11 @@ interface ModPickerProps {
   statFilterCategory?: string;
   equippedModIds: string[];
   onSelect: (mod: Mod, rank: number) => void;
-  onSelectRiven?: (mod: Mod, stats: Record<string, number>) => void;
+  onSelectRiven?: (mod: Mod, stats: Record<string, number>, meta?: RivenSelectMeta) => void;
+  /** Open straight into the riven editor pre-filled (Edit riven). */
+  editRiven?: { mod: Mod; stats: Record<string, number>; polarity?: string; drain?: number } | null;
+  /** Signed-in user's saved rivens for this weapon (Round 54 riven library). */
+  savedRivens?: SavedRivenEntry[];
   weaponCategory?: string; // for riven stat pool filtering
   /** When set, filters mods by beam / AoE / projectile wiki compatibility tags. */
   weapon?: Pick<Weapon, "id" | "name" | "category" | "triggerType"> & { hasRivenSlot?: boolean };
@@ -97,6 +109,23 @@ interface ModPickerProps {
   slotNav?: ModPickerSlotNav;
 }
 
+export interface RivenSelectMeta {
+  polarity: string;
+  drain: number;
+  /** Saved-riven name when equipped from the riven library. */
+  name?: string;
+}
+
+export interface SavedRivenEntry {
+  id: string;
+  name: string;
+  /** Riven catalog mod id (riven_rifle / riven_shotgun / …). */
+  modId: string;
+  stats: Record<string, number>;
+  polarity: string;
+  drain: number;
+}
+
 export interface ModPickerSlotNav {
   /** Short visible position label, e.g. "3 / 9". */
   label: string;
@@ -106,16 +135,28 @@ export interface ModPickerSlotNav {
   onNext?: () => void;
 }
 
-export function ModPicker({ open, onClose, mods, category, statFilterCategory, slotType = "regular", equippedModIds, onSelect, onSelectRiven, weaponCategory, weapon, incarnonFormTriggerType, warframeId, helminthAbility, archwingId, arcaneCatalog, pickerMode = "mods", initialBrowseTab = "mods", equippedArcaneIds = [], slotNav }: ModPickerProps) {
+export function ModPicker({ open, onClose, mods, category, statFilterCategory, slotType = "regular", equippedModIds, onSelect, onSelectRiven, weaponCategory, weapon, incarnonFormTriggerType, warframeId, helminthAbility, archwingId, arcaneCatalog, pickerMode = "mods", initialBrowseTab = "mods", equippedArcaneIds = [], slotNav, editRiven, savedRivens }: ModPickerProps) {
   const [search, setSearch] = useState("");
   const [selectedMod, setSelectedMod] = useState<Mod | null>(null);
   const [selectedRank, setSelectedRank] = useState(0);
   const [browseTab, setBrowseTab] = useState<"mods" | "arcanes">(initialBrowseTab);
   // Riven stat configuration state
   const [rivenStats, setRivenStats] = useState<Record<string, number>>({});
-  const [rivenStatKey, setRivenStatKey] = useState("");
-  const [rivenStatValue, setRivenStatValue] = useState("");
-  const [rivenStatSearch, setRivenStatSearch] = useState("");
+  const [rivenPolarity, setRivenPolarity] = useState<string>(DEFAULT_RIVEN_POLARITY);
+  const [rivenDrain, setRivenDrain] = useState<number>(DEFAULT_RIVEN_DRAIN);
+  const rivenCategory = rivenPoolCategory(weapon, weaponCategory || category);
+  // Edit riven: open straight into the editor pre-filled (adjust-state-during-render on open).
+  const editKey = open && editRiven ? `${editRiven.mod.id}:${JSON.stringify(editRiven.stats)}:${editRiven.polarity}:${editRiven.drain}` : null;
+  const [prevEditKey, setPrevEditKey] = useState<string | null>(null);
+  if (prevEditKey !== editKey) {
+    setPrevEditKey(editKey);
+    if (editKey && editRiven) {
+      setSelectedMod(editRiven.mod);
+      setRivenStats(editRiven.stats);
+      setRivenPolarity(normalizeRivenPolarity(editRiven.polarity));
+      setRivenDrain(clampRivenDrain(editRiven.drain ?? DEFAULT_RIVEN_DRAIN));
+    }
+  }
   const [statFilter, setStatFilter] = useState<ModStatFilterId>("all");
   // Slot stepper: keep the chosen stat chip while moving between slots of the same type,
   // but reset it when the slot type changes (e.g. regular -> Aura/Exilus), whose chip set differs.
@@ -283,6 +324,41 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
   const isArcaneBrowse = pickerMode === "arcanes" && !!arcaneCatalog;
 
 
+  const visibleSavedRivens = useMemo(() => {
+    if (!savedRivens?.length || !onSelectRiven || slotType !== "regular") return [];
+    const pool = getRivenStatsForCategory(rivenCategory);
+    const q = search.trim().toLowerCase();
+    return savedRivens
+      .map((entry) => {
+        const mod = catalogModsMap.get(entry.modId);
+        if (!mod) return null;
+        const lines = Object.entries(entry.stats).map(([k, v]) => {
+          const def = pool.find((d) => d.key === k);
+          const label = def ? def.label.replace(" (Spliced)", "") : k;
+          const shown = def?.isPercent === false ? v.toFixed(1) : `${(v * 100).toFixed(1)}%`;
+          return `${v >= 0 ? "+" : ""}${shown} ${label}`;
+        });
+        return { entry, mod, lines, valid: validateRivenStats(entry.stats, rivenCategory).ok };
+      })
+      .filter((r): r is NonNullable<typeof r> => !!r)
+      .filter((r) => !q || r.entry.name.toLowerCase().includes(q) || r.lines.some((l) => l.toLowerCase().includes(q)) || "riven".includes(q));
+  }, [savedRivens, onSelectRiven, slotType, rivenCategory, search]);
+
+  const equipSavedRiven = (entry: SavedRivenEntry, mod: Mod) => {
+    if (!onSelectRiven || !validateRivenStats(entry.stats, rivenCategory).ok) return;
+    onSelectRiven(mod, entry.stats, {
+      polarity: normalizeRivenPolarity(entry.polarity),
+      drain: clampRivenDrain(entry.drain),
+      name: entry.name,
+    });
+    setSelectedMod(null);
+    setRivenStats({});
+    setRivenPolarity(DEFAULT_RIVEN_POLARITY);
+    setRivenDrain(DEFAULT_RIVEN_DRAIN);
+    setSearch("");
+    onClose();
+  };
+
   const handleSelectMod = (mod: Mod) => {
     setSelectedMod(mod);
     setSelectedRank(mod.maxRank);
@@ -291,16 +367,16 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
   const handleConfirm = () => {
     if (selectedMod) {
       if (isRivenMod(selectedMod) && onSelectRiven) {
-        onSelectRiven(selectedMod, rivenStats);
+        if (!rivenValidation.ok) return;
+        onSelectRiven(selectedMod, rivenStats, { polarity: rivenPolarity, drain: rivenDrain });
       } else {
         onSelect(selectedMod, selectedRank);
       }
       setSelectedMod(null);
       setSelectedRank(0);
       setRivenStats({});
-      setRivenStatKey("");
-      setRivenStatValue("");
-      setRivenStatSearch("");
+      setRivenPolarity(DEFAULT_RIVEN_POLARITY);
+      setRivenDrain(DEFAULT_RIVEN_DRAIN);
       setSearch("");
       onClose();
     }
@@ -310,9 +386,8 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
     setSelectedMod(null);
     setSelectedRank(0);
     setRivenStats({});
-    setRivenStatKey("");
-    setRivenStatValue("");
-    setRivenStatSearch("");
+    setRivenPolarity(DEFAULT_RIVEN_POLARITY);
+    setRivenDrain(DEFAULT_RIVEN_DRAIN);
     setSearch("");
     setStatFilter("all");
     setSortId("name");
@@ -323,8 +398,9 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
   // Escape / tapping outside while the rank card is open equips the mod at the shown rank instead of
   // silently dropping it (Back still returns to the list without equipping). A riven with no
   // stats yet has nothing to equip, so it just closes as before.
-  const dismissEquips =
-    !!selectedMod && !(isRivenMod(selectedMod) && onSelectRiven && Object.keys(rivenStats).length === 0);
+  const rivenValidation = validateRivenStats(rivenStats, rivenCategory);
+  const rivenBlocked = !!selectedMod && isRivenMod(selectedMod) && !!onSelectRiven && !rivenValidation.ok;
+  const dismissEquips = !!selectedMod && !rivenBlocked;
   const handleDismiss = () => {
     if (dismissEquips) {
       handleConfirm();
@@ -445,201 +521,17 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
               )}
             </div>
 
-            {isRivenMod(selectedMod) ? (() => {
-              const rivenPool = getRivenStatsForCategory(rivenPoolCategory(weapon, weaponCategory || category));
-              const availableStats = rivenPool.filter((s) => !s.spliced && !(s.key in rivenStats));
-              const canAddSpliced = !rivenPool.some((s) => s.spliced && s.key in rivenStats) && rivenPool.some((s) => s.spliced);
-              const availableSplicedStats = canAddSpliced ? rivenPool.filter((s) => s.spliced) : [];
-
-              const q = rivenStatSearch.trim().toLowerCase();
-              const filteredNormalStats = q
-                ? availableStats.filter((s) => s.label.toLowerCase().includes(q) || s.key.toLowerCase().includes(q))
-                : availableStats;
-              const filteredSplicedStats = q
-                ? availableSplicedStats.filter((s) => s.label.toLowerCase().includes(q) || s.key.toLowerCase().includes(q))
-                : availableSplicedStats;
-
-              const selectedStatDef = rivenPool.find((s) => s.key === rivenStatKey);
-              const isPercentStat = selectedStatDef ? selectedStatDef.isPercent !== false : true;
-
-              const handleAddRivenStat = () => {
-                if (!rivenStatKey || !rivenStatValue) return;
-                const num = parseFloat(rivenStatValue);
-                if (isNaN(num)) return;
-                const val = isPercentStat ? num / 100 : num;
-                setRivenStats((prev) => ({ ...prev, [rivenStatKey]: val }));
-                setRivenStatKey("");
-                setRivenStatValue("");
-                setRivenStatSearch("");
-              };
-
-              return (
-                <div className="space-y-3">
-                  <div className="text-[10px] text-purple-700/70 uppercase tracking-wider dark:text-purple-300/60">
-                    Configure Riven Stats (up to 4)
-                  </div>
-                  <p className="text-[11px] leading-snug text-muted-foreground">
-                    Enter values as shown in game. A riven can carry one spliced trait; it is always positive.
-                  </p>
-                  {Object.keys(rivenStats).length > 0 && (
-                    <div className="space-y-1">
-                      {Object.entries(rivenStats).map(([key, value]) => {
-                        const statDef = rivenPool.find((s) => s.key === key);
-                        const asPercent = statDef?.isPercent !== false;
-                        return (
-                          <div key={key} className="flex items-center justify-between text-xs p-1.5 rounded bg-background">
-                            <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
-                              <span className="truncate">{statDef?.spliced ? statDef.label.replace(" (Spliced)", "") : statDef?.label || key}</span>
-                              {statDef?.spliced && (
-                                <span
-                                  className="shrink-0 rounded border border-cyan-600/40 bg-cyan-500/10 px-1 py-px text-[9px] font-semibold uppercase tracking-wide text-cyan-700 dark:text-cyan-300"
-                                  title={statDef.displayOnly ? "Spliced trait (Riven Splicer). Shown on the riven; not part of the DPS math." : "Spliced trait (Riven Splicer)"}
-                                >
-                                  Spliced{statDef.displayOnly ? " · info" : ""}
-                                </span>
-                              )}
-                            </span>
-                            <div className="flex items-center gap-2">
-                              <span className={value >= 0 ? "cmp-win" : "cmp-lose"}>
-                                {value >= 0 ? "+" : ""}
-                                {asPercent
-                                  ? `${(value * 100).toFixed(1)}%`
-                                  : value.toFixed(1)}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => setRivenStats((prev) => { const n = { ...prev }; delete n[key]; return n; })}
-                                className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-red-700 dark:hover:text-red-400 sm:h-9 sm:w-9"
-                                aria-label="Remove riven stat"
-                              >
-                                <X className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {Object.keys(rivenStats).length < 4 && (
-                    <div className="space-y-2">
-                      <div className="relative">
-                        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                        <input
-                          type="text"
-                          placeholder="Search stats (e.g. crit, damage, cold)..."
-                          value={rivenStatSearch}
-                          onChange={(e) => setRivenStatSearch(e.target.value)}
-                          className="h-8 w-full rounded border border-border bg-background pl-8 pr-7 text-xs placeholder:text-muted-foreground focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                        />
-                        {rivenStatSearch && (
-                          <button
-                            type="button"
-                            onClick={() => setRivenStatSearch("")}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                            aria-label="Clear stat search"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        )}
-                      </div>
-
-                      {q && (filteredNormalStats.length > 0 || filteredSplicedStats.length > 0) && (
-                        <div className="flex flex-wrap gap-1">
-                          {[...filteredNormalStats, ...filteredSplicedStats].slice(0, 8).map((s) => {
-                            const isSelected = rivenStatKey === s.key;
-                            return (
-                              <button
-                                key={s.key}
-                                type="button"
-                                onClick={() => setRivenStatKey(s.key)}
-                                className={cn(
-                                  "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors",
-                                  isSelected
-                                    ? "border-purple-500 bg-purple-500/20 text-purple-700 dark:text-purple-300"
-                                    : "border-border bg-muted/40 text-muted-foreground hover:border-purple-500/50 hover:text-foreground",
-                                )}
-                              >
-                                <span>{s.spliced ? s.label.replace(" (Spliced)", "") : s.label}</span>
-                                {s.spliced && (
-                                  <span className="text-[8px] uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
-                                    spliced
-                                  </span>
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {q && filteredNormalStats.length === 0 && filteredSplicedStats.length === 0 && (
-                        <p className="text-[11px] text-muted-foreground italic">
-                          No stats match &quot;{rivenStatSearch}&quot;
-                        </p>
-                      )}
-
-                      <div className="flex gap-2">
-                        <select
-                          value={rivenStatKey}
-                          onChange={(e) => setRivenStatKey(e.target.value)}
-                          className="min-h-11 min-w-0 flex-1 rounded border border-border bg-background px-2 py-2 text-xs sm:min-h-9 sm:py-1.5"
-                        >
-                          <option value="">
-                            {q
-                              ? filteredNormalStats.length + filteredSplicedStats.length > 0
-                                ? `Select stat (${filteredNormalStats.length + filteredSplicedStats.length} matching)...`
-                                : "No matching stats"
-                              : "Select stat..."}
-                          </option>
-                          {rivenStatKey && !filteredNormalStats.some((s) => s.key === rivenStatKey) && !filteredSplicedStats.some((s) => s.key === rivenStatKey) && selectedStatDef && (
-                            <option value={selectedStatDef.key}>
-                              {selectedStatDef.spliced ? selectedStatDef.label.replace(" (Spliced)", "") : selectedStatDef.label} (selected)
-                            </option>
-                          )}
-                          {filteredNormalStats.map((s) => (
-                            <option key={s.key} value={s.key}>
-                              {s.label}{s.displayOnly ? " (info only)" : ""}
-                            </option>
-                          ))}
-                          {filteredSplicedStats.length > 0 && (
-                            <optgroup label="Spliced traits (Riven Splicer, max 1)">
-                              {filteredSplicedStats.map((s) => (
-                                <option key={s.key} value={s.key}>
-                                  {s.label.replace(" (Spliced)", "")}{s.displayOnly ? " (info only)" : ""}
-                                </option>
-                              ))}
-                            </optgroup>
-                          )}
-                        </select>
-                        <input
-                          type="number"
-                          step="0.1"
-                          placeholder={isPercentStat ? "% value" : "value"}
-                          value={rivenStatValue}
-                          onChange={(e) => setRivenStatValue(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleAddRivenStat();
-                            }
-                          }}
-                          className="h-11 w-24 shrink-0 rounded border border-border bg-background px-2 text-xs sm:h-9"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddRivenStat}
-                          disabled={!rivenStatKey || !rivenStatValue}
-                          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded bg-purple-600 text-xs text-white transition-colors hover:bg-purple-700 disabled:opacity-40 sm:h-9 sm:w-9"
-                          title="Add stat"
-                          aria-label="Add riven stat"
-                        >
-                          <Plus className="h-3 w-3" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })() : (
+            {isRivenMod(selectedMod) ? (
+              <RivenEditor
+                poolCategory={rivenCategory}
+                stats={rivenStats}
+                onStatsChange={setRivenStats}
+                polarity={rivenPolarity}
+                onPolarityChange={setRivenPolarity}
+                drain={rivenDrain}
+                onDrainChange={setRivenDrain}
+              />
+            ) : (
               <div>
                 <label className="text-sm font-medium mb-2 block">
                   Rank: {selectedRank} / {selectedMod.maxRank}
@@ -673,6 +565,8 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
               </Button>
               <Button
                 onClick={handleConfirm}
+                disabled={rivenBlocked}
+                title={rivenBlocked ? "Fix the riven stats above to equip it" : undefined}
               >
                 {selectedMod?.category === "arcane" ? "Equip Arcane" : "Equip Mod"}
               </Button>
@@ -780,6 +674,34 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
               aria-label={isArcaneBrowse ? "Arcane list" : "Mod list"}
             >
               <div className="space-y-1">
+                {!isArcaneBrowse && visibleSavedRivens.length > 0 && (
+                  <div className="mb-2 space-y-1 rounded-lg border border-purple-500/30 bg-purple-500/5 p-2" data-testid="saved-rivens-in-picker">
+                    <div className="px-1 text-[10px] font-semibold uppercase tracking-wider text-purple-700 dark:text-purple-300">
+                      Your saved rivens
+                    </div>
+                    {visibleSavedRivens.map(({ entry, mod, valid, lines }) => (
+                      <button
+                        key={entry.id}
+                        type="button"
+                        role="option"
+                        aria-selected={false}
+                        disabled={!valid}
+                        onClick={() => equipSavedRiven(entry, mod)}
+                        title={valid ? "Equip this saved riven" : "This saved riven doesn't pass validation; edit it on My Builds"}
+                        className="flex min-h-11 w-full items-start gap-2 rounded-md border border-border bg-background px-2.5 py-2 text-left transition-colors hover:border-purple-500/60 disabled:opacity-50"
+                      >
+                        <PolarityIcon polarity={entry.polarity} size={14} className="mt-0.5 shrink-0" />
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center justify-between gap-2">
+                            <span className="truncate text-sm font-medium">{entry.name}</span>
+                            <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{entry.drain}</span>
+                          </span>
+                          <span className="block text-[11px] leading-snug text-purple-800 dark:text-purple-300">{lines.join(" · ")}</span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
                 {isArcaneBrowse && filteredArcanes.length === 0 ? (
                   <EmptyState
                     icon={Search}
