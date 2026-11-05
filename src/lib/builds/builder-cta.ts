@@ -5,7 +5,7 @@ const BUILDER_LABELS: Record<string, string> = {
   warframe: "Open Warframe Builder",
   companion: "Open Companion Builder",
   modular: "Open Modular Builder",
-  archwing: "Open Archwing Builder",
+  archwing: "Open Vehicle Builder",
   railjack: "Open Railjack Builder",
   loadout: "Open Loadouts",
 };

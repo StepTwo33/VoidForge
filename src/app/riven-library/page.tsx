@@ -26,7 +26,7 @@ import { getEffectiveRivenWeaponType } from "@/lib/weapons/riven-family";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const WEAPON_TYPES = ["All", "Rifle", "Shotgun", "Pistol", "Melee", "Kitgun", "Zaw", "Archgun"];
+const WEAPON_TYPES = ["All", "Rifle", "Shotgun", "Pistol", "Melee", "Kitgun", "Zaw", "Companion", "Archgun"];
 const GRADES = ["All", "God Roll", "Excellent", "Good", "Average", "Reroll"];
 const POLARITIES = ["All", "madurai", "vazarin", "naramon", "zenurik"];
 
@@ -99,7 +99,13 @@ export default function RivenLibraryPage() {
         const weapon = allWeapons.find((w) => w.id === riven.weaponId);
         const baseModType =
           (weapon ? getRivenWeaponType(weapon) : null) ??
-          (riven.weaponType === "Kitgun" ? "Pistol" : riven.weaponType === "Zaw" ? "Melee" : riven.weaponType);
+          (riven.weaponType === "Kitgun"
+            ? "Pistol"
+            : riven.weaponType === "Zaw"
+            ? "Melee"
+            : riven.weaponType === "Companion"
+            ? "Rifle"
+            : riven.weaponType);
         await saveCloudRiven({
           id: riven.id.startsWith("riven_") ? undefined : riven.id,
           weaponId: riven.weaponId,

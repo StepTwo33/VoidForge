@@ -1,4 +1,5 @@
 import { Mod } from "@/lib/types";
+import { cleanModDescription } from "./mod-display";
 import { ARCANE_EFFECTS, ArcaneEffectDef, ArcaneTrigger } from "@/data/arcane-effects";
 import {
   arcaneStackCap,
@@ -438,4 +439,55 @@ export function getArcaneDisplayInfo(
   }
 
   return { name: arcane.name, rank, maxRank: arcane.maxRank, description: cleanDesc, applied, conditional };
+}
+
+/**
+ * Returns the arcane's description scaled to the requested rank (numbers scale down from max rank).
+ */
+export function formatArcaneRankDescription(arcane: Mod, rank: number): string {
+  const clean = cleanModDescription(arcane.description);
+  const def = ARCANE_EFFECTS[arcane.id];
+  if (!def || rank >= arcane.maxRank) return clean;
+
+  let desc = clean;
+
+  // Scale stack cap if stackCapByRank exists
+  if (def.stackCapByRank && def.stackCap) {
+    const curCap = def.stackCapByRank[Math.min(rank, def.stackCapByRank.length - 1)];
+    if (curCap != null && curCap !== def.stackCap) {
+      desc = desc.replace(new RegExp(`(\\bStacks up to\\s+)${def.stackCap}(x|\\b)`, "i"), `$1${curCap}$2`);
+    }
+  }
+
+  // Scale effect lines from ARCANE_EFFECTS
+  for (const line of def.effects) {
+    if (line.constantAtAllRanks) continue;
+    const scaled = scaleArcaneEffectLine(line, rank, def.maxRank);
+    if (scaled === line.maxValue) continue;
+
+    const maxFmt = Number.isInteger(line.maxValue) ? String(line.maxValue) : line.maxValue.toFixed(1);
+    const scaledFmt = Number.isInteger(scaled) ? String(scaled) : scaled.toFixed(1);
+
+    // Try matching with sign and percent: +180% -> +30%
+    const signPctRegex = new RegExp(`([+−-])${maxFmt}%`, "g");
+    if (signPctRegex.test(desc)) {
+      desc = desc.replace(signPctRegex, `$1${scaledFmt}%`);
+      continue;
+    }
+
+    // Try matching with percent: 60% -> 10%
+    const pctRegex = new RegExp(`\\b${maxFmt}%`, "g");
+    if (pctRegex.test(desc)) {
+      desc = desc.replace(pctRegex, `${scaledFmt}%`);
+      continue;
+    }
+
+    // Try matching flat numbers: 18s -> 3s, etc. (only if followed by unit or space)
+    const flatRegex = new RegExp(`\\b${maxFmt}(s|m|x|\\b)`, "g");
+    if (flatRegex.test(desc)) {
+      desc = desc.replace(flatRegex, `${scaledFmt}$1`);
+    }
+  }
+
+  return desc;
 }

@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/page-shell";
 import { findBlockingModId, getBlockedModIds } from "@/data/mod-exclusions";
 import { modsMap as catalogModsMap } from "@/data/mods";
 import { cleanModDescription, getModStatDisplayLines } from "@/lib/display/mod-display";
+import { formatArcaneRankDescription, getArcaneDisplayInfo } from "@/lib/display/arcane-display";
 import { getRivenWeaponType, rivenModMatchesWeapon } from "@/lib/weapons/riven-weapon-type";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -442,9 +443,40 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
                 </div>
               </div>
               <p className="text-sm text-muted-foreground mb-3">
-                {cleanModDescription(selectedMod.description)}
+                {selectedMod.category === "arcane"
+                  ? formatArcaneRankDescription(selectedMod, selectedRank)
+                  : cleanModDescription(selectedMod.description)}
               </p>
-              {getModStatDisplayLines(selectedMod, selectedRank).length > 0 && (
+              {selectedMod.category === "arcane" ? (
+                (() => {
+                  const info = getArcaneDisplayInfo(selectedMod, selectedRank);
+                  const maxInfo = getArcaneDisplayInfo(selectedMod, selectedMod.maxRank);
+                  const lines = [...info.applied, ...info.conditional];
+                  const maxLines = [...maxInfo.applied, ...maxInfo.conditional];
+                  if (lines.length === 0) return null;
+                  return (
+                    <ul className="space-y-1 mb-3">
+                      {lines.map((line, i) => {
+                        const maxLine = maxLines[i];
+                        return (
+                          <li key={`${line.label}-${i}`} className="flex justify-between gap-3 text-xs">
+                            <span className="text-muted-foreground">
+                              {line.label}
+                              {line.note ? ` (${line.note})` : ""}
+                            </span>
+                            <span className="font-mono text-emerald-800 shrink-0 text-right dark:text-emerald-400">
+                              {line.value}
+                              {selectedRank < selectedMod.maxRank && maxLine && maxLine.value !== line.value && (
+                                <span className="text-muted-foreground/70"> ({maxLine.value} max)</span>
+                              )}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  );
+                })()
+              ) : getModStatDisplayLines(selectedMod, selectedRank).length > 0 ? (
                 <ul className="space-y-1 mb-3">
                   {getModStatDisplayLines(selectedMod, selectedRank).map((line) => (
                     <li key={line.statKey} className="flex justify-between gap-3 text-xs">
@@ -458,7 +490,7 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
                     </li>
                   ))}
                 </ul>
-              )}
+              ) : null}
             </div>
 
             {isRivenMod(selectedMod) ? (

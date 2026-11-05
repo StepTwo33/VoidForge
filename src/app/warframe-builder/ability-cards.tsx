@@ -99,10 +99,10 @@ export function AbilityCard({
           </div>
         </div>
         <div className="shrink-0">
-          {effectiveCost != null && ability.energyCost != null && (
+          {effectiveCost != null && ability.energyCost != null && ability.energyCost > 0 && (
             <AbilityEnergyChip baseCost={ability.energyCost} effectiveCost={effectiveCost} />
           )}
-          {augurPct > 0 && effectiveCost != null && (
+          {augurPct > 0 && effectiveCost != null && ability.energyCost != null && ability.energyCost > 0 && (
             <AugurShieldsOnCast energySpent={effectiveCost} convertPercent={augurPct} />
           )}
         </div>
@@ -197,6 +197,7 @@ export function HelminthAbilityCard({
     warframeId: sourceId,
     abilityName: preview.name,
     helminth: true as const,
+    hostWarframeId,
   };
   const augurPct = stats?.augurEnergyToShieldsPercent ?? 0;
 

@@ -25,7 +25,7 @@ const TYPE_LABELS: Record<string, string> = {
   warframe: "Warframe",
   companion: "Companion",
   modular: "Modular",
-  archwing: "Archwing",
+  archwing: "Vehicle",
   railjack: "Railjack",
   loadout: "Loadout",
 };

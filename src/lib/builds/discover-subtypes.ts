@@ -43,7 +43,7 @@ export const DISCOVER_CATEGORIES = [
   },
   {
     id: "archwing",
-    label: "Archwing",
+    label: "Vehicles",
     description: "Archwings and Necramechs",
   },
   {

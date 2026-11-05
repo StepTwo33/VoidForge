@@ -1,8 +1,9 @@
 import { allWeapons } from "@/data/weapons";
+import { customWeapons } from "@/data/custom-items";
 import type { Weapon } from "@/lib/types";
 import { getRivenWeaponType, type RivenWeaponType } from "./riven-weapon-type";
 
-export type ExtendedRivenWeaponType = RivenWeaponType | "Kitgun" | "Zaw";
+export type ExtendedRivenWeaponType = RivenWeaponType | "Kitgun" | "Zaw" | "Companion";
 
 const PREFIXES = [
   "Kuva ",
@@ -24,11 +25,13 @@ const PREFIXES = [
 
 const SUFFIXES = [" Prime", " Vandal", " Wraith"];
 
+const allSourceWeapons = [...allWeapons, ...customWeapons];
+
 // Cache of weapon names and byId for fast lookups
 const weaponsByName = new Map<string, Weapon>();
 const weaponsById = new Map<string, Weapon>();
 
-for (const w of allWeapons) {
+for (const w of allSourceWeapons) {
   weaponsByName.set(w.name, w);
   weaponsById.set(w.id, w);
 }
@@ -97,7 +100,7 @@ export function getRivenFamilyWeaponIds(weaponId: string): string[] {
   const baseName = getRivenBaseName(target.name);
   const familyIds: string[] = [];
 
-  for (const w of allWeapons) {
+  for (const w of allSourceWeapons) {
     if (getRivenBaseName(w.name) === baseName) {
       familyIds.push(w.id);
     }
@@ -108,12 +111,15 @@ export function getRivenFamilyWeaponIds(weaponId: string): string[] {
 
 /**
  * Returns the effective Riven category for display and filtering:
- * Rifle, Shotgun, Pistol, Melee, Kitgun, Zaw, Archgun.
+ * Rifle, Shotgun, Pistol, Melee, Kitgun, Zaw, Companion, Archgun.
  */
 export function getEffectiveRivenWeaponType(
   weapon: Pick<Weapon, "category" | "name"> & { kitgunChamberCategory?: Weapon["kitgunChamberCategory"] },
 ): ExtendedRivenWeaponType | null {
   const cat = (weapon.category || "").toLowerCase();
+  if (cat === "sentinel_weapon" || cat === "hound_weapon") {
+    return "Companion";
+  }
   if (cat === "kitgun_chamber" || weapon.kitgunChamberCategory != null) {
     return "Kitgun";
   }
@@ -127,7 +133,7 @@ export function getEffectiveRivenWeaponType(
  * Returns all base weapons eligible for Rivens (excluding variants so users only create base Rivens).
  */
 export function getBaseRivenWeapons(): Weapon[] {
-  return allWeapons.filter((w) => {
+  return allSourceWeapons.filter((w) => {
     if (w.triggerType === "Zaw Component") return false;
     if (getRivenWeaponType(w) === null) return false;
     return !isRivenVariant(w);

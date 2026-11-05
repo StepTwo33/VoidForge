@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { EmptyState } from "@/components/page-shell";
 import { allHelminthAbilities, type HelminthAbility } from "@/data/helminth";
 import { PointerVerb } from "@/components/pointer-verb";
+import { isHildrynFrame, HILDRYN_SUBSUME_SHIELD_MULTIPLIER } from "@/lib/calc/ability-augment-rows";
 
 export function HelminthPickerDialog({
   open,
@@ -15,12 +16,14 @@ export function HelminthPickerDialog({
   pickerSlot,
   hasCurrentHelminth,
   onSelect,
+  hostWarframeId,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   pickerSlot: number;
   hasCurrentHelminth: boolean;
   onSelect: (ability: HelminthAbility, slot: number) => void;
+  hostWarframeId?: string;
 }) {
   const [search, setSearch] = useState("");
 
@@ -111,7 +114,11 @@ export function HelminthPickerDialog({
                     {ability.description}
                   </p>
                   {ability.energyCost != null && (
-                    <span className="mt-1 inline-block text-[9px] text-muted-foreground">⚡ {ability.energyCost} energy</span>
+                    <span className="mt-1 inline-block text-[9px] text-muted-foreground">
+                      {isHildrynFrame(hostWarframeId)
+                        ? `🛡️ ${ability.energyCost * HILDRYN_SUBSUME_SHIELD_MULTIPLIER} shields`
+                        : `⚡ ${ability.energyCost} energy`}
+                    </span>
                   )}
                 </button>
               ))

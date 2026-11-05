@@ -700,6 +700,8 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
   // wiki: Merulina — health pool × STR; 90% redirection Misc-fixed
   "yareli::Merulina": {
     merulinaHealth: { scale: "strength" },
+    seaSnareCooldown: { scale: "efficiency", formula: "cast_cost" },
+    seaSnareRange: { scale: "range" },
   },
   // wiki: Aquablades — Slash via ability.damage; blade radius Misc-fixed 5m; Helminth unaltered
   // wiki: Riptide — tick/burst × STR; extra/enemy Misc-fixed 50%

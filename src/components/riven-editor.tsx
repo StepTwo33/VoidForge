@@ -57,8 +57,9 @@ export function RivenEditor({
 
     const rivenPool = getRivenStatsForCategory(poolCategory);
     const availableStats = rivenPool.filter((s) => !s.spliced && !(s.key in rivenStats));
-    const canAddSpliced = !rivenPool.some((s) => s.spliced && s.key in rivenStats) && rivenPool.some((s) => s.spliced);
-    const availableSplicedStats = canAddSpliced ? rivenPool.filter((s) => s.spliced) : [];
+    const hasExistingSpliced = rivenPool.some((s) => s.spliced && s.key in rivenStats);
+    // Allow browsing all spliced traits even if one is equipped so user can easily switch
+    const availableSplicedStats = rivenPool.filter((s) => s.spliced && !(s.key in rivenStats));
 
     const q = rivenStatSearch.trim().toLowerCase();
     const filteredNormalStats = q
@@ -83,7 +84,19 @@ export function RivenEditor({
       } else {
         val = isPercentStat ? num / 100 : num;
       }
-      setRivenStats((prev) => ({ ...prev, [rivenStatKey]: val }));
+      setRivenStats((prev) => {
+        const next = { ...prev };
+        if (selectedStatDef?.spliced) {
+          // If switching to another spliced stat, remove the existing spliced stat
+          for (const k of Object.keys(next)) {
+            if (rivenPool.some((p) => p.spliced && p.key === k)) {
+              delete next[k];
+            }
+          }
+        }
+        next[rivenStatKey] = val;
+        return next;
+      });
       setRivenStatKey("");
       setRivenStatValue("");
       setRivenStatSearch("");
@@ -216,7 +229,7 @@ export function RivenEditor({
                   </option>
                 ))}
                 {filteredSplicedStats.length > 0 && (
-                  <optgroup label="Spliced traits (Riven Splicer, max 1)">
+                  <optgroup label={hasExistingSpliced ? "Switch spliced trait (replaces current)" : "Spliced traits (Riven Splicer, max 1)"}>
                     {filteredSplicedStats.map((s) => (
                       <option key={s.key} value={s.key}>
                         {s.label.replace(" (Spliced)", "")}{s.displayOnly ? " (info only)" : ""}

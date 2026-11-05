@@ -39,6 +39,7 @@ interface RivenDialogProps {
 }
 
 const POLARITIES = ["madurai", "vazarin", "naramon", "zenurik"];
+const WEAPON_CATEGORIES = ["All", "Rifle", "Shotgun", "Pistol", "Melee", "Kitgun", "Zaw", "Companion", "Archgun"] as const;
 
 export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialogProps) {
   const eligibleWeapons = useMemo(
@@ -47,6 +48,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
   );
 
   const [weaponId, setWeaponId] = useState<string>("torid");
+  const [weaponCategoryFilter, setWeaponCategoryFilter] = useState<string>("All");
   const [weaponSearch, setWeaponSearch] = useState("");
   const [polarity, setPolarity] = useState<string>("madurai");
   const [masteryRank, setMasteryRank] = useState<number>(12);
@@ -67,9 +69,16 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
     [selectedWeapon],
   );
 
+  const statPoolCategory = useMemo(() => {
+    if (!selectedWeapon) return "Rifle";
+    if (weaponType === "Kitgun") return "Pistol";
+    if (weaponType === "Zaw") return "Melee";
+    return getRivenWeaponType(selectedWeapon) ?? "Rifle";
+  }, [selectedWeapon, weaponType]);
+
   const availableDefs = useMemo(
-    () => getRivenStatsForCategory(weaponType, { includeSpliced: true }),
-    [weaponType],
+    () => getRivenStatsForCategory(statPoolCategory, { includeSpliced: true }),
+    [statPoolCategory],
   );
 
   // Initialize or reset form when modal opens
@@ -120,25 +129,35 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
   );
 
   const scaledPositivePool = useMemo(
-    () => getStatsWithDisposition(weaponType.toLowerCase(), STANDARD_RIVEN_DISPOSITION, rangeOpts),
-    [weaponType, rangeOpts],
+    () => getStatsWithDisposition(statPoolCategory.toLowerCase(), STANDARD_RIVEN_DISPOSITION, rangeOpts),
+    [statPoolCategory, rangeOpts],
   );
 
   const scaledNegativePool = useMemo(
     () =>
       getNegativeStatsWithDisposition(STANDARD_RIVEN_DISPOSITION, {
         ...rangeOpts,
-        category: weaponType.toLowerCase(),
+        category: statPoolCategory.toLowerCase(),
       }),
-    [rangeOpts, weaponType],
+    [rangeOpts, statPoolCategory],
   );
 
   // Filtered weapons for dropdown / search
   const filteredWeapons = useMemo(() => {
-    if (!weaponSearch.trim()) return eligibleWeapons.slice(0, 50);
-    const q = weaponSearch.toLowerCase();
-    return eligibleWeapons.filter((w) => w.name.toLowerCase().includes(q)).slice(0, 50);
-  }, [eligibleWeapons, weaponSearch]);
+    let list = eligibleWeapons;
+    if (weaponCategoryFilter !== "All") {
+      list = list.filter((w) => getEffectiveRivenWeaponType(w) === weaponCategoryFilter);
+    }
+    if (weaponSearch.trim()) {
+      const q = weaponSearch.toLowerCase();
+      list = list.filter(
+        (w) =>
+          w.name.toLowerCase().includes(q) ||
+          (getEffectiveRivenWeaponType(w)?.toLowerCase().includes(q) ?? false),
+      );
+    }
+    return list.slice(0, 150);
+  }, [eligibleWeapons, weaponCategoryFilter, weaponSearch]);
 
   // Construct preview Riven object
   const previewRiven = useMemo<SavedRiven>(() => {
@@ -160,7 +179,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
 
     const evalResult = evaluateSavedRiven(
       selectedWeapon?.name ?? "Weapon",
-      weaponType,
+      statPoolCategory,
       statsMap,
       8,
       rerolls,
@@ -174,6 +193,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
       weaponName: selectedWeapon?.name ?? "Weapon",
       weaponCategory: selectedWeapon?.category ?? "primary",
       weaponType,
+    statPoolCategory,
       polarity,
       rank: 8,
       rerolls,
@@ -192,6 +212,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
     selectedWeapon,
     customName,
     weaponType,
+    statPoolCategory,
     rerolls,
     polarity,
     masteryRank,
@@ -270,8 +291,25 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
                 </button>
               </div>
               <div className="space-y-1.5">
+                <div className="flex flex-wrap gap-1">
+                  {WEAPON_CATEGORIES.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setWeaponCategoryFilter(cat)}
+                      className={cn(
+                        "rounded px-2 py-0.5 text-[10px] font-medium transition-colors",
+                        weaponCategoryFilter === cat
+                          ? "bg-purple-600 text-white"
+                          : "bg-purple-950/40 text-purple-300 hover:bg-purple-900/60",
+                      )}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
                 <Input
-                  placeholder="Search weapon..."
+                  placeholder="Search weapon or type (e.g. sporelacer, kitgun)..."
                   value={weaponSearch}
                   onChange={(e) => setWeaponSearch(e.target.value)}
                   className="h-9 border-purple-500/30 bg-purple-950/20 text-xs text-white placeholder:text-muted-foreground"
@@ -368,6 +406,10 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
                 {positiveStats.map((stat, idx) => {
                   const def = availableDefs.find((d) => d.key === stat.key);
                   const isFaction = stat.key.startsWith("faction");
+                  const otherHasSpliced = positiveStats.some(
+                    (p, i) => i !== idx && availableDefs.find((d) => d.key === p.key)?.spliced,
+                  );
+                  const rowDefs = otherHasSpliced ? availableDefs.filter((d) => !d.spliced) : availableDefs;
                   return (
                     <div key={idx} className="flex items-center gap-2">
                       <select
@@ -384,7 +426,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
                         }}
                         className="h-9 min-w-0 flex-1 rounded border border-purple-500/30 bg-purple-950/40 px-2 text-xs text-white focus:outline-none"
                       >
-                        {availableDefs.map((d) => (
+                        {rowDefs.map((d) => (
                           <option key={d.key} value={d.key} className="bg-[#120822] text-white">
                             {d.label}
                           </option>

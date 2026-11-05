@@ -19,12 +19,22 @@ describe("Round 55 Bug Reports", () => {
       const shieldCost = baseEnergyCost * HILDRYN_SUBSUME_SHIELD_MULTIPLIER;
       expect(shieldCost).toBe(500);
     });
+
+    it("converts energy drain labels to shield drain when hostWarframeId is Hildryn", () => {
+      const lines = scaleAbilityMiscStats(
+        { energyDrainPerEnemy: 0.75 },
+        { efficiency: 1, strength: 1, duration: 1, range: 1 },
+        { warframeId: "sevagoth", abilityName: "Gloom", helminth: true, hostWarframeId: "hildryn" },
+      );
+      expect(lines[0].label).toBe("Shield Drain per Enemy");
+    });
   });
 
   describe("Report 2: Nekros Despoil health per corpse", () => {
-    it("replaces energyPerCorpse with healthPerCorpse when Despoil is equipped", () => {
+    it("replaces energyPerCorpse with healthPerCorpse and sets energyCost to 0 when Despoil is equipped", () => {
       const desecrate = {
         name: "Desecrate",
+        energyCost: 10,
         description: "Forces fallen enemies around you to drop additional loot. Costs 10 energy per corpse.",
         miscStats: {
           energyPerCorpse: 10,
@@ -35,6 +45,7 @@ describe("Round 55 Bug Reports", () => {
       const withDespoil = applyCostAugments(desecrate, ["augment_nekros_despoil"]);
       expect(withDespoil.miscStats.healthPerCorpse).toBe(10);
       expect(withDespoil.miscStats.energyPerCorpse).toBeUndefined();
+      expect(withDespoil.energyCost).toBe(0);
       expect(withDespoil.description).toContain("health per corpse");
     });
 

@@ -325,6 +325,43 @@ const STAT_WEIGHTS: Record<string, number> = {
   Impact: 0.35,
   Puncture: 0.35,
   Slash: 0.55,
+  // Spliced traits (Riven Splicer)
+  "Viral Damage (Spliced)": 0.85,
+  "Corrosive Damage (Spliced)": 0.85,
+  "Radiation Damage (Spliced)": 0.8,
+  "Gas Damage (Spliced)": 0.75,
+  "Blast Damage (Spliced)": 0.75,
+  "Magnetic Damage (Spliced)": 0.75,
+  "Status Damage (Spliced)": 0.8,
+  "Damage to Orokin (Spliced)": 0.7,
+  "Damage to Scaldra (Spliced)": 0.7,
+  "Damage to Techrot (Spliced)": 0.7,
+  "Weak Point Damage (Spliced)": 0.85,
+  "Weak Point Critical Chance (Spliced)": 0.85,
+  "Ammo Efficiency (Spliced)": 0.75,
+  "Reload While Holstered (Spliced)": 0.55,
+  "Heavy Attack Wind Up Speed (Spliced)": 0.7,
+  "Melee Damage On Heavy Attack (Spliced)": 0.7,
+  "Slam Attack Damage (Spliced)": 0.65,
+  "Parry Angle (Spliced)": 0.4,
+  "Viral Damage": 0.85,
+  "Corrosive Damage": 0.85,
+  "Radiation Damage": 0.8,
+  "Gas Damage": 0.75,
+  "Blast Damage": 0.75,
+  "Magnetic Damage": 0.75,
+  "Status Damage": 0.8,
+  "Damage to Orokin": 0.7,
+  "Damage to Scaldra": 0.7,
+  "Damage to Techrot": 0.7,
+  "Weak Point Damage": 0.85,
+  "Weak Point Critical Chance": 0.85,
+  "Ammo Efficiency": 0.75,
+  "Reload While Holstered": 0.55,
+  "Heavy Attack Wind Up Speed": 0.7,
+  "Melee Damage On Heavy Attack": 0.7,
+  "Slam Attack Damage": 0.65,
+  "Parry Angle": 0.4,
 };
 
 /** Higher = better curse for the roll (community preference). */
@@ -366,10 +403,8 @@ export function evaluateRiven(riven: RivenMod): number {
   let greatStats = 0;
 
   for (const stat of riven.positiveStats) {
-    // Spliced traits are excluded from the community-weight score: there is no
-    // established community value for them yet (Update 44.1).
-    if (stat.spliced) continue;
-    const weight = STAT_WEIGHTS[stat.name] ?? 0.3;
+    const cleanName = stat.name.replace(" (Spliced)", "");
+    const weight = STAT_WEIGHTS[stat.name] ?? STAT_WEIGHTS[cleanName] ?? 0.5;
     const value = scoringMagnitude(stat) * toReference;
 
     let tierBonus = 0;

@@ -1601,6 +1601,7 @@ export default function WarframeBuilderPage() {
         onOpenChange={setHelminthPickerOpen}
         pickerSlot={helminthPickerSlot}
         hasCurrentHelminth={!!helminthAbility}
+        hostWarframeId={selectedWarframe?.id}
         onSelect={(ability, slot) => {
           setHelminthSlot(slot);
           setHelminthAbility(ability);

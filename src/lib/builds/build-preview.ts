@@ -366,7 +366,7 @@ export function summarizeBuildPreview(type: string, data: unknown): BuildPreview
       return {
         itemName: "Archwing / Necramech",
         itemImage: null,
-        typeLabel: "Archwing",
+        typeLabel: "Vehicle",
         modChips,
         arcaneChips: [],
         extraLines,

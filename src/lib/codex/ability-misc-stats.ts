@@ -18,6 +18,8 @@ export interface AbilityDisplayContext {
   warframeId?: string;
   abilityName: string;
   helminth?: boolean;
+  /** Host warframe when ability is subsumed (e.g. Hildryn casts with Shields). */
+  hostWarframeId?: string;
   /**
    * Extra flat armor folded into armor-scaled ability pools (e.g. Frost Fortifying Freeze).
    * Comes from the warframe stats-panel sim, not a second ability-card slider.
@@ -624,6 +626,8 @@ const LABELS: Record<string, string> = {
   merulinaHealth: "Merulina Health",
   initialInvulnerability: "Initial Invulnerability",
   dismountInvulnerability: "Dismount Invulnerability",
+  seaSnareCooldown: "Sea Snare Cooldown",
+  seaSnareRange: "Sea Snare Range",
   blades: "Blades",
   hitsPerInterval: "Hits per Interval",
   intervalTime: "Interval Time",
@@ -1501,8 +1505,9 @@ function scaleVerifiedValue(
       Math.abs(scaled - Math.round(scaled)) < 0.05 ? String(Math.round(scaled)) : scaled.toFixed(1);
     // Refunds/gains use the same EFF curve but higher values are better (Virulence).
     const isRefund = /Refund|Restore|Gain/i.test(key);
+    const suffix = isDurationSecondsKey(key) ? "s" : "";
     return {
-      scaled: fmt,
+      scaled: `${fmt}${suffix}`,
       modified: Math.abs(scaled - base) > 0.001,
       positive: isRefund ? scaled >= base : scaled <= base,
     };
@@ -1971,9 +1976,19 @@ export function scaleAbilityMiscStats(
       ? getVerifiedMiscScaling(display.warframeId, display.abilityName, key, display.helminth)
       : null;
 
+    const isHildryn =
+      display?.hostWarframeId === "hildryn" ||
+      display?.hostWarframeId === "hildryn_prime" ||
+      display?.warframeId === "hildryn" ||
+      display?.warframeId === "hildryn_prime";
+    let label = humanizeKey(key);
+    if (isHildryn) {
+      label = label.replace(/\bEnergy\b/g, "Shield");
+    }
+
     if (!rule) {
       lines.push({
-        label: humanizeKey(key),
+        label,
         base,
         scaled: base,
         modified: false,
@@ -1983,7 +1998,7 @@ export function scaleAbilityMiscStats(
 
     const result = scaleVerifiedValue(key, value, rule, ctx, miscStats);
     lines.push({
-      label: humanizeKey(key),
+      label,
       base,
       scaled: result?.scaled ?? base,
       modified: result?.modified ?? false,

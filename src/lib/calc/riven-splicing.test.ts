@@ -165,10 +165,10 @@ describe("grader", () => {
     expect(getStatsWithDisposition("rifle", 1, { includeSpliced: true }).filter((s) => s.spliced)).toHaveLength(14);
   });
 
-  it("spliced traits are excluded from the score", () => {
+  it("spliced traits contribute to the score", () => {
     const cc: RivenStat = { name: "Critical Chance", type: "percent", baseValue: 150, minValue: 90, maxValue: 200 };
     const viral: RivenStat = { name: "Viral Damage (Spliced)", type: "percent", baseValue: 90, minValue: 54.5, maxValue: 119.9, spliced: true };
     const r = { weaponName: "Lato", polarity: "madurai", rank: 8, rerolls: 0, negativeStat: null, disposition: 1 };
-    expect(evaluateRiven({ ...r, positiveStats: [cc, viral] })).toBe(evaluateRiven({ ...r, positiveStats: [cc] }));
+    expect(evaluateRiven({ ...r, positiveStats: [cc, viral] })).toBeGreaterThan(evaluateRiven({ ...r, positiveStats: [cc] }));
   });
 });

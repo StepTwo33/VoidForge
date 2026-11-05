@@ -22,7 +22,7 @@ export function castTimeWithSpeed(castTime: number, castSpeedPct: number): numbe
  * - Despoil (Nekros, Desecrate): no longer consumes Energy, consumes 10 Health per corpse instead.
  */
 export function applyCostAugments<
-  T extends { name: string; description?: string; miscStats?: Record<string, unknown> },
+  T extends { name: string; description?: string; energyCost?: number; miscStats?: Record<string, unknown> },
 >(ability: T, equippedModIds: readonly string[]): T {
   if (ability.name === "Desecrate" && equippedModIds.includes("augment_nekros_despoil")) {
     const misc = { ...(ability.miscStats ?? {}) };
@@ -31,8 +31,20 @@ export function applyCostAugments<
     misc.healthPerCorpse = cost;
     return {
       ...ability,
+      energyCost: 0,
       miscStats: misc,
       description: ability.description?.replace(/(\d+)\s+energy per corpse/i, "$1 health per corpse (Despoil)"),
+    };
+  }
+  if (ability.name === "Merulina" && equippedModIds.includes("loyal_merulina")) {
+    const misc = { ...(ability.miscStats ?? {}) };
+    misc.seaSnareCooldown = 2;
+    misc.seaSnareRange = 15;
+    return {
+      ...ability,
+      description:
+        "Summon Merulina to follow Yareli instead of riding her. Merulina periodically casts Sea Snares on nearby enemies and absorbs incoming damage (Loyal Merulina).",
+      miscStats: misc,
     };
   }
   return ability;

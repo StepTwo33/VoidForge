@@ -1659,10 +1659,10 @@ export function getRivenStatsForCategory(weaponCategory: string, opts: { include
   const spliced = opts.includeSpliced !== false;
   if (cat === "melee" || cat === "zaw_strike" || cat === "zaw" || cat === "archmelee") return spliced ? [...RIVEN_MELEE, ...RIVEN_SPLICED_MELEE] : RIVEN_MELEE;
   if (cat === "shotgun") return spliced ? [...RIVEN_SHOTGUN, ...RIVEN_SPLICED_RANGED, RIVEN_SPLICED_RELOAD_HOLSTERED] : RIVEN_SHOTGUN;
-  if (cat === "pistol" || cat === "secondary" || cat === "dual_pistols" || cat === "kitgun_chamber" || cat === "kitgun" || cat === "sentinel_weapon") return spliced ? [...RIVEN_PISTOL, ...RIVEN_SPLICED_RANGED, RIVEN_SPLICED_RELOAD_HOLSTERED] : RIVEN_PISTOL;
+  if (cat === "pistol" || cat === "secondary" || cat === "dual_pistols" || cat === "kitgun_chamber" || cat === "kitgun") return spliced ? [...RIVEN_PISTOL, ...RIVEN_SPLICED_RANGED, RIVEN_SPLICED_RELOAD_HOLSTERED] : RIVEN_PISTOL;
   // Archgun: no Reload While Holstered (wiki splicing table).
   if (cat === "archgun") return spliced ? [...RIVEN_ARCHGUN, ...RIVEN_SPLICED_RANGED] : RIVEN_ARCHGUN;
-  // rifle, bow, launcher, primary, etc.
+  // rifle, bow, launcher, primary, companion, etc.
   return spliced ? [...RIVEN_RIFLE, ...RIVEN_SPLICED_RANGED, RIVEN_SPLICED_RELOAD_HOLSTERED] : RIVEN_RIFLE;
 }
 

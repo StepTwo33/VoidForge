@@ -37,6 +37,7 @@ export function getRivenWeaponType(
   // is category "primary"/"shotgun" here, but its Riven pool is still Pistol / Kitgun, not Rifle / Shotgun).
   if (weapon.kitgunChamberCategory != null) return "Pistol";
   if (c === "sentinel_weapon") return SENTINEL_WEAPON_TYPE[weapon.name] ?? "Rifle";
+  if (c === "hound_weapon") return "Melee";
   if (SHOTGUN_CLASS_PRIMARIES.has(weapon.name)) return "Shotgun";
   if (c === "shotgun") return "Shotgun";
   if (["rifle", "primary", "bow", "launcher", "sniper"].includes(c)) return "Rifle";

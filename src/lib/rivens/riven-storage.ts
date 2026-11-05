@@ -272,6 +272,12 @@ export function generateRandomRiven(targetWeaponId?: string): SavedRiven {
     eligibleWeapons[0];
 
   const weaponType = getEffectiveRivenWeaponType(weapon) ?? "Rifle";
+  const statCat =
+    weaponType === "Kitgun"
+      ? "pistol"
+      : weaponType === "Zaw"
+      ? "melee"
+      : (getRivenWeaponType(weapon)?.toLowerCase() ?? "rifle");
   const hasNegative = Math.random() < 0.65; // 65% chance of a curse
   const positiveCount = Math.random() < 0.4 ? 3 : 2; // 60% 2-stat, 40% 3-stat
   const polarity = POLARITIES[Math.floor(Math.random() * POLARITIES.length)];
@@ -285,10 +291,10 @@ export function generateRandomRiven(targetWeaponId?: string): SavedRiven {
     includeSpliced: Math.random() < 0.15, // 15% chance of rolling with a spliced trait
   };
 
-  const posPool = getStatsWithDisposition(weaponType.toLowerCase(), STANDARD_RIVEN_DISPOSITION, rangeOpts);
+  const posPool = getStatsWithDisposition(statCat, STANDARD_RIVEN_DISPOSITION, rangeOpts);
   const negPool = getNegativeStatsWithDisposition(STANDARD_RIVEN_DISPOSITION, {
     ...rangeOpts,
-    category: weaponType.toLowerCase(),
+    category: statCat,
   });
 
   // Pick random positive stats without repeating
