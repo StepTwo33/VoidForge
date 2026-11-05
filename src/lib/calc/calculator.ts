@@ -2146,6 +2146,10 @@ export function calculateWeaponBuild(
         md?.slam?.criticalChance != null && baseWeapon.criticalChance > 0
           ? md.slam.criticalChance / baseWeapon.criticalChance
           : undefined;
+      stats.slamCritMultiplierRatio =
+        md?.slam?.criticalMultiplier != null && baseWeapon.criticalMultiplier > 0
+          ? md.slam.criticalMultiplier / baseWeapon.criticalMultiplier
+          : undefined;
       stats.slideBaseMultiplier = md?.slideAttack ? md.slideAttack / baseWeapon.damage : undefined;
     }
     stats.heavyCritChanceBonus = heavyCritExtra;

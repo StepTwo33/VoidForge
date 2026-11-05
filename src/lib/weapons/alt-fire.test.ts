@@ -1098,7 +1098,7 @@ describe("ALT FIRE: Batch 7 detonation and ability alt-fires, hand-worked agains
       castanas: ["Embedded Detonation", 160, 0.08, 1.5, 0.22, false],
       sancti_castanas: ["Embedded Detonation", 300, 0.24, 2, 0.1, false],
       glory: ["Judgment Detonation", 1500, 0.15, 2, 0.2, false],
-      grimoire: ["Voltaic Orb", 350, 0.2, 2, 0.26, false],
+      grimoire: ["Voltaic Orb", 280, 0.2, 2, 0.26, false], // R52: page says the real bolt is 280 (infobox 350)
       neutralizer: ["Cryo Grenade", 25, 0.3, 2, 0, true], // 20 x 1.25 (Neutralize max-rank multiplier, R41)
       noctua: ["Active Attack", 2750, 0.45, 3, 0.45, false],
     };
@@ -1121,7 +1121,7 @@ describe("ALT FIRE: Batch 7 detonation and ability alt-fires, hand-worked agains
     near(tot(alt("neutralizer", ["serration_r3"])), 20 * (1 + 1.65 + 0.25)); // 1.25x is Serration-additive (R41)
     near(calculateWeaponBuild(byId("neutralizer"), slots(["serration_r3"]), modsMap).moddedBaseDamage, 255 * (1 + 1.65 + 0.25)); // 739.5
     const g = alt("grimoire", ["hornet_strike_r3"]);
-    near(tot(g), 350 * 3.2);
+    near(tot(g), 280 * 3.2);
     const scale = tot(g) / g.totalDamage;
     near(g.radialAttacks!.find((x) => x.name === "Active Radial Attack")!.totalDamage * scale, 250 * 3.2);
   });

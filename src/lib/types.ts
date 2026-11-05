@@ -838,6 +838,12 @@ export interface CalculatedStats {
    * weapon's modded CC times this ratio. Undefined = same as the normal attack.
    */
   slamCritChanceRatio?: number;
+  /**
+   * Slam base crit multiplier / normal-attack base crit multiplier when the wiki gives the slam its
+   * own CritMultiplier (Dorrclave 2.4 / 2.2). Crit damage mods scale the base, so the slam's modded
+   * multiplier is the weapon's modded multiplier times this ratio. Undefined = same as normal.
+   */
+  slamCritMultiplierRatio?: number;
   slideBaseMultiplier?: number;
   /** Heavy base / normal base × Killing Blow factor (wiki Module:Weapons HeavyAttack). */
   heavyAttackBaseMultiplier?: number;

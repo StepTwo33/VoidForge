@@ -89,9 +89,9 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       label: "Throw",
       ...dmg({ impact: 17.4, puncture: 17.4, slash: 81.2 }),
       fireRate: 1, criticalChance: 0.14, criticalMultiplier: 2.1, statusChance: 0.14,
-      forcedProcs: [],
+      forcedProcs: ["Impact"],
       radialsKeep: ["Throw Bounce Explosion", "Throw Recall Explosion"],
-      note: "Wiki Glaive attack 2. DPS covers the direct hit only; the explosions are listed below it.",
+      note: "Wiki Glaive attack 2. Guaranteed Impact proc (wiki Glaive page: \"Thrown glaive has a guaranteed Impact proc\"; the infobox lists none for this throw). DPS covers the direct hit only; the explosions are listed below it.",
     },
     {
       label: "Charged Throw",
@@ -431,8 +431,8 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       label: "Fireball",
       ...dmg({ heat: 131 }),
       fireRate: 1, criticalChance: 0.21, criticalMultiplier: 2.3, statusChance: 0.33,
-      forcedProcs: [], showDps: false,
-      note: "Wiki Nepheri attack 2. Each fireball is 50% of base damage; the neutral combo ends with four of them. Range 20 m (wiki infobox; the page text says 19 m). No DPS is shown.",
+      forcedProcs: ["Impact"], showDps: false,
+      note: "Wiki Nepheri attack 2. Each fireball is 50% of base damage; the neutral combo ends with four of them. Range 20 m (wiki infobox; the page text says 19 m). Guaranteed Impact proc on enemies within 10 m (wiki page text; the infobox lists none); beyond 10 m only the normal status chance applies. No DPS is shown.",
     },
   ],
   "sigma_&_octantis": [
@@ -1602,12 +1602,12 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
   grimoire: [
     {
       label: "Voltaic Orb",
-      ...dmg({ electricity: 350 }),
+      ...dmg({ electricity: 280 }),
       fireRate: 1, criticalChance: 0.2, criticalMultiplier: 2, statusChance: 0.26,
       multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 0, forcedProcs: ["Electricity"],
       ignoreMultishotMods: true, showDps: false,
       radialAttacks: [{ name: "Active Radial Attack", electricity: 250, totalDamage: 250, radius: 6, falloffReduction: 0.8 }],
-      note: "Wiki Grimoire attacks 3 and 4. Needs a full meter (45 s, faster with primary-fire hits). The slow orb zaps 1 enemy within 6 m every second (fire rate doesn't change this), chaining to 2 more, each hit with a guaranteed Electricity proc; it explodes at the end (listed below it, falling off to 20%). Multishot adds 1 chain per 33.3% instead of more damage. The wiki lists 350 but says the real in-game bolt is 280. No DPS is shown.",
+      note: "Wiki Grimoire attacks 3 and 4. Needs a full meter (45 s, faster with primary-fire hits). The slow orb zaps 1 enemy within 6 m every second (fire rate doesn't change this), chaining to 2 more, each hit with a guaranteed Electricity proc; it explodes at the end (listed below it, falling off to 20%). Multishot adds 1 chain per 33.3% instead of more damage. Each bolt is 280 Electricity: the wiki infobox lists 350, but the page says \"the alt-fire's actual in-game base damage value is 280. Other base damage values are accurate\" (so the 250 explosion stays). No DPS is shown.",
     },
   ],
   neutralizer: [

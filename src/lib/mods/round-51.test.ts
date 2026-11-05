@@ -44,8 +44,8 @@ describe("Round 51: values that match the wiki infobox (unchanged)", () => {
     }
   });
 
-  it("Glaive Throw has no forced proc; Charged Throw forces Impact (infobox)", () => {
-    expect(alt("glaive", "Throw").forcedProcs).toEqual([]);
+  it("Glaive Throw and Charged Throw force Impact (R52: page text for Throw, infobox for Charged)", () => {
+    expect(alt("glaive", "Throw").forcedProcs).toEqual(["Impact"]);
     expect(alt("glaive", "Charged Throw").forcedProcs).toEqual(["Impact"]);
   });
 
