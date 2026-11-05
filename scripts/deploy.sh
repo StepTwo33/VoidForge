@@ -112,6 +112,8 @@ refuse_older_than_live() {
   fi
 }
 
+BACKUP_FILE=""
+
 backup_database() {
   local url db_path
   url="$(grep -hE '^DATABASE_URL=' .env .env.local .env.production 2>/dev/null | tail -1 | cut -d= -f2- | tr -d "\"'" || true)"
@@ -120,8 +122,51 @@ backup_database() {
   [[ "$db_path" = /* ]] || db_path="$DIR/$db_path"
   if [ -f "$db_path" ]; then
     mkdir -p "$DIR/db-backups"
-    cp -p "$db_path" "$DIR/db-backups/$(basename "$db_path").$(date +%Y%m%d-%H%M%S).bak"
-    echo "==> Backed up $db_path to db-backups/"
+    BACKUP_FILE="$DIR/db-backups/$(basename "$db_path").$(date +%Y%m%d-%H%M%S).bak"
+    cp -p "$db_path" "$BACKUP_FILE"
+    echo "==> Backed up $db_path to $BACKUP_FILE"
+  fi
+}
+
+# Off-site copy of the DB backup via rclone (Google Drive or any rclone remote).
+# No credentials in this repo: the remote holds them in the server user's own
+# rclone config. Set VOIDFORGE_BACKUP_REMOTE (default "gdrive") and optionally
+# VOIDFORGE_BACKUP_FOLDER (default "Voidforge-backups") in the systemd unit.
+# Off-site backup is best-effort: it must never fail or roll back a deploy.
+offsite_backup() {
+  local file="$1" remote folder dest keep=14
+  remote="${VOIDFORGE_BACKUP_REMOTE:-gdrive}"
+  folder="${VOIDFORGE_BACKUP_FOLDER:-Voidforge-backups}"
+  dest="$remote:$folder"
+
+  if ! command -v rclone >/dev/null 2>&1; then
+    echo "WARN: rclone is not installed; the DB backup is only on this server."
+    echo "      Off-site backup setup: docs/deploy-backups.md"
+    return 0
+  fi
+  if ! rclone listremotes 2>/dev/null | grep -qxF "$remote:"; then
+    echo "WARN: rclone remote '$remote' is not configured for user $(id -un); skipping off-site backup."
+    echo "      Run 'rclone config' as that user, or set VOIDFORGE_BACKUP_REMOTE. See docs/deploy-backups.md"
+    return 0
+  fi
+
+  echo "==> Uploading $(basename "$file") to $dest"
+  if ! rclone copyto "$file" "$dest/$(basename "$file")"; then
+    echo "WARN: off-site backup upload FAILED. The deploy is unaffected and the local"
+    echo "      backup is still at $file. Fix rclone before the next deploy."
+    return 0
+  fi
+
+  # Keep only the newest $keep remote backups (best-effort).
+  # Sort by modification time, newest first. `lsf --format tp` prints
+  # "time;name" (semicolon separator), so split on the first semicolon.
+  local old
+  old="$(rclone lsf --files-only --format tp "$dest" 2>/dev/null \
+    | grep -F '.bak' | sort -r | tail -n +$((keep + 1)) | cut -d';' -f2- || true)"
+  if [ -n "$old" ]; then
+    while IFS= read -r name; do
+      [ -n "$name" ] && rclone deletefile "$dest/$name" >/dev/null 2>&1 || true
+    done <<< "$old"
   fi
 }
 
@@ -205,3 +250,7 @@ echo "==> Build complete at $(git rev-parse --short HEAD)"
 backup_database
 git rev-parse HEAD > .deploy-last-sha
 restart_framehub
+
+if [ -n "$BACKUP_FILE" ]; then
+  offsite_backup "$BACKUP_FILE"
+fi
