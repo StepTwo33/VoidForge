@@ -2379,6 +2379,22 @@ export function calculateWarframeBuild(
   stats.abilityEfficiency = 1.0 + wfModAcc.abilityEfficiency;
   stats.abilityRange = 1.0 + wfModAcc.abilityRange;
 
+  // Round 54: fold mod-panel cast speed and shield recharge into the calculated stats.
+  // Calm & Frenzy's cast speed is conditional (kill-triggered), so only the always-on
+  // Natural Talent / Speed Drift count. modBonuses values are percent.
+  for (const [key, pct] of Object.entries(stats.modBonuses ?? {})) {
+    const [modId, statKey] = key.split("::");
+    if (statKey === "castSpeed" && (modId === "natural_talent" || modId === "speed_drift")) {
+      stats.castingSpeedBonus += pct;
+    } else if (statKey === "energy" && modId === "preparation_r10") {
+      stats.startingEnergyPct = (stats.startingEnergyPct ?? 0) + pct;
+    } else if (statKey === "shieldRecharge") {
+      stats.shieldRechargeBonus = (stats.shieldRechargeBonus ?? 0) + pct / 100;
+    } else if (statKey === "shieldRechargeDelay") {
+      stats.shieldRechargeDelayReduction = Math.min(0.8, (stats.shieldRechargeDelayReduction ?? 0) - pct / 100);
+    }
+  }
+
   // Cross-slot movement speed from equipped weapons (Amalgam Serration sprint, etc.)
   if (linkage) {
     stats.slideSpeedBonus += sumSlideSpeedBonusFromModSlots(linkage.primaryMods, allMods);
@@ -2655,6 +2671,8 @@ export function applyWarframeShardsAndArcanes(
         stats.parkourVelocityBonus += bonusValue;
         break;
       case 'startingEnergy':
+        stats.startingEnergyPct = (stats.startingEnergyPct ?? 0) + bonusValue;
+        break;
       case 'healthOrbEffectiveness':
       case 'energyOrbEffectiveness':
         break;

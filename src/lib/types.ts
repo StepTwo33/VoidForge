@@ -1125,6 +1125,10 @@ export interface WarframeCalculatedStats {
   healthRegenPerSec: number;
   /** Additive shield recharge rate fraction (e.g. Arcane Aegis +30% → 0.30). */
   shieldRechargeBonus?: number;
+  /** Shield recharge delay reduction fraction from mods (wiki: capped at 0.80). */
+  shieldRechargeDelayReduction?: number;
+  /** Starting energy bonus, percent of max energy (Preparation + Amber shard). */
+  startingEnergyPct?: number;
   /**
    * Arcane status-effect resistance, one row per element (e.g. Arcane Ice: Heat status).
    * These are chances to ignore a status proc of that element, not damage reduction,

@@ -6807,6 +6807,7 @@ export const allWarframes: Warframe[] = [
       {
         "name": "Final Stand",
         "energyCost": 100,
+        "castTime": 0.75,
         "description": "Exude might and valor. Rise into the air and throw a barrage of Axios Javelins. The javelins deal damage to nearby enemies wherever they land. Direct hits to enemies deal greater damage.",
         "directDamage": 1500,
         "aoeDamage": 1500,
@@ -6865,6 +6866,7 @@ export const allWarframes: Warframe[] = [
       {
         "name": "Final Stand",
         "energyCost": 100,
+        "castTime": 0.75,
         "description": "Exude might and valor. Rise into the air and throw a barrage of Axios Javelins. The javelins deal damage to nearby enemies wherever they land. Direct hits to enemies deal greater damage.",
         "directDamage": 1500,
         "aoeDamage": 1500,

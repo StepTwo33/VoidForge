@@ -49,6 +49,7 @@ export function AbilityCard({
   extraFlatArmor,
   immolationHeatPct,
   batteryPct,
+  intrepidStandRank,
   footer,
   exaltedWeapon,
 }: {
@@ -64,11 +65,20 @@ export function AbilityCard({
   immolationHeatPct?: number;
   /** Gauss battery from the stats-panel sim (shared across ability cards). */
   batteryPct?: number;
+  /** Equipped Intrepid Stand rank (adds Overguard rows to Final Stand). */
+  intrepidStandRank?: number;
   footer?: ReactNode;
   exaltedWeapon?: Weapon | null;
 }) {
   const eff = stats?.abilityEfficiency ?? 1;
-  const display = { warframeId, abilityName: ability.name, extraFlatArmor, immolationHeatPct, batteryPct };
+  const display = {
+    warframeId,
+    abilityName: ability.name,
+    extraFlatArmor,
+    immolationHeatPct,
+    batteryPct,
+    intrepidStandRank,
+  };
   const effectiveCost =
     typeof ability.energyCost === "number" ? scaledAbilityEnergyCost(ability.energyCost, eff) : null;
   const slotNum = gameSlot ?? index + 1;

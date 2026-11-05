@@ -95,6 +95,14 @@ import { computeMechaSetMarkStats } from "@/lib/calc/set-bonuses";
 import { cn } from "@/lib/utils";
 import { CollapsibleSection, SimSlider, StatRow } from "./stat-primitives";
 import { abilityEfficiencyCapNote, formatAbilityEfficiencyPct } from "@/lib/display/ability-efficiency";
+import { WARFRAME_STARTING_ENERGY } from "@/data/warframe-starting-energy";
+import {
+  auraEnergyRegenPerSec,
+  shieldGateSec,
+  shieldRechargeDelays,
+  shieldRechargePerSec,
+  startingEnergy,
+} from "@/lib/calc/warframe-shield-energy";
 
 function GaussPassiveBattery({
   batteryPct,
@@ -2089,6 +2097,86 @@ function wfArcaneStackSlider(id: string, name: string, fullStacks: number | unde
   );
 }
 
+/** Round 54: starting energy, shield recharge / delay / gate and aura energy regen. */
+function ShieldEnergyRows({
+  stats,
+  warframeId,
+  equippedMods,
+  freeModCapacity,
+}: {
+  stats: WarframeCalculatedStats;
+  warframeId?: string;
+  equippedMods?: EquippedMod[];
+  freeModCapacity?: number;
+}) {
+  const shields = stats.persistenceDamageCapPerSecond != null ? 0 : stats.totalShield;
+  const id = warframeId ?? "";
+  const harrow = id === "harrow" || id === "harrow_prime";
+  const baseStart = WARFRAME_STARTING_ENERGY[id];
+  const startPct = stats.startingEnergyPct ?? 0;
+  const start = startingEnergy({
+    base: baseStart ?? 0,
+    maxEnergy: stats.totalEnergy,
+    freeModCapacity,
+    bonusPct: startPct,
+    fullOnSpawn: harrow,
+  });
+  const rechargeBonus = stats.shieldRechargeBonus ?? 0;
+  const delays = shieldRechargeDelays(stats.shieldRechargeDelayReduction ?? 0);
+  const catalyzing = stats.catalyzingShieldsMult != null;
+  const gate = shieldGateSec(shields, catalyzing);
+  const auraRegen = auraEnergyRegenPerSec(equippedMods ?? []);
+  const fmt = (v: number, d = 2) => Number(v.toFixed(d)).toString();
+  return (
+    <>
+      {stats.totalEnergy > 0 && baseStart != null && (
+        <StatRow
+          label="Starting Energy"
+          value={start.toFixed(0)}
+          tooltip={
+            harrow
+              ? "Harrow's passive: always spawns with full energy."
+              : `Base ${baseStart} + 5 × unspent mod capacity (${Math.max(0, freeModCapacity ?? 0)})${startPct ? ` + ${fmt(startPct, 1)}% of max energy (Preparation / Amber shard)` : ""}, up to max energy (wiki Energy Capacity).`
+          }
+        />
+      )}
+      {auraRegen > 0 && (
+        <StatRow
+          label="Aura Energy Regen"
+          value={`+${fmt(auraRegen)}/s`}
+          color="text-blue-700 dark:text-blue-400"
+          tooltip="Energy Siphon +0.6/s, Dreamer's Bond +0.3/s, Energy Nexus +3/s at max rank (wiki). Squad-wide auras stack per player."
+        />
+      )}
+      {shields > 0 && (
+        <>
+          <StatRow
+            label="Shield Recharge"
+            value={`${shieldRechargePerSec(shields, rechargeBonus).toFixed(1)}/s`}
+            color={rechargeBonus > 0 ? "text-cyan-700 dark:text-cyan-400" : rechargeBonus < 0 ? "text-red-700 dark:text-red-400" : undefined}
+            tooltip={`(15 + 5% of max shields) × (1 + ${fmt(rechargeBonus * 100, 1)}% recharge bonus) per second (wiki Shield).`}
+          />
+          <StatRow
+            label="Shield Recharge Delay"
+            value={`${fmt(delays.normal)}s · ${fmt(delays.depleted)}s depleted`}
+            color={(stats.shieldRechargeDelayReduction ?? 0) > 0 ? "text-cyan-700 dark:text-cyan-400" : undefined}
+            tooltip="1 s after taking shield damage, 4 s after shields are depleted; mods reduce both, capped at 80% (wiki Shield)."
+          />
+          <StatRow
+            label="Shield Gate"
+            value={`${fmt(gate)}s`}
+            tooltip={
+              catalyzing
+                ? "Catalyzing Shields fixes the full-shield gate at 1.33 s (wiki Shield Gate)."
+                : "Invulnerability when full shields break: shields/180 + 1/3 s below 53, (shields/350)^0.65 + 1/3 s up to 1150, 2.5 s above (wiki Shield Gate)."
+            }
+          />
+        </>
+      )}
+    </>
+  );
+}
+
 export function WarframeStatsPanel({
   stats,
   warframe,
@@ -2104,6 +2192,7 @@ export function WarframeStatsPanel({
   onGaussBatteryPctChange,
   arcaneStacksById,
   onArcaneStacksChange,
+  freeModCapacity,
 }: {
   stats: WarframeCalculatedStats | null;
   warframe?: Warframe | null;
@@ -2123,6 +2212,8 @@ export function WarframeStatsPanel({
   /** Warframe arcane stack inputs (Arcane Impetus / Arcane Camisado), keyed by arcane id. */
   arcaneStacksById?: Record<string, number>;
   onArcaneStacksChange?: (arcaneId: string, n: number) => void;
+  /** Unspent mod capacity (adds 5 starting energy each, wiki Energy Capacity). */
+  freeModCapacity?: number;
 }) {
   const [frostColdEnemiesLocal, setFrostColdEnemiesLocal] = useState(5);
   const frostColdEnemies = frostColdEnemiesProp ?? frostColdEnemiesLocal;
@@ -2292,6 +2383,12 @@ export function WarframeStatsPanel({
         <StatRow label="Shield" value={stats.totalShield.toFixed(0)} />
         <StatRow label="Armor" value={stats.totalArmor.toFixed(0)} />
         <StatRow label="Energy" value={stats.totalEnergy.toFixed(0)} />
+        <ShieldEnergyRows
+          stats={stats}
+          warframeId={warframe?.id}
+          equippedMods={equippedMods}
+          freeModCapacity={freeModCapacity}
+        />
         <StatRow label="Sprint Speed" value={stats.totalSprint.toFixed(2)} />
         {stats.slideSpeedBonus !== 0 && (
           <StatRow
@@ -2336,8 +2433,7 @@ export function WarframeStatsPanel({
       </CollapsibleSection>
 
       <CollapsibleSection title="ABILITY MODS" defaultOpen>
-        <StatRow label="Strength" value={`${(stats.abilityStrength * 100).toFixed(0)}%`}
-          color={stats.abilityStrength > 1 ? "text-orange-700 dark:text-orange-400" : stats.abilityStrength < 1 ? "text-red-700 dark:text-red-400" : undefined} />
+        {/* In-game arsenal order: Duration, Efficiency, Range, Strength. */}
         <StatRow label="Duration" value={`${(stats.abilityDuration * 100).toFixed(0)}%`}
           color={stats.abilityDuration > 1 ? "text-cyan-700 dark:text-cyan-400" : stats.abilityDuration < 1 ? "text-red-700 dark:text-red-400" : undefined} />
         <StatRow label="Efficiency" value={formatAbilityEfficiencyPct(stats.abilityEfficiency)}
@@ -2345,6 +2441,8 @@ export function WarframeStatsPanel({
           color={stats.abilityEfficiency > 1 ? "text-blue-400" : stats.abilityEfficiency < 1 ? "text-red-700 dark:text-red-400" : undefined} />
         <StatRow label="Range" value={`${(stats.abilityRange * 100).toFixed(0)}%`}
           color={stats.abilityRange > 1 ? "text-green-700 dark:text-green-400" : stats.abilityRange < 1 ? "text-red-700 dark:text-red-400" : undefined} />
+        <StatRow label="Strength" value={`${(stats.abilityStrength * 100).toFixed(0)}%`}
+          color={stats.abilityStrength > 1 ? "text-orange-700 dark:text-orange-400" : stats.abilityStrength < 1 ? "text-red-700 dark:text-red-400" : undefined} />
       </CollapsibleSection>
 
       <CollapsibleSection title="EFFECTIVE HEALTH" defaultOpen>

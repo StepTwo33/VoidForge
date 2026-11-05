@@ -33,6 +33,8 @@ export interface AbilityDisplayContext {
    * Thermal Sunder / Redline / passive don't each show their own slider.
    */
   batteryPct?: number;
+  /** Rank of an equipped Intrepid Stand (Final Stand augment); undefined when not equipped. */
+  intrepidStandRank?: number;
 }
 
 export interface ScaledMiscStatLine {

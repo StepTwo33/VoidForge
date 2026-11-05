@@ -1198,10 +1198,10 @@ export default function WarframeBuilderPage() {
                       )}
                       {calculatedStats && (
                         <span className="hidden text-[10px] font-mono tabular-nums text-muted-foreground lg:inline">
-                          STR {(calculatedStats.abilityStrength * 100).toFixed(0)}%
-                          {" · "}DUR {(calculatedStats.abilityDuration * 100).toFixed(0)}%
+                          DUR {(calculatedStats.abilityDuration * 100).toFixed(0)}%
                           {" · "}EFF {formatAbilityEfficiencyPct(calculatedStats.abilityEfficiency)}
                           {" · "}RNG {(calculatedStats.abilityRange * 100).toFixed(0)}%
+                          {" · "}STR {(calculatedStats.abilityStrength * 100).toFixed(0)}%
                         </span>
                       )}
                     </div>
@@ -1416,6 +1416,7 @@ export default function WarframeBuilderPage() {
                                     ? gaussBatteryPct
                                     : undefined
                                 }
+                                intrepidStandRank={equippedMods.find((m) => m.modId === "intrepid_stand")?.rank}
                                 exaltedWeapon={getExaltedWeaponForAbility(
                                   selectedWarframe.id,
                                   entry.ability.name,
@@ -1533,6 +1534,7 @@ export default function WarframeBuilderPage() {
 
               <div id="build-stats" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] space-y-4 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:self-start lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:overflow-y-auto lg:overscroll-contain">
                 <WarframeStatsPanel
+                  freeModCapacity={totalCapacity - capacityUsed}
                   stats={calculatedStats}
                   warframe={selectedWarframe}
                   equippedMods={equippedMods}

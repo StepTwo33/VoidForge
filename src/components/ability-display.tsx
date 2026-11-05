@@ -32,6 +32,7 @@ import {
 } from "@/lib/codex/ability-misc-stats";
 import { SimSlider } from "@/components/stats/stat-primitives";
 import { Zap, Sparkles } from "lucide-react";
+import { AFFINITY_RANGE_M, castTimeWithSpeed, intrepidStandValues } from "@/lib/calc/ability-augment-rows";
 
 export type AbilityScaleHint = AbilityScaleAttribute;
 
@@ -299,6 +300,15 @@ export function AbilitiesSectionHeader({
   );
 }
 
+
+function formatIntrepid(v: number): string {
+  return Number.isInteger(Math.round(v * 10) / 10) ? Math.round(v).toLocaleString("en-US") : v.toFixed(1);
+}
+
+function formatCastSeconds(v: number): string {
+  return (Math.round(v * 100) / 100).toString();
+}
+
 type AbilityStatSource = Pick<
   Ability,
   | "energyCost"
@@ -338,6 +348,7 @@ export function AbilityStatsBlock({
   hasExaltedWeapon?: boolean;
 }) {
   const str = stats?.abilityStrength ?? 1;
+  const castSpeedPct = stats?.castingSpeedBonus ?? 0;
   const dur = stats?.abilityDuration ?? 1;
   const rng = stats?.abilityRange ?? 1;
   const eff = stats?.abilityEfficiency ?? 1;
@@ -1000,9 +1011,55 @@ export function AbilityStatsBlock({
         key="cast"
         compact={compact}
         label="Cast Time"
-        baseValue={ability.castTime.toFixed(1)}
-        modifiedValue={ability.castTime.toFixed(1)}
+        baseValue={formatCastSeconds(ability.castTime)}
+        modifiedValue={formatCastSeconds(castTimeWithSpeed(ability.castTime, castSpeedPct))}
         unit="s"
+        isModified={castSpeedPct !== 0}
+        isPositive={castSpeedPct >= 0}
+      />,
+    );
+  }
+  if (display.abilityName === "Final Stand" && display.intrepidStandRank != null) {
+    const r = Math.max(0, Math.min(3, display.intrepidStandRank));
+    const intrepid = intrepidStandValues(r, str);
+    rows.push(
+      <AbilityStatRow
+        key="intrepid-cap"
+        compact={compact}
+        label="Overguard Cap (Intrepid Stand)"
+        baseValue={formatIntrepid(15000)}
+        modifiedValue={formatIntrepid(intrepid.cap)}
+        isModified={str !== 1}
+        isPositive={str >= 1}
+        scaleHint="strength"
+      />,
+      <AbilityStatRow
+        key="intrepid-self"
+        compact={compact}
+        label="Overguard / hit (Self)"
+        baseValue={formatIntrepid(30 + 10 * r)}
+        modifiedValue={formatIntrepid(intrepid.self)}
+        isModified={str !== 1}
+        isPositive={str >= 1}
+        scaleHint="strength"
+      />,
+      <AbilityStatRow
+        key="intrepid-ally"
+        compact={compact}
+        label="Overguard / hit (Ally)"
+        baseValue={formatIntrepid(15 + 5 * r)}
+        modifiedValue={formatIntrepid(intrepid.ally)}
+        isModified={str !== 1}
+        isPositive={str >= 1}
+        scaleHint="strength"
+      />,
+      <AbilityStatRow
+        key="intrepid-range"
+        compact={compact}
+        label="Ally Range (Affinity)"
+        baseValue={String(AFFINITY_RANGE_M)}
+        modifiedValue={String(AFFINITY_RANGE_M)}
+        unit="m"
         isModified={false}
         isPositive
       />,
