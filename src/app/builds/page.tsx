@@ -31,8 +31,9 @@ import {
   renameYoursBuild,
   setYoursBuildPublic,
 } from "@/lib/builds/yours-builds";
-import { Edit2, FolderOpen, Globe, Library, Loader2, Search, Trash2 } from "lucide-react";
+import { Edit2, FolderOpen, Globe, Library, Loader2, Search, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { builderCtaForFilter } from "@/lib/builds/builder-cta";
 import { RivenLibrary } from "@/components/riven-library";
 import { cn } from "@/lib/utils";
 
@@ -199,13 +200,22 @@ export default function BuildsLibraryPage() {
           title="Your Builds"
           description="Everything saved on this device and your account. List builds in Community from here."
           actions={
-            <Link
-              href="/loadouts"
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <FolderOpen className="h-4 w-4" />
-              Edit kits in Loadouts
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <a
+                href="#rivens"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-purple-500/40 px-4 py-2 text-sm text-purple-700 transition-colors hover:bg-purple-500/10 dark:text-purple-300"
+              >
+                <Sparkles className="h-4 w-4" />
+                Riven library
+              </a>
+              <Link
+                href="/loadouts"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              >
+                <FolderOpen className="h-4 w-4" />
+                Edit kits in Loadouts
+              </Link>
+            </div>
           }
         />
 
@@ -244,24 +254,26 @@ export default function BuildsLibraryPage() {
                 : "Try a different filter or search."
             }
             // One primary CTA; Loadouts is already linked below the list.
-            action={builds.length === 0 ? { href: "/weapon-builder", label: "Open Weapon Builder" } : undefined}
+            action={builds.length === 0 ? builderCtaForFilter(typeFilter) : undefined}
             secondaryAction={builds.length === 0 ? { href: "/discover", label: "Browse Discover" } : undefined}
           >
             {/* No shared filter reset exists on this page, so the filter-empty case keeps its previous links. */}
             {builds.length > 0 && (
               <>
                 <Link
-                  href="/weapon-builder"
+                  href={builderCtaForFilter(typeFilter).href}
                   className="inline-flex h-11 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                 >
-                  Weapon Builder
+                  {builderCtaForFilter(typeFilter).label}
                 </Link>
-                <Link
-                  href="/loadouts"
-                  className="inline-flex h-11 items-center rounded-lg border border-border px-4 text-sm hover:bg-accent"
-                >
-                  Loadouts
-                </Link>
+                {typeFilter !== "loadout" && (
+                  <Link
+                    href="/loadouts"
+                    className="inline-flex h-11 items-center rounded-lg border border-border px-4 text-sm hover:bg-accent"
+                  >
+                    Loadouts
+                  </Link>
+                )}
                 <Link
                   href="/discover"
                   className="inline-flex h-11 items-center rounded-lg border border-border px-4 text-sm hover:bg-accent"

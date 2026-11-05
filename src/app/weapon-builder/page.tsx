@@ -24,7 +24,8 @@ import { WeaponStatsPanel } from "@/components/stats-panel";
 import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
 import { weaponStatSummary } from "@/lib/ui/mobile-stat-summary";
 import { ModPicker, buildSlotNav, type SlotType, type RivenSelectMeta } from "@/components/mod-picker";
-import { useSavedRivens } from "@/lib/riven/use-saved-rivens";
+import { useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
+import { saveRiven } from "@/lib/riven/saved-rivens";
 import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-validation";
 import { useWeapons, useMods } from "@/lib/weapons/use-data";
 import { calculateWeaponBuild, calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
@@ -781,7 +782,21 @@ export default function WeaponBuilderPage() {
     setRivenStatsMap((prev) => { const n = { ...prev }; delete n[slotIndex]; return n; });
   }, []);
 
-  const savedRivens = useSavedRivens(selectedWeapon?.id);
+  const rivenLibraryState = useSavedRivenLibrary(selectedWeapon?.id);
+  const savedRivens = rivenLibraryState.list;
+  const refreshSavedRivens = rivenLibraryState.refresh;
+  const rivenLibrary = useMemo(
+    () => ({
+      signedIn: rivenLibraryState.signedIn,
+      onSave: async (r: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number }) => {
+        if (!selectedWeapon) return false;
+        const saved = await saveRiven({ weaponId: selectedWeapon.id, ...r });
+        if (saved) refreshSavedRivens();
+        return !!saved;
+      },
+    }),
+    [rivenLibraryState.signedIn, selectedWeapon, refreshSavedRivens],
+  );
   const editRivenTarget = useMemo(() => {
     if (editRivenSlot == null || !modPickerOpen) return null;
     const eq = equippedMods.find((m) => m.slotIndex === editRivenSlot);
@@ -1385,6 +1400,7 @@ export default function WeaponBuilderPage() {
         category={modCategory}
         editRiven={editRivenTarget}
         savedRivens={savedRivens}
+        rivenLibrary={rivenLibrary}
         slotType={modPickerSlotType}
         equippedModIds={equippedModIds}
         onSelect={handleSelectMod}

@@ -65,6 +65,7 @@ const NAV_GROUPS: NavGroup[] = [
     icon: LayoutGrid,
     links: [
       { href: "/builds", label: "Your Builds", desc: "Device & account library" },
+      { href: "/builds#rivens", label: "Riven Library", desc: "Save rivens, equip them on any build" },
       { href: "/loadouts", label: "Loadouts", desc: "Full loadout kits" },
       { href: "/player-sync", label: "Player Sync", desc: "Import from Warframe account" },
       { href: "/compare", label: "Compare", desc: "Compare items side-by-side" },

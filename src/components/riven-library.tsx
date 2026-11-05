@@ -9,7 +9,8 @@ import { PolarityIcon } from "@/components/polarity-icon";
 import { RivenEditor } from "@/components/riven-editor";
 import { useConfirmDialog } from "@/components/confirm-dialog-provider";
 import { hasClientSession } from "@/lib/auth/client-session";
-import { DEFAULT_RIVEN_DRAIN, DEFAULT_RIVEN_POLARITY, rivenPolarityError, validateRivenStats } from "@/lib/riven/riven-validation";
+import { DEFAULT_RIVEN_DRAIN, DEFAULT_RIVEN_POLARITY, clampRivenDrain, rivenPolarityError, rivenRankFromDrain, validateRivenStats } from "@/lib/riven/riven-validation";
+import Link from "next/link";
 import { RIVEN_MOD_IDS, SAVED_RIVEN_NAME_MAX, deleteSavedRiven, getSavedRivens, saveRiven, type SavedRiven } from "@/lib/riven/saved-rivens";
 import { getRivenStatsForCategory } from "@/lib/types";
 import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
@@ -49,6 +50,14 @@ export function RivenLibrary() {
   const [weaponQuery, setWeaponQuery] = useState("");
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // /builds#rivens (header "Riven Library" link, picker "Manage library"): the build list above
+  // loads async and pushes this section down, so re-scroll once it has settled (Round 54b).
+  useEffect(() => {
+    if (typeof window === "undefined" || window.location.hash !== "#rivens") return;
+    const t = window.setTimeout(() => document.getElementById("rivens")?.scrollIntoView({ block: "start" }), 600);
+    return () => window.clearTimeout(t);
+  }, [signedIn]);
 
   useEffect(() => {
     let alive = true;
@@ -122,7 +131,7 @@ export function RivenLibrary() {
   };
 
   return (
-    <section className="mt-8" aria-labelledby="rivens-heading" data-testid="riven-library">
+    <section id="rivens" className="mt-8 scroll-mt-20" aria-labelledby="rivens-heading" data-testid="riven-library">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 id="rivens-heading" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
@@ -270,7 +279,7 @@ export function RivenLibrary() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold">{r.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {weapon?.name ?? r.weaponId} · drain {r.drain}
+                        {weapon?.name ?? r.weaponId} · Rank {rivenRankFromDrain(r.drain)} · drain {clampRivenDrain(r.drain)}
                       </p>
                     </div>
                     <button
@@ -298,6 +307,12 @@ export function RivenLibrary() {
                       </li>
                     ))}
                   </ul>
+                  <Link
+                    href={`/weapon-builder?weapon=${encodeURIComponent(r.weaponId)}`}
+                    className="mt-auto inline-flex min-h-11 items-center self-start text-xs text-primary hover:underline pointer-fine:min-h-0"
+                  >
+                    Open {weapon?.name ?? "weapon"} in the builder
+                  </Link>
                 </ContentPanel>
               </li>
             );

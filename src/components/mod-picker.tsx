@@ -15,7 +15,10 @@ import { EmptyState } from "@/components/page-shell";
 import { findBlockingModId, getBlockedModIds } from "@/data/mod-exclusions";
 import { modsMap as catalogModsMap } from "@/data/mods";
 import { cleanModDescription, getModStatDisplayLines } from "@/lib/display/mod-display";
-import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
+import { getRivenWeaponType, rivenModMatchesWeapon } from "@/lib/weapons/riven-weapon-type";
+import { toast } from "sonner";
+import Link from "next/link";
+import { rivenRankFromDrain } from "@/lib/riven/riven-validation";
 import { RivenEditor } from "@/components/riven-editor";
 import {
   DEFAULT_RIVEN_DRAIN,
@@ -75,6 +78,14 @@ interface ModPickerProps {
   editRiven?: { mod: Mod; stats: Record<string, number>; polarity?: string; drain?: number; name?: string } | null;
   /** Signed-in user's saved rivens for this weapon (Round 54 riven library). */
   savedRivens?: SavedRivenEntry[];
+  /**
+   * Riven library hooks (Round 54b): always show a "Saved rivens" group for riven-capable weapons
+   * and a "Save to library" action in the riven editor.
+   */
+  rivenLibrary?: {
+    signedIn: boolean;
+    onSave: (riven: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number }) => Promise<boolean>;
+  };
   weaponCategory?: string; // for riven stat pool filtering
   /** When set, filters mods by beam / AoE / projectile wiki compatibility tags. */
   weapon?: Pick<Weapon, "id" | "name" | "category" | "triggerType"> & { hasRivenSlot?: boolean };
@@ -126,7 +137,7 @@ export interface ModPickerSlotNav {
   onNext?: () => void;
 }
 
-export function ModPicker({ open, onClose, mods, category, statFilterCategory, slotType = "regular", equippedModIds, onSelect, onSelectRiven, weaponCategory, weapon, incarnonFormTriggerType, warframeId, helminthAbility, archwingId, arcaneCatalog, pickerMode = "mods", initialBrowseTab = "mods", equippedArcaneIds = [], slotNav, editRiven, savedRivens, elsewhereMods }: ModPickerProps) {
+export function ModPicker({ open, onClose, mods, category, statFilterCategory, slotType = "regular", equippedModIds, onSelect, onSelectRiven, weaponCategory, weapon, incarnonFormTriggerType, warframeId, helminthAbility, archwingId, arcaneCatalog, pickerMode = "mods", initialBrowseTab = "mods", equippedArcaneIds = [], slotNav, editRiven, savedRivens, rivenLibrary, elsewhereMods }: ModPickerProps) {
   const [search, setSearch] = useState("");
   const [selectedMod, setSelectedMod] = useState<Mod | null>(null);
   const [selectedRank, setSelectedRank] = useState(0);
@@ -233,6 +244,30 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
       .filter((r): r is NonNullable<typeof r> => !!r)
       .filter((r) => !q || r.entry.name.toLowerCase().includes(q) || r.lines.some((l) => l.toLowerCase().includes(q)) || "riven".includes(q));
   }, [savedRivens, onSelectRiven, slotType, rivenCategory, search]);
+
+  /** This weapon's riven card, when it takes one (drives the always-visible "Saved rivens" group). */
+  const weaponRivenMod = useMemo(() => {
+    if (!onSelectRiven || slotType !== "regular" || !weaponCategory) return null;
+    return mods.find((m) => m.subCategory === "riven" && rivenModMatchesWeapon(m.id, weapon, weaponCategory)) ?? null;
+  }, [mods, onSelectRiven, slotType, weapon, weaponCategory]);
+  const showSavedRivenGroup =
+    !!weaponRivenMod && (visibleSavedRivens.length > 0 || (!!rivenLibrary && !search.trim()));
+
+  const [libraryName, setLibraryName] = useState("");
+  const [librarySaving, setLibrarySaving] = useState(false);
+  const saveToLibrary = async () => {
+    if (!rivenLibrary?.signedIn || !selectedMod || !isRivenMod(selectedMod) || !rivenValidation.ok) return;
+    setLibrarySaving(true);
+    const name = libraryName.trim() || editRiven?.name || `${weapon?.name ?? "Weapon"} riven`;
+    const ok = await rivenLibrary.onSave({ name, modId: selectedMod.id, stats: rivenStats, polarity: rivenPolarity, drain: rivenDrain });
+    setLibrarySaving(false);
+    if (ok) {
+      toast.success(`Saved “${name}” to your riven library`);
+      setLibraryName("");
+    } else {
+      toast.error("Could not save the riven. Try again.");
+    }
+  };
 
   const equipSavedRiven = (entry: SavedRivenEntry, mod: Mod) => {
     if (!onSelectRiven || !validateRivenStats(entry.stats, rivenCategory).ok) return;
@@ -451,6 +486,37 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
               </div>
             )}
 
+            {isRivenMod(selectedMod) && rivenLibrary && (
+              <div className="mt-4 rounded-lg border border-purple-500/30 bg-purple-500/5 p-3" data-testid="riven-save-to-library">
+                {rivenLibrary.signedIn ? (
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <Input
+                      value={libraryName}
+                      onChange={(e) => setLibraryName(e.target.value)}
+                      placeholder={editRiven?.name || `${weapon?.name ?? "Weapon"} riven`}
+                      aria-label="Riven name for your library"
+                      maxLength={80}
+                      className="min-h-11 flex-1 pointer-fine:min-h-9"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={saveToLibrary}
+                      disabled={!rivenValidation.ok || librarySaving}
+                      title={!rivenValidation.ok ? "Fix the riven above to save it" : undefined}
+                      className="min-h-11 pointer-fine:min-h-9"
+                    >
+                      {librarySaving ? "Saving…" : "Save to library"}
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    <Link href="/signin" className="text-primary hover:underline">Sign in</Link> to save this riven to your library and equip it on any build.
+                  </p>
+                )}
+              </div>
+            )}
+
             {dismissEquips && (
               <p className="mt-4 text-right text-[11px] text-muted-foreground">
                 Closing this card equips it at the rank shown. Use Back to cancel.
@@ -574,11 +640,39 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
               aria-label={isArcaneBrowse ? "Arcane list" : "Mod list"}
             >
               <div className="space-y-1">
-                {!isArcaneBrowse && visibleSavedRivens.length > 0 && (
+                {!isArcaneBrowse && showSavedRivenGroup && (
                   <div className="mb-2 space-y-1 rounded-lg border border-purple-500/30 bg-purple-500/5 p-2" data-testid="saved-rivens-in-picker">
-                    <div className="px-1 text-[10px] font-semibold uppercase tracking-wider text-purple-700 dark:text-purple-300">
-                      Your saved rivens
+                    <div className="flex items-center justify-between gap-2 px-1">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-700 dark:text-purple-300">
+                        Saved rivens
+                      </span>
+                      <Link
+                        href="/builds#rivens"
+                        className="inline-flex min-h-11 items-center text-[11px] text-purple-700 hover:underline pointer-fine:min-h-0 dark:text-purple-300"
+                      >
+                        Manage library
+                      </Link>
                     </div>
+                    {visibleSavedRivens.length === 0 && (
+                      <div className="flex flex-col gap-2 px-1 pb-1 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-xs text-muted-foreground">
+                          {rivenLibrary?.signedIn
+                            ? "None saved for this weapon yet. Fill in a riven and tap Save to library."
+                            : "Sign in to save rivens once and equip them on any build."}
+                        </p>
+                        {weaponRivenMod && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleSelectMod(weaponRivenMod)}
+                            className="min-h-11 shrink-0 pointer-fine:min-h-8"
+                          >
+                            New riven
+                          </Button>
+                        )}
+                      </div>
+                    )}
                     {visibleSavedRivens.map(({ entry, mod, valid, lines }) => (
                       <button
                         key={entry.id}
@@ -594,7 +688,7 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center justify-between gap-2">
                             <span className="truncate text-sm font-medium">{entry.name}</span>
-                            <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{entry.drain}</span>
+                            <span className="shrink-0 font-mono text-[11px] text-muted-foreground">R{rivenRankFromDrain(entry.drain)} · {clampRivenDrain(entry.drain)}</span>
                           </span>
                           <span className="block text-[11px] leading-snug text-purple-800 dark:text-purple-300">{lines.join(" · ")}</span>
                         </span>
