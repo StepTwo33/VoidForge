@@ -6,6 +6,7 @@ import {
   STARTER_RIVENS,
   getSavedRivens,
 } from "./riven-storage";
+import { extractRivenAffix, getRivenModArtImage } from "@/components/rivens/riven-card";
 
 describe("Riven Naming Generator", () => {
   it("generates correct nomenclature for 1 positive stat", () => {
@@ -75,5 +76,25 @@ describe("Riven Storage & Evaluation", () => {
     const torid = STARTER_RIVENS.find((r) => r.weaponId === "torid");
     expect(torid).toBeDefined();
     expect(torid?.name).toBe("Torid Sati-critacron");
+  });
+});
+
+describe("Riven Card Display & Affix Extraction", () => {
+  it("extracts affix cleanly without repeating multi-word weapon names", () => {
+    expect(extractRivenAffix("Ceramic Dagger Locti-visicron", "Ceramic Dagger")).toBe("Locti-visicron");
+    expect(extractRivenAffix("Kuva Bramma Toxi-critacan", "Kuva Bramma")).toBe("Toxi-critacan");
+    expect(extractRivenAffix("Rubico Visi-acritis", "Rubico")).toBe("Visi-acritis");
+    expect(extractRivenAffix("Tenet Arca Plasmor Crita-visican", "Tenet Arca Plasmor")).toBe("Crita-visican");
+  });
+
+  it("resolves the authentic Warframe Riven mod art image per category", () => {
+    expect(getRivenModArtImage("Rifle")).toBe("/images/mods/Rifle_Riven_Mod.png");
+    expect(getRivenModArtImage("Shotgun")).toBe("/images/mods/Shotgun_Riven_Mod.png");
+    expect(getRivenModArtImage("Pistol")).toBe("/images/mods/Pistol_Riven_Mod.png");
+    expect(getRivenModArtImage("Melee")).toBe("/images/mods/Melee_Riven_Mod.png");
+    expect(getRivenModArtImage("Kitgun")).toBe("/images/mods/Kitgun_Riven_Mod.png");
+    expect(getRivenModArtImage("Zaw")).toBe("/images/mods/Zaw_Riven_Mod.png");
+    expect(getRivenModArtImage("Companion")).toBe("/images/mods/Companion_Weapon_Riven_Mod.png");
+    expect(getRivenModArtImage("Archgun")).toBe("/images/mods/Archgun_Riven_Mod.png");
   });
 });
