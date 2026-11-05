@@ -21,6 +21,7 @@ const STATIC_ROUTES: Array<{
   // /mod-browser and /arcane-browser only redirect to /codex sections, so they are not listed.
   { path: "/codex", changeFrequency: "weekly", priority: 0.8 },
   { path: "/riven-calculator", changeFrequency: "monthly", priority: 0.65 },
+  { path: "/riven-library", changeFrequency: "weekly", priority: 0.75 },
   { path: "/damage-simulator", changeFrequency: "monthly", priority: 0.65 },
   { path: "/compare", changeFrequency: "monthly", priority: 0.6 },
   { path: "/player-sync", changeFrequency: "monthly", priority: 0.55 },

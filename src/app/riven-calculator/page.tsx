@@ -12,7 +12,12 @@ import {
   getStatTier, getStatTierColor, isValueInStatRange,
 } from "@/lib/calc/riven-calculator";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, X, Sparkles } from "lucide-react";
+import { Search, Plus, X, Sparkles, BookmarkPlus } from "lucide-react";
+import Link from "next/link";
+import { toast } from "sonner";
+import { saveRiven, generateRivenId, evaluateSavedRiven } from "@/lib/rivens/riven-storage";
+import { formatRivenName } from "@/lib/calc/riven-naming";
+import { getRivenStatsForCategory } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
 
@@ -132,6 +137,56 @@ export default function RivenCalculatorPage() {
   ]);
 
   const gradeResult = handleGrade();
+
+  const handleSaveToLibrary = useCallback(() => {
+    if (!selectedWeapon || graderPositives.length === 0) return;
+    const wObj = allWeapons.find((w) => w.name === selectedWeapon);
+    if (!wObj) return;
+    const wType = getRivenWeaponType(wObj) ?? "Rifle";
+    const defs = getRivenStatsForCategory(wType, { includeSpliced: true });
+
+    const statsMap: Record<string, number> = {};
+    const posKeys: string[] = [];
+
+    for (const p of graderPositives) {
+      if (!p.name) continue;
+      const def = defs.find((d) => d.label.replace(" (Spliced)", "") === p.name);
+      const key = def?.key ?? p.name.toLowerCase().replace(/\s+/g, "");
+      posKeys.push(key);
+      statsMap[key] = def && !def.isPercent ? p.value : p.value / 100;
+    }
+
+    if (graderNegative && graderNegative.name) {
+      const def = defs.find((d) => d.label.replace(" (Spliced)", "") === graderNegative.name);
+      const key = def?.key ?? graderNegative.name.toLowerCase().replace(/\s+/g, "");
+      statsMap[key] = def && !def.isPercent ? -Math.abs(graderNegative.value) : -Math.abs(graderNegative.value) / 100;
+    }
+
+    const autoName = formatRivenName(wObj.name, posKeys);
+    const evalRes = evaluateSavedRiven(wObj.name, wType, statsMap, graderRank, graderRerolls, graderPolarity);
+
+    saveRiven({
+      id: generateRivenId(),
+      name: autoName,
+      weaponId: wObj.id,
+      weaponName: wObj.name,
+      weaponCategory: wObj.category,
+      weaponType: wType,
+      polarity: graderPolarity,
+      rank: graderRank,
+      rerolls: graderRerolls,
+      masteryRank: 12,
+      stats: statsMap,
+      displayStats: evalRes.displayStats,
+      score: evalRes.score,
+      grade: evalRes.grade,
+      gradeColor: evalRes.color,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+
+    toast.success(`Saved ${autoName} to Riven Library!`);
+  }, [selectedWeapon, graderPositives, graderNegative, graderRank, graderRerolls, graderPolarity]);
 
   const availablePositiveStats = useMemo(() => {
     const usedNames = new Set(graderPositives.map((s) => s.name));
@@ -368,6 +423,22 @@ export default function RivenCalculatorPage() {
                       Spliced traits are left out of the score. They are new (Update 44.1), so there are no community weights for them yet. The range check still applies.
                     </p>
                   )}
+
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-3">
+                    <button
+                      type="button"
+                      onClick={handleSaveToLibrary}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600 px-3.5 py-1.5 text-xs font-bold text-white shadow transition-colors hover:bg-purple-500"
+                    >
+                      <BookmarkPlus className="h-3.5 w-3.5" /> Save to Riven Library
+                    </button>
+                    <Link
+                      href="/riven-library"
+                      className="text-xs font-medium text-purple-400 hover:text-purple-300 hover:underline"
+                    >
+                      View in Riven Library →
+                    </Link>
+                  </div>
                 </div>
               )}
 

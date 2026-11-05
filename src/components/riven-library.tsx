@@ -140,15 +140,23 @@ export function RivenLibrary() {
           </h2>
           <p className="text-xs text-muted-foreground">Save your riven rolls once, then equip them from that weapon&apos;s mod picker.</p>
         </div>
-        {signedIn && !draft && (
-          <button
-            type="button"
-            onClick={() => setDraft({ ...EMPTY_DRAFT })}
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-purple-500/40 bg-purple-500/10 px-4 py-2 text-sm font-medium text-purple-800 transition-colors hover:bg-purple-500/20 dark:text-purple-300"
+        <div className="flex items-center gap-2">
+          <Link
+            href="/riven-library"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/5 px-3 py-1.5 text-xs font-medium text-purple-700 transition-colors hover:bg-purple-500/10 dark:text-purple-300 pointer-fine:min-h-9"
           >
-            <Plus className="h-4 w-4" /> New riven
-          </button>
-        )}
+            Open Card Grid & Thumbnails →
+          </Link>
+          {signedIn && !draft && (
+            <button
+              type="button"
+              onClick={() => setDraft({ ...EMPTY_DRAFT })}
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-purple-500/40 bg-purple-500/10 px-4 py-2 text-sm font-medium text-purple-800 transition-colors hover:bg-purple-500/20 dark:text-purple-300 pointer-fine:min-h-9"
+            >
+              <Plus className="h-4 w-4" /> New riven
+            </button>
+          )}
+        </div>
       </div>
 
       {signedIn === null && (
