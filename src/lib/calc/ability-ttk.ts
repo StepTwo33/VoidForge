@@ -35,6 +35,13 @@ function normalizeDamageType(raw?: string): { type: string; ignoreArmor: boolean
   return { type: "heat", ignoreArmor: false };
 }
 
+function addDamageToStats(stats: CalculatedStats, type: string, amount: number): void {
+  if (type === "impact") stats.impact += amount;
+  else if (type === "puncture") stats.puncture += amount;
+  else if (type === "slash") stats.slash += amount;
+  else stats.elements = [...stats.elements, { type, value: amount }];
+}
+
 function assignDamageToStats(stats: CalculatedStats, type: string, amount: number): void {
   if (type === "impact") stats.impact = amount;
   else if (type === "puncture") stats.puncture = amount;
@@ -127,7 +134,23 @@ export function abilityToPseudoWeaponStats(
     weepingWoundsBonus: 0,
   };
 
-  assignDamageToStats(stats, type, hitDamage);
+  const str = wfStats.abilityStrength;
+  const aoeType = ability.aoeDamageType ? normalizeDamageType(ability.aoeDamageType).type : null;
+  const splitHit =
+    aoeType !== null &&
+    aoeType !== type &&
+    !((ability.damagePerSecond ?? 0) > 0) &&
+    !((ability.damage ?? 0) > 0) &&
+    (ability.directDamage ?? 0) > 0 &&
+    (ability.aoeDamage ?? 0) > 0;
+  if (splitHit) {
+    // Direct hit and explosion carry different types (Final Stand: Impact + Blast).
+    addDamageToStats(stats, type, ability.directDamage! * str);
+    addDamageToStats(stats, aoeType!, ability.aoeDamage! * str);
+    stats.totalDamage = hitDamage;
+  } else {
+    assignDamageToStats(stats, type, hitDamage);
+  }
   stats.statusChancePerShot = stats.statusChance;
   return { stats, ignoreArmor };
 }

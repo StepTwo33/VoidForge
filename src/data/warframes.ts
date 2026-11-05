@@ -6801,16 +6801,17 @@ export const allWarframes: Warframe[] = [
         "energyCost": 75,
         "description": "Draw enemy attention to Styanax. His resolve uplifts him and nearby allies, regenerating the squad's energy over time. Styanax and his allies also regenerate shields for every kill assist they contribute.",
         "duration": 30,
-        "range": 30,
+        "radius": 30,
         "miscStats": { "energyRegen": 3, "shieldsPerKill": 50 }
       },
       {
         "name": "Final Stand",
         "energyCost": 100,
-        "castTime": 0.75,
         "description": "Exude might and valor. Rise into the air and throw a barrage of Axios Javelins. The javelins deal damage to nearby enemies wherever they land. Direct hits to enemies deal greater damage.",
         "directDamage": 1500,
         "aoeDamage": 1500,
+        "damageType": "Impact",
+        "aoeDamageType": "Blast",
         "radius": 6,
         "miscStats": { "javelins": 30, "javelinsPerSecond": 20 }
       }
@@ -6860,16 +6861,17 @@ export const allWarframes: Warframe[] = [
         "energyCost": 75,
         "description": "Draw enemy attention to Styanax. His resolve uplifts him and nearby allies, regenerating the squad's energy over time. Styanax and his allies also regenerate shields for every kill assist they contribute.",
         "duration": 30,
-        "range": 30,
+        "radius": 30,
         "miscStats": { "energyRegen": 3, "shieldsPerKill": 50 }
       },
       {
         "name": "Final Stand",
         "energyCost": 100,
-        "castTime": 0.75,
         "description": "Exude might and valor. Rise into the air and throw a barrage of Axios Javelins. The javelins deal damage to nearby enemies wherever they land. Direct hits to enemies deal greater damage.",
         "directDamage": 1500,
         "aoeDamage": 1500,
+        "damageType": "Impact",
+        "aoeDamageType": "Blast",
         "radius": 6,
         "miscStats": { "javelins": 30, "javelinsPerSecond": 20 }
       }

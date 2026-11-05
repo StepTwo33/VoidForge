@@ -5039,7 +5039,7 @@ describe("Phase 8 — ability scaling registry + sets", () => {
     expect(tharros.damage).toBe(1000);
     expect(tharros.miscStats?.healthPerHit).toBe(100);
     const rally = styanax.abilities.find((a) => a.name === "Rally Point")!;
-    expect(rally.range).toBe(30);
+    expect(rally.radius).toBe(30); // tooltip: Radius 30 m (Round 54b)
     expect(rally.miscStats).toMatchObject({ energyRegen: 3, shieldsPerKill: 50 });
     const stand = styanax.abilities.find((a) => a.name === "Final Stand")!;
     expect(stand.directDamage).toBe(1500);

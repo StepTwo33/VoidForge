@@ -315,6 +315,8 @@ type AbilityStatSource = Pick<
   | "damage"
   | "directDamage"
   | "aoeDamage"
+  | "damageType"
+  | "aoeDamageType"
   | "damagePerSecond"
   | "range"
   | "duration"
@@ -642,7 +644,7 @@ export function AbilityStatsBlock({
       <AbilityStatRow
         key="direct"
         compact={compact}
-        label="Direct dmg"
+        label={ability.aoeDamageType && ability.damageType ? `Direct dmg (${ability.damageType})` : "Direct dmg"}
         baseValue={ability.directDamage.toFixed(0)}
         modifiedValue={(ability.directDamage * str).toFixed(0)}
         isModified={str !== 1}
@@ -660,7 +662,7 @@ export function AbilityStatsBlock({
       <AbilityStatRow
         key="aoe"
         compact={compact}
-        label="AoE dmg"
+        label={ability.aoeDamageType ? `AoE dmg (${ability.aoeDamageType})` : "AoE dmg"}
         baseValue={ability.aoeDamage.toFixed(0)}
         modifiedValue={(ability.aoeDamage * str).toFixed(0)}
         isModified={str !== 1}

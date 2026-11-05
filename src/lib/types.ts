@@ -267,6 +267,8 @@ export interface Ability {
   damageBuff?: number;
   statusChance?: number;
   damageType?: string;
+  /** Damage type of `aoeDamage` when it differs from `damageType` (e.g. Final Stand: Impact hit, Blast explosion). */
+  aoeDamageType?: string;
   castTime?: number;
   cooldown?: number;
   maxTargets?: number;
