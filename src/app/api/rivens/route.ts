@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
-import { clampRivenDrain, normalizeRivenPolarity } from "@/lib/riven/riven-validation";
+import { clampRivenDrain, normalizeRivenPolarity, validateRivenStats } from "@/lib/riven/riven-validation";
+import { allWeapons } from "@/data/weapons";
+import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
 import {
   RIVEN_MOD_IDS,
   SAVED_RIVEN_NAME_MAX,
@@ -50,6 +52,16 @@ export async function POST(req: NextRequest) {
   }
   if (!(RIVEN_MOD_IDS as readonly string[]).includes(modId) || !stats) {
     return NextResponse.json({ error: "Invalid riven" }, { status: 400 });
+  }
+  // Same rules as the editor: the weapon must take this riven and the roll must be legal.
+  const weapon = allWeapons.find((w) => w.id === weaponId);
+  const type = weapon ? getRivenWeaponType(weapon) : null;
+  if (!type || `riven_${type.toLowerCase()}` !== modId) {
+    return NextResponse.json({ error: "This weapon does not take that riven" }, { status: 400 });
+  }
+  const check = validateRivenStats(stats, type.toLowerCase());
+  if (!check.ok) {
+    return NextResponse.json({ error: check.errors[0] ?? "Invalid riven" }, { status: 400 });
   }
   const data = {
     name,

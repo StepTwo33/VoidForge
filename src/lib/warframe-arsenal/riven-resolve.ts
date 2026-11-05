@@ -1,6 +1,6 @@
 type RivenBuff = { tag?: string; val?: number };
 
-type RawRivenUpgrade = {
+export type RawRivenUpgrade = {
   uniqueName?: string;
   rank?: number;
   /** DE polarity tag (AP_ATTACK / AP_DEFENSE / AP_TACTIC) or a plain polarity name, when present. */

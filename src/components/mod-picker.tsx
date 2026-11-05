@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { Search, Plus, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { PolarityIcon } from "@/components/polarity-icon";
 import { getModImage, getArcaneImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";

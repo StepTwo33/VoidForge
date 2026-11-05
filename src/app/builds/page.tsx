@@ -33,6 +33,7 @@ import {
 } from "@/lib/builds/yours-builds";
 import { Edit2, FolderOpen, Globe, Library, Loader2, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { RivenLibrary } from "@/components/riven-library";
 import { cn } from "@/lib/utils";
 
 type TypeFilter =
@@ -408,6 +409,8 @@ export default function BuildsLibraryPage() {
             })}
           </ul>
         )}
+
+        <RivenLibrary />
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
           Need a full kit editor?{" "}
