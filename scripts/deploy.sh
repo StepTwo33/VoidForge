@@ -136,9 +136,16 @@ include_ui_pass() {
   refuse_local_edits
   refuse_unpushed_commits dev
 
-  echo "==> Resetting working tree to origin/dev (discards local package.json/lock drift)"
   git checkout -f dev
-  git reset --hard origin/dev
+
+  # If origin/dev has commits dev lacks, update dev to origin/dev:
+  if ! git merge-base --is-ancestor origin/dev HEAD; then
+    echo "==> Updating local dev to origin/dev"
+    git merge --ff-only origin/dev || git reset --hard origin/dev
+  else
+    # Discard local working tree changes (e.g. lockfile drift from accidental npm install)
+    git checkout -f HEAD -- .
+  fi
 
   if git merge-base --is-ancestor origin/design/ui-pass HEAD; then
     echo "==> dev already includes design/ui-pass ($(git rev-parse --short HEAD))"
@@ -180,7 +187,23 @@ include_ui_pass() {
   fi
 }
 
-BRANCH="${1:-dev}"
+FORCE="${FORCE:-0}"
+BRANCH="dev"
+
+for arg in "$@"; do
+  case "$arg" in
+    --force|-f)
+      FORCE=1
+      ;;
+    -*)
+      echo "Unknown flag: $arg"
+      exit 1
+      ;;
+    *)
+      BRANCH="$arg"
+      ;;
+  esac
+done
 
 if [ "$BRANCH" = "dev" ]; then
   include_ui_pass
@@ -193,6 +216,15 @@ else
   echo "==> Resetting working tree to origin/$BRANCH"
   git checkout -f -B "$BRANCH" "origin/$BRANCH"
   git reset --hard "origin/$BRANCH"
+fi
+
+CURRENT_HEAD="$(git rev-parse HEAD)"
+LAST_DEPLOYED="$(cat .deploy-last-sha 2>/dev/null || true)"
+
+if [ -n "$LAST_DEPLOYED" ] && [ "$CURRENT_HEAD" = "$LAST_DEPLOYED" ] && [ "$FORCE" != "1" ]; then
+  echo "==> Already up to date at $(git rev-parse --short HEAD) (matches .deploy-last-sha)."
+  echo "    Nothing new to deploy. Pass --force or set FORCE=1 to force reinstall, rebuild, and restart."
+  exit 0
 fi
 
 echo "==> Installing production dependencies from package-lock.json"
