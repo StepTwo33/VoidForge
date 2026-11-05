@@ -53,7 +53,9 @@ import {
 } from "@/lib/mods/railjack-plexus-mods";
 import { cn } from "@/lib/utils";
 import { Save, FolderOpen, Crosshair, Shield, Zap, Gauge, ChevronRight, Users, Lock } from "lucide-react";
-import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, RailjackBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
+import { generateBuildId, SavedBuild, RailjackBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
+import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
+import { BuildsReturnLink } from "@/components/builds-return-link";
 import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
 import { toast } from "sonner";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
@@ -118,7 +120,7 @@ export default function RailjackBuilderPage() {
   const [activeTacticalAbilityId, setActiveTacticalAbilityId] = useState<string | null>(null);
 
   // Save state
-  const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>([]);
+  const { savedBuilds, refreshSavedBuilds, deleteSavedBuild } = useBuilderSavedBuilds("railjack");
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
   const [buildName, setBuildName] = useState("");
@@ -129,7 +131,6 @@ export default function RailjackBuilderPage() {
   const [showComponentPicker, setShowComponentPicker] = useState<string | null>(null);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- saved builds live in localStorage; read once after mount to stay hydration-safe
-  useEffect(() => { setSavedBuilds(getSavedBuilds("railjack")); }, []);
 
   // Current mods/polarities based on active tab
   const currentMods = plexusTab === "integrated" ? integratedMods : plexusTab === "battle" ? battleMods : tacticalMods;
@@ -257,7 +258,7 @@ export default function RailjackBuilderPage() {
     setCurrentBuildId(result.id);
     setBuildName(name);
     setBuildIsPublic(result.isPublic);
-    setSavedBuilds(result.builds);
+    void refreshSavedBuilds();
     if (result.synced) {
       toast.success("Build saved", { description: `${name} saved to your account` });
     } else {
@@ -324,8 +325,7 @@ export default function RailjackBuilderPage() {
   useCloudBuildFromUrl("railjack", handleLoadBuild);
 
   const handleDeleteBuild = useCallback((id: string) => {
-    deleteBuild(id);
-    setSavedBuilds(getSavedBuilds("railjack"));
+    void deleteSavedBuild(id);
     if (currentBuildId === id) setCurrentBuildId(null);
     toast.success("Build deleted");
   }, [currentBuildId]);
@@ -383,6 +383,10 @@ export default function RailjackBuilderPage() {
   return (
     <PageShell>
       <main className="container mx-auto px-4 pt-8 pb-24 lg:pb-8">
+        {/* Round 55: back to /builds (same filter + scroll) or Your builds when signed in. */}
+        <div className="mb-3 flex empty:hidden">
+          <BuildsReturnLink />
+        </div>
         {/* Title bar */}
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <h1 className="min-w-0 text-xl font-bold sm:text-3xl">Railjack Builder</h1>
@@ -397,7 +401,7 @@ export default function RailjackBuilderPage() {
             <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:min-w-0 sm:py-1.5" title="Save Build">
               <Save className="h-3.5 w-3.5" /> <span>Save</span>
             </button>
-            <button onClick={() => { setSavedBuilds(getSavedBuilds("railjack")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-9 sm:min-w-0 sm:py-1.5" title="Load Build">
+            <button onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-9 sm:min-w-0 sm:py-1.5" title="Load Build">
               <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
             </button>
           </div>
@@ -1350,7 +1354,7 @@ export default function RailjackBuilderPage() {
         accent="rose"
         getSubtitle={(build) => {
           const d = build.data as RailjackBuildData;
-          const modCount = d.integratedMods.length + d.battleMods.length + d.tacticalMods.length;
+          const modCount = (d.integratedMods?.length ?? 0) + (d.battleMods?.length ?? 0) + (d.tacticalMods?.length ?? 0);
           return `${modCount} mods • ${new Date(build.updatedAt).toLocaleDateString()}`;
         }}
         onLoad={handleLoadBuild}

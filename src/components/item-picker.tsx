@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import type { AccentColor } from "@/components/page-shell";
 import { EmptyState, FilterChip, PageHero } from "@/components/page-shell";
 import { PointerVerb } from "@/components/pointer-verb";
+import { BuildsReturnLink } from "@/components/builds-return-link";
 
 /** Survives remount so ← Change restores list scroll after picking an item. */
 const pickerListScrollY = new Map<string, number>();
@@ -154,17 +155,21 @@ export function ItemPickerScreen({
 
   return (
     <div className={cn("mx-auto max-w-3xl", className)}>
-      {onBack && (
-        <button
-          type="button"
-          onClick={onBack}
-          data-testid="picker-back"
-          className="mb-3 inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border/70 bg-background/50 px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
-          {backLabel ? `Back to ${backLabel}` : "Back"}
-        </button>
-      )}
+      {/* Round 55: back to the current item and back to /builds sit together; hidden when empty. */}
+      <div className="mb-3 flex flex-wrap items-center gap-2 empty:hidden">
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            data-testid="picker-back"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border/70 bg-background/50 px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+            {backLabel ? `Back to ${backLabel}` : "Back"}
+          </button>
+        )}
+        <BuildsReturnLink />
+      </div>
       <PageHero icon={icon} accent={accent} title={title} description={description} />
 
       {showTabs && (
@@ -362,6 +367,8 @@ export function BuilderItemHeader({
             <p className="mt-0.5 text-xs capitalize text-muted-foreground sm:text-sm">{subtitle}</p>
           )}
         </div>
+        {/* Round 55: full row on phones, right end of the header from sm up. */}
+        <BuildsReturnLink className="w-full justify-center sm:w-auto" />
       </div>
       {children}
     </div>

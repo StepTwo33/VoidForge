@@ -66,6 +66,9 @@ export function useCloudBuildFromUrl(
       return;
     }
     if (loadedInMountRef.current === buildId) return;
+    // A StrictMode-discarded effect's queued microtask runs after its cleanup: bail before
+    // claiming the id, or it blocks the live effect's load and then drops its own result.
+    if (opts?.cancelled()) return;
 
     // Mark as attempted up-front so StrictMode's double effect invoke (same mount)
     // does not fire duplicate fetches/toasts. Cleared on unmount so reopening the

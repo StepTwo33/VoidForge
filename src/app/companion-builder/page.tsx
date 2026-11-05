@@ -40,7 +40,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, Zap, Dog, Bot, Bug, Swords, Crosshair, Flag, Save, FolderOpen, ArrowLeftRight } from "lucide-react";
-import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, CompanionBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
+import { generateBuildId, SavedBuild, CompanionBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
+import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
 import { dropUnknownMods } from "@/lib/mods/known-mods";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
@@ -182,7 +183,7 @@ export default function CompanionBuilderPage() {
   const [showCompanionList, setShowCompanionList] = useState(true);
   const [hasReactor, setHasReactor] = useState(false);
   const [slotPolarities, setSlotPolarities] = useState<Record<number, string>>({});
-  const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>(() => getSavedBuilds("companion"));
+  const { savedBuilds, refreshSavedBuilds, deleteSavedBuild } = useBuilderSavedBuilds("companion");
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [pickerTab, setPickerTab] = useState<"catalog" | "saved">("catalog");
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
@@ -262,7 +263,7 @@ export default function CompanionBuilderPage() {
     setBuildName(name);
     setBuildDescription(description);
     setBuildIsPublic(result.isPublic);
-    setSavedBuilds(result.builds);
+    void refreshSavedBuilds();
     if (result.synced) {
       toast.success(currentBuildId ? "Build saved" : "Saved as new build", { description: `${name} saved to your account` });
     } else {
@@ -368,8 +369,7 @@ export default function CompanionBuilderPage() {
   }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildCompanionData]);
 
   const handleDeleteBuild = useCallback((id: string) => {
-    deleteBuild(id);
-    setSavedBuilds(getSavedBuilds("companion"));
+    void deleteSavedBuild(id);
     if (currentBuildId === id) setCurrentBuildId(null);
     toast.success("Build deleted");
   }, [currentBuildId]);
@@ -647,7 +647,7 @@ export default function CompanionBuilderPage() {
             searchPlaceholder="Search companions..."
             pickerTab={pickerTab}
             onPickerTabChange={(tab) => {
-              if (tab === "saved") setSavedBuilds(getSavedBuilds("companion"));
+              if (tab === "saved") void refreshSavedBuilds();
               setPickerTab(tab);
             }}
             savedPanel={
@@ -752,7 +752,7 @@ export default function CompanionBuilderPage() {
                     <Save className="h-3.5 w-3.5" /> <span>Save</span>
                     {hasUnsavedChanges && <span className={SAVE_DIRTY_DOT_CLASS} aria-hidden />}
                   </button>
-                  <button onClick={() => { setSavedBuilds(getSavedBuilds("companion")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-0 sm:py-1.5" title="Load Build">
+                  <button onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-0 sm:py-1.5" title="Load Build">
                     <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
                   </button>
                   <button
@@ -1242,7 +1242,7 @@ export default function CompanionBuilderPage() {
         getSubtitle={(build) => {
           const d = build.data as CompanionBuildData;
           const comp = allCompanions.find((c) => c.id === d.companionId);
-          return `${comp?.name ?? d.companionId} • ${d.mods.length} mods • ${new Date(build.updatedAt).toLocaleDateString()}`;
+          return `${comp?.name ?? d.companionId} • ${d.mods?.length ?? 0} mods • ${new Date(build.updatedAt).toLocaleDateString()}`;
         }}
         onLoad={handleLoadBuild}
         onDelete={handleDeleteBuild}

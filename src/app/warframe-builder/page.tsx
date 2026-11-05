@@ -63,7 +63,8 @@ import {
   getMeleeExaltedWeapon,
   getPrimaryExaltedWeapon,
 } from "@/lib/weapons/exalted-weapons";
-import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, WarframeBuildData, persistSavedBuild, resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
+import { generateBuildId, SavedBuild, WarframeBuildData, persistSavedBuild, resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
+import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
 import { cleanLoadedBuild, cleanLoadedMods } from "@/lib/builds/incompatible-mod-warnings";
 import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
@@ -192,7 +193,7 @@ export default function WarframeBuilderPage() {
   const [slotPolarities, setSlotPolarities] = useState<Record<number, string>>({});
   const [activeDualFormId, setActiveDualFormId] = useState("sirius");
   const [dualFormBuilds, setDualFormBuilds] = useState<Record<string, DualFormBuildSlice>>({});
-  const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>(() => getSavedBuilds("warframe"));
+  const { savedBuilds, refreshSavedBuilds, deleteSavedBuild } = useBuilderSavedBuilds("warframe");
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [pickerTab, setPickerTab] = useState<"catalog" | "saved">("catalog");
   const [showImporter, setShowImporter] = useState(false);
@@ -441,7 +442,7 @@ export default function WarframeBuilderPage() {
     setBuildName(name);
     setBuildDescription(description);
     setBuildIsPublic(result.isPublic);
-    setSavedBuilds(result.builds);
+    void refreshSavedBuilds();
     if (result.synced) {
       toast.success(currentBuildId ? "Build saved" : "Saved as new build", { description: `${name} saved to your account` });
     } else {
@@ -500,8 +501,7 @@ export default function WarframeBuilderPage() {
   }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildWarframeData]);
 
   const handleDeleteBuild = useCallback((id: string) => {
-    deleteBuild(id);
-    setSavedBuilds(getSavedBuilds("warframe"));
+    void deleteSavedBuild(id);
     if (currentBuildId === id) setCurrentBuildId(null);
     toast.success("Build deleted");
   }, [currentBuildId]);
@@ -990,7 +990,7 @@ export default function WarframeBuilderPage() {
             searchPlaceholder="Search warframes..."
             pickerTab={pickerTab}
             onPickerTabChange={(tab) => {
-              if (tab === "saved") setSavedBuilds(getSavedBuilds("warframe"));
+              if (tab === "saved") void refreshSavedBuilds();
               setPickerTab(tab);
             }}
             savedPanel={
@@ -1086,7 +1086,7 @@ export default function WarframeBuilderPage() {
                     <Save className="h-3.5 w-3.5" /> <span className="inline">Save</span>
                     {hasUnsavedChanges && <span className={SAVE_DIRTY_DOT_CLASS} aria-hidden />}
                   </button>
-                  <button onClick={() => { setSavedBuilds(getSavedBuilds("warframe")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:pointer-fine:min-h-0 lg:py-1.5 text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium" title="Load Build">
+                  <button onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:pointer-fine:min-h-0 lg:py-1.5 text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium" title="Load Build">
                     <FolderOpen className="h-3.5 w-3.5" /> <span className="inline">Load</span>
                   </button>
                   <div className="w-px h-4 bg-border mx-1" />
@@ -1709,7 +1709,7 @@ export default function WarframeBuilderPage() {
         getSubtitle={(build) => {
           const d = build.data as WarframeBuildData;
           const wf = allWarframes.find((w) => w.id === d.warframeId);
-          return `${wf?.name ?? d.warframeId} • ${d.mods.length} mods • ${new Date(build.updatedAt).toLocaleDateString()}`;
+          return `${wf?.name ?? d.warframeId} • ${d.mods?.length ?? 0} mods • ${new Date(build.updatedAt).toLocaleDateString()}`;
         }}
         onLoad={handleLoadBuild}
         onDelete={handleDeleteBuild}

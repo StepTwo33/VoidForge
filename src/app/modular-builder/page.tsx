@@ -16,7 +16,9 @@ import { getWeaponArcanes, arcanesForSlot, arcaneSlotLabel, type WeaponArcaneCon
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import type { SlotType } from "@/components/mod-picker";
 import { Zap, Wrench, ChevronRight, Save, FolderOpen, Gem, ArrowLeftRight } from "lucide-react";
-import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, persistSavedBuild } from "@/lib/builds/build-storage";
+import { generateBuildId, SavedBuild, persistSavedBuild } from "@/lib/builds/build-storage";
+import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
+import { BuildsReturnLink } from "@/components/builds-return-link";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { toast } from "sonner";
 import {
@@ -158,7 +160,7 @@ export default function ModularBuilderPage() {
     }, 0);
   }, [equippedMods, slotPolarities]);
 
-  const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>(() => getSavedBuilds("modular"));
+  const { savedBuilds, refreshSavedBuilds, deleteSavedBuild } = useBuilderSavedBuilds("modular");
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
   const [buildName, setBuildName] = useState("");
@@ -292,7 +294,7 @@ export default function ModularBuilderPage() {
     setCurrentBuildId(result.id);
     setBuildName(name);
     setBuildIsPublic(result.isPublic);
-    setSavedBuilds(result.builds);
+    void refreshSavedBuilds();
     if (result.synced) {
       toast.success(currentBuildId ? "Build saved" : "Saved as new build", { description: `${name} saved to your account` });
     } else {
@@ -369,8 +371,7 @@ export default function ModularBuilderPage() {
   };
 
   const handleDeleteBuild = (id: string) => {
-    deleteBuild(id);
-    setSavedBuilds(getSavedBuilds("modular"));
+    void deleteSavedBuild(id);
     if (currentBuildId === id) setCurrentBuildId(null);
     toast.success("Build deleted");
   };
@@ -426,6 +427,10 @@ export default function ModularBuilderPage() {
           dirty={hasUnsavedChanges}
           onSaveToLoadout={() => handleSaveDialog({ name: buildName, description: "", isPublic: false, tags: [], target: "loadout" })}
         />
+        {/* Round 55: back to /builds (same filter + scroll) or Your builds when signed in. */}
+        <div className="mb-3 flex empty:hidden">
+          <BuildsReturnLink />
+        </div>
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <h1 className="text-xl sm:text-3xl font-bold">Modular Builder</h1>
           <div className="flex items-center gap-2">
@@ -433,7 +438,7 @@ export default function ModularBuilderPage() {
               <Save className="h-3.5 w-3.5" /> <span>Save</span>
               {hasUnsavedChanges && <span className={SAVE_DIRTY_DOT_CLASS} aria-hidden />}
             </button>
-            <button onClick={() => { setSavedBuilds(getSavedBuilds("modular")); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-9 sm:py-1.5" title="Load Build">
+            <button onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-9 sm:py-1.5" title="Load Build">
               <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
             </button>
             <button
@@ -1058,7 +1063,7 @@ export default function ModularBuilderPage() {
         accent="cyan"
         getSubtitle={(build) => {
           const d = build.data as ModularBuildData;
-          return `${d.modularType} • ${d.mods.length} mods • ${new Date(build.updatedAt).toLocaleDateString()}`;
+          return `${d.modularType} • ${d.mods?.length ?? 0} mods • ${new Date(build.updatedAt).toLocaleDateString()}`;
         }}
         onLoad={handleLoadBuild}
         onDelete={handleDeleteBuild}

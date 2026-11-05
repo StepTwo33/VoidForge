@@ -59,7 +59,8 @@ import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import { incarnonDataMap } from "@/data/incarnon";
 import { cn } from "@/lib/utils";
 import { appendReturnTo } from "@/lib/site/nav-return";
-import { getSavedBuilds, deleteBuild, generateBuildId, SavedBuild, WeaponBuildData, persistSavedBuild, resolveSavedArcaneSlots, resolveArcaneById } from "@/lib/builds/build-storage";
+import { generateBuildId, SavedBuild, WeaponBuildData, persistSavedBuild, resolveSavedArcaneSlots, resolveArcaneById } from "@/lib/builds/build-storage";
+import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
 import { cleanLoadedBuild, cleanLoadedMods } from "@/lib/builds/incompatible-mod-warnings";
 import { extractBuildFromUrlAsync, ShareableBuild } from "@/lib/builds/build-url";
@@ -164,7 +165,7 @@ export default function WeaponBuilderPage() {
     () => effectiveSlotPolarities(innatePolarities, slotPolarities),
     [innatePolarities, slotPolarities],
   );
-  const [savedBuilds, setSavedBuilds] = useState<SavedBuild[]>(() => getSavedBuilds("weapon"));
+  const { savedBuilds, refreshSavedBuilds, deleteSavedBuild } = useBuilderSavedBuilds("weapon");
   const [buildName, setBuildName] = useState("");
   const [buildDescription, setBuildDescription] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
@@ -420,7 +421,7 @@ export default function WeaponBuilderPage() {
     setBuildName(name);
     setBuildDescription(description);
     setBuildIsPublic(result.isPublic);
-    setSavedBuilds(result.builds);
+    void refreshSavedBuilds();
     if (result.synced) {
       toast.success(currentBuildId ? "Build saved" : "Saved as new build", { description: `${name} saved to your account` });
     } else {
@@ -479,8 +480,7 @@ export default function WeaponBuilderPage() {
   }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildWeaponData]);
 
   const handleDeleteBuild = useCallback((id: string) => {
-    deleteBuild(id);
-    setSavedBuilds(getSavedBuilds("weapon"));
+    void deleteSavedBuild(id);
     if (currentBuildId === id) setCurrentBuildId(null);
     toast.success("Build deleted");
   }, [currentBuildId]);
@@ -884,7 +884,7 @@ export default function WeaponBuilderPage() {
             searchPlaceholder="Search weapons..."
             pickerTab={pickerTab}
             onPickerTabChange={(tab) => {
-              if (tab === "saved") setSavedBuilds(getSavedBuilds("weapon"));
+              if (tab === "saved") void refreshSavedBuilds();
               setPickerTab(tab);
             }}
             savedPanel={
@@ -1004,7 +1004,7 @@ export default function WeaponBuilderPage() {
                     {hasUnsavedChanges && <span className={SAVE_DIRTY_DOT_CLASS} aria-hidden />}
                   </button>
                   <button
-                    onClick={() => { setSavedBuilds(getSavedBuilds("weapon")); setShowSavedBuilds(true); }}
+                    onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }}
                     className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:pointer-fine:min-h-0 lg:py-1.5 text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium"
                     title="Load Build"
                   >
@@ -1455,7 +1455,7 @@ export default function WeaponBuilderPage() {
         getSubtitle={(build) => {
           const d = build.data as WeaponBuildData;
           const weapon = allWeapons.find((w) => w.id === d.weaponId);
-          return `${weapon?.name ?? d.weaponId} • ${d.mods.length} mods • ${new Date(build.updatedAt).toLocaleDateString()}`;
+          return `${weapon?.name ?? d.weaponId} • ${d.mods?.length ?? 0} mods • ${new Date(build.updatedAt).toLocaleDateString()}`;
         }}
         onLoad={handleLoadBuild}
         onDelete={handleDeleteBuild}

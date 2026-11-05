@@ -1,4 +1,6 @@
 import {
+  deleteBuild,
+  deleteCloudBuild,
   getCloudBuilds,
   getSavedBuilds,
   saveBuild,
@@ -26,6 +28,21 @@ export function ownershipBadge(id: string): OwnershipBadge {
   return isDeviceBuildId(id) ? "Device" : "Account";
 }
 
+/** Dedupe device + account rows by id (newer `updatedAt` wins), newest first. Pure. */
+export function mergeSavedBuildLists(
+  local: readonly SavedBuild[],
+  cloud: readonly SavedBuild[],
+): SavedBuild[] {
+  const byId = new Map<string, SavedBuild>();
+  for (const b of [...local, ...cloud]) {
+    const prev = byId.get(b.id);
+    if (!prev || (b.updatedAt ?? 0) >= (prev.updatedAt ?? 0)) {
+      byId.set(b.id, b);
+    }
+  }
+  return Array.from(byId.values()).sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+}
+
 /** Merge localStorage + signed-in cloud builds for one type (dedupe by id, prefer newer). */
 export async function mergeYoursSavedBuilds(
   type: string,
@@ -38,16 +55,22 @@ export async function mergeYoursSavedBuilds(
   } catch {
     /* offline / signed out */
   }
-  const byId = new Map<string, SavedBuild>();
-  for (const b of [...local, ...cloud]) {
-    const prev = byId.get(b.id);
-    if (!prev || (b.updatedAt ?? 0) >= (prev.updatedAt ?? 0)) {
-      byId.set(b.id, b);
-    }
-  }
-  return Array.from(byId.values())
-    .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
-    .slice(0, limit);
+  return mergeSavedBuildLists(local, cloud).slice(0, limit);
+}
+
+/**
+ * Every saved build of one type for a builder's Saved builds tab / Load dialog: the same
+ * device + account merge /builds uses, with no cap (Round 55).
+ */
+export function mergeBuilderSavedBuilds(type: string): Promise<SavedBuild[]> {
+  return mergeYoursSavedBuilds(type, Number.POSITIVE_INFINITY);
+}
+
+/** Delete from this device and, for account ids, from the account (same as /builds). */
+export async function deleteYoursSavedBuild(id: string): Promise<boolean> {
+  deleteBuild(id);
+  if (isDeviceBuildId(id)) return true;
+  return deleteCloudBuild(id);
 }
 
 function loadoutAsSavedBuild(loadout: Loadout): SavedBuild {
@@ -118,14 +141,7 @@ export async function mergeAllYoursLibrary(limit = 200): Promise<SavedBuild[]> {
       } catch {
         /* offline / signed out */
       }
-      const byId = new Map<string, SavedBuild>();
-      for (const b of [...local, ...cloud]) {
-        const prev = byId.get(b.id);
-        if (!prev || (b.updatedAt ?? 0) >= (prev.updatedAt ?? 0)) {
-          byId.set(b.id, b);
-        }
-      }
-      return Array.from(byId.values());
+      return mergeSavedBuildLists(local, cloud);
     })(),
     mergeYoursLoadouts(limit),
   ]);

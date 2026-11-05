@@ -36,16 +36,18 @@ import { toast } from "sonner";
 import { builderCtaForFilter } from "@/lib/builds/builder-cta";
 import { RivenLibrary } from "@/components/riven-library";
 import { cn } from "@/lib/utils";
+import {
+  BUILDS_RESTORE_SCROLL_KEY,
+  BUILDS_RETURN_KEY,
+  buildsLibraryHref,
+  hrefPathname,
+  parseBuildsLibraryQuery,
+  parseBuildsReturn,
+  withFromBuilds,
+  type LibraryTypeFilter,
+} from "@/lib/builds/builds-return";
 
-type TypeFilter =
-  | "all"
-  | "weapon"
-  | "warframe"
-  | "companion"
-  | "modular"
-  | "archwing"
-  | "railjack"
-  | "loadout";
+type TypeFilter = LibraryTypeFilter;
 
 const TYPE_FILTERS: { id: TypeFilter; label: string }[] = [
   { id: "all", label: "All" },
@@ -90,6 +92,54 @@ export default function BuildsLibraryPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- data-fetch effect: loading flag is set when the request starts
     void refresh();
   }, [refresh]);
+
+  // Round 55: filter + search live in the URL (?type=&q=) so "Back to your builds" lands on the same view.
+  const [urlReady, setUrlReady] = useState(false);
+  useEffect(() => {
+    const initial = parseBuildsLibraryQuery(window.location.search);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- restore filter/search from the URL once after mount
+    setTypeFilter(initial.type);
+    setQuery(initial.q);
+    setUrlReady(true);
+  }, []);
+  useEffect(() => {
+    if (!urlReady) return;
+    const href = buildsLibraryHref({ type: typeFilter, q: query });
+    if (`${window.location.pathname}${window.location.search}` !== href) {
+      window.history.replaceState(window.history.state, "", `${href}${window.location.hash}`);
+    }
+  }, [urlReady, typeFilter, query]);
+
+  // Restore the scroll saved when a row was opened, once, after "Back to your builds".
+  useEffect(() => {
+    if (loading || !urlReady) return;
+    try {
+      if (window.sessionStorage.getItem(BUILDS_RESTORE_SCROLL_KEY) !== "1") return;
+      window.sessionStorage.removeItem(BUILDS_RESTORE_SCROLL_KEY);
+      const entry = parseBuildsReturn(window.sessionStorage.getItem(BUILDS_RETURN_KEY));
+      if (entry?.scrollY) requestAnimationFrame(() => window.scrollTo({ top: entry.scrollY }));
+    } catch {
+      /* private mode */
+    }
+  }, [loading, urlReady]);
+
+  const rememberReturn = useCallback(
+    (builderHref: string) => {
+      try {
+        window.sessionStorage.setItem(
+          BUILDS_RETURN_KEY,
+          JSON.stringify({
+            href: buildsLibraryHref({ type: typeFilter, q: query }),
+            scrollY: Math.round(window.scrollY),
+            builder: hrefPathname(builderHref),
+          }),
+        );
+      } catch {
+        /* private mode */
+      }
+    },
+    [typeFilter, query],
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -288,7 +338,7 @@ export default function BuildsLibraryPage() {
             {filtered.map((build) => {
               const itemId = extractBuildItemId(build.type, build.data);
               const display = resolveBuildItemDisplay(build.type, itemId);
-              const href = libraryOpenUrl(build);
+              const href = withFromBuilds(libraryOpenUrl(build));
               const badge = ownershipBadge(build.id);
               return (
                 <li key={`${build.type}:${build.id}`}>
@@ -296,6 +346,7 @@ export default function BuildsLibraryPage() {
                     <div className="flex items-stretch gap-0">
                       <Link
                         href={href}
+                        onClick={() => rememberReturn(href)}
                         className="flex min-w-0 flex-1 items-center gap-3 px-3 py-3 transition-colors hover:bg-accent/40 sm:px-4"
                       >
                         {display.itemImage ? (
