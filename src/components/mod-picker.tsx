@@ -236,8 +236,13 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
         const lines = Object.entries(entry.stats).map(([k, v]) => {
           const def = pool.find((d) => d.key === k);
           const label = def ? def.label.replace(" (Spliced)", "") : k;
-          const shown = def?.isPercent === false ? v.toFixed(1) : `${(v * 100).toFixed(1)}%`;
-          return `${v >= 0 ? "+" : ""}${shown} ${label}`;
+          const isFaction = k.startsWith("faction");
+          const shown = isFaction
+            ? `${(1 + v).toFixed(2)}x`
+            : def?.isPercent === false
+            ? v.toFixed(1)
+            : `${(v * 100).toFixed(1)}%`;
+          return isFaction ? `${shown} ${label}` : `${v >= 0 ? "+" : ""}${shown} ${label}`;
         });
         return { entry, mod, lines, valid: validateRivenStats(entry.stats, rivenCategory).ok };
       })

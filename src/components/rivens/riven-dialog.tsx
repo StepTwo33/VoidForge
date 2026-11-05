@@ -6,6 +6,12 @@ import { allWeapons } from "@/data/weapons";
 import type { Weapon } from "@/lib/types";
 import { getRivenWeaponType, type RivenWeaponType } from "@/lib/weapons/riven-weapon-type";
 import {
+  getBaseRivenWeapons,
+  getEffectiveRivenWeaponType,
+  getRivenBaseWeapon,
+  type ExtendedRivenWeaponType,
+} from "@/lib/weapons/riven-family";
+import {
   getStatsWithDisposition,
   getNegativeStatsWithDisposition,
   STANDARD_RIVEN_DISPOSITION,
@@ -36,10 +42,7 @@ const POLARITIES = ["madurai", "vazarin", "naramon", "zenurik"];
 
 export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialogProps) {
   const eligibleWeapons = useMemo(
-    () =>
-      allWeapons
-        .filter((w) => getRivenWeaponType(w) !== null && w.triggerType !== "Zaw Component")
-        .sort((a, b) => a.name.localeCompare(b.name)),
+    () => getBaseRivenWeapons().sort((a, b) => a.name.localeCompare(b.name)),
     [],
   );
 
@@ -59,8 +62,8 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
     [eligibleWeapons, weaponId],
   );
 
-  const weaponType: RivenWeaponType = useMemo(
-    () => (selectedWeapon ? getRivenWeaponType(selectedWeapon) ?? "Rifle" : "Rifle"),
+  const weaponType: ExtendedRivenWeaponType = useMemo(
+    () => (selectedWeapon ? getEffectiveRivenWeaponType(selectedWeapon) ?? "Rifle" : "Rifle"),
     [selectedWeapon],
   );
 
@@ -284,7 +287,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
                 >
                   {filteredWeapons.map((w) => (
                     <option key={w.id} value={w.id} className="bg-[#120822] text-white">
-                      {w.name} ({getRivenWeaponType(w)})
+                      {w.name} ({getEffectiveRivenWeaponType(w)})
                     </option>
                   ))}
                 </select>
@@ -344,9 +347,13 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
                         (d) => !positiveStats.some((p) => p.key === d.key),
                       );
                       if (firstUnused) {
+                        const isFac = firstUnused.key.startsWith("faction");
                         setPositiveStats([
                           ...positiveStats,
-                          { key: firstUnused.key, value: firstUnused.isPercent ? 1.0 : 2.0 },
+                          {
+                            key: firstUnused.key,
+                            value: isFac ? 0.45 : firstUnused.isPercent ? 1.0 : 2.0,
+                          },
                         ]);
                       }
                     }}
@@ -360,6 +367,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
               <div className="space-y-2">
                 {positiveStats.map((stat, idx) => {
                   const def = availableDefs.find((d) => d.key === stat.key);
+                  const isFaction = stat.key.startsWith("faction");
                   return (
                     <div key={idx} className="flex items-center gap-2">
                       <select
@@ -367,9 +375,10 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
                         onChange={(e) => {
                           const n = [...positiveStats];
                           const newDef = availableDefs.find((d) => d.key === e.target.value);
+                          const isFac = e.target.value.startsWith("faction");
                           n[idx] = {
                             key: e.target.value,
-                            value: newDef?.isPercent ? 1.0 : 2.0,
+                            value: isFac ? 0.45 : newDef?.isPercent ? 1.0 : 2.0,
                           };
                           setPositiveStats(n);
                         }}
@@ -385,20 +394,34 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
                       <div className="flex w-24 shrink-0 items-center">
                         <Input
                           type="number"
-                          step={def?.isPercent ? "0.1" : "0.1"}
-                          value={def?.isPercent ? Math.round(stat.value * 1000) / 10 : stat.value}
+                          step={isFaction ? "0.01" : "0.1"}
+                          value={
+                            isFaction
+                              ? (1 + (stat.value || 0)).toFixed(2)
+                              : def?.isPercent
+                              ? Math.round(stat.value * 1000) / 10
+                              : stat.value
+                          }
                           onChange={(e) => {
                             const n = [...positiveStats];
                             const raw = parseFloat(e.target.value) || 0;
                             n[idx] = {
                               ...n[idx],
-                              value: def?.isPercent ? raw / 100 : raw,
+                              value: isFaction
+                                ? (raw >= 1 ? raw - 1 : raw)
+                                : def?.isPercent
+                                ? raw / 100
+                                : raw,
                             };
                             setPositiveStats(n);
                           }}
                           className="h-9 border-purple-500/30 bg-purple-950/40 text-xs text-white"
                         />
-                        {def?.isPercent && <span className="ml-1 text-xs text-purple-400">%</span>}
+                        {isFaction ? (
+                          <span className="ml-1 text-xs text-purple-400">x</span>
+                        ) : def?.isPercent ? (
+                          <span className="ml-1 text-xs text-purple-400">%</span>
+                        ) : null}
                       </div>
 
                       <button

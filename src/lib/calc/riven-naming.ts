@@ -9,6 +9,8 @@
  * Source: Official Warframe Wiki (wiki.warframe.com/w/Riven_Mods#Nomenclature)
  */
 
+import { getRivenBaseName } from "@/lib/weapons/riven-family";
+
 export interface RivenAffix {
   prefix: string;
   suffix: string;
@@ -94,5 +96,6 @@ export function formatRivenName(weaponName: string, positiveStatKeys: string[]):
     rollName = `${a.prefix}-${b.prefix.toLowerCase()}${c.suffix.toLowerCase()}`;
   }
 
-  return weaponName ? `${weaponName} ${rollName}` : rollName;
+  const baseName = weaponName ? getRivenBaseName(weaponName) : "";
+  return baseName ? `${baseName} ${rollName}` : rollName;
 }

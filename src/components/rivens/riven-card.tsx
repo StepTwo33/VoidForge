@@ -111,7 +111,9 @@ export function RivenCard({ riven, onDelete, onEdit, onReroll }: RivenCardProps)
         <div className="space-y-1.5 py-1 text-center font-sans">
           {riven.displayStats.map((s, idx) => {
             const sign = s.value >= 0 ? "+" : "";
-            const formattedVal = s.isPercent
+            const formattedVal = s.key.startsWith("faction")
+              ? `${(1 + s.value).toFixed(2)}x`
+              : s.isPercent
               ? `${sign}${(s.value * 100).toFixed(1)}%`
               : `${sign}${s.value.toFixed(1)}`;
 

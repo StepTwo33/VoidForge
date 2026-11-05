@@ -103,6 +103,7 @@ import {
 import { AbilitiesSectionHeader } from "@/components/ability-display";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { AbilityCard, HelminthAbilityCard, HelminthSubsumeButton } from "./ability-cards";
+import { applyCostAugments } from "@/lib/calc/ability-augment-rows";
 import { ShardPickerDialog } from "./shard-picker-dialog";
 import { HelminthPickerDialog } from "./helminth-picker-dialog";
 import { ExaltedWeaponSection } from "./exalted-weapon-section";
@@ -1394,10 +1395,11 @@ export default function WarframeBuilderPage() {
                                 gameSlot={entry.gameSlot}
                                 onChange={openHelminthPicker}
                                 onRemove={() => { setHelminthSlot(null); setHelminthAbility(null); }}
+                                hostWarframeId={selectedWarframe.id}
                               />
                             ) : (
                               <AbilityCard
-                                ability={entry.ability}
+                                ability={applyCostAugments(entry.ability, equippedMods.map((m) => m.modId))}
                                 index={entry.abilityIndex}
                                 gameSlot={entry.gameSlot}
                                 formLabel={entry.formLabel}

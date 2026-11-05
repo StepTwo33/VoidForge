@@ -120,9 +120,9 @@ const RIVEN_ATTRS: RivenAttr[] = [
 
 function poolKey(category: string): RivenPoolKey {
   const cat = category.toLowerCase();
-  if (cat === "melee") return "melee";
+  if (cat === "melee" || cat === "zaw") return "melee";
   if (cat === "shotgun") return "shotgun";
-  if (cat === "pistol" || cat === "secondary") return "pistol";
+  if (cat === "pistol" || cat === "secondary" || cat === "kitgun") return "pistol";
   if (cat === "archgun") return "archgun";
   return "rifle";
 }

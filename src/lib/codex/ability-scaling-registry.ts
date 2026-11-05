@@ -1230,6 +1230,8 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
   // energy per corpse × EFF (cast_cost)
   "nekros::Desecrate": {
     energyPerCorpse: { scale: "efficiency", formula: "cast_cost" },
+    // Despoil augment swaps the energy cost for 10 Health per corpse (same efficiency scaling).
+    healthPerCorpse: { scale: "efficiency", formula: "cast_cost" },
   },
   // wiki: Shadows of the Dead — damage/shield/health bonuses × STR; health decay ÷ DUR
   "nekros::Shadows Of The Dead": {

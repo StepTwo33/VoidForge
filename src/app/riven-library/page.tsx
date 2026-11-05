@@ -22,10 +22,11 @@ import {
 } from "@/lib/riven/saved-rivens";
 import { allWeapons } from "@/data/weapons";
 import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
+import { getEffectiveRivenWeaponType } from "@/lib/weapons/riven-family";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const WEAPON_TYPES = ["All", "Rifle", "Shotgun", "Pistol", "Melee", "Archgun"];
+const WEAPON_TYPES = ["All", "Rifle", "Shotgun", "Pistol", "Melee", "Kitgun", "Zaw", "Archgun"];
 const GRADES = ["All", "God Roll", "Excellent", "Good", "Average", "Reroll"];
 const POLARITIES = ["All", "madurai", "vazarin", "naramon", "zenurik"];
 
@@ -53,7 +54,7 @@ export default function RivenLibraryPage() {
           const map = new Map<string, SavedRiven>(local.map((r) => [r.id, r]));
           for (const c of cloud) {
             const w = allWeapons.find((x) => x.id === c.weaponId);
-            const wType = w ? getRivenWeaponType(w) ?? "Rifle" : "Rifle";
+            const wType = w ? getEffectiveRivenWeaponType(w) ?? "Rifle" : "Rifle";
             const evalRes = evaluateSavedRiven(w?.name ?? c.weaponId, wType, c.stats, 8, 0, c.polarity);
             map.set(c.id, {
               id: c.id,
@@ -95,11 +96,15 @@ export default function RivenLibraryPage() {
     try {
       const signedIn = await hasClientSession();
       if (signedIn) {
+        const weapon = allWeapons.find((w) => w.id === riven.weaponId);
+        const baseModType =
+          (weapon ? getRivenWeaponType(weapon) : null) ??
+          (riven.weaponType === "Kitgun" ? "Pistol" : riven.weaponType === "Zaw" ? "Melee" : riven.weaponType);
         await saveCloudRiven({
           id: riven.id.startsWith("riven_") ? undefined : riven.id,
           weaponId: riven.weaponId,
           name: riven.name,
-          modId: `riven_${riven.weaponType.toLowerCase()}`,
+          modId: `riven_${baseModType.toLowerCase()}`,
           stats: riven.stats,
           polarity: riven.polarity,
           drain: 18,

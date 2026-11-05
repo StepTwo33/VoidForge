@@ -8,11 +8,13 @@ import { hydrateHelminthAbility } from "@/lib/builds/helminth-resolve";
 import { formatAbilityDescription } from "@/lib/display/ability-text";
 import { scaledAbilityEnergyCost } from "@/lib/codex/ability-misc-stats";
 import { augurShieldsFromEnergySpent } from "@/lib/calc/set-bonuses";
+import { HILDRYN_SUBSUME_SHIELD_MULTIPLIER, isHildrynFrame } from "@/lib/calc/ability-augment-rows";
 import {
   AbilityCardShell,
   AbilitySlotBadge,
   AbilityFormBadge,
   AbilityEnergyChip,
+  AbilityShieldCostChip,
   AbilityDamageTypeChip,
   AbilityStatsBlock,
 } from "@/components/ability-display";
@@ -175,17 +177,21 @@ export function HelminthAbilityCard({
   gameSlot,
   onChange,
   onRemove,
+  hostWarframeId,
 }: {
   ability: HelminthAbility;
   stats: WarframeCalculatedStats | null;
   gameSlot: number;
   onChange: () => void;
   onRemove: () => void;
+  /** Frame the ability is subsumed onto (Hildryn pays Shields instead of Energy). */
+  hostWarframeId?: string;
 }) {
   const preview = hydrateHelminthAbility(ability);
   const eff = stats?.abilityEfficiency ?? 1;
   const effectiveCost =
     typeof preview.energyCost === "number" ? scaledAbilityEnergyCost(preview.energyCost, eff) : null;
+  const paysShields = isHildrynFrame(hostWarframeId);
   const sourceId = preview.source !== "helminth" ? preview.source : undefined;
   const display = {
     warframeId: sourceId,
@@ -209,10 +215,17 @@ export function HelminthAbilityCard({
           </div>
         </div>
         <div className="shrink-0">
-          {effectiveCost != null && preview.energyCost != null && (
-            <AbilityEnergyChip baseCost={preview.energyCost} effectiveCost={effectiveCost} />
+          {paysShields && effectiveCost != null && preview.energyCost != null ? (
+            <AbilityShieldCostChip
+              baseCost={preview.energyCost * HILDRYN_SUBSUME_SHIELD_MULTIPLIER}
+              effectiveCost={effectiveCost * HILDRYN_SUBSUME_SHIELD_MULTIPLIER}
+            />
+          ) : (
+            effectiveCost != null && preview.energyCost != null && (
+              <AbilityEnergyChip baseCost={preview.energyCost} effectiveCost={effectiveCost} />
+            )
           )}
-          {augurPct > 0 && effectiveCost != null && (
+          {!paysShields && augurPct > 0 && effectiveCost != null && (
             <AugurShieldsOnCast energySpent={effectiveCost} convertPercent={augurPct} />
           )}
         </div>
@@ -221,6 +234,11 @@ export function HelminthAbilityCard({
       <p className="mb-2 line-clamp-3 text-[11px] leading-snug text-muted-foreground sm:line-clamp-none sm:text-xs sm:leading-relaxed">
         {formatAbilityDescription(preview.description)}
       </p>
+      {paysShields && (
+        <p className="mb-2 text-[10px] leading-snug text-sky-700 dark:text-sky-400">
+          Hildryn casts this with Shields instead of Energy ({HILDRYN_SUBSUME_SHIELD_MULTIPLIER}× the energy cost).
+        </p>
+      )}
 
       {preview.damageType && (
         <div className="mb-2">

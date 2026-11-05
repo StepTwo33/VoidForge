@@ -14,6 +14,7 @@ import Link from "next/link";
 import { RIVEN_MOD_IDS, SAVED_RIVEN_NAME_MAX, deleteSavedRiven, getSavedRivens, saveRiven, type SavedRiven } from "@/lib/riven/saved-rivens";
 import { getRivenStatsForCategory } from "@/lib/types";
 import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
+import { isRivenVariant, getEffectiveRivenWeaponType } from "@/lib/weapons/riven-family";
 import { useWeapons } from "@/lib/weapons/use-data";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +38,9 @@ function rivenModIdFor(weapon: Parameters<typeof getRivenWeaponType>[0]): string
 
 export function formatRivenStatLine(key: string, value: number, category: string): string {
   const label = getRivenStatsForCategory(category).find((s) => s.key === key)?.label ?? key;
+  if (key.startsWith("faction")) {
+    return `${(1 + value).toFixed(2)}x ${label}`;
+  }
   return `${value >= 0 ? "+" : ""}${(value * 100).toFixed(1)}% ${label}`;
 }
 
@@ -76,7 +80,7 @@ export function RivenLibrary() {
 
   const weaponsById = useMemo(() => new Map(allWeapons.map((w) => [w.id, w])), [allWeapons]);
   const rivenWeapons = useMemo(
-    () => allWeapons.filter((w) => w.triggerType !== "Zaw Component" && rivenModIdFor(w) !== null),
+    () => allWeapons.filter((w) => w.triggerType !== "Zaw Component" && rivenModIdFor(w) !== null && !isRivenVariant(w)),
     [allWeapons],
   );
   const weaponMatches = useMemo(() => {
@@ -86,7 +90,9 @@ export function RivenLibrary() {
   }, [rivenWeapons, weaponQuery]);
 
   const draftWeapon = draft?.weaponId ? weaponsById.get(draft.weaponId) : undefined;
-  const draftCategory = draftWeapon ? getRivenWeaponType(draftWeapon)?.toLowerCase() ?? "rifle" : "rifle";
+  const draftCategory = draftWeapon
+    ? getEffectiveRivenWeaponType(draftWeapon)?.toLowerCase() ?? getRivenWeaponType(draftWeapon)?.toLowerCase() ?? "rifle"
+    : "rifle";
   const validation = draft ? validateRivenStats(draft.stats, draftCategory) : null;
   const canSave = !!draft && !!draftWeapon && !!draft.name.trim() && !!validation?.ok && !rivenPolarityError(draft?.polarity) && !saving;
 

@@ -31,7 +31,7 @@ import {
   type AbilityDisplayContext,
 } from "@/lib/codex/ability-misc-stats";
 import { SimSlider } from "@/components/stats/stat-primitives";
-import { Zap, Sparkles } from "lucide-react";
+import { Zap, Sparkles, Shield } from "lucide-react";
 import { AFFINITY_RANGE_M, castTimeWithSpeed, intrepidStandValues } from "@/lib/calc/ability-augment-rows";
 
 export type AbilityScaleHint = AbilityScaleAttribute;
@@ -110,6 +110,32 @@ export function AbilityFormBadge({ label }: { label: string }) {
     <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary ring-1 ring-primary/20">
       {label}
     </span>
+  );
+}
+
+export function AbilityShieldCostChip({
+  baseCost,
+  effectiveCost,
+  className,
+}: {
+  baseCost: number;
+  effectiveCost: number;
+  className?: string;
+}) {
+  const modified = Math.abs(effectiveCost - baseCost) > 0.5;
+  return (
+    <div
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2 py-0.5 text-sky-700 ring-1 ring-sky-500/25 dark:text-sky-300",
+        className,
+      )}
+      title="Shield cost (Hildryn)"
+    >
+      <Shield className="h-3 w-3" />
+      <span className="text-xs font-mono font-semibold">{(modified ? effectiveCost : baseCost).toFixed(0)}</span>
+      {modified && <span className="text-[10px] font-mono text-muted-foreground/70 line-through">{baseCost.toFixed(0)}</span>}
+      <span className="sr-only">shields</span>
+    </div>
   );
 }
 

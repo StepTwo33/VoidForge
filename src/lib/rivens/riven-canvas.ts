@@ -154,7 +154,9 @@ export async function renderRivenCardToCanvas(
     const isSpliced = s.spliced;
 
     const sign = s.value >= 0 ? "+" : "";
-    const formattedVal = s.isPercent
+    const formattedVal = s.key.startsWith("faction")
+      ? `${(1 + s.value).toFixed(2)}x`
+      : s.isPercent
       ? `${sign}${(s.value * 100).toFixed(1)}%`
       : `${sign}${s.value.toFixed(1)}`;
     const lineText = `${formattedVal} ${s.label}${isSpliced ? " [SPLICED]" : ""}`;

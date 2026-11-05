@@ -2,6 +2,12 @@ import { allWeapons } from "@/data/weapons";
 import type { Weapon } from "@/lib/types";
 import { getRivenWeaponType, type RivenWeaponType } from "@/lib/weapons/riven-weapon-type";
 import {
+  getEffectiveRivenWeaponType,
+  getBaseRivenWeapons,
+  getRivenBaseWeapon,
+  type ExtendedRivenWeaponType,
+} from "@/lib/weapons/riven-family";
+import {
   evaluateRiven,
   getRivenGrade,
   getGradeColor,
@@ -29,7 +35,7 @@ export interface SavedRiven {
   weaponId: string;
   weaponName: string;
   weaponCategory: string;
-  weaponType: RivenWeaponType;
+  weaponType: ExtendedRivenWeaponType;
   polarity: string;
   rank: number; // 0-8
   rerolls: number;
@@ -156,8 +162,8 @@ export const STARTER_RIVENS: SavedRiven[] = [
   {
     id: "starter_rubico",
     name: "Rubico Visi-acritis",
-    weaponId: "rubico_prime",
-    weaponName: "Rubico Prime",
+    weaponId: "rubico",
+    weaponName: "Rubico",
     weaponCategory: "primary",
     weaponType: "Rifle",
     polarity: "vazarin",
@@ -258,16 +264,14 @@ const POLARITIES = ["madurai", "vazarin", "naramon", "zenurik"];
  * Procedurally rolls a new authentic Riven for the requested weapon (or a random weapon).
  */
 export function generateRandomRiven(targetWeaponId?: string): SavedRiven {
-  const eligibleWeapons = allWeapons.filter(
-    (w) => getRivenWeaponType(w) !== null && w.triggerType !== "Zaw Component",
-  );
+  const eligibleWeapons = getBaseRivenWeapons();
 
   const weapon: Weapon =
-    (targetWeaponId ? eligibleWeapons.find((w) => w.id === targetWeaponId) : null) ??
+    (targetWeaponId ? getRivenBaseWeapon(targetWeaponId) : null) ??
     eligibleWeapons[Math.floor(Math.random() * eligibleWeapons.length)] ??
     eligibleWeapons[0];
 
-  const weaponType = getRivenWeaponType(weapon) ?? "Rifle";
+  const weaponType = getEffectiveRivenWeaponType(weapon) ?? "Rifle";
   const hasNegative = Math.random() < 0.65; // 65% chance of a curse
   const positiveCount = Math.random() < 0.4 ? 3 : 2; // 60% 2-stat, 40% 3-stat
   const polarity = POLARITIES[Math.floor(Math.random() * POLARITIES.length)];

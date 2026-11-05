@@ -340,6 +340,7 @@ const LABELS: Record<string, string> = {
   projectileDamage: "Projectile Damage",
   markDuration: "Mark Duration",
   energyPerCorpse: "Energy per Corpse",
+  healthPerCorpse: "Health per Corpse",
   dropTableChance: "Drop Table Chance",
   shieldBonus: "Shield Bonus",
   healthBonus: "Health Bonus",
@@ -1268,6 +1269,7 @@ function formatBaseValue(key: string, value: unknown): string {
       key === "energyPerMark" ||
       key === "energyPerAbility" ||
       key === "energyPerCorpse" ||
+      key === "healthPerCorpse" ||
       key === "energyPerPulse" ||
       key === "energyRefundPerHit" ||
       key === "energyDrainGrowth" ||
@@ -1743,6 +1745,7 @@ function scaleVerifiedValue(
       key === "energyPerMark" ||
       key === "energyPerAbility" ||
       key === "energyPerCorpse" ||
+      key === "healthPerCorpse" ||
       key === "energyPerPulse" ||
       key === "energyRefundPerHit" ||
       key === "energyDrainGrowth" ||

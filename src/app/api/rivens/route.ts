@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { clampRivenDrain, normalizeRivenPolarity, validateRivenStats } from "@/lib/riven/riven-validation";
 import { allWeapons } from "@/data/weapons";
 import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
+import { getRivenBaseWeapon, getRivenFamilyWeaponIds } from "@/lib/weapons/riven-family";
 import {
   RIVEN_MOD_IDS,
   SAVED_RIVEN_NAME_MAX,
@@ -20,8 +21,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const weaponId = req.nextUrl.searchParams.get("weaponId");
+  const familyIds = weaponId ? getRivenFamilyWeaponIds(weaponId) : null;
   const rows = await prisma.savedRiven.findMany({
-    where: { userId: session.user.id, ...(weaponId ? { weaponId } : {}) },
+    where: { userId: session.user.id, ...(familyIds ? { weaponId: { in: familyIds } } : {}) },
     orderBy: { updatedAt: "desc" },
   });
   return NextResponse.json(rows.map(parseSavedRivenRow));
@@ -63,9 +65,12 @@ export async function POST(req: NextRequest) {
   if (!check.ok) {
     return NextResponse.json({ error: check.errors[0] ?? "Invalid riven" }, { status: 400 });
   }
+  const baseWeapon = getRivenBaseWeapon(weaponId);
+  const canonicalWeaponId = baseWeapon.id;
+
   const data = {
     name,
-    weaponId,
+    weaponId: canonicalWeaponId,
     modId,
     stats: JSON.stringify(stats),
     polarity: normalizeRivenPolarity(typeof body.polarity === "string" ? body.polarity : null),

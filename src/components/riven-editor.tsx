@@ -69,13 +69,20 @@ export function RivenEditor({
       : availableSplicedStats;
 
     const selectedStatDef = rivenPool.find((s) => s.key === rivenStatKey);
-    const isPercentStat = selectedStatDef ? selectedStatDef.isPercent !== false : true;
+    const isFactionStat = rivenStatKey.startsWith("faction");
+    const isPercentStat = selectedStatDef ? selectedStatDef.isPercent !== false && !isFactionStat : true;
 
     const handleAddRivenStat = () => {
       if (!rivenStatKey || !rivenStatValue) return;
       const num = parseFloat(rivenStatValue);
       if (isNaN(num) || num === 0) return;
-      const val = isPercentStat ? num / 100 : num;
+      let val: number;
+      if (isFactionStat) {
+        // Faction damage: user enters multiplier e.g. 1.55 (or 55 for +55%)
+        val = num >= 1 ? num - 1 : num > 0 ? num - 1 : num <= -1 ? num / 100 : num;
+      } else {
+        val = isPercentStat ? num / 100 : num;
+      }
       setRivenStats((prev) => ({ ...prev, [rivenStatKey]: val }));
       setRivenStatKey("");
       setRivenStatValue("");
@@ -110,10 +117,9 @@ export function RivenEditor({
                   </span>
                   <div className="flex items-center gap-2">
                     <span className={value >= 0 ? "cmp-win" : "cmp-lose"}>
-                      {value >= 0 ? "+" : ""}
-                      {asPercent
-                        ? `${(value * 100).toFixed(1)}%`
-                        : value.toFixed(1)}
+                      {key.startsWith("faction")
+                        ? `${(1 + value).toFixed(2)}x`
+                        : `${value >= 0 ? "+" : ""}${asPercent ? `${(value * 100).toFixed(1)}%` : value.toFixed(1)}`}
                     </span>
                     <button
                       type="button"
@@ -221,8 +227,8 @@ export function RivenEditor({
               </select>
               <input
                 type="number"
-                step="0.1"
-                placeholder={isPercentStat ? "% value" : "value"}
+                step="0.01"
+                placeholder={isFactionStat ? "e.g. 1.55" : isPercentStat ? "% value" : "value"}
                 value={rivenStatValue}
                 onChange={(e) => setRivenStatValue(e.target.value)}
                 onKeyDown={(e) => {
