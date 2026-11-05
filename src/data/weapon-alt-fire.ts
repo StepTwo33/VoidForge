@@ -335,7 +335,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       ...dmg({ impact: 700 }),
       fireRate: 1, criticalChance: 0.3, criticalMultiplier: 2.4, statusChance: 0.14,
       forcedProcs: [], showDps: false,
-      note: "Wiki Stropha attack 2. One 700 Impact shockwave, range 17 m, falloff from 6 m to 12 m in the wiki data (the page describes it differently). Shots come from stance combos and the charged heavy attack; heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
+      note: "Wiki Stropha attack 2. One 700 Impact shockwave, range 17 m (0.39 s charge). Per the wiki infobox: full damage to 6 m, falling linearly to 1.43% (10 damage) at 12 m and beyond (the page text describes 100% to 50% after 11 m instead). Shots come from stance combos and the charged heavy attack; heavy-attack and combo bonuses aren't applied, so no DPS is shown.",
     },
   ],
   vastilok: [
@@ -432,7 +432,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       ...dmg({ heat: 131 }),
       fireRate: 1, criticalChance: 0.21, criticalMultiplier: 2.3, statusChance: 0.33,
       forcedProcs: [], showDps: false,
-      note: "Wiki Nepheri attack 2. Each fireball is 50% of base damage; the neutral combo ends with four of them. Range about 20 m. No DPS is shown.",
+      note: "Wiki Nepheri attack 2. Each fireball is 50% of base damage; the neutral combo ends with four of them. Range 20 m (wiki infobox; the page text says 19 m). No DPS is shown.",
     },
   ],
   "sigma_&_octantis": [
@@ -1140,7 +1140,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       ...dmg({ impact: 40, puncture: 50, slash: 10 }),
       fireRate: 1.5, criticalChance: 0.25, criticalMultiplier: 2.3, statusChance: 0.13,
       triggerType: "Semi-Auto", burstCount: 1, burstDelay: 0, ammoCost: 1, forcedProcs: ["Puncture"],
-      note: "Wiki Harpak attack 2. Tethered harpoon that pulls the enemy in; guaranteed Puncture.",
+      note: "Wiki Harpak attack 2. Tethered harpoon that pulls the enemy in; guaranteed Puncture. Range 40 m (wiki infobox): the page says the harpoon still hits out to 50 m but only pulls enemies within 40 m.",
     },
   ],
   // Higasa: the charged shot needs a full gauge (10% per primary-fire kill), so no DPS.
@@ -1179,7 +1179,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       ...dmg({ slash: 100 }),
       fireRate: 2, criticalChance: 0.26, criticalMultiplier: 2, statusChance: 0.38,
       triggerType: "Held", ammoCost: 1, forcedProcs: [],
-      note: "Wiki Panthera Prime attack 3. Held spinning blade, 2 hits a second; ammo is only used while it hits. The ricochet's Radial Attack belongs to the primary.",
+      note: "Wiki Panthera Prime attack 3. Held spinning blade, 6 m reach (wiki infobox; the page text says 8 m), 2 hits a second; ammo is only used while it hits. The ricochet's Radial Attack belongs to the primary.",
     },
   ],
   stahlta: [
@@ -1337,7 +1337,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       fireRate: 2, criticalChance: 0.16, criticalMultiplier: 1.8, statusChance: 0.32,
       triggerType: "Semi-Auto", ammoCost: 1, forcedProcs: [],
       radialAttacks: [{ name: "Alt-Fire Radial Attack", puncture: 4, corrosive: 10, totalDamage: 14, radius: 8, falloffReduction: 0.5 }],
-      note: "Wiki Enkaus attacks 2 and 3. Inks enemies for 20 s (primary hits on them refill ammo; they dissolve below 35% health). The 8 m explosion is listed below it. The wiki data says 1 ammo, the page says 15.",
+      note: "Wiki Enkaus attacks 2 and 3. Inks enemies for 20 s (primary hits on them refill ammo; they dissolve below 35% health). The 8 m explosion is listed below it. Costs 1 ammo (the wiki infobox lists Ammo Cost 1; the page text says 15).",
     },
   ],
   // Quanta family: a cube explodes for 150 (0.5 m) on contact or 600 (6 m) when shot, never
@@ -1393,7 +1393,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       triggerType: "Semi", ammoCost: 5, forcedProcs: [],
       showDps: false,
       radialAttacks: [{ name: "Orb Explosion", toxin: 100, totalDamage: 100, radius: 4.4, falloffReduction: 0.5 }],
-      note: "Wiki Mutalist Quanta attacks 2 and 3. Costs 5 ammo. The orb sits for 9 s, then explodes (listed below it); shots fired through it gain Electricity and crit but deal 0.66x. No DPS is shown.",
+      note: "Wiki Mutalist Quanta attacks 2 and 3. Costs 5 ammo. The orb sits for 9 s, then explodes in 4.4 m (listed below it; wiki infobox Range 4.4 m, the page text says 8 m); shots fired through it gain Electricity and crit but deal 0.66x. No DPS is shown.",
     },
   ],
   phantasma: [
@@ -1549,7 +1549,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 1, reloadTime: 0.6, forcedProcs: [],
       showDps: false,
       radialAttacks: [{ name: "Spear Throw Explosion", corrosive: 55, totalDamage: 55, radius: 7, falloffReduction: 0.6 }],
-      note: "Wiki Scourge attacks 3 and 4. Throws the spear, then reloads; needs at least 1 round. It impales, explodes for 55 Corrosive in 7 m (listed below it, 100% to 40% falloff), and puts a 2 m Bullet Attractor on the heads of enemies within 14 m. One field at a time. No DPS is shown.",
+      note: "Wiki Scourge attacks 3 and 4. Throws the spear for 1 ammo, then reloads. It impales, explodes for 55 Corrosive in 7 m (listed below it, 100% to 40% falloff), and puts a 2 m Bullet Attractor on the heads of enemies within 14 m. One field at a time. No DPS is shown.",
     },
   ],
   scourge_prime: [
@@ -1616,7 +1616,7 @@ export const WEAPON_ALT_FIRE: Record<string, AltFireMode[]> = {
       ...dmg({ cold: 20 }),
       fireRate: 1.33, criticalChance: 0.3, criticalMultiplier: 2, statusChance: 0,
       multishot: 1, chargeTime: 0, triggerType: "Semi", ammoCost: 3, forcedProcs: ["Cold"],
-      note: "Wiki Neutralizer attack 2. Lobs a grenade for 3 ammo and 20 energy. It explodes in 10 m, puts 10 Cold stacks on enemies (fully freezing them) and leaves a field for 5 s. 0% status chance; the Cold comes from the forced stacks. The Neutralize ability page lists 60% damage falloff; the weapon data lists none. The ability's 1.25x damage multiplier (scaled by Ability Strength) is added to Serration here, as on the main shot.",
+      note: "Wiki Neutralizer attack 2. Lobs a grenade for 3 ammo and 20 energy. It explodes in 10 m, puts 10 Cold stacks on enemies (fully freezing them) and leaves a field for 5 s. 0% status chance; the Cold comes from the forced stacks. The Neutralize ability page says the 10 m explosion has 60% damage falloff (the weapon infobox lists no falloff); the shown damage is the full hit at the centre. The ability's 1.25x damage multiplier (scaled by Ability Strength) is added to Serration here, as on the main shot.",
     },
   ],
   noctua: [

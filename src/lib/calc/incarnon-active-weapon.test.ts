@@ -2151,7 +2151,7 @@ describe("pass-3 wiki forms", () => {
     expect(form.statusChance).toBeCloseTo(0.24, 5);
   });
 
-  it("Dera form is Magnetic hybrid Semi", () => {
+  it("Dera form is Magnetic hybrid (Auto trigger per the wiki infobox)", () => {
     const dera = allWeapons.find((w) => w.id === "dera")!;
     const data = incarnonDataMap.get("dera")!;
     const form = resolveIncarnonActiveWeapon(dera, data, { 1: 0 });

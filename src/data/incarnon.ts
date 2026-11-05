@@ -761,14 +761,15 @@ export const incarnonWeaponData: IncarnonWeaponData[] = [
     forms: [
       { name: "Dera", damage: 30.0, fireRate: 11.25, criticalChance: 0.08, criticalMultiplier: 2.0, statusChance: 0.16, triggerType: "Burst", magazine: 45, reloadTime: 1.8 },
       {
-        // Wiki: IPS+Magnetic 330, FR 2, 22%/3x/18%, mag 50
+        // Wiki: IPS+Magnetic 330, FR 2, 22%/3x/18%, mag 50. Trigger: the Incarnon Form tab has no trigger of its own,
+        // so it takes the weapon's Trigger Type "Auto" (wiki infobox; Round 51).
         name: "Dera Incarnon",
         damage: 330,
         fireRate: 2,
         criticalChance: 0.22,
         criticalMultiplier: 3.0,
         statusChance: 0.18,
-        triggerType: "Semi",
+        triggerType: "Auto",
         magazine: 50,
         reloadTime: 1.8,
         impact: 40,

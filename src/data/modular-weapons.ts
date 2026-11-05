@@ -100,7 +100,7 @@ export const kitgunChambers: KitgunChamber[] = [
   },
   {
     id: "vermisplicer_chamber", name: "Vermisplicer",
-    description: "Infested beam that fires homing tendrils. Secondary latches onto targets, primary chains. Puncture/Toxin.",
+    description: "Infested beam that fires homing tendrils. Secondary latches onto targets with 5 tendrils, primary chains to up to 3 more enemies within 6 m at 70% damage. Puncture/Toxin.",
     category: "beam", baseDamage: 14,
     damageRatios: { impact: 1.5 / 14, puncture: 3.5 / 14, slash: 4.5 / 14, toxin: 4.5 / 14 },
     triggerPrimary: "Held", triggerSecondary: "Held",
