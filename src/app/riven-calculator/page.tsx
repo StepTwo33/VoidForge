@@ -6,7 +6,7 @@ import { allWeapons } from "@/data/weapons";
 import { STANDARD_RIVEN_DISPOSITION } from "@/data/riven-dispositions";
 import {
   RivenMod, RivenStat,
-  evaluateRiven, getRivenGrade, getGradeColor,
+  evaluateRiven, getRivenGrade, getGradeColor, rivenShapeProblem,
   getRerollCost,
   getStatsWithDisposition, getNegativeStatsWithDisposition,
   getStatTier, getStatTierColor, isValueInStatRange,
@@ -74,8 +74,12 @@ export default function RivenCalculatorPage() {
     [disposition, rangeOptions, selectedWeaponType],
   );
 
+  const namedPositives = graderPositives.filter((s) => s.name && s.value !== 0).length;
+  const shapeProblem = rivenShapeProblem(namedPositives, graderNegative?.name ? 1 : 0);
+
   const handleGrade = useCallback((): { score: number; grade: string; color: string } | null => {
     if (!selectedWeapon || graderPositives.length === 0) return null;
+    if (shapeProblem) return null;
     const posStats: RivenStat[] = graderPositives
       .filter((s) => s.name)
       .map((s) => {
@@ -124,16 +128,19 @@ export default function RivenCalculatorPage() {
     disposition,
     scaledPositivePool,
     scaledNegativePool,
+    shapeProblem,
   ]);
 
   const gradeResult = handleGrade();
 
   const availablePositiveStats = useMemo(() => {
     const usedNames = new Set(graderPositives.map((s) => s.name));
+    // A stat can't be both a buff and the curse.
+    if (graderNegative?.name) usedNames.add(graderNegative.name);
     // One spliced trait per riven (Riven Splicer).
     const hasSpliced = scaledPositivePool.some((p) => p.spliced && usedNames.has(p.name));
     return scaledPositivePool.filter((s) => !usedNames.has(s.name) && !(hasSpliced && s.spliced));
-  }, [scaledPositivePool, graderPositives]);
+  }, [scaledPositivePool, graderPositives, graderNegative]);
 
   return (
     <PageShell>
@@ -292,7 +299,9 @@ export default function RivenCalculatorPage() {
                         className="min-h-11 min-w-0 flex-1 bg-background border border-border rounded px-2 py-1.5 text-base sm:text-sm"
                       >
                         <option value="">Select stat...</option>
-                        {scaledNegativePool.map((s) => (
+                        {scaledNegativePool
+                          .filter((s) => s.name === graderNegative.name || !graderPositives.some((p) => p.name === s.name))
+                          .map((s) => (
                           <option key={s.name} value={s.name}>{s.name}</option>
                         ))}
                       </select>
@@ -323,6 +332,11 @@ export default function RivenCalculatorPage() {
                 )}
               </div>
 
+              {shapeProblem && graderPositives.some((s) => s.name) && (
+                <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-900 dark:text-amber-300" data-testid="riven-shape-problem">
+                  {shapeProblem}
+                </p>
+              )}
               {gradeResult && (
                 <div className="border rounded-xl p-6 bg-card" style={{ borderColor: gradeResult.color + "50" }}>
                   <div className="flex items-center justify-between">
@@ -347,6 +361,7 @@ export default function RivenCalculatorPage() {
                   </div>
                   <p className="text-[10px] text-muted-foreground mt-3">
                     Grade is a community heuristic (stat weights + curse quality), not market price or DPS uplift.
+                    Harmful curses (Damage, Multishot, Critical Chance/Damage …) subtract score by their size; only a 3 positive + 1 negative roll can be a God Roll.
                   </p>
                   {graderPositives.some((s) => scaledPositivePool.find((p) => p.name === s.name)?.spliced) && (
                     <p className="text-[10px] text-muted-foreground mt-1">

@@ -383,18 +383,29 @@ export function evaluateRiven(riven: RivenMod): number {
     score += value * weight + tierBonus;
   }
 
+  // Curse: good curses (Impact, Puncture, Zoom, …) add a small bonus. Harmful curses
+  // (Damage, Multishot, Critical Chance / Damage, Status, Fire Rate …) cost score in
+  // proportion to how much of a useful stat they remove: magnitude × (1 − curse value) ×
+  // that stat's own weight. A big -Critical Chance on a 3+1 roll costs well over a grade.
   let negativeBonus = 0;
   if (riven.negativeStat) {
     const curseValue = NEGATIVE_VALUES[riven.negativeStat.name] ?? 0.3;
     if (curseValue >= 0.9) negativeBonus = 0.5;
     else if (curseValue >= 0.7) negativeBonus = 0.3;
     else if (curseValue >= 0.4) negativeBonus = 0.1;
-    else negativeBonus = -0.3;
+    else {
+      const weight = STAT_WEIGHTS[riven.negativeStat.name] ?? 0.3;
+      const magnitude = scoringMagnitude(riven.negativeStat) * toReference * GRADER_REFERENCE_DISPOSITION;
+      negativeBonus = -(0.3 + magnitude * (1 - curseValue) * weight);
+    }
   }
 
+  // God Roll needs the full 3 positive + 1 negative shape (and a harmless curse).
+  const positives = riven.positiveStats.length;
+  const fullShape = positives === 3 && !!riven.negativeStat;
   let godRollBonus = 0;
-  if (greatStats >= 2 && negativeBonus >= 0.3) godRollBonus = 0.5;
-  else if (greatStats >= 2) godRollBonus = 0.3;
+  if (greatStats >= 2 && negativeBonus >= 0.3 && fullShape) godRollBonus = 0.5;
+  else if (greatStats >= 2 && negativeBonus >= 0) godRollBonus = 0.3;
 
   score *= GRADER_REFERENCE_DISPOSITION;
   score += negativeBonus + godRollBonus;
@@ -403,11 +414,27 @@ export function evaluateRiven(riven: RivenMod): number {
     score *= 0.5 + riven.rank / 16;
   }
 
+  // Only a 3 + 1 roll can reach the God Roll band.
+  if (!fullShape) score = Math.min(score, GOD_ROLL_SCORE - 0.01);
+
   return score;
 }
 
+const GOD_ROLL_SCORE = 4.5;
+
+/**
+ * Legal riven shape (wiki Riven Mods): two or three positives, at most one negative.
+ * Returns a reason when the grader should not show a grade.
+ */
+export function rivenShapeProblem(positiveCount: number, negativeCount: number): string | null {
+  if (positiveCount < 2) return "A riven has 2 or 3 positive stats. Add another positive to grade it.";
+  if (positiveCount > 3) return "A riven has at most 3 positive stats.";
+  if (negativeCount > 1) return "A riven has at most 1 negative stat.";
+  return null;
+}
+
 export function getRivenGrade(score: number): string {
-  if (score >= 4.5) return "God Roll";
+  if (score >= GOD_ROLL_SCORE) return "God Roll";
   if (score >= 3.5) return "Excellent";
   if (score >= 2.5) return "Good";
   if (score >= 1.5) return "Average";

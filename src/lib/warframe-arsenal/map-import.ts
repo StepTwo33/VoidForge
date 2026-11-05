@@ -203,6 +203,8 @@ type ResolvedUpgradeMod = {
   rank: number;
   fhMod?: Mod;
   rivenStats?: Record<string, number>;
+  rivenPolarity?: string;
+  rivenDrain?: number;
 };
 
 type ResolvedEntryResult =
@@ -229,6 +231,8 @@ function resolveUpgradeEntry(
         modId: riven.modId,
         rank: riven.rank,
         ...(Object.keys(riven.rivenStats).length > 0 ? { rivenStats: riven.rivenStats } : {}),
+        ...(riven.polarity ? { rivenPolarity: riven.polarity } : {}),
+        ...(riven.drain != null ? { rivenDrain: riven.drain } : {}),
       },
     };
   }
@@ -309,6 +313,8 @@ function slotFromEntry(entry: ResolvedUpgradeMod, slotIndex: number): ModSlot {
     rank: entry.rank,
     slotIndex,
     ...(entry.rivenStats ? { rivenStats: entry.rivenStats } : {}),
+    ...(entry.rivenPolarity ? { rivenPolarity: entry.rivenPolarity } : {}),
+    ...(entry.rivenDrain != null ? { rivenDrain: entry.rivenDrain } : {}),
   };
 }
 
@@ -510,6 +516,8 @@ function mapUpgradeMods(
     rank: entry.rank,
     slotIndex,
     ...(entry.rivenStats ? { rivenStats: entry.rivenStats } : {}),
+    ...(entry.rivenPolarity ? { rivenPolarity: entry.rivenPolarity } : {}),
+    ...(entry.rivenDrain != null ? { rivenDrain: entry.rivenDrain } : {}),
   }));
   return { mods: slots, stanceModId };
 }
@@ -563,6 +571,8 @@ export function mapWarframeUpgradeMods(
     rank: entry.rank,
     slotIndex,
     ...(entry.rivenStats ? { rivenStats: entry.rivenStats } : {}),
+    ...(entry.rivenPolarity ? { rivenPolarity: entry.rivenPolarity } : {}),
+    ...(entry.rivenDrain != null ? { rivenDrain: entry.rivenDrain } : {}),
   });
 
   if (aura) slots.push(toSlot(aura, WARFRAME_IMPORT_AURA_SLOT));

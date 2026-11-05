@@ -3,6 +3,12 @@ type RivenBuff = { tag?: string; val?: number };
 type RawRivenUpgrade = {
   uniqueName?: string;
   rank?: number;
+  /** DE polarity tag (AP_ATTACK / AP_DEFENSE / AP_TACTIC) or a plain polarity name, when present. */
+  pol?: string;
+  polarity?: string;
+  /** Capacity drain, when the export carries it. */
+  drain?: number;
+  baseDrain?: number;
   buffs?: RivenBuff[];
   curses?: RivenBuff[];
 };
@@ -151,16 +157,48 @@ export function unmappedRivenTags(entry: RawRivenUpgrade): string[] {
   return out;
 }
 
+/** DE polarity tags (wiki Polarity: AP_ATTACK = Madurai, AP_DEFENSE = Vazarin, AP_TACTIC = Naramon). */
+const DE_POLARITY: Record<string, string> = {
+  AP_ATTACK: "madurai",
+  AP_DEFENSE: "vazarin",
+  AP_TACTIC: "naramon",
+};
+
+/** Riven polarity from an arsenal entry; undefined when the export doesn't carry one. */
+export function rivenPolarityFromUpgrade(entry: RawRivenUpgrade): string | undefined {
+  const raw = entry.pol ?? entry.polarity;
+  if (typeof raw !== "string") return undefined;
+  const p = DE_POLARITY[raw.toUpperCase()] ?? raw.toLowerCase();
+  return ["madurai", "vazarin", "naramon"].includes(p) ? p : undefined;
+}
+
 export function resolveRivenUpgrade(
   entry: unknown,
-): { modId: string; rank: number; rivenStats: Record<string, number>; unmappedTags: string[] } | undefined {
+): {
+  modId: string;
+  rank: number;
+  rivenStats: Record<string, number>;
+  unmappedTags: string[];
+  polarity?: string;
+  drain?: number;
+} | undefined {
   if (!isRivenUpgrade(entry)) return undefined;
   const modId = entry.uniqueName ? rivenModIdFromUniqueName(entry.uniqueName) : undefined;
   if (!modId) return undefined;
   const rivenStats = parseRivenStatsFromUpgrade(entry);
   const unmappedTags = unmappedRivenTags(entry);
   const rank = typeof entry.rank === "number" ? entry.rank : 0;
-  return { modId, rank, rivenStats, unmappedTags };
+  const polarity = rivenPolarityFromUpgrade(entry);
+  const rawDrain = typeof entry.drain === "number" ? entry.drain : entry.baseDrain;
+  const drain = typeof rawDrain === "number" && Number.isFinite(rawDrain) ? Math.round(rawDrain) : undefined;
+  return {
+    modId,
+    rank,
+    rivenStats,
+    unmappedTags,
+    ...(polarity ? { polarity } : {}),
+    ...(drain != null ? { drain } : {}),
+  };
 }
 
 /** Merge riven rolls from saved mod slots for weapon DPS calculation. */
