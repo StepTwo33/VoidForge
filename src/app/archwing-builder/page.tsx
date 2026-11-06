@@ -22,6 +22,7 @@ import { buildWeaponContributionContext } from "@/lib/calc/dps-contributions";
 import { calculateArchwingBuild, calculateNecramechBuild } from "@/lib/calc/archwing-calculator";
 import { gunneryArchWeaponDamageBonus, MAX_INTRINSIC_RANK } from "@/data/railjack-intrinsics";
 import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
+import { weaponModCapacity } from "@/lib/weapons/weapon-progenitor";
 import { WeaponStatsPanel, ArchwingStatsPanel } from "@/components/stats-panel";
 import { Weapon, EquippedMod, CalculatedStats, ArchwingCalculatedStats } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -269,11 +270,11 @@ export default function ArchwingBuilderPage() {
 
   const frameCapacity = archwingFrameCapacity(
     mode,
-    // Forma count = user/imported overrides (innate defaults are free; "none" still took a forma).
-    mode === "necramech" ? Object.keys(necramechPolarities).length : 0,
+    // Forma count = user/imported overrides (defaults to 5 formas / rank 40 for Necramechs).
+    mode === "necramech" ? Math.max(5, Object.keys(necramechPolarities).length) : 0,
     hasReactor,
   );
-  const weaponCapacity = hasCatalyst ? 60 : 30;
+  const weaponCapacity = weaponModCapacity(selectedWeapon, 5, hasCatalyst);
 
   const frameModsUsed = useMemo(() => {
     const mods = mode === "archwing" ? archwingMods : necramechMods;

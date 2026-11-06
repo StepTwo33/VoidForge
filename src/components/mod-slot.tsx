@@ -257,8 +257,18 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innateP
             <div className="mt-0.5 space-y-0 text-[11px] leading-snug text-purple-800 dark:text-purple-300">
               {Object.entries(rivenStats).map(([k, v]) => {
                 const pool = weaponCategory ? getRivenStatsForCategory(weaponCategory) : [];
-                const lbl = pool.find(s => s.key === k)?.label || k;
-                return <div key={k} className={cn("truncate", v < 0 && "text-red-700 dark:text-red-400")}>{v >= 0 ? "+" : ""}{(v * 100).toFixed(1)}% {lbl}</div>;
+                const def = pool.find((s) => s.key === k);
+                const lbl = def?.label || k;
+                const isFaction = k.startsWith("faction");
+                const isPercent = def ? def.isPercent !== false && !isFaction : !isFaction;
+                const formattedVal = isFaction
+                  ? `${(1 + v).toFixed(2)}x`
+                  : `${v >= 0 ? "+" : ""}${isPercent ? `${(v * 100).toFixed(1)}%` : v.toFixed(1)}`;
+                return (
+                  <div key={k} className={cn("truncate", v < 0 && "text-red-700 dark:text-red-400")}>
+                    {formattedVal} {lbl}
+                  </div>
+                );
               })}
             </div>
           ) : statEntries.length > 0 ? (

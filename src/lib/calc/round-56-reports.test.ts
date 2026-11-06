@@ -7,7 +7,7 @@ import { isHildrynFrame, HILDRYN_SUBSUME_SHIELD_MULTIPLIER, applyCostAugments } 
 import { getBaseRivenWeapons, getEffectiveRivenWeaponType, getRivenFamilyWeaponIds } from "@/lib/weapons/riven-family";
 import { rivenModMatchesWeapon, isZawWeapon, isKitgunWeapon } from "@/lib/weapons/riven-weapon-type";
 import { modFitsCompanionWeapon } from "@/lib/weapons/companion-weapons";
-import { evaluateRiven, type RivenStat } from "@/lib/calc/riven-calculator";
+import { evaluateRiven, getStatsWithDisposition, formatRivenStatValue, isValueInStatRange, type RivenStat } from "@/lib/calc/riven-calculator";
 import { formatArcaneRankDescription, getArcaneDisplayInfo } from "@/lib/display/arcane-display";
 import { allArcanes } from "@/data/arcanes";
 import { computeStyanaxHopliteCritChance } from "@/lib/codex/ability-misc-stats";
@@ -15,6 +15,9 @@ import { calcLoadoutStats } from "@/lib/builds/loadout-stats";
 import { POLARITIES as DIALOG_POLARITIES } from "@/components/rivens/riven-dialog";
 import { POLARITIES as STORAGE_POLARITIES } from "@/lib/rivens/riven-storage";
 import { modMatchesExclusiveWeapon } from "@/lib/mods/weapon-mod-tags";
+import { formatRivenStatLine } from "@/components/riven-library";
+import { weaponSupportsRank40, weaponModCapacity } from "@/lib/weapons/weapon-progenitor";
+import { archwingFrameCapacity } from "@/data/archwing";
 import type { Loadout, Weapon } from "@/lib/types";
 
 describe("Round 56 - Issue Reports Verification", () => {
@@ -277,6 +280,86 @@ describe("Round 56 - Issue Reports Verification", () => {
       expect(torid?.name).toBe("Torid");
       // Total base weapons is well over 150 (roughly 500+)
       expect(baseWeapons.length).toBeGreaterThan(150);
+    });
+  });
+
+  describe("11. Riven Stat Range & Faction Base Values", () => {
+    it("includes faction damage stats in getStatsWithDisposition pools", () => {
+      const riflePool = getStatsWithDisposition("rifle", 1.2, { rank: 8, positiveCount: 2, hasNegative: false });
+      const grineer = riflePool.find((s) => s.name === "Damage to Grineer");
+      const corpus = riflePool.find((s) => s.name === "Damage to Corpus");
+      const infested = riflePool.find((s) => s.name === "Damage to Infested");
+
+      expect(grineer).toBeDefined();
+      expect(corpus).toBeDefined();
+      expect(infested).toBeDefined();
+      // Base value 45 * 1.2 * 1 * 0.99 = 53.46 -> rounded to 53.5
+      expect(grineer?.baseValue).toBeCloseTo(53.5, 1);
+    });
+
+    it("formats faction stats as multipliers with formatRivenStatValue and formatRivenStatLine", () => {
+      const stat: RivenStat = {
+        name: "Damage to Grineer",
+        type: "percent",
+        baseValue: 45,
+        minValue: 40.5,
+        maxValue: 49.5,
+      };
+      expect(formatRivenStatValue(stat)).toBe("1.45x");
+
+      const line = formatRivenStatLine("factionGrineer", 0.45, "rifle");
+      expect(line).toBe("1.45x Damage to Grineer");
+    });
+
+    it("validates stat range with isValueInStatRange", () => {
+      const stat: RivenStat = {
+        name: "Damage to Grineer",
+        type: "percent",
+        baseValue: 45,
+        minValue: 40.5,
+        maxValue: 49.5,
+      };
+      expect(isValueInStatRange(45, stat)).toBe(true);
+      expect(isValueInStatRange(41, stat)).toBe(true);
+      expect(isValueInStatRange(49, stat)).toBe(true);
+      expect(isValueInStatRange(120, stat)).toBe(false);
+      expect(isValueInStatRange(10, stat)).toBe(false);
+    });
+  });
+
+  describe("12. Equipment Capacity (Rank 40 Lich Weapons & Necramechs)", () => {
+    it("identifies weapons that support rank 40 (Kuva, Tenet, Coda, and Paracesis)", () => {
+      expect(weaponSupportsRank40({ id: "kuva_bramma" })).toBe(true);
+      expect(weaponSupportsRank40({ id: "tenet_arca_plasmor" })).toBe(true);
+      expect(weaponSupportsRank40({ id: "coda_bassocyst" })).toBe(true);
+      expect(weaponSupportsRank40({ id: "paracesis" })).toBe(true);
+      expect(weaponSupportsRank40({ id: "braton" })).toBe(false);
+    });
+
+    it("calculates 80 mod capacity for max-rank rank-40 weapons and archguns with catalyst", () => {
+      expect(weaponModCapacity({ id: "kuva_bramma" }, 5, true)).toBe(80);
+      expect(weaponModCapacity({ id: "tenet_arca_plasmor" }, 5, true)).toBe(80);
+      expect(weaponModCapacity({ id: "paracesis" }, 5, true)).toBe(80);
+      expect(weaponModCapacity({ id: "kuva_ayanga" }, 5, true)).toBe(80);
+      // Standard weapons remain 60 with catalyst
+      expect(weaponModCapacity({ id: "braton" }, 5, true)).toBe(60);
+      expect(weaponModCapacity({ id: "imperator" }, 5, true)).toBe(60);
+    });
+
+    it("calculates 80 mod capacity for max-rank Necramechs with reactor", () => {
+      expect(archwingFrameCapacity("necramech", 5, true)).toBe(80);
+      expect(archwingFrameCapacity("necramech", 5, false)).toBe(40);
+      // Archwing remains 60 with reactor
+      expect(archwingFrameCapacity("archwing", 5, true)).toBe(60);
+    });
+  });
+
+  describe("13. Amps in Modular Builder have no Catalyst Slot", () => {
+    it("verifies Amps have 0 mod slots in custom modular weapon definitions", () => {
+      const modularAmp = customWeapons.find((w) => w.category === "amp");
+      if (modularAmp) {
+        expect(modularAmp.modSlots).toBe(0);
+      }
     });
   });
 });

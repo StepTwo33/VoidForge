@@ -47,7 +47,12 @@ export function weaponSupportsProgenitor(weapon: { id: string }): boolean {
   );
 }
 
-/** Formas that raise a Kuva/Tenet/Coda weapon past rank 30. Five Formas reach rank 40. */
+/** Weapons that can reach rank 40 in-game (+2 ranks per Forma, up to 5 Formas). */
+export function weaponSupportsRank40(weapon: { id: string }): boolean {
+  return weaponSupportsProgenitor(weapon) || weapon.id === "paracesis";
+}
+
+/** Formas that raise a Kuva/Tenet/Coda/Paracesis weapon past rank 30. Five Formas reach rank 40. */
 export const ADVERSARY_FORMA_MAX = 5;
 
 export function clampAdversaryFormas(value: number | undefined | null): number {
@@ -62,14 +67,14 @@ export function adversaryRankFromFormas(formas: number): number {
 
 /**
  * Mod capacity. Normal weapons are 30, or 60 with a Catalyst.
- * Kuva, Tenet, and Coda capacity matches max rank (40 / 80 after five Formas).
+ * Kuva, Tenet, Coda, and Paracesis capacity matches max rank (40 / 80 after five Formas).
  */
 export function weaponModCapacity(
   weapon: { id: string } | null | undefined,
   formas: number,
   hasCatalyst: boolean,
 ): number {
-  const rank = weapon && weaponSupportsProgenitor(weapon) ? adversaryRankFromFormas(formas) : 30;
+  const rank = weapon && weaponSupportsRank40(weapon) ? adversaryRankFromFormas(formas) : 30;
   return hasCatalyst ? rank * 2 : rank;
 }
 

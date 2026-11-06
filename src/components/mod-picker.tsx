@@ -237,7 +237,7 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
         const lines = Object.entries(entry.stats).map(([k, v]) => {
           const def = pool.find((d) => d.key === k);
           const label = def ? def.label.replace(" (Spliced)", "") : k;
-          const isFaction = k.startsWith("faction");
+          const isFaction = k.startsWith("faction") || label.startsWith("Damage to ") || label.startsWith("Damage vs ");
           const shown = isFaction
             ? `${(1 + v).toFixed(2)}x`
             : def?.isPercent === false

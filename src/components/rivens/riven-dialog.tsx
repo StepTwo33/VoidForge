@@ -15,9 +15,11 @@ import {
   getStatsWithDisposition,
   getNegativeStatsWithDisposition,
   STANDARD_RIVEN_DISPOSITION,
+  isValueInStatRange,
   type RivenStat,
 } from "@/lib/calc/riven-calculator";
 import { formatRivenName } from "@/lib/calc/riven-naming";
+import { validateRivenStats } from "@/lib/riven/riven-validation";
 import {
   evaluateSavedRiven,
   generateRivenId,
@@ -42,6 +44,43 @@ interface RivenDialogProps {
 
 export const POLARITIES = ["madurai", "vazarin", "naramon"];
 const WEAPON_CATEGORIES = ["All", "Rifle", "Shotgun", "Pistol", "Melee", "Kitgun", "Zaw", "Companion", "Archgun"] as const;
+
+function formatRangeHint(stat: RivenStat | undefined): string {
+  if (!stat) return "";
+  const lo = Math.min(Math.abs(stat.minValue), Math.abs(stat.maxValue));
+  const hi = Math.max(Math.abs(stat.minValue), Math.abs(stat.maxValue));
+  if (stat.name.startsWith("Damage to ") || stat.name.startsWith("Damage vs ")) {
+    return `${(1 + lo / 100).toFixed(2)}–${(1 + hi / 100).toFixed(2)}x`;
+  }
+  if (stat.type === "percent") return `${lo.toFixed(0)}–${hi.toFixed(0)}%`;
+  if (stat.type === "seconds") return `${lo.toFixed(1)}–${hi.toFixed(1)}s`;
+  if (stat.type === "integer") return `${lo.toFixed(1)}–${hi.toFixed(1)}m`;
+  return `${lo.toFixed(1)}–${hi.toFixed(1)}`;
+}
+
+function computeStatMidpoint(poolStat: RivenStat | undefined, isPercent: boolean, isFaction: boolean): number {
+  if (poolStat) {
+    const mid = (poolStat.minValue + poolStat.maxValue) / 2;
+    if (isFaction || poolStat.type === "percent") {
+      return Math.round(mid * 10) / 1000;
+    }
+    return Math.round(mid * 10) / 10;
+  }
+  if (isFaction) return 0.45;
+  return isPercent ? 1.0 : 2.0;
+}
+
+function computeNegMidpoint(poolStat: RivenStat | undefined, isPercent: boolean, isFaction: boolean): number {
+  if (poolStat) {
+    const mid = Math.abs((poolStat.minValue + poolStat.maxValue) / 2);
+    if (isFaction || poolStat.type === "percent") {
+      return Math.round(mid * 10) / 1000;
+    }
+    return Math.round(mid * 10) / 10;
+  }
+  if (isFaction) return 0.45;
+  return isPercent ? 0.45 : 1.0;
+}
 
 export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId, hideWeaponSelect }: RivenDialogProps) {
   const eligibleWeapons = useMemo(
@@ -271,6 +310,11 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
       toast.error("Please add at least 1 positive stat");
       return;
     }
+    const valCheck = validateRivenStats(previewRiven.stats, statPoolCategory.toLowerCase());
+    if (!valCheck.ok) {
+      toast.error(valCheck.errors[0] ?? "Invalid riven stats");
+      return;
+    }
     onSave(previewRiven);
     toast.success(`Saved ${previewRiven.name} to Riven Library!`);
     onClose();
@@ -471,11 +515,15 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
                       );
                       if (firstUnused) {
                         const isFac = firstUnused.key.startsWith("faction");
+                        const cLabel = firstUnused.label.replace(" (Spliced)", "").trim();
+                        const newPool = scaledPositivePool.find(
+                          (p) => p.name.replace(" (Spliced)", "").trim() === cLabel,
+                        );
                         setPositiveStats([
                           ...positiveStats,
                           {
                             key: firstUnused.key,
-                            value: isFac ? 0.45 : firstUnused.isPercent ? 1.0 : 2.0,
+                            value: computeStatMidpoint(newPool, firstUnused.isPercent !== false, isFac),
                           },
                         ]);
                       }
@@ -491,73 +539,94 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
                 {positiveStats.map((stat, idx) => {
                   const def = availableDefs.find((d) => d.key === stat.key);
                   const isFaction = stat.key.startsWith("faction");
+                  const cleanLabel = def ? def.label.replace(" (Spliced)", "").trim() : "";
+                  const poolStat = scaledPositivePool.find(
+                    (p) => p.name.replace(" (Spliced)", "").trim() === cleanLabel,
+                  );
+                  const statToCheckVal = (def?.isPercent || isFaction) ? (stat.value || 0) * 100 : stat.value;
+                  const outOfRange = poolStat && stat.value !== 0 && !isValueInStatRange(statToCheckVal, poolStat);
                   const otherHasSpliced = positiveStats.some(
                     (p, i) => i !== idx && availableDefs.find((d) => d.key === p.key)?.spliced,
                   );
                   const rowDefs = otherHasSpliced ? availableDefs.filter((d) => !d.spliced) : availableDefs;
                   return (
-                    <div key={idx} className="flex items-center gap-2">
-                      <select
-                        value={stat.key}
-                        onChange={(e) => {
-                          const n = [...positiveStats];
-                          const newDef = availableDefs.find((d) => d.key === e.target.value);
-                          const isFac = e.target.value.startsWith("faction");
-                          n[idx] = {
-                            key: e.target.value,
-                            value: isFac ? 0.45 : newDef?.isPercent ? 1.0 : 2.0,
-                          };
-                          setPositiveStats(n);
-                        }}
-                        className="h-9 min-w-0 flex-1 rounded border border-purple-500/30 bg-purple-950/40 px-2 text-xs text-white focus:outline-none"
-                      >
-                        {rowDefs.map((d) => (
-                          <option key={d.key} value={d.key} className="bg-[#120822] text-white">
-                            {d.label}
-                          </option>
-                        ))}
-                      </select>
-
-                      <div className="flex w-24 shrink-0 items-center">
-                        <Input
-                          type="number"
-                          step={isFaction ? "0.01" : "0.1"}
-                          value={
-                            isFaction
-                              ? (1 + (stat.value || 0)).toFixed(2)
-                              : def?.isPercent
-                              ? Math.round(stat.value * 1000) / 10
-                              : stat.value
-                          }
+                    <div key={idx} className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={stat.key}
                           onChange={(e) => {
                             const n = [...positiveStats];
-                            const raw = parseFloat(e.target.value) || 0;
+                            const newDef = availableDefs.find((d) => d.key === e.target.value);
+                            const isFac = e.target.value.startsWith("faction");
+                            const cLabel = newDef ? newDef.label.replace(" (Spliced)", "").trim() : "";
+                            const newPool = scaledPositivePool.find(
+                              (p) => p.name.replace(" (Spliced)", "").trim() === cLabel,
+                            );
                             n[idx] = {
-                              ...n[idx],
-                              value: isFaction
-                                ? (raw >= 1 ? raw - 1 : raw)
-                                : def?.isPercent
-                                ? raw / 100
-                                : raw,
+                              key: e.target.value,
+                              value: computeStatMidpoint(newPool, newDef?.isPercent !== false, isFac),
                             };
                             setPositiveStats(n);
                           }}
-                          className="h-9 border-purple-500/30 bg-purple-950/40 text-xs text-white"
-                        />
-                        {isFaction ? (
-                          <span className="ml-1 text-xs text-purple-400">x</span>
-                        ) : def?.isPercent ? (
-                          <span className="ml-1 text-xs text-purple-400">%</span>
-                        ) : null}
-                      </div>
+                          className="h-9 min-w-0 flex-1 rounded border border-purple-500/30 bg-purple-950/40 px-2 text-xs text-white focus:outline-none"
+                        >
+                          {rowDefs.map((d) => (
+                            <option key={d.key} value={d.key} className="bg-[#120822] text-white">
+                              {d.label}
+                            </option>
+                          ))}
+                        </select>
 
-                      <button
-                        type="button"
-                        onClick={() => setPositiveStats(positiveStats.filter((_, i) => i !== idx))}
-                        className="text-red-400 hover:text-red-300"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
+                        <div className="flex w-24 shrink-0 items-center">
+                          <Input
+                            type="number"
+                            step={isFaction ? "0.01" : "0.1"}
+                            value={
+                              isFaction
+                                ? (1 + (stat.value || 0)).toFixed(2)
+                                : def?.isPercent
+                                ? Math.round(stat.value * 1000) / 10
+                                : stat.value
+                            }
+                            onChange={(e) => {
+                              const n = [...positiveStats];
+                              const raw = parseFloat(e.target.value) || 0;
+                              n[idx] = {
+                                ...n[idx],
+                                value: isFaction
+                                  ? (raw >= 1 ? raw - 1 : raw)
+                                  : def?.isPercent
+                                  ? raw / 100
+                                  : raw,
+                              };
+                              setPositiveStats(n);
+                            }}
+                            className={cn(
+                              "h-9 border-purple-500/30 bg-purple-950/40 text-xs text-white",
+                              outOfRange && "border-amber-500/80 focus:border-amber-400",
+                            )}
+                          />
+                          {isFaction ? (
+                            <span className="ml-1 text-xs text-purple-400">x</span>
+                          ) : def?.isPercent ? (
+                            <span className="ml-1 text-xs text-purple-400">%</span>
+                          ) : null}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setPositiveStats(positiveStats.filter((_, i) => i !== idx))}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                      {poolStat && (
+                        <p className={cn("text-[10px] pl-0.5", outOfRange ? "text-amber-400 font-medium" : "text-purple-300/60")}>
+                          Typical range: {formatRangeHint(poolStat)}
+                          {outOfRange ? " (outside expected band)" : ""}
+                        </p>
+                      )}
                     </div>
                   );
                 })}
@@ -573,7 +642,17 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
                     type="button"
                     onClick={() => {
                       const first = availableDefs.find((d) => !d.spliced);
-                      if (first) setNegativeStat({ key: first.key, value: 0.45 });
+                      if (first) {
+                        const isFac = first.key.startsWith("faction");
+                        const cLabel = first.label.replace(" (Spliced)", "").trim();
+                        const newPool = scaledNegativePool.find(
+                          (p) => p.name.replace(" (Spliced)", "").trim() === cLabel,
+                        );
+                        setNegativeStat({
+                          key: first.key,
+                          value: computeNegMidpoint(newPool, first.isPercent !== false, isFac),
+                        });
+                      }
                     }}
                     className="inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-200"
                   >
@@ -590,39 +669,70 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
                 )}
               </div>
 
-              {negativeStat && (
-                <div className="flex items-center gap-2">
-                  <select
-                    value={negativeStat.key}
-                    onChange={(e) => {
-                      setNegativeStat({ ...negativeStat, key: e.target.value });
-                    }}
-                    className="h-9 min-w-0 flex-1 rounded border border-purple-500/30 bg-purple-950/40 px-2 text-xs text-white focus:outline-none"
-                  >
-                    {availableDefs
-                      .filter((d) => !d.spliced)
-                      .map((d) => (
-                        <option key={d.key} value={d.key} className="bg-[#120822] text-white">
-                          -{d.label}
-                        </option>
-                      ))}
-                  </select>
+              {negativeStat && (() => {
+                const negDef = availableDefs.find((d) => d.key === negativeStat.key);
+                const isFaction = negativeStat.key.startsWith("faction");
+                const cleanLabel = negDef ? negDef.label.replace(" (Spliced)", "").trim() : "";
+                const negPoolStat = scaledNegativePool.find(
+                  (p) => p.name.replace(" (Spliced)", "").trim() === cleanLabel,
+                );
+                const negToCheckVal = (negDef?.isPercent || isFaction) ? (negativeStat.value || 0) * 100 : negativeStat.value;
+                const outOfRange = negPoolStat && negativeStat.value !== 0 && !isValueInStatRange(negToCheckVal, negPoolStat);
 
-                  <div className="flex w-24 shrink-0 items-center">
-                    <Input
-                      type="number"
-                      step="0.1"
-                      value={Math.round(negativeStat.value * 1000) / 10}
-                      onChange={(e) => {
-                        const raw = parseFloat(e.target.value) || 0;
-                        setNegativeStat({ ...negativeStat, value: Math.abs(raw) / 100 });
-                      }}
-                      className="h-9 border-purple-500/30 bg-purple-950/40 text-xs text-white"
-                    />
-                    <span className="ml-1 text-xs text-purple-400">%</span>
+                return (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={negativeStat.key}
+                        onChange={(e) => {
+                          const newDef = availableDefs.find((d) => d.key === e.target.value);
+                          const isFac = e.target.value.startsWith("faction");
+                          const cLabel = newDef ? newDef.label.replace(" (Spliced)", "").trim() : "";
+                          const newPool = scaledNegativePool.find(
+                            (p) => p.name.replace(" (Spliced)", "").trim() === cLabel,
+                          );
+                          setNegativeStat({
+                            key: e.target.value,
+                            value: computeNegMidpoint(newPool, newDef?.isPercent !== false, isFac),
+                          });
+                        }}
+                        className="h-9 min-w-0 flex-1 rounded border border-purple-500/30 bg-purple-950/40 px-2 text-xs text-white focus:outline-none"
+                      >
+                        {availableDefs
+                          .filter((d) => !d.spliced)
+                          .map((d) => (
+                            <option key={d.key} value={d.key} className="bg-[#120822] text-white">
+                              -{d.label}
+                            </option>
+                          ))}
+                      </select>
+
+                      <div className="flex w-24 shrink-0 items-center">
+                        <Input
+                          type="number"
+                          step="0.1"
+                          value={Math.round(negativeStat.value * 1000) / 10}
+                          onChange={(e) => {
+                            const raw = parseFloat(e.target.value) || 0;
+                            setNegativeStat({ ...negativeStat, value: Math.abs(raw) / 100 });
+                          }}
+                          className={cn(
+                            "h-9 border-purple-500/30 bg-purple-950/40 text-xs text-white",
+                            outOfRange && "border-amber-500/80 focus:border-amber-400",
+                          )}
+                        />
+                        <span className="ml-1 text-xs text-purple-400">%</span>
+                      </div>
+                    </div>
+                    {negPoolStat && (
+                      <p className={cn("text-[10px] pl-0.5", outOfRange ? "text-amber-400 font-medium" : "text-purple-300/60")}>
+                        Typical curse magnitude: {formatRangeHint(negPoolStat)}
+                        {outOfRange ? " (outside expected band)" : ""}
+                      </p>
+                    )}
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           </div>
 

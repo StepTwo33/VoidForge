@@ -38,6 +38,9 @@ export interface RivenRangeOptions {
 
 export function formatRivenStatValue(stat: RivenStat): string {
   const value = Math.abs(stat.baseValue);
+  if (stat.name.startsWith("Damage to ") || stat.name.startsWith("Damage vs ")) {
+    return `${(1 + value / 100).toFixed(2)}x`;
+  }
   if (stat.type === "percent") return `${value.toFixed(1)}%`;
   if (stat.type === "integer") return value.toFixed(1);
   if (stat.type === "seconds") return `${value.toFixed(1)}s`;
@@ -116,6 +119,9 @@ const RIVEN_ATTRS: RivenAttr[] = [
   { name: "Cold Damage", type: "percent", base: { rifle: 90, shotgun: 90, pistol: 90, archgun: 119.7, melee: 90 }, positiveOnly: true },
   { name: "Toxin Damage", type: "percent", base: { rifle: 90, shotgun: 90, pistol: 90, archgun: 119.7, melee: 90 }, positiveOnly: true },
   { name: "Electricity Damage", type: "percent", base: { rifle: 90, shotgun: 90, pistol: 90, archgun: 119.7, melee: 90 }, positiveOnly: true },
+  { name: "Damage to Grineer", type: "percent", base: { rifle: 45, shotgun: 45, pistol: 45, melee: 45 } },
+  { name: "Damage to Corpus", type: "percent", base: { rifle: 45, shotgun: 45, pistol: 45, melee: 45 } },
+  { name: "Damage to Infested", type: "percent", base: { rifle: 45, shotgun: 45, pistol: 45, melee: 45 } },
 ];
 
 function poolKey(category: string): RivenPoolKey {

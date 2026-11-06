@@ -870,22 +870,24 @@ export default function ModularBuilderPage() {
                   <Wrench className="h-5 w-5 text-cyan-700 dark:text-cyan-400" />
                   <h2 className="text-lg font-bold">{assembledWeapon.name}</h2>
                   <span className="text-sm text-muted-foreground capitalize">{assembledWeapon.category}</span>
-                  <div className="ml-auto flex items-center gap-2">
-                    <button
-                      onClick={() => setHasOrokinCatalyst(!hasOrokinCatalyst)}
-                      title="Orokin Catalyst — doubles mod capacity"
-                      aria-pressed={hasOrokinCatalyst}
-                      className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all lg:pointer-fine:min-h-9 sm:py-1.5",
-                        hasOrokinCatalyst
-                          ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400"
-                          : "border-border text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <Zap className="h-3.5 w-3.5" />
-                      Catalyst
-                    </button>
-                  </div>
+                  {modularType !== "amp" && totalModSlots > 0 && (
+                    <div className="ml-auto flex items-center gap-2">
+                      <button
+                        onClick={() => setHasOrokinCatalyst(!hasOrokinCatalyst)}
+                        title="Orokin Catalyst — doubles mod capacity"
+                        aria-pressed={hasOrokinCatalyst}
+                        className={cn(
+                          "inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all lg:pointer-fine:min-h-9 sm:py-1.5",
+                          hasOrokinCatalyst
+                            ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400"
+                            : "border-border text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <Zap className="h-3.5 w-3.5" />
+                        Catalyst
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {totalModSlots > 0 && (

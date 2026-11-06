@@ -28,6 +28,9 @@ function formatRangeHint(stat: RivenStat | undefined): string {
   if (!stat) return "";
   const lo = Math.min(Math.abs(stat.minValue), Math.abs(stat.maxValue));
   const hi = Math.max(Math.abs(stat.minValue), Math.abs(stat.maxValue));
+  if (stat.name.startsWith("Damage to ") || stat.name.startsWith("Damage vs ")) {
+    return `${(1 + lo / 100).toFixed(2)}–${(1 + hi / 100).toFixed(2)}x`;
+  }
   if (stat.type === "percent") return `${lo.toFixed(0)}–${hi.toFixed(0)}%`;
   if (stat.type === "seconds") return `${lo.toFixed(1)}–${hi.toFixed(1)}s`;
   if (stat.type === "integer") return `${lo.toFixed(1)}–${hi.toFixed(1)}m`;
@@ -168,15 +171,17 @@ export default function RivenCalculatorPage() {
 
     for (const p of graderPositives) {
       if (!p.name) continue;
-      const def = defs.find((d) => d.label.replace(" (Spliced)", "") === p.name);
-      const key = def?.key ?? p.name.toLowerCase().replace(/\s+/g, "");
+      const cleanName = p.name.replace(" (Spliced)", "").trim();
+      const def = defs.find((d) => d.label.replace(" (Spliced)", "").trim() === cleanName);
+      const key = def?.key ?? cleanName.toLowerCase().replace(/\s+/g, "");
       posKeys.push(key);
       statsMap[key] = def && !def.isPercent ? p.value : p.value / 100;
     }
 
     if (graderNegative && graderNegative.name) {
-      const def = defs.find((d) => d.label.replace(" (Spliced)", "") === graderNegative.name);
-      const key = def?.key ?? graderNegative.name.toLowerCase().replace(/\s+/g, "");
+      const cleanName = graderNegative.name.replace(" (Spliced)", "").trim();
+      const def = defs.find((d) => d.label.replace(" (Spliced)", "").trim() === cleanName);
+      const key = def?.key ?? cleanName.toLowerCase().replace(/\s+/g, "");
       statsMap[key] = def && !def.isPercent ? -Math.abs(graderNegative.value) : -Math.abs(graderNegative.value) / 100;
     }
 

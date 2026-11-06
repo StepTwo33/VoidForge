@@ -39,11 +39,14 @@ function rivenModIdFor(weapon: Weapon | Parameters<typeof getRivenWeaponType>[0]
 }
 
 export function formatRivenStatLine(key: string, value: number, category: string): string {
-  const label = getRivenStatsForCategory(category).find((s) => s.key === key)?.label ?? key;
-  if (key.startsWith("faction")) {
+  const def = getRivenStatsForCategory(category).find((s) => s.key === key);
+  const label = def?.label ?? key;
+  const isFaction = key.startsWith("faction") || label.startsWith("Damage to ") || label.startsWith("Damage vs ");
+  if (isFaction) {
     return `${(1 + value).toFixed(2)}x ${label}`;
   }
-  return `${value >= 0 ? "+" : ""}${(value * 100).toFixed(1)}% ${label}`;
+  const isPercent = def ? def.isPercent !== false : true;
+  return `${value >= 0 ? "+" : ""}${isPercent ? `${(value * 100).toFixed(1)}%` : value.toFixed(1)} ${label}`;
 }
 
 /** /builds "Rivens" section: save riven rolls per weapon and reuse them in the mod picker. */

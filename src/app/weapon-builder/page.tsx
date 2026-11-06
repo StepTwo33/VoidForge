@@ -45,6 +45,7 @@ import { computeAltFire } from "@/lib/weapons/alt-fire";
 import { applyArbucepAttackMode } from "@/lib/weapons/weapon-arbucep-mode";
 import {
   weaponSupportsProgenitor,
+  weaponSupportsRank40,
   weaponModCapacity,
   clampAdversaryFormas,
   adversaryRankFromFormas,
@@ -277,7 +278,11 @@ export default function WeaponBuilderPage() {
         if (shared.progenitorBonusPercent != null) setProgenitorBonusPercent(shared.progenitorBonusPercent);
         if (shared.hasOrokinCatalyst != null) setHasOrokinCatalyst(shared.hasOrokinCatalyst);
         setAdversaryFormas(
-          weaponSupportsProgenitor(weapon) ? clampAdversaryFormas(shared.adversaryFormas) : 0,
+          shared.adversaryFormas != null
+            ? clampAdversaryFormas(shared.adversaryFormas)
+            : weaponSupportsRank40(weapon)
+            ? 5
+            : 0,
         );
         if (shared.slotPolarities) setSlotPolarities(shared.slotPolarities);
         const sharedIncarnon = (shared as ShareableBuild & { incarnonEvolutions?: Record<number, number> }).incarnonEvolutions;
@@ -373,7 +378,11 @@ export default function WeaponBuilderPage() {
     setEquippedArcanes(resolveSavedArcaneSlots(d.arcaneIds, 2));
     setHasOrokinCatalyst(d.hasOrokinCatalyst);
     setAdversaryFormas(
-      weaponSupportsProgenitor(weapon) ? clampAdversaryFormas(d.adversaryFormas) : 0,
+      d.adversaryFormas != null
+        ? clampAdversaryFormas(d.adversaryFormas)
+        : weaponSupportsRank40(weapon)
+        ? 5
+        : 0,
     );
     setSlotPolarities(d.slotPolarities || {});
     if (weaponSupportsProgenitor(weapon)) {
@@ -643,7 +652,7 @@ export default function WeaponBuilderPage() {
     setAlternateModeIndex(-1);
     setEquippedMods([]);
     setHasOrokinCatalyst(false);
-    setAdversaryFormas(0);
+    setAdversaryFormas(weaponSupportsRank40(weapon) ? 5 : 0);
     setSelectedEvolutions({});
     setIncarnonConditionals({});
     setGenesisInstalledOverride(null);
@@ -858,7 +867,7 @@ export default function WeaponBuilderPage() {
     },
     [equippedMods, armImportCapacityNotice, clearImportCapacityNotice, importCapacityAfter],
   );
-  const showAdversaryRank = selectedWeapon != null && weaponSupportsProgenitor(selectedWeapon);
+  const showAdversaryRank = selectedWeapon != null && weaponSupportsRank40(selectedWeapon);
 
   return (
     <PageShell>
