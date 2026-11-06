@@ -684,7 +684,7 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
                         Saved rivens
                       </span>
                       <Link
-                        href="/builds#rivens"
+                        href="/riven-library"
                         className="inline-flex min-h-11 items-center text-[11px] text-purple-700 hover:underline pointer-fine:min-h-0 dark:text-purple-300"
                       >
                         Manage library

@@ -251,13 +251,13 @@ export default function BuildsLibraryPage() {
           description="Everything saved on this device and your account. List builds in Community from here."
           actions={
             <div className="flex flex-wrap gap-2">
-              <a
-                href="#rivens"
+              <Link
+                href="/riven-library"
                 className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-purple-500/40 px-4 py-2 text-sm text-purple-700 transition-colors hover:bg-purple-500/10 dark:text-purple-300"
               >
                 <Sparkles className="h-4 w-4" />
                 Riven library
-              </a>
+              </Link>
               <Link
                 href="/loadouts"
                 className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"

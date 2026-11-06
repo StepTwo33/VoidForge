@@ -25,7 +25,7 @@ import {
   type SavedRiven,
   type SavedRivenStat,
 } from "@/lib/rivens/riven-storage";
-import { RivenCard } from "./riven-card";
+import { RivenCard, extractRivenAffix } from "./riven-card";
 import { Input } from "@/components/ui/input";
 import { getRivenStatsForCategory } from "@/lib/types";
 import { toast } from "sonner";
@@ -64,7 +64,8 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
   const [polarity, setPolarity] = useState<string>("madurai");
   const [masteryRank, setMasteryRank] = useState<number>(12);
   const [rerolls, setRerolls] = useState<number>(0);
-  const [customName, setCustomName] = useState<string>("");
+  const [customSuffix, setCustomSuffix] = useState<string>("");
+  const [isSuffixManual, setIsSuffixManual] = useState<boolean>(false);
 
   // Stats state: key -> value (decimal fraction or flat)
   const [positiveStats, setPositiveStats] = useState<{ key: string; value: number }[]>([]);
@@ -100,7 +101,9 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
       setPolarity(initialRiven.polarity);
       setMasteryRank(initialRiven.masteryRank);
       setRerolls(initialRiven.rerolls);
-      setCustomName(initialRiven.name);
+      const existingAffix = extractRivenAffix(initialRiven.name, initialRiven.weaponName);
+      setCustomSuffix(existingAffix);
+      setIsSuffixManual(true);
 
       const pos: { key: string; value: number }[] = [];
       let neg: { key: string; value: number } | null = null;
@@ -119,7 +122,8 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
       setPolarity("madurai");
       setMasteryRank(12);
       setRerolls(0);
-      setCustomName("");
+      setCustomSuffix("");
+      setIsSuffixManual(false);
       setPositiveStats([
         { key: "criticalChance", value: 1.5 },
         { key: "multishot", value: 0.9 },
@@ -138,6 +142,12 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
     }),
     [positiveStats.length, negativeStat],
   );
+
+  const autoSuffix = useMemo(() => {
+    const posKeys = positiveStats.filter((p) => p.key).map((p) => p.key);
+    if (posKeys.length === 0) return "Riven Mod";
+    return formatRivenName("", posKeys).trim() || "Riven Mod";
+  }, [positiveStats]);
 
   const scaledPositivePool = useMemo(
     () => getStatsWithDisposition(statPoolCategory.toLowerCase(), STANDARD_RIVEN_DISPOSITION, rangeOpts),
@@ -167,8 +177,11 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
           (getEffectiveRivenWeaponType(w)?.toLowerCase().includes(q) ?? false),
       );
     }
-    return list.slice(0, 150);
-  }, [eligibleWeapons, weaponCategoryFilter, weaponSearch]);
+    if (selectedWeapon && !list.some((w) => w.id === selectedWeapon.id)) {
+      list = [selectedWeapon, ...list];
+    }
+    return list;
+  }, [eligibleWeapons, weaponCategoryFilter, weaponSearch, selectedWeapon]);
 
   // Construct preview Riven object
   const previewRiven = useMemo<SavedRiven>(() => {
@@ -185,8 +198,8 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
       statsMap[negativeStat.key] = -Math.abs(negativeStat.value);
     }
 
-    const autoName = formatRivenName(selectedWeapon?.name ?? "Riven", posKeys);
-    const finalName = customName.trim() ? customName.trim() : autoName;
+    const activeSuffix = isSuffixManual && customSuffix.trim() ? customSuffix.trim() : autoSuffix;
+    const finalName = `${selectedWeapon?.name ?? "Weapon"} ${activeSuffix}`;
 
     const evalResult = evaluateSavedRiven(
       selectedWeapon?.name ?? "Weapon",
@@ -204,7 +217,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
       weaponName: selectedWeapon?.name ?? "Weapon",
       weaponCategory: selectedWeapon?.category ?? "primary",
       weaponType,
-    statPoolCategory,
+      statPoolCategory,
       polarity,
       rank: 8,
       rerolls,
@@ -221,7 +234,8 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
     positiveStats,
     negativeStat,
     selectedWeapon,
-    customName,
+    customSuffix,
+    isSuffixManual,
     weaponType,
     statPoolCategory,
     rerolls,
@@ -235,7 +249,8 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
     setPolarity(rolled.polarity);
     setMasteryRank(rolled.masteryRank);
     setRerolls(rolled.rerolls);
-    setCustomName("");
+    setCustomSuffix("");
+    setIsSuffixManual(false);
 
     const pos: { key: string; value: number }[] = [];
     let neg: { key: string; value: number } | null = null;
@@ -361,6 +376,46 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
                 </div>
               </div>
             )}
+
+            {/* Riven Suffix (Roll Name) */}
+            <div>
+              <div className="mb-1 flex items-center justify-between">
+                <label className="text-xs font-semibold uppercase tracking-wider text-purple-300">
+                  Riven Suffix (Roll Name)
+                </label>
+                {isSuffixManual && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSuffixManual(false);
+                      setCustomSuffix("");
+                    }}
+                    className="text-[10px] text-purple-400 hover:text-white"
+                  >
+                    Reset to auto
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="shrink-0 rounded-lg border border-purple-500/30 bg-purple-950/40 px-2.5 py-2 text-xs font-bold text-white">
+                  {selectedWeapon?.name}
+                </span>
+                <Input
+                  value={isSuffixManual ? customSuffix : autoSuffix}
+                  onChange={(e) => {
+                    setIsSuffixManual(true);
+                    setCustomSuffix(e.target.value);
+                  }}
+                  placeholder={autoSuffix}
+                  className="h-9 flex-1 border-purple-500/30 bg-purple-950/20 text-xs font-semibold uppercase text-purple-200 placeholder:text-muted-foreground focus:border-purple-400"
+                />
+              </div>
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                {isSuffixManual
+                  ? "Custom suffix active. Click 'Reset to auto' to match stats."
+                  : "Auto-generated from positive stats (like in-game). You can edit it directly."}
+              </p>
+            </div>
 
             {/* Polarity, MR, Rerolls Row */}
             <div className="grid grid-cols-3 gap-3">

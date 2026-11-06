@@ -3,8 +3,9 @@ import { getSession } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
 import { clampRivenDrain, normalizeRivenPolarity, validateRivenStats } from "@/lib/riven/riven-validation";
 import { allWeapons } from "@/data/weapons";
-import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
-import { getRivenBaseWeapon, getRivenFamilyWeaponIds } from "@/lib/weapons/riven-family";
+import { customWeapons } from "@/data/custom-items";
+import { getRivenWeaponType, rivenModMatchesWeapon } from "@/lib/weapons/riven-weapon-type";
+import { getRivenBaseWeapon, getRivenFamilyWeaponIds, getEffectiveRivenWeaponType } from "@/lib/weapons/riven-family";
 import {
   RIVEN_MOD_IDS,
   SAVED_RIVEN_NAME_MAX,
@@ -56,17 +57,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid riven" }, { status: 400 });
   }
   // Same rules as the editor: the weapon must take this riven and the roll must be legal.
-  const weapon = allWeapons.find((w) => w.id === weaponId);
-  const type = weapon ? getRivenWeaponType(weapon) : null;
-  if (!type || `riven_${type.toLowerCase()}` !== modId) {
+  const allSourceWeapons = [...allWeapons, ...customWeapons];
+  const weapon = allSourceWeapons.find((w) => w.id === weaponId);
+  if (!weapon || !rivenModMatchesWeapon(modId, weapon)) {
     return NextResponse.json({ error: "This weapon does not take that riven" }, { status: 400 });
   }
-  const check = validateRivenStats(stats, type.toLowerCase());
+  const effType = getEffectiveRivenWeaponType(weapon) ?? getRivenWeaponType(weapon);
+  const checkPool = (effType === "Kitgun" ? "Pistol" : effType === "Zaw" ? "Melee" : effType ?? "Rifle").toLowerCase();
+  const check = validateRivenStats(stats, checkPool);
   if (!check.ok) {
     return NextResponse.json({ error: check.errors[0] ?? "Invalid riven" }, { status: 400 });
   }
   const baseWeapon = getRivenBaseWeapon(weaponId);
-  const canonicalWeaponId = baseWeapon.id;
+  const canonicalWeaponId = baseWeapon?.id ?? weaponId;
 
   const data = {
     name,

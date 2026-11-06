@@ -75,7 +75,7 @@ export function isKitgunWeapon(
 export function rivenModMatchesWeapon(
   modId: string,
   weapon: (Pick<Weapon, "name" | "category"> & { hasRivenSlot?: boolean; kitgunChamberCategory?: Weapon["kitgunChamberCategory"]; arcaneType?: string; id?: string }) | undefined,
-  weaponCategory: string | undefined,
+  weaponCategory?: string,
 ): boolean {
   const target = weapon ?? (weaponCategory ? { name: "", category: weaponCategory } : undefined);
   if (!target) return false;

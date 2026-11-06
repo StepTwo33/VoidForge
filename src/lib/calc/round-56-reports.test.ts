@@ -258,4 +258,25 @@ describe("Round 56 - Issue Reports Verification", () => {
       expect(modMatchesExclusiveWeapon("scattered_justice", "kuva_hek")).toBe(true);
     });
   });
+
+  describe("10. Riven Creation, Suffix Editing & Modular Validation", () => {
+    it("allows rivenModMatchesWeapon to be called with 2 arguments (optional weaponCategory)", () => {
+      const torid = allSourceWeapons.find((w) => w.id === "torid")!;
+      expect(rivenModMatchesWeapon("riven_rifle", torid)).toBe(true);
+      expect(rivenModMatchesWeapon("riven_pistol", torid)).toBe(false);
+
+      const balla = allSourceWeapons.find((w) => w.id === "zaw_balla")!;
+      expect(rivenModMatchesWeapon("zaw_riven_mod", balla)).toBe(true);
+      expect(rivenModMatchesWeapon("riven_melee", balla)).toBe(false);
+    });
+
+    it("verifies Torid is in getBaseRivenWeapons and is not truncated", () => {
+      const baseWeapons = getBaseRivenWeapons();
+      const torid = baseWeapons.find((w) => w.id === "torid");
+      expect(torid).toBeDefined();
+      expect(torid?.name).toBe("Torid");
+      // Total base weapons is well over 150 (roughly 500+)
+      expect(baseWeapons.length).toBeGreaterThan(150);
+    });
+  });
 });
