@@ -8,7 +8,7 @@ import { customWeapons } from "@/data/custom-items";
 import { allHelminthAbilities } from "@/data/helminth";
 import { helminthToAbility } from "@/lib/builds/helminth-resolve";
 import { isHildrynFrame, HILDRYN_SUBSUME_SHIELD_MULTIPLIER, applyCostAugments } from "@/lib/calc/ability-augment-rows";
-import { getBaseRivenWeapons, getEffectiveRivenWeaponType, getRivenFamilyWeaponIds } from "@/lib/weapons/riven-family";
+import { getBaseRivenWeapons, getEffectiveRivenWeaponType, getRivenFamilyWeaponIds, isRivenVariant } from "@/lib/weapons/riven-family";
 import { rivenModMatchesWeapon, isZawWeapon, isKitgunWeapon, getRivenModIdForWeapon } from "@/lib/weapons/riven-weapon-type";
 import { modFitsCompanionWeapon } from "@/lib/weapons/companion-weapons";
 import { evaluateRiven, getStatsWithDisposition, formatRivenStatValue, isValueInStatRange, getStatTier, type RivenStat } from "@/lib/calc/riven-calculator";
@@ -430,6 +430,21 @@ describe("Round 56 - Issue Reports Verification", () => {
       if (modularAmp) {
         expect(modularAmp.modSlots).toBe(0);
       }
+    });
+  });
+
+  describe("14. Laser Rifle & Prime Laser Rifle Variant Resolution", () => {
+    it("resolves Prime Laser Rifle to base Laser Rifle so it does not appear as separate riven weapon", () => {
+      expect(isRivenVariant("prime_laser_rifle")).toBe(true);
+      expect(isRivenVariant("laser_rifle")).toBe(false);
+
+      const baseWeapons = getBaseRivenWeapons();
+      expect(baseWeapons.some((w) => w.id === "prime_laser_rifle")).toBe(false);
+      expect(baseWeapons.some((w) => w.id === "laser_rifle")).toBe(true);
+
+      const familyIds = getRivenFamilyWeaponIds("laser_rifle");
+      expect(familyIds).toContain("laser_rifle");
+      expect(familyIds).toContain("prime_laser_rifle");
     });
   });
 });

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { PageShell, PageMain, PageHero, FilterChip, EmptyState } from "@/components/page-shell";
-import { Sparkles, Plus, Dice6, Search, Download, Upload, RefreshCw, Flame, ArrowUpDown } from "lucide-react";
+import { Sparkles, Plus, Search, Download, Upload, RefreshCw, Flame, ArrowUpDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { RivenCard } from "@/components/rivens/riven-card";
 import { RivenDialog } from "@/components/rivens/riven-dialog";
@@ -10,7 +10,6 @@ import {
   getSavedRivens,
   saveRiven,
   deleteRiven,
-  generateRandomRiven,
   evaluateSavedRiven,
   type SavedRiven,
 } from "@/lib/rivens/riven-storage";
@@ -133,48 +132,6 @@ export default function RivenLibraryPage() {
     setDialogOpen(true);
   };
 
-  const handleRerollRiven = async (riven: SavedRiven) => {
-    const rerolled = generateRandomRiven(riven.weaponId);
-    // Keep original identity & cycle count + 1
-    const updated: SavedRiven = {
-      ...rerolled,
-      id: riven.id,
-      polarity: riven.polarity,
-      rerolls: (riven.rerolls || 0) + 1,
-      masteryRank: riven.masteryRank,
-      createdAt: riven.createdAt,
-      updatedAt: Date.now(),
-    };
-    saveRiven(updated);
-    try {
-      const signedIn = await hasClientSession();
-      if (signedIn) {
-        const weapon = allWeapons.find((w) => w.id === updated.weaponId);
-        const modId = getRivenModIdForWeapon(weapon) ?? `riven_${updated.weaponType.toLowerCase()}`;
-        await saveCloudRiven({
-          id: updated.id.startsWith("riven_") ? undefined : updated.id,
-          weaponId: updated.weaponId,
-          name: updated.name,
-          modId,
-          stats: updated.stats,
-          polarity: updated.polarity,
-          drain: 18,
-        });
-      }
-    } catch {
-      // Local save succeeded
-    }
-    refreshRivens();
-    toast.success(`Cycled ${riven.weaponName} → ${updated.name} (Cycle #${updated.rerolls})`);
-  };
-
-  const handleRollNew = () => {
-    const rolled = generateRandomRiven();
-    saveRiven(rolled);
-    refreshRivens();
-    toast.success(`Rolled a new ${rolled.name}!`);
-  };
-
   const handleExportJson = () => {
     const blob = new Blob([JSON.stringify(rivens, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -279,14 +236,6 @@ export default function RivenLibraryPage() {
               <Plus className="h-4 w-4" /> Add Riven
             </button>
 
-            <button
-              type="button"
-              onClick={handleRollNew}
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-950/40 px-3.5 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-900/60 hover:text-white"
-            >
-              <Dice6 className="h-4 w-4 text-purple-400" /> Roll Random
-            </button>
-
             <div className="hidden h-5 w-px bg-border sm:block" />
 
             <button
@@ -387,15 +336,18 @@ export default function RivenLibraryPage() {
             title={rivens.length === 0 ? "Your Riven Library is Empty" : "No Matching Rivens Found"}
             description={
               rivens.length === 0
-                ? "Start your collection by creating a Riven or rolling random stats for your favorite weapons."
+                ? "Start your collection by creating custom Rivens for your favorite weapons."
                 : "Try adjusting your search query or filter chips above."
             }
             action={
               rivens.length === 0
                 ? {
-                    label: "Roll Your First Riven",
-                    icon: Dice6,
-                    onClick: handleRollNew,
+                    label: "Add Your First Riven",
+                    icon: Plus,
+                    onClick: () => {
+                      setEditingRiven(null);
+                      setDialogOpen(true);
+                    },
                   }
                 : undefined
             }
@@ -408,7 +360,6 @@ export default function RivenLibraryPage() {
                 riven={r}
                 onDelete={handleDeleteRiven}
                 onEdit={handleEditRiven}
-                onReroll={handleRerollRiven}
               />
             ))}
           </div>

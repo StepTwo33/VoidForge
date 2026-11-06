@@ -12,7 +12,6 @@ interface RivenCardProps {
   riven: SavedRiven;
   onDelete?: (id: string) => void;
   onEdit?: (riven: SavedRiven) => void;
-  onReroll?: (riven: SavedRiven) => void;
 }
 
 export function getRivenModArtImage(weaponType: string): string {
@@ -38,7 +37,7 @@ export function extractRivenAffix(fullName: string, weaponName: string): string 
   return parts.length > 1 ? parts.slice(1).join(" ") : cleanName;
 }
 
-export function RivenCard({ riven, onDelete, onEdit, onReroll }: RivenCardProps) {
+export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
   const weaponName = riven.weaponName || "Weapon";
   const rollSuffix = extractRivenAffix(riven.name, weaponName) || "Riven";
 
@@ -47,7 +46,7 @@ export function RivenCard({ riven, onDelete, onEdit, onReroll }: RivenCardProps)
     JSON.stringify(riven.stats),
   )}`;
 
-  const hasActions = Boolean(onReroll || onEdit || onDelete);
+  const hasActions = Boolean(onEdit || onDelete);
 
   return (
     <div className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border-2 border-purple-500/40 bg-gradient-to-b from-[#180b2f] via-[#110520] to-[#0a0214] p-3.5 text-purple-100 shadow-[0_4px_24px_rgba(147,51,234,0.18)] transition-all duration-200 hover:-translate-y-1 hover:border-purple-400 hover:shadow-[0_8px_32px_rgba(168,85,247,0.32)]">
@@ -203,18 +202,6 @@ export function RivenCard({ riven, onDelete, onEdit, onReroll }: RivenCardProps)
               <ExternalLink className="h-3.5 w-3.5" />
               <span>Equip</span>
             </Link>
-
-            {onReroll && (
-              <button
-                type="button"
-                onClick={() => onReroll(riven)}
-                title="Cycle (Reroll Stats)"
-                className="flex h-8 items-center justify-center gap-1 rounded-lg border border-purple-500/30 bg-purple-950/60 px-2.5 text-xs font-medium text-purple-300 shadow-sm transition-all hover:border-purple-400 hover:bg-purple-800 hover:text-white"
-              >
-                <RefreshCw className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Cycle</span>
-              </button>
-            )}
 
             {onEdit && (
               <button

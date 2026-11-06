@@ -6,6 +6,7 @@ import { getRivenWeaponType, type RivenWeaponType } from "./riven-weapon-type";
 export type ExtendedRivenWeaponType = RivenWeaponType | "Kitgun" | "Zaw" | "Companion";
 
 const PREFIXES = [
+  "Prime ",
   "Kuva ",
   "Tenet ",
   "Prisma ",

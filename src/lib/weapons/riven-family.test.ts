@@ -15,6 +15,8 @@ describe("riven-family", () => {
     expect(getRivenBaseName("Braton Prime")).toBe("Braton");
     expect(getRivenBaseName("Rubico Prime")).toBe("Rubico");
     expect(getRivenBaseName("Orthos Prime")).toBe("Orthos");
+    // Prefix Prime (Sentinel weapon)
+    expect(getRivenBaseName("Prime Laser Rifle")).toBe("Laser Rifle");
   });
 
   it("resolves Kuva and Tenet variants to base weapon when base exists", () => {
@@ -67,6 +69,8 @@ describe("riven-family", () => {
     expect(isRivenVariant("kuva_nukor")).toBe(true);
     expect(isRivenVariant("nukor")).toBe(false);
     expect(isRivenVariant("kuva_bramma")).toBe(false);
+    expect(isRivenVariant("prime_laser_rifle")).toBe(true);
+    expect(isRivenVariant("laser_rifle")).toBe(false);
   });
 
   it("getRivenFamilyWeaponIds returns all variant IDs for a base or variant", () => {

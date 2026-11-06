@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { X, Plus, Sparkles, RefreshCw, Dice6 } from "lucide-react";
+import { X, Plus, Sparkles, RefreshCw } from "lucide-react";
 import { allWeapons } from "@/data/weapons";
 import type { Weapon } from "@/lib/types";
 import { getRivenWeaponType, type RivenWeaponType } from "@/lib/weapons/riven-weapon-type";
@@ -23,7 +23,6 @@ import { validateRivenStats } from "@/lib/riven/riven-validation";
 import {
   evaluateSavedRiven,
   generateRivenId,
-  generateRandomRiven,
   type SavedRiven,
   type SavedRivenStat,
 } from "@/lib/rivens/riven-storage";
@@ -283,28 +282,6 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
     initialRiven,
   ]);
 
-  const handleRollRandom = () => {
-    const rolled = generateRandomRiven(selectedWeapon.id);
-    setPolarity(rolled.polarity);
-    setMasteryRank(rolled.masteryRank);
-    setRerolls(rolled.rerolls);
-    setCustomSuffix("");
-    setIsSuffixManual(false);
-
-    const pos: { key: string; value: number }[] = [];
-    let neg: { key: string; value: number } | null = null;
-    for (const [k, v] of Object.entries(rolled.stats)) {
-      if (v < 0) {
-        neg = { key: k, value: Math.abs(v) };
-      } else {
-        pos.push({ key: k, value: v });
-      }
-    }
-    setPositiveStats(pos);
-    setNegativeStat(neg);
-    toast.success(`Rolled ${rolled.name}!`);
-  };
-
   const handleSave = () => {
     if (positiveStats.length === 0) {
       toast.error("Please add at least 1 positive stat");
@@ -334,7 +311,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-purple-400" />
             <h2 className="text-lg font-bold text-white">
-              {initialRiven ? "Edit Riven Roll" : "Create or Roll Riven"}
+              {initialRiven ? "Edit Riven Roll" : "Create Riven"}
             </h2>
           </div>
           <button
@@ -353,16 +330,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
             {/* Weapon Selector */}
             {hideWeaponSelect ? (
               <div className="rounded-lg border border-purple-500/30 bg-purple-950/40 p-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wider text-purple-300">Weapon</span>
-                  <button
-                    type="button"
-                    onClick={handleRollRandom}
-                    className="inline-flex items-center gap-1 rounded bg-purple-600/30 px-2 py-0.5 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-600 hover:text-white"
-                  >
-                    <Dice6 className="h-3.5 w-3.5" /> Roll Random
-                  </button>
-                </div>
+                <span className="text-xs font-semibold uppercase tracking-wider text-purple-300">Weapon</span>
                 <div className="mt-1 text-sm font-bold text-white">
                   {selectedWeapon?.name}{" "}
                   <span className="text-xs font-normal text-purple-300">({weaponType})</span>
@@ -374,13 +342,6 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
                   <label className="text-xs font-semibold uppercase tracking-wider text-purple-300">
                     Weapon
                   </label>
-                  <button
-                    type="button"
-                    onClick={handleRollRandom}
-                    className="inline-flex items-center gap-1 rounded bg-purple-600/30 px-2 py-0.5 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-600 hover:text-white"
-                  >
-                    <Dice6 className="h-3.5 w-3.5" /> Roll Random
-                  </button>
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex flex-wrap gap-1">
