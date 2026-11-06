@@ -36,18 +36,29 @@ interface RivenDialogProps {
   onClose: () => void;
   onSave: (riven: SavedRiven) => void;
   initialRiven?: SavedRiven | null;
+  fixedWeaponId?: string;
+  hideWeaponSelect?: boolean;
 }
 
-const POLARITIES = ["madurai", "vazarin", "naramon", "zenurik"];
+export const POLARITIES = ["madurai", "vazarin", "naramon"];
 const WEAPON_CATEGORIES = ["All", "Rifle", "Shotgun", "Pistol", "Melee", "Kitgun", "Zaw", "Companion", "Archgun"] as const;
 
-export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialogProps) {
+export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId, hideWeaponSelect }: RivenDialogProps) {
   const eligibleWeapons = useMemo(
     () => getBaseRivenWeapons().sort((a, b) => a.name.localeCompare(b.name)),
     [],
   );
 
-  const [weaponId, setWeaponId] = useState<string>("torid");
+  const initialTargetWeaponId = useMemo(() => {
+    if (initialRiven?.weaponId) return initialRiven.weaponId;
+    if (fixedWeaponId) {
+      const base = getRivenBaseWeapon(fixedWeaponId);
+      return base?.id ?? fixedWeaponId;
+    }
+    return "torid";
+  }, [initialRiven, fixedWeaponId]);
+
+  const [weaponId, setWeaponId] = useState<string>(initialTargetWeaponId);
   const [weaponCategoryFilter, setWeaponCategoryFilter] = useState<string>("All");
   const [weaponSearch, setWeaponSearch] = useState("");
   const [polarity, setPolarity] = useState<string>("madurai");
@@ -103,8 +114,8 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
       setPositiveStats(pos);
       setNegativeStat(neg);
     } else {
-      // Default to Torid with 2 good stats
-      setWeaponId("torid");
+      const defaultId = fixedWeaponId ? (getRivenBaseWeapon(fixedWeaponId)?.id ?? fixedWeaponId) : "torid";
+      setWeaponId(defaultId);
       setPolarity("madurai");
       setMasteryRank(12);
       setRerolls(0);
@@ -115,7 +126,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
       ]);
       setNegativeStat({ key: "zoom", value: 0.45 });
     }
-  }, [open, initialRiven]);
+  }, [open, initialRiven, fixedWeaponId]);
 
   // Compute stat pools with ranges for reference hints
   const rangeOpts = useMemo(
@@ -277,60 +288,79 @@ export function RivenDialog({ open, onClose, onSave, initialRiven }: RivenDialog
           {/* Controls Column */}
           <div className="space-y-4 md:col-span-7">
             {/* Weapon Selector */}
-            <div>
-              <div className="mb-1.5 flex items-center justify-between">
-                <label className="text-xs font-semibold uppercase tracking-wider text-purple-300">
-                  Weapon
-                </label>
-                <button
-                  type="button"
-                  onClick={handleRollRandom}
-                  className="inline-flex items-center gap-1 rounded bg-purple-600/30 px-2 py-0.5 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-600 hover:text-white"
-                >
-                  <Dice6 className="h-3.5 w-3.5" /> Roll Random
-                </button>
-              </div>
-              <div className="space-y-1.5">
-                <div className="flex flex-wrap gap-1">
-                  {WEAPON_CATEGORIES.map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setWeaponCategoryFilter(cat)}
-                      className={cn(
-                        "rounded px-2 py-0.5 text-[10px] font-medium transition-colors",
-                        weaponCategoryFilter === cat
-                          ? "bg-purple-600 text-white"
-                          : "bg-purple-950/40 text-purple-300 hover:bg-purple-900/60",
-                      )}
-                    >
-                      {cat}
-                    </button>
-                  ))}
+            {hideWeaponSelect ? (
+              <div className="rounded-lg border border-purple-500/30 bg-purple-950/40 p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-purple-300">Weapon</span>
+                  <button
+                    type="button"
+                    onClick={handleRollRandom}
+                    className="inline-flex items-center gap-1 rounded bg-purple-600/30 px-2 py-0.5 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-600 hover:text-white"
+                  >
+                    <Dice6 className="h-3.5 w-3.5" /> Roll Random
+                  </button>
                 </div>
-                <Input
-                  placeholder="Search weapon or type (e.g. sporelacer, kitgun)..."
-                  value={weaponSearch}
-                  onChange={(e) => setWeaponSearch(e.target.value)}
-                  className="h-9 border-purple-500/30 bg-purple-950/20 text-xs text-white placeholder:text-muted-foreground"
-                />
-                <select
-                  value={weaponId}
-                  onChange={(e) => {
-                    setWeaponId(e.target.value);
-                    setPositiveStats([]);
-                    setNegativeStat(null);
-                  }}
-                  className="h-10 w-full rounded-lg border border-purple-500/30 bg-purple-950/40 px-3 text-sm text-white focus:border-purple-400 focus:outline-none"
-                >
-                  {filteredWeapons.map((w) => (
-                    <option key={w.id} value={w.id} className="bg-[#120822] text-white">
-                      {w.name} ({getEffectiveRivenWeaponType(w)})
-                    </option>
-                  ))}
-                </select>
+                <div className="mt-1 text-sm font-bold text-white">
+                  {selectedWeapon?.name}{" "}
+                  <span className="text-xs font-normal text-purple-300">({weaponType})</span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-purple-300">
+                    Weapon
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleRollRandom}
+                    className="inline-flex items-center gap-1 rounded bg-purple-600/30 px-2 py-0.5 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-600 hover:text-white"
+                  >
+                    <Dice6 className="h-3.5 w-3.5" /> Roll Random
+                  </button>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex flex-wrap gap-1">
+                    {WEAPON_CATEGORIES.map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setWeaponCategoryFilter(cat)}
+                        className={cn(
+                          "rounded px-2 py-0.5 text-[10px] font-medium transition-colors",
+                          weaponCategoryFilter === cat
+                            ? "bg-purple-600 text-white"
+                            : "bg-purple-950/40 text-purple-300 hover:bg-purple-900/60",
+                        )}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                  <Input
+                    placeholder="Search weapon or type (e.g. sporelacer, kitgun)..."
+                    value={weaponSearch}
+                    onChange={(e) => setWeaponSearch(e.target.value)}
+                    className="h-9 border-purple-500/30 bg-purple-950/20 text-xs text-white placeholder:text-muted-foreground"
+                  />
+                  <select
+                    value={weaponId}
+                    onChange={(e) => {
+                      setWeaponId(e.target.value);
+                      setPositiveStats([]);
+                      setNegativeStat(null);
+                    }}
+                    className="h-10 w-full rounded-lg border border-purple-500/30 bg-purple-950/40 px-3 text-sm text-white focus:border-purple-400 focus:outline-none"
+                  >
+                    {filteredWeapons.map((w) => (
+                      <option key={w.id} value={w.id} className="bg-[#120822] text-white">
+                        {w.name} ({getEffectiveRivenWeaponType(w)})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
 
             {/* Polarity, MR, Rerolls Row */}
             <div className="grid grid-cols-3 gap-3">

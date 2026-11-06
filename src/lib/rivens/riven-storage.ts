@@ -258,7 +258,7 @@ export function deleteRiven(id: string): void {
   }
 }
 
-const POLARITIES = ["madurai", "vazarin", "naramon", "zenurik"];
+export const POLARITIES = ["madurai", "vazarin", "naramon"];
 
 /**
  * Procedurally rolls a new authentic Riven for the requested weapon (or a random weapon).

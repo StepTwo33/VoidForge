@@ -80,9 +80,9 @@ export function filterPickerMods({
       if (category !== "archgun" && m.category === "archgun") return false;
       // Riven mods: only show the riven matching the specific weapon category
       if (m.subCategory === "riven") return rivenModMatchesWeapon(m.id, weapon, weaponCategory);
-      if (category === "primary") return ["primary", "rifle", "shotgun", "bow", "general"].includes(m.category);
-      if (category === "secondary") return ["secondary", "pistol", "general"].includes(m.category);
-      if (category === "melee") return m.category === "melee" || (m.category === "general" && !isArchmeleeMod(m));
+      if (category === "primary") return ["primary", "rifle", "shotgun", "bow", "general"].includes(m.category) || (m.category === "augment" && m.subCategory === "weapon");
+      if (category === "secondary") return ["secondary", "pistol", "general"].includes(m.category) || (m.category === "augment" && m.subCategory === "weapon");
+      if (category === "melee") return m.category === "melee" || (m.category === "general" && !isArchmeleeMod(m)) || (m.category === "augment" && m.subCategory === "weapon");
       if (category === "archmelee") return isArchmeleeMod(m);
       if (category === "warframe") {
         return m.category === "warframe" || isWarframeAugment(m);

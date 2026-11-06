@@ -688,6 +688,7 @@ function applyWeaponExternalBuffs(
     if (buff.critMultBonus) acc.critMultBonus += buff.critMultBonus;
     if (buff.critMultFlatBonus && critMultFlat) critMultFlat.critEventBonus += buff.critMultFlatBonus;
     if (buff.statusBonus) acc.statusBonus += buff.statusBonus;
+    if (buff.statusChanceFlatBonus) acc.statusChanceFlatBonus += buff.statusChanceFlatBonus;
     if (buff.fireRateBonus) acc.fireRateBonus += buff.fireRateBonus;
     if (buff.reloadBonus) acc.reloadBonus += buff.reloadBonus;
     if (buff.multishotBonus) acc.multishotBonus += buff.multishotBonus;

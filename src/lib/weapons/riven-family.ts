@@ -94,11 +94,24 @@ export function isRivenVariant(weaponOrId: Weapon | string): boolean {
  * Any Riven for this family equips on all these variants.
  */
 export function getRivenFamilyWeaponIds(weaponId: string): string[] {
-  const target = weaponsById.get(weaponId);
+  let lookupId = weaponId;
+  if (weaponId.startsWith("kitgun_")) {
+    const chamber = allSourceWeapons.find(
+      (w) => (w.category === "kitgun_chamber" || w.kitgunChamberCategory != null) && weaponId.includes(w.id),
+    );
+    if (chamber) lookupId = chamber.id;
+  } else if (weaponId.startsWith("zaw_")) {
+    const strike = allSourceWeapons.find(
+      (w) => (w.category === "zaw_strike" || w.category === "zaw") && weaponId.includes(w.id),
+    );
+    if (strike) lookupId = strike.id;
+  }
+
+  const target = weaponsById.get(lookupId);
   if (!target) return [weaponId];
 
   const baseName = getRivenBaseName(target.name);
-  const familyIds: string[] = [];
+  const familyIds: string[] = [weaponId, lookupId];
 
   for (const w of allSourceWeapons) {
     if (getRivenBaseName(w.name) === baseName) {
@@ -106,7 +119,7 @@ export function getRivenFamilyWeaponIds(weaponId: string): string[] {
     }
   }
 
-  return familyIds.length > 0 ? familyIds : [weaponId];
+  return Array.from(new Set(familyIds));
 }
 
 /**

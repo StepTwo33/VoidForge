@@ -57,17 +57,25 @@ export function modFitsCompanionWeapon(
 ): boolean {
   const modClass = companionWeaponModClass(weapon);
   if (modClass === "beast_claw") {
+    // Beast companions cannot equip Riven mods (only sentinel weapons take companion rivens)
+    if (mod.subCategory === "riven" || mod.id === "companion_weapon_riven_mod") return false;
     const familyRule = CLAW_MOD_FAMILY_RULES[mod.id];
     if (familyRule && !familyRule(weapon.id, weapon.companionType)) return false;
     return (
       mod.category === "companion_weapon" &&
-      (mod.subCategory === "beast_weapon" || mod.subCategory === "riven")
+      mod.subCategory === "beast_weapon"
     );
   }
   if (mod.category === "companion" || mod.category === "companion_weapon") {
-    return weapon.category === "sentinel_weapon" && mod.id === "fired_up";
+    if (weapon.category === "sentinel_weapon") {
+      return mod.id === "fired_up" || mod.id === "companion_weapon_riven_mod";
+    }
+    return false;
   }
   if (mod.subCategory === "riven") {
+    if (weapon.category === "sentinel_weapon") {
+      return mod.id === "companion_weapon_riven_mod";
+    }
     const rivenId =
       modClass === "shotgun" ? "riven_shotgun"
       : modClass === "pistol" ? "riven_pistol"

@@ -45,6 +45,7 @@ import type {
   SimulationParams,
   WarframeCalculatedStats,
   Weapon,
+  WeaponExternalBuff,
 } from "@/lib/types";
 import { DEFAULT_SIM_PARAMS } from "@/lib/types";
 
@@ -574,13 +575,51 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
         );
         if (companionWeapon) {
           const base = weaponWithPassive(companionWeapon);
+          const allCompanionSlots: ModSlot[] = [
+            ...(loadout.companionBuild.mods || []),
+            ...weaponMods,
+          ];
+          const companionExternalBuffs: WeaponExternalBuff[] = [];
+
+          // Hunter Synergy: +30% of Primary modded CC to companion weapon
+          const hunterSynergyMod = allCompanionSlots.find((m) => m.modId === "hunter_synergy");
+          if (hunterSynergyMod && result.primary?.stats.criticalChance) {
+            const rank = hunterSynergyMod.rank ?? 5;
+            const primaryCc = result.primary.stats.criticalChance;
+            const bonus = primaryCc * (0.05 * (rank + 1));
+            if (bonus > 0) {
+              companionExternalBuffs.push({
+                id: "mod:hunter_synergy",
+                label: "Hunter Synergy",
+                category: "companion",
+                critChanceFlatBonus: bonus,
+              });
+            }
+          }
+
+          // Mecha Overdrive: +60% of Primary modded SC to companion weapon
+          const mechaOverdriveMod = allCompanionSlots.find((m) => m.modId === "mecha_overdrive");
+          if (mechaOverdriveMod && result.primary?.stats.statusChance) {
+            const rank = mechaOverdriveMod.rank ?? 5;
+            const primarySc = result.primary.stats.statusChance;
+            const bonus = primarySc * (0.10 * (rank + 1));
+            if (bonus > 0) {
+              companionExternalBuffs.push({
+                id: "mod:mecha_overdrive",
+                label: "Mecha Overdrive",
+                category: "companion",
+                statusChanceFlatBonus: bonus,
+              });
+            }
+          }
+
           const stats = calculateWeaponBuild(
             base,
             weaponMods,
             modsMap,
             undefined,
             simParams,
-            undefined,
+            companionExternalBuffs.length > 0 ? { externalBuffs: companionExternalBuffs } : undefined,
             setLinkage,
           );
           const isMelee = base.category === "melee" || base.triggerType === "Melee";

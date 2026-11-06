@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { RefreshCw } from "lucide-react";
 import type { Ability, WarframeCalculatedStats, Weapon } from "@/lib/types";
 import type { HelminthAbility } from "@/data/helminth";
-import { hydrateHelminthAbility } from "@/lib/builds/helminth-resolve";
+import { hydrateHelminthAbility, helminthToAbility } from "@/lib/builds/helminth-resolve";
 import { formatAbilityDescription } from "@/lib/display/ability-text";
 import { scaledAbilityEnergyCost } from "@/lib/codex/ability-misc-stats";
 import { augurShieldsFromEnergySpent } from "@/lib/calc/set-bonuses";
@@ -15,6 +15,7 @@ import {
   AbilityFormBadge,
   AbilityEnergyChip,
   AbilityShieldCostChip,
+  AbilityHealthCostChip,
   AbilityDamageTypeChip,
   AbilityStatsBlock,
 } from "@/components/ability-display";
@@ -83,6 +84,16 @@ export function AbilityCard({
   };
   const effectiveCost =
     typeof ability.energyCost === "number" ? scaledAbilityEnergyCost(ability.energyCost, eff) : null;
+  const healthPerCorpse =
+    typeof ability.miscStats?.healthPerCorpse === "number" ? ability.miscStats.healthPerCorpse : null;
+  const effectiveHealthPerCorpse =
+    healthPerCorpse != null ? scaledAbilityEnergyCost(healthPerCorpse, eff) : null;
+  const nativeShieldCost =
+    typeof ability.miscStats?.shieldCost === "number" && (!ability.energyCost || ability.energyCost <= 0)
+      ? ability.miscStats.shieldCost
+      : null;
+  const effectiveShieldCost =
+    nativeShieldCost != null ? scaledAbilityEnergyCost(nativeShieldCost, eff) : null;
   const slotNum = gameSlot ?? index + 1;
   const augurPct = stats?.augurEnergyToShieldsPercent ?? 0;
 
@@ -101,6 +112,16 @@ export function AbilityCard({
         <div className="shrink-0">
           {effectiveCost != null && ability.energyCost != null && ability.energyCost > 0 && (
             <AbilityEnergyChip baseCost={ability.energyCost} effectiveCost={effectiveCost} />
+          )}
+          {effectiveShieldCost != null && nativeShieldCost != null && (
+            <AbilityShieldCostChip baseCost={nativeShieldCost} effectiveCost={effectiveShieldCost} />
+          )}
+          {effectiveHealthPerCorpse != null && healthPerCorpse != null && (
+            <AbilityHealthCostChip
+              baseCost={healthPerCorpse}
+              effectiveCost={effectiveHealthPerCorpse}
+              title="Health per corpse (Despoil)"
+            />
           )}
           {augurPct > 0 && effectiveCost != null && ability.energyCost != null && ability.energyCost > 0 && (
             <AugurShieldsOnCast energySpent={effectiveCost} convertPercent={augurPct} />
@@ -248,7 +269,7 @@ export function HelminthAbilityCard({
       )}
 
       <div className="mb-2">
-        <AbilityStatsBlock ability={preview} stats={stats} display={display} />
+        <AbilityStatsBlock ability={helminthToAbility(ability, hostWarframeId)} stats={stats} display={display} />
       </div>
 
       <div className="mt-auto flex flex-wrap gap-2 border-t border-emerald-500/15 pt-3">

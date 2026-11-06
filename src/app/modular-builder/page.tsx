@@ -7,7 +7,10 @@ import { ModSlotCard } from "@/components/mod-slot";
 import { WeaponStatsPanel } from "@/components/stats-panel";
 import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
 import { weaponStatSummary } from "@/lib/ui/mobile-stat-summary";
-import { ModPicker, buildSlotNav } from "@/components/mod-picker";
+import { ModPicker, buildSlotNav, type RivenSelectMeta } from "@/components/mod-picker";
+import { useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
+import { saveRiven } from "@/lib/riven/saved-rivens";
+import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-validation";
 import { useMods, useArcanes, useWeapons } from "@/lib/weapons/use-data";
 import { calculateWeaponBuild, calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
 import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
@@ -63,6 +66,11 @@ function StatDelta({ label, value, suffix = "" }: { label: string; value: number
   );
 }
 
+function withRivenRoll(eq: EquippedMod | undefined, mod: Mod | null): Mod | null {
+  if (!eq || !mod || (!eq.modId.startsWith("riven_") && eq.modId !== "zaw_riven_mod" && eq.modId !== "kitgun_riven_mod" && eq.modId !== "companion_weapon_riven_mod")) return mod;
+  return { ...mod, name: eq.modName || mod.name, polarity: eq.polarity ?? mod.polarity };
+}
+
 export default function ModularBuilderPage() {
   const { mods: allMods, modsMap } = useMods();
   const [modularType, setModularType] = useState<ModularType>("kitgun");
@@ -92,6 +100,18 @@ export default function ModularBuilderPage() {
   const [activeArcaneSlot, setActiveArcaneSlot] = useState(0);
   const [hasOrokinCatalyst, setHasOrokinCatalyst] = useState(false);
   const [simParams, setSimParams] = useState<SimulationParams>(() => ({ ...DEFAULT_SIM_PARAMS }));
+  const [rivenStatsMap, setRivenStatsMap] = useState<Record<number, Record<string, number>>>({});
+  const [editRivenSlot, setEditRivenSlot] = useState<number | null>(null);
+
+  const rivenStatChanges = useMemo(() => {
+    let combined: Record<string, number> = {};
+    for (const stats of Object.values(rivenStatsMap)) {
+      for (const [k, v] of Object.entries(stats)) {
+        combined[k] = (combined[k] ?? 0) + v;
+      }
+    }
+    return combined;
+  }, [rivenStatsMap]);
 
   // Build the assembled weapon
   const assembledWeapon = useMemo<Weapon | null>(() => {
@@ -112,15 +132,65 @@ export default function ModularBuilderPage() {
     return null;
   }, [modularType, kitgunChamber, kitgunGrip, kitgunLoader, zawStrike, zawGripSel, zawLinkSel, ampPrism, ampScaffold, ampBrace]);
 
+  const rivenLibraryState = useSavedRivenLibrary(assembledWeapon?.id);
+  const savedRivens = rivenLibraryState.list;
+  const refreshSavedRivens = rivenLibraryState.refresh;
+  const rivenLibrary = useMemo(
+    () => ({
+      signedIn: rivenLibraryState.signedIn,
+      onSave: async (r: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number }) => {
+        if (!assembledWeapon) return false;
+        const saved = await saveRiven({ weaponId: assembledWeapon.id, ...r });
+        if (saved) refreshSavedRivens();
+        return !!saved;
+      },
+    }),
+    [rivenLibraryState.signedIn, assembledWeapon, refreshSavedRivens],
+  );
+
+  const editRivenTarget = useMemo(() => {
+    if (editRivenSlot == null || !modPickerOpen) return null;
+    const eq = equippedMods.find((m) => m.slotIndex === editRivenSlot);
+    const mod = eq ? modsMap.get(eq.modId) : undefined;
+    if (!eq || !mod || (!eq.modId.startsWith("riven_") && eq.modId !== "zaw_riven_mod" && eq.modId !== "kitgun_riven_mod" && eq.modId !== "companion_weapon_riven_mod")) return null;
+    return {
+      mod,
+      stats: rivenStatsMap[editRivenSlot] ?? {},
+      polarity: eq.polarity,
+      drain: rivenDrainFromRank(eq.rank),
+      name: eq.modName && eq.modName !== mod.name ? eq.modName : undefined,
+    };
+  }, [editRivenSlot, modPickerOpen, equippedMods, modsMap, rivenStatsMap]);
+
+  const handleSelectRiven = useCallback((mod: Mod, stats: Record<string, number>, meta?: RivenSelectMeta) => {
+    setEquippedMods((prev) => {
+      const filtered = prev.filter((m) => m.slotIndex !== activeSlotIndex);
+      return [
+        ...filtered,
+        {
+          modId: mod.id,
+          modName: meta?.name ?? mod.name,
+          rank: meta ? rivenRankFromDrain(meta.drain) : mod.maxRank,
+          slotIndex: activeSlotIndex,
+          polarity: meta?.polarity ?? mod.polarity,
+          drain: meta?.drain ?? mod.drain,
+        },
+      ];
+    });
+    setRivenStatsMap((prev) => ({ ...prev, [activeSlotIndex]: stats }));
+    setModPickerOpen(false);
+    setEditRivenSlot(null);
+  }, [activeSlotIndex]);
+
   const calculatedStats = useMemo(() => {
     if (!assembledWeapon) return null;
     const modSlots = equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
     const activeArcanes = equippedArcanes.filter((a): a is Mod => a !== null);
     if (activeArcanes.length > 0) {
-      return calculateWeaponBuildWithArcanes(assembledWeapon, modSlots, modsMap, activeArcanes, undefined, simParams);
+      return calculateWeaponBuildWithArcanes(assembledWeapon, modSlots, modsMap, activeArcanes, undefined, simParams, undefined, undefined, rivenStatChanges);
     }
-    return calculateWeaponBuild(assembledWeapon, modSlots, modsMap, undefined, simParams);
-  }, [assembledWeapon, equippedMods, equippedArcanes, simParams]);
+    return calculateWeaponBuild(assembledWeapon, modSlots, modsMap, undefined, simParams, undefined, undefined, rivenStatChanges);
+  }, [assembledWeapon, equippedMods, equippedArcanes, simParams, rivenStatChanges]);
 
   const contributionContext = useMemo(() => {
     if (!assembledWeapon) return null;
@@ -844,7 +914,7 @@ export default function ModularBuilderPage() {
                     <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
                       {Array.from({ length: totalModSlots }, (_, i) => {
                         const equipped = equippedMods.find((m) => m.slotIndex === i);
-                        const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
+                        const mod = withRivenRoll(equipped, equipped ? modsMap.get(equipped.modId) ?? null : null);
                         const isExilus = isSecondaryKitgun && i === SECONDARY_EXILUS_SLOT_INDEX;
                         return (
                           <ModSlotCard
@@ -854,9 +924,15 @@ export default function ModularBuilderPage() {
                             slotIndex={i}
                             label={isExilus ? "Exilus" : undefined}
                             slotPolarity={slotPolarities[i]}
+                            rivenStats={rivenStatsMap[i]}
+                            weaponCategory={assembledWeapon.category}
                             onAdd={() => openModSlot(i)}
-                            onRemove={() => setEquippedMods((prev) => prev.filter((m) => m.slotIndex !== i))}
+                            onRemove={() => {
+                              setEquippedMods((prev) => prev.filter((m) => m.slotIndex !== i));
+                              setRivenStatsMap((prev) => { const next = { ...prev }; delete next[i]; return next; });
+                            }}
                             onPolarize={(p) => setSlotPolarities((prev) => { const next = { ...prev }; if (p) next[i] = p; else delete next[i]; return next; })}
+                            onEditRiven={() => { openModSlot(i); setEditRivenSlot(i); }}
                           />
                         );
                       })}
@@ -1020,9 +1096,12 @@ export default function ModularBuilderPage() {
       {assembledWeapon && (
         <ModPicker
           open={modPickerOpen}
-          onClose={() => setModPickerOpen(false)}
+          onClose={() => { setModPickerOpen(false); setEditRivenSlot(null); }}
           mods={allMods}
           category={modCategory}
+          editRiven={editRivenTarget}
+          savedRivens={savedRivens}
+          rivenLibrary={rivenLibrary}
           slotType={modPickerSlotType}
           weaponCategory={assembledWeapon.category}
           weapon={assembledWeapon}
@@ -1033,7 +1112,9 @@ export default function ModularBuilderPage() {
               const filtered = prev.filter((m) => m.slotIndex !== activeSlotIndex);
               return [...filtered, { modId: mod.id, modName: mod.name, rank, slotIndex: activeSlotIndex, polarity: mod.polarity, drain: mod.drain }];
             });
+            setRivenStatsMap((prev) => { const next = { ...prev }; delete next[activeSlotIndex]; return next; });
           }}
+          onSelectRiven={handleSelectRiven}
         />
       )}
 

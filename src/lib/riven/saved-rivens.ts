@@ -15,7 +15,16 @@ export interface SavedRiven {
 }
 
 export const SAVED_RIVEN_NAME_MAX = 80;
-export const RIVEN_MOD_IDS = ["riven_rifle", "riven_shotgun", "riven_pistol", "riven_melee"] as const;
+export const RIVEN_MOD_IDS = [
+  "riven_rifle",
+  "riven_shotgun",
+  "riven_pistol",
+  "riven_melee",
+  "kitgun_riven_mod",
+  "zaw_riven_mod",
+  "companion_weapon_riven_mod",
+  "archgun_riven_mod",
+] as const;
 
 /** Keep only finite numeric stats (max 4) so bad JSON never reaches the builder. */
 export function sanitizeRivenStats(raw: unknown): Record<string, number> | null {

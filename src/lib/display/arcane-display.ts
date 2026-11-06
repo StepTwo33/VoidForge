@@ -408,7 +408,7 @@ export function getArcaneDisplayInfo(
       name: arcane.name,
       rank,
       maxRank: arcane.maxRank,
-      description: cleanDesc,
+      description: formatArcaneRankDescription(arcane, rank),
       applied,
       conditional,
       ...(def.trigger === "stacks" ? { fullStacks: arcaneStackCap(def, rank) ?? 1 } : {}),
@@ -438,7 +438,7 @@ export function getArcaneDisplayInfo(
     });
   }
 
-  return { name: arcane.name, rank, maxRank: arcane.maxRank, description: cleanDesc, applied, conditional };
+  return { name: arcane.name, rank, maxRank: arcane.maxRank, description: formatArcaneRankDescription(arcane, rank), applied, conditional };
 }
 
 /**

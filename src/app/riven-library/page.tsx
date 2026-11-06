@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 
 const WEAPON_TYPES = ["All", "Rifle", "Shotgun", "Pistol", "Melee", "Kitgun", "Zaw", "Companion", "Archgun"];
 const GRADES = ["All", "God Roll", "Excellent", "Good", "Average", "Reroll"];
-const POLARITIES = ["All", "madurai", "vazarin", "naramon", "zenurik"];
+const POLARITIES = ["All", "madurai", "vazarin", "naramon"];
 
 type SortOption = "updated" | "name" | "score" | "rerolls";
 

@@ -20909,7 +20909,19 @@ const RAW_MODS: Mod[] = [
     "drain": 0,
     "maxRank": 0,
     "category": "melee",
-    "subCategory": "",
+    "subCategory": "riven",
+    "stats": {},
+    "description": "You will need to prove yourself before I reveal the beauty within this work.",
+    "rarity": "rare"
+  },
+  {
+    "id": "kitgun_riven_mod",
+    "name": "Kitgun Riven Mod",
+    "polarity": "universal",
+    "drain": 0,
+    "maxRank": 0,
+    "category": "secondary",
+    "subCategory": "riven",
     "stats": {},
     "description": "You will need to prove yourself before I reveal the beauty within this work.",
     "rarity": "rare"

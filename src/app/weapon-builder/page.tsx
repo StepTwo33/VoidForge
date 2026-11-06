@@ -119,7 +119,7 @@ function incarnonExtrasForSave(
  * catalog base drain (10) + rank, i.e. 18 at rank 8 (Round 54b), so the catalog drain is kept.
  */
 function withRivenRoll(eq: EquippedMod | undefined, mod: Mod | null): Mod | null {
-  if (!eq || !mod || !eq.modId.startsWith("riven_")) return mod;
+  if (!eq || !mod || (!eq.modId.startsWith("riven_") && eq.modId !== "zaw_riven_mod" && eq.modId !== "kitgun_riven_mod" && eq.modId !== "companion_weapon_riven_mod")) return mod;
   return { ...mod, name: eq.modName || mod.name, polarity: eq.polarity ?? mod.polarity };
 }
 
@@ -801,7 +801,7 @@ export default function WeaponBuilderPage() {
     if (editRivenSlot == null || !modPickerOpen) return null;
     const eq = equippedMods.find((m) => m.slotIndex === editRivenSlot);
     const mod = eq ? modsMap.get(eq.modId) : undefined;
-    if (!eq || !mod || !eq.modId.startsWith("riven_")) return null;
+    if (!eq || !mod || (!eq.modId.startsWith("riven_") && eq.modId !== "zaw_riven_mod" && eq.modId !== "kitgun_riven_mod" && eq.modId !== "companion_weapon_riven_mod")) return null;
     return {
       mod,
       stats: rivenStatsMap[editRivenSlot] ?? {},

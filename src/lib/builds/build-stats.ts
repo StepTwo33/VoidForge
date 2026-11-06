@@ -77,7 +77,7 @@ function resolveBuildAbilities(data: WarframeBuildData): { ability: Ability; slo
     const helminth = allHelminthAbilities.find((a) => a.id === data.helminthAbilityId);
     if (helminth && data.helminthSlot >= 0 && data.helminthSlot < rows.length) {
       rows[data.helminthSlot] = {
-        ability: helminthToAbility(helminth),
+        ability: helminthToAbility(helminth, data.warframeId),
         slot: data.helminthSlot + 1,
         helminth: true,
       };

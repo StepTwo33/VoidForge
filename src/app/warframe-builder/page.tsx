@@ -550,7 +550,7 @@ export default function WarframeBuilderPage() {
     const stats = calculateWarframeBuild(statsWarframe, modSlots, modsMap);
     // Arcane Intention counts this build's channeled abilities (Helminth slot substituted).
     const abilities = (statsWarframe.abilities ?? []).map((a, i) =>
-      helminthSlot === i && helminthAbility ? helminthToAbility(helminthAbility) : a,
+      helminthSlot === i && helminthAbility ? helminthToAbility(helminthAbility, statsWarframe.id) : a,
     );
     const equippedModNames = equippedMods
       .map((m) => modsMap.get(m.modId)?.name)
@@ -745,7 +745,7 @@ export default function WarframeBuilderPage() {
         helminthSlot === slotIndex
       ) {
         return {
-          ability: helminthToAbility(helminthAbility),
+          ability: helminthToAbility(helminthAbility, selectedWarframe?.id),
           slot: entry.gameSlot,
           helminth: true as const,
         };

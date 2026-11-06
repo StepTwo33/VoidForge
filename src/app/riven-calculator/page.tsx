@@ -20,8 +20,9 @@ import { formatRivenName } from "@/lib/calc/riven-naming";
 import { getRivenStatsForCategory } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
+import { getBaseRivenWeapons, getEffectiveRivenWeaponType } from "@/lib/weapons/riven-family";
 
-const weaponTypes = ["Rifle", "Shotgun", "Pistol", "Melee", "Archgun"];
+const weaponTypes = ["Rifle", "Shotgun", "Pistol", "Melee", "Kitgun", "Zaw", "Companion", "Archgun"];
 
 function formatRangeHint(stat: RivenStat | undefined): string {
   if (!stat) return "";
@@ -45,10 +46,9 @@ export default function RivenCalculatorPage() {
   const graderRerolls = 0;
 
   const filteredWeapons = useMemo(() => {
-    // Riven-capable only; skip the legacy Rabvee "Zaw Component" stub (zaw_rabvee is the strike).
-    let weapons = allWeapons.filter((w) => getRivenWeaponType(w) !== null && w.triggerType !== "Zaw Component");
+    let weapons = getBaseRivenWeapons();
     if (selectedWeaponType) {
-      weapons = weapons.filter((w) => getRivenWeaponType(w) === selectedWeaponType);
+      weapons = weapons.filter((w) => getEffectiveRivenWeaponType(w) === selectedWeaponType);
     }
     if (weaponSearch.trim()) {
       const q = weaponSearch.toLowerCase();
@@ -56,6 +56,10 @@ export default function RivenCalculatorPage() {
     }
     return weapons.sort((a, b) => a.name.localeCompare(b.name));
   }, [selectedWeaponType, weaponSearch]);
+
+  const selectedWeaponObj = useMemo(() => {
+    return filteredWeapons.find((w) => w.name === selectedWeapon);
+  }, [filteredWeapons, selectedWeapon]);
 
   const disposition = STANDARD_RIVEN_DISPOSITION;
 
@@ -69,15 +73,29 @@ export default function RivenCalculatorPage() {
     [graderPositives, graderNegative, graderRank],
   );
 
-  const scaledPositivePool = useMemo(() => {
-    if (!selectedWeaponType) return [];
-    return getStatsWithDisposition(selectedWeaponType.toLowerCase(), disposition, rangeOptions);
-  }, [selectedWeaponType, disposition, rangeOptions]);
+  const statCategory = useMemo(() => {
+    if (selectedWeaponObj) {
+      const ext = getEffectiveRivenWeaponType(selectedWeaponObj);
+      if (ext === "Kitgun") return "pistol";
+      if (ext === "Zaw") return "melee";
+      return (getRivenWeaponType(selectedWeaponObj) ?? "rifle").toLowerCase();
+    }
+    if (!selectedWeaponType) return "rifle";
+    if (selectedWeaponType === "Kitgun") return "pistol";
+    if (selectedWeaponType === "Zaw") return "melee";
+    if (selectedWeaponType === "Companion") return "rifle";
+    return selectedWeaponType.toLowerCase();
+  }, [selectedWeaponObj, selectedWeaponType]);
 
-  const scaledNegativePool = useMemo(
-    () => getNegativeStatsWithDisposition(disposition, { ...rangeOptions, category: (selectedWeaponType ?? "rifle").toLowerCase() }),
-    [disposition, rangeOptions, selectedWeaponType],
-  );
+  const scaledPositivePool = useMemo(() => {
+    if (!selectedWeaponType && !selectedWeaponObj) return [];
+    return getStatsWithDisposition(statCategory, disposition, rangeOptions);
+  }, [statCategory, selectedWeaponType, selectedWeaponObj, disposition, rangeOptions]);
+
+  const scaledNegativePool = useMemo(() => {
+    if (!selectedWeaponType && !selectedWeaponObj) return [];
+    return getNegativeStatsWithDisposition(disposition, { ...rangeOptions, category: statCategory });
+  }, [statCategory, selectedWeaponType, selectedWeaponObj, disposition, rangeOptions]);
 
   const namedPositives = graderPositives.filter((s) => s.name && s.value !== 0).length;
   const shapeProblem = rivenShapeProblem(namedPositives, graderNegative?.name ? 1 : 0);
@@ -287,6 +305,18 @@ export default function RivenCalculatorPage() {
                 {graderPositives.map((stat, i) => {
                   const poolStat = scaledPositivePool.find((s) => s.name === stat.name);
                   const outOfRange = poolStat && stat.name && stat.value !== 0 && !isValueInStatRange(stat.value, poolStat);
+                  const otherUsedNames = new Set(
+                    graderPositives.filter((_, idx) => idx !== i).map((s) => s.name),
+                  );
+                  if (graderNegative?.name) otherUsedNames.add(graderNegative.name);
+                  const otherHasSpliced = graderPositives.some(
+                    (s, idx) => idx !== i && scaledPositivePool.some((p) => p.spliced && p.name === s.name),
+                  );
+                  const slotAvailableStats = scaledPositivePool.filter(
+                    (s) =>
+                      (s.name === stat.name || !otherUsedNames.has(s.name)) &&
+                      !(otherHasSpliced && s.spliced && s.name !== stat.name),
+                  );
                   return (
                     <div key={i} className="mb-2">
                       <div className="flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap">
@@ -304,10 +334,7 @@ export default function RivenCalculatorPage() {
                           className="min-h-11 min-w-0 flex-1 bg-background border border-border rounded px-2 py-1.5 text-base sm:text-sm"
                         >
                           <option value="">Select stat...</option>
-                          {(stat.name
-                            ? [{ name: stat.name, minValue: 0, maxValue: 0, type: "percent" as const }, ...availablePositiveStats]
-                            : availablePositiveStats
-                          ).map((s) => (
+                          {slotAvailableStats.map((s) => (
                             <option key={s.name} value={s.name}>{s.name}</option>
                           ))}
                         </select>

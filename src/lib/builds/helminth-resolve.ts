@@ -1,6 +1,7 @@
 import type { Ability } from "@/lib/types";
 import type { HelminthAbility } from "@/data/helminth";
 import { getEffectiveWarframesMap } from "@/lib/weapons/effective-data";
+import { isHildrynFrame, HILDRYN_SUBSUME_SHIELD_MULTIPLIER } from "@/lib/calc/ability-augment-rows";
 
 const NUMERIC_KEYS = [
   "energyCost",
@@ -41,11 +42,18 @@ export function hydrateHelminthAbility(h: HelminthAbility): HelminthAbility {
 }
 
 /** Convert a Helminth row into an Ability for calc / display paths. */
-export function helminthToAbility(h: HelminthAbility): Ability {
+export function helminthToAbility(h: HelminthAbility, hostWarframeId?: string): Ability {
   const hydrated = hydrateHelminthAbility(h);
+  const isHildryn = isHildrynFrame(hostWarframeId);
+  const baseCost = hydrated.energyCost;
+  const energyCost = isHildryn ? 0 : baseCost;
+  const miscStats = { ...(hydrated.miscStats ?? {}) };
+  if (isHildryn && typeof baseCost === "number" && baseCost > 0) {
+    miscStats.shieldCost = baseCost * HILDRYN_SUBSUME_SHIELD_MULTIPLIER;
+  }
   return {
     name: hydrated.name,
-    energyCost: hydrated.energyCost,
+    energyCost,
     description: hydrated.description,
     damage: hydrated.damage,
     damageBuff: hydrated.damageBuff,
@@ -56,6 +64,6 @@ export function helminthToAbility(h: HelminthAbility): Ability {
     castTime: hydrated.castTime,
     statusChance: hydrated.statusChance,
     damageType: hydrated.damageType,
-    miscStats: hydrated.miscStats,
+    miscStats: Object.keys(miscStats).length > 0 ? miscStats : undefined,
   };
 }

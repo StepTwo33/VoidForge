@@ -1,5 +1,6 @@
 import { allHelminthAbilities } from "@/data/helminth";
 import { helminthToAbility } from "@/lib/builds/helminth-resolve";
+import { computeStyanaxHopliteCritChance } from "@/lib/codex/ability-misc-stats";
 import {
   getVerifiedFieldScaling,
   getVerifiedMiscScaling,
@@ -1272,6 +1273,32 @@ function resolveShardBuffs(weapon: Weapon, ctx: WeaponBuffContext): WeaponExtern
   return buffs;
 }
 
+const SPEARGUN_WEAPON_IDS = new Set(["javlok", "scourge", "scourge_prime", "afentis"]);
+
+function resolveWarframePassiveBuffs(
+  weapon: Weapon,
+  ctx: WeaponBuffContext,
+): WeaponExternalBuff[] {
+  const family = warframeFamilyId(ctx.warframeId);
+  const buffs: WeaponExternalBuff[] = [];
+
+  if (family === "styanax") {
+    const shields = ctx.warframeStats?.totalShield ?? 0;
+    const isSpeargun = SPEARGUN_WEAPON_IDS.has(weapon.id) || weapon.name.toLowerCase().includes("speargun");
+    const cc = computeStyanaxHopliteCritChance(shields, { speargun: isSpeargun });
+    if (cc > 0) {
+      buffs.push({
+        id: "passive_styanax_hoplite",
+        label: "Hoplite (Styanax Passive)",
+        category: "ability",
+        critChanceFlatBonus: cc,
+      });
+    }
+  }
+
+  return buffs;
+}
+
 export function resolveWeaponExternalBuffs(
   weapon: Weapon,
   ctx: WeaponBuffContext | undefined,
@@ -1279,6 +1306,7 @@ export function resolveWeaponExternalBuffs(
 ): WeaponExternalBuff[] {
   if (!ctx) return [];
   return [
+    ...resolveWarframePassiveBuffs(weapon, ctx),
     ...resolveAbilityBuffs(weapon, ctx, simParams),
     ...resolveShardBuffs(weapon, ctx),
     ...resolveWarframeCrossModBuffs(weapon, ctx),
@@ -1325,6 +1353,7 @@ export function resolveAbilitiesWithHelminth(
   abilities: Ability[] | undefined,
   helminthAbilityId?: string | null,
   helminthSlot?: number | null,
+  hostWarframeId?: string,
 ): Ability[] {
   if (!abilities?.length) return [];
   const rows = abilities.map((a) => ({ ...a }));
@@ -1338,7 +1367,7 @@ export function resolveAbilitiesWithHelminth(
   }
   const h = allHelminthAbilities.find((x) => x.id === helminthAbilityId);
   if (!h) return rows;
-  rows[helminthSlot] = helminthToAbility(h);
+  rows[helminthSlot] = helminthToAbility(h, hostWarframeId);
   return rows;
 }
 

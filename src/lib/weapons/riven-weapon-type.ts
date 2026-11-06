@@ -49,14 +49,59 @@ export function getRivenWeaponType(
   return null;
 }
 
-/** Riven placeholder for this weapon: same rules as the riven grader (getRivenWeaponType). */
+export function isZawWeapon(
+  weapon: (Pick<Weapon, "name" | "category"> & { arcaneType?: string; id?: string }) | undefined,
+): boolean {
+  if (!weapon) return false;
+  const c = (weapon.category || "").toLowerCase();
+  if (c === "zaw_strike" || c === "zaw") return true;
+  if (weapon.arcaneType === "exodia") return true;
+  if (weapon.id && weapon.id.startsWith("zaw_")) return true;
+  return false;
+}
+
+export function isKitgunWeapon(
+  weapon: (Pick<Weapon, "name" | "category"> & { kitgunChamberCategory?: Weapon["kitgunChamberCategory"]; arcaneType?: string; id?: string }) | undefined,
+): boolean {
+  if (!weapon) return false;
+  const c = (weapon.category || "").toLowerCase();
+  if (c === "kitgun_chamber" || weapon.kitgunChamberCategory != null) return true;
+  if (weapon.arcaneType === "kitgun") return true;
+  if (weapon.id && weapon.id.startsWith("kitgun_")) return true;
+  return false;
+}
+
+/** Riven placeholder for this weapon: matches exact in-game Riven category (Zaw, Kitgun, Companion, Melee, Rifle, Shotgun, Pistol, Archgun). */
 export function rivenModMatchesWeapon(
   modId: string,
-  weapon: (Pick<Weapon, "name" | "category"> & { hasRivenSlot?: boolean; kitgunChamberCategory?: Weapon["kitgunChamberCategory"] }) | undefined,
+  weapon: (Pick<Weapon, "name" | "category"> & { hasRivenSlot?: boolean; kitgunChamberCategory?: Weapon["kitgunChamberCategory"]; arcaneType?: string; id?: string }) | undefined,
   weaponCategory: string | undefined,
 ): boolean {
   const target = weapon ?? (weaponCategory ? { name: "", category: weaponCategory } : undefined);
-  const type = target ? getRivenWeaponType(target) : null;
+  if (!target) return false;
+
+  // 1. Zaws: ONLY match zaw_riven_mod! They can NEVER use riven_melee!
+  if (isZawWeapon(target)) {
+    return modId === "zaw_riven_mod";
+  }
+
+  // 2. Kitguns: ONLY match kitgun_riven_mod! They can NEVER use riven_pistol or riven_rifle!
+  if (isKitgunWeapon(target)) {
+    return modId === "kitgun_riven_mod";
+  }
+
+  // 3. Sentinel / Companion weapons: ONLY match companion_weapon_riven_mod!
+  const c = (target.category || "").toLowerCase();
+  if (c === "sentinel_weapon" || c === "hound_weapon") {
+    return modId === "companion_weapon_riven_mod";
+  }
+
+  // 4. Deny zaw, kitgun, or companion weapon rivens on regular weapons:
+  if (modId === "zaw_riven_mod" || modId === "kitgun_riven_mod" || modId === "companion_weapon_riven_mod") {
+    return false;
+  }
+
+  const type = getRivenWeaponType(target);
   return type !== null && modId === `riven_${type.toLowerCase()}`;
 }
 

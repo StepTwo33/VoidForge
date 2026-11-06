@@ -395,6 +395,8 @@ export interface WeaponExternalBuff {
   /** Flat add to final crit multiplier after percent bonuses (+1.2 = +1.2×). */
   critMultFlatBonus?: number;
   statusBonus?: number;
+  /** Flat add to final status chance after relative mods (e.g. +0.6 = +60% final SC from Mecha Overdrive). */
+  statusChanceFlatBonus?: number;
   fireRateBonus?: number;
   /** Additive reload-speed bonus (+0.7 = +70%; reduces reload time). */
   reloadBonus?: number;

@@ -403,9 +403,14 @@ export function evaluateRiven(riven: RivenMod): number {
   let greatStats = 0;
 
   for (const stat of riven.positiveStats) {
+    const isSpliced = !!stat.spliced || stat.name.includes("(Spliced)");
     const cleanName = stat.name.replace(" (Spliced)", "");
-    const weight = STAT_WEIGHTS[stat.name] ?? STAT_WEIGHTS[cleanName] ?? 0.5;
-    const value = scoringMagnitude(stat) * toReference;
+    let weight = STAT_WEIGHTS[stat.name] ?? STAT_WEIGHTS[cleanName] ?? 0.5;
+    if (isSpliced) {
+      weight = Math.max(weight, 0.9);
+    }
+    const magnitude = scoringMagnitude(stat) * (isSpliced ? 1.3 : 1.0);
+    const value = magnitude * toReference;
 
     let tierBonus = 0;
     if (weight >= 0.9) {

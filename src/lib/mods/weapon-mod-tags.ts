@@ -8,6 +8,7 @@ import {
 } from "@/data/mod-weapon-tags";
 import { WEAPON_WIKI_BASE_TAGS, WEAPON_WIKI_TRIGGERS } from "@/data/wiki-weapon-base-tags";
 import { getWeaponRadialAttacks } from "@/lib/weapons/weapon-radial-utils";
+import { getRivenFamilyWeaponIds } from "@/lib/weapons/riven-family";
 
 /** Tags weapons carry for mod compatibility (mirrors wiki weapon tags). */
 export type WeaponModProfileTag = string;
@@ -196,7 +197,11 @@ export function modMatchesExclusiveWeapon(
   weaponId: string | undefined,
 ): boolean {
   if (!isWeaponExclusiveMod(modId)) return true;
-  return !!weaponId && MOD_EXCLUSIVE_WEAPON_IDS[modId]!.includes(weaponId);
+  if (!weaponId) return false;
+  const exclusive = MOD_EXCLUSIVE_WEAPON_IDS[modId]!;
+  if (exclusive.includes(weaponId)) return true;
+  const familyIds = getRivenFamilyWeaponIds(weaponId);
+  return familyIds.some((id) => exclusive.includes(id));
 }
 
 /**
