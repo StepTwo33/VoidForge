@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { verifyAdmin } from "@/lib/auth/admin";
 import { sendReportStatusEmail } from "@/lib/auth/email";
 import { logServerError } from "@/lib/log-server-error";
+import { removeReportScreenshotFile } from "@/lib/reports/report-screenshot-files";
 
 const ADMIN_REPLY_MAX = 4_000;
 
@@ -100,6 +101,25 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
 
   const { id } = await params;
   try {
+    const existing = await prisma.report.findUnique({
+      where: { id },
+      select: { screenshots: true },
+    });
+    if (existing?.screenshots) {
+      try {
+        const urls = JSON.parse(existing.screenshots);
+        if (Array.isArray(urls)) {
+          for (const u of urls) {
+            if (typeof u === "string" && u.startsWith("/api/uploads/reports/")) {
+              const filename = u.replace("/api/uploads/reports/", "").split("?")[0];
+              await removeReportScreenshotFile(filename);
+            }
+          }
+        }
+      } catch {
+        // ignore JSON parse error
+      }
+    }
     await prisma.report.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch {

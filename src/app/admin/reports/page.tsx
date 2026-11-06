@@ -7,7 +7,7 @@ import { AvatarImage } from "@/components/game-asset-image";
 import {
   Flag, Check, X, ChevronDown, ChevronUp, Trash2, Search,
   AlertTriangle, Shield, RotateCcw, Clock, CheckCircle2, Ban,
-  MessageSquare, User as UserIcon, Calendar,
+  MessageSquare, User as UserIcon, Calendar, Camera, ZoomIn,
 } from "lucide-react";
 import { useConfirmDialog } from "@/components/confirm-dialog-provider";
 
@@ -22,6 +22,7 @@ interface ApiReport {
   statDiscrepancies: string;
   comment: string;
   adminReply: string;
+  screenshots?: string;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -66,6 +67,7 @@ export default function AdminReportsPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [emailNotify, setEmailNotify] = useState<Record<string, boolean>>({});
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
     fetch("/api/reports")
@@ -275,6 +277,14 @@ export default function AdminReportsPage() {
             const discrepancies: { stat: string; currentValue: string; expectedValue: string }[] = (() => {
               try { return typeof report.statDiscrepancies === "string" ? JSON.parse(report.statDiscrepancies) : report.statDiscrepancies; } catch { return []; }
             })();
+            const reportScreenshots: string[] = (() => {
+              try {
+                const s = typeof report.screenshots === "string" ? JSON.parse(report.screenshots) : report.screenshots;
+                return Array.isArray(s) ? s : [];
+              } catch {
+                return [];
+              }
+            })();
             const timeAgo = getTimeAgo(report.createdAt);
 
             return (
@@ -325,6 +335,12 @@ export default function AdminReportsPage() {
                         <span className="flex items-center gap-1 hidden sm:flex">
                           <MessageSquare className="h-2.5 w-2.5" />
                           Comment
+                        </span>
+                      )}
+                      {reportScreenshots.length > 0 && (
+                        <span className="flex items-center gap-1 hidden sm:flex text-amber-500 font-medium">
+                          <Camera className="h-2.5 w-2.5" />
+                          {reportScreenshots.length} {reportScreenshots.length === 1 ? "screenshot" : "screenshots"}
                         </span>
                       )}
                     </div>
@@ -407,6 +423,34 @@ export default function AdminReportsPage() {
                         <p className="text-sm text-muted-foreground bg-muted/20 rounded-lg p-3 border border-border">
                           {report.comment}
                         </p>
+                      </div>
+                    )}
+
+                    {/* Attached Screenshots */}
+                    {reportScreenshots.length > 0 && (
+                      <div>
+                        <div className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase flex items-center gap-1.5">
+                          <Camera className="h-3 w-3 text-amber-500" /> Attached Screenshots ({reportScreenshots.length})
+                        </div>
+                        <div className="flex flex-wrap gap-2.5">
+                          {reportScreenshots.map((url, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setLightboxImage(url)}
+                              className="group relative h-20 w-32 overflow-hidden rounded-lg border border-border bg-black/40 transition-all hover:border-amber-500/60"
+                            >
+                              <img
+                                src={url}
+                                alt={`Screenshot ${idx + 1}`}
+                                className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                              />
+                              <span className="absolute bottom-1 right-1 rounded bg-black/75 px-1.5 py-0.5 text-[9px] text-white flex items-center gap-0.5">
+                                <ZoomIn className="h-2.5 w-2.5" /> Enlarge
+                              </span>
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
 
@@ -525,6 +569,52 @@ export default function AdminReportsPage() {
           })}
         </div>
       </div>
+
+      {/* Screenshot Lightbox Modal */}
+      {lightboxImage && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          onClick={() => setLightboxImage(null)}
+        >
+          <div
+            className="relative max-h-[90vh] max-w-[90vw] overflow-hidden rounded-xl border border-border bg-card shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2">
+              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <Camera className="h-3.5 w-3.5 text-amber-500" /> Screenshot Preview
+              </span>
+              <div className="flex items-center gap-3">
+                <a
+                  href={lightboxImage}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-amber-500 hover:underline inline-flex items-center gap-1"
+                >
+                  Open original
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setLightboxImage(null)}
+                  className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            <div className="max-h-[80vh] overflow-auto p-2 bg-black/30">
+              <img
+                src={lightboxImage}
+                alt="Report attachment full size"
+                className="max-h-[75vh] w-auto max-w-full rounded object-contain mx-auto"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </PageShell>
   );
 }

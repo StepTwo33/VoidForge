@@ -87,6 +87,15 @@ export async function POST(req: NextRequest) {
     const comment =
       typeof body.comment === "string" ? body.comment.trim().slice(0, REPORT_COMMENT_MAX) : "";
 
+    let screenshots: string[] = [];
+    if (Array.isArray(body.screenshots)) {
+      screenshots = body.screenshots
+        .filter((s): s is string => typeof s === "string" && s.trim().length > 0)
+        .slice(0, 5);
+    } else if (typeof body.screenshotUrl === "string" && body.screenshotUrl.trim()) {
+      screenshots = [body.screenshotUrl.trim()];
+    }
+
     const report = await prisma.report.create({
       data: {
         userId: session?.user?.id ?? null,
@@ -99,6 +108,7 @@ export async function POST(req: NextRequest) {
           Array.isArray(body.statDiscrepancies) ? body.statDiscrepancies.slice(0, 500) : []
         ),
         comment,
+        screenshots: JSON.stringify(screenshots),
         status: "open",
       },
     });

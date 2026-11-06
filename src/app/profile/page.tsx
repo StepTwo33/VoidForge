@@ -32,6 +32,7 @@ interface UserReport {
   status: string;
   comment: string;
   adminReply?: string;
+  screenshots?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -837,6 +838,29 @@ export default function ProfilePage() {
                             <p className="text-xs text-foreground/90 whitespace-pre-wrap">{r.adminReply}</p>
                           </div>
                         ) : null}
+                        {(() => {
+                          try {
+                            const sc = typeof r.screenshots === "string" ? JSON.parse(r.screenshots) : r.screenshots;
+                            return Array.isArray(sc) && sc.length > 0 ? (
+                              <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                                {sc.map((url: string, i: number) => (
+                                  <a
+                                    key={i}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group relative h-12 w-16 overflow-hidden rounded border border-border bg-black/40 hover:border-primary/60 transition-colors"
+                                    title="View full screenshot"
+                                  >
+                                    <img src={url} alt={`Screenshot ${i + 1}`} className="h-full w-full object-cover group-hover:scale-105 transition-transform" />
+                                  </a>
+                                ))}
+                              </div>
+                            ) : null;
+                          } catch {
+                            return null;
+                          }
+                        })()}
                         <p className="text-[10px] text-muted-foreground mt-2">
                           Submitted {new Date(r.createdAt).toLocaleString()}
                           {r.updatedAt !== r.createdAt && (

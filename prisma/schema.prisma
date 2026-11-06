@@ -161,6 +161,8 @@ model Report {
   comment          String   @default("")
   /** Moderator reply shown to the reporter and included in status emails. */
   adminReply       String   @default("")
+  /** JSON array of uploaded screenshot URLs attached to this report. */
+  screenshots      String   @default("[]")
   status           String   @default("open") // open | resolved | wontfix
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

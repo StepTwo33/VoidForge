@@ -15,8 +15,9 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
   Flag, Plus, Trash2, Download, Check, X, ChevronDown, ChevronUp,
-  AlertTriangle, Search, Wrench, Edit3,
+  AlertTriangle, Search, Wrench, Edit3, Camera, Upload, Loader2, ZoomIn,
 } from "lucide-react";
+import { toast } from "sonner";
 import { NavBack } from "@/components/nav-back";
 import { decodeReturnTo, returnLabel } from "@/lib/site/nav-return";
 
@@ -30,6 +31,7 @@ interface ApiReport {
   issues: string;
   statDiscrepancies: string;
   comment: string;
+  screenshots?: string;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -86,6 +88,10 @@ export default function ReportIssuePage() {
   const [formIssues, setFormIssues] = useState(emptyIssues());
   const [formDiscrepancies, setFormDiscrepancies] = useState<{ stat: string; currentValue: string; expectedValue: string }[]>([]);
   const [formComment, setFormComment] = useState("");
+  const [formScreenshots, setFormScreenshots] = useState<string[]>([]);
+  const [isUploadingScreenshot, setIsUploadingScreenshot] = useState(false);
+  const [isDraggingScreenshot, setIsDraggingScreenshot] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [itemSearch, setItemSearch] = useState("");
   const [showItemPicker, setShowItemPicker] = useState(false);
   const [returnTo, setReturnTo] = useState<string | null>(null);
@@ -175,6 +181,55 @@ export default function ReportIssuePage() {
     return results;
   }, [itemSearch, formType]);
 
+  const handleUploadScreenshotFile = useCallback(async (file: File | Blob) => {
+    if (formScreenshots.length >= 3) {
+      toast.error("You can attach up to 3 screenshots per report.");
+      return;
+    }
+    setIsUploadingScreenshot(true);
+    const toastId = toast.loading("Uploading screenshot...");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/reports/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Upload failed");
+      }
+      const data = (await res.json()) as { url: string };
+      setFormScreenshots((prev) => [...prev, data.url]);
+      toast.success("Screenshot attached!", { id: toastId });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to upload image", { id: toastId });
+    } finally {
+      setIsUploadingScreenshot(false);
+    }
+  }, [formScreenshots.length]);
+
+  // Clipboard paste listener (Ctrl+V) when New Report form is open
+  useEffect(() => {
+    if (!showForm) return;
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault();
+            handleUploadScreenshotFile(file);
+            break;
+          }
+        }
+      }
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [showForm, handleUploadScreenshotFile]);
+
   const handleSubmit = useCallback(async () => {
     if (!formItemName.trim()) return;
     await fetch("/api/reports", {
@@ -188,6 +243,7 @@ export default function ReportIssuePage() {
         issues: { ...formIssues },
         statDiscrepancies: formDiscrepancies.filter((d) => d.stat.trim()),
         comment: formComment.trim(),
+        screenshots: formScreenshots,
       }),
     });
     refresh();
@@ -196,8 +252,9 @@ export default function ReportIssuePage() {
     setFormIssues(emptyIssues());
     setFormDiscrepancies([]);
     setFormComment("");
+    setFormScreenshots([]);
     setShowForm(false);
-  }, [formType, formItemName, formItemId, formReporter, formIssues, formDiscrepancies, formComment, refresh]);
+  }, [formType, formItemName, formItemId, formReporter, formIssues, formDiscrepancies, formComment, formScreenshots, refresh]);
 
   const handleExport = useCallback(() => {
     const data = JSON.stringify(reports, null, 2);
@@ -443,6 +500,101 @@ export default function ReportIssuePage() {
                 />
               </div>
 
+              {/* Screenshots (Optional) */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
+                    <Camera className="h-3.5 w-3.5 text-amber-500" />
+                    Screenshots ({formScreenshots.length}/3)
+                  </label>
+                  <span className="text-[10px] text-muted-foreground">PNG, JPG, WebP up to 5MB</span>
+                </div>
+
+                {/* Uploaded thumbnails */}
+                {formScreenshots.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {formScreenshots.map((url, i) => (
+                      <div key={i} className="relative group rounded-lg border border-border overflow-hidden bg-black/40 h-20 w-28">
+                        <img src={url} alt={`Screenshot ${i + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setLightboxImage(url)}
+                          className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity text-xs gap-1"
+                        >
+                          <ZoomIn className="h-3.5 w-3.5" /> View
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormScreenshots((prev) => prev.filter((_, idx) => idx !== i))}
+                          className="absolute top-1 right-1 h-5 w-5 rounded-full bg-red-600/90 hover:bg-red-500 text-white flex items-center justify-center shadow-md transition-colors"
+                          title="Remove screenshot"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Dropzone / Paste zone (if < 3 screenshots) */}
+                {formScreenshots.length < 3 && (
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDraggingScreenshot(true);
+                    }}
+                    onDragLeave={(e) => {
+                      e.preventDefault();
+                      setIsDraggingScreenshot(false);
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDraggingScreenshot(false);
+                      const file = e.dataTransfer.files?.[0];
+                      if (file && file.type.startsWith("image/")) {
+                        handleUploadScreenshotFile(file);
+                      }
+                    }}
+                    className={cn(
+                      "relative flex flex-col items-center justify-center rounded-xl border border-dashed p-3 text-center transition-all",
+                      isDraggingScreenshot
+                        ? "border-amber-400 bg-amber-950/40"
+                        : "border-border/80 bg-muted/10 hover:border-amber-500/50 hover:bg-muted/20",
+                    )}
+                  >
+                    {isUploadingScreenshot ? (
+                      <div className="flex items-center gap-2 py-1 text-xs text-amber-400">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Uploading screenshot...</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1.5 font-medium text-foreground">
+                          <Upload className="h-3.5 w-3.5 text-amber-500" />
+                          <span>Attach Screenshot:</span>
+                        </div>
+                        <span className="text-[11px]">
+                          Drop image, paste (<kbd className="rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-mono">Ctrl+V</kbd>), or
+                        </span>
+                        <label className="cursor-pointer font-semibold text-amber-500 underline decoration-amber-500/40 underline-offset-2 hover:text-amber-400">
+                          browse file
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp,image/gif"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleUploadScreenshotFile(file);
+                              e.target.value = "";
+                            }}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <button
                 onClick={handleSubmit}
                 disabled={!formItemName.trim()}
@@ -510,9 +662,21 @@ export default function ReportIssuePage() {
                         <span className="truncate text-sm font-medium">{report.itemName}</span>
                         <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] capitalize">{report.itemType.replace("_", " ")}</span>
                       </div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">
-                        {report.reporterName} · {new Date(report.createdAt).toLocaleDateString()}
-                        {activeIssues.length > 0 && ` · ${activeIssues.slice(0, 2).join(", ")}${activeIssues.length > 2 ? ` +${activeIssues.length - 2}` : ""}`}
+                      <div className="text-[10px] text-muted-foreground mt-0.5 flex flex-wrap items-center gap-1.5">
+                        <span>{report.reporterName} · {new Date(report.createdAt).toLocaleDateString()}</span>
+                        {activeIssues.length > 0 && <span>· {activeIssues.slice(0, 2).join(", ")}{activeIssues.length > 2 ? ` +${activeIssues.length - 2}` : ""}</span>}
+                        {(() => {
+                          try {
+                            const sc = typeof report.screenshots === "string" ? JSON.parse(report.screenshots) : report.screenshots;
+                            return Array.isArray(sc) && sc.length > 0 ? (
+                              <span className="flex items-center gap-1 text-amber-500 font-medium">
+                                · <Camera className="h-2.5 w-2.5 inline" /> {sc.length} {sc.length === 1 ? "screenshot" : "screenshots"}
+                              </span>
+                            ) : null;
+                          } catch {
+                            return null;
+                          }
+                        })()}
                       </div>
                     </div>
                     {isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
@@ -549,6 +713,40 @@ export default function ReportIssuePage() {
                       })()}
 
                       {report.comment && <p className="text-sm text-muted-foreground">{report.comment}</p>}
+
+                      {/* Attached Screenshots */}
+                      {(() => {
+                        const screenshots: string[] = (() => {
+                          try {
+                            const parsed = typeof report.screenshots === "string" ? JSON.parse(report.screenshots) : report.screenshots;
+                            return Array.isArray(parsed) ? parsed : [];
+                          } catch {
+                            return [];
+                          }
+                        })();
+                        return screenshots.length > 0 ? (
+                          <div>
+                            <div className="text-[10px] font-semibold text-muted-foreground mb-1.5 uppercase flex items-center gap-1.5">
+                              <Camera className="h-3 w-3 text-amber-500" /> Attached Screenshots ({screenshots.length})
+                            </div>
+                            <div className="flex gap-2 flex-wrap">
+                              {screenshots.map((url: string, idx: number) => (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() => setLightboxImage(url)}
+                                  className="group relative h-16 w-24 overflow-hidden rounded-lg border border-border bg-black/40 transition-all hover:border-amber-500/60"
+                                >
+                                  <img src={url} alt={`Screenshot ${idx + 1}`} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                                  <span className="absolute bottom-0.5 right-0.5 rounded bg-black/70 px-1 py-0.5 text-[8px] text-white">
+                                    <ZoomIn className="h-2 w-2 inline mr-0.5" /> View
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null;
+                      })()}
 
                       {isAdmin && (
                         <div className="flex flex-wrap gap-2 border-t border-border pt-2">
@@ -595,6 +793,52 @@ export default function ReportIssuePage() {
             <a href="https://discord.gg/bqQXaYdTjS" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-[#4752C4] underline-offset-2 dark:text-[#8891F7] hover:underline">Discord</a>
           </p>
         </div>
+
+        {/* Screenshot Lightbox Modal */}
+        {lightboxImage && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+            onClick={() => setLightboxImage(null)}
+          >
+            <div
+              className="relative max-h-[90vh] max-w-[90vw] overflow-hidden rounded-xl border border-border bg-card shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3 py-2">
+                <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                  <Camera className="h-3.5 w-3.5 text-amber-500" /> Screenshot Preview
+                </span>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={lightboxImage}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-amber-500 hover:underline inline-flex items-center gap-1"
+                  >
+                    Open original
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => setLightboxImage(null)}
+                    className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    aria-label="Close"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="max-h-[80vh] overflow-auto p-2 bg-black/30">
+                <img
+                  src={lightboxImage}
+                  alt="Report attachment full size"
+                  className="max-h-[75vh] w-auto max-w-full rounded object-contain mx-auto"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </PageMain>
     </PageShell>
   );
