@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { X, Plus, Sparkles, RefreshCw } from "lucide-react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { X, Plus, Sparkles, RefreshCw, Camera, Loader2 } from "lucide-react";
 import { allWeapons } from "@/data/weapons";
 import type { Weapon } from "@/lib/types";
 import { getRivenWeaponType, type RivenWeaponType } from "@/lib/weapons/riven-weapon-type";
@@ -26,6 +26,7 @@ import {
   type SavedRiven,
   type SavedRivenStat,
 } from "@/lib/rivens/riven-storage";
+import { scanRivenImageFile, type ParsedOcrRiven } from "@/lib/rivens/riven-ocr";
 import { RivenCard, extractRivenAffix } from "./riven-card";
 import { Input } from "@/components/ui/input";
 import { getRivenStatsForCategory } from "@/lib/types";
@@ -37,6 +38,7 @@ interface RivenDialogProps {
   onClose: () => void;
   onSave: (riven: SavedRiven) => void;
   initialRiven?: SavedRiven | null;
+  initialScannedRiven?: ParsedOcrRiven | null;
   fixedWeaponId?: string;
   hideWeaponSelect?: boolean;
 }
@@ -81,20 +83,21 @@ function computeNegMidpoint(poolStat: RivenStat | undefined, isPercent: boolean,
   return isPercent ? 0.45 : 1.0;
 }
 
-export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId, hideWeaponSelect }: RivenDialogProps) {
+export function RivenDialog({ open, onClose, onSave, initialRiven, initialScannedRiven, fixedWeaponId, hideWeaponSelect }: RivenDialogProps) {
   const eligibleWeapons = useMemo(
     () => getBaseRivenWeapons().sort((a, b) => a.name.localeCompare(b.name)),
     [],
   );
 
   const initialTargetWeaponId = useMemo(() => {
+    if (initialScannedRiven?.weaponId) return initialScannedRiven.weaponId;
     if (initialRiven?.weaponId) return initialRiven.weaponId;
     if (fixedWeaponId) {
       const base = getRivenBaseWeapon(fixedWeaponId);
       return base?.id ?? fixedWeaponId;
     }
     return "torid";
-  }, [initialRiven, fixedWeaponId]);
+  }, [initialRiven, initialScannedRiven, fixedWeaponId]);
 
   const [weaponId, setWeaponId] = useState<string>(initialTargetWeaponId);
   const [weaponCategoryFilter, setWeaponCategoryFilter] = useState<string>("All");
@@ -104,10 +107,73 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
   const [rerolls, setRerolls] = useState<number>(0);
   const [customSuffix, setCustomSuffix] = useState<string>("");
   const [isSuffixManual, setIsSuffixManual] = useState<boolean>(false);
+  const [isScanning, setIsScanning] = useState<boolean>(false);
+  const [scanStatus, setScanStatus] = useState<string>("");
 
   // Stats state: key -> value (decimal fraction or flat)
   const [positiveStats, setPositiveStats] = useState<{ key: string; value: number }[]>([]);
   const [negativeStat, setNegativeStat] = useState<{ key: string; value: number } | null>(null);
+
+  const handleScanFile = useCallback(async (file: File | Blob) => {
+    setIsScanning(true);
+    setScanStatus("Scanning...");
+    try {
+      const parsed = await scanRivenImageFile(file, (_progress, status) => {
+        setScanStatus(status);
+      });
+
+      if (parsed.weaponId) {
+        setWeaponId(parsed.weaponId);
+      }
+      if (parsed.masteryRank) {
+        setMasteryRank(parsed.masteryRank);
+      }
+      if (parsed.rerolls != null) {
+        setRerolls(parsed.rerolls);
+      }
+      if (parsed.customSuffix) {
+        setCustomSuffix(parsed.customSuffix);
+        setIsSuffixManual(true);
+      }
+      if (parsed.positiveStats.length > 0) {
+        setPositiveStats(parsed.positiveStats);
+      }
+      if (parsed.negativeStat) {
+        setNegativeStat(parsed.negativeStat);
+      }
+
+      toast.success(
+        `Scanned ${parsed.weaponName ?? "Riven"} (${parsed.positiveStats.length} buff${parsed.positiveStats.length === 1 ? "" : "s"}${parsed.negativeStat ? ", 1 curse" : ""})! Check details below.`,
+      );
+    } catch (err) {
+      if (process.env.NODE_ENV === "development") console.error("OCR scan error:", err);
+      toast.error("Could not scan Riven card from this image. You can adjust the stats manually.");
+    } finally {
+      setIsScanning(false);
+      setScanStatus("");
+    }
+  }, []);
+
+  // Clipboard paste listener (Ctrl+V) when modal is open
+  useEffect(() => {
+    if (!open) return;
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault();
+            handleScanFile(file);
+            break;
+          }
+        }
+      }
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [open, handleScanFile]);
 
   const selectedWeapon = useMemo(
     () => eligibleWeapons.find((w) => w.id === weaponId) ?? eligibleWeapons[0],
@@ -134,7 +200,23 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
   // Initialize or reset form when modal opens
   useEffect(() => {
     if (!open) return;
-    if (initialRiven) {
+    if (initialScannedRiven) {
+      if (initialScannedRiven.weaponId) {
+        setWeaponId(initialScannedRiven.weaponId);
+      }
+      setPolarity(initialScannedRiven.polarity ?? "madurai");
+      setMasteryRank(initialScannedRiven.masteryRank ?? 12);
+      setRerolls(initialScannedRiven.rerolls ?? 0);
+      if (initialScannedRiven.customSuffix) {
+        setCustomSuffix(initialScannedRiven.customSuffix);
+        setIsSuffixManual(true);
+      } else {
+        setCustomSuffix("");
+        setIsSuffixManual(false);
+      }
+      setPositiveStats(initialScannedRiven.positiveStats ?? []);
+      setNegativeStat(initialScannedRiven.negativeStat ?? null);
+    } else if (initialRiven) {
       setWeaponId(initialRiven.weaponId);
       setPolarity(initialRiven.polarity);
       setMasteryRank(initialRiven.masteryRank);
@@ -168,7 +250,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
       ]);
       setNegativeStat({ key: "zoom", value: 0.30 });
     }
-  }, [open, initialRiven, fixedWeaponId]);
+  }, [open, initialRiven, initialScannedRiven, fixedWeaponId]);
 
   // Compute stat pools with ranges for reference hints
   const rangeOpts = useMemo(
@@ -314,19 +396,60 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
               {initialRiven ? "Edit Riven Roll" : "Create Riven"}
             </h2>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-1 text-muted-foreground hover:bg-purple-500/10 hover:text-white"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <label
+              title="Scan Riven from screenshot or image (or press Ctrl+V to paste)"
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-950/60 px-2.5 py-1 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-900/80 hover:text-white"
+            >
+              {isScanning ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-300" />
+                  <span className="text-[11px]">{scanStatus || "Scanning..."}</span>
+                </>
+              ) : (
+                <>
+                  <Camera className="h-3.5 w-3.5 text-purple-400" />
+                  <span>Scan Screenshot</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleScanFile(file);
+                      e.target.value = "";
+                    }}
+                    className="hidden"
+                  />
+                </>
+              )}
+            </label>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg p-1 text-muted-foreground hover:bg-purple-500/10 hover:text-white"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Modal Body */}
         <div className="grid grid-cols-1 gap-6 overflow-y-auto p-6 md:grid-cols-12">
           {/* Controls Column */}
           <div className="space-y-4 md:col-span-7">
+            {isScanning && (
+              <div className="flex items-center gap-3 rounded-xl border border-purple-500/40 bg-purple-950/70 p-3 text-xs text-purple-200">
+                <Loader2 className="h-4 w-4 animate-spin text-purple-400" />
+                <span>{scanStatus || "Scanning riven screenshot with OCR... reading stats, weapon, and mastery rank."}</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between rounded-xl border border-purple-500/20 bg-purple-950/20 px-3 py-2 text-[11px] text-purple-300/80">
+              <span className="flex items-center gap-1.5">
+                <Camera className="h-3.5 w-3.5 text-purple-400" />
+                <span>Have a screenshot? Paste with <strong>Ctrl+V</strong> or click <strong>Scan Screenshot</strong> to import automatically.</span>
+              </span>
+            </div>
             {/* Weapon Selector */}
             {hideWeaponSelect ? (
               <div className="rounded-lg border border-purple-500/30 bg-purple-950/40 p-3">
