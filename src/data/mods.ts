@@ -14,7 +14,7 @@ const RAW_MODS: Mod[] = [
       "damage": 15,
       "accuracy": -5
     },
-    "description": "+15% Damage, -5% Accuracy per rank",
+    "description": "+165% Damage, -55% Accuracy",
     "rarity": "rare"
   },
   {
@@ -28,7 +28,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "multishot": 10
     },
-    "description": "+10% Multishot per rank",
+    "description": "+60% Multishot",
     "rarity": "common"
   },
   {
@@ -88,7 +88,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "cold": 15
     },
-    "description": "+15% Cold per rank (Primed)",
+    "description": "+165% <DT_FREEZE_COLOR>Cold",
     "rarity": "legendary"
   },
   {
@@ -132,7 +132,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "puncture": 20.0
     },
-    "description": "+20% Puncture per rank (+120% at max)",
+    "description": "+120% <DT_PUNCTURE_COLOR>Puncture",
     "rarity": "rare"
   },
   {
@@ -254,7 +254,7 @@ const RAW_MODS: Mod[] = [
       "fireRate": 15,
       "damage": -2.5
     },
-    "description": "+15% Fire Rate, -2.5% Damage per rank",
+    "description": "+90% Fire Rate, -15% Damage",
     "rarity": "rare"
   },
   {
@@ -269,7 +269,7 @@ const RAW_MODS: Mod[] = [
       "heat": 15,
       "magazine": 5
     },
-    "description": "+15% Heat, +5% Magazine per rank",
+    "description": "+20% Magazine Capacity, +60% <DT_FIRE_COLOR>Heat",
     "rarity": "rare"
   },
   {
@@ -284,7 +284,7 @@ const RAW_MODS: Mod[] = [
       "cold": 10,
       "magazine": 10
     },
-    "description": "+40% Magazine Capacity, +40% Cold at max rank",
+    "description": "+40% Magazine Capacity, +40% <DT_FREEZE_COLOR>Cold",
     "rarity": "rare"
   },
   {
@@ -299,7 +299,7 @@ const RAW_MODS: Mod[] = [
       "heat": 15,
       "statusChance": 15
     },
-    "description": "+60% Heat, +60% Status Chance at max rank",
+    "description": "+60% <DT_FIRE_COLOR>Heat, +60% Status Chance",
     "rarity": "rare"
   },
   {
@@ -314,7 +314,7 @@ const RAW_MODS: Mod[] = [
       "criticalChance": 33.3333,
       "fireRate": -3.3333
     },
-    "description": "+33.3% Crit Chance, -3.3% Fire Rate per rank",
+    "description": "+200% Critical Chance, -20% Fire Rate",
     "rarity": "rare"
   },
   {
@@ -330,7 +330,7 @@ const RAW_MODS: Mod[] = [
       "damage": 14.0909,
       "sprintSpeed": 2.272727
     },
-    "description": "+155% Damage, +25% Sprint Speed at max rank",
+    "description": "+155% Damage, +25% Sprint Speed",
     "rarity": "rare"
   },
   {
@@ -345,7 +345,7 @@ const RAW_MODS: Mod[] = [
       "reloadSpeed": 2.5,
       "punchThrough": 0.2
     },
-    "description": "+5% Reload, +0.2m Punch Through per rank",
+    "description": "+15% Reload Speed, +1.2 Punch Through",
     "rarity": "rare"
   },
   {
@@ -360,7 +360,7 @@ const RAW_MODS: Mod[] = [
       "damage": 15,
       "accuracy": -5.0
     },
-    "description": "+165% Damage, -55% Accuracy at max rank",
+    "description": "+165% Damage, -55% Accuracy",
     "rarity": "rare"
   },
   {
@@ -374,7 +374,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "criticalChance": 17
     },
-    "description": "+187% Critical Chance at max rank (Primed)",
+    "description": "+187% Critical Chance",
     "rarity": "legendary"
   },
   {
@@ -419,7 +419,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "criticalMultiplier": 10
     },
-    "description": "+110% Critical Damage at max rank (Primed)",
+    "description": "+110% Critical Damage",
     "rarity": "legendary"
   },
   {
@@ -464,7 +464,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "heat": 15
     },
-    "description": "+15% Heat per rank (Primed)",
+    "description": "+165% <DT_FIRE_COLOR>Heat",
     "rarity": "legendary"
   },
   {
@@ -478,7 +478,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "electricity": 15
     },
-    "description": "+15% Electricity per rank (Primed)",
+    "description": "+165% <DT_ELECTRICITY_COLOR>Electricity",
     "rarity": "legendary"
   },
   {
@@ -493,7 +493,7 @@ const RAW_MODS: Mod[] = [
       "fireRate": 10,
       "multishot": 10
     },
-    "description": "+10% Fire Rate, +10% Multishot per rank",
+    "description": "+60% Fire Rate, +60% Multishot",
     "rarity": "rare"
   },
   {
@@ -508,7 +508,7 @@ const RAW_MODS: Mod[] = [
       "fireRate": 15,
       "damage": -2.5
     },
-    "description": "+15% Fire Rate, -2.5% Damage per rank",
+    "description": "+90% Fire Rate, -15% Damage",
     "rarity": "rare"
   },
   {
@@ -537,7 +537,7 @@ const RAW_MODS: Mod[] = [
       "criticalChance": 33.3333,
       "fireRate": -3.3333
     },
-    "description": "+33.3% Crit Chance, -3.3% Fire Rate per rank",
+    "description": "+200% Critical Chance, -20% Fire Rate",
     "rarity": "rare"
   },
   {
@@ -551,7 +551,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "damage": 15
     },
-    "description": "+15% Damage per rank (Primed)",
+    "description": "+165% Damage",
     "rarity": "legendary"
   },
   {
@@ -567,7 +567,7 @@ const RAW_MODS: Mod[] = [
       "spread": 10,
       "accuracy": -10.0
     },
-    "description": "+90% Damage, +60% Spread at max rank",
+    "description": "+90% Damage, -60% Accuracy",
     "rarity": "rare"
   },
   {
@@ -581,7 +581,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "multishot": 20
     },
-    "description": "+20% Multishot per rank",
+    "description": "+120% Multishot",
     "rarity": "rare"
   },
   {
@@ -595,7 +595,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "criticalMultiplier": 10
     },
-    "description": "+110% Critical Damage at max rank (Primed)",
+    "description": "+110% Critical Damage",
     "rarity": "legendary"
   },
   {
@@ -609,7 +609,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "electricity": 15
     },
-    "description": "+15% Electricity per rank (Primed)",
+    "description": "+165% <DT_ELECTRICITY_COLOR>Electricity",
     "rarity": "legendary"
   },
   {
@@ -623,7 +623,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "cold": 15
     },
-    "description": "+15% Cold per rank (Primed)",
+    "description": "+165% <DT_FREEZE_COLOR>Cold",
     "rarity": "legendary"
   },
   {
@@ -668,7 +668,7 @@ const RAW_MODS: Mod[] = [
       "heat": 15,
       "damage": 15
     },
-    "description": "+15% Heat, +15% Damage per rank",
+    "description": "+60% Damage, +60% <DT_FIRE_COLOR>Heat",
     "rarity": "rare"
   },
   {
@@ -697,7 +697,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "damage": 15
     },
-    "description": "+165% Damage at max rank (Primed)",
+    "description": "+165% Melee Damage",
     "rarity": "legendary"
   },
   {
@@ -712,7 +712,7 @@ const RAW_MODS: Mod[] = [
       "criticalChancePerCombo": 3.6364,
       "criticalChance": 3.636364
     },
-    "description": "+40% Critical Chance per Combo Multiplier at max rank",
+    "description": "+40% Critical Chance stacks with Combo Multiplier",
     "rarity": "uncommon"
   },
   {
@@ -742,7 +742,7 @@ const RAW_MODS: Mod[] = [
       "damagePerStatus": 13.3333,
       "damage": 13.333333
     },
-    "description": "+80% Damage per Status Type affecting the target at max rank",
+    "description": "+80% Melee Damage per Status Type affecting the target",
     "rarity": "rare"
   },
   {
@@ -756,7 +756,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "toxin": 15
     },
-    "description": "+15% Toxin per rank (Primed)",
+    "description": "+165% <DT_POISON_COLOR>Toxin",
     "rarity": "legendary"
   },
   {
@@ -770,7 +770,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "attackSpeed": 5
     },
-    "description": "+5% Attack Speed per rank (Primed)",
+    "description": "+55% Attack Speed",
     "rarity": "legendary"
   },
   {
@@ -784,7 +784,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "attackSpeed": 5
     },
-    "description": "+5% Attack Speed per rank (Set)",
+    "description": "+30% Attack Speed",
     "rarity": "rare"
   },
   {
@@ -798,7 +798,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "range": 0.272727
     },
-    "description": "+3m Range at max rank (Primed)",
+    "description": "+3 Range",
     "rarity": "legendary"
   },
   {
@@ -828,7 +828,7 @@ const RAW_MODS: Mod[] = [
       "comboDuration": 2,
       "duration": 2.0
     },
-    "description": "+2s Combo Duration per rank",
+    "description": "+12s Combo Duration",
     "rarity": "common"
   },
   {
@@ -842,7 +842,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "comboDuration": 1.0
     },
-    "description": "+1s Combo Duration per rank (+6s at max rank)",
+    "description": "+6s Combo Duration",
     "rarity": "common"
   },
   {
@@ -902,7 +902,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "lifeSteal": 5
     },
-    "description": "Heavy Attacks have +5% Life Steal per rank",
+    "description": "+20% Life Steal on Heavy Attack",
     "rarity": "rare"
   },
   {
@@ -1065,7 +1065,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "armor": -3.0
     },
-    "description": "-3% Enemy Armor per rank",
+    "description": "Enemies lose -18% Armor",
     "rarity": "uncommon"
   },
   {
@@ -1222,7 +1222,7 @@ const RAW_MODS: Mod[] = [
       "armor": 6.6667,
       "sprintSpeed": 2.5
     },
-    "description": "+7.5% Armor, +2.5% Sprint Speed per rank",
+    "description": "+15% Sprint Speed, +40% Armor",
     "rarity": "rare"
   },
   {
@@ -1236,7 +1236,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "armor": 6.6667
     },
-    "description": "+40% Armor at max rank (Set)",
+    "description": "+40% Armor",
     "rarity": "common"
   },
   {
@@ -1250,7 +1250,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "energy": 16.8182
     },
-    "description": "+185% Energy Max at max rank (Primed)",
+    "description": "+185% Energy Max",
     "rarity": "legendary"
   },
   {
@@ -1264,7 +1264,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "abilityDuration": 5
     },
-    "description": "+5% Ability Duration per rank (Primed)",
+    "description": "+55% Ability Duration",
     "rarity": "legendary"
   },
   {
@@ -1401,7 +1401,7 @@ const RAW_MODS: Mod[] = [
       "enemyRadar": 5,
       "range": 5.0
     },
-    "description": "+5m Enemy Radar per rank (Set)",
+    "description": "+30m Enemy Radar",
     "rarity": "uncommon"
   },
   {
@@ -2431,7 +2431,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "healthPerSlashStack": 25
     },
-    "description": "Health stolen per stack of Slash Damage on the target (+25 per rank, max 100)",
+    "description": "100 health stolen each hit per stack of <DT_SLASH_COLOR>Slash.",
     "rarity": "common"
   },
   {
@@ -2447,7 +2447,7 @@ const RAW_MODS: Mod[] = [
       "nonCritDamage": 40,
       "damage": 40
     },
-    "description": "+10% Melee Damage per Status type on the target, +40% Damage on non-Critical Hits per rank",
+    "description": "+60% Melee Damage per Status Type affecting the target, Non-Critical hits deal +240% damage",
     "rarity": "uncommon"
   },
   {
@@ -2461,7 +2461,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "damage": 35
     },
-    "description": "+35% Damage per rank (max +385%). Converts all base Physical Damage to Slash",
+    "description": "+385% Melee Damage, Convert all base Physical Damage to <DT_SLASH_COLOR>Slash Damage",
     "rarity": "uncommon"
   },
   {
@@ -4516,7 +4516,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "abilityDuration": 4
     },
-    "description": "+4% Ability Duration per rank",
+    "description": "+24% Ability Duration",
     "rarity": "common"
   },
   {
@@ -4530,7 +4530,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "statusDuration": 15.0
     },
-    "description": "+15% Status Duration per rank (Secondary)",
+    "description": "+90% Status Duration",
     "rarity": "rare"
   },
   {
@@ -4544,7 +4544,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "abilityRange": 5
     },
-    "description": "+5% Ability Range per rank",
+    "description": "+30% Ability Range",
     "rarity": "uncommon"
   },
   {
@@ -4558,7 +4558,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "shield": 11.6667
     },
-    "description": "+70% Shield Capacity at max",
+    "description": "+70% Shield Capacity",
     "rarity": "uncommon"
   },
   {
@@ -4572,7 +4572,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "abilityStrength": 4
     },
-    "description": "+4% Ability Strength per rank",
+    "description": "+24% Ability Strength",
     "rarity": "rare"
   },
   {
@@ -4586,7 +4586,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "damage": 15
     },
-    "description": "+15% Damage per rank",
+    "description": "+90% Damage",
     "rarity": "common"
   },
   {
@@ -4600,7 +4600,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "criticalMultiplier": 10
     },
-    "description": "+60% Critical Damage at max rank (Set)",
+    "description": "+60% Critical Damage",
     "rarity": "uncommon"
   },
   {
@@ -10752,7 +10752,7 @@ const RAW_MODS: Mod[] = [
     "stats": {
       "damage": 20.0
     },
-    "description": "+20% Melee Damage per rank (max +120% at rank 5)",
+    "description": "+120% Melee Damage",
     "rarity": "common"
   },
   {
@@ -11309,7 +11309,7 @@ const RAW_MODS: Mod[] = [
       "vortexBonusOnHit": 5,
       "duration": 1.25
     },
-    "description": "Axios Javelin Augment: Spawns specters that throw two extra javelins with guaranteed vortexes. Direct hits add +5s vortex duration (scales with Duration). Base vortex duration 5s at max rank.",
+    "description": "Axios Javelin Augment: A pair of Styanax Specters spawn to throw javelins, creating vortexes on impact. Impale an enemy to increase vortex duration by 5s.",
     "rarity": "rare",
     "warframeId": "styanax"
   },
@@ -12333,7 +12333,7 @@ const RAW_MODS: Mod[] = [
       "slideSpeed": 5.0,
       "slideFriction": -5.0
     },
-    "description": "+5% Slide, -5% Friction per rank",
+    "description": "+30% Slide, -30% Friction",
     "rarity": "uncommon"
   },
   {
@@ -15419,7 +15419,7 @@ const RAW_MODS: Mod[] = [
       "heatDamage": 500,
       "duration": 3.0
     },
-    "description": "Core Vent Augment: Blast damage ignites exhaust fumes for 12s. Enemies passing through the flames take 500 Heat damage at max rank.",
+    "description": "Core Vent Augment: <DT_EXPLOSION_COLOR>Blast Damage ignites exhaust fumes for 12s. Enemies passing through the flames take 500 <DT_FIRE_COLOR>Heat Damage.",
     "rarity": "rare",
     "warframeId": "elytron"
   },

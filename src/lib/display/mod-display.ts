@@ -22,11 +22,12 @@ function formatMultiplier(percentTotal: number): string {
   return `x${Number((1 + percentTotal / 100).toFixed(2))}`;
 }
 
-/** Strip wiki/HTML markup from mod descriptions for UI. */
+/** Strip wiki/HTML markup and legacy max-rank suffixes from mod descriptions for UI. */
 export function cleanModDescription(description: string): string {
   return description
     .replace(/\\n/g, " ")
     .replace(/<[^>]+>/g, "")
+    .replace(/\s+(?:at max rank|\(at max rank\)|at max|\(at max\))\b/gi, "")
     .replace(/\s+/g, " ")
     .trim();
 }

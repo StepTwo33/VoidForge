@@ -486,4 +486,29 @@ describe("Round 56 - Issue Reports Verification", () => {
       expect(filtered.some((m) => m.id === "companion_weapon_riven_mod")).toBe(true);
     });
   });
+
+  describe("16. Mod Description Standardization with Warframe Wiki", () => {
+    it("verifies Thermite Rounds matches Wiki / Codex without 'at max rank'", () => {
+      const thermite = allMods.find((m) => m.id === "thermite_rounds_nightmare")!;
+      expect(thermite).toBeDefined();
+      expect(thermite.description).toContain("+60% <DT_FIRE_COLOR>Heat");
+      expect(thermite.description).toContain("+60% Status Chance");
+      expect(thermite.description).not.toContain("at max rank");
+    });
+
+    it("verifies Wildfire shows maxed stat values according to Wiki / Codex", () => {
+      const wildfire = allMods.find((m) => m.id === "wildfire")!;
+      expect(wildfire).toBeDefined();
+      expect(wildfire.description).toContain("+20% Magazine Capacity");
+      expect(wildfire.description).toContain("+60% <DT_FIRE_COLOR>Heat");
+      expect(wildfire.description).not.toContain("per rank");
+    });
+
+    it("verifies no mod in the catalog contains 'per rank' or 'at max rank' phrasing in description", () => {
+      const offending = allMods.filter((m) =>
+        /at max rank|per rank|at max\b/i.test(m.description)
+      );
+      expect(offending).toEqual([]);
+    });
+  });
 });
