@@ -109,6 +109,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
   const [isSuffixManual, setIsSuffixManual] = useState<boolean>(false);
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [scanStatus, setScanStatus] = useState<string>("");
+  const [isDragging, setIsDragging] = useState<boolean>(false);
 
   // Stats state: key -> value (decimal fraction or flat)
   const [positiveStats, setPositiveStats] = useState<{ key: string; value: number }[]>([]);
@@ -154,10 +155,15 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
     }
   }, []);
 
-  // Clipboard paste listener (Ctrl+V) when modal is open
+  // Clipboard paste listener (Ctrl+V) when modal is open and not typing into an input
   useEffect(() => {
     if (!open) return;
     const handlePaste = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+        return;
+      }
+
       const items = e.clipboardData?.items;
       if (!items) return;
       for (let i = 0; i < items.length; i++) {
@@ -396,59 +402,70 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
               {initialRiven ? "Edit Riven Roll" : "Create Riven"}
             </h2>
           </div>
-          <div className="flex items-center gap-2">
-            <label
-              title="Scan Riven from screenshot or image (or press Ctrl+V to paste)"
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-950/60 px-2.5 py-1 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-900/80 hover:text-white"
-            >
-              {isScanning ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-300" />
-                  <span className="text-[11px]">{scanStatus || "Scanning..."}</span>
-                </>
-              ) : (
-                <>
-                  <Camera className="h-3.5 w-3.5 text-purple-400" />
-                  <span>Scan Screenshot</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleScanFile(file);
-                      e.target.value = "";
-                    }}
-                    className="hidden"
-                  />
-                </>
-              )}
-            </label>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg p-1 text-muted-foreground hover:bg-purple-500/10 hover:text-white"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-1 text-muted-foreground hover:bg-purple-500/10 hover:text-white"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Modal Body */}
         <div className="grid grid-cols-1 gap-6 overflow-y-auto p-6 md:grid-cols-12">
           {/* Controls Column */}
           <div className="space-y-4 md:col-span-7">
-            {isScanning && (
-              <div className="flex items-center gap-3 rounded-xl border border-purple-500/40 bg-purple-950/70 p-3 text-xs text-purple-200">
-                <Loader2 className="h-4 w-4 animate-spin text-purple-400" />
-                <span>{scanStatus || "Scanning riven screenshot with OCR... reading stats, weapon, and mastery rank."}</span>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between rounded-xl border border-purple-500/20 bg-purple-950/20 px-3 py-2 text-[11px] text-purple-300/80">
-              <span className="flex items-center gap-1.5">
-                <Camera className="h-3.5 w-3.5 text-purple-400" />
-                <span>Have a screenshot? Paste with <strong>Ctrl+V</strong> or click <strong>Scan Screenshot</strong> to import automatically.</span>
-              </span>
+            {/* Screenshot Drop / Paste Zone */}
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+              }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setIsDragging(false);
+                const file = e.dataTransfer.files?.[0];
+                if (file && (file.type.startsWith("image/") || /\.(png|jpe?g|webp)$/i.test(file.name))) {
+                  handleScanFile(file);
+                }
+              }}
+              className={cn(
+                "relative flex flex-col items-center justify-center rounded-xl border border-dashed p-3 text-center transition-all",
+                isDragging
+                  ? "border-purple-400 bg-purple-900/40"
+                  : "border-purple-500/30 bg-purple-950/20 hover:border-purple-500/50 hover:bg-purple-950/30",
+              )}
+            >
+              {isScanning ? (
+                <div className="flex items-center gap-2 py-1 text-xs text-purple-200">
+                  <Loader2 className="h-4 w-4 animate-spin text-purple-400" />
+                  <span>{scanStatus || "Scanning riven card..."}</span>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center justify-center gap-1.5 text-xs text-purple-300/90">
+                  <div className="flex items-center gap-1.5 font-medium text-white">
+                    <Camera className="h-4 w-4 text-purple-400" />
+                    <span>Import Screenshot:</span>
+                  </div>
+                  <span className="text-[11px] text-muted-foreground">
+                    Drop image here, paste from clipboard (<kbd className="rounded border border-purple-500/30 bg-purple-950/60 px-1 py-0.5 text-[10px] font-mono text-purple-200">Ctrl+V</kbd>), or
+                  </span>
+                  <label className="cursor-pointer font-semibold text-purple-400 underline decoration-purple-500/40 underline-offset-2 hover:text-purple-300">
+                    browse file
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/jpg"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleScanFile(file);
+                        e.target.value = "";
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
             </div>
             {/* Weapon Selector */}
             {hideWeaponSelect ? (

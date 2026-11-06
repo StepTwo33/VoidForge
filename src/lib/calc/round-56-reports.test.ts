@@ -511,4 +511,25 @@ describe("Round 56 - Issue Reports Verification", () => {
       expect(offending).toEqual([]);
     });
   });
+
+  describe("17. Riven Image OCR Import", () => {
+    it("parses in-game card text without needing JSON format", async () => {
+      const { parseRivenOcrText } = await import("@/lib/rivens/riven-ocr");
+      const sample = `
+RIFLE RIVEN MOD
+Torid
+SATI-CRITACRON
++148.2% Critical Chance
++94.5% Multishot
+-48.0% Zoom
+14 Cycles MR 12
+      `;
+      const result = parseRivenOcrText(sample);
+      expect(result.weaponName).toBe("Torid");
+      expect(result.masteryRank).toBe(12);
+      expect(result.rerolls).toBe(14);
+      expect(result.positiveStats).toHaveLength(2);
+      expect(result.negativeStat?.key).toBe("zoom");
+    });
+  });
 });

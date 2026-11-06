@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { PageShell, PageMain, PageHero, FilterChip, EmptyState } from "@/components/page-shell";
-import { Sparkles, Plus, Search, Download, Upload, RefreshCw, Flame, ArrowUpDown, Camera, Loader2 } from "lucide-react";
+import { Sparkles, Plus, Search, RefreshCw, Flame, ArrowUpDown, Camera, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { RivenCard } from "@/components/rivens/riven-card";
 import { RivenDialog } from "@/components/rivens/riven-dialog";
@@ -71,27 +71,6 @@ export default function RivenLibraryPage() {
       setScanStatus("");
     }
   };
-
-  // Clipboard paste listener on Riven Library page
-  useEffect(() => {
-    const handlePaste = (e: ClipboardEvent) => {
-      if (dialogOpen) return;
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.startsWith("image/")) {
-          const file = items[i].getAsFile();
-          if (file) {
-            e.preventDefault();
-            scanAndOpenRiven(file);
-            break;
-          }
-        }
-      }
-    };
-    window.addEventListener("paste", handlePaste);
-    return () => window.removeEventListener("paste", handlePaste);
-  }, [dialogOpen]);
 
   // Load from local storage and cloud if signed in
   const refreshRivens = useCallback(async () => {
@@ -185,48 +164,6 @@ export default function RivenLibraryPage() {
     setDialogOpen(true);
   };
 
-  const handleExportJson = () => {
-    const blob = new Blob([JSON.stringify(rivens, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `voidforge_riven_library_${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Riven library exported!");
-  };
-
-  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.type.startsWith("image/") || /\.(png|jpe?g|webp|bmp|gif)$/i.test(file.name)) {
-      await scanAndOpenRiven(file);
-    } else {
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        try {
-          const parsed = JSON.parse(evt.target?.result as string);
-          if (Array.isArray(parsed)) {
-            for (const item of parsed) {
-              if (item.name && item.weaponId && item.stats) {
-                saveRiven(item);
-              }
-            }
-            refreshRivens();
-            toast.success(`Imported ${parsed.length} Rivens!`);
-          } else {
-            toast.error("Invalid Riven library JSON format");
-          }
-        } catch {
-          toast.error("Failed to read JSON file");
-        }
-      };
-      reader.readAsText(file);
-    }
-    e.target.value = "";
-  };
-
   // Filtered & Sorted Rivens
   const filteredRivens = useMemo(() => {
     let result = [...rivens];
@@ -296,7 +233,7 @@ export default function RivenLibraryPage() {
             </button>
 
             <label
-              title="Scan Riven from screenshot or image (or press Ctrl+V anywhere)"
+              title="Import Riven from a screenshot (PNG, JPG, WebP)"
               className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-950/40 px-3 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-900/60 hover:text-white"
             >
               {isScanningImage ? (
@@ -307,10 +244,10 @@ export default function RivenLibraryPage() {
               ) : (
                 <>
                   <Camera className="h-3.5 w-3.5 text-purple-400" />
-                  <span>Scan Screenshot</span>
+                  <span>Import Screenshot</span>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/png,image/jpeg,image/webp,image/jpg"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) scanAndOpenRiven(file);
@@ -320,25 +257,6 @@ export default function RivenLibraryPage() {
                   />
                 </>
               )}
-            </label>
-
-            <div className="hidden h-5 w-px bg-border sm:block" />
-
-            <button
-              type="button"
-              onClick={handleExportJson}
-              title="Export all rivens to JSON backup"
-              className="inline-flex h-9 items-center gap-1 rounded-lg border border-border/60 bg-card/60 px-2.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <Download className="h-3.5 w-3.5" /> Export
-            </button>
-
-            <label
-              title="Import riven from image screenshot or JSON file"
-              className="inline-flex h-9 cursor-pointer items-center gap-1 rounded-lg border border-border/60 bg-card/60 px-2.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <Upload className="h-3.5 w-3.5" /> Import
-              <input type="file" accept=".json,image/*" onChange={handleImportFile} className="hidden" />
             </label>
           </div>
 
@@ -422,7 +340,7 @@ export default function RivenLibraryPage() {
             title={rivens.length === 0 ? "Your Riven Library is Empty" : "No Matching Rivens Found"}
             description={
               rivens.length === 0
-                ? "Start your collection by creating custom Rivens for your favorite weapons."
+                ? "Start your collection by creating custom Rivens or importing in-game screenshots."
                 : "Try adjusting your search query or filter chips above."
             }
             action={
