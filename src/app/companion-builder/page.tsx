@@ -6,8 +6,23 @@ import {
   innateSlotPolarities,
   isInnatePolarity,
 } from "@/lib/builds/innate-polarities";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
+import { saveRiven } from "@/lib/riven/saved-rivens";
+import { saveRiven as saveLocalRiven, generateRivenId, evaluateSavedRiven } from "@/lib/rivens/riven-storage";
+import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-validation";
+import { hasBuildLinkParam } from "@/lib/builds/weapon-url-param";
+
+function withRivenRoll(eq: EquippedMod | undefined, mod: Mod | null): Mod | null {
+  if (!eq || !mod || (!eq.modId.startsWith("riven_") && eq.modId !== "zaw_riven_mod" && eq.modId !== "kitgun_riven_mod" && eq.modId !== "companion_weapon_riven_mod")) return mod;
+  return {
+    ...mod,
+    name: eq.modName && eq.modName !== mod.name ? eq.modName : mod.name,
+    polarity: eq.polarity || mod.polarity,
+    drain: rivenDrainFromRank(eq.rank),
+  };
+}
 import { PageShell } from "@/components/page-shell";
 import {
   ItemPickerScreen,
@@ -216,10 +231,66 @@ export default function CompanionBuilderPage() {
   );
   const [modPickerTarget, setModPickerTarget] = useState<"companion" | "weapon">("companion");
   const [weaponRivenStatsMap, setWeaponRivenStatsMap] = useState<Record<number, Record<string, number>>>();
+  const [editRivenSlot, setEditRivenSlot] = useState<number | null>(null);
   const [applyHunterVsSlash, setApplyHunterVsSlash] = useState(false);
   const [companionParts, setCompanionParts] = useState<ModularCompanionParts | null>(null);
 
   const [compareOpen, setCompareOpen] = useState(false);
+
+  const rivenLibraryState = useSavedRivenLibrary(selectedWeapon?.id);
+  const savedRivens = rivenLibraryState.list;
+  const refreshSavedRivens = rivenLibraryState.refresh;
+  const rivenLibrary = useMemo(
+    () => ({
+      signedIn: rivenLibraryState.signedIn,
+      onSave: async (r: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number }) => {
+        if (!selectedWeapon) return false;
+        try {
+          const rank = rivenRankFromDrain(r.drain);
+          const evalRes = evaluateSavedRiven(selectedWeapon.name, "Companion", r.stats, rank, 0, r.polarity);
+          saveLocalRiven({
+            id: generateRivenId(),
+            weaponId: selectedWeapon.id,
+            weaponName: selectedWeapon.name,
+            weaponType: "Companion",
+            weaponCategory: selectedWeapon.category,
+            name: r.name,
+            stats: r.stats,
+            displayStats: evalRes.displayStats,
+            polarity: r.polarity,
+            rank,
+            rerolls: 0,
+            masteryRank: 8,
+            score: evalRes.score,
+            grade: evalRes.grade,
+            gradeColor: evalRes.color,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          });
+        } catch {
+          // LocalStorage fallback
+        }
+        const saved = await saveRiven({ weaponId: selectedWeapon.id, ...r });
+        if (saved) refreshSavedRivens();
+        return true;
+      },
+    }),
+    [rivenLibraryState.signedIn, selectedWeapon, refreshSavedRivens],
+  );
+
+  const editRivenTarget = useMemo(() => {
+    if (editRivenSlot == null || !modPickerOpen || modPickerTarget !== "weapon") return null;
+    const eq = weaponMods.find((m) => m.slotIndex === editRivenSlot);
+    const mod = eq ? modsMap.get(eq.modId) : undefined;
+    if (!eq || !mod || (!eq.modId.startsWith("riven_") && eq.modId !== "companion_weapon_riven_mod")) return null;
+    return {
+      mod,
+      stats: weaponRivenStatsMap?.[editRivenSlot] ?? {},
+      polarity: eq.polarity,
+      drain: rivenDrainFromRank(eq.rank),
+      name: eq.modName && eq.modName !== mod.name ? eq.modName : undefined,
+    };
+  }, [editRivenSlot, modPickerOpen, modPickerTarget, weaponMods, modsMap, weaponRivenStatsMap]);
 
   const buildCompanionData = useCallback((): CompanionBuildData | null => {
     if (!selectedCompanion) return null;
@@ -227,7 +298,14 @@ export default function CompanionBuilderPage() {
       companionId: selectedCompanion.id,
       mods: equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
       weaponId: selectedWeapon?.id,
-      weaponMods: weaponMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      weaponMods: weaponMods.map((m) => ({
+        modId: m.modId,
+        rank: m.rank,
+        slotIndex: m.slotIndex,
+        ...(m.modName ? { modName: m.modName } : {}),
+        ...(m.polarity ? { polarity: m.polarity } : {}),
+        ...(weaponRivenStatsMap?.[m.slotIndex] ? { rivenStats: weaponRivenStatsMap[m.slotIndex] } : {}),
+      })),
       weaponSlotPolarities,
       arcaneIds: [],
       hasReactor,
@@ -236,7 +314,7 @@ export default function CompanionBuilderPage() {
       slotPolarities,
       ...(companionParts ? { parts: companionParts } : {}),
     };
-  }, [selectedCompanion, equippedMods, selectedWeapon, weaponMods, weaponSlotPolarities, hasReactor, hasCatalyst, slotPolarities, companionParts]);
+  }, [selectedCompanion, equippedMods, selectedWeapon, weaponMods, weaponSlotPolarities, weaponRivenStatsMap, hasReactor, hasCatalyst, slotPolarities, companionParts]);
 
   const liveCompare = useMemo(() => {
     const data = buildCompanionData();
@@ -315,9 +393,20 @@ export default function CompanionBuilderPage() {
     } else {
       setSelectedWeapon(null);
     }
+    const rivenMap: Record<number, Record<string, number>> = {};
+    for (const m of d.weaponMods || []) {
+      if ((m as any).rivenStats) rivenMap[m.slotIndex] = (m as any).rivenStats;
+    }
+    setWeaponRivenStatsMap(Object.keys(rivenMap).length > 0 ? rivenMap : undefined);
     setWeaponMods(dropUnknownMods(d.weaponMods, modsMap).map((m) => {
       const mod = modsMap.get(m.modId);
-      return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
+      const anyM = m as any;
+      return {
+        ...m,
+        modName: anyM.modName || mod?.name || "",
+        polarity: anyM.polarity || mod?.polarity,
+        drain: typeof anyM.drain === "number" ? anyM.drain : mod?.drain,
+      };
     }));
     setHasReactor(d.hasReactor);
     setHasCatalyst(d.hasCatalyst ?? false);
@@ -340,6 +429,54 @@ export default function CompanionBuilderPage() {
   useCloudBuildFromUrl("companion", handleLoadBuild);
   useLocalBuildFromUrl("companion", handleLoadBuild);
   const { context: loadoutCtx, clearContext: clearLoadoutCtx } = useLoadoutSlotFromUrl("companion", handleLoadBuild, allCompanions.length > 0);
+
+  const weaponParamSeenRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (allCompanions.length === 0 || allWeapons.length === 0) return;
+    const params = new URLSearchParams(searchParams.toString());
+    if (hasBuildLinkParam(params)) return;
+    const weaponId = params.get("weapon")?.trim();
+    if (!weaponId || weaponId === weaponParamSeenRef.current) return;
+    weaponParamSeenRef.current = weaponId;
+
+    const weapon = allWeapons.find((w) => w.id === weaponId);
+    if (!weapon) return;
+
+    // Find companion that can equip this weapon
+    const companion =
+      allCompanions.find((c) => getCompanionWeapons(c, allWeapons).some((w) => w.id === weapon.id)) ||
+      allCompanions.find((c) => c.type === "sentinel") ||
+      allCompanions[0];
+
+    if (!companion) return;
+
+    setSelectedCompanion(companion);
+    setShowCompanionList(false);
+    setSelectedWeapon(weapon);
+
+    const rivenParam = params.get("riven");
+    if (rivenParam) {
+      try {
+        const stats = JSON.parse(decodeURIComponent(rivenParam));
+        const rivenMod = allMods.find((m) => m.id === "companion_weapon_riven_mod");
+        if (rivenMod && typeof stats === "object" && stats !== null) {
+          setWeaponMods([
+            {
+              modId: rivenMod.id,
+              modName: `${weapon.name} Riven`,
+              rank: 8,
+              slotIndex: 0,
+              polarity: "madurai",
+              drain: 18,
+            },
+          ]);
+          setWeaponRivenStatsMap({ 0: stats });
+        }
+      } catch {
+        // ignore bad JSON
+      }
+    }
+  }, [allCompanions, allWeapons, allMods, searchParams]);
 
   const handleSaveDialog = useCallback(async (values: SaveBuildDialogValues) => {
     if (values.target === "loadout" && loadoutCtx) {
@@ -606,6 +743,7 @@ export default function CompanionBuilderPage() {
 
   const handleOpenWeaponModPicker = useCallback((slotIndex: number) => {
     setActiveWeaponSlotIndex(slotIndex);
+    setEditRivenSlot(null);
     setModPickerTarget("weapon");
     setModPickerOpen(true);
   }, []);
@@ -648,16 +786,28 @@ export default function CompanionBuilderPage() {
   const handleRemoveWeaponMod = useCallback((slotIndex: number) => {
     setWeaponMods((prev) => prev.filter((m) => m.slotIndex !== slotIndex));
     setWeaponRivenStatsMap((prev) => { if (!prev) return prev; const n = { ...prev }; delete n[slotIndex]; return n; });
+    setEditRivenSlot((cur) => (cur === slotIndex ? null : cur));
   }, []);
 
-  const handleSelectWeaponRiven = useCallback((mod: Mod, stats: Record<string, number>) => {
+  const handleSelectWeaponRiven = useCallback((mod: Mod, stats: Record<string, number>, meta?: { polarity?: string; drain?: number; name?: string }) => {
+    const rank = meta?.drain != null ? rivenRankFromDrain(meta.drain) : 8;
+    const polarity = meta?.polarity || mod.polarity;
+    const displayName = meta?.name || mod.name;
     setWeaponMods((prev) => {
       const filtered = prev.filter((m) => m.slotIndex !== activeWeaponSlotIndex);
       return [
         ...filtered,
-        { modId: mod.id, modName: mod.name, rank: 0, slotIndex: activeWeaponSlotIndex, polarity: mod.polarity, drain: mod.drain },
+        {
+          modId: mod.id,
+          modName: displayName,
+          rank,
+          slotIndex: activeWeaponSlotIndex,
+          polarity,
+          drain: rivenDrainFromRank(rank),
+        },
       ];
     });
+    setEditRivenSlot(null);
     setWeaponRivenStatsMap((prev) => ({ ...(prev || {}), [activeWeaponSlotIndex]: stats }));
   }, [activeWeaponSlotIndex]);
 
@@ -1118,7 +1268,7 @@ export default function CompanionBuilderPage() {
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                           {Array.from({ length: COMPANION_WEAPON_REGULAR_SLOT_COUNT }, (_, i) => {
                             const equipped = weaponMods.find((m) => m.slotIndex === i);
-                            const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
+                            const mod = withRivenRoll(equipped, equipped ? modsMap.get(equipped.modId) ?? null : null);
                             return (
                               <ModSlotCard
                                 key={`w${i}`}
@@ -1126,10 +1276,13 @@ export default function CompanionBuilderPage() {
                                 rank={equipped?.rank ?? 0}
                                 slotIndex={i}
                                 slotPolarity={effectiveWeaponPolarities[i]}
-                        innatePolarity={isInnatePolarity(innateWeaponPolarities, weaponSlotPolarities, i)}
+                                innatePolarity={isInnatePolarity(innateWeaponPolarities, weaponSlotPolarities, i)}
+                                rivenStats={weaponRivenStatsMap?.[i]}
+                                weaponCategory={selectedWeapon.category}
                                 onAdd={() => handleOpenWeaponModPicker(i)}
                                 onRemove={() => handleRemoveWeaponMod(i)}
                                 onPolarize={(p) => setWeaponSlotPolarities((prev) => applyPolarityOverride(prev, innateWeaponPolarities, i, p))}
+                                onEditRiven={() => { handleOpenWeaponModPicker(i); setEditRivenSlot(i); }}
                               />
                             );
                           })}
@@ -1259,7 +1412,7 @@ export default function CompanionBuilderPage() {
 
       <ModPicker
         open={modPickerOpen}
-        onClose={() => setModPickerOpen(false)}
+        onClose={() => { setModPickerOpen(false); setEditRivenSlot(null); }}
         mods={modPickerTarget === "weapon" ? weaponModPool : companionPickerMods}
         category="_prefiltered"
         statFilterCategory={modPickerTarget === "weapon" ? "primary" : "companion"}
@@ -1267,8 +1420,11 @@ export default function CompanionBuilderPage() {
         equippedModIds={equippedModIds}
         onSelect={handleSelectMod}
         onSelectRiven={modPickerTarget === "weapon" && selectedWeapon?.category !== "beast_claw" ? handleSelectWeaponRiven : undefined}
-        weaponCategory={selectedWeapon?.category}
-        weapon={selectedWeapon ?? undefined}
+        editRiven={editRivenTarget}
+        savedRivens={modPickerTarget === "weapon" ? savedRivens : undefined}
+        rivenLibrary={modPickerTarget === "weapon" ? rivenLibrary : undefined}
+        weaponCategory={modPickerTarget === "weapon" ? selectedWeapon?.category : undefined}
+        weapon={modPickerTarget === "weapon" ? (selectedWeapon ?? undefined) : undefined}
         elsewhereMods={
           modPickerTarget === "weapon"
             ? { label: "the companion's mod panel", mods: companionPickerMods }

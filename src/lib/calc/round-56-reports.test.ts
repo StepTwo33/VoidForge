@@ -447,4 +447,43 @@ describe("Round 56 - Issue Reports Verification", () => {
       expect(familyIds).toContain("prime_laser_rifle");
     });
   });
+
+  describe("15. Companion Weapon Riven Mods in Companion Builder", () => {
+    it("allows companion_weapon_riven_mod on both sentinel weapons and hound weapons", () => {
+      const companionRiven = allMods.find((m) => m.id === "companion_weapon_riven_mod")!;
+      const laserRifle = allWeapons.find((w) => w.id === "laser_rifle")!;
+      const akaten = customWeapons.find((w) => w.id === "akaten")!;
+      const claws: Weapon = {
+        id: "vizier_claws",
+        name: "Vizier Claws",
+        category: "beast_claw",
+        damage: 100,
+        fireRate: 1,
+        criticalChance: 0.1,
+        criticalMultiplier: 2,
+        statusChance: 0.1,
+        triggerType: "Melee",
+      };
+
+      expect(modFitsCompanionWeapon(companionRiven, laserRifle)).toBe(true);
+      expect(modFitsCompanionWeapon(companionRiven, akaten)).toBe(true);
+      expect(modFitsCompanionWeapon(companionRiven, claws)).toBe(false);
+    });
+
+    it("ensures companion_weapon_riven_mod is retained in filterPickerMods with _prefiltered category", () => {
+      const laserRifle = allWeapons.find((w) => w.id === "laser_rifle")!;
+      const pool = allMods.filter((m) => modFitsCompanionWeapon(m, laserRifle));
+      expect(pool.some((m) => m.id === "companion_weapon_riven_mod")).toBe(true);
+
+      const filtered = filterPickerMods({
+        mods: pool,
+        category: "_prefiltered",
+        slotType: "regular",
+        search: "",
+        weaponCategory: laserRifle.category,
+        weapon: laserRifle,
+      });
+      expect(filtered.some((m) => m.id === "companion_weapon_riven_mod")).toBe(true);
+    });
+  });
 });

@@ -70,10 +70,13 @@ export function modFitsCompanionWeapon(
     if (weapon.category === "sentinel_weapon") {
       return mod.id === "fired_up" || mod.id === "companion_weapon_riven_mod";
     }
+    if (weapon.category === "hound_weapon") {
+      return mod.id === "companion_weapon_riven_mod";
+    }
     return false;
   }
   if (mod.subCategory === "riven") {
-    if (weapon.category === "sentinel_weapon") {
+    if (weapon.category === "sentinel_weapon" || weapon.category === "hound_weapon") {
       return mod.id === "companion_weapon_riven_mod";
     }
     const rivenId =

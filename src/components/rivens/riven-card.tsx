@@ -41,10 +41,10 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
   const weaponName = riven.weaponName || "Weapon";
   const rollSuffix = extractRivenAffix(riven.name, weaponName) || "Riven";
 
-  // URL to equip in weapon builder
-  const equipUrl = `/weapon-builder?weapon=${riven.weaponId}&riven=${encodeURIComponent(
-    JSON.stringify(riven.stats),
-  )}`;
+  const isCompanion = riven.weaponType === "Companion";
+  const equipUrl = isCompanion
+    ? `/companion-builder?weapon=${riven.weaponId}&riven=${encodeURIComponent(JSON.stringify(riven.stats))}`
+    : `/weapon-builder?weapon=${riven.weaponId}&riven=${encodeURIComponent(JSON.stringify(riven.stats))}`;
 
   const hasActions = Boolean(onEdit || onDelete);
 

@@ -4,6 +4,7 @@ import { allMods } from "@/data/mods";
 import { allWeapons } from "@/data/weapons";
 import { isWarframeExilusMod } from "@/lib/mods/mod-slot-categories";
 import { getCompanionWeapons, modFitsCompanionWeapon } from "@/lib/weapons/companion-weapons";
+import { filterPickerMods } from "@/components/mod-picker-filter";
 import type { Weapon } from "@/lib/types";
 
 const beastClaws: Weapon[] = [
@@ -68,6 +69,22 @@ describe("companion weapon mod pool", () => {
     expect(modFitsCompanionWeapon(byId.get("fired_up")!, verglas)).toBe(true);
     const rifle = allMods.find((m) => m.category === "rifle" && m.subCategory !== "riven");
     expect(rifle && modFitsCompanionWeapon(rifle, verglas)).toBe(true);
+
+    const rivenMod = byId.get("companion_weapon_riven_mod")!;
+    expect(modFitsCompanionWeapon(rivenMod, verglas)).toBe(true);
+
+    const pool = allMods.filter((m) => modFitsCompanionWeapon(m, verglas));
+    expect(pool.some((m) => m.id === "companion_weapon_riven_mod")).toBe(true);
+
+    const filtered = filterPickerMods({
+      mods: pool,
+      category: "_prefiltered",
+      slotType: "regular",
+      search: "",
+      weaponCategory: verglas.category,
+      weapon: verglas,
+    });
+    expect(filtered.some((m) => m.id === "companion_weapon_riven_mod")).toBe(true);
   });
 
   it("gives Sweeper shotgun mods and claws only claw mods", () => {
