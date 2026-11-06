@@ -13,6 +13,7 @@ export interface ParsedOcrRiven {
   rerolls: number;
   positiveStats: { key: string; value: number }[];
   negativeStat: { key: string; value: number } | null;
+  isLikelyUnranked?: boolean;
   confidence: {
     weaponMatched: boolean;
     statsCount: number;
@@ -211,9 +212,9 @@ export function parseRivenOcrText(rawText: string, weaponsList: Weapon[] = getBa
 
   // 5. Detect Riven Suffix
   let customSuffix: string | undefined;
-  // Look for uppercase hyphenated names or words ending in known Warframe riven suffixes
-  // e.g. "SATI-CRITACRON", "DAGGER LOCTI-VISICRON", "VISI-ACRITIS", "Critatis"
-  const suffixPattern = /\b([A-Z]{3,15}-[A-Z]{3,15}(?:-[A-Z]{3,15})?)\b/;
+  // Look for hyphenated names or words matching Warframe riven suffixes (case-insensitive)
+  // e.g. "SATI-CRITACRON", "Ampi-critatin", "VISI-ACRITIS", "DAGGER LOCTI-VISICRON"
+  const suffixPattern = /\b([a-zA-Z]{3,15}-[a-zA-Z]{3,15}(?:-[a-zA-Z]{3,15})?)\b/;
   for (const line of lines) {
     const sMatch = line.match(suffixPattern);
     if (sMatch) {
@@ -221,6 +222,10 @@ export function parseRivenOcrText(rawText: string, weaponsList: Weapon[] = getBa
       break;
     }
   }
+
+  // Check if positive stats appear to be Rank 0 (unranked)
+  // At Rank 0, stats are ~1/9th of typical values (under 25% for percent stats)
+  const isLikelyUnranked = positiveStats.length > 0 && positiveStats.every((s) => s.value < 0.25);
 
   return {
     weaponId: matchedWeapon?.id,
@@ -232,6 +237,7 @@ export function parseRivenOcrText(rawText: string, weaponsList: Weapon[] = getBa
     rerolls,
     positiveStats,
     negativeStat,
+    isLikelyUnranked,
     confidence: {
       weaponMatched: !!matchedWeapon,
       statsCount: positiveStats.length + (negativeStat ? 1 : 0),
@@ -263,11 +269,15 @@ export async function scanRivenImageFile(
     });
 
     onProgress?.(30, "Optimizing image for text recognition...");
+    // Scale up smaller screenshots (under 800px) so character strokes are clean and legible for OCR
+    const scale = Math.max(1, Math.min(3, 800 / img.width));
     const canvas = document.createElement("canvas");
-    canvas.width = img.width;
-    canvas.height = img.height;
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
     const ctx = canvas.getContext("2d")!;
-    ctx.drawImage(img, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
     onProgress?.(50, "Reading Riven text...");
     const { data } = await worker.recognize(canvas);

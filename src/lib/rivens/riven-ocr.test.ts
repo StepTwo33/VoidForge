@@ -112,4 +112,33 @@ MR 16
     expect(result.negativeStat?.key).toBe("recoil");
     expect(result.negativeStat?.value).toBeCloseTo(0.421, 3);
   });
+
+  it("correctly parses Atomos Ampi-critatin unranked screenshot text with title-case suffix", () => {
+    const rawText = `
+PISTOL RIVEN MOD
+Atomos
+Ampi-critatin
++4.6% Magazine Capacity
++15.4% Critical Chance
++9.9% Ammo Maximum
+9 Cycles MR 11
+    `;
+
+    const result = parseRivenOcrText(rawText);
+    expect(result.weaponName).toBe("Atomos");
+    expect(result.weaponId).toBe("atomos");
+    expect(result.customSuffix).toBe("Ampi-critatin");
+    expect(result.masteryRank).toBe(11);
+    expect(result.rerolls).toBe(9);
+
+    expect(result.positiveStats).toHaveLength(3);
+    expect(result.positiveStats[0].key).toBe("magazine");
+    expect(result.positiveStats[0].value).toBeCloseTo(0.046, 3);
+    expect(result.positiveStats[1].key).toBe("criticalChance");
+    expect(result.positiveStats[1].value).toBeCloseTo(0.154, 3);
+    expect(result.positiveStats[2].key).toBe("ammoMax");
+    expect(result.positiveStats[2].value).toBeCloseTo(0.099, 3);
+
+    expect(result.isLikelyUnranked).toBe(true);
+  });
 });

@@ -110,6 +110,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [scanStatus, setScanStatus] = useState<string>("");
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [isScaled9x, setIsScaled9x] = useState<boolean>(false);
 
   // Stats state: key -> value (decimal fraction or flat)
   const [positiveStats, setPositiveStats] = useState<{ key: string; value: number }[]>([]);
@@ -136,11 +137,31 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
         setCustomSuffix(parsed.customSuffix);
         setIsSuffixManual(true);
       }
-      if (parsed.positiveStats.length > 0) {
-        setPositiveStats(parsed.positiveStats);
+
+      let nextPos = parsed.positiveStats;
+      let nextNeg = parsed.negativeStat;
+      if (parsed.isLikelyUnranked && nextPos.length > 0) {
+        nextPos = nextPos.map((p) => ({
+          key: p.key,
+          value: Math.round(p.value * 9 * 1000) / 1000,
+        }));
+        if (nextNeg) {
+          nextNeg = {
+            key: nextNeg.key,
+            value: Math.round(nextNeg.value * 9 * 1000) / 1000,
+          };
+        }
+        setIsScaled9x(true);
+        toast.info("Unranked (Rank 0) card detected: stats scaled 9× to Max Rank (Rank 8).");
+      } else {
+        setIsScaled9x(false);
       }
-      if (parsed.negativeStat) {
-        setNegativeStat(parsed.negativeStat);
+
+      if (nextPos.length > 0) {
+        setPositiveStats(nextPos);
+      }
+      if (nextNeg) {
+        setNegativeStat(nextNeg);
       }
 
       toast.success(
@@ -154,6 +175,38 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
       setScanStatus("");
     }
   }, []);
+
+  const handleToggleScale9x = useCallback(() => {
+    if (isScaled9x) {
+      setPositiveStats((prev) =>
+        prev.map((p) => ({
+          key: p.key,
+          value: Math.round((p.value / 9) * 1000) / 1000,
+        })),
+      );
+      if (negativeStat) {
+        setNegativeStat((prev) =>
+          prev ? { key: prev.key, value: Math.round((prev.value / 9) * 1000) / 1000 } : null,
+        );
+      }
+      setIsScaled9x(false);
+      toast.info("Scaled down to Rank 0 values (÷9).");
+    } else {
+      setPositiveStats((prev) =>
+        prev.map((p) => ({
+          key: p.key,
+          value: Math.round(p.value * 9 * 1000) / 1000,
+        })),
+      );
+      if (negativeStat) {
+        setNegativeStat((prev) =>
+          prev ? { key: prev.key, value: Math.round(prev.value * 9 * 1000) / 1000 } : null,
+        );
+      }
+      setIsScaled9x(true);
+      toast.info("Scaled up to Max Rank values (×9).");
+    }
+  }, [isScaled9x, negativeStat]);
 
   // Clipboard paste listener (Ctrl+V) when modal is open and not typing into an input
   useEffect(() => {
@@ -206,6 +259,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
   // Initialize or reset form when modal opens
   useEffect(() => {
     if (!open) return;
+    setIsScaled9x(false);
     if (initialScannedRiven) {
       if (initialScannedRiven.weaponId) {
         setWeaponId(initialScannedRiven.weaponId);
@@ -607,37 +661,54 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
 
             {/* Positive Stats */}
             <div className="rounded-xl border border-purple-500/20 bg-purple-950/20 p-3.5">
-              <div className="mb-2 flex items-center justify-between">
+              <div className="mb-2 flex items-center justify-between gap-2">
                 <span className="text-xs font-bold text-purple-300">
                   POSITIVE STATS ({positiveStats.length}/3)
                 </span>
-                {positiveStats.length < 3 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const firstUnused = availableDefs.find(
-                        (d) => !positiveStats.some((p) => p.key === d.key),
-                      );
-                      if (firstUnused) {
-                        const isFac = firstUnused.key.startsWith("faction");
-                        const cLabel = firstUnused.label.replace(" (Spliced)", "").trim();
-                        const newPool = scaledPositivePool.find(
-                          (p) => p.name.replace(" (Spliced)", "").trim() === cLabel,
+                <div className="flex items-center gap-2">
+                  {positiveStats.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleToggleScale9x}
+                      title="Multiply or divide stats by 9 (Warframe Rank 0 ↔ Max Rank 8)"
+                      className={cn(
+                        "inline-flex items-center gap-1 rounded border px-2 py-0.5 text-[11px] font-medium transition-colors",
+                        isScaled9x
+                          ? "border-emerald-500/50 bg-emerald-950/50 text-emerald-300 hover:bg-emerald-900/60"
+                          : "border-purple-500/30 bg-purple-950/40 text-purple-300 hover:bg-purple-900/60 hover:text-white",
+                      )}
+                    >
+                      {isScaled9x ? "Scaled ×9 (Max) · Click to ÷9" : "Scale ×9 (Rank 0 → Max)"}
+                    </button>
+                  )}
+                  {positiveStats.length < 3 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const firstUnused = availableDefs.find(
+                          (d) => !positiveStats.some((p) => p.key === d.key),
                         );
-                        setPositiveStats([
-                          ...positiveStats,
-                          {
-                            key: firstUnused.key,
-                            value: computeStatMidpoint(newPool, firstUnused.isPercent !== false, isFac),
-                          },
-                        ]);
-                      }
-                    }}
-                    className="inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-200"
-                  >
-                    <Plus className="h-3 w-3" /> Add Stat
-                  </button>
-                )}
+                        if (firstUnused) {
+                          const isFac = firstUnused.key.startsWith("faction");
+                          const cLabel = firstUnused.label.replace(" (Spliced)", "").trim();
+                          const newPool = scaledPositivePool.find(
+                            (p) => p.name.replace(" (Spliced)", "").trim() === cLabel,
+                          );
+                          setPositiveStats([
+                            ...positiveStats,
+                            {
+                              key: firstUnused.key,
+                              value: computeStatMidpoint(newPool, firstUnused.isPercent !== false, isFac),
+                            },
+                          ]);
+                        }
+                      }}
+                      className="inline-flex items-center gap-1 text-xs text-purple-400 hover:text-purple-200"
+                    >
+                      <Plus className="h-3 w-3" /> Add Stat
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">

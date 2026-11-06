@@ -2,11 +2,10 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { PageShell, PageMain, PageHero, FilterChip, EmptyState } from "@/components/page-shell";
-import { Sparkles, Plus, Search, RefreshCw, Flame, ArrowUpDown, Camera, Loader2 } from "lucide-react";
+import { Sparkles, Plus, Search, RefreshCw, Flame, ArrowUpDown, Camera } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { RivenCard } from "@/components/rivens/riven-card";
 import { RivenDialog } from "@/components/rivens/riven-dialog";
-import { scanRivenImageFile, type ParsedOcrRiven } from "@/lib/rivens/riven-ocr";
 import {
   getSavedRivens,
   saveRiven,
@@ -42,35 +41,6 @@ export default function RivenLibraryPage() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRiven, setEditingRiven] = useState<SavedRiven | null>(null);
-  const [scannedRivenData, setScannedRivenData] = useState<ParsedOcrRiven | null>(null);
-  const [isScanningImage, setIsScanningImage] = useState<boolean>(false);
-  const [scanStatus, setScanStatus] = useState<string>("");
-
-  const scanAndOpenRiven = async (file: File | Blob) => {
-    setIsScanningImage(true);
-    setScanStatus("Scanning...");
-    const toastId = toast.loading("Scanning Riven screenshot...");
-    try {
-      const parsed = await scanRivenImageFile(file, (_progress, status) => {
-        setScanStatus(status);
-        toast.loading(`Scanning Riven (${status})...`, { id: toastId });
-      });
-
-      setEditingRiven(null);
-      setScannedRivenData(parsed);
-      setDialogOpen(true);
-      toast.success(
-        `Scanned ${parsed.weaponName ?? "Riven"} (${parsed.positiveStats.length} buff${parsed.positiveStats.length === 1 ? "" : "s"}${parsed.negativeStat ? ", 1 curse" : ""})! Review values below.`,
-        { id: toastId },
-      );
-    } catch (err) {
-      if (process.env.NODE_ENV === "development") console.error("OCR scan error:", err);
-      toast.error("Could not scan Riven card from this image. Try another screenshot or enter manually.", { id: toastId });
-    } finally {
-      setIsScanningImage(false);
-      setScanStatus("");
-    }
-  };
 
   // Load from local storage and cloud if signed in
   const refreshRivens = useCallback(async () => {
@@ -141,7 +111,6 @@ export default function RivenLibraryPage() {
       // Local save succeeded
     }
     refreshRivens();
-    setScannedRivenData(null);
   };
 
   const handleDeleteRiven = async (id: string) => {
@@ -160,7 +129,6 @@ export default function RivenLibraryPage() {
 
   const handleEditRiven = (riven: SavedRiven) => {
     setEditingRiven(riven);
-    setScannedRivenData(null);
     setDialogOpen(true);
   };
 
@@ -224,7 +192,6 @@ export default function RivenLibraryPage() {
               type="button"
               onClick={() => {
                 setEditingRiven(null);
-                setScannedRivenData(null);
                 setDialogOpen(true);
               }}
               className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-purple-600 px-3.5 text-xs font-bold text-white shadow-md transition-colors hover:bg-purple-500"
@@ -232,32 +199,18 @@ export default function RivenLibraryPage() {
               <Plus className="h-4 w-4" /> Add Riven
             </button>
 
-            <label
-              title="Import Riven from a screenshot (PNG, JPG, WebP)"
-              className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-950/40 px-3 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-900/60 hover:text-white"
+            <button
+              type="button"
+              onClick={() => {
+                setEditingRiven(null);
+                setDialogOpen(true);
+              }}
+              title="Import a Riven by pasting a screenshot or browsing an image"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-950/40 px-3 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-900/60 hover:text-white"
             >
-              {isScanningImage ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-300" />
-                  <span>{scanStatus || "Scanning..."}</span>
-                </>
-              ) : (
-                <>
-                  <Camera className="h-3.5 w-3.5 text-purple-400" />
-                  <span>Import Screenshot</span>
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp,image/jpg"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) scanAndOpenRiven(file);
-                      e.target.value = "";
-                    }}
-                    className="hidden"
-                  />
-                </>
-              )}
-            </label>
+              <Camera className="h-3.5 w-3.5 text-purple-400" />
+              <span>Import Screenshot</span>
+            </button>
           </div>
 
           {/* Quick Counter Chips */}
@@ -375,11 +328,9 @@ export default function RivenLibraryPage() {
           onClose={() => {
             setDialogOpen(false);
             setEditingRiven(null);
-            setScannedRivenData(null);
           }}
           onSave={handleSaveRiven}
           initialRiven={editingRiven}
-          initialScannedRiven={scannedRivenData}
         />
       </PageMain>
     </PageShell>
