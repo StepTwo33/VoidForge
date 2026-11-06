@@ -20,7 +20,7 @@ import {
 import { ModSlotCard } from "@/components/mod-slot";
 import { ModPicker } from "@/components/mod-picker";
 import { useCompanions, useWeapons, useMods } from "@/lib/weapons/use-data";
-import { Companion, Mod, Weapon, EquippedMod, CompanionCalculatedStats, CompanionLinkedWarframe, DEFAULT_SIM_PARAMS } from "@/lib/types";
+import { Companion, Mod, Weapon, EquippedMod, CompanionCalculatedStats, CompanionLinkedWarframe, DEFAULT_SIM_PARAMS, WeaponExternalBuff, WeaponCalculationOptions } from "@/lib/types";
 import { calculateCompanionBuild } from "@/lib/calc/companion-calculator";
 import { calculateWeaponBuild } from "@/lib/calc/calculator";
 import { weaponSupportsHunterCompanionSet } from "@/lib/calc/set-bonuses";
@@ -455,6 +455,45 @@ export default function CompanionBuilderPage() {
     );
   }, [availableWeapons, weaponSearch]);
 
+  const loadoutLinkedCompanionWeaponBuffs = useMemo<WeaponExternalBuff[]>(() => {
+    if (!loadoutCtx || !selectedWeapon) return [];
+    const loadout = getLoadouts().find((l) => l.id === loadoutCtx.loadoutId);
+    if (!loadout?.primaryBuild?.weaponId) return [];
+    const stats = calcLoadoutStats(loadout);
+    const primaryStats = stats.primary?.stats;
+    if (!primaryStats) return [];
+    const buffs: WeaponExternalBuff[] = [];
+    const allSlots = [
+      ...equippedMods.map((m) => ({ modId: m.modId, rank: m.rank })),
+      ...weaponMods.map((m) => ({ modId: m.modId, rank: m.rank })),
+    ];
+    const hs = allSlots.find((m) => m.modId === "hunter_synergy");
+    if (hs && primaryStats.criticalChance) {
+      const bonus = primaryStats.criticalChance * (0.05 * ((hs.rank ?? 5) + 1));
+      if (bonus > 0) {
+        buffs.push({
+          id: "mod:hunter_synergy",
+          label: "Hunter Synergy",
+          category: "companion",
+          critChanceFlatBonus: bonus,
+        });
+      }
+    }
+    const mo = allSlots.find((m) => m.modId === "mecha_overdrive");
+    if (mo && primaryStats.statusChance) {
+      const bonus = primaryStats.statusChance * (0.10 * ((mo.rank ?? 5) + 1));
+      if (bonus > 0) {
+        buffs.push({
+          id: "mod:mecha_overdrive",
+          label: "Mecha Overdrive",
+          category: "companion",
+          statusChanceFlatBonus: bonus,
+        });
+      }
+    }
+    return buffs;
+  }, [loadoutCtx, selectedWeapon, equippedMods, weaponMods]);
+
   const weaponStats = useMemo(() => {
     if (!selectedWeapon) return null;
     const rivenStatChanges = mergeRivenStatChanges(weaponRivenStatsMap, weaponMods);
@@ -468,6 +507,9 @@ export default function CompanionBuilderPage() {
       // Round 49: Hunter Synergy / Mecha Overdrive sit on the claws since Update 37.
       companionWeaponMods: weaponMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
     };
+    const options: WeaponCalculationOptions = {
+      externalBuffs: loadoutLinkedCompanionWeaponBuffs.length > 0 ? loadoutLinkedCompanionWeaponBuffs : undefined,
+    };
     return calculateWeaponBuild(
       selectedWeapon,
       weaponMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
@@ -477,11 +519,11 @@ export default function CompanionBuilderPage() {
         ...DEFAULT_SIM_PARAMS,
         applyHunterSetVsSlashDamage: applyHunterVsSlash,
       },
-      undefined,
+      options,
       linkage,
       rivenStatChanges,
     );
-  }, [selectedWeapon, weaponMods, weaponRivenStatsMap, modsMap, equippedMods, applyHunterVsSlash]);
+  }, [selectedWeapon, weaponMods, weaponRivenStatsMap, modsMap, equippedMods, applyHunterVsSlash, loadoutLinkedCompanionWeaponBuffs]);
 
   const weaponCapacity = hasCatalyst ? 60 : 30;
   const weaponCapacityUsed = useMemo(() => {
@@ -1224,8 +1266,9 @@ export default function CompanionBuilderPage() {
         slotType="regular"
         equippedModIds={equippedModIds}
         onSelect={handleSelectMod}
-        onSelectRiven={modPickerTarget === "weapon" ? handleSelectWeaponRiven : undefined}
+        onSelectRiven={modPickerTarget === "weapon" && selectedWeapon?.category !== "beast_claw" ? handleSelectWeaponRiven : undefined}
         weaponCategory={selectedWeapon?.category}
+        weapon={selectedWeapon ?? undefined}
         elsewhereMods={
           modPickerTarget === "weapon"
             ? { label: "the companion's mod panel", mods: companionPickerMods }

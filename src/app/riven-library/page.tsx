@@ -21,7 +21,7 @@ import {
   deleteSavedRiven as deleteCloudRiven,
 } from "@/lib/riven/saved-rivens";
 import { allWeapons } from "@/data/weapons";
-import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
+import { getRivenWeaponType, getRivenModIdForWeapon } from "@/lib/weapons/riven-weapon-type";
 import { getEffectiveRivenWeaponType } from "@/lib/weapons/riven-family";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -97,20 +97,12 @@ export default function RivenLibraryPage() {
       const signedIn = await hasClientSession();
       if (signedIn) {
         const weapon = allWeapons.find((w) => w.id === riven.weaponId);
-        const baseModType =
-          (weapon ? getRivenWeaponType(weapon) : null) ??
-          (riven.weaponType === "Kitgun"
-            ? "Pistol"
-            : riven.weaponType === "Zaw"
-            ? "Melee"
-            : riven.weaponType === "Companion"
-            ? "Rifle"
-            : riven.weaponType);
+        const modId = getRivenModIdForWeapon(weapon) ?? `riven_${riven.weaponType.toLowerCase()}`;
         await saveCloudRiven({
           id: riven.id.startsWith("riven_") ? undefined : riven.id,
           weaponId: riven.weaponId,
           name: riven.name,
-          modId: `riven_${baseModType.toLowerCase()}`,
+          modId,
           stats: riven.stats,
           polarity: riven.polarity,
           drain: 18,
@@ -157,11 +149,13 @@ export default function RivenLibraryPage() {
     try {
       const signedIn = await hasClientSession();
       if (signedIn) {
+        const weapon = allWeapons.find((w) => w.id === updated.weaponId);
+        const modId = getRivenModIdForWeapon(weapon) ?? `riven_${updated.weaponType.toLowerCase()}`;
         await saveCloudRiven({
           id: updated.id.startsWith("riven_") ? undefined : updated.id,
           weaponId: updated.weaponId,
           name: updated.name,
-          modId: `riven_${updated.weaponType.toLowerCase()}`,
+          modId,
           stats: updated.stats,
           polarity: updated.polarity,
           drain: 18,

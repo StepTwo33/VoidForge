@@ -12,7 +12,7 @@ describe("Round 25: Necramech Stamina removed", () => {
     expect(allMods.some((m) => m.name === "Necramech Stamina")).toBe(false);
     expect(VERIFIED_MOD_BEHAVIORS["necramech_stamina"]).toBeUndefined();
     expect(allMods.filter((m) => m.category === "necramech")).toHaveLength(27);
-    expect(allMods).toHaveLength(1505); // Round 48: -2 (Shred (Claws), Fury (Claws) retired); Round 49: -5 (Flame / Frost Claws retired, Bite / Maul / Swipe (Claws) folded)
+    expect(allMods).toHaveLength(1506); // Round 48: -2 (Shred (Claws), Fury (Claws) retired); Round 49: -5 (Flame / Frost Claws retired, Bite / Maul / Swipe (Claws) folded)
   });
 
   it("is a retired mod, so saved builds and share links drop it on load", () => {

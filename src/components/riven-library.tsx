@@ -22,20 +22,14 @@ import {
 } from "@/lib/rivens/riven-storage";
 import { RivenDialog } from "@/components/rivens/riven-dialog";
 import { getRivenStatsForCategory, type Weapon } from "@/lib/types";
-import { getRivenWeaponType, isZawWeapon, isKitgunWeapon } from "@/lib/weapons/riven-weapon-type";
+import { getRivenWeaponType, isZawWeapon, isKitgunWeapon, getRivenModIdForWeapon } from "@/lib/weapons/riven-weapon-type";
 import { getEffectiveRivenWeaponType } from "@/lib/weapons/riven-family";
 import { useWeapons } from "@/lib/weapons/use-data";
 import { cn } from "@/lib/utils";
 
 /** Riven catalog id for a weapon (null when the builder has no riven for it). */
 function rivenModIdFor(weapon: Weapon | Parameters<typeof getRivenWeaponType>[0] | undefined | null): string | null {
-  if (!weapon) return null;
-  if (isZawWeapon(weapon)) return "zaw_riven_mod";
-  if (isKitgunWeapon(weapon)) return "kitgun_riven_mod";
-  const cat = (weapon.category || "").toLowerCase();
-  if (cat === "sentinel_weapon" || cat === "hound_weapon") return "companion_weapon_riven_mod";
-  const type = getRivenWeaponType(weapon);
-  return type ? `riven_${type.toLowerCase()}` : null;
+  return getRivenModIdForWeapon(weapon);
 }
 
 export function formatRivenStatLine(key: string, value: number, category: string): string {

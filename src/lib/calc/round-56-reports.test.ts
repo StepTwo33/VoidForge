@@ -1,3 +1,7 @@
+import { allMods } from "@/data/mods";
+import { filterPickerMods } from "@/components/mod-picker-filter";
+import { getWeaponModProfile } from "@/lib/mods/weapon-mod-tags";
+import { getExclusiveModIdsForWeapon } from "@/lib/mods/weapon-exclusive-mods";
 import { describe, expect, it } from "vitest";
 import { allWeapons } from "@/data/weapons";
 import { customWeapons } from "@/data/custom-items";
@@ -5,9 +9,10 @@ import { allHelminthAbilities } from "@/data/helminth";
 import { helminthToAbility } from "@/lib/builds/helminth-resolve";
 import { isHildrynFrame, HILDRYN_SUBSUME_SHIELD_MULTIPLIER, applyCostAugments } from "@/lib/calc/ability-augment-rows";
 import { getBaseRivenWeapons, getEffectiveRivenWeaponType, getRivenFamilyWeaponIds } from "@/lib/weapons/riven-family";
-import { rivenModMatchesWeapon, isZawWeapon, isKitgunWeapon } from "@/lib/weapons/riven-weapon-type";
+import { rivenModMatchesWeapon, isZawWeapon, isKitgunWeapon, getRivenModIdForWeapon } from "@/lib/weapons/riven-weapon-type";
 import { modFitsCompanionWeapon } from "@/lib/weapons/companion-weapons";
-import { evaluateRiven, getStatsWithDisposition, formatRivenStatValue, isValueInStatRange, type RivenStat } from "@/lib/calc/riven-calculator";
+import { evaluateRiven, getStatsWithDisposition, formatRivenStatValue, isValueInStatRange, getStatTier, type RivenStat } from "@/lib/calc/riven-calculator";
+import { validateRivenStats } from "@/lib/riven/riven-validation";
 import { formatArcaneRankDescription, getArcaneDisplayInfo } from "@/lib/display/arcane-display";
 import { allArcanes } from "@/data/arcanes";
 import { computeStyanaxHopliteCritChance } from "@/lib/codex/ability-misc-stats";
@@ -24,6 +29,26 @@ describe("Round 56 - Issue Reports Verification", () => {
   const allSourceWeapons = [...allWeapons, ...customWeapons];
 
   describe("1. Hildryn Subsumed Abilities Shield Cost", () => {
+    it("verifies Styanax passive boosts weapon stats in same loadout", () => {
+      const loadout: Loadout = {
+        id: "test_styanax_loadout",
+        name: "Styanax Test",
+        warframeBuild: {
+          warframeId: "styanax",
+          mods: [{ modId: "redirection_r3", rank: 10, slotIndex: 0 }],
+        },
+        primaryBuild: {
+          weaponId: "braton",
+          mods: [],
+        },
+      };
+      const stats = calcLoadoutStats(loadout);
+      console.log("Warframe shield:", stats.warframe?.stats.totalShield);
+      console.log("Primary CC:", stats.primary?.stats.criticalChance);
+      const bareBratonCc = allWeapons.find((w) => w.id === "braton")!.criticalChance;
+      console.log("Bare Braton CC:", bareBratonCc);
+      expect(stats.primary?.stats.criticalChance).toBeGreaterThan(bareBratonCc);
+    });
     it("converts energy cost to 0 and sets miscStats.shieldCost = energyCost * 10 when subsumed onto Hildryn", () => {
       const roar = allHelminthAbilities.find((h) => h.name === "Roar")!;
       expect(roar).toBeDefined();
@@ -160,6 +185,13 @@ describe("Round 56 - Issue Reports Verification", () => {
       // Spliced stats now receive 1.3x magnitude multiplier and weight >= 0.9, allowing 3+1 rolls to achieve top tier
       expect(score).toBeGreaterThan(5.0);
     });
+
+    it("assigns GREAT stat tier to spliced stats in riven grader", () => {
+      expect(getStatTier("Viral Damage (Spliced)")).toBe("GREAT");
+      expect(getStatTier("Corrosive Damage (Spliced)")).toBe("GREAT");
+      expect(getStatTier("Radiation Damage (Spliced)")).toBe("GREAT");
+      expect(getStatTier("Status Damage (Spliced)")).toBe("GREAT");
+    });
   });
 
   describe("6. Arcane Rank-Scaled Descriptions", () => {
@@ -260,6 +292,19 @@ describe("Round 56 - Issue Reports Verification", () => {
       expect(modMatchesExclusiveWeapon("scattered_justice", "vaykor_hek")).toBe(true);
       expect(modMatchesExclusiveWeapon("scattered_justice", "kuva_hek")).toBe(true);
     });
+
+    it("indexes exclusive mod ids for weapon variants via getExclusiveModIdsForWeapon", () => {
+      const sobekMods = getExclusiveModIdsForWeapon("sobek");
+      const kuvaSobekMods = getExclusiveModIdsForWeapon("kuva_sobek");
+
+      expect(sobekMods).toContain("acid_shells");
+      expect(kuvaSobekMods).toContain("acid_shells");
+
+      const hekMods = getExclusiveModIdsForWeapon("hek");
+      const kuvaHekMods = getExclusiveModIdsForWeapon("kuva_hek");
+      expect(hekMods).toContain("scattered_justice");
+      expect(kuvaHekMods).toContain("scattered_justice");
+    });
   });
 
   describe("10. Riven Creation, Suffix Editing & Modular Validation", () => {
@@ -280,6 +325,31 @@ describe("Round 56 - Issue Reports Verification", () => {
       expect(torid?.name).toBe("Torid");
       // Total base weapons is well over 150 (roughly 500+)
       expect(baseWeapons.length).toBeGreaterThan(150);
+    });
+
+    it("resolves correct riven mod IDs with getRivenModIdForWeapon", () => {
+      const torid = allSourceWeapons.find((w) => w.id === "torid");
+      const deconstructor = allSourceWeapons.find((w) => w.id === "deconstructor");
+      const balla = allSourceWeapons.find((w) => w.id === "zaw_balla");
+      const catchmoon = allSourceWeapons.find((w) => w.id === "catchmoon_chamber");
+      const claws = allSourceWeapons.find((w) => w.category === "beast_claw");
+
+      expect(getRivenModIdForWeapon(torid)).toBe("riven_rifle");
+      expect(getRivenModIdForWeapon(deconstructor)).toBe("companion_weapon_riven_mod");
+      expect(getRivenModIdForWeapon(balla)).toBe("zaw_riven_mod");
+      expect(getRivenModIdForWeapon(catchmoon)).toBe("kitgun_riven_mod");
+      expect(getRivenModIdForWeapon(claws)).toBeNull();
+    });
+
+    it("validates riven stats with standard default zoom curse without error", () => {
+      const stats = {
+        criticalChance: 1.5,
+        multishot: 0.9,
+        zoom: -0.30,
+      };
+      const result = validateRivenStats(stats, "rifle", 1.2);
+      expect(result.ok).toBe(true);
+      expect(result.errors).toHaveLength(0);
     });
   });
 

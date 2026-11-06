@@ -69,6 +69,7 @@ export function graderRivenCategory(poolCategory: string): string {
 export function validateRivenStats(
   stats: Record<string, number>,
   poolCategory: string,
+  weaponDisposition?: number,
 ): RivenValidation {
   const pool = getRivenStatsForCategory(poolCategory);
   const errors: string[] = [];
@@ -101,12 +102,13 @@ export function validateRivenStats(
   if (positives >= 2 && positives <= 3 && negatives <= 1) {
     const hasNegative = negatives === 1;
     const gradeCat = graderRivenCategory(poolCategory);
-    const posRanges = getStatsWithDisposition(gradeCat, STANDARD_RIVEN_DISPOSITION, {
+    const effectiveDispo = Math.max(1.55, (weaponDisposition ?? STANDARD_RIVEN_DISPOSITION) * 1.25);
+    const posRanges = getStatsWithDisposition(gradeCat, effectiveDispo, {
       rank: 8,
       positiveCount: positives,
       hasNegative,
     });
-    const negRanges = getNegativeStatsWithDisposition(STANDARD_RIVEN_DISPOSITION, {
+    const negRanges = getNegativeStatsWithDisposition(effectiveDispo, {
       rank: 8,
       positiveCount: positives,
       category: gradeCat,

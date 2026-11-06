@@ -61,13 +61,15 @@ export function RivenEditor({
     // Allow browsing all spliced traits even if one is equipped so user can easily switch
     const availableSplicedStats = rivenPool.filter((s) => s.spliced && !(s.key in rivenStats));
 
+    const canAddNormal = Object.keys(rivenStats).length < 4;
+    const canSwitchSpliced = hasExistingSpliced || canAddNormal;
     const q = rivenStatSearch.trim().toLowerCase();
-    const filteredNormalStats = q
-      ? availableStats.filter((s) => s.label.toLowerCase().includes(q) || s.key.toLowerCase().includes(q))
-      : availableStats;
-    const filteredSplicedStats = q
-      ? availableSplicedStats.filter((s) => s.label.toLowerCase().includes(q) || s.key.toLowerCase().includes(q))
-      : availableSplicedStats;
+    const filteredNormalStats = canAddNormal
+      ? (q ? availableStats.filter((s) => s.label.toLowerCase().includes(q) || s.key.toLowerCase().includes(q)) : availableStats)
+      : [];
+    const filteredSplicedStats = canSwitchSpliced
+      ? (q ? availableSplicedStats.filter((s) => s.label.toLowerCase().includes(q) || s.key.toLowerCase().includes(q)) : availableSplicedStats)
+      : [];
 
     const selectedStatDef = rivenPool.find((s) => s.key === rivenStatKey);
     const isFactionStat = rivenStatKey.startsWith("faction");
@@ -148,7 +150,7 @@ export function RivenEditor({
             })}
           </div>
         )}
-        {Object.keys(rivenStats).length < 4 && (
+        {(Object.keys(rivenStats).length < 4 || hasExistingSpliced) && (
           <div className="space-y-2">
             <div className="relative">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />

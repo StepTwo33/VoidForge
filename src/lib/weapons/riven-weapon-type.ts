@@ -20,8 +20,8 @@ const SENTINEL_WEAPON_TYPE: Record<string, RivenWeaponType> = {
   "Deconstructor Prime": "Melee",
 };
 
-/** Categories that can never hold a riven (amps, arch-melee, Tektolyst). */
-const NO_RIVEN_CATEGORIES = new Set(["amp_prism", "archmelee", "tektolyst"]);
+/** Categories that can never hold a riven (amps, arch-melee, Tektolyst, beast claws). */
+const NO_RIVEN_CATEGORIES = new Set(["amp_prism", "archmelee", "tektolyst", "beast_claw"]);
 
 /**
  * Which riven stat table a weapon uses, or null when it cannot equip a riven
@@ -103,5 +103,33 @@ export function rivenModMatchesWeapon(
 
   const type = getRivenWeaponType(target);
   return type !== null && modId === `riven_${type.toLowerCase()}`;
+}
+
+/**
+ * Riven catalog modId for a weapon (null when the weapon cannot equip a riven).
+ * Maps:
+ * - Zaws -> zaw_riven_mod
+ * - Kitguns -> kitgun_riven_mod
+ * - Sentinel / Hound weapons -> companion_weapon_riven_mod
+ * - Rifles, Shotguns, Pistols, Melee, Archguns -> riven_<type>
+ */
+export function getRivenModIdForWeapon(
+  weapon:
+    | (Pick<Weapon, "name" | "category"> & {
+        id?: string;
+        hasRivenSlot?: boolean;
+        kitgunChamberCategory?: Weapon["kitgunChamberCategory"];
+        arcaneType?: string;
+      })
+    | undefined
+    | null,
+): string | null {
+  if (!weapon) return null;
+  if (isZawWeapon(weapon)) return "zaw_riven_mod";
+  if (isKitgunWeapon(weapon)) return "kitgun_riven_mod";
+  const cat = (weapon.category || "").toLowerCase();
+  if (cat === "sentinel_weapon" || cat === "hound_weapon") return "companion_weapon_riven_mod";
+  const type = getRivenWeaponType(weapon);
+  return type ? `riven_${type.toLowerCase()}` : null;
 }
 

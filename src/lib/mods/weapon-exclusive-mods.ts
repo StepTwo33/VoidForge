@@ -1,5 +1,6 @@
 import { MOD_EXCLUSIVE_WEAPON_IDS } from "@/data/mod-weapon-tags";
 import { getEffectiveWeaponsMap } from "@/lib/weapons/effective-data";
+import { getRivenFamilyWeaponIds } from "@/lib/weapons/riven-family";
 import type { ModBrowserCategoryId } from "@/lib/mods/mod-browser-categories";
 
 const PRIMARY_WEAPON_CATEGORIES = new Set([
@@ -47,7 +48,16 @@ function getWeaponToExclusiveModsIndex(): Map<string, string[]> {
 
 /** Mod ids exclusive to this weapon (includes variants like supra + supra_vandal). */
 export function getExclusiveModIdsForWeapon(weaponId: string): readonly string[] {
-  return getWeaponToExclusiveModsIndex().get(weaponId) ?? [];
+  const index = getWeaponToExclusiveModsIndex();
+  const familyIds = getRivenFamilyWeaponIds(weaponId);
+  const result = new Set<string>();
+  for (const id of familyIds) {
+    const list = index.get(id);
+    if (list) {
+      for (const m of list) result.add(m);
+    }
+  }
+  return [...result].sort((a, b) => a.localeCompare(b));
 }
 
 /** Codex mod-browser tabs where a weapon-exclusive mod should appear (Primary / Secondary / Melee). */

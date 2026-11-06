@@ -167,7 +167,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
         { key: "criticalChance", value: 1.5 },
         { key: "multishot", value: 0.9 },
       ]);
-      setNegativeStat({ key: "zoom", value: 0.45 });
+      setNegativeStat({ key: "zoom", value: 0.30 });
     }
   }, [open, initialRiven, fixedWeaponId]);
 
@@ -310,7 +310,11 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, fixedWeaponId
       toast.error("Please add at least 1 positive stat");
       return;
     }
-    const valCheck = validateRivenStats(previewRiven.stats, statPoolCategory.toLowerCase());
+    const valCheck = validateRivenStats(
+      previewRiven.stats,
+      statPoolCategory.toLowerCase(),
+      STANDARD_RIVEN_DISPOSITION,
+    );
     if (!valCheck.ok) {
       toast.error(valCheck.errors[0] ?? "Invalid riven stats");
       return;

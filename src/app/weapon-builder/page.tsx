@@ -78,6 +78,10 @@ import { useCloudBuildFromUrl, fetchCloudBuild, setCloudBuildInUrl, clearCloudBu
 import { snapshotFromBuild } from "@/lib/builds/compare-build";
 import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
+import { getLoadouts } from "@/lib/builds/loadouts";
+import { calcLoadoutStats } from "@/lib/builds/loadout-stats";
+import { resolveWeaponExternalBuffs, type WeaponBuffContext } from "@/lib/weapons/weapon-external-buffs";
+import type { WeaponExternalBuff } from "@/lib/types";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
 import { hasBuildLinkParam, hrefForCatalogPick, hrefWithWeaponParam, weaponIdFromParams, WEAPON_URL_PARAM } from "@/lib/builds/weapon-url-param";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
@@ -208,18 +212,14 @@ export default function WeaponBuilderPage() {
     simParams.arbucepAttackMode,
   ]);
 
-  const weaponCalcOptions = useMemo<WeaponCalculationOptions | undefined>(() => {
+  const progenitorOptions = useMemo(() => {
     const data = selectedWeapon ? incarnonDataMap.get(selectedWeapon.id) : undefined;
     const formActive = isIncarnonFormActive(selectedEvolutions, data);
     const progenitor =
       selectedWeapon && weaponSupportsProgenitor(selectedWeapon)
         ? { progenitorElement, progenitorBonusPercent }
         : undefined;
-    if (!progenitor && !formActive) return undefined;
-    return {
-      ...(progenitor ?? {}),
-      ...(formActive ? { incarnonFormActive: true } : {}),
-    };
+    return { progenitor, formActive };
   }, [selectedWeapon, progenitorElement, progenitorBonusPercent, selectedEvolutions]);
 
   // Load build from URL ?build= param
@@ -324,16 +324,16 @@ export default function WeaponBuilderPage() {
         ? { adversaryFormas }
         : {}),
       slotPolarities,
-      ...(weaponCalcOptions?.progenitorElement != null
+      ...(progenitorOptions.progenitor != null
         ? {
-            progenitorElement: weaponCalcOptions.progenitorElement,
-            progenitorBonusPercent: weaponCalcOptions.progenitorBonusPercent,
+            progenitorElement: progenitorOptions.progenitor.progenitorElement,
+            progenitorBonusPercent: progenitorOptions.progenitor.progenitorBonusPercent,
           }
         : {}),
       ...(Object.keys(selectedEvolutions).length > 0 ? { incarnonEvolutions: selectedEvolutions } : {}),
       ...incarnonExtrasForSave(incarnonConditionals, genesisInstalledOverride),
     };
-  }, [selectedWeapon, equippedMods, rivenStatsMap, stanceMod, equippedArcanes, hasOrokinCatalyst, adversaryFormas, slotPolarities, weaponCalcOptions, selectedEvolutions, incarnonConditionals, genesisInstalledOverride]);
+  }, [selectedWeapon, equippedMods, rivenStatsMap, stanceMod, equippedArcanes, hasOrokinCatalyst, adversaryFormas, slotPolarities, progenitorOptions, selectedEvolutions, incarnonConditionals, genesisInstalledOverride]);
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildWeaponData()), [buildWeaponData]));
 
@@ -460,6 +460,32 @@ export default function WeaponBuilderPage() {
     useCallback((build) => applyLoadedBuild(build, { silent: true }), [applyLoadedBuild]),
     allWeapons.length > 0,
   );
+
+  const loadoutLinkedBuffs = useMemo<WeaponExternalBuff[]>(() => {
+    if (!loadoutCtx || !selectedWeapon) return [];
+    const loadout = getLoadouts().find((l) => l.id === loadoutCtx.loadoutId);
+    if (!loadout?.warframeBuild?.warframeId) return [];
+    const stats = calcLoadoutStats(loadout);
+    if (!stats.warframe?.stats) return [];
+    const buffContext: WeaponBuffContext = {
+      warframeId: loadout.warframeBuild.warframeId,
+      warframeStats: stats.warframe.stats,
+      companionModSlots: loadout.companionBuild?.mods ?? [],
+      companionWeaponCritChance: stats.companion?.weapon?.stats.criticalChance,
+    };
+    return resolveWeaponExternalBuffs(selectedWeapon, buffContext, simParams);
+  }, [loadoutCtx, selectedWeapon, simParams]);
+
+  const weaponCalcOptions = useMemo<WeaponCalculationOptions | undefined>(() => {
+    const { progenitor, formActive } = progenitorOptions;
+    const externalBuffs = loadoutLinkedBuffs.length > 0 ? loadoutLinkedBuffs : undefined;
+    if (!progenitor && !formActive && !externalBuffs) return undefined;
+    return {
+      ...(progenitor ?? {}),
+      ...(formActive ? { incarnonFormActive: true } : {}),
+      ...(externalBuffs ? { externalBuffs } : {}),
+    };
+  }, [progenitorOptions, loadoutLinkedBuffs]);
 
   const handleSaveDialog = useCallback(async (values: SaveBuildDialogValues) => {
     if (values.target === "loadout" && loadoutCtx) {

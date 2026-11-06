@@ -567,14 +567,13 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
       const bodyStats = calculateCompanionBuild(c, loadout.companionBuild.mods || [], modsMap, undefined, linkedWarframe);
       let weapon: LoadoutWeaponSlotStats | null = null;
       const weaponMods = loadout.companionBuild.weaponMods || [];
-      if (weaponMods.length > 0) {
-        const companionWeapon = resolveCompanionWeaponForLoadout(
-          loadout.companionBuild,
-          c,
-          weaponList,
-        );
-        if (companionWeapon) {
-          const base = weaponWithPassive(companionWeapon);
+      const companionWeapon = resolveCompanionWeaponForLoadout(
+        loadout.companionBuild,
+        c,
+        weaponList,
+      );
+      if (companionWeapon) {
+        const base = weaponWithPassive(companionWeapon);
           const allCompanionSlots: ModSlot[] = [
             ...(loadout.companionBuild.mods || []),
             ...weaponMods,
@@ -629,7 +628,6 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
               : undefined;
           weapon = { name: base.name, stats, ttk, isMelee };
         }
-      }
       result.companion = { name: c.name, bodyStats, weapon };
     }
   }

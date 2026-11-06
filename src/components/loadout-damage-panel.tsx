@@ -387,6 +387,14 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
                   )}
                   highlight
                 />
+                <StatLine
+                  label="Crit"
+                  value={`${((stats.companion.weapon.stats.criticalChance ?? 0) * 100).toFixed(1)}% / ${(stats.companion.weapon.stats.criticalMultiplier ?? 0).toFixed(1)}x`}
+                />
+                <StatLine
+                  label="Status"
+                  value={`${((stats.companion.weapon.stats.statusChance ?? 0) * 100).toFixed(1)}%`}
+                />
                 {showTtk && stats.companion.weapon.ttk && (
                   <StatLine
                     label="TTK"
