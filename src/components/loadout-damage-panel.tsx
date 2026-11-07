@@ -198,6 +198,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
   const [enemyLevel, setEnemyLevel] = useState(100);
   const [steelPath, setSteelPath] = useState(false);
   const [applyHeadshots, setApplyHeadshots] = useState(false);
+  const [applyTriggerBuffs, setApplyTriggerBuffs] = useState(false);
   const [activeAbilityBuffs, setActiveAbilityBuffs] = useState<string[]>([]);
 
   // Enemy debuff priming (Path-of-Building style combat configuration)
@@ -321,6 +322,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
       ...base,
       activeWeaponAbilityBuffs: activeAbilityBuffs,
       applyHeadshots: applyHeadshots || base.applyHeadshots,
+      applyTriggerBuffs: applyTriggerBuffs || base.applyTriggerBuffs,
       targetFaction: targetActive ? enemy.faction : base.targetFaction,
       ...(passiveYareliOverride != null ? { applyYareliCriticalFlow: passiveYareliOverride } : {}),
       ...(passiveZephyrOverride != null ? { applyZephyrAirborne: passiveZephyrOverride } : {}),
@@ -340,6 +342,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
     scenario,
     activeAbilityBuffs,
     applyHeadshots,
+    applyTriggerBuffs,
     targetActive,
     enemy.faction,
     passiveYareliOverride,
@@ -482,6 +485,18 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
                 className="h-3.5 w-3.5 rounded border-border accent-amber-500"
               />
               Headshots
+            </label>
+            <label
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-border/60 bg-background/60 px-2.5 py-1 text-[10px] text-muted-foreground cursor-pointer"
+              title="Enable short on-equip / while-aiming / on-reload buffs (Vigorous Swap, Holster Amp, Argon Scope, Bladed Rounds)"
+            >
+              <input
+                type="checkbox"
+                checked={applyTriggerBuffs || scenario === "fullRamp"}
+                onChange={(e) => setApplyTriggerBuffs(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-border accent-amber-500"
+              />
+              Swap / Trigger
             </label>
             <button
               type="button"

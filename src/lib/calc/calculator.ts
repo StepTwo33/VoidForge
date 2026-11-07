@@ -2626,7 +2626,8 @@ export interface WarframeArcaneBuildContext {
 
 /**
  * Wiki Coaction Drift: Squad benefits +2.5%×(rank+1) more from Auras AND owner benefits an
- * additional +2.5%×(rank+1) from Auras → self multiplier = (1 + bonus)² (1.3225× at R5).
+ * additional +2.5%×(rank+1) from Auras → self multiplier = (1 + bonus)² (1.3225× at R5)
+ * for player-buffing Auras.
  */
 export function computeWarframeAuraEffectivenessMult(
   equippedMods?: readonly ModSlot[],
@@ -2636,6 +2637,20 @@ export function computeWarframeAuraEffectivenessMult(
   const rank = Math.min(Math.max(0, Math.round(coaction.rank ?? 5)), 5);
   const bonus = 0.025 * (rank + 1);
   return (1 + bonus) * (1 + bonus);
+}
+
+/**
+ * Wiki Coaction Drift / Corrosive Projection: Enemy-debuffing Auras only scale with Squad
+ * Aura Strength (+2.5%×(rank+1) → 1.15× at R5; CP = 18% × 1.15 = 20.7% solo, 82.8% 4× squad),
+ * without double-dipping on personal Aura Effectiveness.
+ */
+export function computeWarframeAuraStrengthMult(
+  equippedMods?: readonly ModSlot[],
+): number {
+  const coaction = equippedMods?.find((m) => m.modId === "coaction_drift");
+  if (!coaction) return 1;
+  const rank = Math.min(Math.max(0, Math.round(coaction.rank ?? 5)), 5);
+  return 1 + 0.025 * (rank + 1);
 }
 
 export interface ConditionalWarframeModDef {
@@ -2652,8 +2667,9 @@ export const CONDITIONAL_WARFRAME_MOD_DEFS: Record<string, ConditionalWarframeMo
     label: "Growing Power",
     maxStacks: 1,
     maxRank: 5,
-    describeEffect: (rank, stacks, auraMult = 1) => {
-      const pct = ((25 * (rank + 1)) / 6) * auraMult * (stacks > 0 ? 1 : 0);
+    describeEffect: (rank, stacks) => {
+      // Wiki Growing Power / Coaction Drift Notes: Coaction Drift does not scale Growing Power.
+      const pct = ((25 * (rank + 1)) / 6) * (stacks > 0 ? 1 : 0);
       return `+${pct.toFixed(pct % 1 === 0 ? 0 : 1)}% Ability Strength on weapon status`;
     },
   },
@@ -2820,7 +2836,6 @@ export function applyWarframeShardsAndArcanes(
   }
 
   if (arcaneCtx?.conditionalModStacksById && arcaneCtx.equippedModSlots?.length) {
-    const auraMult = computeWarframeAuraEffectivenessMult(arcaneCtx.equippedModSlots);
     for (const slot of arcaneCtx.equippedModSlots) {
       const def = CONDITIONAL_WARFRAME_MOD_DEFS[slot.modId];
       if (!def) continue;
@@ -2830,7 +2845,8 @@ export function applyWarframeShardsAndArcanes(
       const rank = Math.min(Math.max(0, Math.round(slot.rank ?? def.maxRank)), def.maxRank);
       switch (slot.modId) {
         case "growing_power":
-          stats.abilityStrength += ((0.25 * (rank + 1)) / 6) * auraMult;
+          // Wiki Growing Power Notes: unaffected by Coaction Drift.
+          stats.abilityStrength += (0.25 * (rank + 1)) / 6;
           break;
         case "augment_universal_energy_conversion":
           stats.abilityStrength += (0.5 * (rank + 1)) / 6;

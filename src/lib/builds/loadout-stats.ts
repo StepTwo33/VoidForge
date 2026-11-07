@@ -103,6 +103,7 @@ export const SCENARIO_PRESETS: Record<Exclude<DamageScenario, "vsEnemy">, Simula
     killStacks: 5,
     statusTypesOnTarget: 4,
     arcaneStacks: 12,
+    applyTriggerBuffs: true,
     applyTenaciousBondCrit: true,
     applyReinforcedBondFireRate: true,
     applyYareliCriticalFlow: true,

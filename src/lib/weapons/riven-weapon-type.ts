@@ -18,6 +18,10 @@ const SENTINEL_WEAPON_TYPE: Record<string, RivenWeaponType> = {
   "Sweeper Prime": "Shotgun",
   Deconstructor: "Melee",
   "Deconstructor Prime": "Melee",
+  "Burst Laser": "Pistol",
+  "Burst Laser Prime": "Pistol",
+  "Prisma Burst Laser": "Pistol",
+  "Shade Burst Laser": "Pistol",
 };
 
 /** Categories that can never hold a riven (amps, arch-melee, Tektolyst, beast claws). */

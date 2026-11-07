@@ -1,7 +1,10 @@
 import { allHelminthAbilities } from "@/data/helminth";
 import { WIKI_WEAPON_CLASS } from "@/data/arcane-weapon-classes";
 import { helminthToAbility } from "@/lib/builds/helminth-resolve";
-import { computeWarframeAuraEffectivenessMult } from "@/lib/calc/calculator";
+import {
+  computeWarframeAuraEffectivenessMult,
+  computeWarframeAuraStrengthMult,
+} from "@/lib/calc/calculator";
 import {
   computeExcaliburSwordsmanshipBonuses,
   computeGarudaPassiveDamageBonus,
@@ -62,11 +65,18 @@ function isPrimaryWeapon(weapon: Weapon): boolean {
   return weaponSupportsPrimaryStyleSets(weapon);
 }
 
-/** Ground primary (rifle/shotgun/bow/launcher) — excludes archgun, secondary, melee, exalted. */
+/** Ground primary (rifle/shotgun/sniper/bow/launcher) — excludes archgun, secondary, melee, exalted. */
 function isGroundPrimaryWeapon(weapon: Weapon): boolean {
   if (weapon.isExalted) return false;
   const c = weapon.category;
-  return c === "primary" || c === "rifle" || c === "shotgun" || c === "bow" || c === "launcher";
+  return (
+    c === "primary" ||
+    c === "rifle" ||
+    c === "shotgun" ||
+    c === "sniper" ||
+    c === "bow" ||
+    c === "launcher"
+  );
 }
 
 function isSecondaryWeapon(weapon: Weapon): boolean {
@@ -240,7 +250,9 @@ function isExcaliburSwordWeapon(weapon: Weapon): boolean {
 }
 
 /**
- * Enemy armor strip % from Warframe Corrosive Projection aura (3% × (rank + 1) × Coaction Drift).
+ * Enemy armor strip % from Warframe Corrosive Projection aura.
+ * Wiki Corrosive Projection / Coaction Drift: enemy-debuffing Auras scale only with Coaction
+ * Drift's Squad Aura Strength (+15% → 18% × 1.15 = 20.7% solo), not personal Aura Effectiveness.
  */
 export function computeLoadoutAuraArmorStripPct(
   warframeModSlots?: readonly ModSlot[],
@@ -248,8 +260,8 @@ export function computeLoadoutAuraArmorStripPct(
   const cp = warframeModSlots?.find((s) => s.modId === "aura_corrosive_projection");
   if (!cp) return 0;
   const rank = Math.min(Math.max(0, Math.round(cp.rank ?? 5)), 5);
-  const auraMult = computeWarframeAuraEffectivenessMult(warframeModSlots);
-  return Math.min(100, 3 * (rank + 1) * auraMult);
+  const auraStrengthMult = computeWarframeAuraStrengthMult(warframeModSlots);
+  return Math.min(100, 3 * (rank + 1) * auraStrengthMult);
 }
 
 function resolveWarframeCrossModBuffs(
@@ -345,7 +357,8 @@ function resolveWarframeCrossModBuffs(
       }
       case "ready_steel": {
         if (isMeleeWeapon(weapon)) {
-          const ic = Math.round(4 * mult * auraMult);
+          // Wiki Ready Steel + Coaction Drift: 24 × 1.3225 = 31.74 → truncates to 31 Initial Combo.
+          const ic = Math.floor(4 * mult * auraMult + 1e-9);
           buffs.push({
             id: "wf-aura:ready_steel",
             label: "Ready Steel",
@@ -383,7 +396,9 @@ function resolveWarframeCrossModBuffs(
         break;
       }
       case "holster_amp": {
-        if (simParams.applyTriggerBuffs && !isMeleeWeapon(weapon)) {
+        // Wiki Holster Amp: "+60% Damage on Equip for 3s" applies to Primary, Secondary & Melee,
+        // excluding Exalted weapons.
+        if (simParams.applyTriggerBuffs && !weapon.isExalted) {
           const dmg = ((10 * mult) / 100) * auraMult;
           buffs.push({
             id: "wf-aura:holster_amp",
@@ -396,6 +411,8 @@ function resolveWarframeCrossModBuffs(
         break;
       }
       case "vigorous_swap": {
+        // Wiki Vigorous Swap: "+165% Damage on Equip for 3s" applies to Primary & Secondary
+        // (including ranged Exalted), not regular Melee swings.
         if (simParams.applyTriggerBuffs && !isMeleeWeapon(weapon)) {
           const dmg = (15 * mult) / 100;
           buffs.push({

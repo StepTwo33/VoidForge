@@ -615,13 +615,49 @@ describe("round 57: Sirocco Amp arcanes, Virtuos rank scaling, Warframe conditio
     // Saryn passive: +25% Status Duration!
     expect(auraRes.primary!.stats.statusDurationBonus).toBeCloseTo(0.25, 4);
 
-    // Corrosive Projection + Coaction Drift = 18% * 1.3225 = 23.805% armor strip
+    // Corrosive Projection + Coaction Drift = 18% * 1.15 = 20.7% armor strip (Wiki: enemy-debuffing
+    // auras only scale with Squad Aura Strength +15%, not personal Aura Effectiveness double-dip).
     expect(
       computeLoadoutAuraArmorStripPct([
         { modId: "aura_corrosive_projection", rank: 5, slotIndex: 8 },
         { modId: "coaction_drift", rank: 5, slotIndex: 9 },
       ]),
-    ).toBeCloseTo(18 * 1.3225, 4);
+    ).toBeCloseTo(20.7, 4);
+
+    // Growing Power + Coaction Drift: Wiki Growing Power Notes — Coaction Drift does NOT scale Growing Power (+25% flat).
+    const gpCoaction = applyWarframeShardsAndArcanes(
+      calculateWarframeBuild(warframe("volt"), [], modsMap),
+      [null, null, null, null, null],
+      [null, null],
+      [5, 5],
+      {
+        equippedModSlots: [
+          { modId: "growing_power", rank: 5, slotIndex: 8 },
+          { modId: "coaction_drift", rank: 5, slotIndex: 9 },
+        ],
+        conditionalModStacksById: { growing_power: 1 },
+      },
+    );
+    expect(gpCoaction.abilityStrength).toBeCloseTo(1.25, 4);
+
+    // Rifle Amp applies to Sniper Rifles (category === "sniper", e.g. Vectis / Rubico), excluding Shotguns.
+    const vectis = weapon("vectis");
+    const vectisBase = calculateWeaponBuild(vectis, [], modsMap);
+    const sniperAuraRes = calcLoadoutStats(
+      {
+        id: "test-sniper-rifle-amp",
+        name: "Sniper Rifle Amp",
+        createdAt: 0,
+        updatedAt: 0,
+        warframeBuild: {
+          warframeId: "volt",
+          mods: [{ modId: "aura_rifle_amplification", rank: 5, slotIndex: 8 }],
+        },
+        primaryBuild: { weaponId: "vectis", mods: [] },
+      },
+      { scenario: "paper" },
+    );
+    expect(sniperAuraRes.primary!.stats.totalDamage / vectisBase.totalDamage).toBeCloseTo(1.27, 4);
 
     // 2. Excalibur + Steel Charge + Ready Steel on Nikana Prime
     const nikanaId = allWeapons.some((w) => w.id === "nikana_prime") ? "nikana_prime" : "skana";
@@ -654,6 +690,71 @@ describe("round 57: Sirocco Amp arcanes, Virtuos rank scaling, Warframe conditio
       (nikanaBaseCalc.heavyAttackInitialCombo ?? 0) + 24,
     );
     expect(excalRes.melee!.stats.comboCount).toBe(nikanaBaseCalc.comboCount + 24);
+
+    // Ready Steel + Coaction Drift truncates 24 * 1.3225 = 31.74 -> 31 Initial Combo (Wiki: 31 + 30 Corrupt Charge = 61 -> 4x).
+    const readyCoactionRes = calcLoadoutStats(
+      {
+        id: "test-ready-steel-coaction",
+        name: "Ready Steel Coaction",
+        createdAt: 0,
+        updatedAt: 0,
+        warframeBuild: {
+          warframeId: "volt",
+          mods: [
+            { modId: "ready_steel", rank: 5, slotIndex: 8 },
+            { modId: "coaction_drift", rank: 5, slotIndex: 9 },
+          ],
+        },
+        meleeBuild: { weaponId: nikanaId, mods: [] },
+      },
+      { scenario: "paper" },
+    );
+    expect(readyCoactionRes.melee!.stats.heavyAttackInitialCombo).toBe(
+      (nikanaBaseCalc.heavyAttackInitialCombo ?? 0) + 31,
+    );
+
+    // Holster Amp applies to Melee (+60% on equip, non-Exalted), whereas Vigorous Swap (+165%) applies to Primary/Secondary only.
+    const swapSim = { ...DEFAULT_SIM_PARAMS, applyTriggerBuffs: true };
+    const swapMeleeRes = calcLoadoutStats(
+      {
+        id: "test-holster-vs-vigorous",
+        name: "Swap Mods Scope",
+        createdAt: 0,
+        updatedAt: 0,
+        warframeBuild: {
+          warframeId: "volt",
+          mods: [
+            { modId: "holster_amp", rank: 5, slotIndex: 8 },
+            { modId: "vigorous_swap", rank: 10, slotIndex: 0 },
+          ],
+        },
+        primaryBuild: { weaponId: "burston_prime", mods: [] },
+        meleeBuild: { weaponId: nikanaId, mods: [] },
+      },
+      { simParams: swapSim },
+    );
+    // Primary gets both Holster Amp (+60%) + Vigorous Swap (+165%) = +225% (3.25x); Melee gets only Holster Amp (+60% = 1.6x)!
+    expect(swapMeleeRes.primary!.stats.totalDamage / burstonBase.totalDamage).toBeCloseTo(3.25, 3);
+    expect(swapMeleeRes.melee!.stats.totalDamage / nikanaBaseCalc.totalDamage).toBeCloseTo(1.6, 3);
+
+    // Excalibur Swordsmanship excludes Two-Handed Nikanas (Tatsu) and Dual Nikanas (Sun & Moon).
+    for (const excludedId of ["tatsu", "sun_and_moon"]) {
+      const excluded = allWeapons.find((w) => w.id === excludedId);
+      if (!excluded) continue;
+      const excludedBase = calculateWeaponBuild(excluded, [], modsMap);
+      const excludedRes = calcLoadoutStats(
+        {
+          id: `test-excal-exclude-${excludedId}`,
+          name: "Excal Excluded",
+          createdAt: 0,
+          updatedAt: 0,
+          warframeBuild: { warframeId: "excalibur", mods: [] },
+          meleeBuild: { weaponId: excludedId, mods: [] },
+        },
+        { scenario: "paper" },
+      );
+      expect(excludedRes.melee!.stats.totalDamage).toBeCloseTo(excludedBase.totalDamage, 4);
+    }
 
     // 3. MesaMarksman: +25% reload on 1H Lex Prime, +50 Health when no melee equipped
     const mesaNoMelee: Loadout = {
