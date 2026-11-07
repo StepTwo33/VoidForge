@@ -291,11 +291,22 @@ export default function DiscoverPage() {
 
   const selectCatalogItem = (item: DiscoverCatalogItem) => {
     if (!typeFilter) return;
-    const next: BuildSearchItem = { id: item.id, name: item.name, type: typeFilter };
+    const resolvedType = item.type ?? typeFilter;
+    const next: BuildSearchItem = { id: item.id, name: item.name, type: resolvedType };
+    if (resolvedType !== typeFilter) {
+      setTypeFilter(resolvedType);
+      setSlotFilter("all");
+    }
     setItemFilter(next);
     setSearchQuery("");
     setTagFilter("");
-    syncUrl({ itemFilter: next, searchQuery: "", tagFilter: "" });
+    syncUrl({
+      typeFilter: resolvedType,
+      slotFilter: resolvedType !== typeFilter ? "all" : undefined,
+      itemFilter: next,
+      searchQuery: "",
+      tagFilter: "",
+    });
   };
 
   const heroTitle = !inCategory

@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = { isPublic: true, type, user: { bannedAt: null } };
 
-  if (slot) {
+  if (slot && slot !== "companion_weapon") {
     const filter = resolveSubtypeItemFilter(type, slot);
     if (filter.kind === "ids") {
       if (filter.ids.length === 0) {
@@ -28,16 +28,40 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  const includeCompanionWeapons =
+    (type === "companion" || type === "weapon") &&
+    (!slot || slot === "all" || slot === "companion_weapon");
+
   try {
-    const rows = await prisma.build.groupBy({
-      by: ["itemId"],
-      where,
-      _count: { _all: true },
-    });
     const counts: Record<string, number> = {};
-    for (const row of rows) {
-      if (!row.itemId) continue;
-      counts[row.itemId] = row._count._all;
+    if (slot !== "companion_weapon") {
+      const rows = await prisma.build.groupBy({
+        by: ["itemId"],
+        where,
+        _count: { _all: true },
+      });
+      for (const row of rows) {
+        if (!row.itemId) continue;
+        counts[row.itemId] = row._count._all;
+      }
+    }
+    if (includeCompanionWeapons) {
+      const compBuilds = await prisma.build.findMany({
+        where: {
+          isPublic: true,
+          type: "companion",
+          user: { bannedAt: null },
+          data: { contains: `"weaponId":"` },
+        },
+        select: { data: true },
+      });
+      for (const b of compBuilds) {
+        const m = /"weaponId":"([a-z0-9_]+)"/i.exec(b.data);
+        if (m?.[1]) {
+          const key = `weapon:${m[1]}`;
+          counts[key] = (counts[key] ?? 0) + 1;
+        }
+      }
     }
     return NextResponse.json({ counts });
   } catch {

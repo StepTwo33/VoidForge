@@ -9,7 +9,7 @@ import {
 import { cleanModDescription } from "@/lib/display/mod-display";
 import { BuilderSectionNav } from "@/components/builder-section-nav";
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
 import {
   ItemPickerScreen,
@@ -154,6 +154,7 @@ function withRivenRoll(eq: EquippedMod | undefined, mod: Mod | null): Mod | null
 }
 
 export default function WeaponBuilderPage() {
+  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const builderReturnTo = useMemo(() => {
@@ -680,6 +681,7 @@ export default function WeaponBuilderPage() {
   ]);
 
   const filteredWeapons = useMemo(() => {
+    if (weaponCategory === "companion") return [];
     const hiddenCategories = [
       "amp_prism",
       "zaw_strike",
@@ -697,6 +699,21 @@ export default function WeaponBuilderPage() {
       weapons = weapons.filter((w) => w.name.toLowerCase().includes(q));
     }
     return weapons.sort((a, b) => a.name.localeCompare(b.name));
+  }, [allWeapons, weaponCategory, weaponSearch]);
+
+  const filteredCompanionWeapons = useMemo(() => {
+    const q = weaponSearch.trim().toLowerCase();
+    if (weaponCategory !== "companion" && !(weaponCategory === "all" && q)) return [];
+    let pool = allWeapons.filter((w) => isCompanionWeaponCategory(w.category));
+    if (q) {
+      pool = pool.filter(
+        (w) =>
+          w.name.toLowerCase().includes(q) ||
+          w.id.toLowerCase().includes(q) ||
+          w.category.replace(/_/g, " ").toLowerCase().includes(q),
+      );
+    }
+    return pool.sort((a, b) => a.name.localeCompare(b.name));
   }, [allWeapons, weaponCategory, weaponSearch]);
 
   const isIncarnon = !!(incarnonData || selectedWeapon?.isIncarnon);
@@ -854,7 +871,12 @@ export default function WeaponBuilderPage() {
       return;
     }
     const weapon = allWeapons.find((w) => w.id === id);
-    if (!weapon || isCompanionWeaponCategory(weapon.category)) return;
+    if (!weapon) return;
+    if (isCompanionWeaponCategory(weapon.category)) {
+      const target = `/companion-builder?weapon=${encodeURIComponent(weapon.id)}${rivenParam ? `&riven=${encodeURIComponent(rivenParam)}` : ""}`;
+      router.replace(target);
+      return;
+    }
     if (current?.id === id && !rivenParam) {
       setShowWeaponList(false);
       return;
@@ -1042,10 +1064,10 @@ export default function WeaponBuilderPage() {
             accent="blue"
             title="Weapon Builder"
             description="Choose a weapon to configure mods, arcanes, rivens, and Incarnon evolutions."
-            count={filteredWeapons.length}
+            count={filteredWeapons.length + filteredCompanionWeapons.length}
             search={weaponSearch}
             onSearchChange={setWeaponSearch}
-            searchPlaceholder="Search weapons..."
+            searchPlaceholder="Search weapons (including companion weapons like Verglas)..."
             pickerTab={pickerTab}
             onPickerTabChange={(tab) => {
               if (tab === "saved") void refreshSavedBuilds();
@@ -1128,6 +1150,38 @@ export default function WeaponBuilderPage() {
                         <span title="Fire rate (attacks per second)">FR {weapon.fireRate.toFixed(1)}</span>
                       </>
                     )}
+                  </div>
+                }
+              />
+            ))}
+            {filteredCompanionWeapons.map((weapon) => (
+              <ItemPickerRow
+                key={`companion:${weapon.id}`}
+                accent="blue"
+                onClick={() => router.push(`/companion-builder?weapon=${encodeURIComponent(weapon.id)}`)}
+                image={
+                  <GameAssetImage
+                    src={getWeaponImage(weapon.name, { category: weapon.category })}
+                    alt=""
+                    width={40}
+                    height={40}
+                    className="h-9 w-9 object-contain"
+                    hideOnError
+                  />
+                }
+                title={weapon.name}
+                badge={
+                  <span className="shrink-0 text-xs text-cyan-700 dark:text-cyan-400">
+                    Companion Builder →
+                  </span>
+                }
+                meta={
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                    <span className="capitalize">{weapon.category.replace(/_/g, " ")}</span>
+                    <span title="Total base damage per shot">DMG {weapon.damage}</span>
+                    <span title="Critical chance">CC {(weapon.criticalChance * 100).toFixed(0)}%</span>
+                    <span title="Critical damage (critical multiplier)">CD {weapon.criticalMultiplier.toFixed(1)}x</span>
+                    <span title="Status chance">SC {(weapon.statusChance * 100).toFixed(0)}%</span>
                   </div>
                 }
               />

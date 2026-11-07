@@ -12,6 +12,7 @@ export const WEAPON_CATEGORY_LABELS: Record<string, string> = {
   archgun: "Archguns",
   archmelee: "Archmelee",
   tektolyst: "Tektolyst",
+  companion: "Companion",
 };
 
 /** Map a weapon's data category onto the mod pool category used by ModPicker. */

@@ -62,7 +62,7 @@ import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { cn } from "@/lib/utils";
 import { appendReturnTo } from "@/lib/site/nav-return";
 import { toast } from "sonner";
-import { getCompanionImage } from "@/lib/display/images";
+import { getCompanionImage, getWeaponImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
 import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
 import { snapshotFromBuild } from "@/lib/builds/compare-build";
@@ -77,6 +77,7 @@ const companionTypeLabels: Record<string, string> = {
   predasite: "Predasites",
   vulpaphyla: "Vulpaphylas",
   hound: "Hounds",
+  weapons: "Weapons",
 };
 
 function getCompanionIcon(type: string) {
@@ -105,12 +106,15 @@ import {
   companionHasFixedWeapon,
   getCompanionWeapons,
   isCompanionPostureMod,
+  isCompanionWeaponCategory,
   migrateClawModsFromCompanion,
   migratePostureToPostureSlot,
   modFitsCompanionWeapon,
   resolveCompanionClawId,
   resolveDefaultCompanionWeapon,
   resolveHoundWeaponId,
+  resolvePreferredCompanionForWeapon,
+  SIGNATURE_COMPANION_BY_WEAPON_ID,
 } from "@/lib/weapons/companion-weapons";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
@@ -416,17 +420,18 @@ export default function CompanionBuilderPage() {
     const weapon = allWeapons.find((w) => w.id === weaponId);
     if (!weapon) return;
 
-    // Find companion that can equip this weapon
-    const companion =
-      allCompanions.find((c) => getCompanionWeapons(c, allWeapons).some((w) => w.id === weapon.id)) ||
-      allCompanions.find((c) => c.type === "sentinel") ||
-      allCompanions[0];
-
+    // Find signature or compatible companion that can equip this weapon
+    const companion = resolvePreferredCompanionForWeapon(weapon, allCompanions);
     if (!companion) return;
 
+    const parts = defaultPartsForCompanion(companion) ?? null;
+    const resolved = parts ? resolveCompanionParts(parts) : null;
     setSelectedCompanion(companion);
+    setCompanionParts(parts);
+    setSlotPolarities(resolved?.defaultSlotPolarities ?? {});
     setShowCompanionList(false);
     setSelectedWeapon(weapon);
+    setBuildName(`${companion.name} — ${weapon.name} Build`);
 
     const rivenParam = params.get("riven");
     if (rivenParam) {
@@ -486,6 +491,7 @@ export default function CompanionBuilderPage() {
   }, [currentBuildId, deleteSavedBuild]);
 
   const filteredCompanions = useMemo(() => {
+    if (companionType === "weapons") return [];
     let comps = [...allCompanions];
     if (companionType !== "all") {
       comps = comps.filter((c) => c.type === companionType);
@@ -496,6 +502,25 @@ export default function CompanionBuilderPage() {
     }
     return comps.sort((a, b) => a.name.localeCompare(b.name));
   }, [allCompanions, companionType, companionSearch]);
+
+  const filteredPickerWeapons = useMemo(() => {
+    const q = companionSearch.trim().toLowerCase();
+    if (companionType !== "weapons" && !q) return [];
+    let pool = allWeapons.filter((w) => isCompanionWeaponCategory(w.category));
+    if (companionType !== "all" && companionType !== "weapons") {
+      const typeComps = allCompanions.filter((c) => c.type === companionType);
+      pool = pool.filter((w) => typeComps.some((c) => getCompanionWeapons(c, [w]).some((cw) => cw.id === w.id)));
+    }
+    if (q) {
+      pool = pool.filter(
+        (w) =>
+          w.name.toLowerCase().includes(q) ||
+          w.id.toLowerCase().includes(q) ||
+          w.category.replace(/_/g, " ").toLowerCase().includes(q),
+      );
+    }
+    return pool.sort((a, b) => a.name.localeCompare(b.name));
+  }, [allWeapons, allCompanions, companionType, companionSearch]);
 
   // Link Vitality / Redirection / Fiber copy the Warframe's max stats. Only known when this
   // companion was opened from a loadout slot; a standalone companion build has no Warframe.
@@ -668,29 +693,69 @@ export default function CompanionBuilderPage() {
     const parts = defaultPartsForCompanion(companion) ?? null;
     setCompanionParts(parts);
     const resolved = parts ? resolveCompanionParts(parts) : null;
-    const weaponId =
-      resolved?.weaponId ??
-      resolveHoundWeaponId(companion) ??
-      (companionHasFixedWeapon(companion) ? resolveCompanionClawId(companion) : undefined);
     const weaponCandidates = getCompanionWeapons(companion, allWeapons);
-    setSelectedWeapon(
-      weaponId
-        ? weaponCandidates.find((w) => w.id === weaponId) ??
-            (companionHasFixedWeapon(companion) ? resolveDefaultCompanionWeapon(companion, allWeapons) : null)
-        : companionHasFixedWeapon(companion)
-          ? resolveDefaultCompanionWeapon(companion, allWeapons)
-          : null,
+    // Preserve an already-selected robotic weapon (and its mods) when swapping between compatible Sentinels/MOAs
+    const keepCurrentWeapon =
+      selectedWeapon != null &&
+      !companionHasFixedWeapon(companion) &&
+      weaponCandidates.some((w) => w.id === selectedWeapon.id);
+    if (!keepCurrentWeapon) {
+      const weaponId =
+        resolved?.weaponId ??
+        resolveHoundWeaponId(companion) ??
+        (companionHasFixedWeapon(companion) ? resolveCompanionClawId(companion) : undefined);
+      setSelectedWeapon(
+        weaponId
+          ? weaponCandidates.find((w) => w.id === weaponId) ??
+              (companionHasFixedWeapon(companion) ? resolveDefaultCompanionWeapon(companion, allWeapons) : null)
+          : companionHasFixedWeapon(companion)
+            ? resolveDefaultCompanionWeapon(companion, allWeapons)
+            : null,
+      );
+      setWeaponMods([]);
+      setHasCatalyst(false);
+      setWeaponSlotPolarities({});
+      setWeaponRivenStatsMap(undefined);
+    }
+    setSlotPolarities(resolved?.defaultSlotPolarities ?? {});
+    setCurrentBuildId(null);
+    setBuildName(
+      keepCurrentWeapon && selectedWeapon
+        ? `${companion.name} — ${selectedWeapon.name} Build`
+        : `${companion.name} Build`,
     );
+    setBuildDescription("");
+    setShowCompanionList(false);
+  }, [allWeapons, selectedWeapon]);
+
+  const handleSelectWeaponFromPicker = useCallback((weapon: Weapon) => {
+    const companion = resolvePreferredCompanionForWeapon(weapon, allCompanions);
+    if (!companion) return;
+    setSelectedCompanion(companion);
+    setEquippedMods([]);
+    setHasReactor(false);
+    const parts = defaultPartsForCompanion(companion) ?? null;
+    setCompanionParts(parts);
+    const resolved = parts ? resolveCompanionParts(parts) : null;
+    setSlotPolarities(resolved?.defaultSlotPolarities ?? {});
+    setSelectedWeapon(weapon);
     setWeaponMods([]);
     setHasCatalyst(false);
     setWeaponSlotPolarities({});
     setWeaponRivenStatsMap(undefined);
-    setSlotPolarities(resolved?.defaultSlotPolarities ?? {});
     setCurrentBuildId(null);
-    setBuildName(`${companion.name} Build`);
+    setBuildName(`${companion.name} — ${weapon.name} Build`);
     setBuildDescription("");
     setShowCompanionList(false);
-  }, [allWeapons]);
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (!hasBuildLinkParam(params)) {
+        params.set("weapon", weapon.id);
+        weaponParamSeenRef.current = weapon.id;
+        window.history.replaceState(window.history.state, "", `${window.location.pathname}?${params.toString()}`);
+      }
+    }
+  }, [allCompanions]);
 
   const updateCompanionParts = useCallback((patch: Partial<ModularCompanionParts>) => {
     setCompanionParts((prev) => {
@@ -811,11 +876,11 @@ export default function CompanionBuilderPage() {
             icon={Dog}
             accent="cyan"
             title="Companion Builder"
-            description="Choose a sentinel, kubrow, kavat, MOA, or other companion to configure."
-            count={filteredCompanions.length}
+            description="Choose a sentinel, kubrow, kavat, MOA, hound, or companion weapon to configure."
+            count={filteredCompanions.length + filteredPickerWeapons.length}
             search={companionSearch}
             onSearchChange={setCompanionSearch}
-            searchPlaceholder="Search companions..."
+            searchPlaceholder="Search companions or weapons (e.g. Verglas)..."
             pickerTab={pickerTab}
             onPickerTabChange={(tab) => {
               if (tab === "saved") void refreshSavedBuilds();
@@ -894,6 +959,47 @@ export default function CompanionBuilderPage() {
                 )}
               </ItemPickerRow>
             ))}
+            {filteredPickerWeapons.map((w) => {
+              const sigId = SIGNATURE_COMPANION_BY_WEAPON_ID[w.id];
+              const sigName = sigId ? allCompanions.find((c) => c.id === sigId)?.name : null;
+              return (
+                <ItemPickerRow
+                  key={`weapon:${w.id}`}
+                  accent="cyan"
+                  onClick={() => handleSelectWeaponFromPicker(w)}
+                  image={
+                    <GameAssetImage
+                      src={getWeaponImage(w.name, { category: w.category })}
+                      alt=""
+                      width={40}
+                      height={40}
+                      className="h-9 w-9 object-contain"
+                      hideOnError
+                    />
+                  }
+                  title={
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="text-orange-700 dark:text-orange-400"><Crosshair className="h-4 w-4" /></span>
+                      {w.name}
+                    </span>
+                  }
+                  badge={
+                    <span className="text-xs capitalize text-muted-foreground">
+                      {w.category.replace(/_/g, " ")}
+                      {sigName ? ` · ${sigName}` : ""}
+                    </span>
+                  }
+                  meta={
+                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                      <span>DMG {w.damage}</span>
+                      <span>CC {(w.criticalChance * 100).toFixed(0)}%</span>
+                      <span>CD {w.criticalMultiplier.toFixed(1)}x</span>
+                      <span>SC {(w.statusChance * 100).toFixed(0)}%</span>
+                    </div>
+                  }
+                />
+              );
+            })}
           </ItemPickerScreen>
         ) : (
           <div>
@@ -910,7 +1016,7 @@ export default function CompanionBuilderPage() {
                 />
               }
               title={selectedCompanion.name}
-              subtitle={selectedCompanion.type}
+              subtitle={selectedWeapon ? `${selectedCompanion.type} • ${selectedWeapon.name}` : selectedCompanion.type}
             >
               <BuilderActionBar>
                 <BuilderActionGroup>

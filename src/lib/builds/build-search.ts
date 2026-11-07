@@ -3,7 +3,9 @@ import { allCompanions } from "@/data/companions";
 import { ampPrisms, kitgunChambers, zawStrikes } from "@/data/modular-weapons";
 import { reactors } from "@/data/railjack";
 import { allWarframes } from "@/data/warframes";
-import { allWeapons } from "@/data/weapons";
+import { CODEX_HIDDEN_WEAPON_CATEGORIES } from "@/lib/codex/codex-catalog";
+import { isCompanionWeaponCategory } from "@/lib/weapons/companion-weapons";
+import { getEffectiveWeapons } from "@/lib/weapons/effective-data";
 
 export interface BuildSearchItem {
   id: string;
@@ -13,8 +15,13 @@ export interface BuildSearchItem {
 
 const BUILD_ITEM_CATALOG: BuildSearchItem[] = (() => {
   const items: BuildSearchItem[] = [];
-  for (const w of allWeapons) {
+  for (const w of getEffectiveWeapons()) {
     if (w.isExalted) continue;
+    if (CODEX_HIDDEN_WEAPON_CATEGORIES.has(w.category)) continue;
+    if (isCompanionWeaponCategory(w.category)) {
+      items.push({ id: `weapon:${w.id}`, name: w.name, type: "companion" });
+      continue;
+    }
     items.push({ id: w.id, name: w.name, type: "weapon" });
   }
   for (const wf of allWarframes) {

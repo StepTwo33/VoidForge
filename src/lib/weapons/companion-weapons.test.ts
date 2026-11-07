@@ -3,7 +3,15 @@ import { allCompanions } from "@/data/companions";
 import { allMods } from "@/data/mods";
 import { allWeapons } from "@/data/weapons";
 import { isWarframeExilusMod } from "@/lib/mods/mod-slot-categories";
-import { getCompanionWeapons, modFitsCompanionWeapon } from "@/lib/weapons/companion-weapons";
+import {
+  getCompanionWeapons,
+  modFitsCompanionWeapon,
+  resolvePreferredCompanionForWeapon,
+} from "@/lib/weapons/companion-weapons";
+import { getEffectiveWeapons } from "@/lib/weapons/effective-data";
+import { searchBuildCatalog } from "@/lib/builds/build-search";
+import { listDiscoverCatalogItems } from "@/lib/builds/discover-subtypes";
+import { resolveBuildItemDisplay } from "@/lib/builds/build-item-display";
 import { filterPickerMods } from "@/components/mod-picker-filter";
 import type { Weapon } from "@/lib/types";
 
@@ -55,6 +63,59 @@ describe("getCompanionWeapons", () => {
     expect(getCompanionWeapons(vizier, beastClaws).map((w) => w.id)).toEqual(["vizier_claws"]);
     expect(getCompanionWeapons(pharaoh, beastClaws).map((w) => w.id)).toEqual(["pharaoh_claws"]);
     expect(getCompanionWeapons(medjay, beastClaws).map((w) => w.id)).toEqual(["medjay_claws"]);
+  });
+
+  it("includes Verglas and Verglas Prime on Sentinels & MOAs, and restricts Deconstructor to Helios", () => {
+    const effective = getEffectiveWeapons();
+    const nautilus = allCompanions.find((c) => c.id === "nautilus")!;
+    const nautilusPrime = allCompanions.find((c) => c.id === "nautilus_prime")!;
+    const helios = allCompanions.find((c) => c.id === "helios")!;
+    const lambeo = allCompanions.find((c) => c.id === "lambeo")!;
+
+    const nautilusWeapons = getCompanionWeapons(nautilus, effective).map((w) => w.id);
+    expect(nautilusWeapons).toContain("verglas");
+    expect(nautilusWeapons).toContain("verglas_prime");
+    expect(nautilusWeapons).not.toContain("deconstructor");
+    expect(nautilusWeapons).not.toContain("deconstructor_prime");
+
+    const moaWeapons = getCompanionWeapons(lambeo, effective).map((w) => w.id);
+    expect(moaWeapons).toContain("verglas");
+    expect(moaWeapons).toContain("verglas_prime");
+    expect(moaWeapons).not.toContain("deconstructor");
+
+    const heliosWeapons = getCompanionWeapons(helios, effective).map((w) => w.id);
+    expect(heliosWeapons).toContain("deconstructor");
+    expect(heliosWeapons).toContain("deconstructor_prime");
+    expect(heliosWeapons).toContain("verglas");
+
+    const verglas = effective.find((w) => w.id === "verglas")!;
+    const verglasPrime = effective.find((w) => w.id === "verglas_prime")!;
+    const deconstructor = effective.find((w) => w.id === "deconstructor")!;
+    expect(resolvePreferredCompanionForWeapon(verglas, allCompanions)?.id).toBe("nautilus");
+    expect(resolvePreferredCompanionForWeapon(verglasPrime, allCompanions)?.id).toBe(nautilusPrime.id);
+    expect(resolvePreferredCompanionForWeapon(deconstructor, allCompanions)?.id).toBe("helios");
+  });
+
+  it("surfaces Verglas and Verglas Prime across search and Discover weapon/companion sections", () => {
+    const matches = searchBuildCatalog("verglas", 5);
+    expect(matches.map((m) => m.name)).toEqual(["Verglas", "Verglas Prime"]);
+    expect(matches[0]).toEqual({ id: "weapon:verglas", name: "Verglas", type: "companion" });
+    expect(matches[1]).toEqual({ id: "weapon:verglas_prime", name: "Verglas Prime", type: "companion" });
+
+    for (const [type, slot] of [
+      ["weapon", "all"],
+      ["weapon", "companion_weapon"],
+      ["companion", "all"],
+      ["companion", "companion_weapon"],
+    ] as const) {
+      const items = listDiscoverCatalogItems(type, slot);
+      expect(items.some((i) => i.id === "weapon:verglas"), `${type}/${slot} verglas`).toBe(true);
+      expect(items.some((i) => i.id === "weapon:verglas_prime"), `${type}/${slot} verglas_prime`).toBe(true);
+    }
+
+    const display = resolveBuildItemDisplay("companion", "weapon:verglas_prime");
+    expect(display.itemName).toBe("Verglas Prime");
+    expect(display.typeLabel).toBe("Companion");
   });
 });
 

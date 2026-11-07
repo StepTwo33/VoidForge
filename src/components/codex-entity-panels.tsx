@@ -18,6 +18,7 @@ import { Archwing, Necramech } from "@/data/archwing";
 import { useMods } from "@/lib/weapons/use-data";
 import { getExclusiveModIdsForWeapon } from "@/lib/mods/weapon-exclusive-mods";
 import { getAugmentModIdsForWarframe } from "@/lib/mods/warframe-augment-mods";
+import { isCompanionWeaponCategory } from "@/lib/weapons/companion-weapons";
 import { appendReturnTo } from "@/lib/site/nav-return";
 import { dataFixesHref } from "@/lib/overrides/data-fixes-url";
 import { useStaffRole } from "@/lib/auth/use-staff";
@@ -31,6 +32,8 @@ export function CodexActionLinks({
   name,
   overrideCategory,
   wikiUrl,
+  builderHref,
+  builderLabel,
   returnTo,
   editValuesLabel,
 }: {
@@ -39,6 +42,8 @@ export function CodexActionLinks({
   name: string;
   overrideCategory: string;
   wikiUrl?: string;
+  builderHref?: string;
+  builderLabel?: string;
   returnTo?: string;
   editValuesLabel?: string;
 }) {
@@ -52,6 +57,14 @@ export function CodexActionLinks({
 
   return (
     <div className="flex flex-wrap gap-2 border-t border-border pt-3">
+      {builderHref && (
+        <Link
+          href={builderHref}
+          className="inline-flex min-h-11 items-center gap-1 rounded border border-cyan-500/35 bg-cyan-500/5 px-2.5 py-2 text-xs font-medium text-cyan-800 hover:border-cyan-500/50 hover:bg-cyan-500/10 dark:text-cyan-300 lg:pointer-fine:min-h-0 lg:px-2 lg:py-1 sm:text-[10px]"
+        >
+          <Crosshair className="h-2.5 w-2.5" /> {builderLabel ?? "Open in Builder"}
+        </Link>
+      )}
       {wikiUrl && (
         <a
           href={wikiUrl}
@@ -488,6 +501,22 @@ export function WeaponDetailPanel({ weapon, compact, returnTo }: { weapon: Weapo
         name={weapon.name}
         overrideCategory="weapon"
         wikiUrl={getCodexWikiUrl(weapon.name)}
+        builderHref={
+          weapon.isExalted
+            ? weapon.warframeId
+              ? `/warframe-builder?warframe=${encodeURIComponent(weapon.warframeId)}`
+              : undefined
+            : isCompanionWeaponCategory(weapon.category)
+              ? `/companion-builder?weapon=${encodeURIComponent(weapon.id)}`
+              : `/weapon-builder?weapon=${encodeURIComponent(weapon.id)}`
+        }
+        builderLabel={
+          weapon.isExalted
+            ? "Open Warframe Builder"
+            : isCompanionWeaponCategory(weapon.category)
+              ? "Open in Companion Builder"
+              : "Open in Weapon Builder"
+        }
         returnTo={returnTo}
       />
     </div>

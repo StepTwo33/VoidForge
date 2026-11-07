@@ -100,16 +100,14 @@ function BuildCompareTab() {
   };
 
   const filteredWeapons = useMemo(() => {
-    const hiddenCategories = [
-      "amp_prism",
-      "zaw_strike",
-      "kitgun_chamber",
-      "sentinel_weapon",
-      "hound_weapon",
-      "beast_claw",
-    ];
-    let weapons = allWeapons.filter((w) => !hiddenCategories.includes(w.category));
-    if (weaponSearch.trim()) {
+    const modularCategories = ["amp_prism", "zaw_strike", "kitgun_chamber"];
+    const hasSearch = weaponSearch.trim().length > 0;
+    let weapons = allWeapons.filter(
+      (w) =>
+        !modularCategories.includes(w.category) &&
+        (hasSearch || !isCompanionWeaponCategory(w.category)),
+    );
+    if (hasSearch) {
       const q = weaponSearch.toLowerCase();
       weapons = weapons.filter((w) => w.name.toLowerCase().includes(q));
     }
@@ -124,11 +122,11 @@ function BuildCompareTab() {
 
   const selectWeapon = (side: 0 | 1, weapon: Weapon) => {
     if (isCompanionWeaponCategory(weapon.category)) {
-      toast.error("Companion weapons are built in Companion Builder", {
+      toast.info(`${weapon.name} is built in Companion Builder`, {
         action: {
           label: "Open",
           onClick: () => {
-            window.location.href = "/companion-builder";
+            window.location.href = `/companion-builder?weapon=${encodeURIComponent(weapon.id)}`;
           },
         },
       });

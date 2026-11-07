@@ -102,6 +102,7 @@ export const COMPANION_CLAW_BY_ID: Record<string, string> = {
   helminth_charger: "helminth_claws",
   adarza: "adarza_claws",
   smeeta: "smeeta_claws",
+  vasca: "vasca_claws",
   vizier_predasite: "vizier_claws",
   pharaoh_predasite: "pharaoh_claws",
   medjay_predasite: "medjay_claws",
@@ -154,10 +155,54 @@ export const COMPANION_CLAW_MAP: Record<string, string> = {
   "Panzer Vulpaphyla": "panzer_claws",
 };
 
+/** Wiki: Deconstructor and Deconstructor Prime can only be equipped by Helios and Helios Prime. */
+const HELIOS_COMPANION_IDS = new Set(["helios", "helios_prime"]);
+const HELIOS_EXCLUSIVE_WEAPON_IDS = new Set(["deconstructor", "deconstructor_prime"]);
+
+/**
+ * Signature / default companion body per companion weapon id.
+ * Used when deep-linking or picking a companion weapon directly (e.g. Verglas → Nautilus).
+ */
+export const SIGNATURE_COMPANION_BY_WEAPON_ID: Readonly<Record<string, string>> = {
+  // Sentinel signature weapons
+  artax: "taxon",
+  burst_laser: "shade",
+  prisma_burst_laser: "prisma_shade",
+  burst_laser_prime: "shade_prime",
+  deconstructor: "helios",
+  deconstructor_prime: "helios_prime",
+  deth_machine_rifle: "dethcube",
+  deth_machine_rifle_prime: "dethcube_prime",
+  laser_rifle: "wyrm",
+  prime_laser_rifle: "wyrm_prime",
+  multron: "oxylus",
+  stinger: "djinn",
+  sweeper: "carrier",
+  sweeper_prime: "carrier_prime",
+  verglas: "nautilus",
+  verglas_prime: "nautilus_prime",
+  vulklok: "diriga",
+  // Fortuna robotic weapons (MOA)
+  cryotra: "lambeo",
+  tazicor: "olaro",
+  vulcax: "para",
+  helstrum: "nidus_moa",
+  // Hound melee weapons
+  lacerten: "bhaira_hound",
+  batoten: "dorma_hound",
+  akaten: "hec_hound",
+  // Beast claws (inverse of COMPANION_CLAW_BY_ID)
+  ...Object.fromEntries(Object.entries(COMPANION_CLAW_BY_ID).map(([compId, clawId]) => [clawId, compId])),
+};
+
 export function getCompanionWeapons(companion: Companion, weaponList: Weapon[]): Weapon[] {
   const type = companion.type;
   if (type === "sentinel") {
-    return weaponList.filter((w) => w.category === "sentinel_weapon");
+    return weaponList.filter(
+      (w) =>
+        w.category === "sentinel_weapon" &&
+        (!HELIOS_EXCLUSIVE_WEAPON_IDS.has(w.id) || HELIOS_COMPANION_IDS.has(companion.id)),
+    );
   }
   if (type === "kubrow" || type === "predasite" || type === "kavat" || type === "vulpaphyla") {
     const specificClawId = resolveCompanionClawId(companion);
@@ -169,13 +214,39 @@ export function getCompanionWeapons(companion: Companion, weaponList: Weapon[]):
   }
   if (type === "moa") {
     return weaponList.filter(
-      (w) => w.category === "sentinel_weapon" && !w.name.toLowerCase().includes("deconstructor"),
+      (w) =>
+        w.category === "sentinel_weapon" &&
+        !HELIOS_EXCLUSIVE_WEAPON_IDS.has(w.id) &&
+        !w.name.toLowerCase().includes("deconstructor"),
     );
   }
   if (type === "hound") {
     return weaponList.filter((w) => w.category === "hound_weapon" || w.companionType === "hound");
   }
   return [];
+}
+
+/**
+ * Resolve the signature or best-matching companion for a companion weapon
+ * (e.g. Verglas → Nautilus, Verglas Prime → Nautilus Prime, Deconstructor → Helios).
+ */
+export function resolvePreferredCompanionForWeapon(
+  weapon: Weapon,
+  companions: readonly Companion[],
+): Companion | null {
+  const sigId = SIGNATURE_COMPANION_BY_WEAPON_ID[weapon.id];
+  if (sigId) {
+    const sig = companions.find((c) => c.id === sigId);
+    if (sig && getCompanionWeapons(sig, [weapon]).some((w) => w.id === weapon.id)) {
+      return sig;
+    }
+  }
+  return (
+    companions.find((c) => getCompanionWeapons(c, [weapon]).some((w) => w.id === weapon.id)) ??
+    companions.find((c) => c.type === "sentinel") ??
+    companions[0] ??
+    null
+  );
 }
 
 /** Default weapon used for DPS when companion build has weapon mods but no explicit weapon id. */

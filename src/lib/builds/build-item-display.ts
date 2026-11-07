@@ -96,6 +96,14 @@ export function resolveBuildItemDisplay(type: string, itemId: string): BuildItem
       };
     }
     case "companion": {
+      if (itemId.startsWith("weapon:")) {
+        const weapon = weaponsMap.get(itemId.slice("weapon:".length));
+        return {
+          itemName: weapon?.name ?? null,
+          itemImage: weapon ? getWeaponImage(weapon.name, { category: weapon.category }) : null,
+          typeLabel,
+        };
+      }
       const companion = companionsMap.get(itemId);
       return {
         itemName: companion?.name ?? null,

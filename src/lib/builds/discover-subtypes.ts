@@ -70,6 +70,7 @@ const WEAPON_SLOTS: DiscoverSubtype[] = [
   { id: "primary", label: "Primary" },
   { id: "secondary", label: "Secondary" },
   { id: "melee", label: "Melee" },
+  { id: "companion_weapon", label: "Companion" },
 ];
 
 const MODULAR_SLOTS: DiscoverSubtype[] = [
@@ -85,9 +86,12 @@ const ARCHWING_SLOTS: DiscoverSubtype[] = [
   { id: "necramech", label: "Necramech" },
 ];
 
-const COMPANION_SLOTS: DiscoverSubtype[] = CODEX_COMPANION_TYPE_FILTERS.map((f) =>
-  f.id === "all" ? { id: "all", label: "All" } : { id: f.id, label: f.label },
-);
+const COMPANION_SLOTS: DiscoverSubtype[] = [
+  ...CODEX_COMPANION_TYPE_FILTERS.map((f) =>
+    f.id === "all" ? { id: "all", label: "All" } : { id: f.id, label: f.label },
+  ),
+  { id: "companion_weapon", label: "Weapons" },
+];
 
 /** Subtype chips for a Discover category; empty when the type has no slots. */
 export function getDiscoverSubtypes(type: string): DiscoverSubtype[] {
@@ -171,9 +175,23 @@ export interface DiscoverCatalogItem {
   id: string;
   name: string;
   image: string | null;
+  /** Override build type when an item routes to another category (e.g. companion weapons inside Weapons). */
+  type?: string;
 }
 
 const WEAPON_SLOTS_SET = new Set(["primary", "secondary", "melee"]);
+
+function listCompanionWeaponCatalogItems(): DiscoverCatalogItem[] {
+  return getEffectiveWeapons()
+    .filter((w) => w.category === "sentinel_weapon" || w.category === "hound_weapon")
+    .map((w) => ({
+      id: `weapon:${w.id}`,
+      name: w.name,
+      image: getWeaponImage(w.name, { category: w.category }),
+      type: "companion",
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
 
 /** Full catalog for a Discover category (+ optional slot), for the item image grid. */
 export function listDiscoverCatalogItems(
@@ -183,7 +201,10 @@ export function listDiscoverCatalogItems(
   const activeSlot = slot && slot !== "all" && isValidDiscoverSlot(type, slot) ? slot : "all";
 
   if (type === "weapon") {
-    return getEffectiveWeapons()
+    if (activeSlot === "companion_weapon") {
+      return listCompanionWeaponCatalogItems();
+    }
+    const groundWeapons: DiscoverCatalogItem[] = getEffectiveWeapons()
       .filter((w) => !w.isExalted)
       .filter((w) => !CODEX_HIDDEN_WEAPON_CATEGORIES.has(w.category))
       .filter((w) => {
@@ -195,8 +216,12 @@ export function listDiscoverCatalogItems(
         id: w.id,
         name: w.name,
         image: getWeaponImage(w.name, { category: w.category }),
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+      }));
+    const combined =
+      activeSlot === "all"
+        ? [...groundWeapons, ...listCompanionWeaponCatalogItems()]
+        : groundWeapons;
+    return combined.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   if (type === "warframe") {
@@ -211,14 +236,21 @@ export function listDiscoverCatalogItems(
   }
 
   if (type === "companion") {
-    return getEffectiveCompanions()
+    if (activeSlot === "companion_weapon") {
+      return listCompanionWeaponCatalogItems();
+    }
+    const companions: DiscoverCatalogItem[] = getEffectiveCompanions()
       .filter((c) => activeSlot === "all" || c.type === activeSlot)
       .map((c) => ({
         id: c.id,
         name: c.name,
         image: getCompanionImage(c.name),
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+      }));
+    const combined =
+      activeSlot === "all"
+        ? [...companions, ...listCompanionWeaponCatalogItems()]
+        : companions;
+    return combined.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   if (type === "modular") {

@@ -71,21 +71,35 @@ export async function GET(req: NextRequest) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = { isPublic: true, user: { bannedAt: null } };
-  if (type) where.type = type;
-  if (itemId) {
-    where.itemId = itemId;
-  } else if (type && slot) {
-    const filter = resolveSubtypeItemFilter(type, slot);
-    if (filter.kind === "ids") {
-      if (filter.ids.length === 0) {
-        return NextResponse.json(
-          { builds: [], nextCursor: null },
-          { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } },
-        );
+  if (itemId && itemId.startsWith("weapon:")) {
+    const wId = itemId.slice("weapon:".length);
+    if (!/^[a-z0-9_]+$/i.test(wId)) {
+      return NextResponse.json({ builds: [], nextCursor: null });
+    }
+    where.type = "companion";
+    where.data = { contains: `"weaponId":"${wId}"` };
+  } else {
+    if (type) where.type = type;
+    if (itemId) {
+      where.itemId = itemId;
+    } else if (type && slot) {
+      if (slot === "companion_weapon") {
+        where.type = "companion";
+        where.data = { contains: `"weaponId":"` };
+      } else {
+        const filter = resolveSubtypeItemFilter(type, slot);
+        if (filter.kind === "ids") {
+          if (filter.ids.length === 0) {
+            return NextResponse.json(
+              { builds: [], nextCursor: null },
+              { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } },
+            );
+          }
+          where.itemId = { in: filter.ids };
+        } else if (filter.kind === "prefix") {
+          where.itemId = { startsWith: filter.prefix };
+        }
       }
-      where.itemId = { in: filter.ids };
-    } else if (filter.kind === "prefix") {
-      where.itemId = { startsWith: filter.prefix };
     }
   }
   if (userId) where.userId = userId;
