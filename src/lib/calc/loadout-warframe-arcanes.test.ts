@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { calcLoadoutStats } from "@/lib/builds/loadout-stats";
+import { allWarframes } from "@/data/warframes";
+import { ENEMY_TYPES } from "@/data/enemies";
+import { weaponDamageBuffAbilities } from "@/lib/weapons/weapon-external-buffs";
 import type { Loadout } from "@/lib/types";
 
 describe("Loadout Warframe Arcanes cross-slot weapon buffs", () => {
@@ -267,5 +270,76 @@ describe("Loadout Warframe Arcanes cross-slot weapon buffs", () => {
     });
     expect(bothBuffs.primary!.stats.criticalChance).toBeCloseTo(unbuffedCc + 0.5, 3);
     expect(bothBuffs.primary!.stats.fireRate).toBeGreaterThan(unbuffed.primary!.stats.fireRate);
+  });
+
+  it("surfaces Sevagoth Reap in loadout abilities and applies damage vulnerability to weapon DPS", () => {
+    const wf = allWarframes.find((w) => w.id === "sevagoth")!;
+    const buffAbilities = weaponDamageBuffAbilities(wf.abilities);
+    expect(buffAbilities.some((a) => a.name === "Reap")).toBe(true);
+
+    const sevagothLoadout: Loadout = {
+      ...baseLoadout,
+      warframeBuild: {
+        warframeId: "sevagoth",
+        mods: [],
+      },
+      primaryBuild: {
+        weaponId: "ax_52",
+        mods: [],
+      },
+    };
+
+    const unbuffed = calcLoadoutStats(sevagothLoadout, { scenario: "paper" });
+    const withReap = calcLoadoutStats(sevagothLoadout, {
+      scenario: "paper",
+      simParams: {
+        activeWeaponAbilityBuffs: ["Reap"],
+      },
+    });
+
+    // Base Reap gives +50% damage vulnerability (1.5x damage mult)
+    expect(withReap.primary!.stats.totalDamage).toBeCloseTo(unbuffed.primary!.stats.totalDamage * 1.5, 4);
+    expect(withReap.primary!.stats.burstDps).toBeCloseTo(unbuffed.primary!.stats.burstDps * 1.5, 4);
+  });
+
+  it("surfaces Nekros Terrify and Styanax Tharros Strike in loadout abilities and strips armor in TTK", () => {
+    const nekros = allWarframes.find((w) => w.id === "nekros" || w.id === "nekros_prime")!;
+    expect(weaponDamageBuffAbilities(nekros.abilities).some((a) => a.name === "Terrify")).toBe(true);
+
+    const styanax = allWarframes.find((w) => w.id === "styanax")!;
+    expect(weaponDamageBuffAbilities(styanax.abilities).some((a) => a.name === "Tharros Strike")).toBe(true);
+
+    const gunner = ENEMY_TYPES.find((e) => e.name.toLowerCase().includes("gunner")) ?? ENEMY_TYPES[0];
+
+    const nekrosLoadout: Loadout = {
+      ...baseLoadout,
+      warframeBuild: {
+        warframeId: "nekros_prime",
+        mods: [],
+      },
+      primaryBuild: {
+        weaponId: "ax_52",
+        mods: [],
+      },
+    };
+
+    const unbuffedTtk = calcLoadoutStats(nekrosLoadout, {
+      scenario: "vsEnemy",
+      enemy: gunner,
+      enemyLevel: 40,
+    });
+
+    const strippedTtk = calcLoadoutStats(nekrosLoadout, {
+      scenario: "vsEnemy",
+      enemy: gunner,
+      enemyLevel: 40,
+      simParams: {
+        activeWeaponAbilityBuffs: ["Terrify"],
+      },
+    });
+
+    // Terrify base 60% armor strip significantly reduces armor DR and TTK
+    expect(strippedTtk.primary!.ttk!.scaledArmor).toBeLessThan(unbuffedTtk.primary!.ttk!.scaledArmor);
+    expect(strippedTtk.primary!.ttk!.ttk).toBeLessThan(unbuffedTtk.primary!.ttk!.ttk);
   });
 });

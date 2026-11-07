@@ -19,6 +19,8 @@ import { getArcaneEffectDef } from "@/lib/calc/arcane-calculator";
 import { arcaneStackCap } from "@/lib/calc/arcane-utils";
 import { CONDITIONAL_WARFRAME_MOD_DEFS } from "@/lib/calc/calculator";
 import {
+  computeLoadoutAbilityArmorStripPct,
+  formatAbilityBuffDebuffBadge,
   resolveAbilitiesWithHelminth,
   weaponDamageBuffAbilities,
 } from "@/lib/weapons/weapon-external-buffs";
@@ -378,6 +380,15 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
     }
   }, [loadout, resolvedSimParams, enemy, enemyLevel, steelPath, allWeapons, targetActive, enemyPriming]);
 
+  const wfStrength = stats?.warframe?.stats?.abilityStrength ?? 1;
+  const activeAbilityStripPct = useMemo(() => {
+    return computeLoadoutAbilityArmorStripPct(
+      abilityBuffOptions,
+      wfStrength,
+      activeAbilityBuffs,
+    );
+  }, [abilityBuffOptions, wfStrength, activeAbilityBuffs]);
+
   const best = useMemo(() => {
     if (!stats) return null;
     try {
@@ -607,8 +618,13 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
                 </label>
                 <label className="text-[10px] text-muted-foreground">
                   <div className="flex justify-between">
-                    <span>Ability armor strip</span>
-                    <span className="font-mono text-red-600 dark:text-red-400">{armorStripPct}%</span>
+                    <span>Armor strip</span>
+                    <span className="font-mono text-red-600 dark:text-red-400">
+                      {Math.min(100, armorStripPct + activeAbilityStripPct)}%
+                      {activeAbilityStripPct > 0 && (
+                        <span className="text-[9px] opacity-80"> ({activeAbilityStripPct}% abilities)</span>
+                      )}
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -639,10 +655,15 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
         <div className="px-4 py-2 border-b border-border/40 bg-card/20 space-y-2">
           {abilityBuffOptions.length > 0 && (
             <div>
-              <p className="text-[10px] text-muted-foreground mb-1.5">Active weapon buffs (warframe abilities)</p>
+              <p className="text-[10px] text-muted-foreground mb-1.5">Active buffs &amp; enemy debuffs (warframe abilities)</p>
               <div className="flex flex-wrap gap-1.5">
                 {abilityBuffOptions.map((ability) => {
                   const active = activeAbilityBuffs.includes(ability.name);
+                  const badge = formatAbilityBuffDebuffBadge(
+                    ability,
+                    wfStrength,
+                    loadout.warframeBuild?.warframeId,
+                  );
                   return (
                     <button
                       key={ability.name}
@@ -653,16 +674,24 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
                         )
                       }
                       className={cn(
-                        "inline-flex min-h-9 items-center px-2.5 py-1 text-[10px] rounded-md border transition-colors",
+                        "inline-flex min-h-9 items-center gap-1 px-2.5 py-1 text-[10px] rounded-md border transition-colors",
                         active
                           ? "border-purple-500/50 bg-purple-500/15 text-purple-900 dark:text-purple-200"
                           : "border-border/60 text-muted-foreground hover:text-foreground",
                       )}
                       title={ability.description}
                     >
-                      {ability.name}
-                      {ability.damageBuff != null && (
-                        <span className="opacity-70"> (+{(ability.damageBuff * 100).toFixed(0)}%)</span>
+                      <span>{ability.name}</span>
+                      {badge && (
+                        <span
+                          className={cn(
+                            "opacity-75 font-mono text-[9px]",
+                            badge.includes("armor") && "text-red-700 dark:text-red-400 font-semibold",
+                            badge.includes("vuln") && "text-amber-800 dark:text-amber-400 font-semibold",
+                          )}
+                        >
+                          ({badge})
+                        </span>
                       )}
                     </button>
                   );

@@ -27,6 +27,7 @@ import {
 import type { WarframeBuildData, WeaponBuildData } from "@/lib/builds/build-storage";
 import { allWarframes } from "@/data/warframes";
 import {
+  formatAbilityBuffDebuffBadge,
   resolveAbilitiesWithHelminth,
   weaponDamageBuffAbilities,
 } from "@/lib/weapons/weapon-external-buffs";
@@ -651,11 +652,17 @@ export function LoadoutBuildPreview({
           {abilityBuffOptions.length > 0 && (
             <div>
               <p className="mb-1.5 text-[10px] text-muted-foreground">
-                Active weapon buffs (warframe abilities)
+                Active buffs &amp; enemy debuffs (warframe abilities)
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {abilityBuffOptions.map((ability) => {
                   const active = activeAbilityBuffs.includes(ability.name);
+                  const wfStrength = stats?.warframe?.stats?.abilityStrength ?? 1;
+                  const badge = formatAbilityBuffDebuffBadge(
+                    ability,
+                    wfStrength,
+                    loadout?.warframeBuild?.warframeId,
+                  );
                   return (
                     <button
                       key={ability.name}
@@ -668,16 +675,24 @@ export function LoadoutBuildPreview({
                         )
                       }
                       className={cn(
-                        "inline-flex min-h-11 items-center rounded-md border px-2.5 py-1.5 text-[10px] transition-colors",
+                        "inline-flex min-h-11 items-center gap-1 rounded-md border px-2.5 py-1.5 text-[10px] transition-colors",
                         active
                           ? "border-purple-500/50 bg-purple-500/15 text-purple-900 dark:text-purple-200"
                           : "border-border/60 text-muted-foreground hover:text-foreground",
                       )}
                       title={ability.description}
                     >
-                      {ability.name}
-                      {ability.damageBuff != null && (
-                        <span className="opacity-70"> (+{(ability.damageBuff * 100).toFixed(0)}%)</span>
+                      <span>{ability.name}</span>
+                      {badge && (
+                        <span
+                          className={cn(
+                            "opacity-75 font-mono text-[9px]",
+                            badge.includes("armor") && "text-red-700 dark:text-red-400 font-semibold",
+                            badge.includes("vuln") && "text-amber-800 dark:text-amber-400 font-semibold",
+                          )}
+                        >
+                          ({badge})
+                        </span>
                       )}
                     </button>
                   );

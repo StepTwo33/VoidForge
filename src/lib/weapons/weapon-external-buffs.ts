@@ -492,7 +492,7 @@ function resolveCompanionBondBuffs(
 }
 
 function scaledAbilityDamageBuff(
-  warframeId: string,
+  warframeId: string | undefined,
   abilityName: string,
   baseBuff: number,
   abilityStrength: number,
@@ -500,7 +500,7 @@ function scaledAbilityDamageBuff(
   // Only verified weapon damage buffs (Roar/Eclipse/…) apply to loadout DPS.
   // Host frame → Helminth subsume key → Rhino (Roar) fallback.
   const rule =
-    getVerifiedFieldScaling(warframeId, abilityName, "damageBuff") ??
+    (warframeId ? getVerifiedFieldScaling(warframeId, abilityName, "damageBuff") : undefined) ??
     getVerifiedFieldScaling("helminth", abilityName, "damageBuff") ??
     getVerifiedFieldScaling("rhino", abilityName, "damageBuff");
   if (!rule) return null;
@@ -1432,6 +1432,40 @@ function resolveAbilityBuffs(
       continue;
     }
 
+    // Damage vulnerability debuffs (e.g. Sevagoth Reap, Dagath Doom, Nezha Blazing Chakram, Caliban Sentient Wrath, Nova Molecular Prime)
+    if (ability.miscStats?.damageVulnerability != null && Number(ability.miscStats.damageVulnerability) > 0) {
+      const baseVuln = Number(ability.miscStats.damageVulnerability);
+      const scaling = getVerifiedMiscScaling(ctx.warframeId, ability.name, "damageVulnerability");
+      const scalesWithStr = scaling == null || scaling.scale === "strength";
+      const vuln = scalesWithStr ? baseVuln * strength : baseVuln;
+      buffs.push({
+        id: `ability:${ability.name}:vulnerability`,
+        label: `${ability.name}`,
+        category: "ability",
+        damageMultBonus: vuln,
+        nominal: `+${(vuln * 100).toFixed(0)}% damage vulnerability`,
+      });
+      continue;
+    }
+
+    // Armor strip debuffs (e.g. Nekros Terrify, Styanax Tharros Strike, Ember Fire Blast, Hildryn Pillage, Frost Avalanche)
+    if (
+      (ability.miscStats?.armorStrip != null && Number(ability.miscStats.armorStrip) > 0) ||
+      (ability.miscStats?.armorStripPerSecond != null && Number(ability.miscStats.armorStripPerSecond) > 0)
+    ) {
+      const baseStrip = Number(ability.miscStats?.armorStrip ?? ability.miscStats?.armorStripPerSecond ?? 0);
+      const cap = Number(ability.miscStats?.armorStripCap ?? 1);
+      const stripFraction = Math.min(cap, baseStrip * strength);
+      const stripPct = Math.round(stripFraction * 100);
+      buffs.push({
+        id: `ability:${ability.name}:armor_strip`,
+        label: `${ability.name}`,
+        category: "ability",
+        nominal: `-${stripPct}% enemy armor`,
+      });
+      continue;
+    }
+
     if (ability.damageBuff == null || ability.damageBuff <= 0) continue;
 
     const bonus = scaledAbilityDamageBuff(ctx.warframeId, ability.name, ability.damageBuff, strength);
@@ -2219,12 +2253,15 @@ export function resolveAbilitiesWithHelminth(
   return rows;
 }
 
-/** Abilities that can be toggled as loadout weapon buffs. */
+/** Abilities that can be toggled as loadout weapon buffs or enemy debuffs. */
 export function weaponDamageBuffAbilities(abilities: Ability[] | undefined): Ability[] {
   if (!abilities) return [];
   const out = abilities.filter((a) => {
     if (NON_WEAPON_DAMAGE_BUFF_ABILITIES.has(a.name)) return false;
     if (NAMED_WEAPON_BUFF_ABILITIES.has(a.name)) return true;
+    if (a.miscStats?.damageVulnerability != null && Number(a.miscStats.damageVulnerability) > 0) return true;
+    if (a.miscStats?.armorStrip != null && Number(a.miscStats.armorStrip) > 0) return true;
+    if (a.miscStats?.armorStripPerSecond != null && Number(a.miscStats.armorStripPerSecond) > 0) return true;
     // Roar / Eclipse / etc. use verified top-level damageBuff.
     return a.damageBuff != null && a.damageBuff > 0 && a.name !== "Xata's Whisper";
   });
@@ -2241,6 +2278,68 @@ export function weaponDamageBuffAbilities(abilities: Ability[] | undefined): Abi
     });
   }
   return out;
+}
+
+/**
+ * Computes total armor strip percentage from active warframe debuff abilities (Terrify, Tharros Strike, etc.).
+ * Scales with warframe Ability Strength and respects per-ability caps (default 100%).
+ */
+export function computeLoadoutAbilityArmorStripPct(
+  abilities: Ability[] | undefined,
+  strength: number,
+  activeAbilityNames: string[],
+): number {
+  if (!abilities?.length || !activeAbilityNames.length) return 0;
+  let totalStrip = 0;
+  for (const name of activeAbilityNames) {
+    const ability = abilities.find((a) => a.name.toLowerCase() === name.toLowerCase());
+    if (!ability?.miscStats) continue;
+    const base = Number(ability.miscStats.armorStrip ?? ability.miscStats.armorStripPerSecond ?? 0);
+    if (base > 0) {
+      const cap = Number(ability.miscStats.armorStripCap ?? 1);
+      const scaled = Math.min(cap, base * strength);
+      totalStrip += scaled * 100;
+    }
+  }
+  return Math.min(100, Math.round(totalStrip));
+}
+
+/** Formats a compact badge describing an active ability buff or enemy debuff. */
+export function formatAbilityBuffDebuffBadge(
+  ability: Ability,
+  strength: number,
+  warframeId?: string,
+): string | null {
+  if (ability.damageBuff != null && ability.damageBuff > 0) {
+    const bonus = scaledAbilityDamageBuff(warframeId, ability.name, ability.damageBuff, strength);
+    return `+${((bonus ?? ability.damageBuff) * 100).toFixed(0)}% dmg`;
+  }
+  if (ability.miscStats?.damageVulnerability != null && Number(ability.miscStats.damageVulnerability) > 0) {
+    const base = Number(ability.miscStats.damageVulnerability);
+    const scaling = getVerifiedMiscScaling(warframeId, ability.name, "damageVulnerability");
+    const scales = scaling == null || scaling.scale === "strength";
+    const vuln = scales ? base * strength : base;
+    return `+${(vuln * 100).toFixed(0)}% vuln`;
+  }
+  if (ability.miscStats?.armorStrip != null && Number(ability.miscStats.armorStrip) > 0) {
+    const base = Number(ability.miscStats.armorStrip);
+    const cap = Number(ability.miscStats.armorStripCap ?? 1);
+    const strip = Math.min(cap, base * strength);
+    return `-${(strip * 100).toFixed(0)}% armor`;
+  }
+  if (ability.miscStats?.armorStripPerSecond != null && Number(ability.miscStats.armorStripPerSecond) > 0) {
+    const base = Number(ability.miscStats.armorStripPerSecond);
+    return `-${(base * strength * 100).toFixed(0)}%/s armor`;
+  }
+  if (ability.name === "Covenant") return "+50% CC / +200% HS";
+  if (ability.name === "Penance") return `+${(0.35 * strength * 100).toFixed(0)}% fire rate`;
+  if (ability.name === "Wrathful Advance") return `+${(2.0 * strength * 100).toFixed(0)}% melee CC`;
+  if (ability.name === "Nourish") return "+Viral";
+  if (ability.name === "Toxic Lash") return "+Toxin";
+  if (ability.name === "Xata's Whisper") return "+Void";
+  if (ability.name === "Vex Armor") return `+${(2.75 * strength * 100).toFixed(0)}% Fury`;
+  if (ability.name === "Symphony Of Mercy") return `+${(0.3 * strength * 100).toFixed(0)}% dmg`;
+  return null;
 }
 
 export function mergeWeaponCalcOptions(

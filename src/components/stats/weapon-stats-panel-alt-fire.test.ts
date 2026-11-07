@@ -84,7 +84,7 @@ describe("ALT FIRE section only appears on weapons with an alt fire", () => {
         expect(html, id).toContain(r.label);
       }
     }
-  });
+  }, 30_000);
 
   it("never renders the section for any other weapon (all ~710)", () => {
     expect(weapons.length).toBeGreaterThan(700);

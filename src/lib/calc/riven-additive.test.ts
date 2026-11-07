@@ -105,7 +105,7 @@ describe("interactions", () => {
     expect(noRiven.criticalChance).toBeGreaterThan(0.05 * 2.2 + 1e-6); // Blood Rush is active
   });
   it("Galvanized Scope stacks: riven CC adds base × r", () => {
-    const sim = { applyHeadshots: true, killStacks: 5 };
+    const sim = { applyHeadshots: true, killStacks: 5, applyTriggerBuffs: true };
     const noRiven = calc("braton", ["Galvanized Scope", { riven: "riven_rifle" }], undefined, sim);
     const withRiven = calc("braton", ["Galvanized Scope", { riven: "riven_rifle" }], { criticalChance: 1.5 }, sim);
     expect(noRiven.criticalChance).toBeGreaterThan(0.12 + 1e-6);

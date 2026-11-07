@@ -48,6 +48,7 @@ import { buildWeaponContributionContext, computeDpsContributions, type DpsContri
 import { rivenStatChangesFromModSlots } from "@/lib/warframe-arsenal/riven-resolve";
 import {
   applyJetStreamWarframeMove,
+  computeLoadoutAbilityArmorStripPct,
   computeLoadoutAuraArmorStripPct,
   mergeWeaponCalcOptions,
   resolveAbilitiesWithHelminth,
@@ -149,7 +150,7 @@ export interface LoadoutStatsResult {
 
 export interface CalcLoadoutStatsOptions {
   scenario?: DamageScenario;
-  simParams?: SimulationParams;
+  simParams?: Partial<SimulationParams>;
   enemy?: EnemyType | null;
   enemyLevel?: number;
   /** Steel Path ×2.5 HP/Shield after level scaling. */
@@ -497,7 +498,8 @@ function calcModularSlotStats(
 }
 
 export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOptions = {}): LoadoutStatsResult {
-  let simParams = options.simParams ?? scenarioSimParams(options.scenario ?? "midFight");
+  const baseSim = scenarioSimParams(options.scenario ?? "midFight");
+  let simParams: SimulationParams = options.simParams ? { ...baseSim, ...options.simParams } : baseSim;
   const enemy = options.enemy ?? null;
   const enemyLevel = options.enemyLevel ?? 100;
   const steelPath = !!options.steelPath;
@@ -818,15 +820,32 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
     }
   }
 
+  const abilityArmorStripPct = computeLoadoutAbilityArmorStripPct(
+    buffContext?.warframeAbilities,
+    buffContext?.warframeStats?.abilityStrength ?? 1,
+    simParams.activeWeaponAbilityBuffs ?? [],
+  );
+  const totalArmorStripPct = Math.min(
+    100,
+    (enemyPriming?.armorStripPct ?? 0) + auraArmorStripPct + abilityArmorStripPct,
+  );
+  const effectiveEnemyPrimingWithAbilities: TTKPrimingOptions | undefined =
+    effectiveEnemyPriming || totalArmorStripPct > 0
+      ? {
+          ...effectiveEnemyPriming,
+          ...(totalArmorStripPct > 0 ? { armorStripPct: totalArmorStripPct } : {}),
+        }
+      : undefined;
+
   result.primary =
-    calcModularSlotStats(loadout, "primary", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPriming) ??
-    calcWeaponSlotStats(loadout.primaryBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPriming);
+    calcModularSlotStats(loadout, "primary", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPrimingWithAbilities) ??
+    calcWeaponSlotStats(loadout.primaryBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPrimingWithAbilities);
   result.secondary =
-    calcModularSlotStats(loadout, "secondary", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPriming) ??
-    calcWeaponSlotStats(loadout.secondaryBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPriming);
+    calcModularSlotStats(loadout, "secondary", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPrimingWithAbilities) ??
+    calcWeaponSlotStats(loadout.secondaryBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPrimingWithAbilities);
   result.melee =
-    calcModularSlotStats(loadout, "melee", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPriming) ??
-    calcWeaponSlotStats(loadout.meleeBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPriming);
+    calcModularSlotStats(loadout, "melee", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPrimingWithAbilities) ??
+    calcWeaponSlotStats(loadout.meleeBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPrimingWithAbilities);
 
   if (loadout.warframeBuild && result.warframe) {
     const wfStr = result.warframe.stats.abilityStrength ?? 1;
@@ -878,7 +897,7 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
       const isMelee = base.category === "melee" || base.triggerType === "Melee";
       const ttk =
         enemy && enemyLevel > 0
-          ? calculateTTK(statsEx, enemy, enemyLevel, { steelPath, ...effectiveEnemyPriming })
+          ? calculateTTK(statsEx, enemy, enemyLevel, { steelPath, ...effectiveEnemyPrimingWithAbilities })
           : undefined;
       const contributions = computeDpsContributions(
         buildWeaponContributionContext({
@@ -930,7 +949,7 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
       const isMelee = base.category === "melee" || base.triggerType === "Melee";
       const ttk =
         enemy && enemyLevel > 0
-          ? calculateTTK(companionWeaponStats, enemy, enemyLevel, { steelPath, ...effectiveEnemyPriming })
+          ? calculateTTK(companionWeaponStats, enemy, enemyLevel, { steelPath, ...effectiveEnemyPrimingWithAbilities })
           : undefined;
       weapon = { name: base.name, stats: companionWeaponStats, ttk, isMelee };
     }
