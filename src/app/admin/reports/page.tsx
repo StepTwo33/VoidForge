@@ -59,6 +59,7 @@ export default function AdminReportsPage() {
   const { confirm } = useConfirmDialog();
   const [reports, setReports] = useState<ApiReport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [authorized, setAuthorized] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("open");
@@ -70,16 +71,26 @@ export default function AdminReportsPage() {
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
-    fetch("/api/reports")
-      .then((r) => r.json())
-      .then((data) => {
+    setLoadError(null);
+    fetch("/api/reports", { cache: "no-store" })
+      .then(async (r) => {
+        const data = await r.json().catch(() => null);
+        if (!r.ok) {
+          throw new Error(
+            (data && typeof data.error === "string" && data.error) ||
+              `Failed to load reports (HTTP ${r.status})`,
+          );
+        }
         if (Array.isArray(data)) {
           setReports(data);
           window.dispatchEvent(new CustomEvent("framehub-reports-updated"));
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        setLoadError(err instanceof Error ? err.message : "Failed to load reports");
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -255,7 +266,24 @@ export default function AdminReportsPage() {
 
         {/* Report List */}
         <div className="space-y-2">
-          {filteredReports.length === 0 && (
+          {loadError && (
+            <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 text-xs text-destructive">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>{loadError}</span>
+              </div>
+              <button
+                type="button"
+                onClick={refresh}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-destructive/40 bg-background px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Retry
+              </button>
+            </div>
+          )}
+
+          {!loadError && filteredReports.length === 0 && (
             <div className="text-center py-16 text-muted-foreground">
               <AlertTriangle className="h-8 w-8 mx-auto mb-3 opacity-50" />
               <p className="text-sm">{reports.length === 0 ? "No reports yet." : "No reports match your filters."}</p>

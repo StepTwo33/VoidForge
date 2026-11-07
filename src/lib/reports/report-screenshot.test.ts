@@ -11,6 +11,8 @@ import {
 } from "./report-screenshot-files";
 import { POST as uploadRoute } from "@/app/api/reports/upload/route";
 import { GET as serveRoute } from "@/app/api/uploads/reports/[filename]/route";
+import { ensureSqliteSchema } from "@/lib/sqlite-schema-repair";
+import Database from "better-sqlite3";
 
 const PNG_HEADER = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0, 1, 2, 3]);
 const JPEG_HEADER = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0x10, 0x4a, 0x46, 0x49, 0x46, 0, 1]);
@@ -109,5 +111,68 @@ describe("Report Screenshot Upload & Serve API Routes", () => {
     const serveReq = new NextRequest("http://localhost/api/uploads/reports/nonexistent.png");
     const serveRes = await serveRoute(serveReq, { params: Promise.resolve({ filename: "nonexistent.png" }) });
     expect(serveRes.status).toBe(404);
+  });
+});
+
+describe("SQLite Report & SavedRiven auto-repair", () => {
+  it("adds missing Report.screenshots / Report.adminReply columns and SavedRiven table while preserving existing reports", () => {
+    const legacyDbPath = path.join(tmpRoot, "legacy.db");
+    const db = new Database(legacyDbPath);
+    db.exec(`
+      CREATE TABLE "User" (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "name" TEXT,
+        "email" TEXT
+      );
+      CREATE TABLE "Report" (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "userId" TEXT,
+        "reporterName" TEXT NOT NULL DEFAULT 'Anonymous',
+        "itemType" TEXT NOT NULL,
+        "itemName" TEXT NOT NULL,
+        "itemId" TEXT NOT NULL DEFAULT '',
+        "issues" TEXT NOT NULL,
+        "statDiscrepancies" TEXT NOT NULL DEFAULT '[]',
+        "comment" TEXT NOT NULL DEFAULT '',
+        "status" TEXT NOT NULL DEFAULT 'open',
+        "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    const insert = db.prepare(
+      `INSERT INTO "Report" ("id", "reporterName", "itemType", "itemName", "issues", "comment", "status")
+       VALUES (?, ?, ?, ?, '{}', ?, 'open')`,
+    );
+    for (let i = 1; i <= 5; i++) {
+      insert.run(`rep_${i}`, "Terkeon", "weapon", `Report ${i}`, `Comment ${i}`);
+    }
+    db.close();
+
+    const applied = ensureSqliteSchema(legacyDbPath, { force: true });
+    expect(applied).toBeGreaterThan(0);
+
+    const verify = new Database(legacyDbPath, { readonly: true });
+    const cols = (verify.prepare('PRAGMA table_info("Report")').all() as Array<{ name: string }>).map(
+      (c) => c.name,
+    );
+    expect(cols).toContain("adminReply");
+    expect(cols).toContain("screenshots");
+
+    const rows = verify
+      .prepare('SELECT id, itemName, adminReply, screenshots, status FROM "Report" ORDER BY id')
+      .all() as Array<{ id: string; screenshots: string; adminReply: string; status: string }>;
+    expect(rows).toHaveLength(5);
+    expect(rows[0]!.screenshots).toBe("[]");
+    expect(rows[0]!.adminReply).toBe("");
+
+    const rivenTable = verify
+      .prepare("SELECT 1 AS ok FROM sqlite_master WHERE type = 'table' AND name = 'SavedRiven'")
+      .get() as { ok?: number } | undefined;
+    expect(rivenTable?.ok).toBe(1);
+    verify.close();
+
+    // Idempotent second pass makes 0 changes
+    expect(ensureSqliteSchema(legacyDbPath, { force: true })).toBe(0);
   });
 });

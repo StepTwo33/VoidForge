@@ -6,11 +6,22 @@
  * Env: SQLITE_DATABASE_PATH and/or DATABASE_URL (set by start.sh).
  */
 import Database from "better-sqlite3";
+import dotenv from "dotenv";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+// Load .env files when invoked standalone or from deploy.sh without pre-exported DATABASE_URL.
+if (!process.env.SQLITE_DATABASE_PATH && !process.env.DATABASE_URL) {
+  for (const envFile of [".env.production", ".env.local", ".env"]) {
+    const full = path.join(root, envFile);
+    if (existsSync(full)) {
+      dotenv.config({ path: full, quiet: true });
+    }
+  }
+}
 
 /** Columns that may be missing if migrations were marked applied without running. */
 const TABLE_COLUMNS = {
@@ -19,6 +30,13 @@ const TABLE_COLUMNS = {
     { name: "bio", alter: 'ALTER TABLE "User" ADD COLUMN "bio" TEXT' },
     { name: "passwordHash", alter: 'ALTER TABLE "User" ADD COLUMN "passwordHash" TEXT' },
     { name: "role", alter: `ALTER TABLE "User" ADD COLUMN "role" TEXT NOT NULL DEFAULT 'user'` },
+    { name: "bannedAt", alter: 'ALTER TABLE "User" ADD COLUMN "bannedAt" DATETIME' },
+    { name: "banReason", alter: 'ALTER TABLE "User" ADD COLUMN "banReason" TEXT' },
+    { name: "supporterAt", alter: 'ALTER TABLE "User" ADD COLUMN "supporterAt" DATETIME' },
+    {
+      name: "newsletterOptIn",
+      alter: 'ALTER TABLE "User" ADD COLUMN "newsletterOptIn" BOOLEAN NOT NULL DEFAULT false',
+    },
     {
       name: "createdAt",
       alter: 'ALTER TABLE "User" ADD COLUMN "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP',
@@ -34,6 +52,14 @@ const TABLE_COLUMNS = {
       alter: 'ALTER TABLE "Build" ADD COLUMN "isPublic" BOOLEAN NOT NULL DEFAULT false',
     },
     {
+      name: "itemId",
+      alter: `ALTER TABLE "Build" ADD COLUMN "itemId" TEXT NOT NULL DEFAULT ''`,
+    },
+    {
+      name: "upvoteCount",
+      alter: 'ALTER TABLE "Build" ADD COLUMN "upvoteCount" INTEGER NOT NULL DEFAULT 0',
+    },
+    {
       name: "tags",
       alter: `ALTER TABLE "Build" ADD COLUMN "tags" TEXT NOT NULL DEFAULT '[]'`,
     },
@@ -46,6 +72,12 @@ const TABLE_COLUMNS = {
     {
       name: "screenshots",
       alter: `ALTER TABLE "Report" ADD COLUMN "screenshots" TEXT NOT NULL DEFAULT '[]'`,
+    },
+  ],
+  SiteUpdate: [
+    {
+      name: "featured",
+      alter: 'ALTER TABLE "SiteUpdate" ADD COLUMN "featured" BOOLEAN NOT NULL DEFAULT false',
     },
   ],
 };

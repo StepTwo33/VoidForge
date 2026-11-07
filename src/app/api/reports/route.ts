@@ -5,6 +5,9 @@ import { verifyAdmin } from "@/lib/auth/admin";
 import { checkRateLimit, getClientIp } from "@/lib/auth/rate-limit";
 import { normalizeReportItemType } from "@/lib/overrides/report-types";
 import { logServerError } from "@/lib/log-server-error";
+import { withSqliteSchemaRetry as withReportSchemaRetry } from "@/lib/sqlite-schema-repair";
+
+export const dynamic = "force-dynamic";
 
 const REPORT_BODY_MAX = 120_000;
 const REPORT_NAME_MAX = 200;
@@ -14,36 +17,43 @@ const REPORT_ITEM_ID_MAX = 200;
 
 // GET /api/reports — anyone logged in can see their own reports; admin/mod sees all
 export async function GET(req: NextRequest) {
-  const session = await getSession();
-  const { isAdmin } = await verifyAdmin();
-  const status = req.nextUrl.searchParams.get("status");
+  try {
+    const session = await getSession();
+    const { isAdmin } = await verifyAdmin();
+    const status = req.nextUrl.searchParams.get("status");
 
-  const where: Record<string, unknown> = {};
-  if (!isAdmin && session?.user) {
-    where.userId = session.user.id;
-  } else if (!isAdmin) {
-    return NextResponse.json([]);
-  }
-  if (status && status !== "all") {
-    const allowedStatus = ["open", "resolved", "wontfix"];
-    if (allowedStatus.includes(status)) {
-      where.status = status;
+    const where: Record<string, unknown> = {};
+    if (!isAdmin && session?.user) {
+      where.userId = session.user.id;
+    } else if (!isAdmin) {
+      return NextResponse.json([]);
     }
+    if (status && status !== "all") {
+      const allowedStatus = ["open", "resolved", "wontfix"];
+      if (allowedStatus.includes(status)) {
+        where.status = status;
+      }
+    }
+
+    const reports = await withReportSchemaRetry(() =>
+      prisma.report.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        include: {
+          user: {
+            select: isAdmin
+              ? { name: true, email: true, image: true }
+              : { name: true, image: true },
+          },
+        },
+      }),
+    );
+
+    return NextResponse.json(reports);
+  } catch (e) {
+    logServerError("GET /api/reports", e);
+    return NextResponse.json({ error: "Failed to load reports" }, { status: 500 });
   }
-
-  const reports = await prisma.report.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: {
-      user: {
-        select: isAdmin
-          ? { name: true, email: true, image: true }
-          : { name: true, image: true },
-      },
-    },
-  });
-
-  return NextResponse.json(reports);
 }
 
 // POST /api/reports — anyone (logged in or not) can submit
@@ -96,22 +106,24 @@ export async function POST(req: NextRequest) {
       screenshots = [body.screenshotUrl.trim()];
     }
 
-    const report = await prisma.report.create({
-      data: {
-        userId: session?.user?.id ?? null,
-        reporterName,
-        itemType: normalizeReportItemType(body.itemType),
-        itemName,
-        itemId,
-        issues: JSON.stringify(body.issues && typeof body.issues === "object" ? body.issues : {}),
-        statDiscrepancies: JSON.stringify(
-          Array.isArray(body.statDiscrepancies) ? body.statDiscrepancies.slice(0, 500) : []
-        ),
-        comment,
-        screenshots: JSON.stringify(screenshots),
-        status: "open",
-      },
-    });
+    const report = await withReportSchemaRetry(() =>
+      prisma.report.create({
+        data: {
+          userId: session?.user?.id ?? null,
+          reporterName,
+          itemType: normalizeReportItemType(body.itemType),
+          itemName,
+          itemId,
+          issues: JSON.stringify(body.issues && typeof body.issues === "object" ? body.issues : {}),
+          statDiscrepancies: JSON.stringify(
+            Array.isArray(body.statDiscrepancies) ? body.statDiscrepancies.slice(0, 500) : [],
+          ),
+          comment,
+          screenshots: JSON.stringify(screenshots),
+          status: "open",
+        },
+      }),
+    );
 
     return NextResponse.json(report, { status: 201 });
   } catch (e) {

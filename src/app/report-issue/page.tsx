@@ -232,28 +232,42 @@ export default function ReportIssuePage() {
 
   const handleSubmit = useCallback(async () => {
     if (!formItemName.trim()) return;
-    await fetch("/api/reports", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        reporterName: formReporter.trim() || "Anonymous",
-        itemType: formType,
-        itemName: formItemName.trim(),
-        itemId: formItemId.trim(),
-        issues: { ...formIssues },
-        statDiscrepancies: formDiscrepancies.filter((d) => d.stat.trim()),
-        comment: formComment.trim(),
-        screenshots: formScreenshots,
-      }),
-    });
-    refresh();
-    setFormItemName("");
-    setFormItemId("");
-    setFormIssues(emptyIssues());
-    setFormDiscrepancies([]);
-    setFormComment("");
-    setFormScreenshots([]);
-    setShowForm(false);
+    try {
+      const res = await fetch("/api/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reporterName: formReporter.trim() || "Anonymous",
+          itemType: formType,
+          itemName: formItemName.trim(),
+          itemId: formItemId.trim(),
+          issues: { ...formIssues },
+          statDiscrepancies: formDiscrepancies.filter((d) => d.stat.trim()),
+          comment: formComment.trim(),
+          screenshots: formScreenshots,
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        toast.error(
+          (errData && typeof errData.error === "string" && errData.error) ||
+            "Could not submit report. Please try again.",
+        );
+        return;
+      }
+      toast.success("Report submitted — thank you!");
+      window.dispatchEvent(new CustomEvent("framehub-reports-updated"));
+      refresh();
+      setFormItemName("");
+      setFormItemId("");
+      setFormIssues(emptyIssues());
+      setFormDiscrepancies([]);
+      setFormComment("");
+      setFormScreenshots([]);
+      setShowForm(false);
+    } catch {
+      toast.error("Could not submit report. Please check your connection and try again.");
+    }
   }, [formType, formItemName, formItemId, formReporter, formIssues, formDiscrepancies, formComment, formScreenshots, refresh]);
 
   const handleExport = useCallback(() => {

@@ -14,22 +14,31 @@ import {
   parseSavedRivenRow,
   sanitizeRivenStats,
 } from "@/lib/riven/saved-rivens";
+import { logServerError } from "@/lib/log-server-error";
+import { withSqliteSchemaRetry } from "@/lib/sqlite-schema-repair";
 
 const MAX_RIVENS_PER_USER = 500;
 
 // GET /api/rivens?weaponId=braton — the signed-in user's saved rivens (Round 54).
 export async function GET(req: NextRequest) {
-  const session = await getSession();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const session = await getSession();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const weaponId = req.nextUrl.searchParams.get("weaponId");
+    const familyIds = weaponId ? getRivenFamilyWeaponIds(weaponId) : null;
+    const rows = await withSqliteSchemaRetry(() =>
+      prisma.savedRiven.findMany({
+        where: { userId: session.user.id, ...(familyIds ? { weaponId: { in: familyIds } } : {}) },
+        orderBy: { updatedAt: "desc" },
+      }),
+    );
+    return NextResponse.json(rows.map(parseSavedRivenRow));
+  } catch (e) {
+    logServerError("GET /api/rivens", e);
+    return NextResponse.json({ error: "Failed to load saved rivens" }, { status: 500 });
   }
-  const weaponId = req.nextUrl.searchParams.get("weaponId");
-  const familyIds = weaponId ? getRivenFamilyWeaponIds(weaponId) : null;
-  const rows = await prisma.savedRiven.findMany({
-    where: { userId: session.user.id, ...(familyIds ? { weaponId: { in: familyIds } } : {}) },
-    orderBy: { updatedAt: "desc" },
-  });
-  return NextResponse.json(rows.map(parseSavedRivenRow));
 }
 
 // POST /api/rivens — create, or update when `id` is the caller's riven.
@@ -80,21 +89,28 @@ export async function POST(req: NextRequest) {
     drain: clampRivenDrain(typeof body.drain === "number" ? body.drain : NaN),
   };
 
-  if (typeof body.id === "string" && body.id) {
-    const existing = await prisma.savedRiven.findUnique({ where: { id: body.id } });
-    if (existing && existing.userId !== session.user.id) {
-      return NextResponse.json({ error: "You do not own this riven" }, { status: 403 });
-    }
-    if (existing) {
-      const updated = await prisma.savedRiven.update({ where: { id: body.id }, data });
-      return NextResponse.json(parseSavedRivenRow(updated));
-    }
-  }
+  try {
+    return await withSqliteSchemaRetry(async () => {
+      if (typeof body.id === "string" && body.id) {
+        const existing = await prisma.savedRiven.findUnique({ where: { id: body.id } });
+        if (existing && existing.userId !== session.user.id) {
+          return NextResponse.json({ error: "You do not own this riven" }, { status: 403 });
+        }
+        if (existing) {
+          const updated = await prisma.savedRiven.update({ where: { id: body.id }, data });
+          return NextResponse.json(parseSavedRivenRow(updated));
+        }
+      }
 
-  const count = await prisma.savedRiven.count({ where: { userId: session.user.id } });
-  if (count >= MAX_RIVENS_PER_USER) {
-    return NextResponse.json({ error: "Riven library is full" }, { status: 400 });
+      const count = await prisma.savedRiven.count({ where: { userId: session.user.id } });
+      if (count >= MAX_RIVENS_PER_USER) {
+        return NextResponse.json({ error: "Riven library is full" }, { status: 400 });
+      }
+      const created = await prisma.savedRiven.create({ data: { ...data, userId: session.user.id } });
+      return NextResponse.json(parseSavedRivenRow(created));
+    });
+  } catch (e) {
+    logServerError("POST /api/rivens", e);
+    return NextResponse.json({ error: "Failed to save riven" }, { status: 500 });
   }
-  const created = await prisma.savedRiven.create({ data: { ...data, userId: session.user.id } });
-  return NextResponse.json(parseSavedRivenRow(created));
 }

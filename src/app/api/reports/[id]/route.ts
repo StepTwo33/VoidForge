@@ -4,6 +4,7 @@ import { verifyAdmin } from "@/lib/auth/admin";
 import { sendReportStatusEmail } from "@/lib/auth/email";
 import { logServerError } from "@/lib/log-server-error";
 import { removeReportScreenshotFile } from "@/lib/reports/report-screenshot-files";
+import { withSqliteSchemaRetry as withReportSchemaRetry } from "@/lib/sqlite-schema-repair";
 
 const ADMIN_REPLY_MAX = 4_000;
 
@@ -51,18 +52,22 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   try {
-    const existing = await prisma.report.findUnique({
-      where: { id },
-      include: { user: { select: { email: true } } },
-    });
+    const existing = await withReportSchemaRetry(() =>
+      prisma.report.findUnique({
+        where: { id },
+        include: { user: { select: { email: true } } },
+      }),
+    );
     if (!existing) {
       return NextResponse.json({ error: "Report not found" }, { status: 404 });
     }
 
-    const report = await prisma.report.update({
-      where: { id },
-      data: updates,
-    });
+    const report = await withReportSchemaRetry(() =>
+      prisma.report.update({
+        where: { id },
+        data: updates,
+      }),
+    );
 
     // Email only when the mod explicitly opts in — status + reply always show on Profile → Reports.
     const newStatus = updates.status as string | undefined;
@@ -87,8 +92,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     return NextResponse.json(report);
-  } catch {
-    return NextResponse.json({ error: "Report not found" }, { status: 404 });
+  } catch (e) {
+    logServerError("PATCH /api/reports/[id]", e);
+    return NextResponse.json({ error: "Failed to update report" }, { status: 500 });
   }
 }
 
@@ -101,10 +107,12 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
 
   const { id } = await params;
   try {
-    const existing = await prisma.report.findUnique({
-      where: { id },
-      select: { screenshots: true },
-    });
+    const existing = await withReportSchemaRetry(() =>
+      prisma.report.findUnique({
+        where: { id },
+        select: { screenshots: true },
+      }),
+    );
     if (existing?.screenshots) {
       try {
         const urls = JSON.parse(existing.screenshots);
