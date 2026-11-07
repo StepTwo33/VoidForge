@@ -8,6 +8,7 @@ import {
   computeWarframeAuraStrengthMult,
 } from "@/lib/calc/calculator";
 import {
+  computeCovenantCritChance,
   computeExcaliburSwordsmanshipBonuses,
   computeGarudaPassiveDamageBonus,
   computeKullervoMeleePassiveBonuses,
@@ -1226,6 +1227,9 @@ function resolveNamedAbilityWeaponBuff(
     // wiki: Penance — fire rate + reload × STR (FR also applies to melee)
     case "Penance":
       return resolvePenanceBuff(ability, strength);
+    // wiki: Covenant — flat additive CC (body cap 50%, headshot cap 200%)
+    case "Covenant":
+      return resolveCovenantBuff(ability, strength, simParams);
     // wiki: Shroud of Dynar — flat melee CD × STR; flat CC/SC Misc-fixed (post-invis window)
     case "Shroud Of Dynar":
       return resolveShroudOfDynarBuff(weapon, ability, strength);
@@ -1276,6 +1280,40 @@ function resolvePenanceBuff(
     ...(fr > 0 ? { fireRateBonus: fr } : {}),
     ...(reload > 0 ? { reloadBonus: reload } : {}),
     nominal: `+${(frBase * 100).toFixed(0)}% fire rate / +${(reloadBase * 100).toFixed(0)}% reload (× Strength)`,
+  };
+}
+
+/** Wiki Covenant: +5% base + 1.5%/100 damage absorbed × Strength flat crit chance (body cap 50%, headshot cap 200%). */
+function resolveCovenantBuff(
+  ability: Ability,
+  strength: number,
+  simParams: SimulationParams,
+): WeaponExternalBuff | null {
+  const misc = ability.miscStats ?? {};
+  const opts = {
+    baseCriticalChance: typeof misc.baseCriticalChance === "number" ? misc.baseCriticalChance : 0.05,
+    critChancePer100Damage: typeof misc.critChancePer100Damage === "number" ? misc.critChancePer100Damage : 0.015,
+    headshotMultiplier: typeof misc.headshotMultiplier === "number" ? misc.headshotMultiplier : 4,
+    bodyshotCritChanceCap: typeof misc.bodyshotCritChanceCap === "number" ? misc.bodyshotCritChanceCap : 0.5,
+    headshotCritChanceCap: typeof misc.headshotCritChanceCap === "number" ? misc.headshotCritChanceCap : 2,
+  };
+  const absorbed =
+    simParams.covenantAbsorbedDamage != null
+      ? Math.max(0, simParams.covenantAbsorbedDamage)
+      : 3000;
+  const cc = computeCovenantCritChance(absorbed, strength, opts);
+  if (cc.body <= 0 && cc.headshot <= 0) return null;
+
+  const bodyPct = (cc.body * 100).toFixed(0);
+  const hsPct = (cc.headshot * 100).toFixed(0);
+
+  return {
+    id: "ability:Covenant",
+    label: "Covenant",
+    category: "ability",
+    critChanceFlatBonus: cc.body,
+    weakPointCritChanceFlatBonus: Math.max(0, cc.headshot - cc.body),
+    nominal: `+${bodyPct}% flat CC (+${hsPct}% on headshots)`,
   };
 }
 
@@ -2125,6 +2163,7 @@ const NAMED_WEAPON_BUFF_ABILITIES = new Set([
   "Wrathful Advance",
   "Grave Spirit",
   "Penance",
+  "Covenant",
   "Shroud Of Dynar",
   "Absorb",
   "Turbulence",

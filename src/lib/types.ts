@@ -392,6 +392,11 @@ export interface WeaponExternalBuff {
    * (wiki: Wrathful Advance — e.g. +2.0 = +200% final CC).
    */
   critChanceFlatBonus?: number;
+  /**
+   * Additional flat critical chance added only on weakpoint / headshot hits
+   * (wiki: Covenant headshot quadrupled bonus).
+   */
+  weakPointCritChanceFlatBonus?: number;
   critMultBonus?: number;
   /** Flat add to final crit multiplier after percent bonuses (+1.2 = +1.2×). */
   critMultFlatBonus?: number;
@@ -533,6 +538,10 @@ export interface SimulationParams {
   applyMechaEmpoweredVsMarkedDamage?: boolean;
   /** Warframe ability names treated as active weapon damage buffs (e.g. "Roar", "Eclipse"). */
   activeWeaponAbilityBuffs?: string[];
+  /**
+   * Harrow Covenant Retaliation absorbed damage input (default 3,000 = capped bonus).
+   */
+  covenantAbsorbedDamage?: number;
   /**
    * Vex Armor Fury progress 0–1 (default 1 = max stacks). Multiplies the +275% Fury bonus.
    */

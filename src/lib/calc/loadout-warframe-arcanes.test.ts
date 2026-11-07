@@ -220,4 +220,52 @@ describe("Loadout Warframe Arcanes cross-slot weapon buffs", () => {
       3,
     );
   });
+
+  it("includes Covenant in Harrow ability options and applies flat CC (+50% body, +200% headshot)", () => {
+    const harrowLoadout: Loadout = {
+      ...baseLoadout,
+      warframeBuild: {
+        warframeId: "harrow_prime",
+        mods: [],
+      },
+      primaryBuild: {
+        weaponId: "ax_52",
+        mods: [],
+      },
+    };
+
+    const unbuffed = calcLoadoutStats(harrowLoadout, { scenario: "paper" });
+    const unbuffedCc = unbuffed.primary!.stats.criticalChance; // 0.31
+
+    // Covenant active without headshots: +50% flat CC (0.50)
+    const covenantBody = calcLoadoutStats(harrowLoadout, {
+      scenario: "paper",
+      simParams: {
+        activeWeaponAbilityBuffs: ["Covenant"],
+        applyHeadshots: false,
+      },
+    });
+    expect(covenantBody.primary!.stats.criticalChance).toBeCloseTo(unbuffedCc + 0.5, 3);
+
+    // Covenant active with headshots: +200% flat CC (2.00)
+    const covenantHeadshot = calcLoadoutStats(harrowLoadout, {
+      scenario: "paper",
+      simParams: {
+        activeWeaponAbilityBuffs: ["Covenant"],
+        applyHeadshots: true,
+      },
+    });
+    expect(covenantHeadshot.primary!.stats.criticalChance).toBeCloseTo(unbuffedCc + 2.0, 3);
+
+    // Both Penance and Covenant active together
+    const bothBuffs = calcLoadoutStats(harrowLoadout, {
+      scenario: "paper",
+      simParams: {
+        activeWeaponAbilityBuffs: ["Penance", "Covenant"],
+        applyHeadshots: false,
+      },
+    });
+    expect(bothBuffs.primary!.stats.criticalChance).toBeCloseTo(unbuffedCc + 0.5, 3);
+    expect(bothBuffs.primary!.stats.fireRate).toBeGreaterThan(unbuffed.primary!.stats.fireRate);
+  });
 });
