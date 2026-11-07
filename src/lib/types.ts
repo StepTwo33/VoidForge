@@ -495,6 +495,7 @@ export interface StackSourceInfo {
   id: string;
   label: string;
   cap: number;
+  modName?: string;
 }
 
 export interface SimulationParams {

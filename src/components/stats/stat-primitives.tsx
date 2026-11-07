@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Map dark-first Tailwind text tokens to light+dark pairs for readable light mode. */
@@ -117,36 +117,145 @@ export function CollapsibleSection({ title, defaultOpen, children, flash }: {
     </div>
   );
 }
-export function SimSlider({ label, value, min, max, onChange, suffix, tooltip }: {
-  label: string; value: number; min: number; max: number;
-  onChange: (v: number) => void; suffix?: string; tooltip?: string;
-}) {
+export interface SimSliderPreset {
+  label: string;
+  value: number;
+}
+
+export interface SimSliderProps {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  onChange: (v: number) => void;
+  suffix?: string;
+  subtitle?: string;
+  tooltip?: string;
+  presets?: SimSliderPreset[];
+  formatValue?: (v: number) => string;
+  showStepButtons?: boolean;
+}
+
+export function SimSlider({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  onChange,
+  suffix,
+  subtitle,
+  tooltip,
+  presets,
+  formatValue,
+  showStepButtons = true,
+}: SimSliderProps) {
   const clamp = (v: number) => Math.min(max, Math.max(min, v));
+  const safeVal = Math.min(max, Math.max(min, value));
+  const pct = max > min ? Math.max(0, Math.min(100, ((safeVal - min) / (max - min)) * 100)) : 0;
+  const displayVal = formatValue ? formatValue(safeVal) : `${safeVal}${suffix ? ` ${suffix}` : ""}`;
+
+  // If presets are not explicitly given, but the range is small (e.g. 0 to 5) and integer step:
+  // automatically create discrete preset pills for 1-click setting!
+  const autoPresets =
+    presets == null && min === 0 && max <= 5 && step === 1 && max > min
+      ? Array.from({ length: max - min + 1 }, (_, i) => ({
+          label: i === max ? `${i} (Max)` : `${i}`,
+          value: min + i,
+        }))
+      : presets;
+
   return (
-    <div className="w-full min-w-0 space-y-0.5" title={tooltip}>
-      <span className="block text-[11px] leading-tight text-muted-foreground">{label}</span>
-      <div className="flex min-w-0 items-center gap-2">
-        <input
-          type="range"
-          min={min}
-          max={max}
-          value={Math.min(value, max)}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="h-2 min-w-0 flex-1 cursor-pointer accent-primary"
-        />
+    <div
+      className="w-full min-w-0 rounded-lg border border-border/50 bg-muted/20 p-2 space-y-1.5 transition-colors hover:border-border/80"
+      title={tooltip}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <span className="block text-[11px] font-semibold leading-tight text-foreground/90">{label}</span>
+          {subtitle && (
+            <span className="block text-[10px] text-muted-foreground leading-tight mt-0.5">{subtitle}</span>
+          )}
+        </div>
+        <span className="shrink-0 rounded px-1.5 py-0.5 font-mono text-[11px] font-semibold tabular-nums border bg-primary/10 text-primary border-primary/25 shadow-xs">
+          {displayVal}
+        </span>
+      </div>
+
+      <div className="flex min-w-0 items-center gap-1.5">
+        {showStepButtons && (
+          <button
+            type="button"
+            disabled={safeVal <= min}
+            onClick={() => onChange(clamp(safeVal - step))}
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border/70 bg-background text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground active:scale-95 disabled:pointer-events-none disabled:opacity-30 transition-all"
+            aria-label={`Decrease ${label}`}
+          >
+            <Minus className="h-3 w-3" />
+          </button>
+        )}
+        <div className="relative flex-1 min-w-0 flex items-center">
+          <input
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={safeVal}
+            onChange={(e) => onChange(Number(e.target.value))}
+            style={{
+              background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${pct}%, hsl(var(--muted)) ${pct}%, hsl(var(--muted)) 100%)`,
+            }}
+            className="h-2 min-w-0 w-full cursor-pointer appearance-none rounded-full accent-primary focus:outline-none"
+          />
+        </div>
+        {showStepButtons && (
+          <button
+            type="button"
+            disabled={safeVal >= max}
+            onClick={() => onChange(clamp(safeVal + step))}
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border/70 bg-background text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground active:scale-95 disabled:pointer-events-none disabled:opacity-30 transition-all"
+            aria-label={`Increase ${label}`}
+          >
+            <Plus className="h-3 w-3" />
+          </button>
+        )}
         <input
           type="number"
           min={min}
           max={max}
+          step={step}
           value={value}
           onChange={(e) => {
             const v = Number(e.target.value);
             if (!isNaN(v)) onChange(clamp(v));
           }}
-          className="h-11 w-14 shrink-0 rounded border border-border bg-background px-1.5 py-0.5 text-right font-mono text-[11px] tabular-nums [appearance:textfield] sm:h-8 sm:w-12 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="h-6 w-11 shrink-0 rounded border border-border/70 bg-background px-1 text-center font-mono text-[10px] tabular-nums text-foreground focus:border-primary focus:ring-1 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
-        {suffix && <span className="shrink-0 text-[10px] text-muted-foreground">{suffix}</span>}
       </div>
+
+      {autoPresets && autoPresets.length > 0 && (
+        <div className="flex flex-wrap gap-1 pt-0.5">
+          {autoPresets.map((p) => {
+            const isSelected = safeVal === p.value;
+            return (
+              <button
+                key={p.label}
+                type="button"
+                onClick={() => onChange(p.value)}
+                className={cn(
+                  "flex-1 min-w-[24px] px-1 py-0.5 rounded text-[9px] font-mono transition-all border text-center",
+                  isSelected
+                    ? "bg-primary text-primary-foreground border-primary font-semibold shadow-xs"
+                    : "bg-background/80 text-muted-foreground border-border/60 hover:text-foreground hover:bg-muted",
+                )}
+              >
+                {p.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

@@ -56,7 +56,7 @@ describe("per-source kill stack overrides", () => {
 
   it("lists the source with its cap", () => {
     const s = calculateWeaponBuildWithArcanes(vectis, [slot("galvanized_chamber")], modsMap, [], undefined, sim({}));
-    expect(s.killStackSources).toEqual([{ id: "galvMultishot", label: "Galvanized multishot", cap: 5 }]);
+    expect(s.killStackSources).toEqual([{ id: "galvMultishot", label: "Galvanized multishot", cap: 5, modName: "Galvanized Chamber" }]);
   });
 
   it("Berserker Fury: 2 stacks × 35% attack speed via override while shared kill stacks are 0", () => {

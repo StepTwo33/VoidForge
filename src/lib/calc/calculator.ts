@@ -1005,6 +1005,12 @@ export function calculateWeaponBuild(
   // Elemental combo order follows mod slot order: left→right, top→bottom (slotIndex).
   const orderedMods = [...equippedMods].sort((a, b) => a.slotIndex - b.slotIndex);
 
+  let galvConditionModName: string | undefined;
+  let galvMultishotModName: string | undefined;
+  let galvCritModName: string | undefined;
+  let onKillPerStackModName: string | undefined;
+  let berserkerModName: string | undefined;
+
   // Riven additive stats / elements enter at the equipped riven's slot; with no riven
   // slot (stats passed directly) they enter after all mods.
   const rivenSlotPresent = !!rivenStatChanges && orderedMods.some((s) => s.modId.startsWith('riven_'));
@@ -1016,6 +1022,22 @@ export function calculateWeaponBuild(
     }
     const mod = allMods.get(modSlot.modId);
     if (!mod) continue;
+
+    if (modSlot.modId === "galvanized_aptitude" || modSlot.modId === "galvanized_savvy" || modSlot.modId === "galvanized_shot") {
+      galvConditionModName = mod.name;
+    }
+    if (modSlot.modId === "galvanized_chamber" || modSlot.modId === "galvanized_hell" || modSlot.modId === "galvanized_diffusion") {
+      galvMultishotModName = mod.name;
+    }
+    if (modSlot.modId === "galvanized_scope" || modSlot.modId === "galvanized_crosshairs") {
+      galvCritModName = mod.name;
+    }
+    if (modSlot.modId === "galvanized_steel" || modSlot.modId === "galvanized_elementalist") {
+      onKillPerStackModName = mod.name;
+    }
+    if (modSlot.modId === "berserker_fury") {
+      berserkerModName = mod.name;
+    }
 
     const rank = Math.min(Math.max(modSlot.rank ?? 0, 0), mod.maxRank);
     const multiplier = rank + 1;
@@ -1221,7 +1243,12 @@ export function calculateWeaponBuild(
   const killStackSources: StackSourceInfo[] = [];
   const galvConditionStacks = Math.min(killStacksFor("galvCondition"), weaponModAcc.galvDamagePerStatusStackCap);
   if (galvDamagePerStatusPerStack > 0 && weaponModAcc.galvDamagePerStatusStackCap > 0) {
-    killStackSources.push({ id: "galvCondition", label: "Galvanized dmg/status", cap: weaponModAcc.galvDamagePerStatusStackCap });
+    killStackSources.push({
+      id: "galvCondition",
+      label: "Galvanized dmg/status",
+      cap: weaponModAcc.galvDamagePerStatusStackCap,
+      modName: galvConditionModName,
+    });
   }
   if (galvDamagePerStatusPerStack > 0 && galvConditionStacks > 0 && sim.statusTypesOnTarget > 0) {
     damageBonus += galvDamagePerStatusPerStack * galvConditionStacks * sim.statusTypesOnTarget;
@@ -1233,7 +1260,12 @@ export function calculateWeaponBuild(
   // Apply Galvanized Multishot on-kill stacks (Chamber caps at 5, Hell/Diffusion at 4)
   const galvMultishotStacks = Math.min(killStacksFor("galvMultishot"), weaponModAcc.galvMultishotStackCap);
   if (galvMultishotOnKillPerStack > 0 && weaponModAcc.galvMultishotStackCap > 0) {
-    killStackSources.push({ id: "galvMultishot", label: "Galvanized multishot", cap: weaponModAcc.galvMultishotStackCap });
+    killStackSources.push({
+      id: "galvMultishot",
+      label: "Galvanized multishot",
+      cap: weaponModAcc.galvMultishotStackCap,
+      modName: galvMultishotModName,
+    });
   }
   if (galvMultishotOnKillPerStack > 0 && galvMultishotStacks > 0) {
     multishotBonus += galvMultishotOnKillPerStack * galvMultishotStacks;
@@ -1306,7 +1338,12 @@ export function calculateWeaponBuild(
     weaponModAcc.onKillPerStackCap > 0 &&
     Object.values(weaponModAcc.onKillPerStackBonuses).some((v) => (v ?? 0) !== 0)
   ) {
-    killStackSources.push({ id: "onKillPerStack", label: "Per-kill stacks", cap: weaponModAcc.onKillPerStackCap });
+    killStackSources.push({
+      id: "onKillPerStack",
+      label: "Per-kill stacks",
+      cap: weaponModAcc.onKillPerStackCap,
+      modName: onKillPerStackModName,
+    });
   }
   if (onKillStacks > 0) {
     const per = weaponModAcc.onKillPerStackBonuses;
@@ -1339,7 +1376,12 @@ export function calculateWeaponBuild(
     critChanceBonus += galvCritOnHeadshotBase + galvCritOnHeadshotPerStack * galvCritStacks;
   }
   if (galvCritOnHeadshotBase > 0) {
-    killStackSources.push({ id: "galvCrit", label: "Galvanized headshot", cap: 5 });
+    killStackSources.push({
+      id: "galvCrit",
+      label: "Galvanized headshot",
+      cap: 5,
+      modName: galvCritModName,
+    });
   }
   stats.galvanizedCritOnHeadshot = galvCritOnHeadshotBase;
   stats.galvanizedCritOnHeadshotPerStack = galvCritOnHeadshotPerStack;
@@ -1348,7 +1390,12 @@ export function calculateWeaponBuild(
   if (hasBerserkerFury) {
     const bfStacks = Math.min(killStacksFor("berserker"), 2);
     if (bfStacks > 0) fireRateBonus += berserkerFuryPerStack * bfStacks;
-    killStackSources.push({ id: "berserker", label: "Berserker Fury", cap: 2 });
+    killStackSources.push({
+      id: "berserker",
+      label: "Berserker Fury",
+      cap: 2,
+      modName: berserkerModName ?? "Berserker Fury",
+    });
   }
   if (killStackSources.length > 0) stats.killStackSources = killStackSources;
   stats.berserkerFuryBonus = berserkerFuryPerStack;

@@ -404,7 +404,7 @@ export const MOD_BEHAVIORS_PRIMARY: Record<string, VerifiedModBehavior> = {
     line("reloadSpeed", "weapon_dps", "multiplicative_percent", "Tainted Mag: reloadSpeed \u2014 +66% Magazine Capacity, -33% Reload Speed"),
   ]),
   target_acquired: mod("target_acquired", [
-    line("headshotMultiplier", "mod_panel", "multiplicative_percent", "Target Acquired: headshotMultiplier \u2014 +60% to Headshot Multiplier"),
+    line("headshotMultiplier", "weapon_dps", "multiplicative_percent", "Target Acquired: headshotMultiplier \u2014 +60% to Headshot Multiplier"),
   ]),
   terminal_velocity: mod("terminal_velocity", [
     line("projectileSpeed", "mod_panel", "multiplicative_percent", "Terminal Velocity: projectileSpeed \u2014 +60% Projectile Speed"),

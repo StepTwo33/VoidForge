@@ -37,7 +37,7 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("punchThrough", "mod_panel", "multiplicative_percent", "Amalgam Argonak Metal Auger: punchThrough \u2014 +3 Punch Through, Damage from Daggers reduces Armor by 6.\\\\n<LINE_SEPARATOR>\\\\nE\u2026"),
   ]),
   amalgam_daikyu_target_acquired: mod("amalgam_daikyu_target_acquired", [
-    line("headshotMultiplier", "mod_panel", "multiplicative_percent", "Amalgam Daikyu Target Acquired: headshotMultiplier \u2014 +75% to Headshot Multiplier, +3% Life Steal on Nikanas, <LINE_SEPARATOR>\\\\n60% c\u2026"),
+    line("headshotMultiplier", "weapon_dps", "multiplicative_percent", "Amalgam Daikyu Target Acquired: headshotMultiplier \u2014 +75% to Headshot Multiplier, +3% Life Steal on Nikanas, <LINE_SEPARATOR>\\\\n60% c\u2026"),
     line("lifeSteal", "mod_panel", "multiplicative_percent", "Amalgam Daikyu Target Acquired: lifeSteal \u2014 +75% to Headshot Multiplier, +3% Life Steal on Nikanas, <LINE_SEPARATOR>\\\\n60% c\u2026"),
     line("arrowPickupChance", "mod_panel", "multiplicative_percent", "wiki: Amalgam Daikyu Target Acquired — 60% chance to pick up used arrows (panel)"),
   ]),
@@ -892,7 +892,7 @@ export const MOD_BEHAVIORS_AUGMENT: Record<string, VerifiedModBehavior> = {
     line("cooldown", "mod_panel", "multiplicative_percent", "Spectral Spirit: cooldown \u2014 Grave Spirit Augment: Immediately assume Spectral Form. 100% chance for weapons \u2026"),
   ]),
   spring_loaded_broadhead: mod("spring_loaded_broadhead", [
-    line("range", "mod_panel", "multiplicative_percent", "Spring-Loaded Broadhead: range \u2014 Increase damage by +40%, if the target is over 15m away."),
+    line("damage", "weapon_dps", "conditional_stat_on_trigger", "wiki: Spring-Loaded Broadhead — Increase damage by +40%, if the target is over 15m away."),
   ]),
   stance_gleaming_talent: mod("stance_gleaming_talent", [
     line("statusChance", "weapon_dps", "multiplicative_percent", "wiki: Gleaming Blight — +100% Status Chance"),

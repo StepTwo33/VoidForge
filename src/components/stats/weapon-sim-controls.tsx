@@ -24,7 +24,12 @@ import {
   weaponSupportsHunterCompanionSet,
 } from "@/lib/calc/set-bonuses";
 import { getModStatLabel } from "@/lib/overrides/override-stat-catalog";
-import { SimSlider } from "./stat-primitives";
+import { CollapsibleSection, SimSlider } from "./stat-primitives";
+
+function comboTier(hits: number): number {
+  if (hits < 20) return 1;
+  return Math.min(12, Math.floor(hits / 20) + 1);
+}
 
 const WF_GLADIATOR_IDS = new Set([
   "gladiator_aegis",
@@ -153,6 +158,31 @@ export function WeaponSimControls({
                 Max stacks
               </button>
             </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 pt-0.5 pb-1">
+            <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!!simParams.applyHeadshots}
+                onChange={(e) =>
+                  onSimParamsChange({ ...simParams, applyHeadshots: e.target.checked })
+                }
+                className="h-3.5 w-3.5 rounded border-border accent-primary"
+              />
+              <span className="font-medium">Headshots (weak point)</span>
+            </label>
+            <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!!simParams.applyTriggerBuffs}
+                onChange={(e) =>
+                  onSimParamsChange({ ...simParams, applyTriggerBuffs: e.target.checked })
+                }
+                className="h-3.5 w-3.5 rounded border-border accent-primary"
+              />
+              <span className="font-medium">Trigger Buffs (Aim / Distance &gt;15m)</span>
+            </label>
           </div>
 
           {isLinkedLoadout && (
@@ -341,118 +371,240 @@ export function WeaponSimControls({
             </div>
           )}
           {isMelee && (
-            <SimSlider
-              label="Combo Hits" value={simParams.comboCount} min={0} max={260}
-              onChange={(v) => onSimParamsChange({ ...simParams, comboCount: v })}
-              tooltip="Consecutive melee combo counter. Blood Rush, Weeping Wounds, Gladiator, and heavy attacks share one track: 1× below 20 hits, then 2×…12× every 20 hits (220+ = 12×). Bonus = mod% × (CM−1), additive with other chance mods."
-            />
-          )}
-          <SimSlider
-            label="Kill Stacks" value={simParams.killStacks} min={0} max={5}
-            onChange={(v) => onSimParamsChange({ ...simParams, killStacks: v, killStacksBySource: undefined })}
-            tooltip="On-kill stacks — Galvanized Chamber/Scope (max 5), Hell/Diffusion (max 4), Aptitude/Savvy (max 2), Shot (max 3), Berserker Fury (max 2). Any stacks also activate non-stacking on-kill buffs (Bladed Rounds etc.). Moving this slider resets the per-source values below."
-          />
-          {killSources.length > 1 && (
-            <div className="space-y-1.5 border-l border-border/60 pl-2" data-testid="kill-stack-sources">
-              {killSources.map((src) => (
-                <SimSlider
-                  key={src.id}
-                  label={src.label}
-                  value={Math.min(ks(src.id as KillStackSource), src.cap)}
-                  min={0}
-                  max={src.cap}
-                  onChange={(v) =>
-                    onSimParamsChange({
-                      ...simParams,
-                      killStacksBySource: { ...simParams.killStacksBySource, [src.id]: v },
-                    })
-                  }
-                  tooltip={`Stacks for ${src.label} only (in-game max ${src.cap}). Defaults to the shared Kill Stacks value.`}
-                />
-              ))}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between border-b border-border/40 pb-1">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Melee Combo Counter
+                </span>
+                <span className="font-mono text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                  {comboTier(simParams.comboCount)}× Multiplier
+                </span>
+              </div>
+              <SimSlider
+                label="Combo Hits"
+                subtitle="Blood Rush (+CC), Weeping Wounds (+SC), Gladiator & Heavy scaling"
+                value={simParams.comboCount}
+                min={0}
+                max={260}
+                step={20}
+                onChange={(v) => onSimParamsChange({ ...simParams, comboCount: v })}
+                formatValue={(v) => `${comboTier(v)}× (${v} hits)`}
+                presets={[
+                  { label: "1× (0)", value: 0 },
+                  { label: "2× (20)", value: 20 },
+                  { label: "4× (60)", value: 60 },
+                  { label: "8× (140)", value: 140 },
+                  { label: "12× (220)", value: 220 },
+                ]}
+                tooltip="Consecutive melee combo counter. Blood Rush, Weeping Wounds, Gladiator, and heavy attacks share one track: 1× below 20 hits, then 2×…12× every 20 hits (220+ = 12×). Bonus = mod% × (CM−1), additive with other chance mods."
+              />
             </div>
           )}
-          <SimSlider
-            label="Status Types" value={simParams.statusTypesOnTarget} min={0} max={14}
-            onChange={(v) => onSimParamsChange({ ...simParams, statusTypesOnTarget: v })}
-            tooltip="Unique status types on target — Condition Overload, Galvanized Aptitude/Savvy/Shot. No in-game cap; 14 = every status type including Tau (wiki.warframe.com lists Tau, fandom does not)."
-          />
-          <SimSlider
-            label={singleArcane ? `Arcane Stacks (${singleArcane.label})` : "Arcane Stacks"}
-            value={Math.min(simParams.arcaneStacks, arcaneMax)} min={0} max={arcaneMax}
-            onChange={(v) => onSimParamsChange({ ...simParams, arcaneStacks: v, arcaneStacksById: undefined })}
-            tooltip={
-              arcaneSources.length > 0
-                ? `Stack count for equipped stacking arcanes: ${arcaneSources.map((a) => `${a.label} (max ${a.cap})`).join(", ")}. Each arcane clamps to its own cap.`
-                : "Stack count for stacking arcanes like Primary/Secondary/Melee Merciless (max 12). The max follows the equipped arcane's cap."
-            }
-          />
-          {arcaneSources.length > 1 && (
-            <div className="space-y-1.5 border-l border-border/60 pl-2" data-testid="arcane-stack-sources">
-              {arcaneSources.map((a) => (
-                <SimSlider
-                  key={a.id}
-                  label={a.label}
-                  value={Math.min(simParams.arcaneStacksById?.[a.id] ?? simParams.arcaneStacks, a.cap)}
-                  min={0}
-                  max={a.cap}
-                  onChange={(v) =>
-                    onSimParamsChange({
-                      ...simParams,
-                      arcaneStacksById: { ...simParams.arcaneStacksById, [a.id]: v },
-                    })
-                  }
-                  tooltip={`Stacks for ${a.label} only (in-game max ${a.cap}). Defaults to the shared Arcane Stacks value.`}
-                />
-              ))}
+
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center justify-between border-b border-border/40 pb-1">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {isMelee ? "On-Kill Stacks (Melee)" : "Galvanized & Kill Stacks"}
+              </span>
+              <span className="text-[9px] text-muted-foreground">
+                Shared control
+              </span>
             </div>
-          )}
-          {stats.usesWarframeMaxEnergy && !isLinkedLoadout && (
             <SimSlider
-              label="WF Max Energy (Overcharge)"
-              value={simParams.warframeMaxEnergy ?? 0}
+              label={isMelee ? "Melee Kill Stacks" : "Shared Kill Stacks"}
+              subtitle={
+                isMelee
+                  ? "Galvanized Steel, Galvanized Elementalist, Berserker Fury"
+                  : "Galvanized Chamber/Hell/Diffusion, Scope/Crosshairs, Aptitude/Savvy/Shot"
+              }
+              value={simParams.killStacks}
               min={0}
-              max={1000}
-              onChange={(v) => onSimParamsChange({ ...simParams, warframeMaxEnergy: v })}
-              tooltip="Primary Overcharge: Multishot = 35% of your Warframe's Max Energy while energy is above 90%, capped by rank (R5 +350% at 1000 Max Energy). 0 = not set (no bonus). Loadouts fill this from the equipped Warframe."
+              max={5}
+              onChange={(v) => onSimParamsChange({ ...simParams, killStacks: v, killStacksBySource: undefined })}
+              presets={[
+                { label: "0", value: 0 },
+                { label: "1", value: 1 },
+                { label: "2", value: 2 },
+                { label: "3", value: 3 },
+                { label: "4", value: 4 },
+                { label: "5 (Max)", value: 5 },
+              ]}
+              tooltip="On-kill stacks — Galvanized Chamber/Scope (max 5), Hell/Diffusion (max 4), Aptitude/Savvy (max 2), Shot (max 3), Berserker Fury (max 2). Any stacks also activate non-stacking on-kill buffs (Bladed Rounds, Shrapnel Shot, etc.). Moving this slider resets the per-source values below."
             />
-          )}
-          {isMelee && !isLinkedLoadout && (
+            {killSources.length > 1 && (
+              <div className="space-y-1.5 border-l-2 border-primary/30 pl-2.5 my-1.5" data-testid="kill-stack-sources">
+                <span className="block text-[10px] font-medium text-muted-foreground">
+                  Per-Mod Stacks (Fine-tune overrides):
+                </span>
+                {killSources.map((src) => {
+                  const modTitle = src.modName ?? src.label;
+                  const modSubtitle =
+                    src.modName && src.modName !== src.label
+                      ? `${src.label} · cap ${src.cap}`
+                      : `In-game cap ${src.cap}`;
+                  return (
+                    <SimSlider
+                      key={src.id}
+                      label={modTitle}
+                      subtitle={modSubtitle}
+                      value={Math.min(ks(src.id as KillStackSource), src.cap)}
+                      min={0}
+                      max={src.cap}
+                      onChange={(v) =>
+                        onSimParamsChange({
+                          ...simParams,
+                          killStacksBySource: { ...simParams.killStacksBySource, [src.id]: v },
+                        })
+                      }
+                      tooltip={`Stacks for ${modTitle} only (in-game max ${src.cap}). Defaults to the shared Kill Stacks value.`}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center justify-between border-b border-border/40 pb-1">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Target Status & Arcanes
+              </span>
+            </div>
             <SimSlider
-              label="WF Gladiator" value={simParams.extraGladiatorMods} min={0} max={3}
-              onChange={(v) => onSimParamsChange({ ...simParams, extraGladiatorMods: v })}
-              tooltip="Gladiator mods on warframe (Aegis/Finesse/Resolve) — +10% crit per melee scaling multiplier tier each (same (CM−1) factor as Blood Rush)"
-            />
-          )}
-          {!isMelee && !isLinkedLoadout && weapon && weaponSupportsPrimaryStyleSets(weapon) && (
-            <>
-              <SimSlider
-                label="WF Vigilante (count)"
-                value={simParams.extraVigilanteModsFromWarframe ?? 0}
-                min={0}
-                max={6}
-                onChange={(v) => onSimParamsChange({ ...simParams, extraVigilanteModsFromWarframe: v })}
-                tooltip="Vigilante mods equipped on your Warframe (e.g. Pursuit on Exilus). Each counts toward primary crit-tier upgrade when not using full loadout linkage."
-              />
-              <SimSlider
-                label="Off-weapon Tek pieces"
-                value={simParams.extraTekSetPiecesOffWeapon ?? 0}
-                min={0}
-                max={3}
-                onChange={(v) => onSimParamsChange({ ...simParams, extraTekSetPiecesOffWeapon: v })}
-                tooltip="Tek mods on other slots (Collateral on frame, Gravity on melee, Assault/Enhance on Kavat). Each piece grows the companion's damage zone (set summary only, no weapon DPS)."
-              />
-            </>
-          )}
-          {!isLinkedLoadout && weapon && weaponAcceptsSynthReloadBonus(weapon) && (
-            <SimSlider
-              label="Off-weapon Synth pieces"
-              value={simParams.extraSynthSetPiecesOffWeapon ?? 0}
+              label="Status Types on Target"
+              subtitle={
+                isMelee
+                  ? "Condition Overload (+80% direct dmg per status) · Galvanized Elementalist"
+                  : "Galvanized Aptitude / Savvy / Shot (+40-80% direct dmg per status)"
+              }
+              value={simParams.statusTypesOnTarget}
               min={0}
-              max={3}
-              onChange={(v) => onSimParamsChange({ ...simParams, extraSynthSetPiecesOffWeapon: v })}
-              tooltip="Synth Fiber + Deconstruct on companion and Synth Reflex on Warframe (max 3 off this pistol). Each piece makes holstered weapons reload 5% of their magazine per second (set summary only, no weapon DPS)."
+              max={14}
+              onChange={(v) => onSimParamsChange({ ...simParams, statusTypesOnTarget: v })}
+              presets={[
+                { label: "0", value: 0 },
+                { label: "2", value: 2 },
+                { label: "4 (Common)", value: 4 },
+                { label: "8", value: 8 },
+                { label: "14 (All)", value: 14 },
+              ]}
+              tooltip="Unique status types on target — Condition Overload, Galvanized Aptitude/Savvy/Shot. No in-game cap; 14 = every status type including Tau (wiki.warframe.com lists Tau, fandom does not)."
             />
+            <SimSlider
+              label={singleArcane ? (singleArcane.modName ?? singleArcane.label) : "Arcane Stacks"}
+              subtitle={
+                singleArcane
+                  ? `Equipped arcane (${singleArcane.label}) · cap ${arcaneMax}`
+                  : `Stack count for stacking arcanes (cap ${arcaneMax})`
+              }
+              value={Math.min(simParams.arcaneStacks, arcaneMax)}
+              min={0}
+              max={arcaneMax}
+              onChange={(v) => onSimParamsChange({ ...simParams, arcaneStacks: v, arcaneStacksById: undefined })}
+              presets={
+                arcaneMax === 12
+                  ? [
+                      { label: "0", value: 0 },
+                      { label: "6", value: 6 },
+                      { label: "12 (Max)", value: 12 },
+                    ]
+                  : arcaneMax === 40
+                  ? [
+                      { label: "0", value: 0 },
+                      { label: "10", value: 10 },
+                      { label: "20", value: 20 },
+                      { label: "40 (Max)", value: 40 },
+                    ]
+                  : undefined
+              }
+              tooltip={
+                arcaneSources.length > 0
+                  ? `Stack count for equipped stacking arcanes: ${arcaneSources.map((a) => `${a.label} (max ${a.cap})`).join(", ")}. Each arcane clamps to its own cap.`
+                  : "Stack count for stacking arcanes like Primary/Secondary/Melee Merciless (max 12). The max follows the equipped arcane's cap."
+              }
+            />
+            {arcaneSources.length > 1 && (
+              <div className="space-y-1.5 border-l-2 border-primary/30 pl-2.5 my-1.5" data-testid="arcane-stack-sources">
+                <span className="block text-[10px] font-medium text-muted-foreground">
+                  Per-Arcane Stacks:
+                </span>
+                {arcaneSources.map((a) => (
+                  <SimSlider
+                    key={a.id}
+                    label={a.label}
+                    subtitle={`In-game cap ${a.cap}`}
+                    value={Math.min(simParams.arcaneStacksById?.[a.id] ?? simParams.arcaneStacks, a.cap)}
+                    min={0}
+                    max={a.cap}
+                    onChange={(v) =>
+                      onSimParamsChange({
+                        ...simParams,
+                        arcaneStacksById: { ...simParams.arcaneStacksById, [a.id]: v },
+                      })
+                    }
+                    tooltip={`Stacks for ${a.label} only (in-game max ${a.cap}). Defaults to the shared Arcane Stacks value.`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Off-weapon what-if set bonuses (Gladiator, Vigilante, Tek, Synth, Overcharge) */}
+          {(!isLinkedLoadout && (isMelee || (weapon && weaponSupportsPrimaryStyleSets(weapon)) || (weapon && weaponAcceptsSynthReloadBonus(weapon)) || stats.usesWarframeMaxEnergy)) && (
+            <CollapsibleSection title="Off-Weapon Sets (What-If)" defaultOpen={false}>
+              <div className="space-y-2 pt-1 pb-1">
+                {stats.usesWarframeMaxEnergy && (
+                  <SimSlider
+                    label="WF Max Energy (Overcharge)"
+                    value={simParams.warframeMaxEnergy ?? 0}
+                    min={0}
+                    max={1000}
+                    onChange={(v) => onSimParamsChange({ ...simParams, warframeMaxEnergy: v })}
+                    tooltip="Primary Overcharge: Multishot = 35% of your Warframe's Max Energy while energy is above 90%, capped by rank (R5 +350% at 1000 Max Energy). 0 = not set (no bonus). Loadouts fill this from the equipped Warframe."
+                  />
+                )}
+                {isMelee && (
+                  <SimSlider
+                    label="WF Gladiator"
+                    value={simParams.extraGladiatorMods}
+                    min={0}
+                    max={3}
+                    onChange={(v) => onSimParamsChange({ ...simParams, extraGladiatorMods: v })}
+                    tooltip="Gladiator mods on warframe (Aegis/Finesse/Resolve) — +10% crit per melee scaling multiplier tier each (same (CM−1) factor as Blood Rush)"
+                  />
+                )}
+                {!isMelee && weapon && weaponSupportsPrimaryStyleSets(weapon) && (
+                  <>
+                    <SimSlider
+                      label="WF Vigilante (count)"
+                      value={simParams.extraVigilanteModsFromWarframe ?? 0}
+                      min={0}
+                      max={6}
+                      onChange={(v) => onSimParamsChange({ ...simParams, extraVigilanteModsFromWarframe: v })}
+                      tooltip="Vigilante mods equipped on your Warframe (e.g. Pursuit on Exilus). Each counts toward primary crit-tier upgrade when not using full loadout linkage."
+                    />
+                    <SimSlider
+                      label="Off-weapon Tek pieces"
+                      value={simParams.extraTekSetPiecesOffWeapon ?? 0}
+                      min={0}
+                      max={3}
+                      onChange={(v) => onSimParamsChange({ ...simParams, extraTekSetPiecesOffWeapon: v })}
+                      tooltip="Tek mods on other slots (Collateral on frame, Gravity on melee, Assault/Enhance on Kavat). Each piece grows the companion's damage zone (set summary only, no weapon DPS)."
+                    />
+                  </>
+                )}
+                {weapon && weaponAcceptsSynthReloadBonus(weapon) && (
+                  <SimSlider
+                    label="Off-weapon Synth pieces"
+                    value={simParams.extraSynthSetPiecesOffWeapon ?? 0}
+                    min={0}
+                    max={3}
+                    onChange={(v) => onSimParamsChange({ ...simParams, extraSynthSetPiecesOffWeapon: v })}
+                    tooltip="Synth Fiber + Deconstruct on companion and Synth Reflex on Warframe (max 3 off this pistol). Each piece makes holstered weapons reload 5% of their magazine per second (set summary only, no weapon DPS)."
+                  />
+                )}
+              </div>
+            </CollapsibleSection>
           )}
           {weapon && weaponSupportsHunterCompanionSet(weapon) && (
             <SimSlider

@@ -415,7 +415,7 @@ describe("Sim1 trigger-gated exclusives (wiki max rank)", () => {
     const bareCm = calculateWeaponBuild(braton, [], modsMap()).criticalMultiplier;
     expect(build("braton", "shrapnel_shot", {}).criticalMultiplier).toBeCloseTo(bareCm, 5);
     expect(
-      build("braton", "shrapnel_shot", { applyTriggerBuffs: true }).criticalMultiplier,
+      build("braton", "shrapnel_shot", { killStacks: 1 }).criticalMultiplier,
     ).toBeCloseTo(bareCm * 1.99, 4);
   });
 

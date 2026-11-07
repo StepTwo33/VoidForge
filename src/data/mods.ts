@@ -7044,7 +7044,7 @@ const RAW_MODS: Mod[] = [
     "category": "augment",
     "subCategory": "weapon",
     "stats": {
-      "range": 2.5
+      "damage": 6.666666666666667
     },
     "description": "Increase damage by +40%, if the target is over 15m away.",
     "rarity": "rare"

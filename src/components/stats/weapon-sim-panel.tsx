@@ -197,13 +197,13 @@ export function WeaponSimPanel({
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
-          side="right"
+          side="left"
           className="sm:max-w-md w-full gap-0 p-0 flex flex-col"
         >
           <SheetHeader className="border-b border-border shrink-0">
             <SheetTitle className="text-sm">Simulation</SheetTitle>
             <SheetDescription className="text-[11px]">
-              Adjust stacks and conditionals for paper DPS. Stats update live in the sidebar.
+              Adjust stacks and conditionals for paper DPS. Stats update live in the right sidebar.
             </SheetDescription>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto px-4 py-2 min-h-0">

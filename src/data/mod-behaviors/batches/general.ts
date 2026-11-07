@@ -518,7 +518,7 @@ export const MOD_BEHAVIORS_GENERAL: Record<string, VerifiedModBehavior> = {
     line("statusChance", "weapon_dps", "multiplicative_percent", "Shotgun Savvy: statusChance \u2014 +90% Status Chance"),
   ]),
   shrapnel_shot: mod("shrapnel_shot", [
-    line("criticalMultiplier", "weapon_dps", "conditional_stat_on_trigger", "wiki: Shrapnel Shot — On Kill: +99% Critical Damage when Aiming for 9s"),
+    line("criticalMultiplier", "weapon_dps", "conditional_stat_on_kill", "wiki: Shrapnel Shot — On Kill: +99% Critical Damage when Aiming for 9s"),
     line("duration", "mod_panel", "multiplicative_percent", "wiki: Shrapnel Shot — buff duration"),
   ]),
   shred_shot: mod("shred_shot", [

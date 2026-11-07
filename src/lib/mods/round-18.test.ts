@@ -142,7 +142,7 @@ const REAL_DAMAGE = new Set([
   "augment_titania_beguiling_lantern", "augment_volt_shock_trooper", "augment_volt_transistor_shield",
   "augment_yareli_surging_blades", "avenging_truth", "blade_of_truth", "bright_purity", "bursting_mass", "cathode_current",
   "conductive_sphere", "damage_decoy", "entropy_detonation", "fatal_teleport", "justice_blades",
-  "lasting_purity", "meticulous_aim", "nightwatch_napalm", "rousing_plunder", "smite_infusion", "static_discharge",
+  "lasting_purity", "meticulous_aim", "nightwatch_napalm", "rousing_plunder", "smite_infusion", "spring_loaded_broadhead", "static_discharge",
   "target_fixation", "thrall_pact", "titanic_rumbler",
   // Conclave weapon damage mods.
   "comet_rounds", "counterweight", "crash_shot", "feathered_arrows", "final_tap", "flak_shot", "impaler_munitions", "impenetrable_offense",
