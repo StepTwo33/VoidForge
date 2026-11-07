@@ -260,6 +260,74 @@ function WeaponPassiveConditionals({
     );
   }
 
+  if (wid === "ax_52") {
+    const active = (state.ax_52_aimed_headshot ?? 0) > 0;
+    return (
+      <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+        <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
+          <span>Aimed Headshots</span>
+          <input
+            type="checkbox"
+            checked={active}
+            onChange={(e) => updateState("ax_52_aimed_headshot", e.target.checked ? 1 : 0)}
+            className="h-3.5 w-3.5 rounded border-border accent-primary"
+          />
+        </label>
+        <StatRow
+          label="Aimed Headshot CC"
+          value={active ? "+400%" : "Inactive"}
+          color={active ? "text-red-700 dark:text-red-400" : "text-muted-foreground"}
+          tooltip="AX-52 passive: +400% Critical Chance while aiming on headshots."
+        />
+      </div>
+    );
+  }
+
+  if (wid === "sibear") {
+    const active = (state.sibear_heavy ?? 0) > 0;
+    return (
+      <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+        <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
+          <span>Heavy Attack Trigger</span>
+          <input
+            type="checkbox"
+            checked={active}
+            onChange={(e) => updateState("sibear_heavy", e.target.checked ? 1 : 0)}
+            className="h-3.5 w-3.5 rounded border-border accent-primary"
+          />
+        </label>
+        <StatRow
+          label="Heavy Attack Status"
+          value={active ? "+50%" : "Inactive"}
+          color={active ? "text-cyan-700 dark:text-cyan-400" : "text-muted-foreground"}
+          tooltip="Sibear passive: +50% Status Chance for 4 seconds after executing a Heavy Attack."
+        />
+      </div>
+    );
+  }
+
+  if (wid === "silva_&_aegis" || wid === "silva_&_aegis_prime") {
+    const stacks = Math.min(4, Math.max(0, state.silva_aegis_block ?? 0));
+    return (
+      <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+        <SimSlider
+          label="Shield Absorption Stacks"
+          value={stacks}
+          min={0}
+          max={4}
+          onChange={(v) => updateState("silva_aegis_block", v)}
+          tooltip="Blocking attacks stores charges (up to 4): +15% Critical and Status Chance per stack to the next attack."
+        />
+        <StatRow
+          label="Absorption CC / SC"
+          value={stacks > 0 ? `+${(15 * stacks).toFixed(0)}% CC & SC` : "0 stacks"}
+          color={stacks > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
+          tooltip="Silva & Aegis passive: +15% Critical Chance and Status Chance per block charge (up to +60%)."
+        />
+      </div>
+    );
+  }
+
   return null;
 }
 

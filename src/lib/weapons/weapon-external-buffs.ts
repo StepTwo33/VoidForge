@@ -1717,6 +1717,38 @@ export function resolveWeaponPassiveBuffs(
     });
   }
 
+  if (wid === "ax_52" && (state.ax_52_aimed_headshot ?? 0) > 0) {
+    buffs.push({
+      id: "passive_ax_52_aimed_headshot",
+      label: "Marksman (AX-52 Passive)",
+      category: "other",
+      critChanceBonus: 4.0,
+      nominal: "+400% Critical Chance on aimed headshots",
+    });
+  }
+
+  if (wid === "sibear" && (state.sibear_heavy ?? 0) > 0) {
+    buffs.push({
+      id: "passive_sibear_heavy",
+      label: "Heavy Surge (Sibear Passive)",
+      category: "other",
+      statusBonus: 0.5,
+      nominal: "+50% Status Chance after Heavy Attack",
+    });
+  }
+
+  if ((wid === "silva_&_aegis" || wid === "silva_&_aegis_prime") && (state.silva_aegis_block ?? 0) > 0) {
+    const stacks = Math.min(4, Math.max(1, Math.round(state.silva_aegis_block)));
+    buffs.push({
+      id: "passive_silva_aegis_block",
+      label: `Shield Absorption (${stacks}×) (Silva & Aegis Passive)`,
+      category: "other",
+      critChanceBonus: 0.15 * stacks,
+      statusBonus: 0.15 * stacks,
+      nominal: `+${(15 * stacks).toFixed(0)}% Crit Chance & +${(15 * stacks).toFixed(0)}% Status Chance`,
+    });
+  }
+
   return buffs;
 }
 

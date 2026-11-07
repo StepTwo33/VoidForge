@@ -162,6 +162,40 @@ describe("Weapon passive conditionals and external buffs", () => {
     expect(ethereal?.fireRateBonus).toBe(0.4);
   });
 
+  it("AX-52 Aimed Headshots grants +400% Critical Chance", () => {
+    const ax52 = findWeapon("ax_52");
+    const activeBuffs = resolveStandaloneExternalBuffs(ax52, {
+      ...DEFAULT_SIM_PARAMS,
+      weaponPassiveState: { ax_52_aimed_headshot: 1 },
+    });
+    const marksman = activeBuffs.find((b) => b.id === "passive_ax_52_aimed_headshot");
+    expect(marksman).toBeDefined();
+    expect(marksman?.critChanceBonus).toBe(4.0);
+  });
+
+  it("Sibear Heavy Attack grants +50% Status Chance", () => {
+    const sibear = findWeapon("sibear");
+    const activeBuffs = resolveStandaloneExternalBuffs(sibear, {
+      ...DEFAULT_SIM_PARAMS,
+      weaponPassiveState: { sibear_heavy: 1 },
+    });
+    const heavy = activeBuffs.find((b) => b.id === "passive_sibear_heavy");
+    expect(heavy).toBeDefined();
+    expect(heavy?.statusBonus).toBe(0.5);
+  });
+
+  it("Silva & Aegis Shield Absorption stacks grant +15% CC & SC per stack", () => {
+    const silva = findWeapon("silva_&_aegis");
+    const activeBuffs = resolveStandaloneExternalBuffs(silva, {
+      ...DEFAULT_SIM_PARAMS,
+      weaponPassiveState: { silva_aegis_block: 4 },
+    });
+    const block = activeBuffs.find((b) => b.id === "passive_silva_aegis_block");
+    expect(block).toBeDefined();
+    expect(block?.critChanceBonus).toBeCloseTo(0.6, 3);
+    expect(block?.statusBonus).toBeCloseTo(0.6, 3);
+  });
+
   it("Incarnon Evolution 1 toggle keeps Evolutions 2-4 active on base weapon", () => {
     // When form is off, Evolution 1 is removed from selectedEvolutions, but perks 2-4 remain.
     // Stock base weapon without incarnon:
