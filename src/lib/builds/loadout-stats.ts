@@ -712,6 +712,8 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
           loadout.warframeBuild.helminthSlot,
         ),
         warframeModSlots: setLinkage.warframeMods,
+        warframeArcaneIds: wb.arcaneIds,
+        warframeArcaneRanks: wb.arcaneRanks,
         allMods: modsMap,
       };
       // Primary Overcharge scales with this frame's real max energy.

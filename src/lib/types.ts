@@ -374,7 +374,7 @@ export interface WeaponExternalBuffElemental {
 export interface WeaponExternalBuff {
   id: string;
   label: string;
-  category: "ability" | "shard" | "companion" | "warframe_mod" | "set" | "other";
+  category: "ability" | "shard" | "companion" | "warframe_mod" | "set" | "arcane" | "other";
   /**
    * Additive base-damage bonus fraction (+0.5 = +50% with Serration-style mods).
    * Prefer {@link damageMultBonus} for Roar / Eclipse-style ability buffs.

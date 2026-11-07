@@ -1,5 +1,7 @@
 import { allHelminthAbilities } from "@/data/helminth";
 import { WIKI_WEAPON_CLASS } from "@/data/arcane-weapon-classes";
+import { getArcaneEffectDef } from "@/lib/calc/arcane-calculator";
+import { arcaneStackCap, scaleArcaneEffectLine } from "@/lib/calc/arcane-utils";
 import { helminthToAbility } from "@/lib/builds/helminth-resolve";
 import {
   computeWarframeAuraEffectivenessMult,
@@ -54,6 +56,9 @@ export interface WeaponBuffContext {
   warframeAbilities?: Ability[];
   /** Warframe mod bar — stance augments (Voltaic Strike) and ability augments with weapon effects. */
   warframeModSlots?: ModSlot[];
+  /** Equipped Warframe arcanes (e.g. Arcane Rage, Arcane Acceleration). */
+  warframeArcaneIds?: (string | null)[];
+  warframeArcaneRanks?: number[];
   /** Companion body mods — bond mods that buff the operator's weapons. */
   companionModSlots?: ModSlot[];
   /** Companion weapon crit chance (for Tenacious Bond gate). */
@@ -1810,6 +1815,285 @@ export function resolveStandaloneExternalBuffs(
   return buffs;
 }
 
+function resolveWarframeArcaneBuffs(
+  weapon: Weapon,
+  ctx: WeaponBuffContext,
+  simParams: SimulationParams,
+): WeaponExternalBuff[] {
+  const arcaneIds = ctx.warframeArcaneIds;
+  if (!arcaneIds?.length) return [];
+
+  const buffs: WeaponExternalBuff[] = [];
+  const ranks = ctx.warframeArcaneRanks ?? [];
+
+  const isPaper =
+    (simParams.arcaneStacks ?? 0) <= 0 &&
+    !simParams.applyTriggerBuffs &&
+    (simParams.killStacks ?? 0) <= 0 &&
+    (simParams.comboCount ?? 0) <= 0;
+
+  for (let idx = 0; idx < arcaneIds.length; idx++) {
+    const id = arcaneIds[idx];
+    if (!id) continue;
+    const def = getArcaneEffectDef(id);
+    if (!def) continue;
+
+    const rank = ranks[idx] != null && Number.isFinite(ranks[idx]) ? ranks[idx]! : def.maxRank;
+
+    let stacks = 0;
+    if (simParams.arcaneStacksById && simParams.arcaneStacksById[id] != null) {
+      stacks = simParams.arcaneStacksById[id];
+    } else if (isPaper) {
+      stacks = def.trigger === "passive" ? 1 : 0;
+    } else {
+      const cap = def.trigger === "stacks" ? (arcaneStackCap(def, rank) ?? 1) : 1;
+      stacks = cap > 1 && (simParams.arcaneStacks ?? 0) > 0 ? Math.min(cap, simParams.arcaneStacks) : cap;
+    }
+
+    if (stacks <= 0) continue;
+
+    const buffId = `warframe_arcane:${id}:${idx}`;
+
+    switch (id) {
+      case "arcane_rage": {
+        if (!isPrimaryWeapon(weapon) && !isGroundPrimaryWeapon(weapon)) break;
+        const line = (def.effects ?? []).find((e) => e.stat === "holsterDamage" || e.stat === "damage");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 180;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Rage",
+          category: "arcane",
+          damageBonus: val / 100,
+          nominal: `+${val}% primary damage on headshot`,
+        });
+        break;
+      }
+
+      case "arcane_acceleration": {
+        if (!isGroundPrimaryWeapon(weapon) && !isPrimaryWeapon(weapon)) break;
+        if (isShotgunPrimaryWeapon(weapon)) break;
+        const line = (def.effects ?? []).find((e) => e.stat === "fireRate");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 90;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Acceleration",
+          category: "arcane",
+          fireRateBonus: val / 100,
+          nominal: `+${val}% primary fire rate on crit (excl. shotguns)`,
+        });
+        break;
+      }
+
+      case "arcane_tempo": {
+        if (!isShotgunPrimaryWeapon(weapon)) break;
+        const line = (def.effects ?? []).find((e) => e.stat === "fireRate");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 90;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Tempo",
+          category: "arcane",
+          fireRateBonus: val / 100,
+          nominal: `+${val}% shotgun fire rate on crit`,
+        });
+        break;
+      }
+
+      case "arcane_velocity": {
+        if (!isSecondaryWeapon(weapon)) break;
+        const line = (def.effects ?? []).find((e) => e.stat === "fireRate");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 120;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Velocity",
+          category: "arcane",
+          fireRateBonus: val / 100,
+          nominal: `+${val}% secondary fire rate on crit`,
+        });
+        break;
+      }
+
+      case "arcane_precision": {
+        if (!isSecondaryWeapon(weapon)) break;
+        const line = (def.effects ?? []).find((e) => e.stat === "headshotDamage" || e.stat === "damage");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 300;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Precision",
+          category: "arcane",
+          damageBonus: val / 100,
+          nominal: `+${val}% secondary damage on headshot`,
+        });
+        break;
+      }
+
+      case "arcane_awakening": {
+        if (!isSecondaryWeapon(weapon)) break;
+        const line = (def.effects ?? []).find((e) => e.stat === "holsterDamage" || e.stat === "damage");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 150;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Awakening",
+          category: "arcane",
+          damageBonus: val / 100,
+          nominal: `+${val}% secondary damage on reload`,
+        });
+        break;
+      }
+
+      case "arcane_rise": {
+        if (!isPrimaryWeapon(weapon) && !isGroundPrimaryWeapon(weapon)) break;
+        const line = (def.effects ?? []).find((e) => e.stat === "holsterDamage" || e.stat === "damage");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 150;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Rise",
+          category: "arcane",
+          damageBonus: val / 100,
+          nominal: `+${val}% primary damage on reload`,
+        });
+        break;
+      }
+
+      case "arcane_primary_charger": {
+        if (!isPrimaryWeapon(weapon) && !isGroundPrimaryWeapon(weapon)) break;
+        const line = (def.effects ?? []).find((e) => e.stat === "damage");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 300;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Primary Charger",
+          category: "arcane",
+          damageBonus: val / 100,
+          nominal: `+${val}% primary damage on melee kill`,
+        });
+        break;
+      }
+
+      case "arcane_fury": {
+        if (!isMeleeWeapon(weapon)) break;
+        const line = (def.effects ?? []).find((e) => e.stat === "meleeDamageBonus" || e.stat === "damage");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 180;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Fury",
+          category: "arcane",
+          damageBonus: val / 100,
+          nominal: `+${val}% melee damage on crit`,
+        });
+        break;
+      }
+
+      case "arcane_blade_charger": {
+        if (!isMeleeWeapon(weapon)) break;
+        const line = (def.effects ?? []).find((e) => e.stat === "meleeDamageBonus" || e.stat === "damage");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 300;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Blade Charger",
+          category: "arcane",
+          damageBonus: val / 100,
+          nominal: `+${val}% melee damage on primary kill`,
+        });
+        break;
+      }
+
+      case "arcane_strike": {
+        if (!isMeleeWeapon(weapon)) break;
+        const line = (def.effects ?? []).find((e) => e.stat === "attackSpeed");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 60;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Strike",
+          category: "arcane",
+          fireRateBonus: val / 100,
+          nominal: `+${val}% melee attack speed on hit`,
+        });
+        break;
+      }
+
+      case "arcane_avenger": {
+        const line = (def.effects ?? []).find((e) => e.stat === "criticalChance");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 45;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Avenger",
+          category: "arcane",
+          critChanceFlatBonus: val / 100,
+          nominal: `+${val}% flat critical chance on damaged`,
+        });
+        break;
+      }
+
+      case "arcane_arachne": {
+        if (!isPrimaryWeapon(weapon) && !isSecondaryWeapon(weapon) && !weapon.isExalted) break;
+        const line = (def.effects ?? []).find((e) => e.stat === "wallLatchDamage" || e.stat === "damage");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 150;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Arachne",
+          category: "arcane",
+          damageBonus: val / 100,
+          nominal: `+${val}% damage on wall latch`,
+        });
+        break;
+      }
+
+      case "arcane_momentum": {
+        if (!isSniperPrimaryWeapon(weapon)) break;
+        const line = (def.effects ?? []).find((e) => e.stat === "reloadSpeedBonus" || e.stat === "reloadSpeed");
+        const val = line ? scaleArcaneEffectLine(line, rank, def.maxRank) : 150;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Momentum",
+          category: "arcane",
+          reloadBonus: val / 100,
+          nominal: `+${val}% sniper reload speed on crit`,
+        });
+        break;
+      }
+
+      case "arcane_crepuscular": {
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Crepuscular",
+          category: "arcane",
+          critMultFlatBonus: 3.0,
+          nominal: "+3× final crit multiplier while invisible",
+        });
+        break;
+      }
+
+      case "theorem_demulcent": {
+        const effStacks = Math.min(15, stacks > 1 ? stacks : 15);
+        buffs.push({
+          id: buffId,
+          label: def.name || "Theorem Demulcent",
+          category: "arcane",
+          damageBonus: (12 * effStacks) / 100,
+          nominal: `+${12 * effStacks}% weapon damage from Residual zone`,
+        });
+        break;
+      }
+
+      case "arcane_hot_shot": {
+        const effStacks = Math.min(50, stacks > 1 ? stacks : 50);
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Hot Shot",
+          category: "arcane",
+          critChanceBonus: (6 * effStacks) / 100,
+          nominal: `+${6 * effStacks}% weapon critical chance on ability heat proc`,
+        });
+        break;
+      }
+
+      default:
+        break;
+    }
+  }
+
+  return buffs;
+}
+
 export function resolveWeaponExternalBuffs(
   weapon: Weapon,
   ctx: WeaponBuffContext | undefined,
@@ -1824,6 +2108,7 @@ export function resolveWeaponExternalBuffs(
     ...resolveShardBuffs(weapon, ctx),
     ...resolveWarframeCrossModBuffs(weapon, ctx, simParams),
     ...resolveCompanionBondBuffs(weapon, ctx, simParams),
+    ...resolveWarframeArcaneBuffs(weapon, ctx, simParams),
   ];
 }
 

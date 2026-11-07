@@ -309,7 +309,9 @@ function enumerateSources(ctx: WeaponDpsCalcContext): OmitSource[] {
               ? "Companion bond mod buff applied to your weapons."
               : buff.category === "warframe_mod"
                 ? "Warframe mod (stance augment / ability augment) applied to this weapon."
-                : buff.category === "set"
+                : buff.category === "arcane"
+                  ? "Warframe arcane buff applied to this weapon."
+                  : buff.category === "set"
                   ? "Set bonus from other loadout slots."
                   : undefined,
       apply: (base) => {

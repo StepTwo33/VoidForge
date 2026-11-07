@@ -771,7 +771,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
                           ? "border-purple-500/50 bg-purple-500/15 text-purple-900 dark:text-purple-200"
                           : "border-border/60 text-muted-foreground hover:text-foreground",
                       )}
-                      title={`Toggle ${arc.name} conditional/stacking effect on Warframe stats.`}
+                      title={`Toggle ${arc.name} conditional/stacking effect on loadout stats.`}
                     >
                       {arc.name}
                       {arc.fullStacks > 1 ? ` (${active ? `×${currentStacks}` : "off"})` : ""}
