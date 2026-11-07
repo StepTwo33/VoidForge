@@ -449,6 +449,10 @@ export interface WeaponExternalBuff {
   initialComboBonus?: number;
   /** Additive Critical Chance bonus on weak-point / headshot hits (+0.75 = +75%; Worthy Comradery). */
   weakPointCritChanceBonus?: number;
+  /** Additive Ammo Efficiency fraction (+0.75 = +75%; AX-52 hip-fire, Helminth Energized Munitions). */
+  ammoEfficiency?: number;
+  /** Expected Infinite Ammo uptime fraction (0..1; Brain Storm, Skull Shots). */
+  infiniteAmmoUptime?: number;
   nominal?: string;
 }
 

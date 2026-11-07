@@ -261,23 +261,27 @@ function WeaponPassiveConditionals({
   }
 
   if (wid === "ax_52") {
-    const active = (state.ax_52_aimed_headshot ?? 0) > 0;
+    const isAimed = (state.ax_52_aimed_headshot ?? 0) > 0;
     return (
       <div className="py-1 space-y-1 border-t border-border/60 mt-1">
         <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
-          <span>Aimed Headshots</span>
+          <span>Aimed Mode (Marksman)</span>
           <input
             type="checkbox"
-            checked={active}
+            checked={isAimed}
             onChange={(e) => updateState("ax_52_aimed_headshot", e.target.checked ? 1 : 0)}
             className="h-3.5 w-3.5 rounded border-border accent-primary"
           />
         </label>
         <StatRow
-          label="Aimed Headshot CC"
-          value={active ? "+400%" : "Inactive"}
-          color={active ? "text-red-700 dark:text-red-400" : "text-muted-foreground"}
-          tooltip="AX-52 passive: +400% Critical Chance while aiming on headshots."
+          label="Mode Passive"
+          value={isAimed ? "+400% Headshot CC" : "+75% Ammo Efficiency"}
+          color={isAimed ? "text-red-700 dark:text-red-400" : "text-emerald-700 dark:text-emerald-400"}
+          tooltip={
+            isAimed
+              ? "Aimed mode: headshots gain +400% Critical Chance."
+              : "Hip-fire mode (default): +75% Ammo Efficiency (chance not to consume ammo)."
+          }
         />
       </div>
     );
@@ -709,6 +713,25 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             label="Reload Time"
             value={`${stats.reloadTime.toFixed(2)}s`}
             changed={flash.has("reloadTime")}
+          />
+        )}
+        {((stats.ammoEfficiency != null && stats.ammoEfficiency > 0) || (stats.infiniteAmmoUptime != null && stats.infiniteAmmoUptime > 0)) && (
+          <StatRow
+            label="Ammo Efficiency"
+            value={
+              stats.infiniteAmmoUptime != null && stats.infiniteAmmoUptime >= 1
+                ? "Infinite (100%)"
+                : stats.infiniteAmmoUptime != null && stats.infiniteAmmoUptime > 0
+                ? `${Math.min(75, Math.round((stats.ammoEfficiency ?? 0) * 100))}% (${Math.round(stats.infiniteAmmoUptime * 100)}% Infinite)`
+                : `${Math.min(75, Math.round((stats.ammoEfficiency ?? 0) * 100))}%`
+            }
+            color="text-emerald-700 dark:text-emerald-400"
+            tooltip={
+              `Ammo Efficiency (capped at 75%): shots have a ${Math.min(75, Math.round((stats.ammoEfficiency ?? 0) * 100))}% chance not to consume ammo (effective magazine ×${(1 / Math.max(0.01, 1 - Math.min(0.75, stats.ammoEfficiency ?? 0))).toFixed(2)}).` +
+              (stats.infiniteAmmoUptime && stats.infiniteAmmoUptime > 0
+                ? ` Infinite Ammo uptime: ${(stats.infiniteAmmoUptime * 100).toFixed(0)}%.`
+                : "")
+            }
           />
         )}
         {stats.range != null && stats.range !== 0 && (

@@ -174,7 +174,12 @@ function WeaponRow({
               )}
             </>
           ) : (
-            <StatLine label="Fire rate" value={(stats.fireRate ?? 0).toFixed(2)} />
+            <>
+              <StatLine label="Fire rate" value={(stats.fireRate ?? 0).toFixed(2)} />
+              {(stats.ammoEfficiency != null && stats.ammoEfficiency > 0) && (
+                <StatLine label="Ammo efficiency" value={`${Math.min(75, Math.round(stats.ammoEfficiency * 100))}%`} />
+              )}
+            </>
           )}
           <ContributionsList contributions={entry.contributions} />
         </div>

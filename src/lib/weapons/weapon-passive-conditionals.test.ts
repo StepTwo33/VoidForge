@@ -162,15 +162,23 @@ describe("Weapon passive conditionals and external buffs", () => {
     expect(ethereal?.fireRateBonus).toBe(0.4);
   });
 
-  it("AX-52 Aimed Headshots grants +400% Critical Chance", () => {
+  it("AX-52 Aimed Headshots grants +400% Critical Chance, and Hip-fire grants +75% Ammo Efficiency", () => {
     const ax52 = findWeapon("ax_52");
-    const activeBuffs = resolveStandaloneExternalBuffs(ax52, {
+    const aimedBuffs = resolveStandaloneExternalBuffs(ax52, {
       ...DEFAULT_SIM_PARAMS,
       weaponPassiveState: { ax_52_aimed_headshot: 1 },
     });
-    const marksman = activeBuffs.find((b) => b.id === "passive_ax_52_aimed_headshot");
+    const marksman = aimedBuffs.find((b) => b.id === "passive_ax_52_aimed_headshot");
     expect(marksman).toBeDefined();
     expect(marksman?.critChanceBonus).toBe(4.0);
+
+    const hipfireBuffs = resolveStandaloneExternalBuffs(ax52, {
+      ...DEFAULT_SIM_PARAMS,
+      weaponPassiveState: { ax_52_aimed_headshot: 0 },
+    });
+    const hipfire = hipfireBuffs.find((b) => b.id === "passive_ax_52_hipfire");
+    expect(hipfire).toBeDefined();
+    expect(hipfire?.ammoEfficiency).toBe(0.75);
   });
 
   it("Sibear Heavy Attack grants +50% Status Chance", () => {

@@ -1761,14 +1761,24 @@ export function resolveWeaponPassiveBuffs(
     });
   }
 
-  if (wid === "ax_52" && (state.ax_52_aimed_headshot ?? 0) > 0) {
-    buffs.push({
-      id: "passive_ax_52_aimed_headshot",
-      label: "Marksman (AX-52 Passive)",
-      category: "other",
-      critChanceBonus: 4.0,
-      nominal: "+400% Critical Chance on aimed headshots",
-    });
+  if (wid === "ax_52") {
+    if ((state.ax_52_aimed_headshot ?? 0) > 0) {
+      buffs.push({
+        id: "passive_ax_52_aimed_headshot",
+        label: "Marksman (AX-52 Passive)",
+        category: "other",
+        critChanceBonus: 4.0,
+        nominal: "+400% Critical Chance on aimed headshots",
+      });
+    } else {
+      buffs.push({
+        id: "passive_ax_52_hipfire",
+        label: "Hip-fire (AX-52 Passive)",
+        category: "other",
+        ammoEfficiency: 0.75,
+        nominal: "+75% Ammo Efficiency while hip-firing",
+      });
+    }
   }
 
   if (wid === "sibear" && (state.sibear_heavy ?? 0) > 0) {

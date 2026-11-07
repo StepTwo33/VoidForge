@@ -57,7 +57,7 @@ import {
 import { WARFRAME_ENERGY_RANK30 } from '@/data/warframe-energy-rank30';
 import { WARFRAME_HEALTH_RANK30, WARFRAME_SHIELD_RANK30 } from '@/data/warframe-health-shield-rank30';
 import { WARFRAME_ARMOR_RANK30 } from '@/data/warframe-armor-rank30';
-import { ammoConsumptionFactor, combineInfiniteAmmoUptime, neverConsumesAmmo } from '@/lib/calc/ammo-efficiency';
+import { MAX_AMMO_EFFICIENCY, ammoConsumptionFactor, combineInfiniteAmmoUptime, neverConsumesAmmo } from '@/lib/calc/ammo-efficiency';
 import {
   applyCrossSlotMeleeWeaponBuffs,
   applyVerifiedModStatToWarframe,
@@ -728,6 +728,12 @@ function applyWeaponExternalBuffs(
     if (buff.initialComboBonus && stats) {
       stats.incarnonInitialCombo = (stats.incarnonInitialCombo ?? 0) + buff.initialComboBonus;
     }
+    if (buff.ammoEfficiency && stats) {
+      stats.ammoEfficiency = Math.min(MAX_AMMO_EFFICIENCY, (stats.ammoEfficiency ?? 0) + buff.ammoEfficiency);
+    }
+    if (buff.infiniteAmmoUptime && stats) {
+      stats.infiniteAmmoUptime = combineInfiniteAmmoUptime(stats.infiniteAmmoUptime, buff.infiniteAmmoUptime);
+    }
     if (buff.extraHitDamageFraction && extraHit) {
       extraHit.fraction += buff.extraHitDamageFraction;
       if (buff.extraHitGuaranteedToxin) extraHit.guaranteedToxin = true;
@@ -1308,7 +1314,7 @@ export function calculateWeaponBuild(
     reloadBonus += pool.reloadSpeed ?? 0;
     magBonus += pool.magazine ?? 0;
     if (pool.ammoEfficiency) {
-      stats.ammoEfficiency = (stats.ammoEfficiency ?? 0) + pool.ammoEfficiency;
+      stats.ammoEfficiency = Math.min(MAX_AMMO_EFFICIENCY, (stats.ammoEfficiency ?? 0) + pool.ammoEfficiency);
     }
     if (pool.infiniteAmmoUptime) {
       stats.infiniteAmmoUptime = combineInfiniteAmmoUptime(stats.infiniteAmmoUptime, pool.infiniteAmmoUptime);
@@ -1764,7 +1770,7 @@ export function calculateWeaponBuild(
           break;
         case 'reloadSpeed': stats.reloadTime /= (1 + value); break;
         case 'ammoEfficiency':
-          stats.ammoEfficiency = (stats.ammoEfficiency ?? 0) + value;
+          stats.ammoEfficiency = Math.min(MAX_AMMO_EFFICIENCY, (stats.ammoEfficiency ?? 0) + value);
           break;
         // Infinite Ammo as an expected uptime (Reaper's Plenty: headshot → Infinite Ammo for 2s).
         case 'infiniteAmmoUptime':

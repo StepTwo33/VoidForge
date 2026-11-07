@@ -3,6 +3,7 @@ import { allMods, modsMap } from "@/data/mods";
 import { allWeapons, weaponsMap } from "@/data/weapons";
 import { calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
 import { headCritFactor, headshotMultiplier } from "@/lib/calc/combat-multipliers";
+import { resolveStandaloneExternalBuffs } from "@/lib/weapons/weapon-external-buffs";
 import { DEFAULT_SIM_PARAMS, type ModSlot, type SimulationParams } from "@/lib/types";
 
 function slot(id: string, rank?: number): ModSlot {
@@ -162,6 +163,67 @@ describe("Terkeon Bug Reports Fixes", () => {
         killStacks: 5,
       });
       expect(aimingBodyWithKillStacks.criticalChance).toBeCloseTo(baseCC * (1 + 0.4 * 5), 5);
+    });
+  });
+
+  describe("Issue 4: Ammo Efficiency (AX-52 hip-fire, Rivens, and 75% cap)", () => {
+    it("AX-52 in hip-fire mode defaults to +75% Ammo Efficiency", () => {
+      const ax52 = weaponsMap.get("ax_52")!;
+      // Default / hip-fire: ax_52_aimed_headshot is 0
+      const hipfireBuffs = resolveStandaloneExternalBuffs(ax52, {
+        ...DEFAULT_SIM_PARAMS,
+        weaponPassiveState: { ax_52_aimed_headshot: 0 },
+      });
+      const hipfire = calculateWeaponBuildWithArcanes(ax52, [], modsMap, [], undefined, DEFAULT_SIM_PARAMS, {
+        externalBuffs: hipfireBuffs,
+      });
+      expect(hipfire.ammoEfficiency).toBeCloseTo(0.75, 5);
+
+      // Aimed mode: gains +400% CC on headshots, ammo efficiency is 0
+      const aimedBuffs = resolveStandaloneExternalBuffs(ax52, {
+        ...DEFAULT_SIM_PARAMS,
+        applyHeadshots: true,
+        weaponPassiveState: { ax_52_aimed_headshot: 1 },
+      });
+      const aimed = calculateWeaponBuildWithArcanes(ax52, [], modsMap, [], undefined, {
+        ...DEFAULT_SIM_PARAMS,
+        applyHeadshots: true,
+      }, {
+        externalBuffs: aimedBuffs,
+      });
+      expect(aimed.ammoEfficiency).toBeCloseTo(0, 5);
+      expect(aimed.criticalChance).toBeCloseTo(ax52.criticalChance * (1 + 4.0), 5);
+    });
+
+    it("Spliced Riven Ammo Efficiency is capped at 75%", () => {
+      const braton = weaponsMap.get("braton")!;
+      // Spliced 75% AE
+      const with75 = calculateWeaponBuildWithArcanes(
+        braton,
+        [],
+        modsMap,
+        [],
+        undefined,
+        DEFAULT_SIM_PARAMS,
+        undefined,
+        undefined,
+        { ammoEfficiency: 0.75 },
+      );
+      expect(with75.ammoEfficiency).toBeCloseTo(0.75, 5);
+
+      // Over cap (e.g. 1.0) clamps to 0.75
+      const with100 = calculateWeaponBuildWithArcanes(
+        braton,
+        [],
+        modsMap,
+        [],
+        undefined,
+        DEFAULT_SIM_PARAMS,
+        undefined,
+        undefined,
+        { ammoEfficiency: 1.0 },
+      );
+      expect(with100.ammoEfficiency).toBeCloseTo(0.75, 5);
     });
   });
 });

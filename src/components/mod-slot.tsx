@@ -254,19 +254,29 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innateP
             </span>
           </div>
           {mod.subCategory === "riven" && rivenStats && Object.keys(rivenStats).length > 0 ? (
-            <div className="mt-0.5 space-y-0 text-[11px] leading-snug text-purple-800 dark:text-purple-300">
+            <div className="mt-0.5 space-y-0.5 text-[11px] leading-snug text-purple-800 dark:text-purple-300">
               {Object.entries(rivenStats).map(([k, v]) => {
                 const pool = weaponCategory ? getRivenStatsForCategory(weaponCategory) : [];
                 const def = pool.find((s) => s.key === k);
-                const lbl = def?.label || k;
+                const rawLabel = def?.label || k;
+                const cleanLabel = rawLabel.replace(" (Spliced)", "").trim();
                 const isFaction = k.startsWith("faction");
                 const isPercent = def ? def.isPercent !== false && !isFaction : !isFaction;
                 const formattedVal = isFaction
                   ? `${(1 + v).toFixed(2)}x`
                   : `${v >= 0 ? "+" : ""}${isPercent ? `${(v * 100).toFixed(1)}%` : v.toFixed(1)}`;
                 return (
-                  <div key={k} className={cn("truncate", v < 0 && "text-red-700 dark:text-red-400")}>
-                    {formattedVal} {lbl}
+                  <div
+                    key={k}
+                    className={cn("flex items-center gap-1 min-w-0", v < 0 && "text-red-700 dark:text-red-400")}
+                    title={`${formattedVal} ${cleanLabel}${def?.spliced ? " (Spliced)" : ""}`}
+                  >
+                    <span className="truncate">{formattedVal} {cleanLabel}</span>
+                    {def?.spliced && (
+                      <span className="shrink-0 rounded bg-purple-500/15 px-1 py-0.5 text-[9px] font-medium leading-none text-purple-700 dark:text-purple-300">
+                        spliced
+                      </span>
+                    )}
                   </div>
                 );
               })}
@@ -284,8 +294,8 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innateP
           )}
         </div>
       </div>
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-2">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
+      <div className="mt-2 flex items-center justify-between gap-1.5 border-t border-border/40 pt-1.5">
+        <div className="flex min-w-0 items-center gap-1.5">
           <span className="whitespace-nowrap text-[11px] font-medium tabular-nums text-muted-foreground">
             Rank {rank}/{mod.maxRank}
           </span>
@@ -302,8 +312,8 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innateP
             ⚡{effectiveDrain}
           </span>
           {mod.subCategory === "riven" && onEditRiven && (
-            <button onClick={(e) => { e.stopPropagation(); onEditRiven(); }} className="inline-flex h-11 w-11 items-center justify-center rounded-md text-purple-700 transition-colors hover:bg-purple-500/10 hover:text-purple-600 dark:text-purple-400 dark:hover:text-purple-300 sm:h-8 sm:w-8" title="Edit Riven Stats" aria-label="Edit riven stats">
-              <Pencil className="h-3.5 w-3.5" />
+            <button onClick={(e) => { e.stopPropagation(); onEditRiven(); }} className="inline-flex h-6 w-6 items-center justify-center rounded text-purple-700 transition-colors hover:bg-purple-500/10 hover:text-purple-600 dark:text-purple-400 dark:hover:text-purple-300" title="Edit Riven Stats" aria-label="Edit riven stats">
+              <Pencil className="h-3 w-3" />
             </button>
           )}
         </div>
