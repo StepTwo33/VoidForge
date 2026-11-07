@@ -56,6 +56,11 @@ describe("Warframe Builder passive simulation & default-off conditionals", () =>
     applyWarframePassivePreArcanes(protea.id, threeBars, { proteaPowerBars: 3 });
     expect(threeBars.abilityStrength).toBeCloseTo(2.0, 5);
 
+    // Verify Blaze Artillery damage scales from 500 (0 bars) to 1000 (3 bars)
+    const blaze = protea.abilities.find((a) => a.name === "Blaze Artillery")!;
+    expect(blaze.damage * baseStats.abilityStrength).toBeCloseTo(500, 5);
+    expect(blaze.damage * threeBars.abilityStrength).toBeCloseTo(1000, 5);
+
     // Arcane Expertise reads Ability Strength modified by Protea's passive when pre-arcane runs first
     const expertise = warframeArcanes.find((a) => a.id === "arcane_expertise") ?? null;
     if (expertise) {
