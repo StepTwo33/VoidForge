@@ -118,6 +118,8 @@ export function WeaponSimControls({
                     statusTypesOnTarget: 0,
                     arcaneStacks: 0,
                     arcaneStacksById: undefined,
+                    applyHeadshots: false,
+                    applyWeakPoints: false,
                     applyTriggerBuffs: false,
                     applyYareliCriticalFlow: false,
                     applyZephyrAirborne: false,
@@ -141,6 +143,8 @@ export function WeaponSimControls({
                     statusTypesOnTarget: Math.max(simParams.statusTypesOnTarget, 4),
                     arcaneStacks: arcaneMax,
                     arcaneStacksById: undefined,
+                    applyHeadshots: true,
+                    applyWeakPoints: false,
                     applyTriggerBuffs: true,
                     ...(isLinkedLoadout
                       ? {
@@ -160,18 +164,64 @@ export function WeaponSimControls({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 pt-0.5 pb-1">
-            <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground cursor-pointer">
-              <input
-                type="checkbox"
-                checked={!!simParams.applyHeadshots}
-                onChange={(e) =>
-                  onSimParamsChange({ ...simParams, applyHeadshots: e.target.checked })
+          <div className="flex flex-wrap items-center gap-2.5 pt-0.5 pb-1">
+            <div className="inline-flex items-center rounded-md border border-border/80 bg-muted/40 p-0.5 text-[10px]">
+              <span className="px-1.5 text-[9px] font-medium text-muted-foreground">Hit:</span>
+              <button
+                type="button"
+                onClick={() =>
+                  onSimParamsChange({
+                    ...simParams,
+                    applyHeadshots: false,
+                    applyWeakPoints: false,
+                  })
                 }
-                className="h-3.5 w-3.5 rounded border-border accent-primary"
-              />
-              <span className="font-medium">Headshots (weak point)</span>
-            </label>
+                className={`rounded px-1.5 py-0.5 font-medium transition-colors ${
+                  !simParams.applyHeadshots && !simParams.applyWeakPoints
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Body shot: baseline damage (no headshot or weak-point bonuses)"
+              >
+                Body
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  onSimParamsChange({
+                    ...simParams,
+                    applyHeadshots: true,
+                    applyWeakPoints: false,
+                  })
+                }
+                className={`rounded px-1.5 py-0.5 font-medium transition-colors ${
+                  simParams.applyHeadshots
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Headshot: 3× head multiplier, 2× critical headshot multiplier, headshot bonuses (Deadhead, Target Acquired, Covenant), and weak-point bonuses"
+              >
+                Headshot
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  onSimParamsChange({
+                    ...simParams,
+                    applyHeadshots: false,
+                    applyWeakPoints: true,
+                  })
+                }
+                className={`rounded px-1.5 py-0.5 font-medium transition-colors ${
+                  !simParams.applyHeadshots && simParams.applyWeakPoints
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Non-head Weak Point (e.g. MOA backpack, Sonar spot): 2× weak-point multiplier and weak-point bonuses (Acuity, Cascadia Accuracy), without headshot bonuses"
+              >
+                Weak Point
+              </button>
+            </div>
             <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground cursor-pointer">
               <input
                 type="checkbox"
@@ -181,7 +231,7 @@ export function WeaponSimControls({
                 }
                 className="h-3.5 w-3.5 rounded border-border accent-primary"
               />
-              <span className="font-medium">Trigger Buffs (Aim / Distance &gt;15m)</span>
+              <span className="font-medium">Aim / Trigger Buffs</span>
             </label>
           </div>
 
@@ -967,17 +1017,6 @@ export function WeaponSimControls({
                 <option value="Anarchs">Anarchs</option>
               </select>
             </label>
-            <label className="flex items-center gap-2 text-[10px] text-muted-foreground cursor-pointer">
-              <input
-                type="checkbox"
-                checked={!!simParams.applyHeadshots}
-                onChange={(e) =>
-                  onSimParamsChange({ ...simParams, applyHeadshots: e.target.checked })
-                }
-                className="h-3.5 w-3.5 rounded border-border accent-primary"
-              />
-              Headshots (2× weak point × Acuity)
-            </label>
             <label
               className="flex items-center gap-2 text-[10px] text-muted-foreground cursor-pointer"
               title="Steel Path: ×2.5 Health & Shields after level scaling (armor unchanged). Applies to TIME TO KILL below."
@@ -1163,10 +1202,22 @@ export function WeaponSimControls({
               </div>
             )}
             {(stats.galvanizedCritOnHeadshot ?? 0) > 0 && (
-              stats.simParams.applyHeadshots ? (
-                <div className="text-[10px] text-blue-700 dark:text-blue-400">Galv. Crit: +{(((stats.galvanizedCritOnHeadshot ?? 0) + (stats.galvanizedCritOnHeadshotPerStack ?? 0) * Math.min(simKs("galvCrit"), 5)) * 100).toFixed(0)}% CC while aiming ({Math.min(simKs("galvCrit"), 5)} headshot-kill stacks)</div>
+              !stats.simParams.applyTriggerBuffs ? (
+                <div className="text-[10px] text-muted-foreground/70">
+                  Galv. Crit: inactive — enable Aiming (Trigger buffs) to apply crit while aiming
+                </div>
+              ) : stats.simParams.applyHeadshots ? (
+                <div className="text-[10px] text-blue-700 dark:text-blue-400">
+                  Galv. Crit: +{(((stats.galvanizedCritOnHeadshot ?? 0) + (stats.galvanizedCritOnHeadshotPerStack ?? 0) * Math.min(simKs("galvCrit"), 5)) * 100).toFixed(0)}% CC while aiming ({Math.min(simKs("galvCrit"), 5)} headshot-kill stacks)
+                </div>
+              ) : simKs("galvCrit") > 0 ? (
+                <div className="text-[10px] text-blue-700 dark:text-blue-400">
+                  Galv. Crit: +{(((stats.galvanizedCritOnHeadshotPerStack ?? 0) * Math.min(simKs("galvCrit"), 5)) * 100).toFixed(0)}% CC while aiming ({Math.min(simKs("galvCrit"), 5)} headshot-kill stacks; enable Headshots for +{((stats.galvanizedCritOnHeadshot ?? 0) * 100).toFixed(0)}% base)
+                </div>
               ) : (
-                <div className="text-[10px] text-muted-foreground/70">Galv. Crit: inactive — enable Headshots to model on-headshot crit</div>
+                <div className="text-[10px] text-muted-foreground/70">
+                  Galv. Crit: inactive — enable Headshots to trigger +{((stats.galvanizedCritOnHeadshot ?? 0) * 100).toFixed(0)}% base CC
+                </div>
               )
             )}
             {stats.berserkerFuryBonus > 0 && (

@@ -167,6 +167,9 @@ function WeaponRow({
                 <>
                   <StatLine label="Heavy attack mult" value={`${(stats.heavyAttackComboMultiplier ?? 1).toFixed(1)}x`} />
                   <StatLine label="Heavy attack" value={fmtDamageNum(stats.heavyAttackDamage ?? 0)} />
+                  {stats.heavyCriticalChance != null && (
+                    <StatLine label="Heavy crit chance" value={`${(stats.heavyCriticalChance * 100).toFixed(1)}%`} />
+                  )}
                 </>
               )}
             </>

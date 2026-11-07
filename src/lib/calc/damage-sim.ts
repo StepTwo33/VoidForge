@@ -44,6 +44,7 @@ export interface DamageSimInputs {
   weakPointDamageBonus?: number;
   factionBonuses: Record<string, number>;
   applyHeadshots: boolean;
+  applyWeakPoints?: boolean;
   /** Latron Flensing Spikes — passed through to discrete TTK. */
   punctureArmorStripPerStack?: number;
   /**
@@ -262,6 +263,7 @@ export function runDamageSim(
   const combatMult = combatDamageMultiplier({
     factionBonus,
     applyHeadshots: input.applyHeadshots,
+    applyWeakPoints: input.applyWeakPoints,
     headshotDamageBonus: input.headshotDamageBonus,
     weakPointDamageBonus: input.weakPointDamageBonus ?? 0,
     targetFaction: enemy.faction,
@@ -273,6 +275,7 @@ export function runDamageSim(
     input.headshotDamageBonus,
     input.weakPointDamageBonus ?? 0,
     enemy.faction,
+    input.applyWeakPoints,
   );
   const dotMult = statusDmg * factionDot * head;
 

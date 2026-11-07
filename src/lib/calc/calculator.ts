@@ -270,6 +270,7 @@ function statusDotTickBase(stats: CalculatedStats, moddedBaseDamage: number, sim
     stats.headshotDamageBonus ?? 0,
     stats.weakPointDamageBonus ?? 0,
     sim?.targetFaction,
+    sim?.applyWeakPoints,
   );
   return moddedBaseDamage * avgCrit * statusDmg * factionDot * head;
 }
@@ -471,6 +472,7 @@ function calculateStatusProcs(
       stats.headshotDamageBonus ?? 0,
       stats.weakPointDamageBonus ?? 0,
       sim?.targetFaction,
+      sim?.applyWeakPoints,
     );
     const toxinMult = 1 + (stats.toxinModBonusFraction ?? 0);
     const extraHit = stats.totalDamage * tlFrac * toxinStatusFactor(stats);
@@ -701,7 +703,7 @@ function applyWeaponExternalBuffs(
       multDamage.product *= 1 + buff.damageMultBonus;
     }
     if (buff.critChanceBonus) acc.critChanceBonus += buff.critChanceBonus;
-    if (buff.weakPointCritChanceBonus && sim?.applyHeadshots) {
+    if (buff.weakPointCritChanceBonus && (sim?.applyHeadshots || sim?.applyWeakPoints)) {
       acc.critChanceBonus += buff.weakPointCritChanceBonus;
     }
     if (buff.critChanceFlatBonus && critChanceFlat) critChanceFlat.chance += buff.critChanceFlatBonus;
@@ -977,6 +979,7 @@ export function calculateWeaponBuild(
     statusDamageBonus: 0,
     headshotDamageBonus: 0,
     weakPointDamageBonus: 0,
+    weakPointCritChanceBonus: 0,
     statusDurationBonus: 0,
     statusChanceFlatBonus: 0,
     factionBonuses: {},
@@ -1370,15 +1373,24 @@ export function calculateWeaponBuild(
   // Charged/Primed Chamber: first-shot damage, averaged over the magazine for DPS.
   stats.firstShotDamageBonus = weaponModAcc.firstShotDamageBonus;
 
+  // Acuity mods: +350% Weak Point Critical Chance on any weak point hit (headshot or body weak point)
+  if (weaponModAcc.weakPointCritChanceBonus > 0 && (sim.applyHeadshots || sim.applyWeakPoints)) {
+    critChanceBonus += weaponModAcc.weakPointCritChanceBonus;
+  }
+
   // Apply Galvanized Scope/Crosshairs: crit while aiming only after headshots (sim toggle);
   // headshot-kill stacks reuse the kill-stacks slider (in-game cap 5).
+  // Wiki: +120% CC when Aiming on Headshot; +40% CC when Aiming per Headshot Kill (max 5x).
+  // Both require Aiming (sim.applyTriggerBuffs).
   const galvCritOnHeadshotBase = weaponModAcc.galvCritOnHeadshotBase;
   const galvCritOnHeadshotPerStack = weaponModAcc.galvCritOnHeadshotPerStack;
-  if (galvCritOnHeadshotBase > 0 && sim.applyHeadshots) {
+  if (galvCritOnHeadshotBase > 0 && sim.applyTriggerBuffs) {
     const galvCritStacks = Math.min(killStacksFor("galvCrit"), 5);
-    critChanceBonus += galvCritOnHeadshotBase + galvCritOnHeadshotPerStack * galvCritStacks;
+    const baseBonus = sim.applyHeadshots ? galvCritOnHeadshotBase : 0;
+    const stackBonus = galvCritOnHeadshotPerStack * galvCritStacks;
+    critChanceBonus += baseBonus + stackBonus;
   }
-  if (galvCritOnHeadshotBase > 0) {
+  if (galvCritOnHeadshotPerStack > 0) {
     killStackSources.push({
       id: "galvCrit",
       label: "Galvanized headshot",
@@ -1463,7 +1475,7 @@ export function calculateWeaponBuild(
   }
   // King's Gambit: ×0 CC on bodyshots (paper when headshot sim is off)
   const bodyCritMult = incarnonStatChanges?.bodyshotCritChanceMult;
-  if (bodyCritMult != null && !sim.applyHeadshots) {
+  if (bodyCritMult != null && !sim.applyHeadshots && !sim.applyWeakPoints) {
     stats.criticalChance *= bodyCritMult;
   }
   stats.criticalMultiplier =
@@ -2021,7 +2033,7 @@ export function calculateWeaponBuild(
   // Spliced Weak Point Critical Chance: wiki Enemy Body Parts, "additive with bonuses
   // like Point Strike" → +value × base CC, only on weak point hits (headshot sim).
   const wpcc = rivenStatChanges?.weakPointCritChance;
-  if (wpcc && sim.applyHeadshots) {
+  if (wpcc && (sim.applyHeadshots || sim.applyWeakPoints)) {
     stats.criticalChance += evolvedBaseCC * wpcc;
   }
 
@@ -3236,6 +3248,7 @@ export function calculateWeaponBuildWithArcanes(
       baseWeapon,
       {
         applyHeadshots: sim.applyHeadshots,
+        applyWeakPoints: sim.applyWeakPoints,
         warframeArmor: sim.warframeArmor,
         warframeMaxEnergy: sim.warframeMaxEnergy,
         coArcaneIds: arcanes.map((a) => a.id),
@@ -3319,6 +3332,7 @@ function calculateBurstDps(stats: CalculatedStats): number {
   const combatMult = combatDamageMultiplier({
     factionBonus,
     applyHeadshots: sim.applyHeadshots,
+    applyWeakPoints: sim.applyWeakPoints,
     headshotDamageBonus: stats.headshotDamageBonus ?? 0,
     weakPointDamageBonus: stats.weakPointDamageBonus ?? 0,
     targetFaction: sim.targetFaction,

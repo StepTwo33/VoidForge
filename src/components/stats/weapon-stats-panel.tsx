@@ -1099,6 +1099,13 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           />
           <StatRow label="Combo Duration" value={`${stats.comboDuration.toFixed(0)}s`} />
           <StatRow label="Heavy Attack" value={stats.heavyAttackDamage.toFixed(0)} highlighted changed={flash.has("heavyAttack")} />
+          {stats.heavyCriticalChance != null && (
+            <StatRow
+              label="Heavy Crit Chance"
+              value={`${(stats.heavyCriticalChance * 100).toFixed(1)}%`}
+              tooltip="Heavy Attack Critical Chance: includes doubled bonus (2×) from Galvanized Steel, True Steel, and Sacrificial Steel, plus combo multiplier scaling."
+            />
+          )}
           {stats.heavyAttackWindUp > 0 && (
             <StatRow
               label="Heavy wind-up"

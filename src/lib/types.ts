@@ -672,8 +672,10 @@ export interface SimulationParams {
    * Empty/undefined = paper DPS without faction mult.
    */
   targetFaction?: string;
-  /** Apply headshot / weak-point multiplier (default body shots). */
+  /** Apply headshot multiplier and on-headshot bonuses (3× base humanoid, 2× crit). Implies weak-point hit. */
   applyHeadshots?: boolean;
+  /** Apply non-head weak-point multiplier and weak-point bonuses (2× base body weak point). Mutually exclusive with applyHeadshots. */
+  applyWeakPoints?: boolean;
   /**
    * Steel Path TTK: ×2.5 Health & Shields after level scaling (armor unchanged).
    * Does not affect paper DPS — only TIME TO KILL in the builder sidebar.
@@ -724,6 +726,7 @@ export const DEFAULT_SIM_PARAMS: SimulationParams = {
   applyMechaEmpoweredVsMarkedDamage: false,
   targetFaction: undefined,
   applyHeadshots: false,
+  applyWeakPoints: false,
   steelPath: false,
   applyStanceMultiplier: true,
   applyTriggerBuffs: false,
@@ -896,6 +899,8 @@ export interface CalculatedStats {
   followThroughTargetFactor?: number;
   /** Extra crit-chance fraction on heavies from "x2 for Heavy Attacks" Steel mods. */
   heavyCritChanceBonus?: number;
+  /** Heavy attack critical chance (including doubled Steel mods and combo counter scaling). */
+  heavyCriticalChance?: number;
   heavyAttackWindUp: number;
   comboCount: number;
   comboDuration: number;

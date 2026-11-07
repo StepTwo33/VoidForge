@@ -548,6 +548,7 @@ export function simulateDiscreteTTK(
   const factionHit = combatDamageMultiplier({
     factionBonus,
     applyHeadshots: sim?.applyHeadshots,
+    applyWeakPoints: sim?.applyWeakPoints,
     headshotDamageBonus: stats.headshotDamageBonus ?? 0,
     weakPointDamageBonus: stats.weakPointDamageBonus ?? 0,
     targetFaction,
@@ -564,6 +565,7 @@ export function simulateDiscreteTTK(
     stats.headshotDamageBonus ?? 0,
     stats.weakPointDamageBonus ?? 0,
     targetFaction,
+    sim?.applyWeakPoints,
   );
   // combatMult for hits uses factionHit; for DoT tick base rebuild without double head/stance
   const dotBase =

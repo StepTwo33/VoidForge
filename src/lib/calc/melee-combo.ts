@@ -182,6 +182,7 @@ export function applyMeleeComboToStats(
   // Heavy attack: per-weapon heavy base × Killing Blow (heavyAttackBaseMultiplier) and the
   // Steel mods' crit chance counted twice (base × extra), see calculator.
   const heavyCC = stats.criticalChance + baseCritChance * (stats.heavyCritChanceBonus ?? 0);
+  stats.heavyCriticalChance = heavyCC;
   stats.heavyAttackDamage =
     stats.totalDamage *
     (stats.heavyAttackBaseMultiplier ?? 1) *

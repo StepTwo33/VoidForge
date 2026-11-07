@@ -43,7 +43,8 @@ function simSummaryChips(
   if (simParams.applyReinforcedBondFireRate === true) chips.push("Reinforced Bond");
   if (simParams.targetFaction) chips.push(simParams.targetFaction);
   if (simParams.steelPath) chips.push("Steel Path");
-  if (simParams.applyHeadshots) chips.push("Headshots");
+  if (simParams.applyHeadshots) chips.push("Headshot");
+  else if (simParams.applyWeakPoints) chips.push("Weak point");
   return chips;
 }
 
@@ -111,6 +112,8 @@ export function WeaponSimPanel({
                 statusTypesOnTarget: 0,
                 arcaneStacks: 0,
                 arcaneStacksById: undefined,
+                applyHeadshots: false,
+                applyWeakPoints: false,
                 applyTriggerBuffs: false,
                 applyYareliCriticalFlow: false,
                 applyZephyrAirborne: false,

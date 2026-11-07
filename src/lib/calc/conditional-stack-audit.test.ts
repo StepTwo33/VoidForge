@@ -239,36 +239,49 @@ describe("on-kill / trigger conditionals (wiki max rank, Phase M16)", () => {
     );
   });
 
-  it("Argon Scope / Hydraulic Crosshairs: paper no CC; applyHeadshots → +135% CC", () => {
+  it("Argon Scope / Hydraulic Crosshairs: paper no CC; applyTriggerBuffs + applyHeadshots → +135% CC", () => {
     const braton = requireWeapon("braton");
     const lex = requireWeapon("lex");
     expect(build("braton", "argon_scope", {}).criticalChance).toBeCloseTo(braton.criticalChance, 5);
-    expect(build("braton", "argon_scope", { applyHeadshots: true }).criticalChance).toBeCloseTo(
+    // Not aiming: headshots alone do not trigger "when Aiming" CC
+    expect(build("braton", "argon_scope", { applyHeadshots: true, applyTriggerBuffs: false }).criticalChance).toBeCloseTo(
+      braton.criticalChance,
+      5,
+    );
+    expect(build("braton", "argon_scope", { applyHeadshots: true, applyTriggerBuffs: true }).criticalChance).toBeCloseTo(
       braton.criticalChance * 2.35,
       5,
     );
     expect(build("lex", "hydraulic_crosshairs", {}).criticalChance).toBeCloseTo(lex.criticalChance, 5);
-    expect(build("lex", "hydraulic_crosshairs", { applyHeadshots: true }).criticalChance).toBeCloseTo(
+    expect(build("lex", "hydraulic_crosshairs", { applyHeadshots: true, applyTriggerBuffs: false }).criticalChance).toBeCloseTo(
+      lex.criticalChance,
+      5,
+    );
+    expect(build("lex", "hydraulic_crosshairs", { applyHeadshots: true, applyTriggerBuffs: true }).criticalChance).toBeCloseTo(
       lex.criticalChance * 2.35,
       5,
     );
   });
 
-  it("Galvanized Scope / Crosshairs: paper no CC; headshot +0 stacks +120%; +5 stacks +320%", () => {
+  it("Galvanized Scope / Crosshairs: paper no CC; requires aiming; headshot +0 stacks +120%; +5 stacks +320%", () => {
     const braton = requireWeapon("braton");
     const lex = requireWeapon("lex");
     expect(build("braton", "galvanized_scope", {}).criticalChance).toBeCloseTo(
       braton.criticalChance,
       5,
     );
+    // When aiming is off, no crit chance is applied even with headshots or kill stacks
     expect(
-      build("braton", "galvanized_scope", { applyHeadshots: true, killStacks: 0 }).criticalChance,
+      build("braton", "galvanized_scope", { applyHeadshots: true, killStacks: 5, applyTriggerBuffs: false }).criticalChance,
+    ).toBeCloseTo(braton.criticalChance, 5);
+    expect(
+      build("braton", "galvanized_scope", { applyHeadshots: true, killStacks: 0, applyTriggerBuffs: true }).criticalChance,
     ).toBeCloseTo(braton.criticalChance * 2.2, 4);
     expect(
-      build("braton", "galvanized_scope", { applyHeadshots: true, killStacks: 5 }).criticalChance,
+      build("braton", "galvanized_scope", { applyHeadshots: true, killStacks: 5, applyTriggerBuffs: true }).criticalChance,
     ).toBeCloseTo(braton.criticalChance * (1 + 1.2 + 0.4 * 5), 4);
     expect(
-      build("lex", "galvanized_crosshairs", { applyHeadshots: true, killStacks: 5 }).criticalChance,
+      build("lex", "galvanized_crosshairs", { applyHeadshots: true, killStacks: 5, applyTriggerBuffs: true }).criticalChance,
     ).toBeCloseTo(lex.criticalChance * (1 + 1.2 + 0.4 * 5), 4);
   });
 

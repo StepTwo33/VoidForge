@@ -115,12 +115,18 @@ export function headshotMultiplier(
   headshotDamageBonus = 0,
   weakPointDamageBonus = 0,
   targetFaction?: string | null,
+  applyWeakPoints?: boolean,
 ): number {
-  if (!applyHeadshots) return 1;
-  return (
-    (baseHeadMultiplier(targetFaction) + 1.5 * Math.max(0, weakPointDamageBonus)) *
-    (1 + Math.max(0, headshotDamageBonus))
-  );
+  if (!applyHeadshots && !applyWeakPoints) return 1;
+  if (applyHeadshots) {
+    return (
+      (baseHeadMultiplier(targetFaction) + 1.5 * Math.max(0, weakPointDamageBonus)) *
+      (1 + Math.max(0, headshotDamageBonus))
+    );
+  }
+  // Non-head weak point: 2.0× base body part multiplier + weakPointDamageBonus.
+  // Headshot multiplier bonuses (Deadhead, Target Acquired) do not apply to non-head weak points.
+  return 2.0 + Math.max(0, weakPointDamageBonus);
 }
 
 /**
@@ -355,6 +361,7 @@ export function resolveStanceDamageMultiplier(
 export function combatDamageMultiplier(opts: {
   factionBonus?: number;
   applyHeadshots?: boolean;
+  applyWeakPoints?: boolean;
   headshotDamageBonus?: number;
   weakPointDamageBonus?: number;
   targetFaction?: string | null;
@@ -366,6 +373,7 @@ export function combatDamageMultiplier(opts: {
     opts.headshotDamageBonus ?? 0,
     opts.weakPointDamageBonus ?? 0,
     opts.targetFaction,
+    opts.applyWeakPoints,
   );
   const stance = opts.stanceMultiplier && opts.stanceMultiplier > 0 ? opts.stanceMultiplier : 1;
   return faction * head * stance;

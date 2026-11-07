@@ -23,6 +23,7 @@ export interface ArcaneHandlerContext {
   warframeCtx?: WarframeArcaneContext;
   /** From sim — gates weakpoint-only bonuses (e.g. Cascadia Accuracy). */
   applyHeadshots?: boolean;
+  applyWeakPoints?: boolean;
   /** From sim — Primary Bulwark armor input. */
   warframeArmor?: number;
   /** From sim / loadout — Primary Overcharge max-energy input. */
@@ -548,7 +549,7 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
       const cc = ccLine ? scaleArcaneEffectLine(ccLine, rank, def.maxRank) : 0;
       trackBonus(stats, "criticalChance", cc);
       trackBonus(stats, "buffDuration", findEffect(def, "buffDuration")?.maxValue ?? 4);
-      if (ctx.applyHeadshots && cc > 0) {
+      if ((ctx.applyHeadshots || ctx.applyWeakPoints) && cc > 0) {
         const baseCrit = ctx.baseWeapon?.criticalChance ?? stats.criticalChance;
         stats.criticalChance += baseCrit * (cc / 100);
       }

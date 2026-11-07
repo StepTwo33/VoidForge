@@ -31,6 +31,8 @@ export type WeaponModAccumulators = {
   headshotDamageBonus: number;
   /** Weak point damage bonus (Acuity, Pain Points, spliced WP) — adds to the body-part multiplier (×1.5 on heads). */
   weakPointDamageBonus: number;
+  /** Weak point critical chance bonus (Acuity mods) — applies on weak point hits. */
+  weakPointCritChanceBonus: number;
   /** Status duration bonus (Continuous Misery, etc.) — extends DoT ticks. */
   statusDurationBonus: number;
   /** Normalized faction id → bonus fraction (Bane / Expel / Smite / Cleanse). */
@@ -216,6 +218,11 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
       return false;
     case "conditional_crit_on_headshot":
       if (statKey === "criticalChanceOnHeadshot") {
+        // Acuity mods give Weak Point Critical Chance without requiring Aiming
+        if (ctx.modId === "primary_acuity" || ctx.modId === "pistol_acuity") {
+          acc.weakPointCritChanceBonus = (acc.weakPointCritChanceBonus ?? 0) + modValue;
+          return true;
+        }
         acc.galvCritOnHeadshotBase += modValue;
         return true;
       }

@@ -262,6 +262,7 @@ function applyWarframeStatToBuild(
 /** Sim / build context the weapon arcane handlers read. */
 export interface ArcaneWeaponOpts {
   applyHeadshots?: boolean;
+  applyWeakPoints?: boolean;
   warframeArmor?: number;
   warframeMaxEnergy?: number;
   /** Other arcane ids on the same weapon (Demulcent's paired Residual). */
@@ -291,6 +292,7 @@ export function applyArcaneEffectsToWeapon(
     baseWeapon,
     simStacks,
     applyHeadshots: opts?.applyHeadshots,
+    applyWeakPoints: opts?.applyWeakPoints,
     warframeArmor: opts?.warframeArmor,
     warframeMaxEnergy: opts?.warframeMaxEnergy,
     coArcaneIds: opts?.coArcaneIds,
