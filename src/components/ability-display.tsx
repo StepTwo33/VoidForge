@@ -447,7 +447,9 @@ export function AbilityStatsBlock({
   const [covenantAbsorbK, setCovenantAbsorbK] = useState(0);
   const hasVirulenceMutation =
     display.abilityName === "Virulence" && typeof ability.damage === "number";
-  const [mutationStacks, setMutationStacks] = useState(0);
+  const mutationControlled = display.mutationStacks != null;
+  const [mutationStacksLocal, setMutationStacksLocal] = useState(0);
+  const mutationStacks = mutationControlled ? display.mutationStacks! : mutationStacksLocal;
   const maxHeatEnergyCost = Number(ability.miscStats?.maxHeatEnergyCost);
   const hasHeatEnergyLerp =
     display.abilityName === "Fire Blast" &&
@@ -499,9 +501,7 @@ export function AbilityStatsBlock({
     hasKineticPlatingBattery || hasThermalSunderBattery || hasRedlineBattery;
   /** Builder lifts battery to the stats panel; local slider only when uncontrolled. */
   const batteryControlled = display.batteryPct != null;
-  const [batteryPctLocal, setBatteryPctLocal] = useState(
-    hasKineticPlatingBattery || hasRedlineBattery || hasThermalSunderBattery ? 80 : 0,
-  );
+  const [batteryPctLocal, setBatteryPctLocal] = useState(0);
   const batteryPct = batteryControlled ? display.batteryPct! : batteryPctLocal;
   const batteryT = Math.min(1, Math.max(0, batteryPct / 100));
 
@@ -1649,13 +1649,13 @@ export function AbilityStatsBlock({
           tooltip="Covenant Retaliation: CC = (5% + absorb÷100 × 1.5%) × STR; body cap 50%, HS ×4 cap 200%."
         />
       )}
-      {hasVirulenceMutation && (
+      {hasVirulenceMutation && !mutationControlled && (
         <SimSlider
           label="Mutation Stacks"
           value={mutationStacks}
           min={0}
           max={300}
-          onChange={setMutationStacks}
+          onChange={setMutationStacksLocal}
           tooltip="Virulence: damage = floor(base × STR × (1 + stacks)); field DPS uses half base (wiki)."
         />
       )}

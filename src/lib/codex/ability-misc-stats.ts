@@ -35,6 +35,8 @@ export interface AbilityDisplayContext {
    * Thermal Sunder / Redline / passive don't each show their own slider.
    */
   batteryPct?: number;
+  /** Nidus Mutation stacks (0–300) shared from the stats-panel passive sim. */
+  mutationStacks?: number;
   /** Rank of an equipped Intrepid Stand (Final Stand augment); undefined when not equipped. */
   intrepidStandRank?: number;
 }

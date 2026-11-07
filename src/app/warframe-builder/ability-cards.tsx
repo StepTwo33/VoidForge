@@ -52,6 +52,7 @@ export function AbilityCard({
   extraFlatArmor,
   immolationHeatPct,
   batteryPct,
+  mutationStacks,
   intrepidStandRank,
   footer,
   exaltedWeapon,
@@ -68,6 +69,8 @@ export function AbilityCard({
   immolationHeatPct?: number;
   /** Gauss battery from the stats-panel sim (shared across ability cards). */
   batteryPct?: number;
+  /** Nidus Mutation stacks from the stats-panel sim (shared with Virulence). */
+  mutationStacks?: number;
   /** Equipped Intrepid Stand rank (adds Overguard rows to Final Stand). */
   intrepidStandRank?: number;
   footer?: ReactNode;
@@ -80,6 +83,7 @@ export function AbilityCard({
     extraFlatArmor,
     immolationHeatPct,
     batteryPct,
+    mutationStacks,
     intrepidStandRank,
   };
   const effectiveCost =

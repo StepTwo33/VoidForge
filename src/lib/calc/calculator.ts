@@ -79,6 +79,21 @@ import {
   factionTripleDotMultiplier,
   resolveStanceDamageMultiplier,
 } from '@/lib/calc/combat-multipliers';
+import {
+  computeBaruukRestraintDr,
+  computeCitrineGeoluminesence,
+  computeCyte09PracticedAimCritChance,
+  computeEmberPassiveAbilityStrength,
+  computeExcaliburSwordsmanshipBonuses,
+  computeFrostPassiveArmor,
+  computeGarudaPassiveDamageBonus,
+  computeGaussPassiveRechargeDelayReduction,
+  computeGaussPassiveShieldRecharge,
+  computeGrendelPassiveArmor,
+  computeProteaPassiveStrengthBonus,
+  computeTempleBackbeatEfficiencyBonus,
+  computeValkyrRageMeleeBonus,
+} from '@/lib/codex/ability-misc-stats';
 
 /**
  * Unmodded rank-30 health / shields: the base Vitality, Redirection, etc. scale since
@@ -2715,6 +2730,222 @@ export function warframeArcaneStackOverride(
     return countIntentionAbilities(ctx.abilities, ctx.equippedModNames);
   }
   return ctx.arcaneStacksById?.[arcaneId];
+}
+
+/**
+ * Paper-baseline Warframe arcane stack map for Warframe Builder: non-passive conditional
+ * arcanes (e.g. Arcane Sculptor, Arcane Guardian, Molt Augmented, Arcane Impetus) default to 0
+ * until the user toggles them on or adjusts their stack slider, while passive arcanes
+ * (Arcane Bellicose, Arcane Battery, Arcane Expertise, Arcane Persistence, Arcane Intention,
+ * Molt Efficiency, status resist arcanes) remain active.
+ */
+export function resolveDefaultOffWarframeArcaneStacks(
+  arcanes: readonly (Mod | null)[] | undefined,
+  userOverrides?: Record<string, number>,
+): Record<string, number> {
+  const out: Record<string, number> = { ...userOverrides };
+  for (const arc of arcanes ?? []) {
+    if (!arc || out[arc.id] !== undefined) continue;
+    if (arc.id === "arcane_intention" || arc.id === "arcane_persistence") continue;
+    const def = getArcaneEffectDef(arc.id);
+    if (def && def.trigger !== "passive") {
+      out[arc.id] = 0;
+    }
+  }
+  return out;
+}
+
+export interface WarframePassiveSimState {
+  proteaPowerBars: number;
+  emberHeatEnemies: number;
+  emberImmolationHeatPct: number;
+  frostColdEnemies: number;
+  grendelGutEnemies: number;
+  gaussBatteryPct: number;
+  baruukRestraintErodedPct: number;
+  citrineGeolumOrbs: number;
+  templeBackbeatActive: boolean;
+  valkyrRagePct: number;
+  garudaKillStacks: number;
+  cyteWeakPointKills: number;
+  nidusMutationStacks: number;
+}
+
+export const DEFAULT_WARFRAME_PASSIVE_SIM: WarframePassiveSimState = {
+  proteaPowerBars: 0,
+  emberHeatEnemies: 0,
+  emberImmolationHeatPct: 0,
+  frostColdEnemies: 0,
+  grendelGutEnemies: 0,
+  gaussBatteryPct: 0,
+  baruukRestraintErodedPct: 0,
+  citrineGeolumOrbs: 0,
+  templeBackbeatActive: false,
+  valkyrRagePct: 0,
+  garudaKillStacks: 0,
+  cyteWeakPointKills: 0,
+  nidusMutationStacks: 0,
+};
+
+function warframeFamily(warframeId: string | undefined): string {
+  return (warframeId ?? "").replace(/_prime$/, "");
+}
+
+/**
+ * Apply interactive Warframe passive simulation values that feed into ability/armor/shield/regen
+ * stats BEFORE shards and arcanes run (so Arcane Expertise, Arcane Battery, and Arcane Persistence
+ * observe passive Strength and Armor bonuses).
+ */
+export function applyWarframePassivePreArcanes(
+  warframeId: string | undefined,
+  stats: WarframeCalculatedStats,
+  passiveSim?: Partial<WarframePassiveSimState>,
+): WarframeCalculatedStats {
+  const fam = warframeFamily(warframeId);
+  const sim = { ...DEFAULT_WARFRAME_PASSIVE_SIM, ...passiveSim };
+
+  switch (fam) {
+    case "protea": {
+      stats.abilityStrength += computeProteaPassiveStrengthBonus(sim.proteaPowerBars);
+      break;
+    }
+    case "ember": {
+      stats.abilityStrength += computeEmberPassiveAbilityStrength(sim.emberHeatEnemies);
+      break;
+    }
+    case "temple": {
+      stats.abilityEfficiency += computeTempleBackbeatEfficiencyBonus(sim.templeBackbeatActive);
+      break;
+    }
+    case "frost": {
+      const bonus = computeFrostPassiveArmor(sim.frostColdEnemies);
+      if (bonus > 0) {
+        stats.flatArmorBonus += bonus;
+        stats.totalArmor += bonus;
+        finalizeWarframeSurvivability(stats);
+      }
+      break;
+    }
+    case "grendel": {
+      const bonus = computeGrendelPassiveArmor(sim.grendelGutEnemies);
+      if (bonus > 0) {
+        stats.flatArmorBonus += bonus;
+        stats.totalArmor += bonus;
+        finalizeWarframeSurvivability(stats);
+      }
+      break;
+    }
+    case "gauss": {
+      const t = Math.min(1, Math.max(0, sim.gaussBatteryPct / 100));
+      if (t > 0) {
+        stats.shieldRechargeBonus =
+          (stats.shieldRechargeBonus ?? 0) + computeGaussPassiveShieldRecharge(t);
+        stats.shieldRechargeDelayReduction = Math.min(
+          0.8,
+          (stats.shieldRechargeDelayReduction ?? 0) + computeGaussPassiveRechargeDelayReduction(t),
+        );
+      }
+      break;
+    }
+    case "citrine": {
+      stats.healthRegenPerSec += computeCitrineGeoluminesence(sim.citrineGeolumOrbs).healPerSec;
+      break;
+    }
+  }
+
+  return stats;
+}
+
+/**
+ * Apply post-arcane Warframe passive survivability sources (Baruuk Restraint pure DR)
+ * after `applyWarframeShardsAndArcanes` builds `pureDamageReductionSources`.
+ */
+export function applyWarframePassivePostArcanes(
+  warframeId: string | undefined,
+  stats: WarframeCalculatedStats,
+  passiveSim?: Partial<WarframePassiveSimState>,
+): WarframeCalculatedStats {
+  const fam = warframeFamily(warframeId);
+  if (fam === "baruuk") {
+    const dr = computeBaruukRestraintDr((passiveSim?.baruukRestraintErodedPct ?? 0) / 100);
+    if (dr > 0) {
+      stats.pureDamageReductionSources = [
+        ...(stats.pureDamageReductionSources ?? []),
+        { name: "Restraint (Passive)", value: dr },
+      ];
+      finalizeWarframeSurvivability(stats);
+    }
+  }
+  return stats;
+}
+
+/**
+ * Resolve host Warframe passive buffs that apply directly to an Exalted weapon in Warframe Builder
+ * (Excalibur Swordsmanship on Exalted Blade, Valkyr Rage on Valkyr Talons, Garuda Death's Gate on
+ * Garuda Talons, Cyte-09 Practiced Aim on Neutralizer).
+ */
+export function resolveExaltedPassiveBuffs(
+  warframeId: string | undefined,
+  exaltedWeapon: Weapon,
+  passiveSim?: Partial<WarframePassiveSimState>,
+): WeaponExternalBuff[] {
+  const fam = warframeFamily(warframeId);
+  const sim = { ...DEFAULT_WARFRAME_PASSIVE_SIM, ...passiveSim };
+  const buffs: WeaponExternalBuff[] = [];
+  const isMelee = exaltedWeapon.category === "melee" || exaltedWeapon.triggerType === "Melee";
+
+  if ((fam === "excalibur" || warframeId === "excalibur_umbra") && isMelee) {
+    const excal = computeExcaliburSwordsmanshipBonuses(true);
+    buffs.push({
+      id: "passive_excalibur_swordsmanship",
+      label: "Swordsmanship (Excalibur Passive)",
+      category: "ability",
+      damageBonus: excal.damageBonus,
+      fireRateBonus: excal.attackSpeedBonus,
+      nominal: "+10% sword damage, +10% attack speed",
+    });
+  }
+
+  if (fam === "valkyr" && isMelee) {
+    const bonus = computeValkyrRageMeleeBonus(sim.valkyrRagePct);
+    if (bonus > 0) {
+      buffs.push({
+        id: "passive_valkyr_rage",
+        label: "Rage (Valkyr Passive)",
+        category: "ability",
+        damageBonus: bonus,
+        nominal: `+${(bonus * 100).toFixed(0)}% melee damage`,
+      });
+    }
+  }
+
+  if (fam === "garuda") {
+    const bonus = computeGarudaPassiveDamageBonus(sim.garudaKillStacks);
+    if (bonus > 0) {
+      buffs.push({
+        id: "passive_garuda_deaths_gate",
+        label: "Death's Gate (Garuda Passive)",
+        category: "ability",
+        damageMultBonus: bonus,
+        nominal: `+${(bonus * 100).toFixed(0)}% multiplicative weapon damage`,
+      });
+    }
+  }
+
+  if (fam === "cyte_09") {
+    const wpCc = computeCyte09PracticedAimCritChance(sim.cyteWeakPointKills);
+    if (wpCc > 0) {
+      buffs.push({
+        id: "passive_cyte09_practiced_aim",
+        label: "Practiced Aim (Cyte-09 Passive)",
+        category: "ability",
+        weakPointCritChanceBonus: wpCc,
+        nominal: `+${(wpCc * 100).toFixed(0)}% weak point crit chance`,
+      });
+    }
+  }
+
+  return buffs;
 }
 
 /** wiki Archon Shard (Violet): the melee crit bonus doubles when Max Energy is over 500 (501+). */

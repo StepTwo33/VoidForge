@@ -11,6 +11,7 @@ import {
   computeAdaptationSurvivability,
   computeWarframeAuraEffectivenessMult,
   CONDITIONAL_WARFRAME_MOD_DEFS,
+  type WarframePassiveSimState,
 } from "@/lib/calc/calculator";
 import {
   computeGaussPassiveShieldRecharge,
@@ -143,8 +144,16 @@ function GaussPassiveBattery({
   );
 }
 
-function BaruukRestraintPassive() {
-  const [erodedPct, setErodedPct] = useState(0);
+function BaruukRestraintPassive({
+  erodedPct: erodedPctProp,
+  onErodedPctChange,
+}: {
+  erodedPct?: number;
+  onErodedPctChange?: (n: number) => void;
+}) {
+  const [erodedPctLocal, setErodedPctLocal] = useState(0);
+  const erodedPct = erodedPctProp ?? erodedPctLocal;
+  const setErodedPct = onErodedPctChange ?? setErodedPctLocal;
   const dr = computeBaruukRestraintDr(erodedPct / 100);
 
   return (
@@ -155,20 +164,28 @@ function BaruukRestraintPassive() {
         min={0}
         max={100}
         onChange={setErodedPct}
-        tooltip="Baruuk passive: DR scales linearly with eroded Restraint (wiki: full erosion → 50% DR)."
+        tooltip="Baruuk passive: DR scales linearly with eroded Restraint (wiki: full erosion → 50% DR). Updates Damage Reduction & EHP below."
       />
       <StatRow
         label="Restraint DR"
         value={`${(dr * 100).toFixed(0)}%`}
-        color="text-amber-800 dark:text-amber-400"
+        color={dr > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
         tooltip="Max 50% at fully eroded meter (not affected by Ability Strength)."
       />
     </div>
   );
 }
 
-function ValkyrRagePassive() {
-  const [ragePct, setRagePct] = useState(150);
+function ValkyrRagePassive({
+  ragePct: ragePctProp,
+  onRagePctChange,
+}: {
+  ragePct?: number;
+  onRagePctChange?: (n: number) => void;
+}) {
+  const [ragePctLocal, setRagePctLocal] = useState(0);
+  const ragePct = ragePctProp ?? ragePctLocal;
+  const setRagePct = onRagePctChange ?? setRagePctLocal;
   const meleeBonus = computeValkyrRageMeleeBonus(ragePct);
   const deathPrev = valkyrRageDeathPreventionActive(ragePct);
 
@@ -180,13 +197,13 @@ function ValkyrRagePassive() {
         min={0}
         max={300}
         onChange={setRagePct}
-        tooltip="Valkyr Rage: melee damage bonus equals meter % (cap 300%). Death prevention at ≥150%."
+        tooltip="Valkyr Rage: melee damage bonus equals meter % (cap 300%, applied to Valkyr Talons below). Death prevention at ≥150%."
       />
       <StatRow
         label="Melee Damage"
         value={`+${(meleeBonus * 100).toFixed(0)}%`}
-        color="text-red-700 dark:text-red-400"
-        tooltip="Flat additive melee damage bonus from Rage (not × Ability Strength)."
+        color={meleeBonus > 0 ? "text-red-700 dark:text-red-400" : "text-muted-foreground"}
+        tooltip="Flat additive melee damage bonus from Rage (applied to Valkyr Talons & equipped melee; not × Ability Strength)."
       />
       <StatRow
         label="Death Prevention"
@@ -201,11 +218,17 @@ function ValkyrRagePassive() {
 function EmberHeatPassive({
   immolationHeatPct,
   onImmolationHeatPctChange,
+  heatEnemies: heatEnemiesProp,
+  onHeatEnemiesChange,
 }: {
   immolationHeatPct: number;
   onImmolationHeatPctChange: (n: number) => void;
+  heatEnemies?: number;
+  onHeatEnemiesChange?: (n: number) => void;
 }) {
-  const [heatEnemies, setHeatEnemies] = useState(5);
+  const [heatEnemiesLocal, setHeatEnemiesLocal] = useState(0);
+  const heatEnemies = heatEnemiesProp ?? heatEnemiesLocal;
+  const setHeatEnemies = onHeatEnemiesChange ?? setHeatEnemiesLocal;
   const bonusStr = computeEmberPassiveAbilityStrength(heatEnemies);
 
   return (
@@ -224,20 +247,28 @@ function EmberHeatPassive({
         min={0}
         max={40}
         onChange={setHeatEnemies}
-        tooltip="Ember passive: +5% Ability Strength per enemy with active Heat status in Affinity Range."
+        tooltip="Ember passive: +5% Ability Strength per enemy with active Heat status in Affinity Range (updates Ability Strength & ability values)."
       />
       <StatRow
         label="Passive Strength"
         value={`+${(bonusStr * 100).toFixed(0)}%`}
-        color="text-orange-700 dark:text-orange-400"
+        color={bonusStr > 0 ? "text-orange-700 dark:text-orange-400" : "text-muted-foreground"}
         tooltip="Additive Ability Strength from Heat-status enemies (not multiplied by Ability Strength)."
       />
     </div>
   );
 }
 
-function GarudaDeathsGatePassive() {
-  const [kills, setKills] = useState(10);
+function GarudaDeathsGatePassive({
+  kills: killsProp,
+  onKillsChange,
+}: {
+  kills?: number;
+  onKillsChange?: (n: number) => void;
+}) {
+  const [killsLocal, setKillsLocal] = useState(0);
+  const kills = killsProp ?? killsLocal;
+  const setKills = onKillsChange ?? setKillsLocal;
   const dmgBonus = computeGarudaPassiveDamageBonus(kills);
 
   return (
@@ -248,13 +279,13 @@ function GarudaDeathsGatePassive() {
         min={0}
         max={20}
         onChange={setKills}
-        tooltip="Garuda Death's Gate: +5% weapon/melee damage per kill (cap 100% / 20 kills)."
+        tooltip="Garuda Death's Gate: +5% multiplicative damage per kill (cap 100% / 20 kills). Updates Garuda Talons DPS below."
       />
       <StatRow
         label="Damage Bonus"
         value={`+${(dmgBonus * 100).toFixed(0)}%`}
-        color="text-red-700 dark:text-red-400"
-        tooltip="Multiplicative universal weapon bonus (panel-only; not wired into weapon DPS)."
+        color={dmgBonus > 0 ? "text-red-700 dark:text-red-400" : "text-muted-foreground"}
+        tooltip="Multiplicative weapon bonus (applied to Garuda Talons here; toggleable for all weapons in Loadout & Weapon Builder)."
       />
     </div>
   );
@@ -264,12 +295,15 @@ function FrostFortifyingFreezePassive({
   moddedArmor,
   coldEnemies,
   onColdEnemiesChange,
+  armorIncludesPassive,
 }: {
   moddedArmor: number;
   coldEnemies: number;
   onColdEnemiesChange: (n: number) => void;
+  armorIncludesPassive?: boolean;
 }) {
   const bonusArmor = computeFrostPassiveArmor(coldEnemies);
+  const totalWithPassive = armorIncludesPassive ? moddedArmor : moddedArmor + bonusArmor;
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
@@ -279,26 +313,34 @@ function FrostFortifyingFreezePassive({
         min={0}
         max={40}
         onChange={onColdEnemiesChange}
-        tooltip="Frost Fortifying Freeze: +50 Armor per enemy with Cold status in Affinity Range. Also fortifies Snow Globe Initial Health."
+        tooltip="Frost Fortifying Freeze: +50 Armor per enemy with Cold status in Affinity Range. Updates Armor, EHP, and Snow Globe Initial Health."
       />
       <StatRow
         label="Bonus Armor"
         value={`+${bonusArmor}`}
-        color="text-sky-700 dark:text-sky-400"
+        color={bonusArmor > 0 ? "text-sky-700 dark:text-sky-400" : "text-muted-foreground"}
         tooltip="Flat armor after mods (not × Ability Strength). Ability Cold status also lasts +100%."
       />
       <StatRow
         label="Armor w/ Passive"
-        value={(moddedArmor + bonusArmor).toFixed(0)}
+        value={totalWithPassive.toFixed(0)}
         color="text-sky-700 dark:text-sky-400"
-        tooltip="Modded armor + Fortifying Freeze bonus (used by Snow Globe)."
+        tooltip="Modded armor + Fortifying Freeze bonus (used by Armor, EHP, and Snow Globe)."
       />
     </div>
   );
 }
 
-function Cyte09PracticedAimPassive() {
-  const [wpKills, setWpKills] = useState(0);
+function Cyte09PracticedAimPassive({
+  wpKills: wpKillsProp,
+  onWpKillsChange,
+}: {
+  wpKills?: number;
+  onWpKillsChange?: (n: number) => void;
+}) {
+  const [wpKillsLocal, setWpKillsLocal] = useState(0);
+  const wpKills = wpKillsProp ?? wpKillsLocal;
+  const setWpKills = onWpKillsChange ?? setWpKillsLocal;
   const wpCc = computeCyte09PracticedAimCritChance(wpKills);
 
   return (
@@ -309,21 +351,34 @@ function Cyte09PracticedAimPassive() {
         min={0}
         max={300}
         onChange={setWpKills}
-        tooltip="Cyte-09 Practiced Aim: +1% Weak Point Critical Chance per WP kill (mission-long, cap 300%)."
+        tooltip="Cyte-09 Practiced Aim: +1% Weak Point Critical Chance per WP kill (mission-long, cap 300%). Applied to Neutralizer weak-point crit."
       />
       <StatRow
         label="WP Crit Chance"
         value={`+${(wpCc * 100).toFixed(0)}%`}
-        color="text-amber-800 dark:text-amber-400"
+        color={wpCc > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
         tooltip="Additive to weapon crit chance vs weak points (not × Ability Strength)."
       />
     </div>
   );
 }
 
-function GrendelBellyArmorPassive({ moddedArmor }: { moddedArmor: number }) {
-  const [gutEnemies, setGutEnemies] = useState(3);
+function GrendelBellyArmorPassive({
+  moddedArmor,
+  gutEnemies: gutEnemiesProp,
+  onGutEnemiesChange,
+  armorIncludesPassive,
+}: {
+  moddedArmor: number;
+  gutEnemies?: number;
+  onGutEnemiesChange?: (n: number) => void;
+  armorIncludesPassive?: boolean;
+}) {
+  const [gutEnemiesLocal, setGutEnemiesLocal] = useState(0);
+  const gutEnemies = gutEnemiesProp ?? gutEnemiesLocal;
+  const setGutEnemies = onGutEnemiesChange ?? setGutEnemiesLocal;
   const bonusArmor = computeGrendelPassiveArmor(gutEnemies);
+  const totalWithPassive = armorIncludesPassive ? moddedArmor : moddedArmor + bonusArmor;
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
@@ -333,17 +388,17 @@ function GrendelBellyArmorPassive({ moddedArmor }: { moddedArmor: number }) {
         min={0}
         max={5}
         onChange={setGutEnemies}
-        tooltip="Grendel passive: +250 Armor per living Feast victim (cap 5 → +1,250). Catgut not included."
+        tooltip="Grendel passive: +250 Armor per living Feast victim (cap 5 → +1,250). Updates Armor & EHP below."
       />
       <StatRow
         label="Bonus Armor"
         value={`+${bonusArmor}`}
-        color="text-amber-800 dark:text-amber-400"
+        color={bonusArmor > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
         tooltip="Flat armor after mods (not × Ability Strength)."
       />
       <StatRow
         label="Armor w/ Passive"
-        value={(moddedArmor + bonusArmor).toFixed(0)}
+        value={totalWithPassive.toFixed(0)}
         color="text-amber-800 dark:text-amber-400"
         tooltip="Modded armor + belly armor. Max +1,250 at 5 enemies (base; Catgut can raise per-enemy)."
       />
@@ -397,10 +452,22 @@ function CalibanAdaptiveArmorPassive({
   );
 }
 
-function ProteaPowerRecorderPassive({ abilityStrength }: { abilityStrength: number }) {
-  const [powerBars, setPowerBars] = useState(3);
+function ProteaPowerRecorderPassive({
+  abilityStrength,
+  powerBars: powerBarsProp,
+  onPowerBarsChange,
+  strengthIncludesPassive,
+}: {
+  abilityStrength: number;
+  powerBars?: number;
+  onPowerBarsChange?: (n: number) => void;
+  strengthIncludesPassive?: boolean;
+}) {
+  const [powerBarsLocal, setPowerBarsLocal] = useState(0);
+  const powerBars = powerBarsProp ?? powerBarsLocal;
+  const setPowerBars = onPowerBarsChange ?? setPowerBarsLocal;
   const bonus = computeProteaPassiveStrengthBonus(powerBars);
-  const nextStr = abilityStrength + bonus;
+  const effectiveStr = strengthIncludesPassive ? abilityStrength : abilityStrength + bonus;
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
@@ -410,19 +477,19 @@ function ProteaPowerRecorderPassive({ abilityStrength }: { abilityStrength: numb
         min={0}
         max={3}
         onChange={setPowerBars}
-        tooltip="Protea: 1 bar per cast; at 3 bars the next cast gets +100% Ability Strength, then resets."
+        tooltip="Protea: 1 bar per cast; at 3 bars the next cast gets +100% Ability Strength (updates Ability Strength & all ability cards), then resets."
       />
       <StatRow
         label="Next Cast STR"
-        value={bonus > 0 ? `+${(bonus * 100).toFixed(0)}% Ready` : "Charging"}
+        value={bonus > 0 ? `+${(bonus * 100).toFixed(0)}% Ready` : `Charging (${powerBars}/3)`}
         color={bonus > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
-        tooltip="Additive +100% Ability Strength on the empowered cast only."
+        tooltip="Additive +100% Ability Strength on the 4th cast when all 3 Power Bars are filled."
       />
       <StatRow
         label="Effective STR"
-        value={`${(nextStr * 100).toFixed(0)}%`}
-        color="text-amber-800 dark:text-amber-400"
-        tooltip="Current Ability Strength + passive bonus if power recorder is full."
+        value={`${(effectiveStr * 100).toFixed(0)}%`}
+        color={bonus > 0 ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
+        tooltip="Ability Strength applied to ability cards at the selected Power Bars."
       />
     </div>
   );
@@ -458,51 +525,37 @@ function StyanaxHoplitePassive({ moddedShield }: { moddedShield: number }) {
 }
 
 function YareliCriticalFlowPassive() {
-  const [moving, setMoving] = useState(true);
-  const cc = computeYareliCriticalFlowCritChance(moving);
+  const cc = computeYareliCriticalFlowCritChance(true);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
-        <span>Active while moving (≥1.5s)</span>
-        <input
-          type="checkbox"
-          checked={moving}
-          onChange={(e) => setMoving(e.target.checked)}
-          className="h-3.5 w-3.5 rounded border-border accent-sky-500"
-        />
-      </label>
       <StatRow
-        label="Secondary CC"
+        label="Secondary CC (moving ≥1.5s)"
         value={`+${(cc * 100).toFixed(0)}%`}
-        color={moving ? "text-sky-700 dark:text-sky-400" : "text-muted-foreground"}
-        tooltip="Additive to secondary weapon base crit chance mods. Toggleable in Loadout & linked Weapon Builder simulation."
+        color="text-sky-700 dark:text-sky-400"
+        tooltip="Additive to Secondary weapon critical chance mods while moving for at least 1.5s."
       />
+      <p className="text-[9px] text-muted-foreground/80 leading-snug">
+        Weapon buff — toggleable in Weapon Builder &amp; Loadout simulation.
+      </p>
     </div>
   );
 }
 
 function ZephyrAirbornePassive() {
-  const [airborne, setAirborne] = useState(true);
-  const cc = computeZephyrAirborneCritChance(airborne);
+  const cc = computeZephyrAirborneCritChance(true);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
-        <span>Active while airborne</span>
-        <input
-          type="checkbox"
-          checked={airborne}
-          onChange={(e) => setAirborne(e.target.checked)}
-          className="h-3.5 w-3.5 rounded border-border accent-sky-500"
-        />
-      </label>
       <StatRow
-        label="Weapon CC"
+        label="Weapon CC (airborne)"
         value={`+${(cc * 100).toFixed(0)}%`}
-        color={airborne ? "text-sky-700 dark:text-sky-400" : "text-muted-foreground"}
-        tooltip="Additive to all equipped weapons' crit chance while airborne. Toggleable in Loadout & linked Weapon Builder simulation."
+        color="text-sky-700 dark:text-sky-400"
+        tooltip="Additive to all equipped weapons' critical chance while airborne."
       />
+      <p className="text-[9px] text-muted-foreground/80 leading-snug">
+        Weapon buff — toggleable in Weapon Builder &amp; Loadout simulation.
+      </p>
     </div>
   );
 }
@@ -796,32 +849,22 @@ function HydroidCorrosivePassive() {
 }
 
 function DanteChroniclersMarkPassive() {
-  const [baseScPct, setBaseScPct] = useState(40);
-  const base = baseScPct / 100;
-  const unscanned = computeDanteChroniclersMarkStatusChance(base, false);
-  const scanned = computeDanteChroniclersMarkStatusChance(base, true);
+  const sampleBase = 0.4;
+  const scanned = computeDanteChroniclersMarkStatusChance(sampleBase, true);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Weapon SC %"
-        value={baseScPct}
-        min={0}
-        max={100}
-        onChange={setBaseScPct}
-        tooltip="Post-mod Status Chance before Chronicler's Mark (multiplicative ×1.5 on fully Codex-scanned foes)."
-      />
       <StatRow
-        label="Unscanned"
-        value={`${(unscanned * 100).toFixed(0)}%`}
-        color="text-muted-foreground"
-        tooltip="Status Chance vs enemies without completed Codex research (no Chronicler's Mark)."
-      />
-      <StatRow
-        label="Fully Scanned"
-        value={`${(scanned * 100).toFixed(0)}%`}
+        label="Scanned Foe Status"
+        value="×1.5 (+50% final)"
         color="text-amber-800 dark:text-amber-400"
-        tooltip="×1.5 vs fully researched enemies. Wiki example: 40% × 1.5 = 60%."
+        tooltip="Multiplicative ×1.5 Status Chance vs enemies with completed Codex research."
+      />
+      <StatRow
+        label="Example (40% SC)"
+        value={`40% → ${(scanned * 100).toFixed(0)}%`}
+        color="text-muted-foreground"
+        tooltip="Post-mod Status Chance before Chronicler's Mark (wiki example: 40% × 1.5 = 60%)."
       />
     </div>
   );
@@ -1002,7 +1045,7 @@ function OctaviaInspirationPassivePanel() {
 
 function NekrosDeathHealPassivePanel() {
   const heal = computeNekrosDeathHealPassive();
-  const [deaths, setDeaths] = useState(10);
+  const [deaths, setDeaths] = useState(0);
   const total = computeNekrosDeathHealTotal(deaths);
 
   return (
@@ -1196,7 +1239,7 @@ function KhoraVenariPassivePanel() {
 
 function OberonRighteousNegationPassivePanel() {
   const negation = computeOberonRighteousNegationPassive();
-  const [stacks, setStacks] = useState(3);
+  const [stacks, setStacks] = useState(0);
   const clamped = computeOberonRighteousNegationStacks(stacks);
   const nextInvuln =
     clamped <= 0 ? 0 : clamped === 1 ? negation.invulnOnFinalSec : negation.invulnOnConsumeSec;
@@ -1252,32 +1295,49 @@ function JadeJudgmentPassivePanel() {
   );
 }
 
-function TempleBackbeatPassivePanel({ abilityEfficiency }: { abilityEfficiency: number }) {
+function TempleBackbeatPassivePanel({
+  abilityEfficiency,
+  active: activeProp,
+  onActiveChange,
+  efficiencyIncludesPassive,
+}: {
+  abilityEfficiency: number;
+  active?: boolean;
+  onActiveChange?: (v: boolean) => void;
+  efficiencyIncludesPassive?: boolean;
+}) {
+  const [activeLocal, setActiveLocal] = useState(false);
+  const active = activeProp ?? activeLocal;
+  const setActive = onActiveChange ?? setActiveLocal;
   const bonus = computeTempleBackbeatEfficiencyBonus(true);
-  const onBeatEff = abilityEfficiency + bonus;
+  const baseEff = efficiencyIncludesPassive && active ? abilityEfficiency - bonus : abilityEfficiency;
+  const onBeatEff = baseEff + bonus;
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
       <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
         Cast while the metronome is in the Backbeat zone to amplify the ability and gain Efficiency.
       </p>
-      <StatRow
-        label="Backbeat EFF"
-        value={`+${(bonus * 100).toFixed(0)}%`}
-        color="text-fuchsia-700 dark:text-fuchsia-400"
-        tooltip="Additive Ability Efficiency on timed casts (also fuels Exalted and per-ability bonuses)."
-      />
+      <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
+        <span>Apply Backbeat (+50% Efficiency)</span>
+        <input
+          type="checkbox"
+          checked={active}
+          onChange={(e) => setActive(e.target.checked)}
+          className="h-3.5 w-3.5 rounded border-border accent-fuchsia-500"
+        />
+      </label>
       <StatRow
         label="EFF on Backbeat"
         value={formatAbilityEfficiencyPct(onBeatEff)}
-        color="text-amber-800 dark:text-amber-400"
-        tooltip={`Your Ability Efficiency (${formatAbilityEfficiencyPct(abilityEfficiency)}) + Backbeat bonus.${abilityEfficiencyCapNote(onBeatEff) ? ` ${abilityEfficiencyCapNote(onBeatEff)}` : ""}`}
+        color={active ? "text-fuchsia-700 dark:text-fuchsia-400" : "text-amber-800 dark:text-amber-400"}
+        tooltip={`Your Ability Efficiency (${formatAbilityEfficiencyPct(baseEff)}) + Backbeat bonus.${abilityEfficiencyCapNote(onBeatEff) ? ` ${abilityEfficiencyCapNote(onBeatEff)}` : ""}`}
       />
       <StatRow
         label="EFF off Beat"
-        value={formatAbilityEfficiencyPct(abilityEfficiency)}
+        value={formatAbilityEfficiencyPct(baseEff)}
         color="text-muted-foreground"
-        tooltip={abilityEfficiencyCapNote(abilityEfficiency) ?? "Ability Efficiency without a Backbeat cast."}
+        tooltip={abilityEfficiencyCapNote(baseEff) ?? "Ability Efficiency without a Backbeat cast."}
       />
     </div>
   );
@@ -1373,8 +1433,8 @@ function GaraPassiveBlindPanel() {
 
 function LimboRiftPassivePanel() {
   const rift = computeLimboRiftPassive();
-  const [riftKills, setRiftKills] = useState(5);
-  const [secondsInRift, setSecondsInRift] = useState(10);
+  const [riftKills, setRiftKills] = useState(0);
+  const [secondsInRift, setSecondsInRift] = useState(0);
   const energy = computeLimboRiftEnergyGained(riftKills, secondsInRift, rift);
 
   return (
@@ -1482,25 +1542,26 @@ function AtlasKnockdownPassivePanel() {
 }
 
 function NyxPsychicPassivePanel() {
-  const [confused, setConfused] = useState(3);
-  const cc = computeNyxPsychicCritChance(confused);
+  const perEnemy = computeNyxPsychicCritChance(1);
+  const cap = computeNyxPsychicCritChance(5);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <SimSlider
-        label="Confused Enemies"
-        value={confused}
-        min={0}
-        max={8}
-        onChange={setConfused}
-        tooltip="Nyx: +40% Primary/Secondary Critical Chance per Confused enemy within Affinity Range (cap +200%)."
+      <StatRow
+        label="Gun CC / Confused Foe"
+        value={`+${(perEnemy * 100).toFixed(0)}%`}
+        color="text-violet-800 dark:text-violet-300"
+        tooltip="Nyx: +40% Primary/Secondary Critical Chance per Confused enemy within Affinity Range."
       />
       <StatRow
-        label="Gun Crit Chance"
-        value={`+${(cc * 100).toFixed(0)}%`}
+        label="Max Gun CC (5 foes)"
+        value={`+${(cap * 100).toFixed(0)}%`}
         color="text-violet-800 dark:text-violet-300"
-        tooltip="Additive to Primary/Secondary crit chance mods. Cap at 5 Confused enemies."
+        tooltip="Additive to Primary & Secondary critical chance mods (capped at 5 Confused enemies)."
       />
+      <p className="text-[9px] text-muted-foreground/80 leading-snug">
+        Weapon buff — applies to Primary &amp; Secondary weapons.
+      </p>
     </div>
   );
 }
@@ -1527,7 +1588,7 @@ function HarrowPassivePanel() {
 }
 
 function GyreAbilityCritPassivePanel() {
-  const [stacks, setStacks] = useState(5);
+  const [stacks, setStacks] = useState(0);
   const crit = computeGyreAbilityCritChance(stacks);
 
   return (
@@ -1568,8 +1629,16 @@ function GyreAbilityCritPassivePanel() {
   );
 }
 
-function CitrineGeoluminesencePassivePanel() {
-  const [orbs, setOrbs] = useState(0);
+function CitrineGeoluminesencePassivePanel({
+  orbs: orbsProp,
+  onOrbsChange,
+}: {
+  orbs?: number;
+  onOrbsChange?: (n: number) => void;
+}) {
+  const [orbsLocal, setOrbsLocal] = useState(0);
+  const orbs = orbsProp ?? orbsLocal;
+  const setOrbs = onOrbsChange ?? setOrbsLocal;
   const geo = computeCitrineGeoluminesence(orbs);
 
   return (
@@ -1580,7 +1649,7 @@ function CitrineGeoluminesencePassivePanel() {
         min={0}
         max={geo.orbsToMax}
         onChange={setOrbs}
-        tooltip="Citrine Geoluminesence: +0.1 Health/s per Health/Universal Orb permanently (mission), up to 25/s."
+        tooltip="Citrine Geoluminesence: +0.1 Health/s per Health/Universal Orb permanently (mission), up to 25/s. Updates Health Regen below."
       />
       <StatRow
         label="Heal / s"
@@ -1686,9 +1755,20 @@ function HildrynShieldGatePassivePanel() {
   );
 }
 
-function NidusUndyingPassivePanel() {
-  const [stacks, setStacks] = useState(30);
+function NidusUndyingPassivePanel({
+  stacks: stacksProp,
+  onStacksChange,
+  hasAbundantMutation,
+}: {
+  stacks?: number;
+  onStacksChange?: (n: number) => void;
+  hasAbundantMutation?: boolean;
+}) {
+  const [stacksLocal, setStacksLocal] = useState(0);
+  const stacks = stacksProp ?? stacksLocal;
+  const setStacks = onStacksChange ?? setStacksLocal;
   const undying = computeNidusUndyingPassive(stacks);
+  const maxStacks = hasAbundantMutation ? 300 : undying.stackCap;
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
@@ -1696,15 +1776,15 @@ function NidusUndyingPassivePanel() {
         label="Mutation Stacks"
         value={stacks}
         min={0}
-        max={undying.stackCap}
+        max={maxStacks}
         onChange={setStacks}
-        tooltip="Nidus Undying: at ≥15 Mutation stacks on lethal damage, consume 15 stacks for 5s invuln and 50% Health."
+        tooltip="Nidus Undying: at ≥15 Mutation stacks on lethal damage, consume 15 stacks for 5s invuln and 50% Health. Also scales Virulence damage."
       />
       <StatRow
         label="Undying"
         value={undying.undyingReady ? "Ready" : "Need 15"}
         color={undying.undyingReady ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
-        tooltip={`${undying.invulnSec}s invulnerability · restore ${(undying.healFraction * 100).toFixed(0)}% Health. Cap ${undying.stackCap} stacks.`}
+        tooltip={`${undying.invulnSec}s invulnerability · restore ${(undying.healFraction * 100).toFixed(0)}% Health. Cap ${maxStacks} stacks.`}
       />
       <StatRow
         label="After Proc"
@@ -1759,7 +1839,7 @@ function WispAirborneInvisPassivePanel() {
 
 function FollieInkblotPassivePanel() {
   const ink = computeFollieInkblotPassive();
-  const [kills, setKills] = useState(10);
+  const [kills, setKills] = useState(0);
   const expected = computeFollieInkblotExpected(kills, ink);
 
   return (
@@ -2037,8 +2117,8 @@ function UrielLegionPassivePanel() {
 function AdaptationSurvivability({ stats }: { stats: WarframeCalculatedStats }) {
   const perStack = stats.adaptationDrPerStack ?? ADAPTATION_DR_PER_STACK;
   const maxStacks = adaptationMaxStacks(perStack);
-  const [stacksRaw, setStacks] = useState<number | null>(null);
-  const stacks = Math.min(stacksRaw ?? maxStacks, maxStacks);
+  const [stacksRaw, setStacks] = useState<number>(0);
+  const stacks = Math.min(stacksRaw, maxStacks);
   const armorDR = stats.damageReduction / 100;
   const { typedDRPercent, combinedDRPercent, adaptedEHP } = computeAdaptationSurvivability(
     stats.effectiveHealth,
@@ -2093,12 +2173,12 @@ const WF_ARCANE_STACK_SLIDERS: Record<string, { label: string; tooltip: string }
   arcane_impetus: {
     label: "Impetus: unique ability statuses",
     tooltip:
-      "One stack per unique status type your abilities have applied (20 s, refreshed by any ability damage). Default 14 = the wiki's maximum realistic count (13 without Helminth).",
+      "One stack per unique status type your abilities have applied (20 s, refreshed by any ability damage; max 14 with Helminth, 13 without).",
   },
   arcane_camisado: {
     label: "Camisado: summon hit stacks",
     tooltip:
-      "Stacks from your summons' attacks; the bonus applies to your next ability cast. Default 10 = full stacks (wiki max +60% at R5), i.e. the strength of a cast made at full stacks.",
+      "Stacks from your summons' attacks; the bonus applies to your next ability cast (wiki max +60% at R5 / 10 stacks).",
   },
 };
 
@@ -2108,7 +2188,7 @@ function wfArcaneStackSlider(id: string, name: string, fullStacks: number | unde
   return (
     WF_ARCANE_STACK_SLIDERS[id] ?? {
       label: `${name}: stacks`,
-      tooltip: `Stacks applied to the warframe stats. Default ${fullStacks} = full stacks (wiki maximum at this rank); drag down to see partial stacks.`,
+      tooltip: `Set how many stacks (0 to ${fullStacks} at this rank) apply to Warframe stats.`,
     }
   );
 }
@@ -2200,6 +2280,8 @@ export function WarframeStatsPanel({
   allMods,
   equippedArcanes,
   arcaneRanks,
+  passiveSim,
+  onPassiveSimChange,
   frostColdEnemies: frostColdEnemiesProp,
   onFrostColdEnemiesChange,
   emberImmolationHeatPct: emberImmolationHeatPctProp,
@@ -2218,6 +2300,9 @@ export function WarframeStatsPanel({
   allMods?: Map<string, Mod>;
   equippedArcanes?: (Mod | null)[];
   arcaneRanks?: number[];
+  /** Unified Warframe passive simulation state (default-off baseline; drives Warframe stats, ability cards, and Exalted weapons). */
+  passiveSim?: Partial<WarframePassiveSimState>;
+  onPassiveSimChange?: (patch: Partial<WarframePassiveSimState>) => void;
   /** Controlled Fortifying Freeze sim (builder wires this into Snow Globe). */
   frostColdEnemies?: number;
   onFrostColdEnemiesChange?: (n: number) => void;
@@ -2236,15 +2321,23 @@ export function WarframeStatsPanel({
   /** Unspent mod capacity (adds 5 starting energy each, wiki Energy Capacity). */
   freeModCapacity?: number;
 }) {
-  const [frostColdEnemiesLocal, setFrostColdEnemiesLocal] = useState(5);
-  const frostColdEnemies = frostColdEnemiesProp ?? frostColdEnemiesLocal;
+  const passiveControlled = Boolean(onPassiveSimChange);
+  const [frostColdEnemiesLocal, setFrostColdEnemiesLocal] = useState(0);
+  const frostColdEnemies = passiveSim?.frostColdEnemies ?? frostColdEnemiesProp ?? frostColdEnemiesLocal;
   const [emberHeatLocal, setEmberHeatLocal] = useState(0);
-  const emberImmolationHeatPct = emberImmolationHeatPctProp ?? emberHeatLocal;
-  const setEmberImmolationHeatPct = onEmberImmolationHeatPctChange ?? setEmberHeatLocal;
-  const [gaussBatteryLocal, setGaussBatteryLocal] = useState(80);
-  const gaussBatteryPct = gaussBatteryPctProp ?? gaussBatteryLocal;
-  const setGaussBatteryPct = onGaussBatteryPctChange ?? setGaussBatteryLocal;
-  const setFrostColdEnemies = onFrostColdEnemiesChange ?? setFrostColdEnemiesLocal;
+  const emberImmolationHeatPct =
+    passiveSim?.emberImmolationHeatPct ?? emberImmolationHeatPctProp ?? emberHeatLocal;
+  const setEmberImmolationHeatPct = onPassiveSimChange
+    ? (n: number) => onPassiveSimChange({ emberImmolationHeatPct: n })
+    : (onEmberImmolationHeatPctChange ?? setEmberHeatLocal);
+  const [gaussBatteryLocal, setGaussBatteryLocal] = useState(0);
+  const gaussBatteryPct = passiveSim?.gaussBatteryPct ?? gaussBatteryPctProp ?? gaussBatteryLocal;
+  const setGaussBatteryPct = onPassiveSimChange
+    ? (n: number) => onPassiveSimChange({ gaussBatteryPct: n })
+    : (onGaussBatteryPctChange ?? setGaussBatteryLocal);
+  const setFrostColdEnemies = onPassiveSimChange
+    ? (n: number) => onPassiveSimChange({ frostColdEnemies: n })
+    : (onFrostColdEnemiesChange ?? setFrostColdEnemiesLocal);
 
   const arcaneDisplays = useMemo(() => {
     if (!equippedArcanes || !stats) return [];
@@ -2315,25 +2408,77 @@ export function WarframeStatsPanel({
               onBatteryPctChange={setGaussBatteryPct}
             />
           )}
-          {(warframe.id === "baruuk" || warframe.id === "baruuk_prime") && <BaruukRestraintPassive />}
-          {(warframe.id === "valkyr" || warframe.id === "valkyr_prime") && <ValkyrRagePassive />}
+          {(warframe.id === "baruuk" || warframe.id === "baruuk_prime") && (
+            <BaruukRestraintPassive
+              erodedPct={passiveSim?.baruukRestraintErodedPct}
+              onErodedPctChange={
+                onPassiveSimChange
+                  ? (n) => onPassiveSimChange({ baruukRestraintErodedPct: n })
+                  : undefined
+              }
+            />
+          )}
+          {(warframe.id === "valkyr" || warframe.id === "valkyr_prime") && (
+            <ValkyrRagePassive
+              ragePct={passiveSim?.valkyrRagePct}
+              onRagePctChange={
+                onPassiveSimChange
+                  ? (n) => onPassiveSimChange({ valkyrRagePct: n })
+                  : undefined
+              }
+            />
+          )}
           {(warframe.id === "ember" || warframe.id === "ember_prime") && (
             <EmberHeatPassive
               immolationHeatPct={emberImmolationHeatPct}
               onImmolationHeatPctChange={setEmberImmolationHeatPct}
+              heatEnemies={passiveSim?.emberHeatEnemies}
+              onHeatEnemiesChange={
+                onPassiveSimChange
+                  ? (n) => onPassiveSimChange({ emberHeatEnemies: n })
+                  : undefined
+              }
             />
           )}
-          {(warframe.id === "garuda" || warframe.id === "garuda_prime") && <GarudaDeathsGatePassive />}
+          {(warframe.id === "garuda" || warframe.id === "garuda_prime") && (
+            <GarudaDeathsGatePassive
+              kills={passiveSim?.garudaKillStacks}
+              onKillsChange={
+                onPassiveSimChange
+                  ? (n) => onPassiveSimChange({ garudaKillStacks: n })
+                  : undefined
+              }
+            />
+          )}
           {(warframe.id === "frost" || warframe.id === "frost_prime") && (
             <FrostFortifyingFreezePassive
               moddedArmor={stats.totalArmor}
               coldEnemies={frostColdEnemies}
               onColdEnemiesChange={setFrostColdEnemies}
+              armorIncludesPassive={passiveControlled}
             />
           )}
-          {warframe.id === "cyte_09" && <Cyte09PracticedAimPassive />}
+          {warframe.id === "cyte_09" && (
+            <Cyte09PracticedAimPassive
+              wpKills={passiveSim?.cyteWeakPointKills}
+              onWpKillsChange={
+                onPassiveSimChange
+                  ? (n) => onPassiveSimChange({ cyteWeakPointKills: n })
+                  : undefined
+              }
+            />
+          )}
           {(warframe.id === "grendel" || warframe.id === "grendel_prime") && (
-            <GrendelBellyArmorPassive moddedArmor={stats.totalArmor} />
+            <GrendelBellyArmorPassive
+              moddedArmor={stats.totalArmor}
+              gutEnemies={passiveSim?.grendelGutEnemies}
+              onGutEnemiesChange={
+                onPassiveSimChange
+                  ? (n) => onPassiveSimChange({ grendelGutEnemies: n })
+                  : undefined
+              }
+              armorIncludesPassive={passiveControlled}
+            />
           )}
           {(warframe.id === "caliban" || warframe.id === "caliban_prime") && (
             <CalibanAdaptiveArmorPassive
@@ -2342,7 +2487,16 @@ export function WarframeStatsPanel({
             />
           )}
           {(warframe.id === "protea" || warframe.id === "protea_prime") && (
-            <ProteaPowerRecorderPassive abilityStrength={stats.abilityStrength} />
+            <ProteaPowerRecorderPassive
+              abilityStrength={stats.abilityStrength}
+              powerBars={passiveSim?.proteaPowerBars}
+              onPowerBarsChange={
+                onPassiveSimChange
+                  ? (n) => onPassiveSimChange({ proteaPowerBars: n })
+                  : undefined
+              }
+              strengthIncludesPassive={passiveControlled}
+            />
           )}
           {(warframe.id === "styanax" || warframe.id === "styanax_prime") && (
             <StyanaxHoplitePassive moddedShield={stats.totalShield} />
@@ -2382,7 +2536,16 @@ export function WarframeStatsPanel({
           {(warframe.id === "oberon" || warframe.id === "oberon_prime") && <OberonRighteousNegationPassivePanel />}
           {warframe.id === "jade" && <JadeJudgmentPassivePanel />}
           {warframe.id === "temple" && (
-            <TempleBackbeatPassivePanel abilityEfficiency={stats.abilityEfficiency} />
+            <TempleBackbeatPassivePanel
+              abilityEfficiency={stats.abilityEfficiency}
+              active={passiveSim?.templeBackbeatActive}
+              onActiveChange={
+                onPassiveSimChange
+                  ? (v) => onPassiveSimChange({ templeBackbeatActive: v })
+                  : undefined
+              }
+              efficiencyIncludesPassive={passiveControlled}
+            />
           )}
           {warframe.id === "oraxia" && <OraxiaPredatorsLurkPassivePanel />}
           {(warframe.id === "rhino" || warframe.id === "rhino_prime") && <RhinoHardLandingPassivePanel />}
@@ -2395,11 +2558,32 @@ export function WarframeStatsPanel({
           {(warframe.id === "nyx" || warframe.id === "nyx_prime") && <NyxPsychicPassivePanel />}
           {(warframe.id === "harrow" || warframe.id === "harrow_prime") && <HarrowPassivePanel />}
           {(warframe.id === "gyre" || warframe.id === "gyre_prime") && <GyreAbilityCritPassivePanel />}
-          {(warframe.id === "citrine" || warframe.id === "citrine_prime") && <CitrineGeoluminesencePassivePanel />}
+          {(warframe.id === "citrine" || warframe.id === "citrine_prime") && (
+            <CitrineGeoluminesencePassivePanel
+              orbs={passiveSim?.citrineGeolumOrbs}
+              onOrbsChange={
+                onPassiveSimChange
+                  ? (n) => onPassiveSimChange({ citrineGeolumOrbs: n })
+                  : undefined
+              }
+            />
+          )}
           {(warframe.id === "chroma" || warframe.id === "chroma_prime") && <ChromaPassivePanel />}
           {(warframe.id === "titania" || warframe.id === "titania_prime") && <TitaniaUpsurgePassivePanel />}
           {(warframe.id === "hildryn" || warframe.id === "hildryn_prime") && <HildrynShieldGatePassivePanel />}
-          {(warframe.id === "nidus" || warframe.id === "nidus_prime") && <NidusUndyingPassivePanel />}
+          {(warframe.id === "nidus" || warframe.id === "nidus_prime") && (
+            <NidusUndyingPassivePanel
+              stacks={passiveSim?.nidusMutationStacks}
+              onStacksChange={
+                onPassiveSimChange
+                  ? (n) => onPassiveSimChange({ nidusMutationStacks: n })
+                  : undefined
+              }
+              hasAbundantMutation={equippedMods?.some(
+                (m) => m.modId === "augment_nidus_abundant_mutation",
+              )}
+            />
+          )}
           {warframe.id === "sirius_orion" && <SiriusOrionPassivePanel />}
           {(warframe.id === "wisp" || warframe.id === "wisp_prime") && <WispAirborneInvisPassivePanel />}
           {warframe.id === "follie" && <FollieInkblotPassivePanel />}
@@ -2712,6 +2896,11 @@ export function WarframeStatsPanel({
             const conditionalActive = canToggleSingleConditional
               ? (arcaneStacksById?.[info.id] ?? 1) > 0
               : true;
+            const usedStacks =
+              info.fullStacks != null
+                ? (stats.arcaneStackCounts?.[info.id] ?? arcaneStacksById?.[info.id] ?? info.fullStacks)
+                : undefined;
+            const effectiveActive = slider ? (usedStacks ?? 0) > 0 : conditionalActive;
 
             return (
               <div key={info.name} className="py-1.5 border-b border-border/30 last:border-0">
@@ -2719,8 +2908,9 @@ export function WarframeStatsPanel({
                   <span className="text-xs font-medium text-purple-300">{info.name}</span>
                   <span className="flex items-center gap-1.5 shrink-0">
                     {info.fullStacks != null && !canToggleSingleConditional && (() => {
-                      const used = stats.arcaneStackCounts?.[info.id] ?? info.fullStacks;
+                      const used = usedStacks ?? info.fullStacks;
                       const full = used >= info.fullStacks;
+                      const off = slider != null && used === 0;
                       const title =
                         info.id === "arcane_intention"
                           ? `Stacks = this build's channeled abilities on the wiki's eligible list (Helminth and augments included), max ${info.fullStacks}.`
@@ -2729,11 +2919,20 @@ export function WarframeStatsPanel({
                             : `Warframe stats assume this arcane is at full stacks (${info.fullStacks}).`;
                       return (
                         <span
-                          className="rounded border border-purple-500/40 px-1 text-[9px] text-purple-700 dark:text-purple-300"
+                          className={cn(
+                            "rounded border px-1 text-[9px]",
+                            off
+                              ? "border-border text-muted-foreground"
+                              : "border-purple-500/40 text-purple-700 dark:text-purple-300",
+                          )}
                           title={title}
                           data-testid="arcane-full-stacks"
                         >
-                          {full ? `Full stacks ×${info.fullStacks}` : `Stacks ×${used}/${info.fullStacks}`}
+                          {off
+                            ? `Off (0/${info.fullStacks})`
+                            : full
+                              ? `Full stacks ×${info.fullStacks}`
+                              : `Stacks ×${used}/${info.fullStacks}`}
                         </span>
                       );
                     })()}
@@ -2746,7 +2945,7 @@ export function WarframeStatsPanel({
                             : "border-border text-muted-foreground",
                         )}
                       >
-                        {conditionalActive ? "Active" : "Off"}
+                        {conditionalActive ? "Active" : "Off (Paper)"}
                       </span>
                     )}
                     <span className="text-[10px] text-muted-foreground font-mono">R{info.rank}/{info.maxRank}</span>
@@ -2756,7 +2955,7 @@ export function WarframeStatsPanel({
                   <div className="py-1" data-testid={`arcane-stack-slider-${info.id}`}>
                     <SimSlider
                       label={slider.label}
-                      value={Math.min(arcaneStacksById?.[info.id] ?? info.fullStacks, info.fullStacks)}
+                      value={Math.min(usedStacks ?? info.fullStacks, info.fullStacks)}
                       min={0}
                       max={info.fullStacks}
                       onChange={(v) => onArcaneStacksChange(info.id, v)}
@@ -2783,8 +2982,8 @@ export function WarframeStatsPanel({
                   <div key={`a-${i}`} className="py-0.5">
                     <StatRow
                       label={line.label}
-                      value={conditionalActive ? line.value : `${line.value} (off)`}
-                      color={!conditionalActive || line.active === false ? "text-muted-foreground" : "text-purple-700 dark:text-purple-400"}
+                      value={effectiveActive ? line.value : `${line.value} (off)`}
+                      color={!effectiveActive || line.active === false ? "text-muted-foreground" : "text-purple-700 dark:text-purple-400"}
                     />
                     {line.note && (
                       <p className="text-[9px] text-muted-foreground/80 pl-0.5">{line.note}</p>

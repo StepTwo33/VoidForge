@@ -24,7 +24,22 @@ import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
 import { warframeStatSummary } from "@/lib/ui/mobile-stat-summary";
 import { ModPicker, buildSlotNav, SlotType } from "@/components/mod-picker";
 import { useWeapons, useWarframes, useMods, useArchonShards } from "@/lib/weapons/use-data";
-import { calculateWarframeBuild, getWarframeArmorModBase, getWarframeEnergyModBase, getWarframeHealthModBase, getWarframeShieldModBase, calculateWeaponBuild, calculateWeaponBuildWithArcanes, applyWarframeShardsAndArcanes } from "@/lib/calc/calculator";
+import {
+  calculateWarframeBuild,
+  getWarframeArmorModBase,
+  getWarframeEnergyModBase,
+  getWarframeHealthModBase,
+  getWarframeShieldModBase,
+  calculateWeaponBuild,
+  calculateWeaponBuildWithArcanes,
+  applyWarframeShardsAndArcanes,
+  applyWarframePassivePreArcanes,
+  applyWarframePassivePostArcanes,
+  resolveDefaultOffWarframeArcaneStacks,
+  resolveExaltedPassiveBuffs,
+  DEFAULT_WARFRAME_PASSIVE_SIM,
+  type WarframePassiveSimState,
+} from "@/lib/calc/calculator";
 import {
   computeUsedCapacity,
   warframeBaseCapacity,
@@ -51,7 +66,6 @@ import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import { ArchonShardSlot } from "@/components/archon-shard-slot";
 import { allHelminthAbilities, HelminthAbility } from "@/data/helminth";
 import { isNecramechId } from "@/data/archwing";
-import { computeFrostPassiveArmor } from "@/lib/codex/ability-misc-stats";
 import { buildAbilityTTKEntries } from "@/lib/calc/ability-ttk";
 import { helminthToAbility } from "@/lib/builds/helminth-resolve";
 import { AbilityTTKPanel } from "@/components/ability-ttk-panel";
@@ -168,13 +182,8 @@ export default function WarframeBuilderPage() {
   const [helminthPickerOpen, setHelminthPickerOpen] = useState(false);
   const [wfArcaneStacksById, setWfArcaneStacksById] = useState<Record<string, number>>({});
   const [wfConditionalModStacksById, setWfConditionalModStacksById] = useState<Record<string, number>>({});
+  const [wfPassiveSim, setWfPassiveSim] = useState<WarframePassiveSimState>(DEFAULT_WARFRAME_PASSIVE_SIM);
   const [helminthPickerSlot, setHelminthPickerSlot] = useState(0);
-  /** Fortifying Freeze sim — shared with Snow Globe Initial Health. */
-  const [frostColdEnemies, setFrostColdEnemies] = useState(5);
-  /** Immolation heat gauge — shared across Ember ability cards. */
-  const [emberImmolationHeatPct, setEmberImmolationHeatPct] = useState(0);
-  /** Battery gauge — shared across Gauss ability cards + passive. */
-  const [gaussBatteryPct, setGaussBatteryPct] = useState(80);
   const [modPickerMode, setModPickerMode] = useState<"mods" | "arcanes">("mods");
   const [equippedArcanes, setEquippedArcanes] = useState<(Mod | null)[]>([null, null]);
   const [equippedArcaneRanks, setEquippedArcaneRanks] = useState<number[]>([5, 5]);
@@ -214,11 +223,10 @@ export default function WarframeBuilderPage() {
     [selectedWarframe],
   );
 
-  const frostExtraFlatArmor = useMemo(() => {
-    const id = selectedWarframe?.id ?? "";
-    if (id !== "frost" && id !== "frost_prime") return 0;
-    return computeFrostPassiveArmor(frostColdEnemies);
-  }, [selectedWarframe?.id, frostColdEnemies]);
+  const effectiveWfArcaneStacksById = useMemo(
+    () => resolveDefaultOffWarframeArcaneStacks(equippedArcanes, wfArcaneStacksById),
+    [equippedArcanes, wfArcaneStacksById],
+  );
 
   const modSlotsToEquipped = useCallback((mods: { modId: string; rank: number; slotIndex: number }[]): EquippedMod[] => {
     return dropUnknownMods(mods, modsMap).map((m) => {
@@ -411,6 +419,7 @@ export default function WarframeBuilderPage() {
     setEquippedShards(d.shards?.length === 5 ? d.shards : [...EMPTY_SHARDS]);
     setWfArcaneStacksById(d.arcaneStacksById ?? {});
     setWfConditionalModStacksById(d.conditionalModStacksById ?? {});
+    setWfPassiveSim(DEFAULT_WARFRAME_PASSIVE_SIM);
     setSelectedWarframe(wf);
     setHasOrokinReactor(d.hasOrokinReactor);
     setExaltedMods(dropUnknownMods(d.exaltedMods, modsMap).map((m) => {
@@ -588,6 +597,7 @@ export default function WarframeBuilderPage() {
     // Dual-form frames (Orion) can have their own stat block per form.
     const statsWarframe = dualFormConfig ? warframeForDualForm(selectedWarframe, activeDualFormId) : selectedWarframe;
     const stats = calculateWarframeBuild(statsWarframe, modSlots, modsMap, linkage);
+    applyWarframePassivePreArcanes(statsWarframe.id, stats, wfPassiveSim);
     // Arcane Intention counts this build's channeled abilities (Helminth slot substituted).
     const abilities = (statsWarframe.abilities ?? []).map((a, i) =>
       helminthSlot === i && helminthAbility ? helminthToAbility(helminthAbility, statsWarframe.id) : a,
@@ -596,22 +606,29 @@ export default function WarframeBuilderPage() {
       .map((m) => modsMap.get(m.modId)?.name)
       .filter((n): n is string => !!n);
     const withShardsAndArcanes = applyWarframeShardsAndArcanes(stats, equippedShards, equippedArcanes, equippedArcaneRanks, {
-      arcaneStacksById: wfArcaneStacksById,
+      arcaneStacksById: effectiveWfArcaneStacksById,
       conditionalModStacksById: wfConditionalModStacksById,
       equippedModSlots: modSlots,
       abilities,
       equippedModNames,
     });
+    applyWarframePassivePostArcanes(statsWarframe.id, withShardsAndArcanes, wfPassiveSim);
     if (linkedLoadout) {
       applyWeaponIncarnonMobilityToWarframe(withShardsAndArcanes, linkedLoadout);
     }
     return withShardsAndArcanes;
-  }, [selectedWarframe, dualFormConfig, activeDualFormId, equippedMods, equippedShards, equippedArcanes, equippedArcaneRanks, modsMap, helminthSlot, helminthAbility, wfArcaneStacksById, wfConditionalModStacksById, loadoutCtx]);
+  }, [selectedWarframe, dualFormConfig, activeDualFormId, equippedMods, equippedShards, equippedArcanes, equippedArcaneRanks, modsMap, helminthSlot, helminthAbility, effectiveWfArcaneStacksById, wfConditionalModStacksById, wfPassiveSim, loadoutCtx]);
 
-  /** Primary Overcharge on an exalted weapon reads the host frame's max energy. */
+  /** Primary Overcharge on an exalted weapon reads the host frame's max energy; Cyte-09 WP Kills enables weak-point crit preview on Neutralizer. */
   const exaltedSimParams = useMemo<SimulationParams>(
-    () => ({ ...DEFAULT_SIM_PARAMS, warframeMaxEnergy: calculatedStats?.totalEnergy }),
-    [calculatedStats?.totalEnergy],
+    () => ({
+      ...DEFAULT_SIM_PARAMS,
+      warframeMaxEnergy: calculatedStats?.totalEnergy,
+      ...(selectedWarframe?.id === "cyte_09" && wfPassiveSim.cyteWeakPointKills > 0
+        ? { applyHeadshots: true }
+        : {}),
+    }),
+    [calculatedStats?.totalEnergy, selectedWarframe?.id, wfPassiveSim.cyteWeakPointKills],
   );
 
   const exaltedActiveArcanes = useMemo(
@@ -632,25 +649,36 @@ export default function WarframeBuilderPage() {
     [exaltedMeleeArcanes, exaltedMeleeArcaneRanks, exaltedMeleeArcaneConfig.slots],
   );
 
-  /** Exalted DPS scales with host Ability Strength (wiki). */
-  const exaltedCalcOptions = useMemo<WeaponCalculationOptions>(
-    () => ({
+  /** Exalted DPS scales with host Ability Strength + host Warframe passive buffs (wiki). */
+  const exaltedCalcOptions = useMemo<WeaponCalculationOptions>(() => {
+    const externalBuffs = exaltedWeapon
+      ? resolveExaltedPassiveBuffs(selectedWarframe?.id, exaltedWeapon, wfPassiveSim)
+      : [];
+    return {
       abilityStrength: calculatedStats?.abilityStrength ?? 1,
       ...(exaltedActiveArcanes.arcanes.length > 0
         ? { arcaneRanks: exaltedActiveArcanes.arcaneRanks }
         : {}),
-    }),
-    [calculatedStats?.abilityStrength, exaltedActiveArcanes],
-  );
+      ...(externalBuffs.length > 0 ? { externalBuffs } : {}),
+    };
+  }, [calculatedStats?.abilityStrength, exaltedActiveArcanes, exaltedWeapon, selectedWarframe?.id, wfPassiveSim]);
 
-  const exaltedMeleeCalcOptions = useMemo<WeaponCalculationOptions>(
-    () => ({
+  const exaltedMeleeCalcOptions = useMemo<WeaponCalculationOptions>(() => {
+    const externalBuffs = exaltedMeleeWeapon
+      ? resolveExaltedPassiveBuffs(selectedWarframe?.id, exaltedMeleeWeapon, wfPassiveSim)
+      : [];
+    return {
       abilityStrength: calculatedStats?.abilityStrength ?? 1,
       ...(exaltedMeleeActiveArcanes.arcanes.length > 0
         ? { arcaneRanks: exaltedMeleeActiveArcanes.arcaneRanks }
         : {}),
-    }),
-    [calculatedStats?.abilityStrength, exaltedMeleeActiveArcanes],
+      ...(externalBuffs.length > 0 ? { externalBuffs } : {}),
+    };
+  }, [calculatedStats?.abilityStrength, exaltedMeleeActiveArcanes, exaltedMeleeWeapon, selectedWarframe?.id, wfPassiveSim]);
+
+  const exaltedBaseCalcOptions = useMemo<WeaponCalculationOptions>(
+    () => ({ abilityStrength: calculatedStats?.abilityStrength ?? 1 }),
+    [calculatedStats?.abilityStrength],
   );
 
   const exaltedStats = useMemo<CalculatedStats | null>(() => {
@@ -673,7 +701,7 @@ export default function WarframeBuilderPage() {
       slots,
       modsMap,
       undefined,
-      undefined,
+      exaltedSimParams,
       exaltedCalcOptions,
     );
   }, [exaltedWeapon, exaltedMods, exaltedActiveArcanes.arcanes, modsMap, exaltedCalcOptions, exaltedSimParams]);
@@ -698,7 +726,7 @@ export default function WarframeBuilderPage() {
       slots,
       modsMap,
       undefined,
-      undefined,
+      exaltedSimParams,
       exaltedMeleeCalcOptions,
     );
   }, [
@@ -718,9 +746,9 @@ export default function WarframeBuilderPage() {
       modsMap,
       undefined,
       undefined,
-      exaltedCalcOptions,
+      exaltedBaseCalcOptions,
     );
-  }, [exaltedWeapon, modsMap, exaltedCalcOptions]);
+  }, [exaltedWeapon, modsMap, exaltedBaseCalcOptions]);
 
   const exaltedMeleeBaseStats = useMemo<CalculatedStats | null>(() => {
     if (!exaltedMeleeWeapon) return null;
@@ -730,9 +758,9 @@ export default function WarframeBuilderPage() {
       modsMap,
       undefined,
       undefined,
-      exaltedMeleeCalcOptions,
+      exaltedBaseCalcOptions,
     );
-  }, [exaltedMeleeWeapon, modsMap, exaltedMeleeCalcOptions]);
+  }, [exaltedMeleeWeapon, modsMap, exaltedBaseCalcOptions]);
 
   const exaltedContributionContext = useMemo(() => {
     if (!exaltedWeapon) return null;
@@ -918,6 +946,7 @@ export default function WarframeBuilderPage() {
     setEquippedArcaneRanks([5, 5]);
     setWfArcaneStacksById({});
     setWfConditionalModStacksById({});
+    setWfPassiveSim(DEFAULT_WARFRAME_PASSIVE_SIM);
     setExaltedMods([]);
     setExaltedSlotPolarities({});
     setExaltedArcanes([null]);
@@ -1486,17 +1515,22 @@ export default function WarframeBuilderPage() {
                                 formLabel={entry.formLabel}
                                 stats={calculatedStats}
                                 warframeId={selectedWarframe.id}
-                                extraFlatArmor={frostExtraFlatArmor}
                                 immolationHeatPct={
                                   selectedWarframe.id === "ember" ||
                                   selectedWarframe.id === "ember_prime"
-                                    ? emberImmolationHeatPct
+                                    ? wfPassiveSim.emberImmolationHeatPct
                                     : undefined
                                 }
                                 batteryPct={
                                   selectedWarframe.id === "gauss" ||
                                   selectedWarframe.id === "gauss_prime"
-                                    ? gaussBatteryPct
+                                    ? wfPassiveSim.gaussBatteryPct
+                                    : undefined
+                                }
+                                mutationStacks={
+                                  selectedWarframe.id === "nidus" ||
+                                  selectedWarframe.id === "nidus_prime"
+                                    ? wfPassiveSim.nidusMutationStacks
                                     : undefined
                                 }
                                 intrepidStandRank={equippedMods.find((m) => m.modId === "intrepid_stand")?.rank}
@@ -1640,13 +1674,9 @@ export default function WarframeBuilderPage() {
                   allMods={modsMap}
                   equippedArcanes={equippedArcanes}
                   arcaneRanks={equippedArcaneRanks}
-                  frostColdEnemies={frostColdEnemies}
-                  onFrostColdEnemiesChange={setFrostColdEnemies}
-                  emberImmolationHeatPct={emberImmolationHeatPct}
-                  onEmberImmolationHeatPctChange={setEmberImmolationHeatPct}
-                  gaussBatteryPct={gaussBatteryPct}
-                  onGaussBatteryPctChange={setGaussBatteryPct}
-                  arcaneStacksById={wfArcaneStacksById}
+                  passiveSim={wfPassiveSim}
+                  onPassiveSimChange={(patch) => setWfPassiveSim((prev) => ({ ...prev, ...patch }))}
+                  arcaneStacksById={effectiveWfArcaneStacksById}
                   onArcaneStacksChange={(id, n) => setWfArcaneStacksById((prev) => ({ ...prev, [id]: n }))}
                   conditionalModStacksById={wfConditionalModStacksById}
                   onConditionalModStacksChange={(id, n) => setWfConditionalModStacksById((prev) => ({ ...prev, [id]: n }))}
