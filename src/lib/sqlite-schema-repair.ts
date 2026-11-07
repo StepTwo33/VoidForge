@@ -1,5 +1,7 @@
 import Database from "better-sqlite3";
+import crypto from "node:crypto";
 import fs from "node:fs";
+import path from "node:path";
 import { resolveSqliteDatabasePath } from "./sqlite-path";
 
 interface ColumnSpec {
@@ -108,6 +110,112 @@ const INDEXES = [
   },
 ];
 
+const REPAIRED_MIGRATIONS: Array<{
+  name: string;
+  isAppliedInSchema: (db: Database.Database) => boolean;
+}> = [
+  {
+    name: "20260604120000_add_user_bio",
+    isAppliedInSchema: (db) => columnExists(db, "User", "bio"),
+  },
+  {
+    name: "20260607180000_user_created_at_build_fields",
+    isAppliedInSchema: (db) =>
+      columnExists(db, "User", "createdAt") &&
+      columnExists(db, "Build", "description") &&
+      columnExists(db, "Build", "isPublic"),
+  },
+  {
+    name: "20260710120000_build_tags",
+    isAppliedInSchema: (db) => columnExists(db, "Build", "tags"),
+  },
+  {
+    name: "20260718010000_report_reply_newsletter",
+    isAppliedInSchema: (db) =>
+      columnExists(db, "Report", "adminReply") && columnExists(db, "User", "newsletterOptIn"),
+  },
+  {
+    name: "20260725150000_site_update_featured",
+    isAppliedInSchema: (db) => !tableExists(db, "SiteUpdate") || columnExists(db, "SiteUpdate", "featured"),
+  },
+  {
+    name: "20261105120000_saved_rivens",
+    isAppliedInSchema: (db) => tableExists(db, "SavedRiven"),
+  },
+  {
+    name: "20261106030000_add_report_screenshots",
+    isAppliedInSchema: (db) => columnExists(db, "Report", "screenshots"),
+  },
+];
+
+function migrationChecksum(migrationName: string): string | null {
+  try {
+    const sqlPath = path.join(
+      /* turbopackIgnore: true */ process.cwd(),
+      "prisma",
+      "migrations",
+      migrationName,
+      "migration.sql",
+    );
+    if (!fs.existsSync(sqlPath)) return null;
+    return crypto.createHash("sha256").update(fs.readFileSync(sqlPath)).digest("hex");
+  } catch {
+    return null;
+  }
+}
+
+function reconcilePrismaMigrations(db: Database.Database): number {
+  if (!tableExists(db, "_prisma_migrations")) return 0;
+  let fixed = 0;
+  const now = Date.now();
+
+  const findRows = db.prepare(
+    `SELECT id, finished_at, rolled_back_at
+     FROM "_prisma_migrations"
+     WHERE migration_name = ?`,
+  );
+  const markFinished = db.prepare(
+    `UPDATE "_prisma_migrations"
+     SET finished_at = ?, logs = NULL, applied_steps_count = 1
+     WHERE id = ?`,
+  );
+  const insertApplied = db.prepare(
+    `INSERT INTO "_prisma_migrations"
+       ("id", "checksum", "finished_at", "migration_name", "logs", "rolled_back_at", "started_at", "applied_steps_count")
+     VALUES (?, ?, ?, ?, NULL, NULL, ?, 1)`,
+  );
+
+  for (const mig of REPAIRED_MIGRATIONS) {
+    if (!mig.isAppliedInSchema(db)) continue;
+    const rows = findRows.all(mig.name) as Array<{
+      id: string;
+      finished_at: unknown;
+      rolled_back_at: unknown;
+    }>;
+
+    let hasCompletedRow = false;
+    for (const r of rows) {
+      if (r.finished_at != null && r.rolled_back_at == null) {
+        hasCompletedRow = true;
+      } else if (r.finished_at == null && r.rolled_back_at == null) {
+        markFinished.run(now, r.id);
+        hasCompletedRow = true;
+        fixed += 1;
+      }
+    }
+
+    if (!hasCompletedRow) {
+      const checksum = migrationChecksum(mig.name);
+      if (checksum) {
+        insertApplied.run(crypto.randomUUID(), checksum, now, mig.name, now);
+        fixed += 1;
+      }
+    }
+  }
+
+  return fixed;
+}
+
 const repairedPaths = new Set<string>();
 
 function tableExists(db: Database.Database, table: string): boolean {
@@ -175,6 +283,8 @@ export function ensureSqliteSchema(
         changes += 1;
       }
     }
+
+    changes += reconcilePrismaMigrations(db);
 
     repairedPaths.add(dbPath);
     if (changes > 0) {

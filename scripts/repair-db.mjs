@@ -7,7 +7,8 @@
  */
 import Database from "better-sqlite3";
 import dotenv from "dotenv";
-import { existsSync } from "node:fs";
+import crypto from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -215,6 +216,72 @@ try {
   for (const idx of INDEXES) {
     if (tableExists(db, idx.table)) {
       if (ensureIndex(db, idx)) changes += 1;
+    }
+  }
+
+  if (tableExists(db, "_prisma_migrations")) {
+    const repairedMigrations = [
+      { name: "20260604120000_add_user_bio", ok: () => columnExists(db, "User", "bio") },
+      {
+        name: "20260607180000_user_created_at_build_fields",
+        ok: () =>
+          columnExists(db, "User", "createdAt") &&
+          columnExists(db, "Build", "description") &&
+          columnExists(db, "Build", "isPublic"),
+      },
+      { name: "20260710120000_build_tags", ok: () => columnExists(db, "Build", "tags") },
+      {
+        name: "20260718010000_report_reply_newsletter",
+        ok: () =>
+          columnExists(db, "Report", "adminReply") && columnExists(db, "User", "newsletterOptIn"),
+      },
+      {
+        name: "20260725150000_site_update_featured",
+        ok: () => !tableExists(db, "SiteUpdate") || columnExists(db, "SiteUpdate", "featured"),
+      },
+      { name: "20261105120000_saved_rivens", ok: () => tableExists(db, "SavedRiven") },
+      {
+        name: "20261106030000_add_report_screenshots",
+        ok: () => columnExists(db, "Report", "screenshots"),
+      },
+    ];
+
+    const findRows = db.prepare(
+      `SELECT id, finished_at, rolled_back_at FROM "_prisma_migrations" WHERE migration_name = ?`,
+    );
+    const markFinished = db.prepare(
+      `UPDATE "_prisma_migrations" SET finished_at = ?, logs = NULL, applied_steps_count = 1 WHERE id = ?`,
+    );
+    const insertApplied = db.prepare(
+      `INSERT INTO "_prisma_migrations"
+         ("id", "checksum", "finished_at", "migration_name", "logs", "rolled_back_at", "started_at", "applied_steps_count")
+       VALUES (?, ?, ?, ?, NULL, NULL, ?, 1)`,
+    );
+    const now = Date.now();
+
+    for (const mig of repairedMigrations) {
+      if (!mig.ok()) continue;
+      const rows = findRows.all(mig.name);
+      let completed = false;
+      for (const r of rows) {
+        if (r.finished_at != null && r.rolled_back_at == null) {
+          completed = true;
+        } else if (r.finished_at == null && r.rolled_back_at == null) {
+          console.log(`[repair-db] Resolving failed migration ${mig.name}…`);
+          markFinished.run(now, r.id);
+          completed = true;
+          changes += 1;
+        }
+      }
+      if (!completed) {
+        const sqlPath = path.join(root, "prisma", "migrations", mig.name, "migration.sql");
+        if (existsSync(sqlPath)) {
+          const checksum = crypto.createHash("sha256").update(readFileSync(sqlPath)).digest("hex");
+          console.log(`[repair-db] Recording already-applied migration ${mig.name}…`);
+          insertApplied.run(crypto.randomUUID(), checksum, now, mig.name, now);
+          changes += 1;
+        }
+      }
     }
   }
 

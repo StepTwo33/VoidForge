@@ -175,4 +175,52 @@ describe("SQLite Report & SavedRiven auto-repair", () => {
     // Idempotent second pass makes 0 changes
     expect(ensureSqliteSchema(legacyDbPath, { force: true })).toBe(0);
   });
+
+  it("reconciles failed 20261105120000_saved_rivens and unrecorded 20261106030000_add_report_screenshots in _prisma_migrations", () => {
+    vi.restoreAllMocks(); // allow reading real prisma/migrations/*/migration.sql checksums
+    const brokenDbPath = path.join(tmpRoot, "broken-migrations.db");
+    const db = new Database(brokenDbPath);
+    db.exec(`
+      CREATE TABLE "_prisma_migrations" (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "checksum" TEXT NOT NULL,
+        "finished_at" DATETIME,
+        "migration_name" TEXT NOT NULL,
+        "logs" TEXT,
+        "rolled_back_at" DATETIME,
+        "started_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "applied_steps_count" INTEGER UNSIGNED NOT NULL DEFAULT 0
+      );
+      CREATE TABLE "User" ("id" TEXT NOT NULL PRIMARY KEY, "bio" TEXT, "createdAt" DATETIME, "newsletterOptIn" BOOLEAN DEFAULT 0);
+      CREATE TABLE "Report" ("id" TEXT NOT NULL PRIMARY KEY, "adminReply" TEXT DEFAULT '', "screenshots" TEXT DEFAULT '[]');
+      CREATE TABLE "SavedRiven" ("id" TEXT NOT NULL PRIMARY KEY, "userId" TEXT NOT NULL, "weaponId" TEXT NOT NULL);
+      INSERT INTO "_prisma_migrations" ("id", "checksum", "finished_at", "migration_name", "logs", "applied_steps_count")
+      VALUES ('failed-1', 'abc', NULL, '20261105120000_saved_rivens', 'table SavedRiven already exists', 0);
+    `);
+    db.close();
+
+    const fixed = ensureSqliteSchema(brokenDbPath, { force: true });
+    expect(fixed).toBeGreaterThanOrEqual(2);
+
+    const verify = new Database(brokenDbPath, { readonly: true });
+    try {
+      const migs = verify
+        .prepare('SELECT migration_name, finished_at, logs, applied_steps_count FROM "_prisma_migrations"')
+        .all() as Array<{
+        migration_name: string;
+        finished_at: number | null;
+        logs: string | null;
+        applied_steps_count: number;
+      }>;
+      const savedRivenMig = migs.find((m) => m.migration_name === "20261105120000_saved_rivens");
+      const reportSsMig = migs.find((m) => m.migration_name === "20261106030000_add_report_screenshots");
+      expect(savedRivenMig?.finished_at).not.toBeNull();
+      expect(savedRivenMig?.logs).toBeNull();
+      expect(savedRivenMig?.applied_steps_count).toBe(1);
+      expect(reportSsMig?.finished_at).not.toBeNull();
+      expect(reportSsMig?.applied_steps_count).toBe(1);
+    } finally {
+      verify.close();
+    }
+  });
 });

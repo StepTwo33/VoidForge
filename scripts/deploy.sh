@@ -235,13 +235,17 @@ npm run build
 
 echo "==> Build complete at $(git rev-parse --short HEAD)"
 backup_database
-echo "==> Applying database migrations and schema repair"
+echo "==> Applying database schema repair and migrations"
 db_url="$(grep -hE '^DATABASE_URL=' .env .env.local .env.production 2>/dev/null | tail -1 | cut -d= -f2- | tr -d "\"'" || true)"
 export DATABASE_URL="${db_url:-file:./dev.db}"
 db_file="${DATABASE_URL#file:}"
 [[ "$db_file" = /* ]] || db_file="$DIR/$db_file"
 export SQLITE_DATABASE_PATH="$db_file"
-npx prisma migrate deploy || echo "WARN: prisma migrate deploy reported an issue; running repair-db.mjs"
 node "$DIR/scripts/repair-db.mjs"
+if ! npx prisma migrate deploy; then
+  echo "WARN: prisma migrate deploy reported an issue; re-running repair-db.mjs"
+  node "$DIR/scripts/repair-db.mjs"
+  npx prisma migrate deploy || true
+fi
 git rev-parse HEAD > .deploy-last-sha
 restart_framehub

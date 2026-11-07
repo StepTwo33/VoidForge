@@ -82,12 +82,15 @@ prepare_database() {
 
   echo "DATABASE_URL=$DATABASE_URL"
   echo "SQLite: $db_path"
+  repair_database_schema || true
   echo "Applying Prisma migrations..."
   if ! npx prisma migrate deploy; then
     echo "WARN: prisma migrate deploy failed — repairing schema and resolving stuck migrations..."
     repair_database_schema || true
     npx prisma migrate resolve --applied 20260604120000_add_user_bio 2>/dev/null || true
     npx prisma migrate resolve --applied 20260607180000_user_created_at_build_fields 2>/dev/null || true
+    npx prisma migrate resolve --applied 20261105120000_saved_rivens 2>/dev/null || true
+    npx prisma migrate resolve --applied 20261106030000_add_report_screenshots 2>/dev/null || true
     npx prisma migrate deploy 2>/dev/null || echo "WARN: migrate deploy still failing; schema repair will align columns."
   fi
   repair_database_schema
