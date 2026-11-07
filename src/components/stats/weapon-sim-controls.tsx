@@ -222,7 +222,10 @@ export function WeaponSimControls({
                 Weak Point
               </button>
             </div>
-            <label className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground cursor-pointer">
+            <label
+              className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground cursor-pointer"
+              title="Aiming, distance (>15m Spring-Loaded Broadhead, >10m Range Advantage), reload, cast, and wall latch conditionals"
+            >
               <input
                 type="checkbox"
                 checked={!!simParams.applyTriggerBuffs}
@@ -231,7 +234,7 @@ export function WeaponSimControls({
                 }
                 className="h-3.5 w-3.5 rounded border-border accent-primary"
               />
-              <span className="font-medium">Aim / Trigger Buffs</span>
+              <span className="font-medium">Aim / Distance / Trigger</span>
             </label>
           </div>
 
@@ -1046,7 +1049,7 @@ export function WeaponSimControls({
                   }
                   className="h-3.5 w-3.5 rounded border-border accent-primary"
                 />
-                Trigger buffs (aim / reload / cast / latch)
+                Trigger &amp; Distance buffs (aim / distance &gt;15m / reload / cast / latch)
               </label>
             )}
             {weapon &&
@@ -1197,9 +1200,31 @@ export function WeaponSimControls({
             )}
             {triggerBuffTotal > 0 && (
               <div className={stats.simParams.applyTriggerBuffs ? "text-[10px] text-blue-700 dark:text-blue-400" : "text-[10px] text-muted-foreground/70"}>
-                Trigger buffs{stats.simParams.applyTriggerBuffs ? ": " : " (inactive — enable Trigger buffs): "}
+                Trigger / Distance buffs{stats.simParams.applyTriggerBuffs ? ": " : " (inactive — enable Aim/Distance buffs): "}
                 {Object.entries(stats.triggerStatBonuses ?? {}).map(([k, v]) => `+${(v * 100).toFixed(0)}% ${getModStatLabel(k)}`).join(", ")}
               </div>
+            )}
+            {(stats.headshotDamageBonus ?? 0) > 0 && (
+              stats.simParams.applyHeadshots ? (
+                <div className="text-[10px] text-blue-700 dark:text-blue-400">
+                  Headshot Multiplier: +{((stats.headshotDamageBonus ?? 0) * 100).toFixed(0)}% (Target Acquired / Headshot bonus active)
+                </div>
+              ) : (
+                <div className="text-[10px] text-muted-foreground/70">
+                  Headshot Multiplier: inactive — select Headshot target to apply +{((stats.headshotDamageBonus ?? 0) * 100).toFixed(0)}% bonus
+                </div>
+              )
+            )}
+            {(stats.weakPointDamageBonus ?? 0) > 0 && (
+              (stats.simParams.applyHeadshots || stats.simParams.applyWeakPoints) ? (
+                <div className="text-[10px] text-blue-700 dark:text-blue-400">
+                  Weak Point Damage: +{((stats.weakPointDamageBonus ?? 0) * 100).toFixed(0)}% (active on {stats.simParams.applyHeadshots ? "Headshot" : "Weak Point"})
+                </div>
+              ) : (
+                <div className="text-[10px] text-muted-foreground/70">
+                  Weak Point Damage: inactive — select Headshot or Weak Point to apply +{((stats.weakPointDamageBonus ?? 0) * 100).toFixed(0)}% bonus
+                </div>
+              )
             )}
             {(stats.galvanizedCritOnHeadshot ?? 0) > 0 && (
               !stats.simParams.applyTriggerBuffs ? (
