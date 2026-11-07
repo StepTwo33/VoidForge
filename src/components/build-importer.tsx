@@ -243,6 +243,27 @@ export function BuildImporter({
     }
   }, []);
 
+  // Clipboard paste (Ctrl+V): an image on the clipboard is read like an uploaded screenshot.
+  // Plain-text pastes (e.g. into the mod list box) are left alone.
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault();
+            void handleScreenshot(file);
+            return;
+          }
+        }
+      }
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [handleScreenshot]);
+
   const importLabel =
     plan.importedCount === 0
       ? "Nothing to import yet"
@@ -303,7 +324,7 @@ export function BuildImporter({
       {tab === "screenshot" && (
         <div className="mb-3">
           <p className="mb-2 text-xs text-muted-foreground">
-            Upload a screenshot of the mod list. The text is read in your browser (nothing is uploaded) and put in the paste box so you can fix misreads before importing.
+            Upload or paste (<kbd className="rounded border border-border bg-background px-1 py-0.5 font-mono text-[10px]">Ctrl+V</kbd>) a screenshot of the mod list. The text is read in your browser (nothing is uploaded) and put in the paste box so you can fix misreads before importing.
           </p>
           <label
             className={cn(
@@ -312,7 +333,7 @@ export function BuildImporter({
             )}
           >
             {isProcessing ? <Loader2 className="h-5 w-5 animate-spin text-blue-500" /> : <Camera className="h-5 w-5 text-muted-foreground" />}
-            <span className="text-xs text-muted-foreground">{isProcessing ? "Reading screenshot…" : "Choose a screenshot (PNG or JPG)"}</span>
+            <span className="text-xs text-muted-foreground">{isProcessing ? "Reading screenshot…" : "Choose a screenshot (PNG or JPG) or press Ctrl+V to paste one"}</span>
             <input
               ref={fileRef}
               type="file"

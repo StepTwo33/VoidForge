@@ -733,7 +733,28 @@ export default function WeaponBuilderPage() {
     selectedEvolutions,
     genesisInstalledOverride,
   );
-  const incarnonFormTriggerType = incarnonGenesisFormTrigger(incarnonData, genesisInstalled);
+  const incarnonFormTriggerType = incarnonGenesisFormTrigger(
+    incarnonData,
+    genesisInstalled && isIncarnonFormActive(effectiveEvolutions, incarnonData),
+  );
+  /** Tier-1 "Incarnon Form" evolution: the toolbar toggle selects / deselects only this perk. */
+  const incarnonFormEvolution = useMemo(
+    () => incarnonData?.evolutions.find((e) => e.tier === 1 && /incarnon\s*form/i.test(e.name)),
+    [incarnonData],
+  );
+  const incarnonFormActive = isIncarnonFormActive(effectiveEvolutions, incarnonData);
+  const toggleIncarnonForm = useCallback(() => {
+    if (!incarnonFormEvolution) return;
+    const turnOn = !incarnonFormActive;
+    setSelectedEvolutions((prev) => {
+      const next = { ...prev };
+      if (turnOn) next[1] = incarnonFormEvolution.slot;
+      else delete next[1];
+      return next;
+    });
+    // Re-enabling the form with the adapter toggled off in the panel brings the adapter back too.
+    if (turnOn) setGenesisInstalledOverride((cur) => (cur === false ? null : cur));
+  }, [incarnonFormEvolution, incarnonFormActive]);
 
   const rivenStatChanges = useMemo(
     () => mergeRivenStatChanges(rivenStatsMap, equippedMods),
@@ -1293,26 +1314,26 @@ export default function WeaponBuilderPage() {
                     <Zap className="h-3.5 w-3.5" />
                     <span className="inline">Catalyst</span>
                   </button>
-                  {isIncarnonGenesisData(incarnonData) && (
+                  {incarnonFormEvolution && (
                     <button
                       type="button"
-                      onClick={() => setGenesisInstalledOverride(!genesisInstalled)}
-                      aria-pressed={genesisInstalled}
-                      data-testid="toolbar-incarnon-adapter-toggle"
+                      onClick={toggleIncarnonForm}
+                      aria-pressed={incarnonFormActive}
+                      data-testid="toolbar-incarnon-form-toggle"
                       title={
-                        genesisInstalled
-                          ? "Incarnon Genesis Adapter active — click to disable adapter (keeps evolution picks saved)"
-                          : "Incarnon Genesis Adapter disabled — click to enable adapter and apply evolutions"
+                        incarnonFormActive
+                          ? "Incarnon Form is on — click to switch back to the normal weapon. The other evolution picks keep applying (adapter stays installed)."
+                          : "Normal weapon form — click to turn Incarnon Form back on. Evolution picks 2–4 apply either way while the adapter is installed."
                       }
                       className={cn(
                         "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
-                        genesisInstalled
+                        incarnonFormActive
                           ? "bg-orange-500/15 text-orange-700 dark:text-orange-400"
                           : "text-muted-foreground hover:text-foreground hover:bg-accent"
                       )}
                     >
                       <Flame className="h-3.5 w-3.5" />
-                      <span className="inline">{genesisInstalled ? "Incarnon ON" : "Incarnon OFF"}</span>
+                      <span className="inline">{incarnonFormActive ? "Incarnon Form ON" : "Incarnon Form OFF"}</span>
                     </button>
                   )}
                   {weaponHasGravimagMode(selectedWeapon) && (
@@ -1615,6 +1636,8 @@ export default function WeaponBuilderPage() {
                           }
                         : undefined
                     }
+                    formActive={incarnonFormActive}
+                    onToggleForm={incarnonFormEvolution ? toggleIncarnonForm : undefined}
                   />
                 )}
 

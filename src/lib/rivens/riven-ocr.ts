@@ -162,9 +162,23 @@ export function parseRivenOcrText(rawText: string, weaponsList: Weapon[] = getBa
   // Stat line pattern:
   // Supports both standard "+148.2% Critical Chance" / "-48.0% Zoom" / "+1.9 Range"
   // AND Warframe's faction multiplier format "x1.45 Damage to Grineer" / "1.45x Damage to Corpus" / "x0.65 Damage to Infested".
-  const statLineRegex = /(?:([x×])\s*(\d+(?:[.,]\d+)?)|([+−–—\-]?\s*\d+(?:[.,]\d+)?)\s*([x×]|%|s|m)?)\s+([A-Za-z\s()/\d-]+)/i;
+  // The in-game card draws an element icon between the value and the stat name ("+9.2% 🔥 Heat"),
+  // which OCR turns into stray symbols or letters, so everything after the number is matched loosely.
+  const statLineRegex = /(?:([x×])\s*(\d+(?:[.,]\d+)?)|([+−–—\-]?\s*\d+(?:[.,]\d+)?)\s*([x×]|%|s|m)?)\s*(.+)/i;
 
-  for (const line of lines) {
+  // A value alone on its line ("+9.2%") belongs with the stat name on the next line.
+  const statLines: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const cur = lines[i];
+    if (/^(?:[+−–—\-]\s*\d+(?:[.,]\d+)?\s*[x×%]?|\d+(?:[.,]\d+)?\s*[x×%])\W*$/i.test(cur) && i + 1 < lines.length) {
+      statLines.push(`${cur} ${lines[i + 1]}`);
+      i++;
+    } else {
+      statLines.push(cur);
+    }
+  }
+
+  for (const line of statLines) {
     // Skip header/footer lines like "MR 12", "Cycles", "RIFLE RIVEN MOD"
     if (/^\s*(?:MR\s*\d+|cycles|rolls|riven mod|melee riven|rifle riven|pistol riven|shotgun riven)\s*$/i.test(line)) {
       continue;

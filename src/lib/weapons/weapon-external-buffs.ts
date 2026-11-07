@@ -1629,11 +1629,107 @@ function resolveWarframePassiveBuffs(
  * External conditional buffs toggled manually in standalone Weapon / Modular Builders
  * when no Loadout is linked (defaults are all OFF so paper stats remain untouched).
  */
+/**
+ * Resolves innate weapon passive buffs conditioned on user toggle/slider state.
+ * Default is 0 / false (all buffs OFF so paper stats remain stock).
+ */
+export function resolveWeaponPassiveBuffs(
+  weapon: Weapon,
+  state?: Record<string, number>,
+): WeaponExternalBuff[] {
+  if (!state) return [];
+  const buffs: WeaponExternalBuff[] = [];
+  const wid = weapon.id;
+
+  if (wid === "athodai" && (state.athodai_overdrive ?? 0) > 0) {
+    buffs.push({
+      id: "passive_athodai_overdrive",
+      label: "Overdrive (Athodai Passive)",
+      category: "other",
+      fireRateBonus: 1.0,
+      nominal: "+100% Fire Rate & unlimited ammo on headshot kill",
+    });
+  }
+
+  if (wid === "dual_toxocyst" && (state.dual_toxocyst_frenzy ?? 0) > 0) {
+    buffs.push({
+      id: "passive_dual_toxocyst_frenzy",
+      label: "Frenzy (Dual Toxocyst Passive)",
+      category: "other",
+      fireRateBonus: 1.5,
+      damageBonus: 1.0,
+      nominal: "+150% Fire Rate & +100% Damage on headshot",
+    });
+  }
+
+  if ((wid === "knell" || wid === "knell_prime") && (state.knell_death_knell ?? 0) > 0) {
+    const stacks = Math.min(3, Math.max(1, Math.round(state.knell_death_knell)));
+    buffs.push({
+      id: "passive_knell_death_knell",
+      label: `Death Knell (${stacks}×) (Knell Passive)`,
+      category: "other",
+      critMultFlatBonus: 0.5 * stacks,
+      statusChanceFlatBonus: 0.2 * stacks,
+      nominal: `+${(0.5 * stacks).toFixed(1)}× Crit Multiplier, +${(20 * stacks).toFixed(0)}% Status Chance`,
+    });
+  }
+
+  if (wid === "arca_scisco" && (state.arca_scisco_target_analysis ?? 0) > 0) {
+    const stacks = Math.min(5, Math.max(1, Math.round(state.arca_scisco_target_analysis)));
+    buffs.push({
+      id: "passive_arca_scisco_target_analysis",
+      label: `Target Analysis (${stacks}×) (Arca Scisco Passive)`,
+      category: "other",
+      critChanceBonus: 0.04 * stacks,
+      statusBonus: 0.04 * stacks,
+      nominal: `+${(4 * stacks).toFixed(0)}% Crit Chance, +${(4 * stacks).toFixed(0)}% Status Chance`,
+    });
+  }
+
+  if (wid === "lesion" && (state.lesion_status_rush ?? 0) > 0) {
+    buffs.push({
+      id: "passive_lesion_status_rush",
+      label: "Status Rush (Lesion Passive)",
+      category: "other",
+      fireRateBonus: 0.15,
+      elemental: [{ type: "toxin", bonusFraction: 1.0 }],
+      nominal: "+15% Attack Speed & +100% Toxin damage on status proc",
+    });
+  }
+
+  if (wid === "pennant" && (state.pennant_speed ?? 0) > 0) {
+    buffs.push({
+      id: "passive_pennant_speed",
+      label: "Surge (Pennant Passive)",
+      category: "other",
+      fireRateBonus: 0.5,
+      nominal: "+50% Attack Speed on Heavy Attack kill",
+    });
+  }
+
+  if (wid === "pyrana_prime" && (state.pyrana_ethereal ?? 0) > 0) {
+    buffs.push({
+      id: "passive_pyrana_ethereal",
+      label: "Ethereal Pyrana (Pyrana Prime Passive)",
+      category: "other",
+      fireRateBonus: 0.4,
+      nominal: "+40% Fire Rate on 3 kills in 3s",
+    });
+  }
+
+  return buffs;
+}
+
+/**
+ * Standalone weapon builder external buffs (Yareli / Zephyr / Garuda / Bond mods / Weapon Passives)
+ * when no Loadout is linked (defaults are all OFF so paper stats remain untouched).
+ */
 export function resolveStandaloneExternalBuffs(
   weapon: Weapon,
   simParams: SimulationParams,
 ): WeaponExternalBuff[] {
   const buffs: WeaponExternalBuff[] = [];
+  buffs.push(...resolveWeaponPassiveBuffs(weapon, simParams.weaponPassiveState));
   if (simParams.applyYareliCriticalFlow === true && isSecondaryWeapon(weapon)) {
     buffs.push({
       id: "passive_yareli_critical_flow",
@@ -1687,8 +1783,10 @@ export function resolveWeaponExternalBuffs(
   ctx: WeaponBuffContext | undefined,
   simParams: SimulationParams,
 ): WeaponExternalBuff[] {
-  if (!ctx) return [];
+  const passiveBuffs = resolveWeaponPassiveBuffs(weapon, simParams?.weaponPassiveState);
+  if (!ctx) return passiveBuffs;
   return [
+    ...passiveBuffs,
     ...resolveAbilityBuffs(weapon, ctx, simParams),
     ...resolveWarframePassiveBuffs(weapon, ctx, simParams),
     ...resolveShardBuffs(weapon, ctx),

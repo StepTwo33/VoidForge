@@ -141,4 +141,34 @@ Ampi-critatin
 
     expect(result.isLikelyUnranked).toBe(true);
   });
+
+  it("keeps element stats when OCR reads the element icon as stray symbols or letters", () => {
+    const rawText = `
+Spectra Igni-fevado
++9.2% © Heat
++5.1% Reload Speed
++8.6% % Cold
+MR 10
+    `;
+
+    const result = parseRivenOcrText(rawText);
+    expect(result.weaponName).toBe("Spectra");
+    expect(result.positiveStats.map((s) => s.key)).toEqual(["heat", "reloadSpeed", "cold"]);
+    expect(result.positiveStats[0].value).toBeCloseTo(0.092, 3);
+    expect(result.positiveStats[2].value).toBeCloseTo(0.086, 3);
+  });
+
+  it("joins a value that OCR put on its own line with the stat name below it", () => {
+    const rawText = `
+Spectra Igni-fevado
++9.2%
+Heat
++5.1% Reload Speed
++8.6%
+Cold
+    `;
+
+    const result = parseRivenOcrText(rawText);
+    expect(result.positiveStats.map((s) => s.key)).toEqual(["heat", "reloadSpeed", "cold"]);
+  });
 });

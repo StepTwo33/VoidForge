@@ -25,6 +25,8 @@ export function IncarnonEvolutionsSection({
   conditionalsOn = {},
   onToggleConditional,
   genesis,
+  formActive = false,
+  onToggleForm,
 }: {
   incarnonData: IncarnonWeaponData | null | undefined;
   selectedEvolutions: Record<number, number>;
@@ -35,6 +37,10 @@ export function IncarnonEvolutionsSection({
   onToggleConditional?: (key: string, on: boolean) => void;
   /** Incarnon Genesis weapons only — adapter installed toggle (controls Form, Evo perks, and Cannonade). */
   genesis?: IncarnonGenesisToggle;
+  /** Incarnon Form (Evolution 1) active state. */
+  formActive?: boolean;
+  /** Toggles Evolution 1 on / off, keeping other evolution perks active on the base weapon. */
+  onToggleForm?: () => void;
 }) {
   const adapterDisabled = Boolean(genesis && !genesis.installed);
   const pickedCount = Object.keys(selectedEvolutions).length;
@@ -57,7 +63,34 @@ export function IncarnonEvolutionsSection({
               Reset picks
             </button>
           )}
-          {genesis && (
+          {onToggleForm ? (
+            <button
+              type="button"
+              role="switch"
+              aria-checked={formActive}
+              onClick={onToggleForm}
+              data-testid="incarnon-form-toggle"
+              className={cn(
+                "inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-all",
+                formActive
+                  ? "border-orange-500/40 bg-orange-500/15 text-orange-800 dark:text-orange-300"
+                  : "border-border bg-muted/40 text-muted-foreground hover:border-orange-500/30 hover:text-foreground",
+              )}
+              title={
+                formActive
+                  ? "Incarnon Form is ON — click to switch back to base weapon form (evolution perks 2–4 remain active on the base weapon)."
+                  : "Incarnon Form is OFF — base weapon form with evolution perks 2–4 active. Click to activate Incarnon Form."
+              }
+            >
+              <span
+                className={cn(
+                  "h-2 w-2 rounded-full transition-colors",
+                  formActive ? "bg-orange-500" : "bg-muted-foreground/50",
+                )}
+              />
+              <span>Form {formActive ? "ON" : "OFF"}</span>
+            </button>
+          ) : genesis && (
             <button
               type="button"
               role="switch"

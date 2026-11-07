@@ -14,7 +14,7 @@ import {
   type WeaponDpsCalcContext,
 } from "@/lib/calc/dps-contributions";
 import { avgCritMultiplier, critTierDamage, critTiersToShow, critTierLabel, critTierColorClass, exceedsWarframeInt32 } from "@/lib/calc/crit-utils";
-import { CollapsibleSection, StatRow, toLightSafeTextColor } from "./stat-primitives";
+import { CollapsibleSection, SimSlider, StatRow, toLightSafeTextColor } from "./stat-primitives";
 import type { AltFireResult } from "@/lib/weapons/alt-fire";
 import { altFireNoteForDisplay } from "@/lib/display/alt-fire-note";
 import { TTKSection } from "./ttk-section";
@@ -78,6 +78,191 @@ const CONTRIBUTION_CATEGORY_COLORS: Record<DpsContributionCategory, string> = {
   other: "text-muted-foreground",
 };
 
+function WeaponPassiveConditionals({
+  weapon,
+  simParams,
+  onSimParamsChange,
+}: {
+  weapon: Weapon;
+  simParams?: SimulationParams;
+  onSimParamsChange?: (params: SimulationParams) => void;
+}) {
+  if (!simParams || !onSimParamsChange) return null;
+  const wid = weapon.id;
+  const state = simParams.weaponPassiveState ?? {};
+
+  const updateState = (key: string, val: number) => {
+    onSimParamsChange({
+      ...simParams,
+      weaponPassiveState: {
+        ...(simParams.weaponPassiveState ?? {}),
+        [key]: val,
+      },
+    });
+  };
+
+  if (wid === "athodai") {
+    const active = (state.athodai_overdrive ?? 0) > 0;
+    return (
+      <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+        <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
+          <span>Overdrive (weak point kill)</span>
+          <input
+            type="checkbox"
+            checked={active}
+            onChange={(e) => updateState("athodai_overdrive", e.target.checked ? 1 : 0)}
+            className="h-3.5 w-3.5 rounded border-border accent-primary"
+          />
+        </label>
+        <StatRow
+          label="Overdrive Fire Rate"
+          value={active ? "+100%" : "Inactive"}
+          color={active ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
+          tooltip="Headshot kills trigger Overdrive: +100% Fire Rate & unlimited ammo."
+        />
+      </div>
+    );
+  }
+
+  if (wid === "dual_toxocyst") {
+    const active = (state.dual_toxocyst_frenzy ?? 0) > 0;
+    return (
+      <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+        <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
+          <span>Frenzy (headshot)</span>
+          <input
+            type="checkbox"
+            checked={active}
+            onChange={(e) => updateState("dual_toxocyst_frenzy", e.target.checked ? 1 : 0)}
+            className="h-3.5 w-3.5 rounded border-border accent-primary"
+          />
+        </label>
+        <StatRow
+          label="Frenzy Fire Rate & Dmg"
+          value={active ? "+150% FR, +100% Dmg" : "Inactive"}
+          color={active ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
+          tooltip="Headshots trigger Frenzy (3s): +150% Fire Rate, +100% base damage, unlimited ammo."
+        />
+      </div>
+    );
+  }
+
+  if (wid === "knell" || wid === "knell_prime") {
+    const stacks = Math.min(3, Math.max(0, state.knell_death_knell ?? 0));
+    return (
+      <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+        <SimSlider
+          label="Death Knell Stacks"
+          value={stacks}
+          min={0}
+          max={3}
+          onChange={(v) => updateState("knell_death_knell", v)}
+          tooltip="Headshots grant Death Knell (2s, max 3 stacks): +0.5x crit multiplier & +20% status chance per stack."
+        />
+        <StatRow
+          label="Death Knell CM / SC"
+          value={stacks > 0 ? `+${(0.5 * stacks).toFixed(1)}× CM, +${(20 * stacks).toFixed(0)}% SC` : "0 stacks"}
+          color={stacks > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
+          tooltip="Death Knell: adds flat +0.5x critical multiplier and +20% status chance per stack."
+        />
+      </div>
+    );
+  }
+
+  if (wid === "arca_scisco") {
+    const stacks = Math.min(5, Math.max(0, state.arca_scisco_target_analysis ?? 0));
+    return (
+      <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+        <SimSlider
+          label="Target Analysis Stacks"
+          value={stacks}
+          min={0}
+          max={5}
+          onChange={(v) => updateState("arca_scisco_target_analysis", v)}
+          tooltip="Each hit grants Target Analysis (2s, max 5 stacks): +4% critical chance & +4% status chance per stack."
+        />
+        <StatRow
+          label="Target Analysis CC / SC"
+          value={stacks > 0 ? `+${(4 * stacks).toFixed(0)}% CC, +${(4 * stacks).toFixed(0)}% SC` : "0 stacks"}
+          color={stacks > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
+          tooltip="Target Analysis: +4% crit chance and +4% status chance per stack (up to +20%)."
+        />
+      </div>
+    );
+  }
+
+  if (wid === "lesion") {
+    const active = (state.lesion_status_rush ?? 0) > 0;
+    return (
+      <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+        <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
+          <span>Status Rush (on status proc)</span>
+          <input
+            type="checkbox"
+            checked={active}
+            onChange={(e) => updateState("lesion_status_rush", e.target.checked ? 1 : 0)}
+            className="h-3.5 w-3.5 rounded border-border accent-primary"
+          />
+        </label>
+        <StatRow
+          label="Status Rush Speed & Toxin"
+          value={active ? "+15% Speed, +100% Toxin" : "Inactive"}
+          color={active ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
+          tooltip="Inflicting a status proc grants +15% Attack Speed and +100% Toxin damage for 6s."
+        />
+      </div>
+    );
+  }
+
+  if (wid === "pennant") {
+    const active = (state.pennant_speed ?? 0) > 0;
+    return (
+      <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+        <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
+          <span>Surge (on Heavy Attack kill)</span>
+          <input
+            type="checkbox"
+            checked={active}
+            onChange={(e) => updateState("pennant_speed", e.target.checked ? 1 : 0)}
+            className="h-3.5 w-3.5 rounded border-border accent-primary"
+          />
+        </label>
+        <StatRow
+          label="Surge Attack Speed"
+          value={active ? "+50%" : "Inactive"}
+          color={active ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
+          tooltip="Heavy attack kills grant +50% Attack Speed."
+        />
+      </div>
+    );
+  }
+
+  if (wid === "pyrana_prime") {
+    const active = (state.pyrana_ethereal ?? 0) > 0;
+    return (
+      <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+        <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
+          <span>Ethereal Pyrana (3 kills in 3s)</span>
+          <input
+            type="checkbox"
+            checked={active}
+            onChange={(e) => updateState("pyrana_ethereal", e.target.checked ? 1 : 0)}
+            className="h-3.5 w-3.5 rounded border-border accent-primary"
+          />
+        </label>
+        <StatRow
+          label="Ethereal Fire Rate"
+          value={active ? "+40%" : "Inactive"}
+          color={active ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
+          tooltip="Getting 3 kills in 3s summons a second ethereal Pyrana: +40% Fire Rate."
+        />
+      </div>
+    );
+  }
+
+  return null;
+}
+
 export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEvolutions, allEvolutions, simParams, onSimParamsChange, contributionContext, heading, altFire }: {
   stats: CalculatedStats | null; baseStats?: CalculatedStats | null; weapon?: Weapon | null; isMelee?: boolean;
   selectedEvolutions?: Record<number, number>; allEvolutions?: IncarnonEvolution[];
@@ -127,6 +312,17 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
         <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{heading ?? "Weapon Stats"}</h3>
         <WeaponStatsGlossary />
       </div>
+
+      {weapon?.passive && (
+        <CollapsibleSection title="PASSIVE" defaultOpen>
+          <p className="text-[11px] text-muted-foreground leading-relaxed py-1">{weapon.passive}</p>
+          <WeaponPassiveConditionals
+            weapon={weapon}
+            simParams={simParams}
+            onSimParamsChange={onSimParamsChange}
+          />
+        </CollapsibleSection>
+      )}
 
       {/* DPS — direct hit vs radial shown separately; totals include both when radial applies */}
       <CollapsibleSection title="DPS" defaultOpen>
@@ -305,12 +501,6 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           </CollapsibleSection>
         );
       })()}
-
-      {weapon?.passive && (
-        <CollapsibleSection title="PASSIVE" defaultOpen={false}>
-          <p className="text-[11px] text-muted-foreground leading-relaxed py-1">{weapon.passive}</p>
-        </CollapsibleSection>
-      )}
 
       {simParams && onSimParamsChange && (
         <WeaponSimPanel

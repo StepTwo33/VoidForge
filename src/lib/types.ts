@@ -655,6 +655,8 @@ export interface SimulationParams {
   applyGarudaDeathsGate?: boolean;
   /** Per-mod stack/toggle overrides for conditional Warframe mods (Growing Power, Energy/Health Conversion, Archon Intensify). */
   conditionalModStacksById?: Record<string, number>;
+  /** Per-weapon passive conditional toggle / stack state (e.g. Athodai Overdrive, Dual Toxocyst Frenzy, Knell Death Knell). */
+  weaponPassiveState?: Record<string, number>;
   /**
    * Target faction for Bane/Expel/Smite damage (e.g. "Grineer", "Corpus").
    * Empty/undefined = paper DPS without faction mult.
