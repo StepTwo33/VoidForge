@@ -9,6 +9,8 @@ import {
   ADAPTATION_DR_PER_STACK,
   adaptationMaxStacks,
   computeAdaptationSurvivability,
+  computeWarframeAuraEffectivenessMult,
+  CONDITIONAL_WARFRAME_MOD_DEFS,
 } from "@/lib/calc/calculator";
 import {
   computeGaussPassiveShieldRecharge,
@@ -456,36 +458,50 @@ function StyanaxHoplitePassive({ moddedShield }: { moddedShield: number }) {
 }
 
 function YareliCriticalFlowPassive() {
-  const cc = computeYareliCriticalFlowCritChance(true);
+  const [moving, setMoving] = useState(true);
+  const cc = computeYareliCriticalFlowCritChance(moving);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
-        After 1.5s of movement (until idle 1s).
-      </p>
+      <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
+        <span>Active while moving (≥1.5s)</span>
+        <input
+          type="checkbox"
+          checked={moving}
+          onChange={(e) => setMoving(e.target.checked)}
+          className="h-3.5 w-3.5 rounded border-border accent-sky-500"
+        />
+      </label>
       <StatRow
         label="Secondary CC"
         value={`+${(cc * 100).toFixed(0)}%`}
-        color="text-sky-700 dark:text-sky-400"
-        tooltip="Additive to secondary weapon base crit chance mods (panel-only)."
+        color={moving ? "text-sky-700 dark:text-sky-400" : "text-muted-foreground"}
+        tooltip="Additive to secondary weapon base crit chance mods. Toggleable in Loadout & linked Weapon Builder simulation."
       />
     </div>
   );
 }
 
 function ZephyrAirbornePassive() {
-  const cc = computeZephyrAirborneCritChance(true);
+  const [airborne, setAirborne] = useState(true);
+  const cc = computeZephyrAirborneCritChance(airborne);
 
   return (
     <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-      <p className="text-[10px] text-muted-foreground leading-snug pt-0.5">
-        While airborne (also slower fall / more maneuverable).
-      </p>
+      <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
+        <span>Active while airborne</span>
+        <input
+          type="checkbox"
+          checked={airborne}
+          onChange={(e) => setAirborne(e.target.checked)}
+          className="h-3.5 w-3.5 rounded border-border accent-sky-500"
+        />
+      </label>
       <StatRow
         label="Weapon CC"
         value={`+${(cc * 100).toFixed(0)}%`}
-        color="text-sky-700 dark:text-sky-400"
-        tooltip="Additive to all equipped weapons' crit chance while airborne (panel-only)."
+        color={airborne ? "text-sky-700 dark:text-sky-400" : "text-muted-foreground"}
+        tooltip="Additive to all equipped weapons' crit chance while airborne. Toggleable in Loadout & linked Weapon Builder simulation."
       />
     </div>
   );
@@ -2192,6 +2208,8 @@ export function WarframeStatsPanel({
   onGaussBatteryPctChange,
   arcaneStacksById,
   onArcaneStacksChange,
+  conditionalModStacksById,
+  onConditionalModStacksChange,
   freeModCapacity,
 }: {
   stats: WarframeCalculatedStats | null;
@@ -2209,9 +2227,12 @@ export function WarframeStatsPanel({
   /** Controlled Gauss battery gauge (builder wires into ability cards + passive). */
   gaussBatteryPct?: number;
   onGaussBatteryPctChange?: (n: number) => void;
-  /** Warframe arcane stack inputs (Arcane Impetus / Arcane Camisado), keyed by arcane id. */
+  /** Warframe arcane stack inputs (Arcane Impetus / Arcane Camisado / conditionals), keyed by arcane id. */
   arcaneStacksById?: Record<string, number>;
   onArcaneStacksChange?: (arcaneId: string, n: number) => void;
+  /** Conditional Warframe mod stack/toggle inputs (Growing Power, Energy/Health Conversion, Archon Intensify). */
+  conditionalModStacksById?: Record<string, number>;
+  onConditionalModStacksChange?: (modId: string, n: number) => void;
   /** Unspent mod capacity (adds 5 starting energy each, wiki Energy Capacity). */
   freeModCapacity?: number;
 }) {
@@ -2251,16 +2272,35 @@ export function WarframeStatsPanel({
     );
   }
 
-  // Detect equipped augments (with rank for display)
+  // Detect equipped augments (with rank for display) and conditional Warframe mods
   const equippedAugments: { mod: Mod; rank: number }[] = [];
-  if (equippedMods && allMods) {
+  const equippedConditionalMods: { slot: EquippedMod; def: (typeof CONDITIONAL_WARFRAME_MOD_DEFS)[string] }[] = [];
+  if (equippedMods) {
     for (const em of equippedMods) {
-      const mod = allMods.get(em.modId);
-      if (mod && mod.category === "augment") {
-        equippedAugments.push({ mod, rank: em.rank });
+      if (allMods) {
+        const mod = allMods.get(em.modId);
+        if (mod && mod.category === "augment") {
+          equippedAugments.push({ mod, rank: em.rank });
+        }
+      }
+      const condDef = CONDITIONAL_WARFRAME_MOD_DEFS[em.modId];
+      if (condDef) {
+        equippedConditionalMods.push({ slot: em, def: condDef });
       }
     }
   }
+  const auraMult = computeWarframeAuraEffectivenessMult(equippedMods);
+  const toggleableArcaneTargets = arcaneDisplays.filter(
+    (info): info is NonNullable<typeof info> =>
+      Boolean(
+        info &&
+          info.trigger != null &&
+          info.trigger !== "passive" &&
+          info.id !== "arcane_intention" &&
+          info.id !== "arcane_persistence" &&
+          ((info.fullStacks ?? 0) > 1 || info.applied.length > 0),
+      ),
+  );
 
   return (
     <div className="border border-border rounded-xl p-4 bg-card space-y-1">
@@ -2545,79 +2585,227 @@ export function WarframeStatsPanel({
         </CollapsibleSection>
       )}
 
+      {/* Conditional Warframe Mods */}
+      {equippedConditionalMods.length > 0 && onConditionalModStacksChange && (
+        <CollapsibleSection title="CONDITIONAL MODS" defaultOpen>
+          {equippedConditionalMods.length > 1 && (
+            <div className="flex items-center justify-between gap-1.5 py-1 border-b border-border/40">
+              <span className="text-[10px] text-muted-foreground">Quick toggle</span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    for (const { def } of equippedConditionalMods) {
+                      onConditionalModStacksChange(def.id, 0);
+                    }
+                  }}
+                  className="rounded border border-border px-1.5 py-0.5 text-[9px] text-muted-foreground hover:text-foreground"
+                >
+                  All off
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    for (const { def } of equippedConditionalMods) {
+                      onConditionalModStacksChange(def.id, def.maxStacks);
+                    }
+                  }}
+                  className="rounded border border-purple-500/40 bg-purple-500/10 px-1.5 py-0.5 text-[9px] text-purple-300 hover:bg-purple-500/20"
+                >
+                  All active
+                </button>
+              </div>
+            </div>
+          )}
+          {equippedConditionalMods.map(({ slot, def }) => {
+            const currentStacks = Math.min(
+              def.maxStacks,
+              Math.max(0, Math.floor(conditionalModStacksById?.[def.id] ?? 0)),
+            );
+            const active = currentStacks > 0;
+            const rank = Math.min(Math.max(0, Math.round(slot.rank ?? def.maxRank)), def.maxRank);
+            const summary = def.describeEffect(rank, active ? currentStacks : def.maxStacks, auraMult);
+            return (
+              <div key={def.id} className="py-1.5 border-b border-border/30 last:border-0 space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-medium text-purple-300">{def.label}</span>
+                  <span
+                    className={cn(
+                      "rounded border px-1 text-[9px]",
+                      active
+                        ? "border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
+                        : "border-border text-muted-foreground",
+                    )}
+                  >
+                    {active ? (def.maxStacks > 1 ? `×${currentStacks}/${def.maxStacks}` : "Active") : "Off (Paper)"}
+                  </span>
+                </div>
+                {def.maxStacks > 1 ? (
+                  <SimSlider
+                    label="Health Orb stacks"
+                    value={currentStacks}
+                    min={0}
+                    max={def.maxStacks}
+                    onChange={(v) => onConditionalModStacksChange(def.id, v)}
+                    tooltip={summary}
+                  />
+                ) : (
+                  <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                    <span>{summary}</span>
+                    <input
+                      type="checkbox"
+                      checked={active}
+                      onChange={(e) => onConditionalModStacksChange(def.id, e.target.checked ? 1 : 0)}
+                      className="h-3.5 w-3.5 rounded border-border accent-purple-500"
+                    />
+                  </label>
+                )}
+              </div>
+            );
+          })}
+        </CollapsibleSection>
+      )}
+
       {/* Arcane Bonuses */}
       {arcaneDisplays.length > 0 && (
         <CollapsibleSection title="ARCANE BONUSES" defaultOpen>
-          {arcaneDisplays.map((info) => info && (
-            <div key={info.name} className="py-1.5 border-b border-border/30 last:border-0">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-medium text-purple-300">{info.name}</span>
-                <span className="flex items-center gap-1.5">
-                  {info.fullStacks != null && (() => {
-                    const used = stats.arcaneStackCounts?.[info.id] ?? info.fullStacks;
-                    const full = used >= info.fullStacks;
-                    const title =
-                      info.id === "arcane_intention"
-                        ? `Stacks = this build's channeled abilities on the wiki's eligible list (Helminth and augments included), max ${info.fullStacks}.`
-                        : wfArcaneStackSlider(info.id, info.name, info.fullStacks)
-                          ? `Applied at ${used} of ${info.fullStacks} stacks. Set the count with the slider below.`
-                          : `Warframe stats assume this arcane is at full stacks (${info.fullStacks}).`;
-                    return (
-                      <span
-                        className="rounded border border-purple-500/40 px-1 text-[9px] text-purple-700 dark:text-purple-300"
-                        title={title}
-                        data-testid="arcane-full-stacks"
-                      >
-                        {full ? `Full stacks ×${info.fullStacks}` : `Stacks ×${used}/${info.fullStacks}`}
-                      </span>
-                    );
-                  })()}
-                  <span className="text-[10px] text-muted-foreground font-mono">R{info.rank}/{info.maxRank}</span>
-                </span>
+          {toggleableArcaneTargets.length > 0 && onArcaneStacksChange && (
+            <div className="flex items-center justify-between gap-1.5 py-1 border-b border-border/40">
+              <span className="text-[10px] text-muted-foreground">Quick conditionals</span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    for (const info of toggleableArcaneTargets) {
+                      onArcaneStacksChange(info.id, 0);
+                    }
+                  }}
+                  className="rounded border border-border px-1.5 py-0.5 text-[9px] text-muted-foreground hover:text-foreground"
+                >
+                  All off (Paper)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    for (const info of toggleableArcaneTargets) {
+                      onArcaneStacksChange(info.id, info.fullStacks ?? 1);
+                    }
+                  }}
+                  className="rounded border border-purple-500/40 bg-purple-500/10 px-1.5 py-0.5 text-[9px] text-purple-300 hover:bg-purple-500/20"
+                >
+                  All active
+                </button>
               </div>
-              {(() => {
-                const slider = wfArcaneStackSlider(info.id, info.name, info.fullStacks);
-                if (!slider || info.fullStacks == null || !onArcaneStacksChange) return null;
-                const full = info.fullStacks;
-                return (
+            </div>
+          )}
+          {arcaneDisplays.map((info) => {
+            if (!info) return null;
+            const slider = wfArcaneStackSlider(info.id, info.name, info.fullStacks);
+            const canToggleSingleConditional =
+              !slider &&
+              info.trigger != null &&
+              info.trigger !== "passive" &&
+              (info.fullStacks == null || info.fullStacks <= 1) &&
+              info.id !== "arcane_intention" &&
+              info.id !== "arcane_persistence" &&
+              info.applied.length > 0;
+            const conditionalActive = canToggleSingleConditional
+              ? (arcaneStacksById?.[info.id] ?? 1) > 0
+              : true;
+
+            return (
+              <div key={info.name} className="py-1.5 border-b border-border/30 last:border-0">
+                <div className="flex justify-between items-center gap-2">
+                  <span className="text-xs font-medium text-purple-300">{info.name}</span>
+                  <span className="flex items-center gap-1.5 shrink-0">
+                    {info.fullStacks != null && !canToggleSingleConditional && (() => {
+                      const used = stats.arcaneStackCounts?.[info.id] ?? info.fullStacks;
+                      const full = used >= info.fullStacks;
+                      const title =
+                        info.id === "arcane_intention"
+                          ? `Stacks = this build's channeled abilities on the wiki's eligible list (Helminth and augments included), max ${info.fullStacks}.`
+                          : slider
+                            ? `Applied at ${used} of ${info.fullStacks} stacks. Set the count with the slider below.`
+                            : `Warframe stats assume this arcane is at full stacks (${info.fullStacks}).`;
+                      return (
+                        <span
+                          className="rounded border border-purple-500/40 px-1 text-[9px] text-purple-700 dark:text-purple-300"
+                          title={title}
+                          data-testid="arcane-full-stacks"
+                        >
+                          {full ? `Full stacks ×${info.fullStacks}` : `Stacks ×${used}/${info.fullStacks}`}
+                        </span>
+                      );
+                    })()}
+                    {canToggleSingleConditional && (
+                      <span
+                        className={cn(
+                          "rounded border px-1 text-[9px]",
+                          conditionalActive
+                            ? "border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
+                            : "border-border text-muted-foreground",
+                        )}
+                      >
+                        {conditionalActive ? "Active" : "Off"}
+                      </span>
+                    )}
+                    <span className="text-[10px] text-muted-foreground font-mono">R{info.rank}/{info.maxRank}</span>
+                  </span>
+                </div>
+                {slider && info.fullStacks != null && onArcaneStacksChange && (
                   <div className="py-1" data-testid={`arcane-stack-slider-${info.id}`}>
                     <SimSlider
                       label={slider.label}
-                      value={Math.min(arcaneStacksById?.[info.id] ?? full, full)}
+                      value={Math.min(arcaneStacksById?.[info.id] ?? info.fullStacks, info.fullStacks)}
                       min={0}
-                      max={full}
+                      max={info.fullStacks}
                       onChange={(v) => onArcaneStacksChange(info.id, v)}
                       tooltip={slider.tooltip}
                     />
                   </div>
-                );
-              })()}
-              {info.applied.map((line, i) => (
-                <div key={`a-${i}`} className="py-0.5">
-                  <StatRow
-                    label={line.label}
-                    value={line.value}
-                    color={line.active === false ? "text-muted-foreground" : "text-purple-700 dark:text-purple-400"}
-                  />
-                  {line.note && (
-                    <p className="text-[9px] text-muted-foreground/80 pl-0.5">{line.note}</p>
-                  )}
-                </div>
-              ))}
-              {info.conditional.map((line, i) => (
-                <div key={`c-${i}-${line.label}`} className="py-0.5">
-                  <StatRow
-                    label={line.label}
-                    value={line.value}
-                    color={line.active ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
-                  />
-                  {line.note && (
-                    <p className="text-[9px] text-muted-foreground/80 pl-0.5">{line.note}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          ))}
+                )}
+                {canToggleSingleConditional && onArcaneStacksChange && (
+                  <label
+                    className="flex items-center justify-between gap-2 py-1 text-[10px] text-muted-foreground cursor-pointer"
+                    data-testid={`arcane-conditional-toggle-${info.id}`}
+                    title="Switch this conditional arcane effect on or off to compare Warframe stats with and without the proc."
+                  >
+                    <span>Apply conditional buff to stats</span>
+                    <input
+                      type="checkbox"
+                      checked={conditionalActive}
+                      onChange={(e) => onArcaneStacksChange(info.id, e.target.checked ? 1 : 0)}
+                      className="h-3.5 w-3.5 rounded border-border accent-purple-500"
+                    />
+                  </label>
+                )}
+                {info.applied.map((line, i) => (
+                  <div key={`a-${i}`} className="py-0.5">
+                    <StatRow
+                      label={line.label}
+                      value={conditionalActive ? line.value : `${line.value} (off)`}
+                      color={!conditionalActive || line.active === false ? "text-muted-foreground" : "text-purple-700 dark:text-purple-400"}
+                    />
+                    {line.note && (
+                      <p className="text-[9px] text-muted-foreground/80 pl-0.5">{line.note}</p>
+                    )}
+                  </div>
+                ))}
+                {info.conditional.map((line, i) => (
+                  <div key={`c-${i}-${line.label}`} className="py-0.5">
+                    <StatRow
+                      label={line.label}
+                      value={line.value}
+                      color={line.active ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
+                    />
+                    {line.note && (
+                      <p className="text-[9px] text-muted-foreground/80 pl-0.5">{line.note}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            );
+          })}
         </CollapsibleSection>
       )}
 

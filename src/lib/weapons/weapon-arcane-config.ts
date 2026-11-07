@@ -82,7 +82,7 @@ export function getWeaponArcanes(weapon: Weapon): WeaponArcaneConfig {
       { label: "Exodia Arcane", arcanes: exodiaArcanes },
     ]);
   }
-  if (cat === "amp_prism" || weapon.arcaneType === "amp") {
+  if (cat === "amp_prism" || weapon.arcaneType === "amp" || weapon.id === "sirocco") {
     return single(ampArcanes, "Amp Arcane", 2);
   }
   if (cat === "archgun") {

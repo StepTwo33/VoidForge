@@ -352,6 +352,7 @@ export interface ModularBuildData {
   parts: Record<string, string>;
   mods: ModSlot[];
   arcaneIds?: (string | null)[];
+  arcaneRanks?: number[];
   hasOrokinCatalyst: boolean;
   isMR30?: boolean;
   slotPolarities?: Record<number, string>;
@@ -431,6 +432,18 @@ export interface WeaponExternalBuff {
    * Sprint / move speed bonus fraction (Jet Stream). Applied to warframe totals in loadout.
    */
   sprintSpeedBonus?: number;
+  /** Additive status duration bonus fraction (+0.25 = +25%; Saryn passive). */
+  statusDurationBonus?: number;
+  /** Additive Heavy Attack Efficiency fraction (+0.75 = +75%; Kullervo passive). */
+  heavyAttackEfficiencyBonus?: number;
+  /** Additive Heavy Attack Wind Up Speed fraction (+1.0 = +100%; Kullervo passive, Swift Momentum). */
+  heavyAttackWindUpBonus?: number;
+  /** Flat Melee Combo Duration seconds (+6 = +6s; Swift Momentum). */
+  comboDurationBonus?: number;
+  /** Flat Initial Melee Combo hits (+24 = +24 initial combo; Ready Steel). */
+  initialComboBonus?: number;
+  /** Additive Critical Chance bonus on weak-point / headshot hits (+0.75 = +75%; Worthy Comradery). */
+  weakPointCritChanceBonus?: number;
   nominal?: string;
 }
 
@@ -450,6 +463,8 @@ export interface WeaponCalculationOptions {
    * additive 1.25×STR−1 pool instead of a flat base multiply.
    */
   abilityStrength?: number;
+  /** Per-arcane rank aligned with `arcanes` array (defaults to `arcane.maxRank`). */
+  arcaneRanks?: number[];
 }
 
 export interface ElementalDamage {
@@ -628,10 +643,18 @@ export interface SimulationParams {
    * additive weapon damage buff √(0.025% × STR × absorbed), capped at 400%.
    */
   absorbAbsorbedDamage?: number;
-  /** Tenacious Bond: +1.2× crit damage when companion crit > 50%. Default on in loadout calcs. */
+  /** Tenacious Bond: +1.2× crit damage when companion crit >= 50%. Default on in loadout calcs. */
   applyTenaciousBondCrit?: boolean;
   /** Reinforced Bond: +60% fire rate when companion shields exceed threshold. Default on in loadout calcs. */
   applyReinforcedBondFireRate?: boolean;
+  /** Yareli Critical Flow passive: +200% Secondary critical chance after moving for 1.5s. */
+  applyYareliCriticalFlow?: boolean;
+  /** Zephyr Airborne passive: +150% weapon critical chance while airborne. */
+  applyZephyrAirborne?: boolean;
+  /** Garuda Death's Gate passive: +100% multiplicative weapon damage at max stacks. */
+  applyGarudaDeathsGate?: boolean;
+  /** Per-mod stack/toggle overrides for conditional Warframe mods (Growing Power, Energy/Health Conversion, Archon Intensify). */
+  conditionalModStacksById?: Record<string, number>;
   /**
    * Target faction for Bane/Expel/Smite damage (e.g. "Grineer", "Corpus").
    * Empty/undefined = paper DPS without faction mult.
@@ -1420,6 +1443,8 @@ export interface Loadout {
     shards: (EquippedArchonShard | null)[];
     arcaneIds?: (string | null)[];
     arcaneRanks?: number[];
+    arcaneStacksById?: Record<string, number>;
+    conditionalModStacksById?: Record<string, number>;
     hasOrokinReactor: boolean;
     isMR30?: boolean;
     slotPolarities?: Record<number, string>;
@@ -1428,9 +1453,11 @@ export interface Loadout {
     exaltedMods?: ModSlot[];
     exaltedSlotPolarities?: Record<number, string>;
     exaltedArcaneIds?: (string | null)[];
+    exaltedArcaneRanks?: number[];
     exaltedMeleeMods?: ModSlot[];
     exaltedMeleeSlotPolarities?: Record<number, string>;
     exaltedMeleeArcaneIds?: (string | null)[];
+    exaltedMeleeArcaneRanks?: number[];
     /** Non-default form mod configs for dual-form warframes (e.g. Orion on Sirius & Orion). */
     dualFormBuilds?: Record<string, { mods: ModSlot[]; slotPolarities?: Record<number, string> }>;
   };
@@ -1439,6 +1466,7 @@ export interface Loadout {
     mods: ModSlot[];
     stanceModId?: string;
     arcaneIds?: (string | null)[];
+    arcaneRanks?: number[];
     hasOrokinCatalyst: boolean;
     isMR30?: boolean;
     slotPolarities?: Record<number, string>;
@@ -1456,6 +1484,7 @@ export interface Loadout {
     mods: ModSlot[];
     stanceModId?: string;
     arcaneIds?: (string | null)[];
+    arcaneRanks?: number[];
     hasOrokinCatalyst: boolean;
     isMR30?: boolean;
     slotPolarities?: Record<number, string>;
@@ -1471,6 +1500,7 @@ export interface Loadout {
     mods: ModSlot[];
     stanceModId?: string;
     arcaneIds?: (string | null)[];
+    arcaneRanks?: number[];
     hasOrokinCatalyst: boolean;
     isMR30?: boolean;
     slotPolarities?: Record<number, string>;

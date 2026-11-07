@@ -31,12 +31,26 @@ import {
 } from "@/lib/riven/riven-validation";
 
 function isRivenMod(mod: Mod): boolean {
-  return mod.subCategory === "riven" || mod.id.startsWith("riven_");
+  return (
+    mod.subCategory === "riven" ||
+    mod.id.startsWith("riven_") ||
+    mod.id === "kitgun_riven_mod" ||
+    mod.id === "zaw_riven_mod" ||
+    mod.id === "companion_weapon_riven_mod" ||
+    mod.id === "archgun_riven_mod"
+  );
 }
 
-/** Riven stat pool category for the picker (Kuva Hek / Phantasma use the shotgun pool). */
+/** Riven stat pool category for the picker (Kuva Hek / Phantasma use the shotgun pool; Kitguns use pistol; Zaws use melee). */
 function rivenPoolCategory(
-  weapon: (Pick<Weapon, "name" | "category"> & { hasRivenSlot?: boolean }) | undefined,
+  weapon:
+    | (Pick<Weapon, "name" | "category"> & {
+        id?: string;
+        hasRivenSlot?: boolean;
+        kitgunChamberCategory?: Weapon["kitgunChamberCategory"];
+        arcaneType?: string;
+      })
+    | undefined,
   fallback: string,
 ): string {
   const type = weapon ? getRivenWeaponType(weapon) : null;
@@ -89,7 +103,11 @@ interface ModPickerProps {
   };
   weaponCategory?: string; // for riven stat pool filtering
   /** When set, filters mods by beam / AoE / projectile wiki compatibility tags. */
-  weapon?: Pick<Weapon, "id" | "name" | "category" | "triggerType"> & { hasRivenSlot?: boolean };
+  weapon?: Pick<Weapon, "id" | "name" | "category" | "triggerType"> & {
+    hasRivenSlot?: boolean;
+    kitgunChamberCategory?: Weapon["kitgunChamberCategory"];
+    arcaneType?: string;
+  };
   /** Incarnon Genesis installed: form trigger also gates Cannonade (round 47). */
   incarnonFormTriggerType?: string;
   warframeId?: string; // When set, augment mods are filtered to this warframe + universal
@@ -262,7 +280,7 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
   const [libraryName, setLibraryName] = useState("");
   const [librarySaving, setLibrarySaving] = useState(false);
   const saveToLibrary = async () => {
-    if (!rivenLibrary?.signedIn || !selectedMod || !isRivenMod(selectedMod) || !rivenValidation.ok) return;
+    if (!rivenLibrary || !selectedMod || !isRivenMod(selectedMod) || !rivenValidation.ok) return;
     setLibrarySaving(true);
     const name = libraryName.trim() || editRiven?.name || `${weapon?.name ?? "Weapon"} riven`;
     const ok = await rivenLibrary.onSave({ name, modId: selectedMod.id, stats: rivenStats, polarity: rivenPolarity, drain: rivenDrain });
@@ -524,31 +542,34 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
             )}
 
             {isRivenMod(selectedMod) && rivenLibrary && (
-              <div className="mt-4 rounded-lg border border-purple-500/30 bg-purple-500/5 p-3" data-testid="riven-save-to-library">
-                {rivenLibrary.signedIn ? (
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <Input
-                      value={libraryName}
-                      onChange={(e) => setLibraryName(e.target.value)}
-                      placeholder={editRiven?.name || `${weapon?.name ?? "Weapon"} riven`}
-                      aria-label="Riven name for your library"
-                      maxLength={80}
-                      className="min-h-11 flex-1 pointer-fine:min-h-9"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={saveToLibrary}
-                      disabled={!rivenValidation.ok || librarySaving}
-                      title={!rivenValidation.ok ? "Fix the riven above to save it" : undefined}
-                      className="min-h-11 pointer-fine:min-h-9"
-                    >
-                      {librarySaving ? "Saving…" : "Save to library"}
-                    </Button>
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    <Link href="/signin" className="text-primary hover:underline">Sign in</Link> to save this riven to your library and equip it on any build.
+              <div className="mt-4 space-y-1.5 rounded-lg border border-purple-500/30 bg-purple-500/5 p-3" data-testid="riven-save-to-library">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <Input
+                    value={libraryName}
+                    onChange={(e) => setLibraryName(e.target.value)}
+                    placeholder={editRiven?.name || `${weapon?.name ?? "Weapon"} riven`}
+                    aria-label="Riven name for your library"
+                    maxLength={80}
+                    className="min-h-11 flex-1 pointer-fine:min-h-9"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={saveToLibrary}
+                    disabled={!rivenValidation.ok || librarySaving}
+                    title={!rivenValidation.ok ? "Fix the riven above to save it" : undefined}
+                    className="min-h-11 pointer-fine:min-h-9"
+                  >
+                    {librarySaving ? "Saving…" : "Save to library"}
+                  </Button>
+                </div>
+                {!rivenLibrary.signedIn && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Saves to your local Riven Library.{" "}
+                    <Link href="/signin" className="text-primary hover:underline">
+                      Sign in
+                    </Link>{" "}
+                    to sync across devices.
                   </p>
                 )}
               </div>

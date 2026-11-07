@@ -6,11 +6,11 @@ import { Mod } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, X, Plus } from "lucide-react";
+import { Search, X, Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getArcaneImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
-import { getArcaneDisplayInfo } from "@/lib/display/arcane-display";
+import { formatArcaneRankDescription, getArcaneDisplayInfo } from "@/lib/display/arcane-display";
 
 import { RARITY_BADGE_COLORS } from "@/lib/display/rarity-badge-colors";
 interface ArcaneSlotProps {
@@ -19,6 +19,7 @@ interface ArcaneSlotProps {
   label: string;
   onAdd: () => void;
   onRemove: () => void;
+  onRankChange?: (rank: number) => void;
 }
 
 function ArcaneEffectSummary({ arcane, rank }: { arcane: Mod; rank: number }) {
@@ -51,7 +52,7 @@ function ArcaneEffectSummary({ arcane, rank }: { arcane: Mod; rank: number }) {
   );
 }
 
-export function ArcaneSlotCard({ arcane, rank, label, onAdd, onRemove }: ArcaneSlotProps) {
+export function ArcaneSlotCard({ arcane, rank, label, onAdd, onRemove, onRankChange }: ArcaneSlotProps) {
   if (!arcane) {
     return (
       <button
@@ -64,6 +65,8 @@ export function ArcaneSlotCard({ arcane, rank, label, onAdd, onRemove }: ArcaneS
     );
   }
 
+  const effectiveRank = Math.max(0, Math.min(arcane.maxRank, Number.isFinite(rank) ? Math.round(rank) : arcane.maxRank));
+
   return (
     <div className="relative w-full min-h-16 border border-purple-500/30 rounded-lg p-3 bg-purple-500/5">
       <button
@@ -75,13 +78,62 @@ export function ArcaneSlotCard({ arcane, rank, label, onAdd, onRemove }: ArcaneS
         <X className="h-3.5 w-3.5" />
       </button>
       <div className="flex items-start gap-2">
-        <GameAssetImage src={getArcaneImage(arcane.name)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/20 shrink-0 mt-0.5" hideOnError />
+        <button
+          type="button"
+          onClick={onAdd}
+          title="Change arcane"
+          className="shrink-0 mt-0.5 rounded transition-opacity hover:opacity-80"
+        >
+          <GameAssetImage src={getArcaneImage(arcane.name)} alt="" width={32} height={32} className="w-8 h-8 rounded object-contain bg-muted/20 shrink-0" hideOnError />
+        </button>
         <div className="flex-1 min-w-0 space-y-1">
-          <div>
-            <span className="text-sm font-medium truncate block">{arcane.name}</span>
-            <span className="text-[10px] text-muted-foreground">Rank {rank}/{arcane.maxRank}</span>
+          <div className="pr-8">
+            <button
+              type="button"
+              onClick={onAdd}
+              title="Change arcane"
+              className="text-left text-sm font-medium truncate block max-w-full hover:text-purple-700 dark:hover:text-purple-300"
+            >
+              {arcane.name}
+            </button>
+            {onRankChange && arcane.maxRank > 0 ? (
+              <div className="mt-1 inline-flex items-center gap-1" data-testid="arcane-slot-rank-stepper">
+                <button
+                  type="button"
+                  onClick={() => onRankChange(Math.max(0, effectiveRank - 1))}
+                  disabled={effectiveRank <= 0}
+                  aria-label="Decrease arcane rank"
+                  className="inline-flex h-5 w-5 items-center justify-center rounded border border-purple-500/30 bg-background/70 text-muted-foreground transition-colors hover:border-purple-500/60 hover:text-foreground disabled:opacity-35"
+                >
+                  <Minus className="h-2.5 w-2.5" />
+                </button>
+                <select
+                  value={effectiveRank}
+                  onChange={(e) => onRankChange(parseInt(e.target.value, 10))}
+                  aria-label={`${arcane.name} rank`}
+                  className="h-5 rounded border border-purple-500/30 bg-background/70 px-1 text-[10px] font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-purple-500"
+                >
+                  {Array.from({ length: arcane.maxRank + 1 }, (_, r) => arcane.maxRank - r).map((r) => (
+                    <option key={r} value={r}>
+                      Rank {r}/{arcane.maxRank}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => onRankChange(Math.min(arcane.maxRank, effectiveRank + 1))}
+                  disabled={effectiveRank >= arcane.maxRank}
+                  aria-label="Increase arcane rank"
+                  className="inline-flex h-5 w-5 items-center justify-center rounded border border-purple-500/30 bg-background/70 text-muted-foreground transition-colors hover:border-purple-500/60 hover:text-foreground disabled:opacity-35"
+                >
+                  <Plus className="h-2.5 w-2.5" />
+                </button>
+              </div>
+            ) : (
+              <span className="text-[10px] text-muted-foreground">Rank {effectiveRank}/{arcane.maxRank}</span>
+            )}
           </div>
-          <ArcaneEffectSummary arcane={arcane} rank={rank} />
+          <ArcaneEffectSummary arcane={arcane} rank={effectiveRank} />
         </div>
       </div>
     </div>
@@ -93,17 +145,42 @@ interface ArcanePickerProps {
   onOpenChange: (open: boolean) => void;
   arcanes: Mod[];
   equippedArcaneIds: string[];
-  onSelect: (arcane: Mod) => void;
+  onSelect: (arcane: Mod, rank: number) => void;
+  /** Initial rank when opening (defaults to max rank). */
+  initialRank?: number;
   title?: string;
 }
 
-export function ArcanePicker({ open, onOpenChange, arcanes, equippedArcaneIds, onSelect, title = "Select Arcane" }: ArcanePickerProps) {
+export function ArcanePicker({
+  open,
+  onOpenChange,
+  arcanes,
+  equippedArcaneIds,
+  onSelect,
+  initialRank,
+  title = "Select Arcane",
+}: ArcanePickerProps) {
   const [search, setSearch] = useState("");
+  const maxAvailableRank = useMemo(
+    () => arcanes.reduce((m, a) => Math.max(m, a.maxRank ?? 5), 0) || 5,
+    [arcanes],
+  );
+  const [selectedRank, setSelectedRank] = useState<number>(() => initialRank ?? maxAvailableRank);
+  const [prevOpen, setPrevOpen] = useState(false);
+  if (prevOpen !== open) {
+    setPrevOpen(open);
+    if (open) {
+      setSelectedRank(initialRank ?? maxAvailableRank);
+      setSearch("");
+    }
+  }
 
   const filtered = useMemo(() => {
     if (!search.trim()) return arcanes;
     const q = search.toLowerCase();
-    return arcanes.filter((a) => a.name.toLowerCase().includes(q));
+    return arcanes.filter(
+      (a) => a.name.toLowerCase().includes(q) || a.description.toLowerCase().includes(q),
+    );
   }, [arcanes, search]);
 
   return (
@@ -112,7 +189,7 @@ export function ArcanePicker({ open, onOpenChange, arcanes, equippedArcaneIds, o
         <DialogHeader className="p-6 pb-0 sm:pl-6 sm:pr-12 lg:pl-6 lg:pr-12">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <div className="px-6 pb-3">
+        <div className="px-6 pb-3 space-y-2.5">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -123,7 +200,38 @@ export function ArcanePicker({ open, onOpenChange, arcanes, equippedArcaneIds, o
               autoFocus
             />
           </div>
-          <p className="text-xs text-muted-foreground mt-2">{filtered.length} arcanes</p>
+          {maxAvailableRank > 0 && (
+            <div
+              className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-purple-500/25 bg-purple-500/5 px-2.5 py-1.5"
+              data-testid="arcane-picker-rank-bar"
+            >
+              <span className="text-[11px] font-medium text-muted-foreground">
+                Equip at rank
+              </span>
+              <div className="flex flex-wrap items-center gap-1">
+                {Array.from({ length: maxAvailableRank + 1 }, (_, r) => r).map((r) => {
+                  const active = selectedRank === r;
+                  return (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setSelectedRank(r)}
+                      className={cn(
+                        "inline-flex h-6 min-w-7 items-center justify-center rounded px-1.5 text-[11px] font-mono font-medium transition-colors",
+                        active
+                          ? "bg-purple-600 text-white shadow-xs"
+                          : "border border-border/70 bg-background text-muted-foreground hover:border-purple-500/50 hover:text-foreground",
+                      )}
+                    >
+                      R{r}
+                      {r === maxAvailableRank ? " · Max" : ""}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground">{filtered.length} arcanes</p>
         </div>
         <div className="flex-1 overflow-y-auto px-6 pb-6 min-h-0">
           {filtered.length === 0 ? (
@@ -135,11 +243,13 @@ export function ArcanePicker({ open, onOpenChange, arcanes, equippedArcaneIds, o
           <div className="space-y-1">
             {filtered.map((arcane) => {
               const isEquipped = equippedArcaneIds.includes(arcane.id);
+              const effectiveRank = Math.max(0, Math.min(arcane.maxRank, selectedRank));
+              const desc = formatArcaneRankDescription(arcane, effectiveRank) || cleanModDescription(arcane.description);
               return (
                 <button
                   key={arcane.id}
                   type="button"
-                  onClick={() => !isEquipped && onSelect(arcane)}
+                  onClick={() => !isEquipped && onSelect(arcane, effectiveRank)}
                   disabled={isEquipped}
                   className={cn(
                     "w-full min-h-11 text-left p-3 rounded-lg border transition-all",
@@ -148,17 +258,22 @@ export function ArcanePicker({ open, onOpenChange, arcanes, equippedArcaneIds, o
                       : "border-border hover:border-purple-500/50 hover:bg-purple-500/5 cursor-pointer"
                   )}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
                       <GameAssetImage src={getArcaneImage(arcane.name)} alt="" width={28} height={28} className="w-7 h-7 rounded object-contain bg-muted/20 shrink-0" hideOnError />
-                      <span className="text-sm font-medium">{arcane.name}</span>
+                      <span className="truncate text-sm font-medium">{arcane.name}</span>
                     </div>
-                    <Badge variant="outline" className={cn("text-[10px]", RARITY_BADGE_COLORS[arcane.rarity])}>
-                      {arcane.rarity}
-                    </Badge>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <span className="font-mono text-[10px] text-purple-700 dark:text-purple-300">
+                        R{effectiveRank}/{arcane.maxRank}
+                      </span>
+                      <Badge variant="outline" className={cn("text-[10px]", RARITY_BADGE_COLORS[arcane.rarity])}>
+                        {arcane.rarity}
+                      </Badge>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5 truncate pl-5.5">
-                    {cleanModDescription(arcane.description).substring(0, 80)}
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 pl-9">
+                    {desc}
                   </p>
                 </button>
               );

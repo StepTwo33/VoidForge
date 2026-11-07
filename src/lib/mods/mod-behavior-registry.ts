@@ -656,7 +656,7 @@ export function applyVerifiedModStatToWarframe(
  */
 export function sumSlideSpeedBonusFromModSlots(
   slots: { modId: string; rank?: number }[] | undefined,
-  allMods: Map<string, { maxRank: number; stats?: Record<string, number>; category?: string }>,
+  allMods: Map<string, { maxRank: number; stats?: Record<string, number>; category?: string; subCategory?: string }>,
 ): number {
   return sumMovementBonusFromWeaponModSlots(slots, allMods, "slideSpeed");
 }
@@ -667,14 +667,14 @@ export function sumSlideSpeedBonusFromModSlots(
  */
 export function sumSprintSpeedBonusFromModSlots(
   slots: { modId: string; rank?: number }[] | undefined,
-  allMods: Map<string, { maxRank: number; stats?: Record<string, number>; category?: string }>,
+  allMods: Map<string, { maxRank: number; stats?: Record<string, number>; category?: string; subCategory?: string }>,
 ): number {
   return sumMovementBonusFromWeaponModSlots(slots, allMods, "sprintSpeed");
 }
 
 function sumMovementBonusFromWeaponModSlots(
   slots: { modId: string; rank?: number }[] | undefined,
-  allMods: Map<string, { maxRank: number; stats?: Record<string, number>; category?: string }>,
+  allMods: Map<string, { maxRank: number; stats?: Record<string, number>; category?: string; subCategory?: string }>,
   statKey: "slideSpeed" | "sprintSpeed",
 ): number {
   if (!slots?.length) return 0;
@@ -685,7 +685,7 @@ function sumMovementBonusFromWeaponModSlots(
     if (perRank == null || !mod) continue;
     // Only weapon-slot mods contribute here (warframe mods are applied in calculateWarframeBuild).
     const cat = (mod.category ?? "").toLowerCase();
-    if (cat === "warframe" || cat === "aura" || cat === "exilus" || cat === "augment") continue;
+    if (cat === "warframe" || cat === "aura" || cat === "exilus" || (cat === "augment" && mod.subCategory !== "weapon")) continue;
     const line = getVerifiedModStatLine(slot.modId, statKey);
     if (line && line.mode !== "multiplicative_percent") continue;
     const rank = Math.min(Math.max(slot.rank ?? 0, 0), mod.maxRank);

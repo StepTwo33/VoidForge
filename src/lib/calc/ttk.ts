@@ -315,6 +315,31 @@ export interface TTKResult {
   ammoShotBudget?: number;
 }
 
+export interface TTKPrimingOptions {
+  /** Pre-applied Viral stacks at t = 0 (0–10). */
+  primedViralStacks?: number;
+  /** Pre-applied Corrosive stacks at t = 0 (0–14). */
+  primedCorrosiveStacks?: number;
+  /** Pre-applied Magnetic stacks at t = 0 (0–10). */
+  primedMagneticStacks?: number;
+  /** Pre-applied Cold stacks at t = 0 (0–10; 10 freezes target for 3s). */
+  primedColdStacks?: number;
+  /** Pre-applied Puncture stacks at t = 0 (0–5). */
+  primedPunctureStacks?: number;
+  /** Pre-applied Blast stacks in active fuse window at t = 0 (0–10). */
+  primedBlastStacks?: number;
+  /** Pre-ramped Heat 50% armor strip active at t = 0. */
+  primedHeatStrip?: boolean;
+  /** External ability armor strip percentage (0–100, e.g. Terrify / Pillage / Tharros Strike). */
+  armorStripPct?: number;
+}
+
+export interface TTKOptions extends TTKPrimingOptions {
+  maxTime?: number;
+  maxShots?: number;
+  steelPath?: boolean;
+}
+
 export interface DotInstance {
   /** Absolute time of next tick. */
   nextTick: number;
@@ -327,6 +352,8 @@ export interface DotInstance {
   ignoreShields: boolean;
   /** Apply viral mult (slash/gas). */
   useViral: boolean;
+  /** Undetonated Blast stack count represented by this fuse instance (prematurely detonates at 10). */
+  blastStacks?: number;
 }
 
 function collectDamageTypes(stats: CalculatedStats): { type: string; value: number }[] {
@@ -445,7 +472,7 @@ export function simulateDiscreteTTK(
   stats: CalculatedStats,
   enemy: EnemyType,
   level: number,
-  opts?: { maxTime?: number; maxShots?: number; steelPath?: boolean },
+  opts?: TTKOptions,
 ): TTKResult {
   const maxTime = opts?.maxTime ?? 600;
   const maxShots = opts?.maxShots ?? 50_000;
@@ -453,7 +480,8 @@ export function simulateDiscreteTTK(
 
   const pools = scaleEnemyPools(enemy, level, { steelPath });
   const scaledHp = pools.health;
-  const baseArmor = pools.armor;
+  const stripMult = 1 - Math.min(100, Math.max(0, opts?.armorStripPct ?? 0)) / 100;
+  const baseArmor = pools.armor * stripMult;
   const scaledShield = pools.shield;
   const scaledOverguard = pools.overguard;
 
@@ -695,6 +723,99 @@ export function simulateDiscreteTTK(
   const coldT = new StackTimers(6 * durScale, 10);
   const punctureCritT = new StackTimers(6 * durScale, 5);
   const punctureStripT = new StackTimers(6 * durScale, Math.max(punctureStackCap, 0));
+
+  /**
+   * Wiki Damage/Blast (Update 36): each Blast stack has a 1.5s × Status Duration fuse for 30%
+   * modded base damage, UNLESS total active Blast stacks reach 10 — then all 10 stacks detonate
+   * immediately (300% total) and reset the stack counter.
+   */
+  const enqueueBlastStacks = (stackAmt: number, perStackDmg: number, atTime: number) => {
+    if (stackAmt <= 0 || perStackDmg <= 0) return;
+    let pending = 0;
+    for (const d of dots) {
+      if (d.type === "blast" && d.remainingTicks > 0 && (d.blastStacks ?? 0) > 0) {
+        pending += d.blastStacks!;
+      }
+    }
+    let remaining = stackAmt;
+    while (pending + remaining >= 10 - 1e-9) {
+      const needed = Math.max(0, 10 - pending);
+      for (const d of dots) {
+        if (d.type === "blast" && d.remainingTicks > 0 && (d.blastStacks ?? 0) > 0) {
+          d.nextTick = atTime;
+          d.blastStacks = 0;
+        }
+      }
+      if (needed > 1e-9) {
+        dots.push({
+          nextTick: atTime,
+          remainingTicks: 1,
+          damagePerTick: perStackDmg * needed,
+          type: "blast",
+          ignoreArmor: false,
+          ignoreShields: false,
+          useViral: true,
+          blastStacks: 0,
+        });
+      }
+      remaining -= needed;
+      pending = 0;
+    }
+    if (remaining > 1e-9) {
+      dots.push({
+        nextTick: atTime + BLAST_FUSE_SECONDS * durScale,
+        remainingTicks: 1,
+        damagePerTick: perStackDmg * remaining,
+        type: "blast",
+        ignoreArmor: false,
+        ignoreShields: false,
+        useViral: true,
+        blastStacks: remaining,
+      });
+    }
+  };
+
+  // Pre-seed enemy debuff priming at t = 0 (loadout / PoB-style target configuration).
+  if ((opts?.primedViralStacks ?? 0) > 0) {
+    viralStacks = viralT.add(Math.min(10, Math.max(0, opts!.primedViralStacks!)), 0);
+    peakViral = viralStacks;
+  }
+  if ((opts?.primedCorrosiveStacks ?? 0) > 0) {
+    corrosiveStacks = corrosiveT.add(
+      Math.min(corrosiveCap, Math.max(0, opts!.primedCorrosiveStacks!)),
+      0,
+    );
+    peakCorrosive = corrosiveStacks;
+  }
+  if ((opts?.primedMagneticStacks ?? 0) > 0) {
+    magneticStacks = magneticT.add(Math.min(10, Math.max(0, opts!.primedMagneticStacks!)), 0);
+  }
+  if ((opts?.primedColdStacks ?? 0) > 0) {
+    const cCap = overguard > 0 || enemy.kind === "boss" ? 4 : 10;
+    coldT.setCap(cCap);
+    coldStacks = coldT.add(Math.min(cCap, Math.max(0, opts!.primedColdStacks!)), 0);
+    if (coldStacks >= 10 - 1e-9) {
+      coldStacks = 10;
+      frozenUntil = 3;
+    }
+  }
+  if ((opts?.primedPunctureStacks ?? 0) > 0) {
+    const pAmt = Math.min(5, Math.max(0, opts!.primedPunctureStacks!));
+    punctureCritStacks = punctureCritT.add(pAmt, 0);
+    if (punctureStackCap > 0) {
+      punctureStacks = punctureStripT.add(pAmt, 0);
+    }
+  }
+  if (opts?.primedHeatStrip) {
+    heatEver = true;
+    heatRampStart = -4 * HEAT_STRIP_RAMP_STEP * durScale;
+    heatExpire = dotDuration;
+  }
+  if ((opts?.primedBlastStacks ?? 0) > 0) {
+    const primedBlast = Math.min(10, Math.max(0, opts!.primedBlastStacks!));
+    const perStack = 0.3 * dotBase * enemyDamageTypeMultiplier(enemy, "blast");
+    enqueueBlastStacks(primedBlast, perStack, 0);
+  }
 
   const heatStripIdx = (t: number): number => {
     if (!heatEver || t < heatRampStart) return 0;
@@ -1014,22 +1135,12 @@ export function simulateDiscreteTTK(
       typeMult: 1 + typeBonus("gas"),
     });
 
-    // Blast Detonate: one hit of 0.3 × modded base per proc after the 1.5s fuse
-    // (wiki Damage/Blast). No Heat/Cold type bonus; armor and Viral apply.
+    // Blast Detonate: 0.3 × modded base per proc after 1.5s × Status Duration fuse, OR immediate
+    // premature detonation when active stacks reach 10 (wiki Damage/Blast, Update 36).
     const blastProcs = expectedProcs("blast");
     if (blastProcs > 0) {
-      const perHit = 0.3 * dotBase * critScale * enemyDamageTypeMultiplier(enemy, "blast") * blastProcs;
-      if (perHit > 0) {
-        dots.push({
-          nextTick: time + BLAST_FUSE_SECONDS * durScale,
-          remainingTicks: 1,
-          damagePerTick: perHit,
-          type: "blast",
-          ignoreArmor: false,
-          ignoreShields: false,
-          useViral: true,
-        });
-      }
+      const perStack = 0.3 * dotBase * critScale * enemyDamageTypeMultiplier(enemy, "blast");
+      enqueueBlastStacks(blastProcs, perStack, time);
     }
 
     // Toxic Lash: guaranteed Toxin DoT per pellet; ticks use faction³
@@ -1156,7 +1267,7 @@ export function calculateTTK(
   stats: CalculatedStats,
   enemy: EnemyType,
   level: number,
-  opts?: { steelPath?: boolean },
+  opts?: TTKOptions,
 ): TTKResult {
   return simulateDiscreteTTK(stats, enemy, level, opts);
 }

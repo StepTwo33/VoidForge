@@ -8,12 +8,14 @@ import {
 import { allHelminthAbilities } from "@/data/helminth";
 import { helminthToAbility } from "@/lib/builds/helminth-resolve";
 import {
+  resolveActiveSavedArcanes,
   resolveSavedArcaneSlots,
   type ArchwingBuildData,
   type CompanionBuildData,
   type WarframeBuildData,
   type WeaponBuildData,
 } from "@/lib/builds/build-storage";
+import { rivenStatChangesFromModSlots } from "@/lib/warframe-arsenal/riven-resolve";
 import { buildAbilityTTKEntries, type AbilityTTKEntry } from "@/lib/calc/ability-ttk";
 import { resolveDefaultCompanionWeapon } from "@/lib/weapons/companion-weapons";
 import {
@@ -91,11 +93,16 @@ function resolveExaltedWeaponPreview(
   weapon: Weapon,
   mods: ModSlot[],
   arcaneIds: (string | null)[] | undefined,
+  arcaneRanks: number[] | undefined,
   abilityStrength: number,
   labelPrefix = "Exalted",
   warframeMaxEnergy?: number,
 ): PublicBuildWeaponPreview | null {
-  const exaltedArcanes = resolveSavedArcaneSlots(arcaneIds, 2).filter((m): m is Mod => m != null);
+  const { arcanes: exaltedArcanes, arcaneRanks: resolvedArcaneRanks } = resolveActiveSavedArcanes(
+    arcaneIds,
+    arcaneRanks,
+    2,
+  );
   if (mods.length === 0 && exaltedArcanes.length === 0) return null;
   const modsMap = getEffectiveModsMap();
   const base = enrichWeapon(weapon);
@@ -103,7 +110,18 @@ function resolveExaltedWeaponPreview(
   const sim = { ...scenarioSimParams("midFight"), warframeMaxEnergy };
   const stats =
     exaltedArcanes.length > 0
-      ? calculateWeaponBuildWithArcanes(base, mods, modsMap, exaltedArcanes, undefined, sim, calcOptions)
+      ? calculateWeaponBuildWithArcanes(
+          base,
+          mods,
+          modsMap,
+          exaltedArcanes,
+          undefined,
+          sim,
+          calcOptions,
+          undefined,
+          undefined,
+          resolvedArcaneRanks,
+        )
       : calculateWeaponBuild(base, mods, modsMap, undefined, sim, calcOptions);
   const isMelee = base.category === "melee" || base.triggerType === "Melee";
   return {
@@ -127,6 +145,7 @@ function resolveExaltedPreview(
     exaltedWeapon,
     data.exaltedMods ?? [],
     data.exaltedArcaneIds,
+    data.exaltedArcaneRanks,
     abilityStrength,
     "Exalted",
     warframeMaxEnergy,
@@ -145,6 +164,7 @@ function resolveExaltedMeleePreview(
     meleeWeapon,
     data.exaltedMeleeMods ?? [],
     data.exaltedMeleeArcaneIds,
+    data.exaltedMeleeArcaneRanks,
     abilityStrength,
     "Exalted Melee",
     warframeMaxEnergy,
@@ -196,9 +216,11 @@ function baseWeaponStats(
   weapon: Weapon,
   incarnonEvolutions?: Record<number, number>,
   incarnonConditionals?: Record<string, boolean>,
+  incarnonGenesisInstalled?: boolean,
 ): CalculatedStats {
   const incarnonChanges = getIncarnonStatChangesForWeapon(weapon.id, incarnonEvolutions, {
     conditionalsOn: incarnonConditionals,
+    genesisInstalledOverride: incarnonGenesisInstalled,
   });
   return calculateWeaponBuild(
     enrichWeapon(weapon),
@@ -226,10 +248,12 @@ export function resolvePublicBuildWeaponPreview(
         weaponId: d.weaponId,
         mods: d.mods ?? [],
         arcaneIds: d.arcaneIds,
+        arcaneRanks: d.arcaneRanks,
         progenitorElement: d.progenitorElement,
         progenitorBonusPercent: d.progenitorBonusPercent,
         incarnonEvolutions: d.incarnonEvolutions,
         incarnonConditionals: d.incarnonConditionals,
+        incarnonGenesisInstalled: d.incarnonGenesisInstalled,
       });
       if (!entry) return null;
       const weapon = weaponsMap.get(d.weaponId);
@@ -238,7 +262,12 @@ export function resolvePublicBuildWeaponPreview(
         label: entry.name,
         weapon: enrichWeapon(weapon),
         stats: entry.stats,
-        baseStats: baseWeaponStats(weapon, d.incarnonEvolutions, d.incarnonConditionals),
+        baseStats: baseWeaponStats(
+          weapon,
+          d.incarnonEvolutions,
+          d.incarnonConditionals,
+          d.incarnonGenesisInstalled,
+        ),
         isMelee: entry.isMelee,
       };
     }
@@ -273,11 +302,23 @@ export function resolvePublicBuildWeaponPreview(
       const base = enrichWeapon(assembled);
       const simParams = scenarioSimParams("midFight");
       const modSlots = d.mods ?? [];
-      const arcaneMods = resolveSavedArcaneSlots(d.arcaneIds, 2).filter((m): m is Mod => m != null);
+      const rivenStatChanges = rivenStatChangesFromModSlots(modSlots);
+      const { arcanes: arcaneMods, arcaneRanks } = resolveActiveSavedArcanes(d.arcaneIds, d.arcaneRanks, 2);
       const stats =
         arcaneMods.length > 0
-          ? calculateWeaponBuildWithArcanes(base, modSlots, modsMap, arcaneMods, undefined, simParams)
-          : calculateWeaponBuild(base, modSlots, modsMap, undefined, simParams);
+          ? calculateWeaponBuildWithArcanes(
+              base,
+              modSlots,
+              modsMap,
+              arcaneMods,
+              undefined,
+              simParams,
+              undefined,
+              undefined,
+              rivenStatChanges,
+              arcaneRanks,
+            )
+          : calculateWeaponBuild(base, modSlots, modsMap, undefined, simParams, undefined, undefined, rivenStatChanges);
       const isMelee = base.category === "melee" || base.triggerType === "Melee";
       return {
         label: base.name,

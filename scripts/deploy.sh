@@ -235,5 +235,8 @@ npm run build
 
 echo "==> Build complete at $(git rev-parse --short HEAD)"
 backup_database
+echo "==> Applying database migrations and schema repair"
+npx prisma migrate deploy || echo "WARN: prisma migrate deploy reported an issue; running repair-db.mjs"
+node "$DIR/scripts/repair-db.mjs"
 git rev-parse HEAD > .deploy-last-sha
 restart_framehub

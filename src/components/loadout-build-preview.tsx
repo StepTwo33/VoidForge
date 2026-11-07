@@ -125,6 +125,7 @@ function slotBuilderHref(loadout: Loadout | null, slotId: string): string | null
         itemId: wb.warframeId,
         mods: modsToShare(wb.mods),
         arcanes: (wb.arcaneIds ?? []).map((id) => id ?? ""),
+        arcaneRanks: wb.arcaneRanks,
         shards: (wb.shards ?? [])
           .filter((s): s is NonNullable<typeof s> => s != null)
           .map((s) => ({ id: s.shardId, bonus: s.selectedBonus })),
@@ -144,6 +145,7 @@ function slotBuilderHref(loadout: Loadout | null, slotId: string): string | null
           modularType: mb.modularType,
           parts: mb.parts,
           arcanes: (mb.arcaneIds ?? []).map((id) => id ?? ""),
+          arcaneRanks: mb.arcaneRanks,
           hasOrokinCatalyst: mb.hasOrokinCatalyst,
           isMR30: mb.isMR30,
           slotPolarities: polaritiesToShare(mb.slotPolarities),
@@ -162,6 +164,7 @@ function slotBuilderHref(loadout: Loadout | null, slotId: string): string | null
           itemId: data.weaponId,
           mods: modsToShare(data.mods),
           arcanes: (data.arcaneIds ?? []).map((id) => id ?? ""),
+          arcaneRanks: data.arcaneRanks,
           hasOrokinCatalyst: data.hasOrokinCatalyst,
           isMR30: data.isMR30,
           progenitorElement: data.progenitorElement,
@@ -187,6 +190,7 @@ function slotBuilderHref(loadout: Loadout | null, slotId: string): string | null
           modularType: mb.modularType,
           parts: mb.parts,
           arcanes: (mb.arcaneIds ?? []).map((id) => id ?? ""),
+          arcaneRanks: mb.arcaneRanks,
           hasOrokinCatalyst: mb.hasOrokinCatalyst,
           isMR30: mb.isMR30,
           slotPolarities: polaritiesToShare(mb.slotPolarities),
@@ -214,6 +218,7 @@ function warframeMiniStats(s: WarframeCalculatedStats | null | undefined) {
       <MiniStat label="Duration" value={`${((s.abilityDuration ?? 0) * 100).toFixed(0)}%`} />
       <MiniStat label="Efficiency" value={s.abilityEfficiency != null ? formatAbilityEfficiencyPct(s.abilityEfficiency) : "0%"} />
       <MiniStat label="Range" value={`${((s.abilityRange ?? 0) * 100).toFixed(0)}%`} />
+      <MiniStat label="Sprint" value={(s.totalSprint ?? 0).toFixed(2)} />
       {(s.damageReduction ?? 0) > 0 && (
         <MiniStat label="DR" value={`${((s.damageReduction ?? 0) * 100).toFixed(0)}%`} />
       )}

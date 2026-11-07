@@ -43,9 +43,20 @@ export function effectiveArcaneStacks(
     return Math.min(simStacks, cap);
   }
 
-  // Warframe: always active when equipped; stacking arcanes assume full stack cap
-  // unless a stack count is supplied.
-  if (!isStacking) return 1;
+  // Warframe: always active when equipped by default; conditional/non-passive arcanes can be
+  // explicitly toggled off via `stackOverride === 0`, and stacking arcanes use `stackOverride`
+  // or assume full stack cap.
+  if (!isStacking) {
+    if (
+      def.trigger !== "passive" &&
+      stackOverride != null &&
+      Number.isFinite(stackOverride) &&
+      stackOverride <= 0
+    ) {
+      return 0;
+    }
+    return 1;
+  }
   const cap = arcaneStackCap(def, rank ?? def.maxRank);
   if (stackOverride != null && Number.isFinite(stackOverride)) {
     const n = Math.max(0, Math.floor(stackOverride));
@@ -352,16 +363,21 @@ export function applyArcaneToWeaponFromMod(
   stacks: number = 1,
   baseWeapon?: Weapon,
   opts?: ArcaneWeaponOpts,
+  rank?: number,
 ): void {
-  const rank = arcane.maxRank;
+  const effectiveRank =
+    typeof rank === "number" && Number.isFinite(rank)
+      ? Math.max(0, Math.min(arcane.maxRank, Math.trunc(rank)))
+      : arcane.maxRank;
   if (getArcaneEffectDef(arcane.id)) {
-    applyArcaneEffectsToWeapon(stats, arcane.id, rank, stacks, baseWeapon, opts);
+    applyArcaneEffectsToWeapon(stats, arcane.id, effectiveRank, stacks, baseWeapon, opts);
     return;
   }
   // Fallback for arcanes missing from generated data
+  const rankFactor = arcane.maxRank > 0 ? (effectiveRank + 1) / (arcane.maxRank + 1) : 1;
   for (const [stat, value] of Object.entries(arcane.stats)) {
     const line = { stat, maxValue: value, flat: false };
-    const raw = value * stacks;
+    const raw = value * rankFactor * stacks;
     trackBonus(stats, stat, raw);
     if (shouldApplyArcaneLineToBuild(arcane.id, stat, "weapon")) {
       applyWeaponStatToBuild(stats, stat, raw, line, baseWeapon);

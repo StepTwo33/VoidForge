@@ -9,7 +9,8 @@ import type {
   WarframeCalculatedStats,
 } from "@/lib/types";
 import type { ArchwingBuildData, CompanionBuildData, WarframeBuildData, WeaponBuildData } from "@/lib/builds/build-storage";
-import { resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
+import { resolveActiveSavedArcanes } from "@/lib/builds/build-storage";
+import { rivenStatChangesFromModSlots } from "@/lib/warframe-arsenal/riven-resolve";
 import { extractBuildItemId } from "@/lib/builds/build-types";
 import { resolvePublicBuildWarframePreview } from "@/lib/builds/build-stats";
 import { calcSavedWeaponBuildStats, scenarioSimParams } from "@/lib/builds/loadout-stats";
@@ -152,6 +153,7 @@ function moddedWeaponStats(
   linkage?: SetBonusLinkage,
   /** Additive base-damage bonus (Railjack Gunnery intrinsic on arch weapons). */
   intrinsicDamageBonus = 0,
+  arcaneRanks?: number[],
 ): CalculatedStats | null {
   const calcOptions = intrinsicDamageBonus > 0
     ? { externalBuffs: [{ id: "railjack_gunnery", label: "Gunnery intrinsic", category: "other" as const, damageBonus: intrinsicDamageBonus }] }
@@ -162,11 +164,27 @@ function moddedWeaponStats(
   if (!weapon) return null;
   const modsMap = getEffectiveModsMap();
   const sim = scenarioSimParams("midFight");
-  const arcanes = resolveSavedArcaneSlots(arcaneIds, arcaneIds?.length ?? 0).filter((a): a is NonNullable<typeof a> => a != null);
+  const rivenStatChanges = rivenStatChangesFromModSlots(mods);
+  const { arcanes, arcaneRanks: resolvedRanks } = resolveActiveSavedArcanes(
+    arcaneIds,
+    arcaneRanks,
+    arcaneIds?.length ?? 0,
+  );
   if (arcanes.length > 0) {
-    return calculateWeaponBuildWithArcanes(weapon, mods, modsMap, arcanes, undefined, sim, calcOptions, linkage);
+    return calculateWeaponBuildWithArcanes(
+      weapon,
+      mods,
+      modsMap,
+      arcanes,
+      undefined,
+      sim,
+      calcOptions,
+      linkage,
+      rivenStatChanges,
+      resolvedRanks,
+    );
   }
-  return calculateWeaponBuild(enrichWeapon(weapon), mods, modsMap, undefined, sim, calcOptions, linkage);
+  return calculateWeaponBuild(enrichWeapon(weapon), mods, modsMap, undefined, sim, calcOptions, linkage, rivenStatChanges);
 }
 
 function companionSnapshot(label: string, data: CompanionBuildData): CompareSnapshot | null {
@@ -192,7 +210,7 @@ function companionSnapshot(label: string, data: CompanionBuildData): CompareSnap
 function modularSnapshot(label: string, data: ModularBuildData): CompareSnapshot | null {
   const weapon = weaponFromModularData(data);
   if (!weapon) return null;
-  const stats = moddedWeaponStats(weapon, data.mods ?? [], data.arcaneIds);
+  const stats = moddedWeaponStats(weapon, data.mods ?? [], data.arcaneIds, undefined, 0, data.arcaneRanks);
   if (!stats) return null;
   return { kind: "modular", label, stats, equipment: modularEquipment(data) };
 }
@@ -248,10 +266,12 @@ export function snapshotFromBuild(
       weaponId: d.weaponId,
       mods: d.mods ?? [],
       arcaneIds: d.arcaneIds,
+      arcaneRanks: d.arcaneRanks,
       progenitorElement: d.progenitorElement,
       progenitorBonusPercent: d.progenitorBonusPercent,
       incarnonEvolutions: d.incarnonEvolutions,
       incarnonConditionals: d.incarnonConditionals,
+      incarnonGenesisInstalled: d.incarnonGenesisInstalled,
     });
     if (!entry) return null;
     return { kind: "weapon", label, stats: entry.stats, equipment: weaponEquipment(d) };

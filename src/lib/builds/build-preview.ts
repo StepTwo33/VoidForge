@@ -48,12 +48,27 @@ function modChipsFromSlots(mods: ModSlot[] | undefined, modsMap = getEffectiveMo
   return chips;
 }
 
-function arcaneChipsFromIds(ids: (string | null)[] | undefined): BuildPreviewChip[] {
+function arcaneChipsFromIds(
+  ids: (string | null)[] | undefined,
+  ranks?: number[],
+): BuildPreviewChip[] {
   const chips: BuildPreviewChip[] = [];
-  for (const id of ids ?? []) {
+  for (let i = 0; i < (ids ?? []).length; i++) {
+    const id = ids?.[i];
     if (!id) continue;
     const arcane = resolveArcaneById(id);
-    chips.push({ label: arcane?.name ?? id });
+    const maxRank = arcane?.maxRank ?? 5;
+    const rawRank = ranks?.[i];
+    const rank =
+      rawRank != null && Number.isFinite(rawRank)
+        ? Math.min(Math.max(0, Math.round(rawRank)), maxRank)
+        : arcane != null
+          ? maxRank
+          : undefined;
+    chips.push({
+      label: arcane?.name ?? id,
+      ...(rank != null ? { sublabel: `R${rank}` } : {}),
+    });
   }
   return chips;
 }
@@ -75,6 +90,7 @@ type WeaponSlotBuild = {
   mods?: ModSlot[];
   stanceModId?: string;
   arcaneIds?: (string | null)[];
+  arcaneRanks?: number[];
 };
 
 function weaponSlotPreview(
@@ -97,7 +113,7 @@ function weaponSlotPreview(
     itemName: w?.name ?? build.weaponId,
     itemImage: w ? getWeaponImage(w.name, { category: w.category }) : null,
     modChips,
-    arcaneChips: arcaneChipsFromIds(build.arcaneIds),
+    arcaneChips: arcaneChipsFromIds(build.arcaneIds, build.arcaneRanks),
     extraLines: [],
   };
 }
@@ -131,7 +147,7 @@ export function summarizeLoadoutSlots(data: unknown): LoadoutSlotPreview[] {
       itemName: wf?.name ?? wfBuild.warframeId,
       itemImage: wf ? getWarframeImage(wf.name) : null,
       modChips: modChipsFromSlots(wfBuild.mods, modsMap),
-      arcaneChips: arcaneChipsFromIds(wfBuild.arcaneIds),
+      arcaneChips: arcaneChipsFromIds(wfBuild.arcaneIds, wfBuild.arcaneRanks),
       extraLines,
     });
   }
@@ -169,6 +185,7 @@ export function summarizeLoadoutSlots(data: unknown): LoadoutSlotPreview[] {
     parts?: Record<string, string>;
     mods?: ModSlot[];
     arcaneIds?: (string | null)[];
+    arcaneRanks?: number[];
     customName?: string;
   }> = [];
   const mbMap = ld.modularBuilds as
@@ -211,7 +228,7 @@ export function summarizeLoadoutSlots(data: unknown): LoadoutSlotPreview[] {
         ? getWeaponImage(partWeapon.name, { category: partWeapon.category })
         : null,
       modChips: modChipsFromSlots(modular.mods, modsMap),
-      arcaneChips: arcaneChipsFromIds(modular.arcaneIds),
+      arcaneChips: arcaneChipsFromIds(modular.arcaneIds, modular.arcaneRanks),
       extraLines: partLines,
     });
   }
@@ -276,7 +293,7 @@ export function summarizeBuildPreview(type: string, data: unknown): BuildPreview
       const wb = data as WarframeBuildData;
       const wf = warframesMap.get(String(wb.warframeId ?? ""));
       const modChips = modChipsFromSlots(wb.mods);
-      const arcaneChips = arcaneChipsFromIds(wb.arcaneIds);
+      const arcaneChips = arcaneChipsFromIds(wb.arcaneIds, wb.arcaneRanks);
       if (wb.dualFormBuilds && Object.keys(wb.dualFormBuilds).length > 0) {
         extraLines.push(dualFormModCountSummary(wb));
       }
@@ -300,7 +317,10 @@ export function summarizeBuildPreview(type: string, data: unknown): BuildPreview
     case "weapon": {
       const w = weaponsMap.get(String(d.weaponId ?? ""));
       const modChips = modChipsFromSlots(d.mods as ModSlot[]);
-      const arcaneChips = arcaneChipsFromIds(d.arcaneIds as (string | null)[]);
+      const arcaneChips = arcaneChipsFromIds(
+        d.arcaneIds as (string | null)[],
+        d.arcaneRanks as number[] | undefined,
+      );
       if (d.stanceModId) {
         const stance = modsMap.get(String(d.stanceModId));
         if (stance) modChips.unshift({ label: stance.name, sublabel: "Stance" });
@@ -338,7 +358,10 @@ export function summarizeBuildPreview(type: string, data: unknown): BuildPreview
     case "modular": {
       const parts = d.parts as Record<string, string> | undefined;
       const modChips = modChipsFromSlots(d.mods as ModSlot[]);
-      const arcaneChips = arcaneChipsFromIds(d.arcaneIds as (string | null)[]);
+      const arcaneChips = arcaneChipsFromIds(
+        d.arcaneIds as (string | null)[],
+        d.arcaneRanks as number[] | undefined,
+      );
       if (parts) {
         const partNames = Object.entries(parts)
           .map(([slot, id]) => `${slot}: ${weaponsMap.get(id)?.name ?? id}`)

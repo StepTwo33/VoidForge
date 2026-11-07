@@ -322,6 +322,9 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           hasConditionals={hasConditionals}
           onKillBuffTotal={onKillBuffTotal}
           triggerBuffTotal={triggerBuffTotal}
+          linkage={contributionContext?.linkage}
+          linkedWarframeId={contributionContext?.warframeId}
+          linkedCompanionModIds={contributionContext?.companionModIds}
         />
       )}
       {stats.setBonusSummary && stats.setBonusSummary.length > 0 && (

@@ -33,17 +33,62 @@ const TABLE_COLUMNS = {
       name: "isPublic",
       alter: 'ALTER TABLE "Build" ADD COLUMN "isPublic" BOOLEAN NOT NULL DEFAULT false',
     },
+    {
+      name: "tags",
+      alter: `ALTER TABLE "Build" ADD COLUMN "tags" TEXT NOT NULL DEFAULT '[]'`,
+    },
+  ],
+  Report: [
+    {
+      name: "adminReply",
+      alter: `ALTER TABLE "Report" ADD COLUMN "adminReply" TEXT NOT NULL DEFAULT ''`,
+    },
+    {
+      name: "screenshots",
+      alter: `ALTER TABLE "Report" ADD COLUMN "screenshots" TEXT NOT NULL DEFAULT '[]'`,
+    },
   ],
 };
+
+const TABLES = [
+  {
+    name: "SavedRiven",
+    sql: `CREATE TABLE IF NOT EXISTS "SavedRiven" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "userId" TEXT NOT NULL,
+      "weaponId" TEXT NOT NULL,
+      "name" TEXT NOT NULL,
+      "modId" TEXT NOT NULL,
+      "stats" TEXT NOT NULL,
+      "polarity" TEXT NOT NULL DEFAULT 'universal',
+      "drain" INTEGER NOT NULL DEFAULT 10,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "SavedRiven_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    )`,
+  },
+];
 
 const INDEXES = [
   {
     name: "User_username_key",
+    table: "User",
     sql: 'CREATE UNIQUE INDEX IF NOT EXISTS "User_username_key" ON "User"("username")',
   },
   {
     name: "Build_isPublic_idx",
+    table: "Build",
     sql: 'CREATE INDEX IF NOT EXISTS "Build_isPublic_idx" ON "Build"("isPublic")',
+  },
+  {
+    name: "SavedRiven_userId_idx",
+    table: "SavedRiven",
+    sql: 'CREATE INDEX IF NOT EXISTS "SavedRiven_userId_idx" ON "SavedRiven"("userId")',
+  },
+  {
+    name: "SavedRiven_userId_weaponId_idx",
+    table: "SavedRiven",
+    sql: 'CREATE INDEX IF NOT EXISTS "SavedRiven_userId_weaponId_idx" ON "SavedRiven"("userId", "weaponId")',
   },
 ];
 
@@ -74,6 +119,13 @@ function indexExists(db, name) {
       .prepare("SELECT 1 AS ok FROM sqlite_master WHERE type = 'index' AND name = ?")
       .get(name)?.ok === 1
   );
+}
+
+function ensureTable(db, { name, sql }) {
+  if (tableExists(db, name)) return false;
+  console.log(`[repair-db] Creating table ${name}…`);
+  db.exec(sql);
+  return true;
 }
 
 function ensureColumn(db, table, { name, alter }) {
@@ -117,6 +169,10 @@ try {
   const userCount = db.prepare('SELECT COUNT(*) AS n FROM "User"').get();
   console.log(`[repair-db] Users in database: ${userCount?.n ?? "?"}`);
 
+  for (const tbl of TABLES) {
+    if (ensureTable(db, tbl)) changes += 1;
+  }
+
   for (const [table, columns] of Object.entries(TABLE_COLUMNS)) {
     if (!tableExists(db, table)) continue;
     for (const col of columns) {
@@ -125,7 +181,7 @@ try {
   }
 
   for (const idx of INDEXES) {
-    if (tableExists(db, idx.name.startsWith("User_") ? "User" : "Build")) {
+    if (tableExists(db, idx.table)) {
       if (ensureIndex(db, idx)) changes += 1;
     }
   }

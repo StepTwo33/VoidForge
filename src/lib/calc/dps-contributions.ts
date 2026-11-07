@@ -48,11 +48,16 @@ export interface WeaponDpsCalcContext {
   modSlots: ModSlot[];
   allMods: Map<string, Mod>;
   arcanes?: Mod[];
+  arcaneRanks?: number[];
   incarnonStatChanges?: Record<string, number>;
   simParams?: SimulationParams;
   calcOptions?: WeaponCalculationOptions;
   linkage?: SetBonusLinkage;
   rivenStatChanges?: Record<string, number>;
+  /** Linked Warframe ID when editing inside a loadout context (for passive toggles). */
+  warframeId?: string;
+  /** Linked Companion body mod IDs when editing inside a loadout context (for Bond toggles). */
+  companionModIds?: string[];
 }
 
 type OmitSource = {
@@ -96,6 +101,7 @@ function cloneCtx(ctx: WeaponDpsCalcContext): WeaponDpsCalcContext {
     ...ctx,
     modSlots: [...ctx.modSlots],
     arcanes: ctx.arcanes ? [...ctx.arcanes] : undefined,
+    arcaneRanks: ctx.arcaneRanks ? [...ctx.arcaneRanks] : undefined,
     simParams: ctx.simParams ? { ...ctx.simParams } : undefined,
     calcOptions: ctx.calcOptions
       ? {
@@ -125,6 +131,7 @@ function calcWeaponStats(ctx: WeaponDpsCalcContext): CalculatedStats {
       ctx.calcOptions,
       ctx.linkage,
       ctx.rivenStatChanges,
+      ctx.arcaneRanks,
     );
   }
   return calculateWeaponBuild(
@@ -225,6 +232,7 @@ function enumerateSources(ctx: WeaponDpsCalcContext): OmitSource[] {
       apply: (base) => {
         const next = cloneCtx(base);
         next.arcanes = (next.arcanes ?? []).filter((_, idx) => idx !== i);
+        if (next.arcaneRanks) next.arcaneRanks = next.arcaneRanks.filter((_, idx) => idx !== i);
         return next;
       },
     });
@@ -409,6 +417,42 @@ function enumerateSources(ctx: WeaponDpsCalcContext): OmitSource[] {
     }
   }
 
+  if (ctx.linkage?.meleeMods?.length) {
+    const isSecondary = ["pistol", "secondary", "dual_pistols"].includes(ctx.baseWeapon.category);
+    const isShotgun = ctx.baseWeapon.category === "shotgun";
+    const crossSlotMeleeIds = new Set<string>();
+    if (isSecondary) {
+      crossSlotMeleeIds.add("amalgam_furax_body_count");
+      crossSlotMeleeIds.add("combo_fury");
+      crossSlotMeleeIds.add("mark_of_the_beast");
+    }
+    if (isShotgun) {
+      crossSlotMeleeIds.add("amalgam_ripkas_true_steel");
+    }
+    for (const mSlot of ctx.linkage.meleeMods) {
+      if (!crossSlotMeleeIds.has(mSlot.modId)) continue;
+      const mod = ctx.allMods.get(mSlot.modId);
+      if (!mod) continue;
+      const rank = Math.min(Math.max(mSlot.rank ?? 0, 0), mod.maxRank);
+      sources.push({
+        id: `linkage-melee:${mSlot.modId}`,
+        label: `${mod.name} (Melee)`,
+        category: mSlot.modId === "amalgam_furax_body_count" || mSlot.modId === "amalgam_ripkas_true_steel" ? "rate" : "external",
+        nominal: modNominalLine(mod, rank),
+        tooltip: "Cross-slot melee mod bonus applied to this weapon via loadout.",
+        apply: (base) => {
+          const next = cloneCtx(base);
+          if (!next.linkage?.meleeMods) return null;
+          next.linkage = {
+            ...next.linkage,
+            meleeMods: next.linkage.meleeMods.filter((s) => s.modId !== mSlot.modId),
+          };
+          return next;
+        },
+      });
+    }
+  }
+
   return sources;
 }
 
@@ -467,6 +511,7 @@ export function buildWeaponContributionContext(params: {
   modSlots: ModSlot[];
   allMods: Map<string, Mod>;
   arcanes?: Mod[];
+  arcaneRanks?: number[];
   incarnonStatChanges?: Record<string, number>;
   simParams?: SimulationParams;
   progenitorElement?: string;
@@ -492,10 +537,13 @@ export function buildWeaponContributionContext(params: {
     modSlots: params.modSlots,
     allMods: params.allMods,
     arcanes: params.arcanes,
+    arcaneRanks: params.arcaneRanks,
     incarnonStatChanges: params.incarnonStatChanges,
     simParams,
     calcOptions,
     linkage: params.linkage,
     rivenStatChanges: params.rivenStatChanges,
+    warframeId: params.buffContext?.warframeId,
+    companionModIds: params.buffContext?.companionModSlots?.map((s) => s.modId),
   };
 }

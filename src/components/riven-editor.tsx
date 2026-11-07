@@ -1,19 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus, Search, X } from "lucide-react";
 import { getRivenStatsForCategory } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { PolarityIcon } from "@/components/polarity-icon";
 import {
+  STANDARD_RIVEN_DISPOSITION,
+  getNegativeStatsWithDisposition,
+  getStatsWithDisposition,
+  isValueInStatRange,
+  type RivenStat,
+} from "@/lib/calc/riven-calculator";
+import {
   DEFAULT_RIVEN_POLARITY,
   RIVEN_MAX_RANK,
   RIVEN_POLARITIES,
+  graderRivenCategory,
+  isRivenBuff,
   rivenDrainFromRank,
   rivenPolarityError,
   rivenRankFromDrain,
   validateRivenStats,
 } from "@/lib/riven/riven-validation";
+
+function formatExpectedRange(stat: RivenStat | undefined, key: string, isCurse: boolean): string {
+  if (!stat) return "";
+  const lo = Math.min(Math.abs(stat.minValue), Math.abs(stat.maxValue));
+  const hi = Math.max(Math.abs(stat.minValue), Math.abs(stat.maxValue));
+  if (key.startsWith("faction") || stat.name.startsWith("Damage to ") || stat.name.startsWith("Damage vs ")) {
+    if (isCurse) {
+      return `${Math.max(0.01, 1 - hi / 100).toFixed(2)}–${Math.max(0.01, 1 - lo / 100).toFixed(2)}x`;
+    }
+    return `${(1 + lo / 100).toFixed(2)}–${(1 + hi / 100).toFixed(2)}x`;
+  }
+  if (key === "recoil") {
+    return isCurse ? `+${lo.toFixed(1)}–${hi.toFixed(1)}%` : `-${hi.toFixed(1)} to -${lo.toFixed(1)}%`;
+  }
+  const sign = isCurse ? "-" : "+";
+  if (stat.type === "percent") return `${sign}${lo.toFixed(1)}–${hi.toFixed(1)}%`;
+  if (stat.type === "seconds") return `${sign}${lo.toFixed(1)}–${hi.toFixed(1)}s`;
+  return `${sign}${lo.toFixed(1)}–${hi.toFixed(1)}m`;
+}
 
 export interface RivenEditorProps {
   /** Riven stat pool category (rifle / shotgun / pistol / melee / archgun …). */
@@ -75,6 +103,79 @@ export function RivenEditor({
     const isFactionStat = rivenStatKey.startsWith("faction");
     const isPercentStat = selectedStatDef ? selectedStatDef.isPercent !== false && !isFactionStat : true;
 
+    const gradeCat = graderRivenCategory(poolCategory);
+    const { existingPositives, existingNegatives } = useMemo(() => {
+      let pos = 0;
+      let neg = 0;
+      for (const [k, v] of Object.entries(rivenStats)) {
+        if (isRivenBuff(k, v)) pos++;
+        else neg++;
+      }
+      return { existingPositives: pos, existingNegatives: neg };
+    }, [rivenStats]);
+
+    const shapePositiveCount = Math.max(2, Math.min(3, existingPositives || 2));
+    const shapeHasNegative = existingNegatives > 0;
+
+    const addedPosPool = useMemo(
+      () =>
+        getStatsWithDisposition(gradeCat, STANDARD_RIVEN_DISPOSITION, {
+          rank,
+          positiveCount: shapePositiveCount,
+          hasNegative: shapeHasNegative,
+          includeSpliced: true,
+        }),
+      [gradeCat, rank, shapePositiveCount, shapeHasNegative],
+    );
+
+    const addedNegPool = useMemo(
+      () =>
+        getNegativeStatsWithDisposition(STANDARD_RIVEN_DISPOSITION, {
+          rank,
+          positiveCount: shapePositiveCount,
+          hasNegative: true,
+          category: gradeCat,
+        }),
+      [gradeCat, rank, shapePositiveCount],
+    );
+
+    const nextPosCount = Math.max(2, Math.min(3, existingPositives + 1));
+    const previewPosPool = useMemo(
+      () =>
+        getStatsWithDisposition(gradeCat, STANDARD_RIVEN_DISPOSITION, {
+          rank,
+          positiveCount: nextPosCount,
+          hasNegative: shapeHasNegative,
+          includeSpliced: true,
+        }),
+      [gradeCat, rank, nextPosCount, shapeHasNegative],
+    );
+
+    const selectedCleanLabel = selectedStatDef
+      ? (selectedStatDef.spliced ? selectedStatDef.label.replace(" (Spliced)", "") : selectedStatDef.label).trim()
+      : "";
+    const selectedPosRange = selectedCleanLabel
+      ? previewPosPool.find((p) => p.name.replace(" (Spliced)", "").trim() === selectedCleanLabel)
+      : undefined;
+    const selectedNegRange =
+      selectedCleanLabel && !selectedStatDef?.spliced && existingNegatives === 0
+        ? addedNegPool.find((p) => p.name.replace(" (Spliced)", "").trim() === selectedCleanLabel)
+        : undefined;
+
+    const fillMidpointValue = (poolStat: RivenStat, asCurse: boolean) => {
+      const mid = (Math.abs(poolStat.minValue) + Math.abs(poolStat.maxValue)) / 2;
+      if (isFactionStat) {
+        const mult = asCurse ? Math.max(0.05, 1 - mid / 100) : 1 + mid / 100;
+        setRivenStatValue(mult.toFixed(2));
+        return;
+      }
+      if (rivenStatKey === "recoil") {
+        setRivenStatValue((asCurse ? mid : -mid).toFixed(1));
+        return;
+      }
+      setRivenStatValue((asCurse ? -mid : mid).toFixed(1));
+    };
+
     const handleAddRivenStat = () => {
       if (!rivenStatKey || !rivenStatValue) return;
       const num = parseFloat(rivenStatValue);
@@ -117,34 +218,67 @@ export function RivenEditor({
             {Object.entries(rivenStats).map(([key, value]) => {
               const statDef = rivenPool.find((s) => s.key === key);
               const asPercent = statDef?.isPercent !== false;
+              const isFac = key.startsWith("faction");
+              const buff = isRivenBuff(key, value);
+              const cleanLabel = statDef
+                ? (statDef.spliced ? statDef.label.replace(" (Spliced)", "") : statDef.label).trim()
+                : "";
+              const poolStat = cleanLabel
+                ? (buff ? addedPosPool : addedNegPool).find(
+                    (p) => p.name.replace(" (Spliced)", "").trim() === cleanLabel,
+                  )
+                : undefined;
+              const checkVal = asPercent || isFac ? Math.abs(value) * 100 : Math.abs(value);
+              const outOfBand =
+                !!poolStat &&
+                value !== 0 &&
+                !isValueInStatRange(key === "recoil" && buff ? -checkVal : buff ? checkVal : -checkVal, poolStat);
+              const rangeText = formatExpectedRange(poolStat, key, !buff);
               return (
-                <div key={key} className="flex items-center justify-between text-xs p-1.5 rounded bg-background">
-                  <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
-                    <span className="truncate">{statDef?.spliced ? statDef.label.replace(" (Spliced)", "") : statDef?.label || key}</span>
-                    {statDef?.spliced && (
-                      <span
-                        className="shrink-0 rounded border border-cyan-600/40 bg-cyan-500/10 px-1 py-px text-[9px] font-semibold uppercase tracking-wide text-cyan-700 dark:text-cyan-300"
-                        title={statDef.displayOnly ? "Spliced trait (Riven Splicer). Shown on the riven; not part of the DPS math." : "Spliced trait (Riven Splicer)"}
-                      >
-                        Spliced{statDef.displayOnly ? " · info" : ""}
-                      </span>
-                    )}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className={value >= 0 ? "cmp-win" : "cmp-lose"}>
-                      {key.startsWith("faction")
-                        ? `${(1 + value).toFixed(2)}x`
-                        : `${value >= 0 ? "+" : ""}${asPercent ? `${(value * 100).toFixed(1)}%` : value.toFixed(1)}`}
+                <div key={key} className="rounded bg-background p-1.5 text-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
+                      <span className="truncate">{statDef?.spliced ? statDef.label.replace(" (Spliced)", "") : statDef?.label || key}</span>
+                      {statDef?.spliced && (
+                        <span
+                          className="shrink-0 rounded border border-cyan-600/40 bg-cyan-500/10 px-1 py-px text-[9px] font-semibold uppercase tracking-wide text-cyan-700 dark:text-cyan-300"
+                          title={statDef.displayOnly ? "Spliced trait (Riven Splicer). Shown on the riven; not part of the DPS math." : "Spliced trait (Riven Splicer)"}
+                        >
+                          Spliced{statDef.displayOnly ? " · info" : ""}
+                        </span>
+                      )}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => setRivenStats((prev) => { const n = { ...prev }; delete n[key]; return n; })}
-                      className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-red-700 dark:hover:text-red-400 sm:h-9 sm:w-9"
-                      aria-label="Remove riven stat"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <span className={buff ? "cmp-win" : "cmp-lose"}>
+                        {isFac
+                          ? `${(1 + value).toFixed(2)}x`
+                          : `${value >= 0 ? "+" : ""}${asPercent ? `${(value * 100).toFixed(1)}%` : value.toFixed(1)}`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setRivenStats((prev) => { const n = { ...prev }; delete n[key]; return n; })}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-red-700 dark:hover:text-red-400 sm:h-9 sm:w-9"
+                        aria-label="Remove riven stat"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
+                  {rangeText && (
+                    <div
+                      className={cn(
+                        "mt-0.5 text-[10px]",
+                        outOfBand
+                          ? "font-medium text-amber-700 dark:text-amber-400"
+                          : "text-muted-foreground/80",
+                      )}
+                      data-testid="riven-stat-expected-range"
+                    >
+                      Typical {buff ? "range" : "curse"} (R{rank}, {shapePositiveCount}+{shapeHasNegative ? 1 : 0}):{" "}
+                      <span className="font-mono">{rangeText}</span>
+                      {outOfBand ? " · outside standard 1.2 band" : ""}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -265,6 +399,53 @@ export function RivenEditor({
                 <Plus className="h-3 w-3" />
               </button>
             </div>
+            {rivenStatKey && (selectedPosRange || selectedNegRange) && (
+              <div
+                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-purple-500/25 bg-purple-500/5 px-2.5 py-1.5 text-[11px]"
+                data-testid="riven-expected-range"
+              >
+                <div className="min-w-0 space-y-0.5">
+                  {selectedPosRange && (
+                    <p className="text-purple-900 dark:text-purple-200">
+                      <span className="text-muted-foreground">
+                        Expected buff (R{rank}, {nextPosCount}+{shapeHasNegative ? 1 : 0}):
+                      </span>{" "}
+                      <span className="font-mono font-semibold">
+                        {formatExpectedRange(selectedPosRange, rivenStatKey, false)}
+                      </span>
+                    </p>
+                  )}
+                  {selectedNegRange && (
+                    <p className="text-muted-foreground">
+                      <span>Curse range:</span>{" "}
+                      <span className="font-mono text-red-700 dark:text-red-300">
+                        {formatExpectedRange(selectedNegRange, rivenStatKey, true)}
+                      </span>
+                    </p>
+                  )}
+                </div>
+                <div className="flex shrink-0 items-center gap-1">
+                  {selectedPosRange && (
+                    <button
+                      type="button"
+                      onClick={() => fillMidpointValue(selectedPosRange, false)}
+                      className="rounded border border-purple-500/35 bg-background px-2 py-0.5 text-[10px] font-medium text-purple-700 transition-colors hover:bg-purple-500/15 dark:text-purple-300"
+                    >
+                      Fill avg buff
+                    </button>
+                  )}
+                  {selectedNegRange && (
+                    <button
+                      type="button"
+                      onClick={() => fillMidpointValue(selectedNegRange, true)}
+                      className="rounded border border-red-500/35 bg-background px-2 py-0.5 text-[10px] font-medium text-red-700 transition-colors hover:bg-red-500/15 dark:text-red-300"
+                    >
+                      Fill avg curse
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       <div className="grid grid-cols-2 gap-2" data-testid="riven-polarity-drain">

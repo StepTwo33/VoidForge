@@ -25,6 +25,7 @@ export function ExaltedWeaponSection({
   exaltedInnatePolarities,
   exaltedArcaneConfig,
   exaltedArcanes,
+  exaltedArcaneRanks,
   exaltedStats,
   exaltedBaseStats,
   exaltedContributionContext,
@@ -35,6 +36,7 @@ export function ExaltedWeaponSection({
   onPolarize,
   onAddArcane,
   onRemoveArcane,
+  onArcaneRankChange,
 }: {
   exaltedWeapon: Weapon;
   exaltedWeapons: Weapon[];
@@ -48,6 +50,7 @@ export function ExaltedWeaponSection({
   exaltedInnatePolarities?: Record<number, string>;
   exaltedArcaneConfig: { slots: number; label: string };
   exaltedArcanes: (Mod | null)[];
+  exaltedArcaneRanks?: number[];
   exaltedStats: CalculatedStats | null;
   exaltedBaseStats: CalculatedStats | null;
   exaltedContributionContext: WeaponDpsCalcContext | null;
@@ -59,6 +62,7 @@ export function ExaltedWeaponSection({
   onPolarize: (slotIndex: number, polarity: string | null) => void;
   onAddArcane: (slotIndex: number) => void;
   onRemoveArcane: (slotIndex: number) => void;
+  onArcaneRankChange?: (slotIndex: number, rank: number) => void;
 }) {
   return (
     <div className="rounded-xl border border-violet-500/25 bg-gradient-to-br from-violet-500/[0.07] via-card to-card p-5 shadow-sm ring-1 ring-violet-500/10">
@@ -165,10 +169,11 @@ export function ExaltedWeaponSection({
               <ArcaneSlotCard
                 key={`exalted-arcane-${i}`}
                 arcane={exaltedArcanes[i] ?? null}
-                rank={exaltedArcanes[i]?.maxRank ?? 0}
+                rank={exaltedArcaneRanks?.[i] ?? exaltedArcanes[i]?.maxRank ?? 0}
                 label={`${exaltedArcaneConfig.label}${exaltedArcaneConfig.slots > 1 ? ` ${i + 1}` : ""}`}
                 onAdd={() => onAddArcane(i)}
                 onRemove={() => onRemoveArcane(i)}
+                onRankChange={onArcaneRankChange ? (r) => onArcaneRankChange(i, r) : undefined}
               />
             ))}
           </div>

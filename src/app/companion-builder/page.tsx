@@ -8,9 +8,8 @@ import {
 } from "@/lib/builds/innate-polarities";
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
-import { saveRiven } from "@/lib/riven/saved-rivens";
-import { saveRiven as saveLocalRiven, generateRivenId, evaluateSavedRiven } from "@/lib/rivens/riven-storage";
+import { saveBuilderRivenToLibrary, useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
+import { sanitizeRivenStats } from "@/lib/riven/saved-rivens";
 import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-validation";
 import { hasBuildLinkParam } from "@/lib/builds/weapon-url-param";
 
@@ -120,7 +119,7 @@ import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-c
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { getLoadouts } from "@/lib/builds/loadouts";
-import { calcLoadoutStats } from "@/lib/builds/loadout-stats";
+import { calcLoadoutStats, setBonusLinkageFromLoadout } from "@/lib/builds/loadout-stats";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
 import {
   houndBrackets,
@@ -245,34 +244,9 @@ export default function CompanionBuilderPage() {
       signedIn: rivenLibraryState.signedIn,
       onSave: async (r: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number }) => {
         if (!selectedWeapon) return false;
-        try {
-          const rank = rivenRankFromDrain(r.drain);
-          const evalRes = evaluateSavedRiven(selectedWeapon.name, "Companion", r.stats, rank, 0, r.polarity);
-          saveLocalRiven({
-            id: generateRivenId(),
-            weaponId: selectedWeapon.id,
-            weaponName: selectedWeapon.name,
-            weaponType: "Companion",
-            weaponCategory: selectedWeapon.category,
-            name: r.name,
-            stats: r.stats,
-            displayStats: evalRes.displayStats,
-            polarity: r.polarity,
-            rank,
-            rerolls: 0,
-            masteryRank: 8,
-            score: evalRes.score,
-            grade: evalRes.grade,
-            gradeColor: evalRes.color,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
-          });
-        } catch {
-          // LocalStorage fallback
-        }
-        const saved = await saveRiven({ weaponId: selectedWeapon.id, ...r });
-        if (saved) refreshSavedRivens();
-        return true;
+        const ok = await saveBuilderRivenToLibrary(selectedWeapon, r);
+        if (ok) refreshSavedRivens();
+        return ok;
       },
     }),
     [rivenLibraryState.signedIn, selectedWeapon, refreshSavedRivens],
@@ -457,17 +431,17 @@ export default function CompanionBuilderPage() {
     const rivenParam = params.get("riven");
     if (rivenParam) {
       try {
-        const stats = JSON.parse(decodeURIComponent(rivenParam));
+        const stats = sanitizeRivenStats(JSON.parse(rivenParam));
         const rivenMod = allMods.find((m) => m.id === "companion_weapon_riven_mod");
-        if (rivenMod && typeof stats === "object" && stats !== null) {
+        if (rivenMod && stats && Object.keys(stats).length > 0) {
           setWeaponMods([
             {
               modId: rivenMod.id,
               modName: `${weapon.name} Riven`,
               rank: 8,
               slotIndex: 0,
-              polarity: "madurai",
-              drain: 18,
+              polarity: rivenMod.polarity || "madurai",
+              drain: rivenMod.drain,
             },
           ]);
           setWeaponRivenStatsMap({ 0: stats });
@@ -635,7 +609,12 @@ export default function CompanionBuilderPage() {
     if (!selectedWeapon) return null;
     const rivenStatChanges = mergeRivenStatChanges(weaponRivenStatsMap, weaponMods);
 
+    const linkedLoadout = loadoutCtx
+      ? getLoadouts().find((l) => l.id === loadoutCtx.loadoutId)
+      : undefined;
+    const baseLinkage = linkedLoadout ? setBonusLinkageFromLoadout(linkedLoadout) : undefined;
     const linkage = {
+      ...baseLinkage,
       companionMods: equippedMods.map((m) => ({
         modId: m.modId,
         rank: m.rank,

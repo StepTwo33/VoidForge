@@ -38,6 +38,27 @@ export function resolveIncarnonGenesisInstalled(
   return Object.keys(selectedEvolutions ?? {}).length > 0;
 }
 
+/**
+ * Effective evolutions for calculation: when a weapon uses an Incarnon Genesis adapter and the
+ * adapter is toggled OFF (`!resolveIncarnonGenesisInstalled(...)`), no evolutions or Incarnon Form
+ * apply — preserving the user's chosen evolutions in UI state for instant A/B comparison.
+ * Native Incarnons (`!isIncarnonGenesisData`) always keep their selected evolutions.
+ */
+export function effectiveIncarnonEvolutions(
+  data: IncarnonWeaponData | null | undefined,
+  selectedEvolutions: Record<number, number> | undefined,
+  genesisInstalledOverride?: boolean | null,
+): Record<number, number> {
+  if (!selectedEvolutions || Object.keys(selectedEvolutions).length === 0) return {};
+  if (
+    isIncarnonGenesisData(data) &&
+    !resolveIncarnonGenesisInstalled(data, selectedEvolutions, genesisInstalledOverride)
+  ) {
+    return {};
+  }
+  return selectedEvolutions;
+}
+
 /** Form trigger for getWeaponModProfile when a Genesis adapter is installed, else undefined. */
 export function incarnonGenesisFormTrigger(
   data: IncarnonWeaponData | null | undefined,

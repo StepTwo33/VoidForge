@@ -60,10 +60,12 @@ export type SimWeaponBuildData = {
   weaponId?: string;
   mods?: { modId: string; rank: number; slotIndex: number }[];
   arcaneIds?: (string | null)[];
+  arcaneRanks?: number[];
   progenitorElement?: string;
   progenitorBonusPercent?: number;
   incarnonEvolutions?: Record<number, number>;
   incarnonConditionals?: Record<string, boolean>;
+  incarnonGenesisInstalled?: boolean;
 };
 
 export type AppliedSimBuild = ReturnType<typeof calculatedStatsToSimInputs> & {
@@ -125,10 +127,12 @@ export function applyWeaponBuildToSim(
       weaponId: data.weaponId,
       mods: data.mods ?? [],
       arcaneIds: data.arcaneIds,
+      arcaneRanks: data.arcaneRanks,
       progenitorElement: data.progenitorElement,
       progenitorBonusPercent: data.progenitorBonusPercent,
       incarnonEvolutions: data.incarnonEvolutions,
       incarnonConditionals: data.incarnonConditionals,
+      incarnonGenesisInstalled: data.incarnonGenesisInstalled,
     },
     { ...DEFAULT_SIM_PARAMS, killStacks: 5, statusTypesOnTarget: 3, arcaneStacks: 12 },
   );

@@ -28,22 +28,27 @@ const NO_RIVEN_CATEGORIES = new Set(["amp_prism", "archmelee", "tektolyst", "bea
  * (exalted weapons, amps, arch-melee: flagged `hasRivenSlot: false` in data).
  */
 export function getRivenWeaponType(
-  weapon: Pick<Weapon, "name" | "category"> & { hasRivenSlot?: boolean; kitgunChamberCategory?: Weapon["kitgunChamberCategory"] },
+  weapon: Pick<Weapon, "name" | "category"> & {
+    hasRivenSlot?: boolean;
+    kitgunChamberCategory?: Weapon["kitgunChamberCategory"];
+    arcaneType?: string;
+    id?: string;
+  },
 ): RivenWeaponType | null {
   if (weapon.hasRivenSlot === false) return null;
   const c = weapon.category.toLowerCase();
   if (NO_RIVEN_CATEGORIES.has(c)) return null;
   // Wiki Riven Mods: kitguns use the "Pistol / Kitgun" stat column in either slot (a primary kitgun
   // is category "primary"/"shotgun" here, but its Riven pool is still Pistol / Kitgun, not Rifle / Shotgun).
-  if (weapon.kitgunChamberCategory != null) return "Pistol";
+  if (isKitgunWeapon(weapon)) return "Pistol";
+  // Zaw rivens use the Melee / Zaw column.
+  if (isZawWeapon(weapon)) return "Melee";
   if (c === "sentinel_weapon") return SENTINEL_WEAPON_TYPE[weapon.name] ?? "Rifle";
   if (c === "hound_weapon") return "Melee";
   if (SHOTGUN_CLASS_PRIMARIES.has(weapon.name)) return "Shotgun";
   if (c === "shotgun") return "Shotgun";
   if (["rifle", "primary", "bow", "launcher", "sniper"].includes(c)) return "Rifle";
-  // Kitgun rivens: standalone chamber entries (no slot yet) use the Pistol / Kitgun column too.
   if (["pistol", "secondary", "dual_pistols", "kitgun_chamber"].includes(c)) return "Pistol";
-  // Zaw rivens use the Melee / Zaw column.
   if (c === "melee" || c === "zaw_strike") return "Melee";
   if (c === "archgun") return "Archgun";
   return null;

@@ -41,7 +41,7 @@ describe("mod values at max rank match the wiki", () => {
     ["primed_fury", 55], ["gladiator_vice", 30], ["augur_message", 24], ["augur_reach", 30], ["augur_secrets", 24],
   ])("%s = %d", (id, v) => expect(atMax(id as string)).toBeCloseTo(v as number, 3));
   it.each([
-    ["primed_fury", "+5% Attack Speed per rank"], ["augur_secrets", "+4% Ability Strength per rank"],
+    ["primed_fury", "+55% Attack Speed"], ["augur_secrets", "+24% Ability Strength"],
     ["flame_repellent_r3", "+60%"], ["sure_footed_r5", "+60%"], ["shock_absorbers", "+20%"], ["handspring_r10", "+160%"],
   ])("%s text says %s", (id, t) => expect(mm.get(id as string)!.description).toContain(t));
 });

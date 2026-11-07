@@ -676,6 +676,8 @@ function applyWeaponExternalBuffs(
   extraHit?: { fraction: number; guaranteedToxin: boolean },
   /** Parallel elemental fractions (infusion augments) — applied after combos. */
   parallelElementals?: { type: string; bonusFraction: number }[],
+  stats?: CalculatedStats,
+  sim?: SimulationParams,
 ): void {
   if (!buffs?.length) return;
   for (const buff of buffs) {
@@ -684,14 +686,28 @@ function applyWeaponExternalBuffs(
       multDamage.product *= 1 + buff.damageMultBonus;
     }
     if (buff.critChanceBonus) acc.critChanceBonus += buff.critChanceBonus;
+    if (buff.weakPointCritChanceBonus && sim?.applyHeadshots) {
+      acc.critChanceBonus += buff.weakPointCritChanceBonus;
+    }
     if (buff.critChanceFlatBonus && critChanceFlat) critChanceFlat.chance += buff.critChanceFlatBonus;
     if (buff.critMultBonus) acc.critMultBonus += buff.critMultBonus;
     if (buff.critMultFlatBonus && critMultFlat) critMultFlat.critEventBonus += buff.critMultFlatBonus;
     if (buff.statusBonus) acc.statusBonus += buff.statusBonus;
     if (buff.statusChanceFlatBonus) acc.statusChanceFlatBonus += buff.statusChanceFlatBonus;
+    if (buff.statusDurationBonus) acc.statusDurationBonus += buff.statusDurationBonus;
     if (buff.fireRateBonus) acc.fireRateBonus += buff.fireRateBonus;
     if (buff.reloadBonus) acc.reloadBonus += buff.reloadBonus;
     if (buff.multishotBonus) acc.multishotBonus += buff.multishotBonus;
+    if (buff.heavyAttackWindUpBonus) acc.heavyAttackWindUpBonus += buff.heavyAttackWindUpBonus;
+    if (buff.heavyAttackEfficiencyBonus && stats) {
+      stats.heavyAttackEfficiency += buff.heavyAttackEfficiencyBonus;
+    }
+    if (buff.comboDurationBonus && stats) {
+      stats.comboDuration += buff.comboDurationBonus;
+    }
+    if (buff.initialComboBonus && stats) {
+      stats.incarnonInitialCombo = (stats.incarnonInitialCombo ?? 0) + buff.initialComboBonus;
+    }
     if (buff.extraHitDamageFraction && extraHit) {
       extraHit.fraction += buff.extraHitDamageFraction;
       if (buff.extraHitGuaranteedToxin) extraHit.guaranteedToxin = true;
@@ -1062,6 +1078,8 @@ export function calculateWeaponBuild(
     externalDamageMult,
     externalExtraHit,
     parallelElementals,
+    stats,
+    sim,
   );
   applyNightwaveWeaponAugmentEffects(
     orderedMods,
@@ -2570,8 +2588,9 @@ export function applyArcaneToWeapon(
   stacks: number = 1,
   baseWeapon?: Weapon,
   opts?: ArcaneWeaponOpts,
+  rank?: number,
 ): void {
-  applyArcaneToWeaponFromMod(stats, arcane, stacks, baseWeapon, opts);
+  applyArcaneToWeaponFromMod(stats, arcane, stacks, baseWeapon, opts, rank);
 }
 
 // Apply arcane stats to warframe — reads from ARCANE_EFFECTS (generated wiki data).
@@ -2595,11 +2614,80 @@ export function applyArcaneToWarframe(
 export interface WarframeArcaneBuildContext {
   /** User stack counts by arcane id (Arcane Impetus / Arcane Camisado sliders). */
   arcaneStacksById?: Record<string, number>;
+  /** User stack/toggle counts for conditional Warframe mods (Growing Power, Energy/Health Conversion, Archon Intensify). */
+  conditionalModStacksById?: Record<string, number>;
+  /** Equipped Warframe mod slots with ranks (used to scale conditional Warframe mods & Coaction Drift). */
+  equippedModSlots?: readonly ModSlot[];
   /** The frame's abilities with the Helminth slot substituted (Arcane Intention). */
   abilities?: readonly Pick<Ability, "name">[];
   /** Names of equipped Warframe mods (augment gates for Arcane Intention). */
   equippedModNames?: readonly string[];
 }
+
+/**
+ * Wiki Coaction Drift: Squad benefits +2.5%×(rank+1) more from Auras AND owner benefits an
+ * additional +2.5%×(rank+1) from Auras → self multiplier = (1 + bonus)² (1.3225× at R5).
+ */
+export function computeWarframeAuraEffectivenessMult(
+  equippedMods?: readonly ModSlot[],
+): number {
+  const coaction = equippedMods?.find((m) => m.modId === "coaction_drift");
+  if (!coaction) return 1;
+  const rank = Math.min(Math.max(0, Math.round(coaction.rank ?? 5)), 5);
+  const bonus = 0.025 * (rank + 1);
+  return (1 + bonus) * (1 + bonus);
+}
+
+export interface ConditionalWarframeModDef {
+  id: string;
+  label: string;
+  maxStacks: number;
+  maxRank: number;
+  describeEffect: (rank: number, stacks: number, auraMult?: number) => string;
+}
+
+export const CONDITIONAL_WARFRAME_MOD_DEFS: Record<string, ConditionalWarframeModDef> = {
+  growing_power: {
+    id: "growing_power",
+    label: "Growing Power",
+    maxStacks: 1,
+    maxRank: 5,
+    describeEffect: (rank, stacks, auraMult = 1) => {
+      const pct = ((25 * (rank + 1)) / 6) * auraMult * (stacks > 0 ? 1 : 0);
+      return `+${pct.toFixed(pct % 1 === 0 ? 0 : 1)}% Ability Strength on weapon status`;
+    },
+  },
+  augment_universal_energy_conversion: {
+    id: "augment_universal_energy_conversion",
+    label: "Energy Conversion",
+    maxStacks: 1,
+    maxRank: 5,
+    describeEffect: (rank, stacks) => {
+      const pct = ((50 * (rank + 1)) / 6) * (stacks > 0 ? 1 : 0);
+      return `+${pct.toFixed(pct % 1 === 0 ? 0 : 1)}% Ability Strength on Energy Orb`;
+    },
+  },
+  archon_intensify: {
+    id: "archon_intensify",
+    label: "Archon Intensify (Heal)",
+    maxStacks: 1,
+    maxRank: 10,
+    describeEffect: (rank, stacks) => {
+      const pct = ((30 * (rank + 1)) / 11) * (stacks > 0 ? 1 : 0);
+      return `+${pct.toFixed(pct % 1 === 0 ? 0 : 1)}% Ability Strength on ability heal`;
+    },
+  },
+  augment_universal_health_conversion: {
+    id: "augment_universal_health_conversion",
+    label: "Health Conversion",
+    maxStacks: 3,
+    maxRank: 5,
+    describeEffect: (rank, stacks) => {
+      const armor = 75 * (rank + 1) * Math.min(3, Math.max(0, Math.floor(stacks)));
+      return `+${armor} Armor (${stacks}/3 Health Orb stacks)`;
+    },
+  },
+};
 
 /** Stack count a Warframe arcane uses in this build; undefined = full stacks. */
 export function warframeArcaneStackOverride(
@@ -2669,7 +2757,7 @@ export function applyWarframeShardsAndArcanes(
         stats.castingSpeedBonus += bonusValue;
         break;
       case 'parkourVelocity':
-        stats.parkourVelocityBonus += bonusValue;
+        stats.parkourVelocityBonus += bonusValue / 100;
         break;
       case 'startingEnergy':
         stats.startingEnergyPct = (stats.startingEnergyPct ?? 0) + bonusValue;
@@ -2728,6 +2816,32 @@ export function applyWarframeShardsAndArcanes(
         break;
       case 'toxinHealthRecovery':
         break;
+    }
+  }
+
+  if (arcaneCtx?.conditionalModStacksById && arcaneCtx.equippedModSlots?.length) {
+    const auraMult = computeWarframeAuraEffectivenessMult(arcaneCtx.equippedModSlots);
+    for (const slot of arcaneCtx.equippedModSlots) {
+      const def = CONDITIONAL_WARFRAME_MOD_DEFS[slot.modId];
+      if (!def) continue;
+      const rawStacks = arcaneCtx.conditionalModStacksById[slot.modId] ?? 0;
+      const stacks = Math.min(def.maxStacks, Math.max(0, Math.floor(rawStacks)));
+      if (stacks <= 0) continue;
+      const rank = Math.min(Math.max(0, Math.round(slot.rank ?? def.maxRank)), def.maxRank);
+      switch (slot.modId) {
+        case "growing_power":
+          stats.abilityStrength += ((0.25 * (rank + 1)) / 6) * auraMult;
+          break;
+        case "augment_universal_energy_conversion":
+          stats.abilityStrength += (0.5 * (rank + 1)) / 6;
+          break;
+        case "archon_intensify":
+          stats.abilityStrength += (0.3 * (rank + 1)) / 11;
+          break;
+        case "augment_universal_health_conversion":
+          stats.flatArmorBonus += 75 * (rank + 1) * stacks;
+          break;
+      }
     }
   }
 
@@ -2790,6 +2904,7 @@ export function calculateWeaponBuildWithArcanes(
   calcOptions?: WeaponCalculationOptions,
   linkage?: SetBonusLinkage,
   rivenStatChanges?: Record<string, number>,
+  arcaneRanks?: number[],
 ): CalculatedStats {
   const baseWeapon = enrichWeapon(rawWeapon);
   const sim = simParams || DEFAULT_SIM_PARAMS;
@@ -2798,24 +2913,38 @@ export function calculateWeaponBuildWithArcanes(
   const preArcaneHeavy = stats.heavyAttackDamage;
   const preArcaneCombo = stats.comboCount;
   const arcaneStackSources: StackSourceInfo[] = [];
-  for (const arcane of arcanes) {
+  const effectiveArcaneRanks = arcaneRanks ?? calcOptions?.arcaneRanks;
+  for (let idx = 0; idx < arcanes.length; idx++) {
+    const arcane = arcanes[idx]!;
+    const rawRank = effectiveArcaneRanks?.[idx];
+    const rank =
+      typeof rawRank === "number" && Number.isFinite(rawRank)
+        ? Math.max(0, Math.min(arcane.maxRank, Math.trunc(rawRank)))
+        : arcane.maxRank;
     const arcaneDef = getArcaneEffectDef(arcane.id);
     if (arcaneDef?.trigger === "stacks") {
       arcaneStackSources.push({
         id: arcane.id,
         label: arcane.name,
-        cap: arcaneStackCap(arcaneDef, arcane.maxRank) ?? arcaneDef.maxRank + 1,
+        cap: arcaneStackCap(arcaneDef, rank) ?? rank + 1,
       });
     }
     // Pass raw sim stacks (per-arcane override, else the shared slider) — applyArcaneEffectsToWeapon
     // computes effective stacks per arcane.
     const simArcaneStacks = sim.arcaneStacksById?.[arcane.id] ?? sim.arcaneStacks;
-    applyArcaneToWeapon(stats, arcane, simArcaneStacks, baseWeapon, {
-      applyHeadshots: sim.applyHeadshots,
-      warframeArmor: sim.warframeArmor,
-      warframeMaxEnergy: sim.warframeMaxEnergy,
-      coArcaneIds: arcanes.map((a) => a.id),
-    });
+    applyArcaneToWeapon(
+      stats,
+      arcane,
+      simArcaneStacks,
+      baseWeapon,
+      {
+        applyHeadshots: sim.applyHeadshots,
+        warframeArmor: sim.warframeArmor,
+        warframeMaxEnergy: sim.warframeMaxEnergy,
+        coArcaneIds: arcanes.map((a) => a.id),
+      },
+      rank,
+    );
   }
   if (arcaneStackSources.length > 0) stats.arcaneStackSources = arcaneStackSources;
   if (isMelee && stats.meleeComboModContext && stats.comboCount !== preArcaneCombo) {

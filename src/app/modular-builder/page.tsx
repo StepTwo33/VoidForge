@@ -8,18 +8,23 @@ import { WeaponStatsPanel } from "@/components/stats-panel";
 import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
 import { weaponStatSummary } from "@/lib/ui/mobile-stat-summary";
 import { ModPicker, buildSlotNav, type RivenSelectMeta } from "@/components/mod-picker";
-import { useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
-import { saveRiven } from "@/lib/riven/saved-rivens";
+import { saveBuilderRivenToLibrary, useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
+import { sanitizeRivenStats } from "@/lib/riven/saved-rivens";
 import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-validation";
-import { useMods, useArcanes, useWeapons } from "@/lib/weapons/use-data";
+import { mergeRivenStatChanges } from "@/lib/calc/weapon-stat-merges";
+import { useMods, useWarframes } from "@/lib/weapons/use-data";
 import { calculateWeaponBuild, calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
 import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
-import { Weapon, Mod, EquippedMod, SimulationParams, DEFAULT_SIM_PARAMS, ModularBuildData } from "@/lib/types";
+import { Weapon, Mod, EquippedMod, SimulationParams, DEFAULT_SIM_PARAMS, ModularBuildData, WeaponExternalBuff, WeaponCalculationOptions, SetBonusLinkage } from "@/lib/types";
 import { getWeaponArcanes, arcanesForSlot, arcaneSlotLabel, type WeaponArcaneConfig } from "@/lib/weapons/weapon-arcane-config";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import type { SlotType } from "@/components/mod-picker";
 import { Zap, Wrench, ChevronRight, Save, FolderOpen, Gem, ArrowLeftRight } from "lucide-react";
-import { generateBuildId, SavedBuild, persistSavedBuild } from "@/lib/builds/build-storage";
+import { generateBuildId, SavedBuild, persistSavedBuild, resolveActiveArcaneList, resolveArcaneById } from "@/lib/builds/build-storage";
+import { getLoadouts } from "@/lib/builds/loadouts";
+import { calcLoadoutStats, setBonusLinkageFromLoadout } from "@/lib/builds/loadout-stats";
+import { resolveAbilitiesWithHelminth, resolveStandaloneExternalBuffs, resolveWeaponExternalBuffs, type WeaponBuffContext } from "@/lib/weapons/weapon-external-buffs";
+import { hasBuildLinkParam } from "@/lib/builds/weapon-url-param";
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { BuildsReturnLink } from "@/components/builds-return-link";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
@@ -35,7 +40,6 @@ import { cn } from "@/lib/utils";
 import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
 import { cleanLoadedBuild, cleanLoadedMods } from "@/lib/builds/incompatible-mod-warnings";
 import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
-import { resolveArcaneById } from "@/lib/builds/build-storage";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
@@ -66,13 +70,28 @@ function StatDelta({ label, value, suffix = "" }: { label: string; value: number
   );
 }
 
+function isRivenSlotModId(modId: string): boolean {
+  return (
+    modId.startsWith("riven_") ||
+    modId === "zaw_riven_mod" ||
+    modId === "kitgun_riven_mod" ||
+    modId === "companion_weapon_riven_mod"
+  );
+}
+
 function withRivenRoll(eq: EquippedMod | undefined, mod: Mod | null): Mod | null {
-  if (!eq || !mod || (!eq.modId.startsWith("riven_") && eq.modId !== "zaw_riven_mod" && eq.modId !== "kitgun_riven_mod" && eq.modId !== "companion_weapon_riven_mod")) return mod;
-  return { ...mod, name: eq.modName || mod.name, polarity: eq.polarity ?? mod.polarity };
+  if (!eq || !mod || !isRivenSlotModId(eq.modId)) return mod;
+  return {
+    ...mod,
+    name: eq.modName && eq.modName !== mod.name ? eq.modName : mod.name,
+    polarity: eq.polarity || mod.polarity,
+    drain: rivenDrainFromRank(eq.rank),
+  };
 }
 
 export default function ModularBuilderPage() {
   const { mods: allMods, modsMap } = useMods();
+  const allWarframes = useWarframes();
   const [modularType, setModularType] = useState<ModularType>("kitgun");
 
   // Kitgun state
@@ -96,6 +115,7 @@ export default function ModularBuilderPage() {
   const [activeSlotIndex, setActiveSlotIndex] = useState(0);
   const [modPickerSlotType, setModPickerSlotType] = useState<SlotType>("regular");
   const [equippedArcanes, setEquippedArcanes] = useState<(Mod | null)[]>([null, null]);
+  const [equippedArcaneRanks, setEquippedArcaneRanks] = useState<number[]>([5, 5]);
   const [arcanePickerOpen, setArcanePickerOpen] = useState(false);
   const [activeArcaneSlot, setActiveArcaneSlot] = useState(0);
   const [hasOrokinCatalyst, setHasOrokinCatalyst] = useState(false);
@@ -103,15 +123,10 @@ export default function ModularBuilderPage() {
   const [rivenStatsMap, setRivenStatsMap] = useState<Record<number, Record<string, number>>>({});
   const [editRivenSlot, setEditRivenSlot] = useState<number | null>(null);
 
-  const rivenStatChanges = useMemo(() => {
-    let combined: Record<string, number> = {};
-    for (const stats of Object.values(rivenStatsMap)) {
-      for (const [k, v] of Object.entries(stats)) {
-        combined[k] = (combined[k] ?? 0) + v;
-      }
-    }
-    return combined;
-  }, [rivenStatsMap]);
+  const rivenStatChanges = useMemo(
+    () => mergeRivenStatChanges(rivenStatsMap, equippedMods),
+    [rivenStatsMap, equippedMods],
+  );
 
   // Build the assembled weapon
   const assembledWeapon = useMemo<Weapon | null>(() => {
@@ -140,9 +155,9 @@ export default function ModularBuilderPage() {
       signedIn: rivenLibraryState.signedIn,
       onSave: async (r: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number }) => {
         if (!assembledWeapon) return false;
-        const saved = await saveRiven({ weaponId: assembledWeapon.id, ...r });
-        if (saved) refreshSavedRivens();
-        return !!saved;
+        const ok = await saveBuilderRivenToLibrary(assembledWeapon, r);
+        if (ok) refreshSavedRivens();
+        return ok;
       },
     }),
     [rivenLibraryState.signedIn, assembledWeapon, refreshSavedRivens],
@@ -152,7 +167,7 @@ export default function ModularBuilderPage() {
     if (editRivenSlot == null || !modPickerOpen) return null;
     const eq = equippedMods.find((m) => m.slotIndex === editRivenSlot);
     const mod = eq ? modsMap.get(eq.modId) : undefined;
-    if (!eq || !mod || (!eq.modId.startsWith("riven_") && eq.modId !== "zaw_riven_mod" && eq.modId !== "kitgun_riven_mod" && eq.modId !== "companion_weapon_riven_mod")) return null;
+    if (!eq || !mod || !isRivenSlotModId(eq.modId)) return null;
     return {
       mod,
       stats: rivenStatsMap[editRivenSlot] ?? {},
@@ -173,7 +188,7 @@ export default function ModularBuilderPage() {
           rank: meta ? rivenRankFromDrain(meta.drain) : mod.maxRank,
           slotIndex: activeSlotIndex,
           polarity: meta?.polarity ?? mod.polarity,
-          drain: meta?.drain ?? mod.drain,
+          drain: mod.drain,
         },
       ];
     });
@@ -181,27 +196,6 @@ export default function ModularBuilderPage() {
     setModPickerOpen(false);
     setEditRivenSlot(null);
   }, [activeSlotIndex]);
-
-  const calculatedStats = useMemo(() => {
-    if (!assembledWeapon) return null;
-    const modSlots = equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
-    const activeArcanes = equippedArcanes.filter((a): a is Mod => a !== null);
-    if (activeArcanes.length > 0) {
-      return calculateWeaponBuildWithArcanes(assembledWeapon, modSlots, modsMap, activeArcanes, undefined, simParams, undefined, undefined, rivenStatChanges);
-    }
-    return calculateWeaponBuild(assembledWeapon, modSlots, modsMap, undefined, simParams, undefined, undefined, rivenStatChanges);
-  }, [assembledWeapon, equippedMods, equippedArcanes, simParams, rivenStatChanges]);
-
-  const contributionContext = useMemo(() => {
-    if (!assembledWeapon) return null;
-    return {
-      baseWeapon: assembledWeapon,
-      modSlots: equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
-      allMods: modsMap,
-      arcanes: equippedArcanes.filter((a): a is Mod => a !== null),
-      simParams,
-    };
-  }, [assembledWeapon, equippedMods, equippedArcanes, simParams, modsMap]);
 
   const modCategory = useMemo(() => {
     if (!assembledWeapon) return "primary";
@@ -228,7 +222,7 @@ export default function ModularBuilderPage() {
       const slotPol = slotPolarities[m.slotIndex];
       return sum + modSlotCapacityCost(baseDrain, slotPol, mod.polarity);
     }, 0);
-  }, [equippedMods, slotPolarities]);
+  }, [equippedMods, slotPolarities, modsMap]);
 
   const { savedBuilds, refreshSavedBuilds, deleteSavedBuild } = useBuilderSavedBuilds("modular");
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
@@ -279,11 +273,15 @@ export default function ModularBuilderPage() {
             };
           }))
         );
+        setRivenStatsMap({});
         setHasOrokinCatalyst(shared.hasOrokinCatalyst ?? false);
         if (shared.arcanes?.length) {
-          setEquippedArcanes(shared.arcanes.map((id) => (id ? resolveArcaneById(id) : null)));
+          const resolved = shared.arcanes.map((id) => (id ? resolveArcaneById(id) : null));
+          setEquippedArcanes(resolved);
+          setEquippedArcaneRanks([0, 1].map((i) => shared.arcaneRanks?.[i] ?? resolved[i]?.maxRank ?? 5));
         } else {
           setEquippedArcanes([null, null]);
+          setEquippedArcaneRanks([5, 5]);
         }
         const pol: Record<number, string> = {};
         if (shared.slotPolarities) {
@@ -299,9 +297,95 @@ export default function ModularBuilderPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [modsMap]);
 
-  const buildModularData = (): ModularBuildData => {
+  // Support deep-link from Riven Library: /modular-builder?type=kitgun|zaw&part=<id>&riven=<json>
+  useEffect(() => {
+    if (allMods.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    if (hasBuildLinkParam(params)) return;
+    const typeParam = params.get("type")?.toLowerCase();
+    const partParam = params.get("part")?.trim();
+    const rivenParam = params.get("riven");
+    if (!typeParam && !partParam) return;
+
+    const matchesChamber = (c: KitgunChamber, p: string) => {
+      const slug = c.id.replace(/_chamber$/, "");
+      return p === c.id || p === slug || p.includes(c.id) || p.includes(`kitgun_${slug}`);
+    };
+    const matchesStrike = (s: ZawStrike, p: string) => {
+      const slug = s.id.replace(/^zaw_/, "");
+      return p === s.id || p === slug || p.includes(s.id) || p.includes(`zaw_${slug}`);
+    };
+
+    if (typeParam === "kitgun" || (!typeParam && partParam && kitgunChambers.some((c) => matchesChamber(c, partParam)))) {
+      const chamber =
+        (partParam
+          ? [...kitgunChambers]
+              .sort((a, b) => b.id.length - a.id.length)
+              .find((c) => matchesChamber(c, partParam))
+          : undefined) ?? kitgunChambers[0] ?? null;
+      setModularType("kitgun");
+      setKitgunChamber(chamber);
+      setKitgunGrip((prev) => prev ?? kitgunGrips.find((g) => g.id.includes("haymaker")) ?? kitgunGrips[0] ?? null);
+      setKitgunLoader((prev) => prev ?? kitgunLoaders.find((l) => l.id.includes("splat")) ?? kitgunLoaders[0] ?? null);
+      if (rivenParam && chamber) {
+        try {
+          const parsedStats = sanitizeRivenStats(JSON.parse(rivenParam));
+          const rivenMod = allMods.find((m) => m.id === "kitgun_riven_mod");
+          if (rivenMod && parsedStats && Object.keys(parsedStats).length > 0) {
+            setEquippedMods([
+              {
+                modId: rivenMod.id,
+                modName: `${chamber.name} Riven`,
+                rank: 8,
+                slotIndex: 0,
+                polarity: rivenMod.polarity || "madurai",
+                drain: rivenMod.drain,
+              },
+            ]);
+            setRivenStatsMap({ 0: parsedStats });
+          }
+        } catch {
+          // Ignore malformed riven JSON
+        }
+      }
+    } else if (typeParam === "zaw" || (!typeParam && partParam && zawStrikes.some((s) => matchesStrike(s, partParam)))) {
+      const strike =
+        (partParam
+          ? [...zawStrikes]
+              .sort((a, b) => b.id.length - a.id.length)
+              .find((s) => matchesStrike(s, partParam))
+          : undefined) ?? zawStrikes[0] ?? null;
+      setModularType("zaw");
+      setZawStrike(strike);
+      setZawGripSel((prev) => prev ?? zawGrips.find((g) => g.id.includes("peye")) ?? zawGrips[0] ?? null);
+      setZawLinkSel((prev) => prev ?? zawLinks.find((l) => l.id.includes("vargeet_2_jai")) ?? zawLinks[0] ?? null);
+      if (rivenParam && strike) {
+        try {
+          const parsedStats = sanitizeRivenStats(JSON.parse(rivenParam));
+          const rivenMod = allMods.find((m) => m.id === "zaw_riven_mod");
+          if (rivenMod && parsedStats && Object.keys(parsedStats).length > 0) {
+            setEquippedMods([
+              {
+                modId: rivenMod.id,
+                modName: `${strike.name} Riven`,
+                rank: 8,
+                slotIndex: 0,
+                polarity: rivenMod.polarity || "madurai",
+                drain: rivenMod.drain,
+              },
+            ]);
+            setRivenStatsMap({ 0: parsedStats });
+          }
+        } catch {
+          // Ignore malformed riven JSON
+        }
+      }
+    }
+  }, [allMods]);
+
+  const buildModularData = useCallback((): ModularBuildData => {
     const parts: Record<string, string> = {};
     if (modularType === "kitgun") {
       if (kitgunChamber) parts.chamber = kitgunChamber.id;
@@ -319,20 +403,25 @@ export default function ModularBuilderPage() {
     return {
       modularType,
       parts,
-      mods: equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      mods: equippedMods.map((m) => {
+        const riven = isRivenSlotModId(m.modId) ? rivenStatsMap[m.slotIndex] : undefined;
+        if (!riven) return { modId: m.modId, rank: m.rank, slotIndex: m.slotIndex };
+        return {
+          modId: m.modId,
+          rank: m.rank,
+          slotIndex: m.slotIndex,
+          rivenStats: riven,
+          ...(m.polarity ? { rivenPolarity: m.polarity } : {}),
+          rivenDrain: rivenDrainFromRank(m.rank),
+        };
+      }),
       arcaneIds: equippedArcanes.map((a) => a?.id ?? null),
+      arcaneRanks: [...equippedArcaneRanks],
       hasOrokinCatalyst,
       isMR30: false,
       slotPolarities,
     };
-  };
-
-  const liveCompare = useMemo(() => {
-    if (!assembledWeapon) return null;
-    return snapshotFromBuild("modular", buildName || assembledWeapon.name, buildModularData());
   }, [
-    assembledWeapon,
-    buildName,
     modularType,
     kitgunChamber,
     kitgunGrip,
@@ -344,10 +433,17 @@ export default function ModularBuilderPage() {
     ampScaffold,
     ampBrace,
     equippedMods,
+    rivenStatsMap,
     equippedArcanes,
+    equippedArcaneRanks,
     hasOrokinCatalyst,
     slotPolarities,
   ]);
+
+  const liveCompare = useMemo(() => {
+    if (!assembledWeapon) return null;
+    return snapshotFromBuild("modular", buildName || assembledWeapon.name, buildModularData());
+  }, [assembledWeapon, buildName, buildModularData]);
 
   const handleSaveBuildConfirm = async ({ name, isPublic }: SaveBuildDialogValues) => {
     const data = buildModularData();
@@ -392,26 +488,144 @@ export default function ModularBuilderPage() {
       setAmpScaffold(ampScaffolds.find((s) => s.id === d.parts.scaffold) ?? null);
       setAmpBrace(ampBraces.find((b) => b.id === d.parts.brace) ?? null);
     }
+    const nextRivenMap: Record<number, Record<string, number>> = {};
     setEquippedMods(d.mods.map((m) => {
       const mod = modsMap.get(m.modId);
-      return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
+      const isRiven = isRivenSlotModId(m.modId);
+      const rank = isRiven && !m.rank && typeof m.rivenDrain === "number" ? rivenRankFromDrain(m.rivenDrain) : m.rank;
+      if (isRiven && m.rivenStats) {
+        nextRivenMap[m.slotIndex] = m.rivenStats;
+      }
+      return {
+        ...m,
+        rank,
+        modName: mod?.name ?? "",
+        polarity: isRiven && m.rivenPolarity ? m.rivenPolarity : mod?.polarity,
+        drain: mod?.drain,
+      };
     }));
+    setRivenStatsMap(nextRivenMap);
     setHasOrokinCatalyst(d.hasOrokinCatalyst);
     setSlotPolarities(d.slotPolarities || {});
     const aid = d.arcaneIds ?? [];
-    setEquippedArcanes([
+    const loadedArcanes = [
       aid[0] ? resolveArcaneById(aid[0]) : null,
       aid[1] ? resolveArcaneById(aid[1]) : null,
+    ];
+    setEquippedArcanes(loadedArcanes);
+    setEquippedArcaneRanks([
+      d.arcaneRanks?.[0] ?? loadedArcanes[0]?.maxRank ?? 5,
+      d.arcaneRanks?.[1] ?? loadedArcanes[1]?.maxRank ?? 5,
     ]);
     setCurrentBuildId(build.id);
     setBuildName(build.name);
     setBuildIsPublic(build.isPublic ?? false);
     setShowSavedBuilds(false);
     toast.info("Build loaded", { description: build.name });
-  }, [markClean]);
+  }, [markClean, modsMap]);
 
   useCloudBuildFromUrl("modular", handleLoadBuild);
   const { context: loadoutCtx, clearContext: clearLoadoutCtx } = useLoadoutSlotFromUrl("modular", handleLoadBuild);
+
+  const loadoutLinkState = useMemo<{
+    buffs: WeaponExternalBuff[];
+    linkage?: SetBonusLinkage;
+    warframeId?: string;
+    companionModIds?: string[];
+    warframeMaxEnergy?: number;
+  }>(() => {
+    const standaloneBuffs = () =>
+      assembledWeapon != null ? resolveStandaloneExternalBuffs(assembledWeapon, simParams) : [];
+    if (!loadoutCtx || !assembledWeapon) return { buffs: standaloneBuffs() };
+    const loadout = getLoadouts().find((l) => l.id === loadoutCtx.loadoutId);
+    if (!loadout) return { buffs: standaloneBuffs() };
+
+    const baseLinkage = setBonusLinkageFromLoadout(loadout);
+    const liveSlots = equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
+    const linkage: SetBonusLinkage = {
+      ...baseLinkage,
+      ...(loadoutCtx.slot === "primary" ? { primaryMods: liveSlots } : {}),
+      ...(loadoutCtx.slot === "secondary" ? { secondaryMods: liveSlots } : {}),
+      ...(loadoutCtx.slot === "melee" ? { meleeMods: liveSlots } : {}),
+    };
+
+    const stats = calcLoadoutStats(loadout, { simParams });
+    const wb = loadout.warframeBuild;
+    const wf = wb?.warframeId ? allWarframes.find((w) => w.id === wb.warframeId) : undefined;
+    const buffContext: WeaponBuffContext = {
+      ...(wb?.warframeId && stats.warframe?.stats
+        ? {
+            warframeId: wb.warframeId,
+            warframeStats: stats.warframe.stats,
+            warframeAbilities: resolveAbilitiesWithHelminth(
+              wf?.abilities,
+              wb.helminthAbilityId,
+              wb.helminthSlot,
+            ),
+            warframeModSlots: baseLinkage.warframeMods,
+          }
+        : {}),
+      companionModSlots: baseLinkage.companionMods ?? [],
+      companionWeaponCritChance: stats.companion?.weapon?.stats.criticalChance,
+      allMods: modsMap,
+    };
+
+    return {
+      buffs: resolveWeaponExternalBuffs(assembledWeapon, buffContext, simParams),
+      linkage,
+      warframeId: wb?.warframeId,
+      companionModIds: (baseLinkage.companionMods ?? []).map((m) => m.modId),
+      warframeMaxEnergy: stats.warframe?.stats.totalEnergy,
+    };
+  }, [loadoutCtx, assembledWeapon, equippedMods, simParams, allWarframes, modsMap]);
+
+  const effectiveSimParams = useMemo<SimulationParams>(() => {
+    if (loadoutLinkState.warframeMaxEnergy == null || simParams.warframeMaxEnergy != null) {
+      return simParams;
+    }
+    return { ...simParams, warframeMaxEnergy: loadoutLinkState.warframeMaxEnergy };
+  }, [simParams, loadoutLinkState.warframeMaxEnergy]);
+
+  const activeArcaneState = useMemo(
+    () => resolveActiveArcaneList(equippedArcanes, equippedArcaneRanks),
+    [equippedArcanes, equippedArcaneRanks],
+  );
+
+  const modularCalcOptions = useMemo<WeaponCalculationOptions | undefined>(() => {
+    const hasBuffs = loadoutLinkState.buffs.length > 0;
+    const hasArcaneRanks = activeArcaneState.arcanes.length > 0;
+    if (!hasBuffs && !hasArcaneRanks) return undefined;
+    return {
+      ...(hasBuffs ? { externalBuffs: loadoutLinkState.buffs } : {}),
+      ...(hasArcaneRanks ? { arcaneRanks: activeArcaneState.arcaneRanks } : {}),
+    };
+  }, [loadoutLinkState.buffs, activeArcaneState]);
+
+  const calculatedStats = useMemo(() => {
+    if (!assembledWeapon) return null;
+    const modSlots = equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
+    const activeArcanes = activeArcaneState.arcanes;
+    if (activeArcanes.length > 0) {
+      return calculateWeaponBuildWithArcanes(assembledWeapon, modSlots, modsMap, activeArcanes, undefined, effectiveSimParams, modularCalcOptions, loadoutLinkState.linkage, rivenStatChanges);
+    }
+    return calculateWeaponBuild(assembledWeapon, modSlots, modsMap, undefined, effectiveSimParams, modularCalcOptions, loadoutLinkState.linkage, rivenStatChanges);
+  }, [assembledWeapon, equippedMods, activeArcaneState.arcanes, effectiveSimParams, modularCalcOptions, loadoutLinkState.linkage, rivenStatChanges, modsMap]);
+
+  const contributionContext = useMemo(() => {
+    if (!assembledWeapon) return null;
+    return {
+      baseWeapon: assembledWeapon,
+      modSlots: equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      allMods: modsMap,
+      arcanes: activeArcaneState.arcanes,
+      simParams: effectiveSimParams,
+      calcOptions: modularCalcOptions,
+      linkage: loadoutLinkState.linkage,
+      rivenStatChanges,
+      warframeId: loadoutLinkState.warframeId,
+      companionModIds: loadoutLinkState.companionModIds,
+    };
+  }, [assembledWeapon, equippedMods, activeArcaneState.arcanes, effectiveSimParams, modularCalcOptions, loadoutLinkState.linkage, rivenStatChanges, modsMap, loadoutLinkState.warframeId, loadoutLinkState.companionModIds]);
 
   const handleSaveDialog = async (values: SaveBuildDialogValues) => {
     if (values.target === "loadout" && loadoutCtx) {
@@ -448,7 +662,9 @@ export default function ModularBuilderPage() {
 
   const resetMods = () => {
     setEquippedMods([]);
+    setRivenStatsMap({});
     setEquippedArcanes([null, null]);
+    setEquippedArcaneRanks([5, 5]);
     setHasOrokinCatalyst(false);
     setSimParams({ ...DEFAULT_SIM_PARAMS });
     setCurrentBuildId(null);
@@ -953,10 +1169,17 @@ export default function ModularBuilderPage() {
                         <ArcaneSlotCard
                           key={i}
                           arcane={equippedArcanes[i]}
-                          rank={equippedArcanes[i]?.maxRank ?? 0}
+                          rank={equippedArcaneRanks[i] ?? equippedArcanes[i]?.maxRank ?? 0}
                           label={arcaneSlotLabel(arcaneConfig, i)}
                           onAdd={() => { setActiveArcaneSlot(i); setArcanePickerOpen(true); }}
                           onRemove={() => setEquippedArcanes((prev) => { const next = [...prev]; next[i] = null; return next; })}
+                          onRankChange={(r) =>
+                            setEquippedArcaneRanks((prev) => {
+                              const next = [...prev];
+                              next[i] = r;
+                              return next;
+                            })
+                          }
                         />
                       ))}
                     </div>
@@ -977,7 +1200,7 @@ export default function ModularBuilderPage() {
                   stats={calculatedStats}
                   weapon={assembledWeapon}
                   isMelee={assembledWeapon.category === "melee"}
-                  simParams={simParams}
+                  simParams={effectiveSimParams}
                   onSimParamsChange={setSimParams}
                   contributionContext={contributionContext}
                 />
@@ -1125,11 +1348,23 @@ export default function ModularBuilderPage() {
           open={arcanePickerOpen}
           onOpenChange={setArcanePickerOpen}
           arcanes={arcanesForSlot(arcaneConfig, activeArcaneSlot)}
-          equippedArcaneIds={equippedArcanes.filter(Boolean).map((a) => a!.id)}
-          onSelect={(arcane) => {
+          equippedArcaneIds={equippedArcanes
+            .map((a, idx) => (idx === activeArcaneSlot ? null : a?.id))
+            .filter((id): id is string => Boolean(id))}
+          initialRank={
+            equippedArcanes[activeArcaneSlot]
+              ? (equippedArcaneRanks[activeArcaneSlot] ?? equippedArcanes[activeArcaneSlot]!.maxRank)
+              : undefined
+          }
+          onSelect={(arcane, rank) => {
             setEquippedArcanes((prev) => {
               const next = [...prev];
               next[activeArcaneSlot] = arcane;
+              return next;
+            });
+            setEquippedArcaneRanks((prev) => {
+              const next = [...prev];
+              next[activeArcaneSlot] = rank ?? arcane.maxRank;
               return next;
             });
             setArcanePickerOpen(false);

@@ -160,9 +160,9 @@ export function parseRivenOcrText(rawText: string, weaponsList: Weapon[] = getBa
   const seenKeys = new Set<string>();
 
   // Stat line pattern:
-  // Optional +/- or signs (hyphen, en-dash, minus, em-dash), then decimal number (with dot or comma), optional %, followed by stat text
-  // e.g. "+148.2% Critical Chance", "-48.0% Zoom", "+1.9 Range", "162.4% Damage", "– 38.0% Ammo Maximum"
-  const statLineRegex = /([+−–—\-]?\s*\d+(?:[.,]\d+)?)\s*(?:%|s|m)?\s+([A-Za-z\s()/\d-]+)/;
+  // Supports both standard "+148.2% Critical Chance" / "-48.0% Zoom" / "+1.9 Range"
+  // AND Warframe's faction multiplier format "x1.45 Damage to Grineer" / "1.45x Damage to Corpus" / "x0.65 Damage to Infested".
+  const statLineRegex = /(?:([x×])\s*(\d+(?:[.,]\d+)?)|([+−–—\-]?\s*\d+(?:[.,]\d+)?)\s*([x×]|%|s|m)?)\s+([A-Za-z\s()/\d-]+)/i;
 
   for (const line of lines) {
     // Skip header/footer lines like "MR 12", "Cycles", "RIFLE RIVEN MOD"
@@ -173,11 +173,15 @@ export function parseRivenOcrText(rawText: string, weaponsList: Weapon[] = getBa
     const match = line.match(statLineRegex);
     if (!match) continue;
 
-    const rawNumStr = match[1].replace(/[+−–—\-\s]/g, "").replace(",", ".");
+    const prefixMult = !!match[1];
+    const suffixUnit = (match[4] || "").toLowerCase();
+    const isMultNotation = prefixMult || suffixUnit === "x" || suffixUnit === "×";
+    const rawSignedStr = prefixMult ? match[2] : match[3];
+    const rawNumStr = rawSignedStr.replace(/[+−–—\-\s]/g, "").replace(",", ".");
     const rawVal = parseFloat(rawNumStr);
     if (isNaN(rawVal) || Math.abs(rawVal) === 0) continue;
 
-    const restOfLine = match[2].trim();
+    const restOfLine = match[5].trim();
 
     // Find matching stat alias
     let matchedKey: string | undefined;
@@ -191,11 +195,36 @@ export function parseRivenOcrText(rawText: string, weaponsList: Weapon[] = getBa
     if (!matchedKey || seenKeys.has(matchedKey)) continue;
 
     const def = statDefsByKey.get(matchedKey);
+    const isFaction = matchedKey.startsWith("faction");
     const isPercent = def ? def.isPercent : true;
 
-    // Convert value: if percent stat, store as fraction (148.2% -> 1.482)
-    const convertedVal = isPercent ? Math.abs(rawVal) / 100 : Math.abs(rawVal);
-    const isCurse = /[−–—\-]/.test(match[1]) || /^[−–—\-]/.test(line.trim());
+    let convertedVal: number;
+    let isCurse: boolean;
+
+    if (isFaction && (isMultNotation || (rawVal > 0 && rawVal < 3))) {
+      // Warframe faction multiplier: x1.45 -> +0.45 buff; x0.65 -> 0.35 curse magnitude
+      if (rawVal < 1) {
+        convertedVal = Math.round((1 - rawVal) * 1000) / 1000;
+        isCurse = true;
+      } else {
+        convertedVal = Math.round((rawVal - 1) * 1000) / 1000;
+        isCurse = false;
+      }
+      if (convertedVal <= 0) continue;
+    } else {
+      // Convert value: if percent stat, store as fraction (148.2% -> 1.482)
+      convertedVal = isPercent ? Math.abs(rawVal) / 100 : Math.abs(rawVal);
+      const hasMinusSign = /[−–—\-]/.test(rawSignedStr) || /^[−–—\-]/.test(line.trim());
+      if (positiveStats.length >= 3) {
+        // Rivens have at most 3 positive stats; a 4th stat line is always the negative curse.
+        isCurse = true;
+      } else if (matchedKey === "recoil") {
+        // In Warframe, "-72% Weapon Recoil" reduces recoil (buff); "+58% Weapon Recoil" increases recoil (curse).
+        isCurse = !hasMinusSign;
+      } else {
+        isCurse = hasMinusSign;
+      }
+    }
 
     seenKeys.add(matchedKey);
 
@@ -205,6 +234,7 @@ export function parseRivenOcrText(rawText: string, weaponsList: Weapon[] = getBa
       }
     } else {
       if (positiveStats.length < 3) {
+        // SavedRiven / RivenDialog convention: all positiveStats carry positive magnitude (> 0).
         positiveStats.push({ key: matchedKey, value: convertedVal });
       }
     }
@@ -225,7 +255,7 @@ export function parseRivenOcrText(rawText: string, weaponsList: Weapon[] = getBa
 
   // Check if positive stats appear to be Rank 0 (unranked)
   // At Rank 0, stats are ~1/9th of typical values (under 25% for percent stats)
-  const isLikelyUnranked = positiveStats.length > 0 && positiveStats.every((s) => s.value < 0.25);
+  const isLikelyUnranked = positiveStats.length > 0 && positiveStats.every((s) => Math.abs(s.value) < 0.25);
 
   return {
     weaponId: matchedWeapon?.id,

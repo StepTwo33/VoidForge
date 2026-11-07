@@ -27,6 +27,8 @@ export interface ArcaneDisplayInfo {
    * (effectiveArcaneStacks), so the Warframe panel labels them. Unset for non-stacking arcanes.
    */
   fullStacks?: number;
+  /** Trigger category from ARCANE_EFFECTS so UI can expose ON/OFF toggles for conditional arcanes. */
+  trigger?: ArcaneTrigger;
 }
 
 const STAT_LABELS: Record<string, string> = {
@@ -411,6 +413,7 @@ export function getArcaneDisplayInfo(
       description: formatArcaneRankDescription(arcane, rank),
       applied,
       conditional,
+      trigger: def.trigger,
       ...(def.trigger === "stacks" ? { fullStacks: arcaneStackCap(def, rank) ?? 1 } : {}),
     };
   }

@@ -36,6 +36,7 @@ export interface SavedRiven {
   weaponName: string;
   weaponCategory: string;
   weaponType: ExtendedRivenWeaponType;
+  statPoolCategory?: string;
   polarity: string;
   rank: number; // 0-8
   rerolls: number;

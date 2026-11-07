@@ -8,8 +8,11 @@ import {
 import { incarnonDataMap } from "@/data/incarnon";
 import type { WarframeBuildData } from "@/lib/builds/build-storage";
 import { allDualFormMods, getDualFormConfig, warframeForDualForm } from "@/lib/builds/dual-form-warframes";
-import { resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
-import { resolveDefaultCompanionWeapon } from "@/lib/weapons/companion-weapons";
+import { resolveActiveSavedArcanes, resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
+import {
+  migrateClawModsFromCompanion,
+  resolveDefaultCompanionWeapon,
+} from "@/lib/weapons/companion-weapons";
 import { weaponFromModularData } from "@/lib/builds/modular-resolve";
 import { getLoadoutModular } from "@/lib/builds/loadout-slot-helpers";
 import { enrichWeapon } from "@/lib/weapons/weapon-enrich";
@@ -19,15 +22,33 @@ import {
   calculateWarframeBuild,
   calculateWeaponBuild,
   calculateWeaponBuildWithArcanes,
+  CONDITIONAL_WARFRAME_MOD_DEFS,
+  finalizeWarframeSurvivability,
 } from "@/lib/calc/calculator";
-import { resolveIncarnonActiveWeapon, isIncarnonFormActive } from "@/lib/calc/incarnon-active-weapon";
+import { getArcaneEffectDef } from "@/lib/calc/arcane-calculator";
+import {
+  computeKhoraVenariPassive,
+  computeMesaPassiveBonuses,
+} from "@/lib/codex/ability-misc-stats";
+import {
+  effectiveIncarnonEvolutions,
+  isIncarnonFormActive,
+  resolveIncarnonActiveWeapon,
+} from "@/lib/calc/incarnon-active-weapon";
 import { mergeIncarnonStatChanges } from "@/lib/calc/weapon-stat-merges";
 import { calculateCompanionBuild } from "@/lib/calc/companion-calculator";
-import { calculateTTK, ENEMY_TYPES, type EnemyType, type TTKResult } from "@/lib/calc/ttk";
+import {
+  calculateTTK,
+  ENEMY_TYPES,
+  type EnemyType,
+  type TTKPrimingOptions,
+  type TTKResult,
+} from "@/lib/calc/ttk";
 import { buildWeaponContributionContext, computeDpsContributions, type DpsContribution } from "@/lib/calc/dps-contributions";
 import { rivenStatChangesFromModSlots } from "@/lib/warframe-arsenal/riven-resolve";
 import {
   applyJetStreamWarframeMove,
+  computeLoadoutAuraArmorStripPct,
   mergeWeaponCalcOptions,
   resolveAbilitiesWithHelminth,
   resolveWeaponExternalBuffs,
@@ -58,6 +79,11 @@ export const SCENARIO_PRESETS: Record<Exclude<DamageScenario, "vsEnemy">, Simula
     killStacks: 0,
     statusTypesOnTarget: 0,
     arcaneStacks: 0,
+    applyTenaciousBondCrit: false,
+    applyReinforcedBondFireRate: false,
+    applyYareliCriticalFlow: false,
+    applyZephyrAirborne: false,
+    applyGarudaDeathsGate: false,
   },
   midFight: {
     ...DEFAULT_SIM_PARAMS,
@@ -67,6 +93,9 @@ export const SCENARIO_PRESETS: Record<Exclude<DamageScenario, "vsEnemy">, Simula
     arcaneStacks: 6,
     applyTenaciousBondCrit: true,
     applyReinforcedBondFireRate: true,
+    applyYareliCriticalFlow: true,
+    applyZephyrAirborne: true,
+    applyGarudaDeathsGate: true,
   },
   fullRamp: {
     ...DEFAULT_SIM_PARAMS,
@@ -74,6 +103,11 @@ export const SCENARIO_PRESETS: Record<Exclude<DamageScenario, "vsEnemy">, Simula
     killStacks: 5,
     statusTypesOnTarget: 4,
     arcaneStacks: 12,
+    applyTenaciousBondCrit: true,
+    applyReinforcedBondFireRate: true,
+    applyYareliCriticalFlow: true,
+    applyZephyrAirborne: true,
+    applyGarudaDeathsGate: true,
   },
 };
 
@@ -113,11 +147,14 @@ export interface LoadoutStatsResult {
 }
 
 export interface CalcLoadoutStatsOptions {
+  scenario?: DamageScenario;
   simParams?: SimulationParams;
   enemy?: EnemyType | null;
   enemyLevel?: number;
   /** Steel Path ×2.5 HP/Shield after level scaling. */
   steelPath?: boolean;
+  /** Pre-applied enemy debuff priming & armor strip for TTK and CO status counts. */
+  enemyPriming?: TTKPrimingOptions;
   allWeapons?: Weapon[];
 }
 
@@ -144,24 +181,47 @@ export function setBonusLinkageFromLoadout(loadout: Loadout): SetBonusLinkage {
   const primaryMod = getLoadoutModular(loadout, "primary");
   const secondaryMod = getLoadoutModular(loadout, "secondary");
   const meleeMod = getLoadoutModular(loadout, "melee");
+  let companionMods = loadout.companionBuild?.mods;
+  let companionWeaponMods = loadout.companionBuild?.weaponMods;
+  if (loadout.companionBuild) {
+    const c = getEffectiveCompanionsMap().get(loadout.companionBuild.companionId);
+    if (c) {
+      const migrated = migrateClawModsFromCompanion(
+        companionMods ?? [],
+        companionWeaponMods ?? [],
+        c,
+      );
+      companionMods = migrated.mods;
+      companionWeaponMods = migrated.weaponMods;
+    }
+  }
   return {
     warframeMods: wfMods,
     primaryMods: loadout.primaryBuild?.mods ?? primaryMod?.mods,
     secondaryMods: loadout.secondaryBuild?.mods ?? secondaryMod?.mods,
     meleeMods: loadout.meleeBuild?.mods ?? meleeMod?.mods,
-    companionMods: loadout.companionBuild?.mods,
-    companionWeaponMods: loadout.companionBuild?.weaponMods,
+    companionMods,
+    companionWeaponMods,
   };
 }
 
 function getIncarnonStatChanges(
   weaponId: string,
   evolutions?: Record<number, number>,
-  options?: { chargeMode?: boolean; conditionalsOn?: Record<string, boolean> },
+  options?: {
+    chargeMode?: boolean;
+    conditionalsOn?: Record<string, boolean>;
+    genesisInstalledOverride?: boolean | null;
+  },
 ): Record<string, number> | undefined {
   const data = incarnonDataMap.get(weaponId);
-  return mergeIncarnonStatChanges(data, evolutions ?? {}, weaponId, {
-    formActive: isIncarnonFormActive(evolutions, data),
+  const effectiveEvos = effectiveIncarnonEvolutions(
+    data,
+    evolutions,
+    options?.genesisInstalledOverride,
+  );
+  return mergeIncarnonStatChanges(data, effectiveEvos, weaponId, {
+    formActive: isIncarnonFormActive(effectiveEvos, data),
     chargeMode: options?.chargeMode === true,
     conditionalsOn: options?.conditionalsOn,
   });
@@ -173,12 +233,93 @@ export type WeaponBuildPayload = {
   weaponId: string;
   mods: ModSlot[];
   arcaneIds?: (string | null)[];
+  arcaneRanks?: number[];
   progenitorElement?: string;
   progenitorBonusPercent?: number;
   incarnonEvolutions?: Record<number, number>;
   /** Conditional Incarnon perks switched on (round 47; unset = off). */
   incarnonConditionals?: Record<string, boolean>;
+  /** Explicit Incarnon Genesis Adapter ON/OFF state (unset = inferred from evolutions). */
+  incarnonGenesisInstalled?: boolean;
 };
+
+/**
+ * Apply equipped weapon Incarnon mobility perks (Okina's Swordsman's Celerity +30% Movement Speed,
+ * Praedos Drifting Grace / Evolved Ascension, Innodem Striking Swiftness, Bo / Anku / Ruvox / Obex,
+ * and active melee Tier 1 Incarnon Form sprint / parkour bonuses) to Warframe stats.
+ */
+export function applyWeaponIncarnonMobilityToWarframe(
+  stats: WarframeCalculatedStats,
+  loadout: Pick<Loadout, "primaryBuild" | "secondaryBuild" | "meleeBuild">,
+): void {
+  const builds = [loadout.primaryBuild, loadout.secondaryBuild, loadout.meleeBuild];
+  let sprintDelta = 0;
+  let slideDelta = 0;
+  let parkourDelta = 0;
+
+  for (const b of builds) {
+    if (!b?.weaponId) continue;
+    const data = incarnonDataMap.get(b.weaponId);
+    if (!data) continue;
+    const effectiveEvos = effectiveIncarnonEvolutions(
+      data,
+      b.incarnonEvolutions,
+      b.incarnonGenesisInstalled,
+    );
+    if (Object.keys(effectiveEvos).length === 0) continue;
+    const formActive = isIncarnonFormActive(effectiveEvos, data);
+    const merged = mergeIncarnonStatChanges(data, effectiveEvos, b.weaponId, {
+      formActive,
+      conditionalsOn: b.incarnonConditionals,
+    });
+
+    // Exclude aim-gated movement perks (e.g. Laetum Raptor's Chase "+50% Movement Speed while Aiming").
+    let aimOnlyMove = 0;
+    for (const [tierStr, slot] of Object.entries(effectiveEvos)) {
+      const evo = data.evolutions.find((e) => e.tier === Number(tierStr) && e.slot === slot);
+      if (!evo) continue;
+      const moveVal = evo.variantStatChanges?.[b.weaponId]?.movementSpeed ?? evo.statChanges.movementSpeed;
+      if (moveVal && /while\s+aiming/i.test(evo.description)) {
+        aimOnlyMove += moveVal;
+      }
+      // Melee Tier 1 Incarnon Form active transformation mobility ("+20% Sprint Speed +20% to Parkour Velocity").
+      if (formActive && evo.tier === 1) {
+        const hasStructuredSprint =
+          evo.statChanges.sprintSpeed != null || evo.formStatChanges?.sprintSpeed != null;
+        if (!hasStructuredSprint) {
+          const sm = evo.description.match(/\+(\d+(?:\.\d+)?)%\s*Sprint Speed/i);
+          if (sm) sprintDelta += Number(sm[1]) / 100;
+        }
+        const hasStructuredParkour =
+          evo.statChanges.parkourVelocity != null || evo.formStatChanges?.parkourVelocity != null;
+        if (!hasStructuredParkour) {
+          const pm = evo.description.match(
+            /\+(\d+(?:\.\d+)?)%\s*(?:to\s+)?(?:Parkour Velocity|Bullet Jump)/i,
+          );
+          if (pm) parkourDelta += Number(pm[1]) / 100;
+        }
+      }
+    }
+
+    if (merged) {
+      const moveSpeed = Math.max(0, (merged.movementSpeed ?? 0) - aimOnlyMove);
+      sprintDelta += moveSpeed + (merged.sprintSpeed ?? 0);
+      slideDelta += merged.slideSpeed ?? 0;
+      parkourDelta += merged.parkourVelocity ?? 0;
+    }
+  }
+
+  if (sprintDelta !== 0) {
+    stats.sprintSpeedBonus += sprintDelta;
+    stats.totalSprint = stats.baseSprint * (1 + stats.sprintSpeedBonus);
+  }
+  if (slideDelta !== 0) {
+    stats.slideSpeedBonus += slideDelta;
+  }
+  if (parkourDelta !== 0) {
+    stats.parkourVelocityBonus += parkourDelta;
+  }
+}
 
 function calcWeaponSlotStats(
   build: WeaponBuildPayload | undefined,
@@ -188,6 +329,7 @@ function calcWeaponSlotStats(
   enemyLevel?: number,
   buffContext?: WeaponBuffContext,
   steelPath?: boolean,
+  enemyPriming?: TTKPrimingOptions,
 ): LoadoutWeaponSlotStats | null {
   if (!build) return null;
   const weaponsMap = getEffectiveWeaponsMap();
@@ -196,10 +338,20 @@ function calcWeaponSlotStats(
   if (!w) return null;
   const base = weaponWithPassive(w);
   const incarnonData = incarnonDataMap.get(build.weaponId);
-  const calcWeapon = resolveIncarnonActiveWeapon(base, incarnonData, build.incarnonEvolutions, {
+  const effectiveEvos = effectiveIncarnonEvolutions(
+    incarnonData,
+    build.incarnonEvolutions,
+    build.incarnonGenesisInstalled,
+  );
+  const calcWeapon = resolveIncarnonActiveWeapon(base, incarnonData, effectiveEvos, {
     onosIncarnonMode: simParams.onosIncarnonMode,
   });
-  const formActive = isIncarnonFormActive(build.incarnonEvolutions, incarnonData);
+  const formActive = isIncarnonFormActive(effectiveEvos, incarnonData);
+  const { arcanes: arcaneMods, arcaneRanks: activeArcaneRanks } = resolveActiveSavedArcanes(
+    build.arcaneIds,
+    build.arcaneRanks,
+    2,
+  );
   const progenitorOpts =
     build.progenitorElement &&
     build.progenitorBonusPercent != null &&
@@ -208,17 +360,21 @@ function calcWeaponSlotStats(
           progenitorElement: build.progenitorElement,
           progenitorBonusPercent: build.progenitorBonusPercent,
           ...(formActive ? { incarnonFormActive: true as const } : {}),
+          ...(activeArcaneRanks.length > 0 ? { arcaneRanks: activeArcaneRanks } : {}),
         }
-      : formActive
-        ? { incarnonFormActive: true as const }
+      : formActive || activeArcaneRanks.length > 0
+        ? {
+            ...(formActive ? { incarnonFormActive: true as const } : {}),
+            ...(activeArcaneRanks.length > 0 ? { arcaneRanks: activeArcaneRanks } : {}),
+          }
         : undefined;
   const externalBuffs = resolveWeaponExternalBuffs(calcWeapon, buffContext, simParams);
   const calcOptions = mergeWeaponCalcOptions(progenitorOpts, externalBuffs);
-  const incarnonChanges = getIncarnonStatChanges(build.weaponId, build.incarnonEvolutions, {
+  const incarnonChanges = getIncarnonStatChanges(build.weaponId, effectiveEvos, {
     chargeMode: simParams.onosIncarnonMode === "charge",
     conditionalsOn: build.incarnonConditionals,
+    genesisInstalledOverride: build.incarnonGenesisInstalled,
   });
-  const arcaneMods = resolveSavedArcaneSlots(build.arcaneIds, 2).filter((m): m is Mod => m != null);
   const modSlots = build.mods || [];
   const rivenStatChanges = rivenStatChangesFromModSlots(modSlots);
   const stats =
@@ -233,6 +389,7 @@ function calcWeaponSlotStats(
           calcOptions,
           setLinkage,
           rivenStatChanges,
+          activeArcaneRanks,
         )
       : calculateWeaponBuild(
           calcWeapon,
@@ -247,13 +404,14 @@ function calcWeaponSlotStats(
   const isMelee = base.category === "melee" || base.triggerType === "Melee";
   const ttk =
     enemy && enemyLevel != null && enemyLevel > 0
-      ? calculateTTK(stats, enemy, enemyLevel, { steelPath })
+      ? calculateTTK(stats, enemy, enemyLevel, { steelPath, ...enemyPriming })
       : undefined;
   const contributionContext = buildWeaponContributionContext({
     weapon: calcWeapon,
     modSlots,
     allMods: modsMap,
     arcanes: arcaneMods,
+    arcaneRanks: activeArcaneRanks,
     incarnonStatChanges: incarnonChanges,
     simParams,
     progenitorElement: build.progenitorElement,
@@ -274,6 +432,7 @@ function calcModularSlotStats(
   enemyLevel?: number,
   buffContext?: WeaponBuffContext,
   steelPath?: boolean,
+  enemyPriming?: TTKPrimingOptions,
 ): LoadoutWeaponSlotStats | null {
   const data = getLoadoutModular(loadout, slot);
   if (!data) return null;
@@ -283,9 +442,16 @@ function calcModularSlotStats(
   w = weaponWithPassive(w);
   const modSlots = data.mods || [];
   const rivenStatChanges = rivenStatChangesFromModSlots(modSlots);
-  const arcaneMods = resolveSavedArcaneSlots(data.arcaneIds, 2).filter((m): m is Mod => m != null);
+  const { arcanes: arcaneMods, arcaneRanks: activeArcaneRanks } = resolveActiveSavedArcanes(
+    data.arcaneIds,
+    data.arcaneRanks,
+    2,
+  );
   const externalBuffs = resolveWeaponExternalBuffs(w, buffContext, simParams);
-  const calcOptions = mergeWeaponCalcOptions(undefined, externalBuffs);
+  const calcOptions = mergeWeaponCalcOptions(
+    activeArcaneRanks.length > 0 ? { arcaneRanks: activeArcaneRanks } : undefined,
+    externalBuffs,
+  );
   const stats =
     arcaneMods.length > 0
       ? calculateWeaponBuildWithArcanes(
@@ -298,6 +464,7 @@ function calcModularSlotStats(
           calcOptions,
           setLinkage,
           rivenStatChanges,
+          activeArcaneRanks,
         )
       : calculateWeaponBuild(
           w,
@@ -312,13 +479,14 @@ function calcModularSlotStats(
   const isMelee = w.category === "melee" || w.triggerType === "Melee";
   const ttk =
     enemy && enemyLevel != null && enemyLevel > 0
-      ? calculateTTK(stats, enemy, enemyLevel, { steelPath })
+      ? calculateTTK(stats, enemy, enemyLevel, { steelPath, ...enemyPriming })
       : undefined;
   const contributionContext = buildWeaponContributionContext({
     weapon: w,
     modSlots,
     allMods: modsMap,
     arcanes: arcaneMods,
+    arcaneRanks: activeArcaneRanks,
     simParams,
     linkage: setLinkage,
     buffContext,
@@ -328,15 +496,50 @@ function calcModularSlotStats(
 }
 
 export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOptions = {}): LoadoutStatsResult {
-  let simParams = options.simParams ?? scenarioSimParams("midFight");
+  let simParams = options.simParams ?? scenarioSimParams(options.scenario ?? "midFight");
   const enemy = options.enemy ?? null;
   const enemyLevel = options.enemyLevel ?? 100;
   const steelPath = !!options.steelPath;
+  const enemyPriming = options.enemyPriming;
+  if (enemyPriming) {
+    let primedTypeCount = 0;
+    if ((enemyPriming.primedViralStacks ?? 0) > 0) primedTypeCount++;
+    if ((enemyPriming.primedCorrosiveStacks ?? 0) > 0) primedTypeCount++;
+    if ((enemyPriming.primedMagneticStacks ?? 0) > 0) primedTypeCount++;
+    if ((enemyPriming.primedColdStacks ?? 0) > 0) primedTypeCount++;
+    if ((enemyPriming.primedPunctureStacks ?? 0) > 0) primedTypeCount++;
+    if ((enemyPriming.primedBlastStacks ?? 0) > 0) primedTypeCount++;
+    if (enemyPriming.primedHeatStrip) primedTypeCount++;
+    if (primedTypeCount > simParams.statusTypesOnTarget) {
+      simParams = { ...simParams, statusTypesOnTarget: primedTypeCount };
+    }
+  }
   const weaponList = options.allWeapons ?? getEffectiveWeapons();
   const warframesMap = getEffectiveWarframesMap();
   const companionsMap = getEffectiveCompanionsMap();
   const modsMap = getEffectiveModsMap();
   const setLinkage = setBonusLinkageFromLoadout(loadout);
+  const auraArmorStripPct = computeLoadoutAuraArmorStripPct(setLinkage.warframeMods);
+  const effectiveEnemyPriming: TTKPrimingOptions | undefined =
+    enemyPriming || auraArmorStripPct > 0
+      ? {
+          ...enemyPriming,
+          ...(auraArmorStripPct > 0 || (enemyPriming?.armorStripPct ?? 0) > 0
+            ? {
+                armorStripPct: Math.min(
+                  100,
+                  (enemyPriming?.armorStripPct ?? 0) + auraArmorStripPct,
+                ),
+              }
+            : {}),
+        }
+      : undefined;
+
+  const isPaperScenario =
+    simParams.arcaneStacks <= 0 &&
+    !simParams.applyTriggerBuffs &&
+    simParams.killStacks <= 0 &&
+    simParams.comboCount <= 0;
 
   const result: LoadoutStatsResult = {
     warframe: null,
@@ -356,15 +559,57 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
       // `arcaneRanks` isn't declared on Loadout["warframeBuild"] but survives the
       // save round-trip (payload spread from WarframeBuildData).
       const wb = loadout.warframeBuild as NonNullable<Loadout["warframeBuild"]> &
-        Pick<WarframeBuildData, "arcaneRanks">;
+        Pick<WarframeBuildData, "arcaneRanks" | "arcaneStacksById" | "conditionalModStacksById">;
       const shards = wb.shards;
-      // Arcane Intention: this build's abilities (Helminth slot substituted) + mod names.
-      const warframeArcaneCtx = (abilities: Ability[] | undefined, mods: ModSlot[]) => ({
-        abilities: resolveAbilitiesWithHelminth(abilities, wb.helminthAbilityId, wb.helminthSlot),
-        equippedModNames: mods
-          .map((m) => modsMap.get(m.modId)?.name)
-          .filter((n): n is string => !!n),
-      });
+      const warframeArcaneCtx = (
+        abilities: Ability[] | undefined,
+        mods: ModSlot[],
+        arcanes: (Mod | null)[],
+      ) => {
+        const arcaneStacksById: Record<string, number> = {
+          ...(isPaperScenario ? {} : wb.arcaneStacksById),
+        };
+        if (isPaperScenario) {
+          for (const arc of arcanes) {
+            if (!arc) continue;
+            const def = getArcaneEffectDef(arc.id);
+            if (
+              def &&
+              def.trigger !== "passive" &&
+              arc.id !== "arcane_intention" &&
+              arc.id !== "arcane_persistence"
+            ) {
+              arcaneStacksById[arc.id] = 0;
+            }
+          }
+        }
+        if (simParams.arcaneStacksById) {
+          Object.assign(arcaneStacksById, simParams.arcaneStacksById);
+        }
+
+        const conditionalModStacksById: Record<string, number> = {};
+        for (const slot of mods) {
+          const def = CONDITIONAL_WARFRAME_MOD_DEFS[slot.modId];
+          if (!def) continue;
+          conditionalModStacksById[slot.modId] = isPaperScenario ? 0 : def.maxStacks;
+        }
+        if (!isPaperScenario && wb.conditionalModStacksById) {
+          Object.assign(conditionalModStacksById, wb.conditionalModStacksById);
+        }
+        if (simParams.conditionalModStacksById) {
+          Object.assign(conditionalModStacksById, simParams.conditionalModStacksById);
+        }
+
+        return {
+          arcaneStacksById,
+          conditionalModStacksById,
+          equippedModSlots: mods,
+          abilities: resolveAbilitiesWithHelminth(abilities, wb.helminthAbilityId, wb.helminthSlot),
+          equippedModNames: mods
+            .map((m) => modsMap.get(m.modId)?.name)
+            .filter((n): n is string => !!n),
+        };
+      };
       const dualConfig = getDualFormConfig(loadout.warframeBuild.warframeId);
       if (dualConfig) {
         const formStats = dualConfig.forms.map((form) => {
@@ -377,6 +622,7 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
             | undefined;
           const arcaneIds = isDefault ? wb.arcaneIds : sliceWithArcanes?.arcaneIds;
           const arcaneRanks = isDefault ? wb.arcaneRanks : sliceWithArcanes?.arcaneRanks;
+          const formArcanes = resolveSavedArcaneSlots(arcaneIds, 2);
           const formWf = warframeForDualForm(wf, form.id);
           const stats = calculateWarframeBuild(formWf, mods, modsMap, setLinkage);
           return {
@@ -385,9 +631,9 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
             stats: applyWarframeShardsAndArcanes(
               stats,
               shards,
-              resolveSavedArcaneSlots(arcaneIds, 2),
+              formArcanes,
               arcaneRanks,
-              warframeArcaneCtx(formWf.abilities, mods),
+              warframeArcaneCtx(formWf.abilities, mods, formArcanes),
             ),
           };
         });
@@ -400,29 +646,57 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
           forms: formStats,
         };
       } else {
+        const wfArcanes = resolveSavedArcaneSlots(wb.arcaneIds, 2);
         const stats = applyWarframeShardsAndArcanes(
           calculateWarframeBuild(wf, wb.mods || [], modsMap, setLinkage),
           shards,
-          resolveSavedArcaneSlots(wb.arcaneIds, 2),
+          wfArcanes,
           wb.arcaneRanks,
-          warframeArcaneCtx(wf.abilities, wb.mods || []),
+          warframeArcaneCtx(wf.abilities, wb.mods || [], wfArcanes),
         );
         result.warframe = { name: wf.name, stats };
       }
 
-      // Jet Stream: Turbulence-gated move speed × Strength (augment on warframe bar).
+      // Jet Stream + equipped Incarnon weapon mobility perks + Warframe loadout passives
+      // (Mesa +50 flat Health with no melee; Khora Venari +15% Sprint Speed).
       // Dual-form default stats may share a reference with forms[] — apply once per object.
       {
+        const wfFamily = loadout.warframeBuild.warframeId.replace(/_prime$/, "");
+        const hasMeleeEquipped = Boolean(
+          loadout.meleeBuild?.weaponId || getLoadoutModular(loadout, "melee"),
+        );
+        const mesaHpBonus =
+          wfFamily === "mesa"
+            ? computeMesaPassiveBonuses({
+                sidearmStyle: "none",
+                meleeEquipped: hasMeleeEquipped,
+              }).bonusHealth
+            : 0;
+        const khoraMoveBonus =
+          wfFamily === "khora" && !isPaperScenario
+            ? computeKhoraVenariPassive(true).moveSpeedBonus
+            : 0;
+
         const seen = new Set<WarframeCalculatedStats>();
         const applyOnce = (stats: WarframeCalculatedStats) => {
           if (seen.has(stats)) return;
           seen.add(stats);
+          if (mesaHpBonus > 0) {
+            stats.flatHealthBonus += mesaHpBonus;
+            stats.totalHealth += mesaHpBonus;
+            finalizeWarframeSurvivability(stats);
+          }
+          if (khoraMoveBonus > 0) {
+            stats.sprintSpeedBonus += khoraMoveBonus;
+            stats.totalSprint = stats.baseSprint * (1 + stats.sprintSpeedBonus);
+          }
           applyJetStreamWarframeMove(
             stats,
             setLinkage.warframeMods,
             modsMap,
             simParams,
           );
+          applyWeaponIncarnonMobilityToWarframe(stats, loadout);
         };
         applyOnce(result.warframe.stats);
         for (const form of result.warframe.forms ?? []) applyOnce(form.stats);
@@ -443,193 +717,221 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
       if (simParams.warframeMaxEnergy == null) {
         simParams = { ...simParams, warframeMaxEnergy: result.warframe!.stats.totalEnergy };
       }
-
-      const wfStr = result.warframe?.stats.abilityStrength ?? 1;
-      const calcExaltedSlot = (
-        weapon: Weapon | null,
-        modSlots: ModSlot[],
-        arcaneIds: (string | null)[] | undefined,
-      ): LoadoutWeaponSlotStats | null => {
-        if (!weapon) return null;
-        const arcanes = resolveSavedArcaneSlots(arcaneIds, 2).filter((m): m is Mod => m != null);
-        if (modSlots.length === 0 && arcanes.length === 0) return null;
-        const base = weaponWithPassive(weapon);
-        const externalBuffs = resolveWeaponExternalBuffs(base, buffContext, simParams);
-        const calcOptions = {
-          ...mergeWeaponCalcOptions(undefined, externalBuffs),
-          abilityStrength: wfStr,
-        };
-        const statsEx =
-          arcanes.length > 0
-            ? calculateWeaponBuildWithArcanes(
-                base,
-                modSlots,
-                modsMap,
-                arcanes,
-                undefined,
-                simParams,
-                calcOptions,
-                setLinkage,
-              )
-            : calculateWeaponBuild(
-                base,
-                modSlots,
-                modsMap,
-                undefined,
-                simParams,
-                calcOptions,
-                setLinkage,
-              );
-        const isMelee = base.category === "melee" || base.triggerType === "Melee";
-        const ttk =
-          enemy && enemyLevel > 0
-            ? calculateTTK(statsEx, enemy, enemyLevel, { steelPath })
-            : undefined;
-        const contributions = computeDpsContributions(
-          buildWeaponContributionContext({
-            weapon: base,
-            modSlots,
-            allMods: modsMap,
-            arcanes,
-            simParams,
-            linkage: setLinkage,
-            buffContext,
-            abilityStrength: wfStr,
-          }),
-        );
-        return { name: base.name, stats: statsEx, ttk, isMelee, contributions };
-      };
-
-      result.exalted = calcExaltedSlot(
-        getPrimaryExaltedWeapon(loadout.warframeBuild!.warframeId, weaponList),
-        loadout.warframeBuild.exaltedMods || [],
-        loadout.warframeBuild.exaltedArcaneIds,
-      );
-      result.exaltedMelee = calcExaltedSlot(
-        getMeleeExaltedWeapon(loadout.warframeBuild!.warframeId, weaponList),
-        loadout.warframeBuild.exaltedMeleeMods || [],
-        loadout.warframeBuild.exaltedMeleeArcaneIds,
-      );
     }
   }
+
+  // Resolve companion body/weapon mods (including pre-U37 claw mod migration + Hunter Synergy)
+  // BEFORE computing weapon & exalted slots so Tenacious Bond and Reinforced Bond apply everywhere.
+  let resolvedCompanionEntry: {
+    companion: Companion;
+    companionMods: ModSlot[];
+    weaponMods: ModSlot[];
+    companionWeapon: Weapon | null;
+    companionExternalBuffs: WeaponExternalBuff[];
+    companionWeaponStats?: CalculatedStats;
+  } | null = null;
 
   if (loadout.companionBuild) {
     const c = companionsMap.get(loadout.companionBuild.companionId);
     if (c) {
-      let companionWeaponCritChance: number | undefined;
-      const weaponMods = loadout.companionBuild.weaponMods || [];
-      if (weaponMods.length > 0) {
-        const companionWeapon = resolveCompanionWeaponForLoadout(
-          loadout.companionBuild,
-          c,
-          weaponList,
-        );
-        if (companionWeapon) {
-          const cwStats = calculateWeaponBuild(
-            weaponWithPassive(companionWeapon),
-            weaponMods,
-            modsMap,
-            undefined,
-            simParams,
-            undefined,
-            setLinkage,
-          );
-          companionWeaponCritChance = cwStats.criticalChance;
-        }
-      }
-      buffContext = {
-        ...buffContext,
-        companionModSlots: loadout.companionBuild.mods ?? [],
-        companionWeaponCritChance,
-        allMods: modsMap,
-      };
-    }
-  }
-
-  result.primary =
-    calcModularSlotStats(loadout, "primary", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath) ??
-    calcWeaponSlotStats(loadout.primaryBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath);
-  result.secondary =
-    calcModularSlotStats(loadout, "secondary", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath) ??
-    calcWeaponSlotStats(loadout.secondaryBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath);
-  result.melee =
-    calcModularSlotStats(loadout, "melee", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath) ??
-    calcWeaponSlotStats(loadout.meleeBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath);
-
-  if (loadout.companionBuild) {
-    const c = companionsMap.get(loadout.companionBuild.companionId);
-    if (c) {
-      const wfStats = result.warframe?.stats;
-      // Link Vitality / Redirection / Fiber copy the loadout Warframe's max stats.
-      const linkedWarframe = wfStats
-        ? { name: result.warframe?.name, health: wfStats.totalHealth, shield: wfStats.totalShield, armor: wfStats.totalArmor }
-        : null;
-      const bodyStats = calculateCompanionBuild(c, loadout.companionBuild.mods || [], modsMap, undefined, linkedWarframe);
-      let weapon: LoadoutWeaponSlotStats | null = null;
-      const weaponMods = loadout.companionBuild.weaponMods || [];
+      const migrated = migrateClawModsFromCompanion(
+        loadout.companionBuild.mods ?? [],
+        loadout.companionBuild.weaponMods ?? [],
+        c,
+      );
+      const companionMods = migrated.mods;
+      const weaponMods = migrated.weaponMods;
       const companionWeapon = resolveCompanionWeaponForLoadout(
         loadout.companionBuild,
         c,
         weaponList,
       );
-      if (companionWeapon) {
-        const base = weaponWithPassive(companionWeapon);
-          const allCompanionSlots: ModSlot[] = [
-            ...(loadout.companionBuild.mods || []),
-            ...weaponMods,
-          ];
-          const companionExternalBuffs: WeaponExternalBuff[] = [];
+      const allCompanionSlots: ModSlot[] = [...companionMods, ...weaponMods];
+      const companionExternalBuffs: WeaponExternalBuff[] = [];
 
-          // Hunter Synergy: +30% of Primary modded CC to companion weapon
-          const hunterSynergyMod = allCompanionSlots.find((m) => m.modId === "hunter_synergy");
-          if (hunterSynergyMod && result.primary?.stats.criticalChance) {
-            const rank = hunterSynergyMod.rank ?? 5;
-            const primaryCc = result.primary.stats.criticalChance;
-            const bonus = primaryCc * (0.05 * (rank + 1));
-            if (bonus > 0) {
-              companionExternalBuffs.push({
-                id: "mod:hunter_synergy",
-                label: "Hunter Synergy",
-                category: "companion",
-                critChanceFlatBonus: bonus,
-              });
-            }
+      const hunterSynergyMod = allCompanionSlots.find((m) => m.modId === "hunter_synergy");
+      const mechaOverdriveMod = allCompanionSlots.find((m) => m.modId === "mecha_overdrive");
+      if (companionWeapon && (hunterSynergyMod || mechaOverdriveMod)) {
+        // Tenacious/Reinforced Bond only add Crit Damage / Fire Rate, never Primary CC/SC.
+        const primaryProbe =
+          calcModularSlotStats(loadout, "primary", simParams, setLinkage, null, undefined, buffContext) ??
+          calcWeaponSlotStats(loadout.primaryBuild, simParams, setLinkage, null, undefined, buffContext);
+        if (hunterSynergyMod && primaryProbe?.stats.criticalChance) {
+          const rank = hunterSynergyMod.rank ?? 5;
+          const bonus = primaryProbe.stats.criticalChance * (0.05 * (rank + 1));
+          if (bonus > 0) {
+            companionExternalBuffs.push({
+              id: "mod:hunter_synergy",
+              label: "Hunter Synergy",
+              category: "companion",
+              critChanceFlatBonus: bonus,
+            });
           }
-
-          // Mecha Overdrive: +60% of Primary modded SC to companion weapon
-          const mechaOverdriveMod = allCompanionSlots.find((m) => m.modId === "mecha_overdrive");
-          if (mechaOverdriveMod && result.primary?.stats.statusChance) {
-            const rank = mechaOverdriveMod.rank ?? 5;
-            const primarySc = result.primary.stats.statusChance;
-            const bonus = primarySc * (0.10 * (rank + 1));
-            if (bonus > 0) {
-              companionExternalBuffs.push({
-                id: "mod:mecha_overdrive",
-                label: "Mecha Overdrive",
-                category: "companion",
-                statusChanceFlatBonus: bonus,
-              });
-            }
-          }
-
-          const stats = calculateWeaponBuild(
-            base,
-            weaponMods,
-            modsMap,
-            undefined,
-            simParams,
-            companionExternalBuffs.length > 0 ? { externalBuffs: companionExternalBuffs } : undefined,
-            setLinkage,
-          );
-          const isMelee = base.category === "melee" || base.triggerType === "Melee";
-          const ttk =
-            enemy && enemyLevel > 0
-              ? calculateTTK(stats, enemy, enemyLevel, { steelPath })
-              : undefined;
-          weapon = { name: base.name, stats, ttk, isMelee };
         }
-      result.companion = { name: c.name, bodyStats, weapon };
+        if (mechaOverdriveMod && primaryProbe?.stats.statusChance) {
+          const rank = mechaOverdriveMod.rank ?? 5;
+          const bonus = primaryProbe.stats.statusChance * (0.10 * (rank + 1));
+          if (bonus > 0) {
+            companionExternalBuffs.push({
+              id: "mod:mecha_overdrive",
+              label: "Mecha Overdrive",
+              category: "companion",
+              statusChanceFlatBonus: bonus,
+            });
+          }
+        }
+      }
+
+      let companionWeaponStats: CalculatedStats | undefined;
+      if (companionWeapon) {
+        const cwRivenChanges = rivenStatChangesFromModSlots(weaponMods);
+        companionWeaponStats = calculateWeaponBuild(
+          weaponWithPassive(companionWeapon),
+          weaponMods,
+          modsMap,
+          undefined,
+          simParams,
+          companionExternalBuffs.length > 0 ? { externalBuffs: companionExternalBuffs } : undefined,
+          setLinkage,
+          cwRivenChanges,
+        );
+      }
+
+      buffContext = {
+        ...buffContext,
+        companionModSlots: companionMods,
+        companionWeaponCritChance: companionWeaponStats?.criticalChance,
+        allMods: modsMap,
+      };
+
+      resolvedCompanionEntry = {
+        companion: c,
+        companionMods,
+        weaponMods,
+        companionWeapon,
+        companionExternalBuffs,
+        companionWeaponStats,
+      };
     }
+  }
+
+  result.primary =
+    calcModularSlotStats(loadout, "primary", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPriming) ??
+    calcWeaponSlotStats(loadout.primaryBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPriming);
+  result.secondary =
+    calcModularSlotStats(loadout, "secondary", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPriming) ??
+    calcWeaponSlotStats(loadout.secondaryBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPriming);
+  result.melee =
+    calcModularSlotStats(loadout, "melee", simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPriming) ??
+    calcWeaponSlotStats(loadout.meleeBuild, simParams, setLinkage, enemy, enemyLevel, buffContext, steelPath, effectiveEnemyPriming);
+
+  if (loadout.warframeBuild && result.warframe) {
+    const wfStr = result.warframe.stats.abilityStrength ?? 1;
+    const calcExaltedSlot = (
+      weapon: Weapon | null,
+      modSlots: ModSlot[],
+      arcaneIds: (string | null)[] | undefined,
+      arcaneRanks: number[] | undefined,
+    ): LoadoutWeaponSlotStats | null => {
+      if (!weapon) return null;
+      const { arcanes, arcaneRanks: activeArcaneRanks } = resolveActiveSavedArcanes(
+        arcaneIds,
+        arcaneRanks,
+        2,
+      );
+      if (modSlots.length === 0 && arcanes.length === 0) return null;
+      const base = weaponWithPassive(weapon);
+      const externalBuffs = resolveWeaponExternalBuffs(base, buffContext, simParams);
+      const calcOptions = {
+        ...mergeWeaponCalcOptions(
+          activeArcaneRanks.length > 0 ? { arcaneRanks: activeArcaneRanks } : undefined,
+          externalBuffs,
+        ),
+        abilityStrength: wfStr,
+      };
+      const statsEx =
+        arcanes.length > 0
+          ? calculateWeaponBuildWithArcanes(
+              base,
+              modSlots,
+              modsMap,
+              arcanes,
+              undefined,
+              simParams,
+              calcOptions,
+              setLinkage,
+              undefined,
+              activeArcaneRanks,
+            )
+          : calculateWeaponBuild(
+              base,
+              modSlots,
+              modsMap,
+              undefined,
+              simParams,
+              calcOptions,
+              setLinkage,
+            );
+      const isMelee = base.category === "melee" || base.triggerType === "Melee";
+      const ttk =
+        enemy && enemyLevel > 0
+          ? calculateTTK(statsEx, enemy, enemyLevel, { steelPath, ...effectiveEnemyPriming })
+          : undefined;
+      const contributions = computeDpsContributions(
+        buildWeaponContributionContext({
+          weapon: base,
+          modSlots,
+          allMods: modsMap,
+          arcanes,
+          arcaneRanks: activeArcaneRanks,
+          simParams,
+          linkage: setLinkage,
+          buffContext,
+          abilityStrength: wfStr,
+        }),
+      );
+      return { name: base.name, stats: statsEx, ttk, isMelee, contributions };
+    };
+
+    result.exalted = calcExaltedSlot(
+      getPrimaryExaltedWeapon(loadout.warframeBuild.warframeId, weaponList),
+      loadout.warframeBuild.exaltedMods || [],
+      loadout.warframeBuild.exaltedArcaneIds,
+      loadout.warframeBuild.exaltedArcaneRanks,
+    );
+    result.exaltedMelee = calcExaltedSlot(
+      getMeleeExaltedWeapon(loadout.warframeBuild.warframeId, weaponList),
+      loadout.warframeBuild.exaltedMeleeMods || [],
+      loadout.warframeBuild.exaltedMeleeArcaneIds,
+      loadout.warframeBuild.exaltedMeleeArcaneRanks,
+    );
+  }
+
+  if (resolvedCompanionEntry) {
+    const { companion: c, companionMods, companionWeapon, companionWeaponStats } =
+      resolvedCompanionEntry;
+    const wfStats = result.warframe?.stats;
+    // Link Vitality / Redirection / Fiber copy the loadout Warframe's max stats.
+    const linkedWarframe = wfStats
+      ? {
+          name: result.warframe?.name,
+          health: wfStats.totalHealth,
+          shield: wfStats.totalShield,
+          armor: wfStats.totalArmor,
+        }
+      : null;
+    const bodyStats = calculateCompanionBuild(c, companionMods, modsMap, undefined, linkedWarframe);
+    let weapon: LoadoutWeaponSlotStats | null = null;
+    if (companionWeapon && companionWeaponStats) {
+      const base = weaponWithPassive(companionWeapon);
+      const isMelee = base.category === "melee" || base.triggerType === "Melee";
+      const ttk =
+        enemy && enemyLevel > 0
+          ? calculateTTK(companionWeaponStats, enemy, enemyLevel, { steelPath, ...effectiveEnemyPriming })
+          : undefined;
+      weapon = { name: base.name, stats: companionWeaponStats, ttk, isMelee };
+    }
+    result.companion = { name: c.name, bodyStats, weapon };
   }
 
   return result;

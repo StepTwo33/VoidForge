@@ -22,15 +22,15 @@ describe("R29 mod label and value fixes", () => {
     for (const id of ["critical_deceleration", "creeping_bullseye"]) {
       expect(maxTotal(id, "criticalChance")).toBeCloseTo(200, 0);
       expect(maxTotal(id, "fireRate")).toBeCloseTo(-20, 0);
-      expect(byId(id).description).toBe("+33.3% Crit Chance, -3.3% Fire Rate per rank");
+      expect(byId(id).description).toBe("+200% Critical Chance, -20% Fire Rate");
     }
   });
-  it("Corrosive Projection label is -3% per rank (-18% at max)", () => {
+  it("Corrosive Projection label is -18% Enemy Armor at max rank", () => {
     expect(maxTotal("aura_corrosive_projection", "armor")).toBe(-18);
-    expect(byId("aura_corrosive_projection").description).toBe("-3% Enemy Armor per rank");
+    expect(byId("aura_corrosive_projection").description).toBe("Enemies lose -18% Armor");
   });
-  it("Maglev label is +5% Slide / -5% Friction per rank (30% at max)", () => {
+  it("Maglev label is +30% Slide / -30% Friction at max rank", () => {
     expect(maxTotal("maglev", "slideSpeed")).toBe(30);
-    expect(byId("maglev").description).toBe("+5% Slide, -5% Friction per rank");
+    expect(byId("maglev").description).toBe("+30% Slide, -30% Friction");
   });
 });

@@ -6,6 +6,7 @@ export interface ShareableBuild {
   itemId: string;
   mods: { id: string; rank: number; slotIndex?: number }[];
   arcanes?: string[];
+  arcaneRanks?: number[];
   progenitorElement?: string;
   progenitorBonusPercent?: number;
   // Modular-specific
@@ -119,6 +120,7 @@ export function packShareableBuild(build: ShareableBuild): unknown[] {
 
   const extras: Record<string, unknown> = {};
   if (build.arcanes && build.arcanes.length > 0) extras.a = build.arcanes;
+  if (build.arcaneRanks && build.arcaneRanks.length > 0) extras.ar = build.arcaneRanks;
   if (build.shards && build.shards.length > 0) {
     extras.s = build.shards.map((sh) => [sh.id, sh.bonus]);
   }
@@ -171,6 +173,9 @@ export function unpackShareableBuild(raw: unknown): ShareableBuild | null {
     const e = extrasRaw as Record<string, unknown>;
     if (Array.isArray(e.a) && e.a.every((x) => typeof x === "string")) {
       build.arcanes = e.a as string[];
+    }
+    if (Array.isArray(e.ar) && e.ar.every((x) => typeof x === "number")) {
+      build.arcaneRanks = e.ar as number[];
     }
     if (Array.isArray(e.s)) {
       const shards: { id: string; bonus: string }[] = [];

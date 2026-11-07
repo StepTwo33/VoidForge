@@ -19,6 +19,36 @@ export function resolveSavedArcaneSlots(arcaneIds: (string | null)[] | undefined
   return out;
 }
 
+/** Resolve non-null equipped arcanes and their aligned ranks from live `(Mod | null)[]` slot arrays. */
+export function resolveActiveArcaneList(
+  slots: (Mod | null)[],
+  slotRanks?: (number | undefined)[],
+): { arcanes: Mod[]; arcaneRanks: number[] } {
+  const arcanes: Mod[] = [];
+  const arcaneRanks: number[] = [];
+  for (let i = 0; i < slots.length; i++) {
+    const mod = slots[i];
+    if (!mod) continue;
+    arcanes.push(mod);
+    const rawRank = slotRanks?.[i];
+    const r =
+      typeof rawRank === "number" && Number.isFinite(rawRank)
+        ? Math.max(0, Math.min(mod.maxRank, Math.trunc(rawRank)))
+        : mod.maxRank;
+    arcaneRanks.push(r);
+  }
+  return { arcanes, arcaneRanks };
+}
+
+/** Resolve non-null equipped arcanes and their aligned ranks from saved `arcaneIds` + `arcaneRanks`. */
+export function resolveActiveSavedArcanes(
+  arcaneIds: (string | null)[] | undefined,
+  arcaneRanks: (number | undefined)[] | undefined,
+  slotCount = 2,
+): { arcanes: Mod[]; arcaneRanks: number[] } {
+  return resolveActiveArcaneList(resolveSavedArcaneSlots(arcaneIds, slotCount), arcaneRanks);
+}
+
 export interface SavedBuild {
   id: string;
   name: string;
@@ -160,6 +190,7 @@ export interface WeaponBuildData {
   mods: ModSlot[];
   stanceModId?: string;
   arcaneIds: (string | null)[];
+  arcaneRanks?: number[];
   hasOrokinCatalyst: boolean;
   isMR30: boolean;
   slotPolarities: Record<number, string>;
@@ -183,6 +214,8 @@ export interface WarframeBuildData {
   shards: (EquippedArchonShard | null)[];
   arcaneIds: (string | null)[];
   arcaneRanks?: number[];
+  arcaneStacksById?: Record<string, number>;
+  conditionalModStacksById?: Record<string, number>;
   hasOrokinReactor: boolean;
   isMR30: boolean;
   slotPolarities: Record<number, string>;
@@ -191,10 +224,12 @@ export interface WarframeBuildData {
   exaltedMods?: ModSlot[];
   exaltedSlotPolarities?: Record<number, string>;
   exaltedArcaneIds?: (string | null)[];
+  exaltedArcaneRanks?: number[];
   /** Titania Diwata (melee) when Dex Pixia is the primary exalted. */
   exaltedMeleeMods?: ModSlot[];
   exaltedMeleeSlotPolarities?: Record<number, string>;
   exaltedMeleeArcaneIds?: (string | null)[];
+  exaltedMeleeArcaneRanks?: number[];
   /** Non-default form configs for dual-form warframes (e.g. Orion on Sirius & Orion). */
   dualFormBuilds?: Record<string, {
     mods: ModSlot[];

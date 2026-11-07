@@ -46,11 +46,14 @@ interface RivenDialogProps {
 export const POLARITIES = ["madurai", "vazarin", "naramon"];
 const WEAPON_CATEGORIES = ["All", "Rifle", "Shotgun", "Pistol", "Melee", "Kitgun", "Zaw", "Companion", "Archgun"] as const;
 
-function formatRangeHint(stat: RivenStat | undefined): string {
+function formatRangeHint(stat: RivenStat | undefined, isCurse = false): string {
   if (!stat) return "";
   const lo = Math.min(Math.abs(stat.minValue), Math.abs(stat.maxValue));
   const hi = Math.max(Math.abs(stat.minValue), Math.abs(stat.maxValue));
   if (stat.name.startsWith("Damage to ") || stat.name.startsWith("Damage vs ")) {
+    if (isCurse) {
+      return `${Math.max(0.01, 1 - hi / 100).toFixed(2)}–${Math.max(0.01, 1 - lo / 100).toFixed(2)}x`;
+    }
     return `${(1 + lo / 100).toFixed(2)}–${(1 + hi / 100).toFixed(2)}x`;
   }
   if (stat.type === "percent") return `${lo.toFixed(0)}–${hi.toFixed(0)}%`;
@@ -886,23 +889,40 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
                       <div className="flex w-24 shrink-0 items-center">
                         <Input
                           type="number"
-                          step="0.1"
-                          value={Math.round(negativeStat.value * 1000) / 10}
+                          step={isFaction ? "0.01" : "0.1"}
+                          value={
+                            isFaction
+                              ? Math.max(0.01, 1 - (negativeStat.value || 0)).toFixed(2)
+                              : negDef?.isPercent !== false
+                              ? Math.round(negativeStat.value * 1000) / 10
+                              : negativeStat.value
+                          }
                           onChange={(e) => {
                             const raw = parseFloat(e.target.value) || 0;
-                            setNegativeStat({ ...negativeStat, value: Math.abs(raw) / 100 });
+                            const nextMagnitude = isFaction
+                              ? raw > 0 && raw < 1
+                                ? Math.round((1 - raw) * 1000) / 1000
+                                : Math.abs(raw) / 100
+                              : negDef?.isPercent !== false
+                              ? Math.abs(raw) / 100
+                              : Math.abs(raw);
+                            setNegativeStat({ ...negativeStat, value: nextMagnitude });
                           }}
                           className={cn(
                             "h-9 border-purple-500/30 bg-purple-950/40 text-xs text-white",
                             outOfRange && "border-amber-500/80 focus:border-amber-400",
                           )}
                         />
-                        <span className="ml-1 text-xs text-purple-400">%</span>
+                        {isFaction ? (
+                          <span className="ml-1 text-xs text-purple-400">x</span>
+                        ) : negDef?.isPercent !== false ? (
+                          <span className="ml-1 text-xs text-purple-400">%</span>
+                        ) : null}
                       </div>
                     </div>
                     {negPoolStat && (
                       <p className={cn("text-[10px] pl-0.5", outOfRange ? "text-amber-400 font-medium" : "text-purple-300/60")}>
-                        Typical curse magnitude: {formatRangeHint(negPoolStat)}
+                        Typical curse: {formatRangeHint(negPoolStat, true)}
                         {outOfRange ? " (outside expected band)" : ""}
                       </p>
                     )}

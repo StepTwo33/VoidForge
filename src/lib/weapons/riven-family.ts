@@ -66,11 +66,59 @@ export function getRivenBaseName(name: string): string {
   return name;
 }
 
+const kitgunChambersDesc = allSourceWeapons
+  .filter((w) => w.category === "kitgun_chamber" || w.kitgunChamberCategory != null)
+  .sort((a, b) => b.id.length - a.id.length);
+
+const zawStrikesDesc = allSourceWeapons
+  .filter((w) => w.category === "zaw_strike" || w.category === "zaw")
+  .sort((a, b) => b.id.length - a.id.length);
+
+/**
+ * Resolves a catalog weapon or modular assembled weapon ID (e.g.
+ * `kitgun_sporelacer_haymaker_splat` → `kitgun_sporelacer`,
+ * `zaw_sepfahn_peye_vargeet_ii_jai` → `zaw_sepfahn`) to its canonical catalog Weapon.
+ * Returns `null` when the weapon ID does not correspond to any known weapon.
+ */
+export function resolveRivenWeapon(weaponOrId: Weapon | string | undefined | null): Weapon | null {
+  if (!weaponOrId) return null;
+  if (typeof weaponOrId !== "string") {
+    const direct = weaponsById.get(weaponOrId.id);
+    if (direct) return direct;
+    const modular = resolveRivenWeapon(weaponOrId.id);
+    return modular ?? weaponOrId;
+  }
+  const direct = weaponsById.get(weaponOrId);
+  if (direct) return direct;
+  if (weaponOrId.startsWith("kitgun_") || weaponOrId.endsWith("_chamber")) {
+    const chamber = kitgunChambersDesc.find((w) => {
+      const slug = w.id.replace(/^kitgun_/, "").replace(/_chamber$/, "");
+      return (
+        weaponOrId === w.id ||
+        weaponOrId.includes(w.id) ||
+        (slug.length >= 3 && weaponOrId.includes(slug))
+      );
+    });
+    if (chamber) return chamber;
+  } else if (weaponOrId.startsWith("zaw_")) {
+    const strike = zawStrikesDesc.find((w) => {
+      const slug = w.id.replace(/^zaw_/, "");
+      return (
+        weaponOrId === w.id ||
+        weaponOrId.includes(w.id) ||
+        (slug.length >= 3 && weaponOrId.includes(slug))
+      );
+    });
+    if (strike) return strike;
+  }
+  return null;
+}
+
 /**
  * Given a weapon or weapon id, returns the canonical base weapon for Riven modding.
  */
 export function getRivenBaseWeapon(weaponOrId: Weapon | string): Weapon {
-  const w = typeof weaponOrId === "string" ? weaponsById.get(weaponOrId) : weaponOrId;
+  const w = resolveRivenWeapon(weaponOrId);
   if (!w) {
     return allWeapons[0];
   }
@@ -85,34 +133,22 @@ export function getRivenBaseWeapon(weaponOrId: Weapon | string): Weapon {
  * Returns true if the weapon is a variant (Prime, Kuva, Vandal, etc.) of another base weapon.
  */
 export function isRivenVariant(weaponOrId: Weapon | string): boolean {
-  const w = typeof weaponOrId === "string" ? weaponsById.get(weaponOrId) : weaponOrId;
+  const w = resolveRivenWeapon(weaponOrId);
   if (!w) return false;
   return getRivenBaseName(w.name) !== w.name;
 }
 
 /**
- * Returns all weapon IDs belonging to the same Riven family (e.g. "acceltra" and "acceltra_prime").
+ * Returns all weapon IDs belonging to the same Riven family (e.g. "acceltra" and "acceltra_prime",
+ * or "kitgun_sporelacer" for "kitgun_sporelacer_haymaker_splat").
  * Any Riven for this family equips on all these variants.
  */
 export function getRivenFamilyWeaponIds(weaponId: string): string[] {
-  let lookupId = weaponId;
-  if (weaponId.startsWith("kitgun_")) {
-    const chamber = allSourceWeapons.find(
-      (w) => (w.category === "kitgun_chamber" || w.kitgunChamberCategory != null) && weaponId.includes(w.id),
-    );
-    if (chamber) lookupId = chamber.id;
-  } else if (weaponId.startsWith("zaw_")) {
-    const strike = allSourceWeapons.find(
-      (w) => (w.category === "zaw_strike" || w.category === "zaw") && weaponId.includes(w.id),
-    );
-    if (strike) lookupId = strike.id;
-  }
-
-  const target = weaponsById.get(lookupId);
+  const target = resolveRivenWeapon(weaponId);
   if (!target) return [weaponId];
 
   const baseName = getRivenBaseName(target.name);
-  const familyIds: string[] = [weaponId, lookupId];
+  const familyIds: string[] = [weaponId, target.id];
 
   for (const w of allSourceWeapons) {
     if (getRivenBaseName(w.name) === baseName) {

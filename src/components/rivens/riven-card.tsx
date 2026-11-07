@@ -41,10 +41,15 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
   const weaponName = riven.weaponName || "Weapon";
   const rollSuffix = extractRivenAffix(riven.name, weaponName) || "Riven";
 
-  const isCompanion = riven.weaponType === "Companion";
-  const equipUrl = isCompanion
-    ? `/companion-builder?weapon=${riven.weaponId}&riven=${encodeURIComponent(JSON.stringify(riven.stats))}`
-    : `/weapon-builder?weapon=${riven.weaponId}&riven=${encodeURIComponent(JSON.stringify(riven.stats))}`;
+  const encodedStats = encodeURIComponent(JSON.stringify(riven.stats));
+  const equipUrl =
+    riven.weaponType === "Companion"
+      ? `/companion-builder?weapon=${encodeURIComponent(riven.weaponId)}&riven=${encodedStats}`
+      : riven.weaponType === "Kitgun" || riven.weaponCategory === "kitgun_chamber"
+        ? `/modular-builder?type=kitgun&part=${encodeURIComponent(riven.weaponId)}&riven=${encodedStats}`
+        : riven.weaponType === "Zaw" || riven.weaponCategory === "zaw_strike"
+          ? `/modular-builder?type=zaw&part=${encodeURIComponent(riven.weaponId)}&riven=${encodedStats}`
+          : `/weapon-builder?weapon=${encodeURIComponent(riven.weaponId)}&riven=${encodedStats}`;
 
   const hasActions = Boolean(onEdit || onDelete);
 
@@ -61,7 +66,7 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
         <div className="flex items-center justify-between gap-1 border-b border-purple-500/20 pb-2 text-xs">
           <div className="flex items-center gap-1.5 font-bold text-purple-200">
             <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-purple-400/30 bg-purple-900/70 font-mono text-[11px] text-purple-200 shadow-sm">
-              18
+              {10 + (riven.rank ?? 8)}
             </span>
             <PolarityIcon polarity={riven.polarity} size={15} />
           </div>

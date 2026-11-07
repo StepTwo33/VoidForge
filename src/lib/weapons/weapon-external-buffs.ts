@@ -1,6 +1,17 @@
 import { allHelminthAbilities } from "@/data/helminth";
+import { WIKI_WEAPON_CLASS } from "@/data/arcane-weapon-classes";
 import { helminthToAbility } from "@/lib/builds/helminth-resolve";
-import { computeStyanaxHopliteCritChance } from "@/lib/codex/ability-misc-stats";
+import { computeWarframeAuraEffectivenessMult } from "@/lib/calc/calculator";
+import {
+  computeExcaliburSwordsmanshipBonuses,
+  computeGarudaPassiveDamageBonus,
+  computeKullervoMeleePassiveBonuses,
+  computeMesaPassiveBonuses,
+  computeSarynPassiveStatusDurationMultiplier,
+  computeStyanaxHopliteCritChance,
+  computeYareliCriticalFlowCritChance,
+  computeZephyrAirborneCritChance,
+} from "@/lib/codex/ability-misc-stats";
 import {
   getVerifiedFieldScaling,
   getVerifiedMiscScaling,
@@ -203,18 +214,201 @@ function extractWeaponDpsBuffFromMod(
   });
 }
 
+function isShotgunPrimaryWeapon(weapon: Weapon): boolean {
+  if (!isGroundPrimaryWeapon(weapon)) return false;
+  return weapon.category === "shotgun" || WIKI_WEAPON_CLASS[weapon.id] === "Shotgun";
+}
+
+function isSniperPrimaryWeapon(weapon: Weapon): boolean {
+  return weapon.category === "sniper" || WIKI_WEAPON_CLASS[weapon.id] === "Sniper Rifle";
+}
+
+function isDualSidearmWeapon(weapon: Weapon): boolean {
+  if (!isSecondaryWeapon(weapon)) return false;
+  const cls = WIKI_WEAPON_CLASS[weapon.id];
+  if (cls === "Dual Pistols" || cls === "Dual Shotguns") return true;
+  if (weapon.category === "dual_pistols") return true;
+  return /^(ak|twin |dual |afuris|dex furis)/i.test(weapon.name);
+}
+
+const EXCALIBUR_SWORD_STANCES = new Set(["sword", "dual_swords", "nikana", "rapier"]);
+
+function isExcaliburSwordWeapon(weapon: Weapon): boolean {
+  if (!isMeleeWeapon(weapon)) return false;
+  if (weapon.stanceType && EXCALIBUR_SWORD_STANCES.has(weapon.stanceType)) return true;
+  return /^exalted.*blade/i.test(weapon.id);
+}
+
+/**
+ * Enemy armor strip % from Warframe Corrosive Projection aura (3% × (rank + 1) × Coaction Drift).
+ */
+export function computeLoadoutAuraArmorStripPct(
+  warframeModSlots?: readonly ModSlot[],
+): number {
+  const cp = warframeModSlots?.find((s) => s.modId === "aura_corrosive_projection");
+  if (!cp) return 0;
+  const rank = Math.min(Math.max(0, Math.round(cp.rank ?? 5)), 5);
+  const auraMult = computeWarframeAuraEffectivenessMult(warframeModSlots);
+  return Math.min(100, 3 * (rank + 1) * auraMult);
+}
+
 function resolveWarframeCrossModBuffs(
   weapon: Weapon,
   ctx: WeaponBuffContext,
+  simParams: SimulationParams,
 ): WeaponExternalBuff[] {
   const slots = ctx.warframeModSlots;
+  if (!slots?.length) return [];
   const allMods = ctx.allMods;
-  if (!slots?.length || !allMods) return [];
+  const auraMult = computeWarframeAuraEffectivenessMult(slots);
 
   const buffs: WeaponExternalBuff[] = [];
   for (const slot of slots) {
-    const buff = extractWeaponDpsBuffFromMod(weapon, slot, allMods, "wf-mod", "warframe_mod");
-    if (buff) buffs.push(buff);
+    if (allMods) {
+      const buff = extractWeaponDpsBuffFromMod(weapon, slot, allMods, "wf-mod", "warframe_mod");
+      if (buff) {
+        buffs.push(buff);
+        continue;
+      }
+    }
+
+    const mod = allMods?.get(slot.modId);
+    const maxRank = mod?.maxRank ?? (slot.modId === "vigorous_swap" ? 10 : 5);
+    const rank = Math.min(Math.max(0, Math.round(slot.rank ?? maxRank)), maxRank);
+    const mult = rank + 1;
+
+    switch (slot.modId) {
+      case "aura_rifle_amplification": {
+        if (isGroundPrimaryWeapon(weapon) && !isShotgunPrimaryWeapon(weapon)) {
+          const dmg = ((4.5 * mult) / 100) * auraMult;
+          buffs.push({
+            id: "wf-aura:aura_rifle_amplification",
+            label: "Rifle Amp",
+            category: "warframe_mod",
+            damageBonus: dmg,
+            nominal: `+${(dmg * 100).toFixed(1)}% Rifle Damage`,
+          });
+        }
+        break;
+      }
+      case "aura_shotgun_amplification": {
+        if (isShotgunPrimaryWeapon(weapon)) {
+          const dmg = ((3 * mult) / 100) * auraMult;
+          buffs.push({
+            id: "wf-aura:aura_shotgun_amplification",
+            label: "Shotgun Amp",
+            category: "warframe_mod",
+            damageBonus: dmg,
+            nominal: `+${(dmg * 100).toFixed(1)}% Shotgun Damage`,
+          });
+        }
+        break;
+      }
+      case "aura_pistol_amplification": {
+        if (isSecondaryWeapon(weapon)) {
+          const dmg = ((4.5 * mult) / 100) * auraMult;
+          buffs.push({
+            id: "wf-aura:aura_pistol_amplification",
+            label: "Pistol Amp",
+            category: "warframe_mod",
+            damageBonus: dmg,
+            nominal: `+${(dmg * 100).toFixed(1)}% Pistol Damage`,
+          });
+        }
+        break;
+      }
+      case "dead_eye": {
+        if (isSniperPrimaryWeapon(weapon)) {
+          const dmg = ((8.75 * mult) / 100) * auraMult;
+          buffs.push({
+            id: "wf-aura:dead_eye",
+            label: "Dead Eye",
+            category: "warframe_mod",
+            damageBonus: dmg,
+            nominal: `+${(dmg * 100).toFixed(1)}% Sniper Damage`,
+          });
+        }
+        break;
+      }
+      case "aura_steel_charge": {
+        if (isMeleeWeapon(weapon)) {
+          const dmg = ((10 * mult) / 100) * auraMult;
+          buffs.push({
+            id: "wf-aura:aura_steel_charge",
+            label: "Steel Charge",
+            category: "warframe_mod",
+            damageBonus: dmg,
+            nominal: `+${(dmg * 100).toFixed(1)}% Melee Damage`,
+          });
+        }
+        break;
+      }
+      case "ready_steel": {
+        if (isMeleeWeapon(weapon)) {
+          const ic = Math.round(4 * mult * auraMult);
+          buffs.push({
+            id: "wf-aura:ready_steel",
+            label: "Ready Steel",
+            category: "warframe_mod",
+            initialComboBonus: ic,
+            nominal: `+${ic} Initial Combo`,
+          });
+        }
+        break;
+      }
+      case "swift_momentum": {
+        if (isMeleeWeapon(weapon)) {
+          const windUp = ((5 * mult) / 100) * auraMult;
+          const comboDur = 1 * mult * auraMult;
+          buffs.push({
+            id: "wf-aura:swift_momentum",
+            label: "Swift Momentum",
+            category: "warframe_mod",
+            heavyAttackWindUpBonus: windUp,
+            comboDurationBonus: comboDur,
+            nominal: `+${(windUp * 100).toFixed(0)}% Heavy Wind-Up, +${comboDur.toFixed(1)}s Combo Duration`,
+          });
+        }
+        break;
+      }
+      case "worthy_comradery": {
+        const wpCc = ((12.5 * mult) / 100) * auraMult;
+        buffs.push({
+          id: "wf-aura:worthy_comradery",
+          label: "Worthy Comradery",
+          category: "warframe_mod",
+          weakPointCritChanceBonus: wpCc,
+          nominal: `+${(wpCc * 100).toFixed(1)}% Weak Point Crit Chance`,
+        });
+        break;
+      }
+      case "holster_amp": {
+        if (simParams.applyTriggerBuffs && !isMeleeWeapon(weapon)) {
+          const dmg = ((10 * mult) / 100) * auraMult;
+          buffs.push({
+            id: "wf-aura:holster_amp",
+            label: "Holster Amp",
+            category: "warframe_mod",
+            damageBonus: dmg,
+            nominal: `+${(dmg * 100).toFixed(0)}% Damage on Equip`,
+          });
+        }
+        break;
+      }
+      case "vigorous_swap": {
+        if (simParams.applyTriggerBuffs && !isMeleeWeapon(weapon)) {
+          const dmg = (15 * mult) / 100;
+          buffs.push({
+            id: "wf-mod:vigorous_swap",
+            label: "Vigorous Swap",
+            category: "warframe_mod",
+            damageBonus: dmg,
+            nominal: `+${(dmg * 100).toFixed(0)}% Damage on Equip`,
+          });
+        }
+        break;
+      }
+    }
   }
   return buffs;
 }
@@ -235,8 +429,7 @@ function resolveCompanionBondBuffs(
   simParams: SimulationParams,
 ): WeaponExternalBuff[] {
   const slots = ctx.companionModSlots;
-  const allMods = ctx.allMods;
-  if (!slots?.length || !allMods) return [];
+  if (!slots?.length) return [];
 
   const buffs: WeaponExternalBuff[] = [];
   const tenaciousActive = simParams.applyTenaciousBondCrit !== false;
@@ -245,13 +438,13 @@ function resolveCompanionBondBuffs(
   const tenaciousSlot = findCompanionMod(slots, "tenacious_bond");
   if (tenaciousSlot && tenaciousActive) {
     const companionCrit = ctx.companionWeaponCritChance ?? 0;
-    if (companionCrit > 0.5) {
+    if (companionCrit >= 0.5 - 1e-6) {
       buffs.push({
         id: "companion:tenacious_bond",
         label: "Tenacious Bond",
         category: "companion",
         critMultFlatBonus: 1.2,
-        nominal: "+1.2× crit damage (companion crit >50%)",
+        nominal: "+1.2× crit damage (companion crit ≥50%)",
       });
     }
   }
@@ -1273,11 +1466,19 @@ function resolveShardBuffs(weapon: Weapon, ctx: WeaponBuffContext): WeaponExtern
   return buffs;
 }
 
-const SPEARGUN_WEAPON_IDS = new Set(["javlok", "scourge", "scourge_prime", "afentis"]);
+const SPEARGUN_WEAPON_IDS = new Set([
+  "javlok",
+  "scourge",
+  "scourge_prime",
+  "afentis",
+  "ferrox",
+  "tenet_ferrox",
+]);
 
 function resolveWarframePassiveBuffs(
   weapon: Weapon,
   ctx: WeaponBuffContext,
+  simParams: SimulationParams,
 ): WeaponExternalBuff[] {
   const family = warframeFamilyId(ctx.warframeId);
   const buffs: WeaponExternalBuff[] = [];
@@ -1292,10 +1493,175 @@ function resolveWarframePassiveBuffs(
         label: "Hoplite (Styanax Passive)",
         category: "ability",
         critChanceFlatBonus: cc,
+        nominal: `+${(cc * 100).toFixed(0)}% flat crit chance from shields`,
       });
     }
   }
 
+  if (family === "yareli" && isSecondaryWeapon(weapon) && simParams.applyYareliCriticalFlow === true) {
+    const ccBonus = computeYareliCriticalFlowCritChance(true);
+    if (ccBonus > 0) {
+      buffs.push({
+        id: "passive_yareli_critical_flow",
+        label: "Critical Flow (Yareli Passive)",
+        category: "ability",
+        critChanceBonus: ccBonus,
+        nominal: "+200% secondary crit chance while moving",
+      });
+    }
+  }
+
+  if (family === "zephyr" && simParams.applyZephyrAirborne === true) {
+    const ccBonus = computeZephyrAirborneCritChance(true);
+    if (ccBonus > 0) {
+      buffs.push({
+        id: "passive_zephyr_airborne",
+        label: "Aerodynamic (Zephyr Passive)",
+        category: "ability",
+        critChanceBonus: ccBonus,
+        nominal: "+150% weapon crit chance while airborne",
+      });
+    }
+  }
+
+  if (family === "mesa" && isSecondaryWeapon(weapon)) {
+    const dual = isDualSidearmWeapon(weapon);
+    const mesa = computeMesaPassiveBonuses({
+      sidearmStyle: dual ? "dual" : "single",
+      meleeEquipped: true,
+    });
+    if (mesa.fireRateBonus > 0) {
+      buffs.push({
+        id: "passive_mesa_marksman_dual",
+        label: "Marksman's Dexterity (Mesa Passive)",
+        category: "ability",
+        fireRateBonus: mesa.fireRateBonus,
+        nominal: "+15% dual sidearm fire rate",
+      });
+    }
+    if (mesa.reloadSpeedBonus > 0) {
+      buffs.push({
+        id: "passive_mesa_marksman_single",
+        label: "Marksman's Dexterity (Mesa Passive)",
+        category: "ability",
+        reloadBonus: mesa.reloadSpeedBonus,
+        nominal: "+25% one-handed sidearm reload speed",
+      });
+    }
+  }
+
+  if (
+    (family === "excalibur" || ctx.warframeId === "excalibur_umbra") &&
+    isExcaliburSwordWeapon(weapon)
+  ) {
+    const excal = computeExcaliburSwordsmanshipBonuses(true);
+    if (excal.damageBonus > 0 || excal.attackSpeedBonus > 0) {
+      buffs.push({
+        id: "passive_excalibur_swordsmanship",
+        label: "Swordsmanship (Excalibur Passive)",
+        category: "ability",
+        damageBonus: excal.damageBonus,
+        fireRateBonus: excal.attackSpeedBonus,
+        nominal: "+10% sword damage, +10% attack speed",
+      });
+    }
+  }
+
+  if (family === "kullervo" && isMeleeWeapon(weapon)) {
+    const kul = computeKullervoMeleePassiveBonuses();
+    buffs.push({
+      id: "passive_kullervo_wrathful",
+      label: "Wrathful Mastery (Kullervo Passive)",
+      category: "ability",
+      heavyAttackEfficiencyBonus: kul.heavyAttackEfficiency,
+      heavyAttackWindUpBonus: kul.heavyAttackWindUpSpeed,
+      nominal: "+75% Heavy Attack Efficiency, +100% Heavy Wind-Up Speed",
+    });
+  }
+
+  if (family === "saryn") {
+    const durBonus = computeSarynPassiveStatusDurationMultiplier() - 1;
+    if (durBonus > 0) {
+      buffs.push({
+        id: "passive_saryn_potency",
+        label: "Potency (Saryn Passive)",
+        category: "ability",
+        statusDurationBonus: durBonus,
+        nominal: "+25% status duration",
+      });
+    }
+  }
+
+  if (family === "garuda" && simParams.applyGarudaDeathsGate === true) {
+    const dmgBonus = computeGarudaPassiveDamageBonus(20);
+    if (dmgBonus > 0) {
+      buffs.push({
+        id: "passive_garuda_deaths_gate",
+        label: "Death's Gate (Garuda Passive)",
+        category: "ability",
+        damageMultBonus: dmgBonus,
+        nominal: "+100% multiplicative weapon damage (max stacks)",
+      });
+    }
+  }
+
+  return buffs;
+}
+
+/**
+ * External conditional buffs toggled manually in standalone Weapon / Modular Builders
+ * when no Loadout is linked (defaults are all OFF so paper stats remain untouched).
+ */
+export function resolveStandaloneExternalBuffs(
+  weapon: Weapon,
+  simParams: SimulationParams,
+): WeaponExternalBuff[] {
+  const buffs: WeaponExternalBuff[] = [];
+  if (simParams.applyYareliCriticalFlow === true && isSecondaryWeapon(weapon)) {
+    buffs.push({
+      id: "passive_yareli_critical_flow",
+      label: "Critical Flow (Yareli Passive)",
+      category: "ability",
+      critChanceBonus: computeYareliCriticalFlowCritChance(true),
+      nominal: "+200% secondary crit chance while moving",
+    });
+  }
+  if (simParams.applyZephyrAirborne === true) {
+    buffs.push({
+      id: "passive_zephyr_airborne",
+      label: "Aerodynamic (Zephyr Passive)",
+      category: "ability",
+      critChanceBonus: computeZephyrAirborneCritChance(true),
+      nominal: "+150% weapon crit chance while airborne",
+    });
+  }
+  if (simParams.applyGarudaDeathsGate === true) {
+    buffs.push({
+      id: "passive_garuda_deaths_gate",
+      label: "Death's Gate (Garuda Passive)",
+      category: "ability",
+      damageMultBonus: computeGarudaPassiveDamageBonus(20),
+      nominal: "+100% multiplicative weapon damage",
+    });
+  }
+  if (simParams.applyTenaciousBondCrit === true) {
+    buffs.push({
+      id: "companion:tenacious_bond",
+      label: "Tenacious Bond",
+      category: "companion",
+      critMultFlatBonus: 1.2,
+      nominal: "+1.2× crit damage (companion crit ≥50%)",
+    });
+  }
+  if (simParams.applyReinforcedBondFireRate === true && !isMeleeWeapon(weapon)) {
+    buffs.push({
+      id: "companion:reinforced_bond",
+      label: "Reinforced Bond",
+      category: "companion",
+      fireRateBonus: 0.6,
+      nominal: "+60% fire rate (companion shields)",
+    });
+  }
   return buffs;
 }
 
@@ -1306,10 +1672,10 @@ export function resolveWeaponExternalBuffs(
 ): WeaponExternalBuff[] {
   if (!ctx) return [];
   return [
-    ...resolveWarframePassiveBuffs(weapon, ctx),
     ...resolveAbilityBuffs(weapon, ctx, simParams),
+    ...resolveWarframePassiveBuffs(weapon, ctx, simParams),
     ...resolveShardBuffs(weapon, ctx),
-    ...resolveWarframeCrossModBuffs(weapon, ctx),
+    ...resolveWarframeCrossModBuffs(weapon, ctx, simParams),
     ...resolveCompanionBondBuffs(weapon, ctx, simParams),
   ];
 }
@@ -1402,6 +1768,7 @@ export function mergeWeaponCalcOptions(
         progenitorBonusPercent?: number;
         incarnonFormActive?: boolean;
         abilityStrength?: number;
+        arcaneRanks?: number[];
       }
     | undefined,
   externalBuffs: WeaponExternalBuff[],
@@ -1413,7 +1780,10 @@ export function mergeWeaponCalcOptions(
   const formActive = existing?.incarnonFormActive === true;
   const hasStr =
     typeof existing?.abilityStrength === "number" && Number.isFinite(existing.abilityStrength);
-  if (!hasProgenitor && externalBuffs.length === 0 && !formActive && !hasStr) return undefined;
+  const hasArcaneRanks = Boolean(existing?.arcaneRanks?.length);
+  if (!hasProgenitor && externalBuffs.length === 0 && !formActive && !hasStr && !hasArcaneRanks) {
+    return undefined;
+  }
   return {
     ...(hasProgenitor
       ? {
@@ -1424,5 +1794,6 @@ export function mergeWeaponCalcOptions(
     ...(externalBuffs.length > 0 ? { externalBuffs } : {}),
     ...(formActive ? { incarnonFormActive: true } : {}),
     ...(hasStr ? { abilityStrength: existing!.abilityStrength } : {}),
+    ...(hasArcaneRanks ? { arcaneRanks: existing!.arcaneRanks } : {}),
   };
 }

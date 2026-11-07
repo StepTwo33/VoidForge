@@ -24,21 +24,23 @@ import { WeaponStatsPanel } from "@/components/stats-panel";
 import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
 import { weaponStatSummary } from "@/lib/ui/mobile-stat-summary";
 import { ModPicker, buildSlotNav, type SlotType, type RivenSelectMeta } from "@/components/mod-picker";
-import { useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
-import { saveRiven } from "@/lib/riven/saved-rivens";
+import { saveBuilderRivenToLibrary, useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
+import { sanitizeRivenStats } from "@/lib/riven/saved-rivens";
 import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-validation";
-import { useWeapons, useMods } from "@/lib/weapons/use-data";
+import { getRivenModIdForWeapon } from "@/lib/weapons/riven-weapon-type";
+import { useWeapons, useMods, useWarframes } from "@/lib/weapons/use-data";
 import { calculateWeaponBuild, calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
 import { modCapacityAtRank } from "@/lib/calc/mod-capacity";
 import { mergeIncarnonStatChanges, mergeRivenStatChanges } from "@/lib/calc/weapon-stat-merges";
 import {
+  effectiveIncarnonEvolutions,
   resolveIncarnonActiveWeapon,
   isIncarnonFormActive,
   isIncarnonGenesisData,
   resolveIncarnonGenesisInstalled,
   incarnonGenesisFormTrigger,
 } from "@/lib/calc/incarnon-active-weapon";
-import { Weapon, Mod, CalculatedStats, EquippedMod, SimulationParams, DEFAULT_SIM_PARAMS, WeaponCalculationOptions } from "@/lib/types";
+import { Weapon, Mod, CalculatedStats, EquippedMod, SetBonusLinkage, SimulationParams, DEFAULT_SIM_PARAMS, WeaponCalculationOptions } from "@/lib/types";
 import { applyGravimagMode, weaponHasGravimagMode } from "@/lib/weapons/weapon-gravimag";
 import { applyAlternateMode, getAlternateModes, weaponHasStanceFormMode } from "@/lib/weapons/weapon-alternate-mode";
 import { computeAltFire } from "@/lib/weapons/alt-fire";
@@ -60,7 +62,15 @@ import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import { incarnonDataMap } from "@/data/incarnon";
 import { cn } from "@/lib/utils";
 import { appendReturnTo } from "@/lib/site/nav-return";
-import { generateBuildId, SavedBuild, WeaponBuildData, persistSavedBuild, resolveSavedArcaneSlots, resolveArcaneById } from "@/lib/builds/build-storage";
+import {
+  generateBuildId,
+  SavedBuild,
+  WeaponBuildData,
+  persistSavedBuild,
+  resolveActiveArcaneList,
+  resolveSavedArcaneSlots,
+  resolveArcaneById,
+} from "@/lib/builds/build-storage";
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
 import { cleanLoadedBuild, cleanLoadedMods } from "@/lib/builds/incompatible-mod-warnings";
@@ -79,8 +89,13 @@ import { snapshotFromBuild } from "@/lib/builds/compare-build";
 import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { getLoadouts } from "@/lib/builds/loadouts";
-import { calcLoadoutStats } from "@/lib/builds/loadout-stats";
-import { resolveWeaponExternalBuffs, type WeaponBuffContext } from "@/lib/weapons/weapon-external-buffs";
+import { calcLoadoutStats, setBonusLinkageFromLoadout } from "@/lib/builds/loadout-stats";
+import {
+  resolveAbilitiesWithHelminth,
+  resolveStandaloneExternalBuffs,
+  resolveWeaponExternalBuffs,
+  type WeaponBuffContext,
+} from "@/lib/weapons/weapon-external-buffs";
 import type { WeaponExternalBuff } from "@/lib/types";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
 import { hasBuildLinkParam, hrefForCatalogPick, hrefWithWeaponParam, weaponIdFromParams, WEAPON_URL_PARAM } from "@/lib/builds/weapon-url-param";
@@ -119,12 +134,22 @@ function incarnonExtrasForSave(
   };
 }
 
+function isRivenSlotModId(modId: string): boolean {
+  return (
+    modId.startsWith("riven_") ||
+    modId === "zaw_riven_mod" ||
+    modId === "kitgun_riven_mod" ||
+    modId === "companion_weapon_riven_mod" ||
+    modId === "archgun_riven_mod"
+  );
+}
+
 /**
  * Riven slots show their rolled polarity and saved name (Round 54). Drain is never rolled: it is the
  * catalog base drain (10) + rank, i.e. 18 at rank 8 (Round 54b), so the catalog drain is kept.
  */
 function withRivenRoll(eq: EquippedMod | undefined, mod: Mod | null): Mod | null {
-  if (!eq || !mod || (!eq.modId.startsWith("riven_") && eq.modId !== "zaw_riven_mod" && eq.modId !== "kitgun_riven_mod" && eq.modId !== "companion_weapon_riven_mod")) return mod;
+  if (!eq || !mod || !isRivenSlotModId(eq.modId)) return mod;
   return { ...mod, name: eq.modName || mod.name, polarity: eq.polarity ?? mod.polarity };
 }
 
@@ -137,6 +162,7 @@ export default function WeaponBuilderPage() {
   }, [pathname, searchParams]);
 
   const allWeapons = useWeapons();
+  const allWarframes = useWarframes();
   const { mods: allMods, modsMap } = useMods();
   const [selectedWeapon, setSelectedWeapon] = useState<Weapon | null>(null);
   const [equippedMods, setEquippedMods] = useState<EquippedMod[]>([]);
@@ -157,6 +183,7 @@ export default function WeaponBuilderPage() {
   // Round 54: Edit riven opens the riven editor pre-filled for this slot.
   const [editRivenSlot, setEditRivenSlot] = useState<number | null>(null);
   const [equippedArcanes, setEquippedArcanes] = useState<(Mod | null)[]>([null, null]);
+  const [equippedArcaneRanks, setEquippedArcaneRanks] = useState<number[]>([5, 5]);
   const [arcanePickerOpen, setArcanePickerOpen] = useState(false);
   const [activeArcaneSlot, setActiveArcaneSlot] = useState(0);
   const [stanceMod, setStanceMod] = useState<Mod | null>(null);
@@ -189,6 +216,12 @@ export default function WeaponBuilderPage() {
   const [alternateModeIndex, setAlternateModeIndex] = useState(-1);
   const alternateMode = alternateModeIndex >= 0;
 
+  const incarnonData = selectedWeapon ? incarnonDataMap.get(selectedWeapon.id) : undefined;
+  const effectiveEvolutions = useMemo(
+    () => effectiveIncarnonEvolutions(incarnonData, selectedEvolutions, genesisInstalledOverride),
+    [incarnonData, selectedEvolutions, genesisInstalledOverride],
+  );
+
   /** Archgun Gravimag / alternate fire-form / Arbucep cycle, then Incarnon resolution. */
   const activeWeapon = useMemo<Weapon | null>(() => {
     if (!selectedWeapon) return null;
@@ -199,7 +232,8 @@ export default function WeaponBuilderPage() {
       w = applyArbucepAttackMode(w, simParams.arbucepAttackMode, { atmosphere: gravimagMode });
     }
     const data = incarnonDataMap.get(w.id);
-    return resolveIncarnonActiveWeapon(w, data, selectedEvolutions, {
+    const evos = effectiveIncarnonEvolutions(data, selectedEvolutions, genesisInstalledOverride);
+    return resolveIncarnonActiveWeapon(w, data, evos, {
       onosIncarnonMode: simParams.onosIncarnonMode,
     });
   }, [
@@ -208,19 +242,20 @@ export default function WeaponBuilderPage() {
     alternateMode,
     alternateModeIndex,
     selectedEvolutions,
+    genesisInstalledOverride,
     simParams.onosIncarnonMode,
     simParams.arbucepAttackMode,
   ]);
 
   const progenitorOptions = useMemo(() => {
     const data = selectedWeapon ? incarnonDataMap.get(selectedWeapon.id) : undefined;
-    const formActive = isIncarnonFormActive(selectedEvolutions, data);
+    const formActive = isIncarnonFormActive(effectiveEvolutions, data);
     const progenitor =
       selectedWeapon && weaponSupportsProgenitor(selectedWeapon)
         ? { progenitorElement, progenitorBonusPercent }
         : undefined;
     return { progenitor, formActive };
-  }, [selectedWeapon, progenitorElement, progenitorBonusPercent, selectedEvolutions]);
+  }, [selectedWeapon, progenitorElement, progenitorBonusPercent, effectiveEvolutions]);
 
   // Load build from URL ?build= param
   const appliedShareParamRef = useRef<string | null>(null);
@@ -267,7 +302,14 @@ export default function WeaponBuilderPage() {
         });
         setEquippedMods(cleanLoadedMods(mods));
         if (shared.arcanes) {
-          setEquippedArcanes(shared.arcanes.map((id) => (id ? resolveArcaneById(id) : null)));
+          const resolved = shared.arcanes.map((id) => (id ? resolveArcaneById(id) : null));
+          setEquippedArcanes(resolved);
+          setEquippedArcaneRanks(
+            [0, 1].map((i) => shared.arcaneRanks?.[i] ?? resolved[i]?.maxRank ?? 5),
+          );
+        } else {
+          setEquippedArcanes([null, null]);
+          setEquippedArcaneRanks([5, 5]);
         }
         setCurrentBuildId(null);
         setBuildName(`${weapon.name} Build`);
@@ -304,7 +346,7 @@ export default function WeaponBuilderPage() {
     return {
       weaponId: selectedWeapon.id,
       mods: equippedMods.map((m) => {
-        const riven = m.modId.startsWith("riven_") ? rivenStatsMap[m.slotIndex] : undefined;
+        const riven = isRivenSlotModId(m.modId) ? rivenStatsMap[m.slotIndex] : undefined;
         if (!riven) return { modId: m.modId, rank: m.rank, slotIndex: m.slotIndex };
         // Round 54: rivens keep their rolls, polarity and drain through save / load.
         return {
@@ -318,6 +360,7 @@ export default function WeaponBuilderPage() {
       }),
       stanceModId: stanceMod?.id,
       arcaneIds: equippedArcanes.map((a) => a?.id ?? null),
+      arcaneRanks: [...equippedArcaneRanks],
       hasOrokinCatalyst,
       isMR30: false,
       ...(weaponSupportsProgenitor(selectedWeapon) && adversaryFormas > 0
@@ -333,7 +376,7 @@ export default function WeaponBuilderPage() {
       ...(Object.keys(selectedEvolutions).length > 0 ? { incarnonEvolutions: selectedEvolutions } : {}),
       ...incarnonExtrasForSave(incarnonConditionals, genesisInstalledOverride),
     };
-  }, [selectedWeapon, equippedMods, rivenStatsMap, stanceMod, equippedArcanes, hasOrokinCatalyst, adversaryFormas, slotPolarities, progenitorOptions, selectedEvolutions, incarnonConditionals, genesisInstalledOverride]);
+  }, [selectedWeapon, equippedMods, rivenStatsMap, stanceMod, equippedArcanes, equippedArcaneRanks, hasOrokinCatalyst, adversaryFormas, slotPolarities, progenitorOptions, selectedEvolutions, incarnonConditionals, genesisInstalledOverride]);
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildWeaponData()), [buildWeaponData]));
 
@@ -358,7 +401,7 @@ export default function WeaponBuilderPage() {
     setSelectedWeapon(weapon);
     setEquippedMods(d.mods.map((m) => {
       const mod = modsMap.get(m.modId);
-      const isRiven = m.modId.startsWith("riven_");
+      const isRiven = isRivenSlotModId(m.modId);
       // Round 54 saves stored rivens at rank 0 with a free-form drain; read that drain back as the rank.
       const rank = isRiven && !m.rank && typeof m.rivenDrain === "number" ? rivenRankFromDrain(m.rivenDrain) : m.rank;
       return {
@@ -375,7 +418,11 @@ export default function WeaponBuilderPage() {
     } else {
       setStanceMod(null);
     }
-    setEquippedArcanes(resolveSavedArcaneSlots(d.arcaneIds, 2));
+    const resolvedArcanes = resolveSavedArcaneSlots(d.arcaneIds, 2);
+    setEquippedArcanes(resolvedArcanes);
+    setEquippedArcaneRanks(
+      [0, 1].map((i) => d.arcaneRanks?.[i] ?? resolvedArcanes[i]?.maxRank ?? 5),
+    );
     setHasOrokinCatalyst(d.hasOrokinCatalyst);
     setAdversaryFormas(
       d.adversaryFormas != null
@@ -409,7 +456,7 @@ export default function WeaponBuilderPage() {
     if (!options?.silent) {
       toast.info("Build loaded", { description: build.name });
     }
-  }, [markClean, allWeapons]);
+  }, [markClean, allWeapons, allMods, modsMap]);
 
   const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags }: SaveBuildDialogValues) => {
     const data = buildWeaponData();
@@ -461,31 +508,85 @@ export default function WeaponBuilderPage() {
     allWeapons.length > 0,
   );
 
-  const loadoutLinkedBuffs = useMemo<WeaponExternalBuff[]>(() => {
-    if (!loadoutCtx || !selectedWeapon) return [];
+  const loadoutLinkState = useMemo<{
+    buffs: WeaponExternalBuff[];
+    linkage?: SetBonusLinkage;
+    warframeId?: string;
+    companionModIds?: string[];
+    warframeMaxEnergy?: number;
+  }>(() => {
+    const standaloneBuffs = () =>
+      activeWeapon != null ? resolveStandaloneExternalBuffs(activeWeapon, simParams) : [];
+    if (!loadoutCtx || !selectedWeapon) return { buffs: standaloneBuffs() };
     const loadout = getLoadouts().find((l) => l.id === loadoutCtx.loadoutId);
-    if (!loadout?.warframeBuild?.warframeId) return [];
-    const stats = calcLoadoutStats(loadout);
-    if (!stats.warframe?.stats) return [];
-    const buffContext: WeaponBuffContext = {
-      warframeId: loadout.warframeBuild.warframeId,
-      warframeStats: stats.warframe.stats,
-      companionModSlots: loadout.companionBuild?.mods ?? [],
-      companionWeaponCritChance: stats.companion?.weapon?.stats.criticalChance,
+    if (!loadout) return { buffs: standaloneBuffs() };
+
+    const baseLinkage = setBonusLinkageFromLoadout(loadout);
+    const liveSlots = equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
+    const linkage: SetBonusLinkage = {
+      ...baseLinkage,
+      ...(loadoutCtx.slot === "primary" ? { primaryMods: liveSlots } : {}),
+      ...(loadoutCtx.slot === "secondary" ? { secondaryMods: liveSlots } : {}),
+      ...(loadoutCtx.slot === "melee" ? { meleeMods: liveSlots } : {}),
     };
-    return resolveWeaponExternalBuffs(selectedWeapon, buffContext, simParams);
-  }, [loadoutCtx, selectedWeapon, simParams]);
+
+    const stats = calcLoadoutStats(loadout, { simParams });
+    const wb = loadout.warframeBuild;
+    const wf = wb?.warframeId ? allWarframes.find((w) => w.id === wb.warframeId) : undefined;
+    const buffContext: WeaponBuffContext = {
+      ...(wb?.warframeId && stats.warframe?.stats
+        ? {
+            warframeId: wb.warframeId,
+            warframeStats: stats.warframe.stats,
+            warframeAbilities: resolveAbilitiesWithHelminth(
+              wf?.abilities,
+              wb.helminthAbilityId,
+              wb.helminthSlot,
+            ),
+            warframeModSlots: baseLinkage.warframeMods,
+          }
+        : {}),
+      companionModSlots: baseLinkage.companionMods ?? [],
+      companionWeaponCritChance: stats.companion?.weapon?.stats.criticalChance,
+      allMods: modsMap,
+    };
+
+    const buffs =
+      activeWeapon != null ? resolveWeaponExternalBuffs(activeWeapon, buffContext, simParams) : [];
+
+    return {
+      buffs,
+      linkage,
+      warframeId: wb?.warframeId,
+      companionModIds: (baseLinkage.companionMods ?? []).map((m) => m.modId),
+      warframeMaxEnergy: stats.warframe?.stats.totalEnergy,
+    };
+  }, [loadoutCtx, selectedWeapon, activeWeapon, equippedMods, simParams, allWarframes, modsMap]);
+
+  const effectiveSimParams = useMemo<SimulationParams>(() => {
+    if (loadoutLinkState.warframeMaxEnergy == null || simParams.warframeMaxEnergy != null) {
+      return simParams;
+    }
+    return { ...simParams, warframeMaxEnergy: loadoutLinkState.warframeMaxEnergy };
+  }, [simParams, loadoutLinkState.warframeMaxEnergy]);
+
+  const activeArcaneState = useMemo(
+    () => resolveActiveArcaneList(equippedArcanes, equippedArcaneRanks),
+    [equippedArcanes, equippedArcaneRanks],
+  );
 
   const weaponCalcOptions = useMemo<WeaponCalculationOptions | undefined>(() => {
     const { progenitor, formActive } = progenitorOptions;
-    const externalBuffs = loadoutLinkedBuffs.length > 0 ? loadoutLinkedBuffs : undefined;
-    if (!progenitor && !formActive && !externalBuffs) return undefined;
+    const externalBuffs = loadoutLinkState.buffs.length > 0 ? loadoutLinkState.buffs : undefined;
+    const arcaneRanks = activeArcaneState.arcanes.length > 0 ? activeArcaneState.arcaneRanks : undefined;
+    if (!progenitor && !formActive && !externalBuffs && !arcaneRanks) return undefined;
     return {
       ...(progenitor ?? {}),
       ...(formActive ? { incarnonFormActive: true } : {}),
       ...(externalBuffs ? { externalBuffs } : {}),
+      ...(arcaneRanks ? { arcaneRanks } : {}),
     };
-  }, [progenitorOptions, loadoutLinkedBuffs]);
+  }, [progenitorOptions, loadoutLinkState.buffs, activeArcaneState]);
 
   const handleSaveDialog = useCallback(async (values: SaveBuildDialogValues) => {
     if (values.target === "loadout" && loadoutCtx) {
@@ -538,6 +639,7 @@ export default function WeaponBuilderPage() {
         itemId: selectedWeapon.id,
         mods: equippedMods.map((m) => ({ id: m.modId, rank: m.rank })),
         arcanes: equippedArcanes.map((a) => a?.id ?? ""),
+        arcaneRanks: [...equippedArcaneRanks],
         hasOrokinCatalyst,
         isMR30: false,
         ...(weaponSupportsProgenitor(selectedWeapon) && adversaryFormas > 0
@@ -565,6 +667,7 @@ export default function WeaponBuilderPage() {
     selectedWeapon,
     equippedMods,
     equippedArcanes,
+    equippedArcaneRanks,
     hasOrokinCatalyst,
     adversaryFormas,
     slotPolarities,
@@ -596,19 +699,17 @@ export default function WeaponBuilderPage() {
     return weapons.sort((a, b) => a.name.localeCompare(b.name));
   }, [allWeapons, weaponCategory, weaponSearch]);
 
-  // Get Incarnon evolution data for selected weapon
-  const incarnonData = selectedWeapon ? incarnonDataMap.get(selectedWeapon.id) : undefined;
   const isIncarnon = !!(incarnonData || selectedWeapon?.isIncarnon);
 
-  // Merge selected incarnon evolution / riven stat changes
+  // Merge selected incarnon evolution / riven stat changes (respecting Adapter ON/OFF)
   const incarnonStatChanges = useMemo(
     () =>
-      mergeIncarnonStatChanges(incarnonData, selectedEvolutions, selectedWeapon?.id, {
-        formActive: isIncarnonFormActive(selectedEvolutions, incarnonData),
-        chargeMode: simParams.onosIncarnonMode === "charge",
+      mergeIncarnonStatChanges(incarnonData, effectiveEvolutions, selectedWeapon?.id, {
+        formActive: isIncarnonFormActive(effectiveEvolutions, incarnonData),
+        chargeMode: effectiveSimParams.onosIncarnonMode === "charge",
         conditionalsOn: incarnonConditionals,
       }),
-    [incarnonData, selectedEvolutions, selectedWeapon?.id, simParams.onosIncarnonMode, incarnonConditionals],
+    [incarnonData, effectiveEvolutions, selectedWeapon?.id, effectiveSimParams.onosIncarnonMode, incarnonConditionals],
   );
   const genesisInstalled = resolveIncarnonGenesisInstalled(
     incarnonData,
@@ -629,25 +730,25 @@ export default function WeaponBuilderPage() {
       rank: m.rank,
       slotIndex: m.slotIndex,
     }));
-    const activeArcanes = equippedArcanes.filter((a): a is Mod => a !== null);
+    const activeArcanes = activeArcaneState.arcanes;
     if (activeArcanes.length > 0) {
-      return calculateWeaponBuildWithArcanes(activeWeapon, modSlots, modsMap, activeArcanes, incarnonStatChanges, simParams, weaponCalcOptions, undefined, rivenStatChanges);
+      return calculateWeaponBuildWithArcanes(activeWeapon, modSlots, modsMap, activeArcanes, incarnonStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, rivenStatChanges);
     }
-    return calculateWeaponBuild(activeWeapon, modSlots, modsMap, incarnonStatChanges, simParams, weaponCalcOptions, undefined, rivenStatChanges);
-  }, [activeWeapon, equippedMods, equippedArcanes, incarnonStatChanges, rivenStatChanges, simParams, weaponCalcOptions]);
+    return calculateWeaponBuild(activeWeapon, modSlots, modsMap, incarnonStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, rivenStatChanges);
+  }, [activeWeapon, equippedMods, activeArcaneState.arcanes, incarnonStatChanges, rivenStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, modsMap]);
 
   // ALT FIRE: other firing modes, shown read-only in the stats panel (never selected, never summed into DPS).
   const altFireResults = useMemo(() => {
     const modSlots = equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
-    const activeArcanes = equippedArcanes.filter((a): a is Mod => a !== null);
+    const activeArcanes = activeArcaneState.arcanes;
     return computeAltFire(activeWeapon, (w) =>
       activeArcanes.length > 0
-        ? calculateWeaponBuildWithArcanes(w, modSlots, modsMap, activeArcanes, incarnonStatChanges, simParams, weaponCalcOptions, undefined, rivenStatChanges)
-        : calculateWeaponBuild(w, modSlots, modsMap, incarnonStatChanges, simParams, weaponCalcOptions, undefined, rivenStatChanges),
+        ? calculateWeaponBuildWithArcanes(w, modSlots, modsMap, activeArcanes, incarnonStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, rivenStatChanges)
+        : calculateWeaponBuild(w, modSlots, modsMap, incarnonStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, rivenStatChanges),
       // Archguns: Gravimag on means the alt-fire modes use their atmosphere numbers too.
       { atmosphere: gravimagMode && weaponHasGravimagMode(selectedWeapon) },
     );
-  }, [activeWeapon, selectedWeapon, gravimagMode, equippedMods, equippedArcanes, incarnonStatChanges, rivenStatChanges, simParams, weaponCalcOptions]);
+  }, [activeWeapon, selectedWeapon, gravimagMode, equippedMods, activeArcaneState.arcanes, incarnonStatChanges, rivenStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, modsMap]);
 
   const contributionContext = useMemo(() => {
     if (!activeWeapon) return null;
@@ -659,18 +760,21 @@ export default function WeaponBuilderPage() {
         slotIndex: m.slotIndex,
       })),
       allMods: modsMap,
-      arcanes: equippedArcanes.filter((a): a is Mod => a !== null),
+      arcanes: activeArcaneState.arcanes,
       incarnonStatChanges,
-      simParams,
+      simParams: effectiveSimParams,
       calcOptions: weaponCalcOptions,
+      linkage: loadoutLinkState.linkage,
       rivenStatChanges,
+      warframeId: loadoutLinkState.warframeId,
+      companionModIds: loadoutLinkState.companionModIds,
     };
-  }, [activeWeapon, equippedMods, equippedArcanes, incarnonStatChanges, simParams, weaponCalcOptions, rivenStatChanges, modsMap]);
+  }, [activeWeapon, equippedMods, activeArcaneState.arcanes, incarnonStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, rivenStatChanges, modsMap, loadoutLinkState.warframeId, loadoutLinkState.companionModIds]);
 
   const baseStats = useMemo<CalculatedStats | null>(() => {
     if (!activeWeapon) return null;
-    return calculateWeaponBuild(activeWeapon, [], modsMap, undefined, simParams, weaponCalcOptions);
-  }, [activeWeapon, simParams, weaponCalcOptions]);
+    return calculateWeaponBuild(activeWeapon, [], modsMap, undefined, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage);
+  }, [activeWeapon, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, modsMap]);
 
   const handleSelectWeapon = useCallback((weapon: Weapon) => {
     setSelectedWeapon(weapon);
@@ -684,6 +788,7 @@ export default function WeaponBuilderPage() {
     setGenesisInstalledOverride(null);
     setRivenStatsMap({});
     setEquippedArcanes([null, null]);
+    setEquippedArcaneRanks([5, 5]);
     setStanceMod(null);
     setSlotPolarities({});
     setProgenitorElement("heat");
@@ -737,24 +842,48 @@ export default function WeaponBuilderPage() {
       return;
     }
     const id = weaponIdFromParams(params);
-    if (id === weaponParamSeenRef.current) return; // unchanged (e.g. our own replaceState)
+    const rivenParam = params.get("riven");
+    const paramKey = id ? `${id}|${rivenParam ?? ""}` : null;
+    if (paramKey === weaponParamSeenRef.current) return; // unchanged (e.g. our own replaceState)
     const previous = weaponParamSeenRef.current;
-    weaponParamSeenRef.current = id;
+    weaponParamSeenRef.current = paramKey;
     const current = selectedWeaponRef.current;
     if (!id) {
       // Back from ?weapon=<id> to the bare builder URL: show the catalog again.
       if (previous && current) setShowWeaponList(true);
       return;
     }
-    if (current?.id === id) {
+    const weapon = allWeapons.find((w) => w.id === id);
+    if (!weapon || isCompanionWeaponCategory(weapon.category)) return;
+    if (current?.id === id && !rivenParam) {
       setShowWeaponList(false);
       return;
     }
-    const weapon = allWeapons.find((w) => w.id === id);
-    if (!weapon || isCompanionWeaponCategory(weapon.category)) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from the URL (an external system) on load and Back/Forward
     handleSelectWeapon(weapon);
-  }, [allWeapons, searchParams, handleSelectWeapon]);
+    if (rivenParam && allMods.length > 0) {
+      try {
+        const parsedStats = sanitizeRivenStats(JSON.parse(rivenParam));
+        const modId = getRivenModIdForWeapon(weapon);
+        const rivenMod = modId ? allMods.find((m) => m.id === modId) : undefined;
+        if (rivenMod && parsedStats && Object.keys(parsedStats).length > 0) {
+          setEquippedMods([
+            {
+              modId: rivenMod.id,
+              modName: `${weapon.name} Riven`,
+              rank: 8,
+              slotIndex: 0,
+              polarity: rivenMod.polarity || "madurai",
+              drain: rivenDrainFromRank(8),
+            },
+          ]);
+          setRivenStatsMap({ 0: parsedStats });
+        }
+      } catch {
+        // Ignore malformed riven JSON in URL
+      }
+    }
+  }, [allWeapons, allMods, searchParams, handleSelectWeapon]);
 
   const handleOpenModPicker = useCallback((slotIndex: number) => {
     setActiveSlotIndex(slotIndex);
@@ -825,9 +954,9 @@ export default function WeaponBuilderPage() {
       signedIn: rivenLibraryState.signedIn,
       onSave: async (r: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number }) => {
         if (!selectedWeapon) return false;
-        const saved = await saveRiven({ weaponId: selectedWeapon.id, ...r });
-        if (saved) refreshSavedRivens();
-        return !!saved;
+        const ok = await saveBuilderRivenToLibrary(selectedWeapon, r);
+        if (ok) refreshSavedRivens();
+        return ok;
       },
     }),
     [rivenLibraryState.signedIn, selectedWeapon, refreshSavedRivens],
@@ -1110,6 +1239,28 @@ export default function WeaponBuilderPage() {
                     <Zap className="h-3.5 w-3.5" />
                     <span className="inline">Catalyst</span>
                   </button>
+                  {isIncarnonGenesisData(incarnonData) && (
+                    <button
+                      type="button"
+                      onClick={() => setGenesisInstalledOverride(!genesisInstalled)}
+                      aria-pressed={genesisInstalled}
+                      data-testid="toolbar-incarnon-adapter-toggle"
+                      title={
+                        genesisInstalled
+                          ? "Incarnon Genesis Adapter active — click to disable adapter (keeps evolution picks saved)"
+                          : "Incarnon Genesis Adapter disabled — click to enable adapter and apply evolutions"
+                      }
+                      className={cn(
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
+                        genesisInstalled
+                          ? "bg-orange-500/15 text-orange-700 dark:text-orange-400"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      )}
+                    >
+                      <Flame className="h-3.5 w-3.5" />
+                      <span className="inline">{genesisInstalled ? "Incarnon ON" : "Incarnon OFF"}</span>
+                    </button>
+                  )}
                   {weaponHasGravimagMode(selectedWeapon) && (
                     <button
                       onClick={() => setGravimagMode((v) => !v)}
@@ -1354,10 +1505,17 @@ export default function WeaponBuilderPage() {
                           <ArcaneSlotCard
                             key={i}
                             arcane={equippedArcanes[i]}
-                            rank={equippedArcanes[i]?.maxRank ?? 0}
+                            rank={equippedArcaneRanks[i] ?? equippedArcanes[i]?.maxRank ?? 0}
                             label={arcaneSlotLabel(arcaneConfig, i)}
                             onAdd={() => { setActiveArcaneSlot(i); setArcanePickerOpen(true); }}
                             onRemove={() => setEquippedArcanes((prev) => { const next = [...prev]; next[i] = null; return next; })}
+                            onRankChange={(r) =>
+                              setEquippedArcaneRanks((prev) => {
+                                const next = [...prev];
+                                next[i] = r;
+                                return next;
+                              })
+                            }
                           />
                         ))}
                       </div>
@@ -1370,8 +1528,17 @@ export default function WeaponBuilderPage() {
                     incarnonData={incarnonData}
                     selectedEvolutions={selectedEvolutions}
                     onSelectEvolution={(tier, slot) =>
-                      setSelectedEvolutions((prev) => ({ ...prev, [tier]: slot }))
+                      setSelectedEvolutions((prev) => {
+                        const next = { ...prev };
+                        if (next[tier] === slot) delete next[tier];
+                        else next[tier] = slot;
+                        return next;
+                      })
                     }
+                    onClearEvolutions={() => {
+                      setSelectedEvolutions({});
+                      setIncarnonConditionals({});
+                    }}
                     conditionalsOn={incarnonConditionals}
                     onToggleConditional={(key, on) =>
                       setIncarnonConditionals((prev) => {
@@ -1415,9 +1582,9 @@ export default function WeaponBuilderPage() {
                   baseStats={baseStats}
                   weapon={activeWeapon}
                   isMelee={activeWeapon?.category === 'melee' || activeWeapon?.triggerType === 'Melee'}
-                  selectedEvolutions={isIncarnon ? selectedEvolutions : undefined}
+                  selectedEvolutions={isIncarnon ? effectiveEvolutions : undefined}
                   allEvolutions={incarnonData?.evolutions}
-                  simParams={simParams}
+                  simParams={effectiveSimParams}
                   onSimParamsChange={setSimParams}
                   contributionContext={contributionContext}
                   altFire={altFireResults}
@@ -1456,11 +1623,23 @@ export default function WeaponBuilderPage() {
           open={arcanePickerOpen}
           onOpenChange={setArcanePickerOpen}
           arcanes={arcanesForSlot(getWeaponArcanes(selectedWeapon), activeArcaneSlot)}
-          equippedArcaneIds={equippedArcanes.filter(Boolean).map((a) => a!.id)}
-          onSelect={(arcane) => {
+          equippedArcaneIds={equippedArcanes
+            .map((a, idx) => (idx === activeArcaneSlot ? null : a?.id))
+            .filter((id): id is string => Boolean(id))}
+          initialRank={
+            equippedArcanes[activeArcaneSlot]
+              ? (equippedArcaneRanks[activeArcaneSlot] ?? equippedArcanes[activeArcaneSlot]!.maxRank)
+              : undefined
+          }
+          onSelect={(arcane, rank) => {
             setEquippedArcanes((prev) => {
               const next = [...prev];
               next[activeArcaneSlot] = arcane;
+              return next;
+            });
+            setEquippedArcaneRanks((prev) => {
+              const next = [...prev];
+              next[activeArcaneSlot] = rank ?? arcane.maxRank;
               return next;
             });
             setArcanePickerOpen(false);

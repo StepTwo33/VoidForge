@@ -7,14 +7,30 @@ import {
   sniperComboMultiplier,
   type SniperZoomLevel,
 } from "@/data/sniper-zoom";
-import type { CalculatedStats, KillStackSource, SimulationParams, Weapon } from "@/lib/types";
+import type {
+  CalculatedStats,
+  KillStackSource,
+  SetBonusLinkage,
+  SimulationParams,
+  Weapon,
+} from "@/lib/types";
 import {
+  countSetModsInSlots,
+  SYNTH_SET_MOD_IDS,
+  TEK_SET_MOD_IDS,
+  VIGILANTE_MOD_IDS,
   weaponSupportsPrimaryStyleSets,
   weaponAcceptsSynthReloadBonus,
   weaponSupportsHunterCompanionSet,
 } from "@/lib/calc/set-bonuses";
 import { getModStatLabel } from "@/lib/overrides/override-stat-catalog";
 import { SimSlider } from "./stat-primitives";
+
+const WF_GLADIATOR_IDS = new Set([
+  "gladiator_aegis",
+  "gladiator_finesse",
+  "gladiator_resolve",
+]);
 
 /** Simulation sliders / toggles body — rendered inside the Sim Sheet, not inline in the sidebar. */
 export function WeaponSimControls({
@@ -26,6 +42,9 @@ export function WeaponSimControls({
   hasConditionals,
   onKillBuffTotal,
   triggerBuffTotal,
+  linkage,
+  linkedWarframeId,
+  linkedCompanionModIds,
 }: {
   stats: CalculatedStats;
   simParams: SimulationParams;
@@ -35,6 +54,9 @@ export function WeaponSimControls({
   hasConditionals: boolean;
   onKillBuffTotal: number;
   triggerBuffTotal: number;
+  linkage?: SetBonusLinkage;
+  linkedWarframeId?: string;
+  linkedCompanionModIds?: string[];
 }) {
   const killSources = stats.killStackSources ?? [];
   const arcaneSources = stats.arcaneStackSources ?? [];
@@ -43,8 +65,281 @@ export function WeaponSimControls({
     Math.max(0, stats.simParams.killStacksBySource?.[src] ?? stats.simParams.killStacks);
   const arcaneMax = arcaneSources.length > 0 ? Math.max(...arcaneSources.map((a) => a.cap)) : 12;
   const singleArcane = arcaneSources.length === 1 ? arcaneSources[0] : null;
+  const isLinkedLoadout = Boolean(linkage);
+  const wfFamily = (linkedWarframeId ?? "").replace(/_prime$/, "");
+  const isSecondaryWeapon = Boolean(
+    weapon && ["pistol", "secondary", "dual_pistols"].includes(weapon.category),
+  );
+  const hasTenaciousBond = Boolean(linkedCompanionModIds?.includes("tenacious_bond"));
+  const hasReinforcedBond = Boolean(
+    !isMelee && linkedCompanionModIds?.includes("reinforced_bond"),
+  );
+
+  const linkedSetSummary: string[] = [];
+  if (linkage) {
+    const vig = countSetModsInSlots(linkage.warframeMods, new Set(VIGILANTE_MOD_IDS));
+    const glad = countSetModsInSlots(linkage.warframeMods, WF_GLADIATOR_IDS);
+    const tekSet = new Set<string>(TEK_SET_MOD_IDS);
+    const tek =
+      countSetModsInSlots(linkage.warframeMods, tekSet) +
+      countSetModsInSlots(linkage.meleeMods, tekSet) +
+      countSetModsInSlots(linkage.companionMods, tekSet);
+    const synthSet = new Set<string>(SYNTH_SET_MOD_IDS);
+    const synth =
+      countSetModsInSlots(linkage.warframeMods, synthSet) +
+      countSetModsInSlots(linkage.companionMods, synthSet);
+    if (vig > 0) linkedSetSummary.push(`${vig} WF Vigilante`);
+    if (glad > 0) linkedSetSummary.push(`${glad} WF Gladiator`);
+    if (tek > 0) linkedSetSummary.push(`${tek} Tek`);
+    if (synth > 0) linkedSetSummary.push(`${synth} Synth`);
+    if (stats.usesWarframeMaxEnergy && simParams.warframeMaxEnergy != null) {
+      linkedSetSummary.push(`${Math.round(simParams.warframeMaxEnergy)} WF Max Energy`);
+    }
+  }
+
   return (
         <div className="space-y-1.5 py-1 min-w-0">
+          <div className="flex items-center justify-between gap-1.5 pb-1 border-b border-border/50">
+            <span className="text-[10px] font-medium text-muted-foreground">Quick conditionals</span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() =>
+                  onSimParamsChange({
+                    ...simParams,
+                    comboCount: 0,
+                    killStacks: 0,
+                    killStacksBySource: undefined,
+                    statusTypesOnTarget: 0,
+                    arcaneStacks: 0,
+                    arcaneStacksById: undefined,
+                    applyTriggerBuffs: false,
+                    applyYareliCriticalFlow: false,
+                    applyZephyrAirborne: false,
+                    applyGarudaDeathsGate: false,
+                    applyTenaciousBondCrit: false,
+                    applyReinforcedBondFireRate: false,
+                  })
+                }
+                className="rounded border border-border px-2 py-0.5 text-[10px] text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+              >
+                All off (Paper)
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  onSimParamsChange({
+                    ...simParams,
+                    comboCount: isMelee ? 220 : simParams.comboCount,
+                    killStacks: 5,
+                    killStacksBySource: undefined,
+                    statusTypesOnTarget: Math.max(simParams.statusTypesOnTarget, 4),
+                    arcaneStacks: arcaneMax,
+                    arcaneStacksById: undefined,
+                    applyTriggerBuffs: true,
+                    ...(isLinkedLoadout
+                      ? {
+                          applyYareliCriticalFlow: true,
+                          applyZephyrAirborne: true,
+                          applyGarudaDeathsGate: true,
+                          applyTenaciousBondCrit: true,
+                          applyReinforcedBondFireRate: true,
+                        }
+                      : {}),
+                  })
+                }
+                className="rounded border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] text-primary hover:bg-primary/20 transition-colors"
+              >
+                Max stacks
+              </button>
+            </div>
+          </div>
+
+          {isLinkedLoadout && (
+            <div
+              className="rounded-md border border-emerald-500/30 bg-emerald-500/[0.06] px-2.5 py-1.5 text-[10px] text-emerald-800 dark:text-emerald-300"
+              data-testid="loadout-auto-sets"
+            >
+              <span className="font-semibold">Loadout auto-linked:</span>{" "}
+              {linkedSetSummary.length > 0
+                ? linkedSetSummary.join(" · ")
+                : "Set pieces (Vigilante, Tek, Synth, Gladiator) calculated automatically from equipped loadout slots."}
+            </div>
+          )}
+
+          {isLinkedLoadout ? (
+            (wfFamily === "yareli" && isSecondaryWeapon) ||
+            wfFamily === "zephyr" ||
+            wfFamily === "garuda" ||
+            hasTenaciousBond ||
+            hasReinforcedBond ? (
+              <div className="rounded-md border border-border/60 bg-muted/20 px-2.5 py-1.5 space-y-1">
+                <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Loadout passives & bonds
+                </div>
+                {wfFamily === "yareli" && isSecondaryWeapon && (
+                  <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                    <span>Yareli Critical Flow (+200% CC while moving)</span>
+                    <input
+                      type="checkbox"
+                      checked={!!simParams.applyYareliCriticalFlow}
+                      onChange={(e) =>
+                        onSimParamsChange({
+                          ...simParams,
+                          applyYareliCriticalFlow: e.target.checked,
+                        })
+                      }
+                      className="h-3.5 w-3.5 rounded border-border accent-primary"
+                    />
+                  </label>
+                )}
+                {wfFamily === "zephyr" && (
+                  <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                    <span>Zephyr Aerodynamic (+150% CC while airborne)</span>
+                    <input
+                      type="checkbox"
+                      checked={!!simParams.applyZephyrAirborne}
+                      onChange={(e) =>
+                        onSimParamsChange({
+                          ...simParams,
+                          applyZephyrAirborne: e.target.checked,
+                        })
+                      }
+                      className="h-3.5 w-3.5 rounded border-border accent-primary"
+                    />
+                  </label>
+                )}
+                {wfFamily === "garuda" && (
+                  <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                    <span>Garuda Death&apos;s Gate (+100% Damage)</span>
+                    <input
+                      type="checkbox"
+                      checked={!!simParams.applyGarudaDeathsGate}
+                      onChange={(e) =>
+                        onSimParamsChange({
+                          ...simParams,
+                          applyGarudaDeathsGate: e.target.checked,
+                        })
+                      }
+                      className="h-3.5 w-3.5 rounded border-border accent-primary"
+                    />
+                  </label>
+                )}
+                {hasTenaciousBond && (
+                  <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                    <span>Tenacious Bond (+1.2× Crit Damage)</span>
+                    <input
+                      type="checkbox"
+                      checked={simParams.applyTenaciousBondCrit !== false}
+                      onChange={(e) =>
+                        onSimParamsChange({
+                          ...simParams,
+                          applyTenaciousBondCrit: e.target.checked,
+                        })
+                      }
+                      className="h-3.5 w-3.5 rounded border-border accent-primary"
+                    />
+                  </label>
+                )}
+                {hasReinforcedBond && (
+                  <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                    <span>Reinforced Bond (+60% Fire Rate)</span>
+                    <input
+                      type="checkbox"
+                      checked={simParams.applyReinforcedBondFireRate !== false}
+                      onChange={(e) =>
+                        onSimParamsChange({
+                          ...simParams,
+                          applyReinforcedBondFireRate: e.target.checked,
+                        })
+                      }
+                      className="h-3.5 w-3.5 rounded border-border accent-primary"
+                    />
+                  </label>
+                )}
+              </div>
+            ) : null
+          ) : (
+            <div className="rounded-md border border-border/60 bg-muted/20 px-2.5 py-1.5 space-y-1">
+              <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                External passives & bonds (what-if)
+              </div>
+              {isSecondaryWeapon && (
+                <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                  <span>Yareli Critical Flow (+200% CC while moving)</span>
+                  <input
+                    type="checkbox"
+                    checked={!!simParams.applyYareliCriticalFlow}
+                    onChange={(e) =>
+                      onSimParamsChange({
+                        ...simParams,
+                        applyYareliCriticalFlow: e.target.checked,
+                      })
+                    }
+                    className="h-3.5 w-3.5 rounded border-border accent-primary"
+                  />
+                </label>
+              )}
+              <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                <span>Zephyr Aerodynamic (+150% CC while airborne)</span>
+                <input
+                  type="checkbox"
+                  checked={!!simParams.applyZephyrAirborne}
+                  onChange={(e) =>
+                    onSimParamsChange({
+                      ...simParams,
+                      applyZephyrAirborne: e.target.checked,
+                    })
+                  }
+                  className="h-3.5 w-3.5 rounded border-border accent-primary"
+                />
+              </label>
+              <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                <span>Garuda Death&apos;s Gate (+100% Damage)</span>
+                <input
+                  type="checkbox"
+                  checked={!!simParams.applyGarudaDeathsGate}
+                  onChange={(e) =>
+                    onSimParamsChange({
+                      ...simParams,
+                      applyGarudaDeathsGate: e.target.checked,
+                    })
+                  }
+                  className="h-3.5 w-3.5 rounded border-border accent-primary"
+                />
+              </label>
+              <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                <span>Tenacious Bond (+1.2× Crit Damage)</span>
+                <input
+                  type="checkbox"
+                  checked={simParams.applyTenaciousBondCrit === true}
+                  onChange={(e) =>
+                    onSimParamsChange({
+                      ...simParams,
+                      applyTenaciousBondCrit: e.target.checked,
+                    })
+                  }
+                  className="h-3.5 w-3.5 rounded border-border accent-primary"
+                />
+              </label>
+              {!isMelee && (
+                <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                  <span>Reinforced Bond (+60% Fire Rate)</span>
+                  <input
+                    type="checkbox"
+                    checked={simParams.applyReinforcedBondFireRate === true}
+                    onChange={(e) =>
+                      onSimParamsChange({
+                        ...simParams,
+                        applyReinforcedBondFireRate: e.target.checked,
+                      })
+                    }
+                    className="h-3.5 w-3.5 rounded border-border accent-primary"
+                  />
+                </label>
+              )}
+            </div>
+          )}
           {isMelee && (
             <SimSlider
               label="Combo Hits" value={simParams.comboCount} min={0} max={260}
@@ -112,7 +407,7 @@ export function WeaponSimControls({
               ))}
             </div>
           )}
-          {stats.usesWarframeMaxEnergy && (
+          {stats.usesWarframeMaxEnergy && !isLinkedLoadout && (
             <SimSlider
               label="WF Max Energy (Overcharge)"
               value={simParams.warframeMaxEnergy ?? 0}
@@ -122,14 +417,14 @@ export function WeaponSimControls({
               tooltip="Primary Overcharge: Multishot = 35% of your Warframe's Max Energy while energy is above 90%, capped by rank (R5 +350% at 1000 Max Energy). 0 = not set (no bonus). Loadouts fill this from the equipped Warframe."
             />
           )}
-          {isMelee && (
+          {isMelee && !isLinkedLoadout && (
             <SimSlider
               label="WF Gladiator" value={simParams.extraGladiatorMods} min={0} max={3}
               onChange={(v) => onSimParamsChange({ ...simParams, extraGladiatorMods: v })}
               tooltip="Gladiator mods on warframe (Aegis/Finesse/Resolve) — +10% crit per melee scaling multiplier tier each (same (CM−1) factor as Blood Rush)"
             />
           )}
-          {!isMelee && weapon && weaponSupportsPrimaryStyleSets(weapon) && (
+          {!isMelee && !isLinkedLoadout && weapon && weaponSupportsPrimaryStyleSets(weapon) && (
             <>
               <SimSlider
                 label="WF Vigilante (count)"
@@ -149,7 +444,7 @@ export function WeaponSimControls({
               />
             </>
           )}
-          {weapon && weaponAcceptsSynthReloadBonus(weapon) && (
+          {!isLinkedLoadout && weapon && weaponAcceptsSynthReloadBonus(weapon) && (
             <SimSlider
               label="Off-weapon Synth pieces"
               value={simParams.extraSynthSetPiecesOffWeapon ?? 0}

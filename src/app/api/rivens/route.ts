@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
 import { clampRivenDrain, normalizeRivenPolarity, validateRivenStats } from "@/lib/riven/riven-validation";
-import { allWeapons } from "@/data/weapons";
-import { customWeapons } from "@/data/custom-items";
 import { getRivenWeaponType, rivenModMatchesWeapon } from "@/lib/weapons/riven-weapon-type";
-import { getRivenBaseWeapon, getRivenFamilyWeaponIds, getEffectiveRivenWeaponType } from "@/lib/weapons/riven-family";
+import {
+  getRivenBaseWeapon,
+  getRivenFamilyWeaponIds,
+  resolveRivenWeapon,
+} from "@/lib/weapons/riven-family";
 import {
   RIVEN_MOD_IDS,
   SAVED_RIVEN_NAME_MAX,
@@ -57,19 +59,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid riven" }, { status: 400 });
   }
   // Same rules as the editor: the weapon must take this riven and the roll must be legal.
-  const allSourceWeapons = [...allWeapons, ...customWeapons];
-  const weapon = allSourceWeapons.find((w) => w.id === weaponId);
+  const weapon = resolveRivenWeapon(weaponId);
   if (!weapon || !rivenModMatchesWeapon(modId, weapon)) {
     return NextResponse.json({ error: "This weapon does not take that riven" }, { status: 400 });
   }
-  const effType = getEffectiveRivenWeaponType(weapon) ?? getRivenWeaponType(weapon);
-  const checkPool = (effType === "Kitgun" ? "Pistol" : effType === "Zaw" ? "Melee" : effType ?? "Rifle").toLowerCase();
+  const checkPool = (getRivenWeaponType(weapon) ?? "Rifle").toLowerCase();
   const check = validateRivenStats(stats, checkPool);
   if (!check.ok) {
     return NextResponse.json({ error: check.errors[0] ?? "Invalid riven" }, { status: 400 });
   }
-  const baseWeapon = getRivenBaseWeapon(weaponId);
-  const canonicalWeaponId = baseWeapon?.id ?? weaponId;
+  const baseWeapon = getRivenBaseWeapon(weapon);
+  const canonicalWeaponId = baseWeapon?.id ?? weapon.id;
 
   const data = {
     name,
