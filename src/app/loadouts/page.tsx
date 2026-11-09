@@ -18,6 +18,7 @@ import {
   ModularBuildData,
 } from "@/lib/builds/build-storage";
 import { LoadoutCardOverflowMenu } from "@/components/loadout-card-overflow-menu";
+import { nextCombatOpen } from "@/lib/builds/loadout-card-expand";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import {
   useCloudBuildFromUrl,
@@ -137,6 +138,7 @@ export default function LoadoutsPage() {
   const weapons = useWeapons();
   const weaponsMap = useMemo(() => new Map(weapons.map((w) => [w.id, w])), [weapons]);
   const [loadouts, setLoadouts] = useState<Loadout[]>([]);
+  const [combatOpen, setCombatOpen] = useState<Record<string, boolean>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -1120,9 +1122,20 @@ export default function LoadoutsPage() {
                     })}
                   </div>
 
-                  <LoadoutSectionErrorBoundary label="damage panel" resetKey={loadout.updatedAt}>
-                    <LoadoutDamagePanel loadout={loadout} />
-                  </LoadoutSectionErrorBoundary>
+                  <button
+                    type="button"
+                    aria-expanded={combatOpen[loadout.id] === true}
+                    onClick={() => setCombatOpen((prev) => nextCombatOpen(prev, loadout.id))}
+                    className="mt-4 inline-flex min-h-11 w-full items-center justify-between rounded-lg border border-border/70 bg-muted/20 px-3 text-sm font-medium"
+                  >
+                    <span>{combatOpen[loadout.id] ? "Hide combat report" : "Combat report"}</span>
+                    <ChevronDown className={cn("h-4 w-4 transition-transform", combatOpen[loadout.id] && "rotate-180")} />
+                  </button>
+                  {combatOpen[loadout.id] && (
+                    <LoadoutSectionErrorBoundary label="damage panel" resetKey={loadout.updatedAt}>
+                      <LoadoutDamagePanel loadout={loadout} />
+                    </LoadoutSectionErrorBoundary>
+                  )}
                 </ContentPanel>
               </div>
               </LoadoutSectionErrorBoundary>
