@@ -58,7 +58,7 @@ export default function Home({ counts }: { counts: CatalogCounts }) {
               </p>
             </div>
 
-            <div className="grid w-full grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
+            <div className="grid w-full grid-cols-1 gap-3 min-[360px]:grid-cols-2 sm:gap-5 lg:grid-cols-3">
               <FeatureCard
                 href="/weapon-builder"
                 title="Weapon Builder"

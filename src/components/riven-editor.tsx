@@ -290,10 +290,11 @@ export function RivenEditor({
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search stats (e.g. crit, damage, cold)..."
+                placeholder="Search stats"
+                aria-label="Search stats, for example crit, damage, or cold"
                 value={rivenStatSearch}
                 onChange={(e) => setRivenStatSearch(e.target.value)}
-                className="h-8 w-full rounded border border-border bg-background pl-8 pr-7 text-xs placeholder:text-muted-foreground focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                className="h-11 w-full rounded border border-border bg-background pl-8 pr-7 text-sm placeholder:text-muted-foreground focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 sm:h-9 sm:text-xs"
               />
               {rivenStatSearch && (
                 <button

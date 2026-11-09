@@ -344,7 +344,7 @@ export function FeatureCard({
           )}
         </div>
       </div>
-      <p className="line-clamp-2 flex-1 text-sm leading-relaxed text-muted-foreground sm:line-clamp-none" title={description}>{description}</p>
+      <p className="line-clamp-2 flex-1 text-sm leading-relaxed text-muted-foreground max-[359px]:line-clamp-none sm:line-clamp-none" title={description}>{description}</p>
       {badges && badges.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
           {badges.map((badge) => (
