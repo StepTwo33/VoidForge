@@ -2,7 +2,7 @@ import { ArcaneEffectDef, ArcaneEffectLine } from "@/data/arcane-effects";
 import { arcaneEffectStackMultiplier } from "@/lib/calc/arcane-proc-model";
 import { getPersistenceDamageCap, scaleArcaneEffectLine } from "@/lib/calc/arcane-utils";
 import { avgCritMultiplier } from "@/lib/calc/crit-utils";
-import { combineInfiniteAmmoUptime, infiniteAmmoUptimeFromChance } from "@/lib/calc/ammo-efficiency";
+import { combineInfiniteAmmoUptime } from "@/lib/calc/ammo-efficiency";
 import { getWeaponRadialAttacks } from "@/lib/weapons/weapon-radial-utils";
 import { CalculatedStats, WarframeCalculatedStats, Weapon } from "@/lib/types";
 import { addStatusResistance, ARCANE_STATUS_RESIST } from "@/lib/calc/status-resistance";
@@ -1222,18 +1222,12 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
     }
 
     case "arcane_pistoleer": {
-      // wiki (Hotfix 44.1.3): on pistol Weak Point kill, 10–60% (R0–R5) chance for Infinite Ammo
-      // for 12s. Not Ammo Efficiency: modelled as an expected Infinite Ammo uptime so the 75% AE
-      // cap does not undercount it. Paper: stacks>0 = trigger toggle on.
+      // The active toggle is the realized Infinite Ammo window (wiki: buff is up), not a
+      // reduced proc chance. Expected uptime is infiniteAmmoUptimeFromChance, tested separately.
       const chanceLine = findEffect(def, "infiniteAmmoChance");
       const chancePct = chanceLine ? scaleArcaneEffectLine(chanceLine, rank, def.maxRank) : 0;
-      const durLine = findEffect(def, "buffDuration");
-      const durationS = durLine ? scaleArcaneEffectLine(durLine, rank, def.maxRank) : 12;
       if (chancePct > 0) {
-        stats.infiniteAmmoUptime = combineInfiniteAmmoUptime(
-          stats.infiniteAmmoUptime,
-          infiniteAmmoUptimeFromChance(chancePct / 100, durationS),
-        );
+        stats.infiniteAmmoUptime = combineInfiniteAmmoUptime(stats.infiniteAmmoUptime, 1);
       }
       trackBonus(stats, "infiniteAmmoChance", chancePct);
       return true;

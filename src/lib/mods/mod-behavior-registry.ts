@@ -65,6 +65,10 @@ export type WeaponModAccumulators = {
   heavyAttackWindUpBonus: number;
   /** Aim/reload/cast/latch buffs gated by sim.applyTriggerBuffs (statKey → summed bonus). */
   triggerStatBonuses: Record<string, number>;
+  /** Spectral Serration and other invisibility buffs. Gated by sim.applyInvisible. */
+  invisibleStatBonuses: Record<string, number>;
+  /** Catalyzer Link: on ability cast, and only while aiming. */
+  abilityCastAimStatBonuses: Record<string, number>;
   /** Chance to force a Slash proc on crits (Hunter Munitions). */
   slashOnCritChance: number;
   /** Chance to force an extra Electric proc on hit (Prototype Shock Coils; independent of damage types). */
@@ -254,6 +258,14 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
       acc.onKillPerStackCap = GALV_STACK_CAPS[ctx.modId] ?? acc.onKillPerStackCap ?? 4;
       return true;
     case "conditional_stat_on_trigger": {
+      if (ctx.modId === "spectral_serration" || ctx.modId === "spectral_serration_r5") {
+        acc.invisibleStatBonuses[statKey] = (acc.invisibleStatBonuses[statKey] ?? 0) + modValue;
+        return true;
+      }
+      if (ctx.modId === "catalyzer_link" || ctx.modId === "embedded_catalyzer") {
+        acc.abilityCastAimStatBonuses[statKey] = (acc.abilityCastAimStatBonuses[statKey] ?? 0) + modValue;
+        return true;
+      }
       // Brain Storm / Skull Shots (Hotfix 44.1.3): "On Headshot: N% chance for Infinite Ammo for Ds".
       // Catalog value = chance (+10% per rank step); duration follows the wiki rank table
       // (0.5 / 1 / 2 / 2 s). Converted to an expected Infinite Ammo uptime, not AE.

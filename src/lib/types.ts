@@ -700,9 +700,29 @@ export interface SimulationParams {
    */
   stanceDpsModel?: "hitAvg" | "cycle";
   /**
-   * Treat aim/reload/cast/wall-latch trigger buffs as active
-   * (Catalyzer Link, Spring-Loaded Chamber, Deadly Efficiency, …). Default false —
-   * the in-game arsenal never includes them.
+   * Currently aiming (zoom / ADS). Distinct from the shot's hit location.
+   * Galvanized Scope's buff applies while aiming; AX-52 aimed mode is this flag.
+   * Default false — hip-fire.
+   */
+  applyAiming?: boolean;
+  /**
+   * Invisibility is active (realized). Turns on Arcane Crepuscular and Spectral Serration together.
+   * Does not imply aiming, a headshot, or an ability cast.
+   */
+  applyInvisible?: boolean;
+  /**
+   * An ability was cast recently (realized). Catalyzer Link also requires aiming.
+   */
+  applyAbilityCast?: boolean;
+  /**
+   * Clip Delegation: shots landed with the current magazine before reload (0–15).
+   * The next magazine's status and multishot bonus. Not pellets or punch-through.
+   */
+  clipDelegationShots?: number;
+  /**
+   * Other situational buffs that are not aiming, invisibility, or an ability cast
+   * (reload, distance, wall-latch, and similar). Default false.
+   * Does not activate Crepuscular, Spectral Serration, or Galvanized Scope by itself.
    */
   applyTriggerBuffs?: boolean;
   /**
