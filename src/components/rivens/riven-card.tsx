@@ -202,7 +202,7 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
             <Link
               href={equipUrl}
               title="Equip in Weapon Builder"
-              className="flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-600/30 px-2.5 text-xs font-semibold text-purple-200 shadow-sm transition-all hover:border-purple-400 hover:bg-purple-600 hover:text-white"
+              className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-600/30 px-2.5 text-xs font-semibold text-purple-200 shadow-sm transition-all hover:border-purple-400 hover:bg-purple-600 hover:text-white"
             >
               <ExternalLink className="h-3.5 w-3.5" />
               <span>Equip</span>
@@ -213,7 +213,7 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
                 type="button"
                 onClick={() => onEdit(riven)}
                 title="Edit Riven"
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-purple-500/30 bg-purple-950/60 text-purple-300 shadow-sm transition-all hover:border-purple-400 hover:bg-purple-800 hover:text-white"
+                className="flex h-11 w-11 items-center justify-center rounded-lg border border-purple-500/30 bg-purple-950/60 text-purple-300 shadow-sm transition-all hover:border-purple-400 hover:bg-purple-800 hover:text-white"
               >
                 <Edit3 className="h-3.5 w-3.5" />
               </button>
@@ -224,7 +224,7 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
                 type="button"
                 onClick={() => onDelete(riven.id)}
                 title="Delete Riven"
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/30 bg-red-950/40 text-red-400 shadow-sm transition-all hover:border-red-400 hover:bg-red-600 hover:text-white"
+                className="flex h-11 w-11 items-center justify-center rounded-lg border border-red-500/30 bg-red-950/40 text-red-400 shadow-sm transition-all hover:border-red-400 hover:bg-red-600 hover:text-white"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>

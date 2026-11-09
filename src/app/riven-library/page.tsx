@@ -202,7 +202,7 @@ export default function RivenLibraryPage() {
                 setEditingRiven(null);
                 setDialogOpen(true);
               }}
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-purple-600 px-3.5 text-xs font-bold text-white shadow-md transition-colors hover:bg-purple-500"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-purple-600 px-3.5 text-xs font-bold text-white shadow-md transition-colors hover:bg-purple-500"
             >
               <Plus className="h-4 w-4" /> Add Riven
             </button>
@@ -214,7 +214,7 @@ export default function RivenLibraryPage() {
                 setDialogOpen(true);
               }}
               title="Import a Riven by pasting a screenshot or browsing an image"
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-950/40 px-3 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-900/60 hover:text-white"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-950/40 px-3 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-900/60 hover:text-white"
             >
               <Camera className="h-3.5 w-3.5 text-purple-400" />
               <span>Import Screenshot</span>
@@ -240,10 +240,11 @@ export default function RivenLibraryPage() {
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search rivens by weapon, name, stats, or grade..."
+              placeholder="Search rivens"
+              aria-label="Search rivens by weapon, name, stats, or grade"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-10 border-border/60 bg-card/40 pl-9 text-sm"
+              className="h-11 border-border/60 bg-card/40 pl-9 text-sm"
             />
           </div>
 

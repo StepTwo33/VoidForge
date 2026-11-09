@@ -656,9 +656,11 @@ export function Header() {
           ) : (
             <a
               href="/signin"
-              className="ml-1 inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-primary/50 hover:text-foreground lg:pointer-fine:min-h-0 lg:py-1.5"
+              aria-label="Sign in"
+              className="ml-1 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-2.5 py-2 text-xs text-muted-foreground transition-all hover:border-primary/50 hover:text-foreground lg:pointer-fine:min-h-0 lg:py-1.5"
             >
-              <LogIn className="h-3.5 w-3.5" /> Sign in
+              <LogIn className="h-3.5 w-3.5" />
+              <span className="hidden min-[340px]:inline">Sign in</span>
             </a>
           )}
 
