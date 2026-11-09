@@ -20,6 +20,7 @@ import { getWeaponImage, getWarframeImage, getCompanionImage } from "@/lib/displ
 import { GameAssetImage } from "@/components/game-asset-image";
 import { BuildSourcePicker } from "@/components/compare/build-source-picker";
 import { snapshotFromBuild, equipmentFromLoadoutSlot, type CompareKind, type CompareSnapshot } from "@/lib/builds/compare-build";
+import { compareIdsTaken, isSameCompareSelection } from "@/lib/builds/compare-same-id";
 import type { SavedBuild } from "@/lib/builds/build-storage";
 import { savedBuildToLoadout, ownershipBadge } from "@/lib/builds/yours-builds";
 import { calcLoadoutStats, fmtDamageNum, scenarioSimParams, type LoadoutStatsResult } from "@/lib/builds/loadout-stats";
@@ -68,15 +69,22 @@ function BuildCompareTab() {
   const [weaponSearch, setWeaponSearch] = useState("");
   const [kind, setKind] = useState<CompareKind>("weapon");
   const [loaded, setLoaded] = useState<[CompareSnapshot | null, CompareSnapshot | null]>([null, null]);
+  const [loadedIds, setLoadedIds] = useState<[string | null, string | null]>([null, null]);
   const [sourceOpen, setSourceOpen] = useState<0 | 1 | null>(null);
 
   const setCompareKind = (next: CompareKind) => {
     setKind(next);
     setLoaded([null, null]);
+    setLoadedIds([null, null]);
     setSourceOpen(null);
   };
 
   const loadSavedOrCommunity = (side: 0 | 1, rawBuild: SavedBuild) => {
+    const otherId = loadedIds[side === 0 ? 1 : 0];
+    if (isSameCompareSelection(rawBuild.id, compareIdsTaken([otherId]))) {
+      toast.error("That build is already on the other side");
+      return;
+    }
     const build = cleanLoadedBuild(rawBuild);
     const snap = snapshotFromBuild(kind, build.name, build.data);
     if (!snap) {
@@ -88,12 +96,22 @@ function BuildCompareTab() {
       next[side] = snap;
       return next;
     });
+    setLoadedIds((prev) => {
+      const next = [...prev] as [string | null, string | null];
+      next[side] = rawBuild.id;
+      return next;
+    });
     setSourceOpen(null);
   };
 
   const clearLoaded = (side: 0 | 1) => {
     setLoaded((prev) => {
       const next = [...prev] as [CompareSnapshot | null, CompareSnapshot | null];
+      next[side] = null;
+      return next;
+    });
+    setLoadedIds((prev) => {
+      const next = [...prev] as [string | null, string | null];
       next[side] = null;
       return next;
     });
@@ -229,7 +247,11 @@ function BuildCompareTab() {
                         <X className="h-4 w-4" />
                       </button>
                     </div>
-                    <BuildSourcePicker type={kind} onSelect={(build) => loadSavedOrCommunity(side, build)} />
+                    <BuildSourcePicker
+                      type={kind}
+                      excludeIds={compareIdsTaken([loadedIds[side === 0 ? 1 : 0]])}
+                      onSelect={(build) => loadSavedOrCommunity(side, build)}
+                    />
                   </div>
                 ) : (
                   <button
@@ -628,6 +650,12 @@ function LoadoutCompareTab({ initialA }: { initialA?: string | null }) {
   }, [initialA]);
 
   const pickLoadout = (side: 0 | 1, build: SavedBuild, origin: "yours" | "community") => {
+    const other = sides[side === 0 ? 1 : 0];
+    const taken = compareIdsTaken([other?.id, other?.cloudId]);
+    if (isSameCompareSelection(build.id, taken)) {
+      toast.error("That loadout is already on the other side");
+      return;
+    }
     const loadout = savedBuildToLoadout(build);
     setSides((prev) => {
       const next = [...prev] as [Loadout | null, Loadout | null];
@@ -724,7 +752,14 @@ function LoadoutCompareTab({ initialA }: { initialA?: string | null }) {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <BuildSourcePicker type="loadout" onSelect={(build, origin) => pickLoadout(side, build, origin)} />
+            <BuildSourcePicker
+              type="loadout"
+              excludeIds={compareIdsTaken([
+                sides[side === 0 ? 1 : 0]?.id,
+                sides[side === 0 ? 1 : 0]?.cloudId,
+              ])}
+              onSelect={(build, origin) => pickLoadout(side, build, origin)}
+            />
           </ContentPanel>
         ) : (
           <button

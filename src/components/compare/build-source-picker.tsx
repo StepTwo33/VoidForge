@@ -9,6 +9,7 @@ import { buildItemId, type CompareKind } from "@/lib/builds/compare-build";
 import type { PublicBuildSummary } from "@/lib/builds/build-types";
 import { SupporterHeart } from "@/components/supporter-badge";
 import { mergeYoursBuilds, ownershipBadge } from "@/lib/builds/yours-builds";
+import { isSameCompareSelection } from "@/lib/builds/compare-same-id";
 import { cn } from "@/lib/utils";
 
 export type BuildSourceType = CompareKind | "loadout";
@@ -18,11 +19,14 @@ type Tab = "yours" | "community";
 export function BuildSourcePicker({
   type,
   itemId,
+  excludeIds,
   onSelect,
 }: {
   type: BuildSourceType;
   /** When set, only builds for this weapon or warframe are listed. */
   itemId?: string;
+  /** Builds already chosen on the other side. Those rows stay visible and cannot be picked. */
+  excludeIds?: readonly string[];
   onSelect: (build: SavedBuild, origin: "yours" | "community") => void;
 }) {
   const [tab, setTab] = useState<Tab>("yours");
@@ -133,17 +137,24 @@ export function BuildSourcePicker({
         )}
         {tab === "yours" &&
           !loadingYours &&
-          yours.map((b) => (
+          yours.map((b) => {
+            const taken = isSameCompareSelection(b.id, excludeIds ?? []);
+            return (
             <button
               key={b.id}
               type="button"
+              disabled={taken}
               onClick={() => onSelect(b, "yours")}
-              className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-xs hover:bg-accent"
+              title={taken ? "Already selected on the other side" : undefined}
+              className="flex min-h-11 w-full items-center gap-2 rounded-md px-2 py-2 text-left text-xs hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
             >
               <span className="min-w-0 flex-1 truncate font-medium">{b.name}</span>
-              <span className="shrink-0 text-[10px] text-muted-foreground">{ownershipBadge(b.id)}</span>
+              <span className="shrink-0 text-[10px] text-muted-foreground">
+                {taken ? "On the other side" : ownershipBadge(b.id)}
+              </span>
             </button>
-          ))}
+            );
+          })}
         {tab === "community" && loadingCommunity && (
           <p className="flex items-center justify-center gap-2 px-2 py-6 text-xs text-muted-foreground">
             <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading
@@ -154,22 +165,26 @@ export function BuildSourcePicker({
         )}
         {tab === "community" &&
           !loadingCommunity &&
-          community.map((b) => (
+          community.map((b) => {
+            const taken = isSameCompareSelection(b.id, excludeIds ?? []);
+            return (
             <button
               key={b.id}
               type="button"
-              disabled={loadingId === b.id}
+              disabled={taken || loadingId === b.id}
               onClick={() => void pickCommunity(b)}
-              className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-xs hover:bg-accent disabled:opacity-60"
+              title={taken ? "Already selected on the other side" : undefined}
+              className="flex min-h-11 w-full items-center gap-2 rounded-md px-2 py-2 text-left text-xs hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
             >
               <span className="min-w-0 flex-1 truncate font-medium">{b.name}</span>
               <span className="inline-flex shrink-0 items-center gap-1 text-[10px] text-muted-foreground">
-                @{b.author.username}
-                {b.author.supporter && <SupporterHeart />}
+                {taken ? "On the other side" : `@${b.author.username}`}
+                {!taken && b.author.supporter && <SupporterHeart />}
               </span>
               {loadingId === b.id && <Loader2 className="h-3 w-3 animate-spin" />}
             </button>
-          ))}
+            );
+          })}
       </div>
     </div>
   );
