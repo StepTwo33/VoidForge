@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   calcLoadoutStats,
   bestSustainedDps,
@@ -15,6 +15,7 @@ import type { TTKPrimingOptions } from "@/lib/calc/ttk";
 import { useWeapons } from "@/lib/weapons/use-data";
 import { allWarframes } from "@/data/warframes";
 import { resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
+import { saveLoadout } from "@/lib/builds/loadouts";
 import { getArcaneEffectDef } from "@/lib/calc/arcane-calculator";
 import { arcaneStackCap } from "@/lib/calc/arcane-utils";
 import { CONDITIONAL_WARFRAME_MOD_DEFS } from "@/lib/calc/calculator";
@@ -229,7 +230,25 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
   const [wfArcaneOverrides, setWfArcaneOverrides] = useState<Record<string, number>>({});
   const [wfModOverrides, setWfModOverrides] = useState<Record<string, number>>({});
 
-  const wfFamily = (loadout.warframeBuild?.warframeId ?? "").replace(/_prime$/, "");
+  useEffect(() => {
+    const wb = loadout.warframeBuild;
+    if (!wb) return;
+    if (Object.keys(wfArcaneOverrides).length === 0 && Object.keys(wfModOverrides).length === 0) return;
+    const arcaneStacksById = { ...(wb.arcaneStacksById ?? {}), ...wfArcaneOverrides };
+    const conditionalModStacksById = { ...(wb.conditionalModStacksById ?? {}), ...wfModOverrides };
+    const sameArcanes = JSON.stringify(arcaneStacksById) === JSON.stringify(wb.arcaneStacksById ?? {});
+    const sameMods = JSON.stringify(conditionalModStacksById) === JSON.stringify(wb.conditionalModStacksById ?? {});
+    if (sameArcanes && sameMods) return;
+    saveLoadout({
+      ...loadout,
+      updatedAt: Date.now(),
+      warframeBuild: { ...wb, arcaneStacksById, conditionalModStacksById },
+      simulation: {
+        ...(loadout.simulation ?? {}),
+        applyInvisible: (arcaneStacksById.arcane_crepuscular ?? 0) > 0,
+      },
+    });
+  }, [wfArcaneOverrides, wfModOverrides, loadout]);
   const companionModIds = useMemo(
     () => (loadout.companionBuild?.mods ?? []).map((m) => m.modId),
     [loadout.companionBuild?.mods],

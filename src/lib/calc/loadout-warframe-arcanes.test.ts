@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { calcLoadoutStats } from "@/lib/builds/loadout-stats";
+import { DEFAULT_SIM_PARAMS, type Loadout } from "@/lib/types";
 import { allWarframes } from "@/data/warframes";
 import { ENEMY_TYPES } from "@/data/enemies";
 import { weaponDamageBuffAbilities } from "@/lib/weapons/weapon-external-buffs";
-import type { Loadout } from "@/lib/types";
 
 describe("Loadout Warframe Arcanes cross-slot weapon buffs", () => {
   const baseLoadout: Loadout = {
@@ -30,6 +30,26 @@ describe("Loadout Warframe Arcanes cross-slot weapon buffs", () => {
       mods: [],
     },
   };
+
+  it("reads a saved Crepuscular stack even when the weapon page sim is still at paper zeros", () => {
+    const loadout: Loadout = {
+      ...baseLoadout,
+      warframeBuild: {
+        warframeId: "excalibur",
+        mods: [],
+        shards: [],
+        arcaneIds: ["arcane_crepuscular", null],
+        arcaneRanks: [5, 5],
+        arcaneStacksById: { arcane_crepuscular: 1 },
+        hasOrokinReactor: true,
+      },
+    };
+    const fromWeaponPage = calcLoadoutStats(loadout, { simParams: { ...DEFAULT_SIM_PARAMS } });
+    const paper = calcLoadoutStats(loadout, { scenario: "paper", simParams: { ...DEFAULT_SIM_PARAMS } });
+    expect(fromWeaponPage.primary!.stats.criticalMultiplier).toBeGreaterThan(
+      paper.primary!.stats.criticalMultiplier,
+    );
+  });
 
   it("applies Arcane Rage and Acceleration only when those arcanes are explicitly active", () => {
     // Stock AX-52 stats with no arcanes on frame

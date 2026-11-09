@@ -1480,6 +1480,8 @@ export interface Loadout {
   importWarnings?: string[];
   /** Local-only: the Player Sync account this loadout was imported from (re-import offers Update). */
   importSource?: { platform: string; account: string };
+  /** Shared simulation the weapon builder reads when this loadout opens a slot. */
+  simulation?: Partial<SimulationParams>;
   createdAt: number;
   updatedAt: number;
   /** Matches warframe builder / saved build payload so mods, arcanes, helminth, etc. round-trip. */

@@ -538,11 +538,9 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
         }
       : undefined;
 
-  const isPaperScenario =
-    simParams.arcaneStacks <= 0 &&
-    !simParams.applyTriggerBuffs &&
-    simParams.killStacks <= 0 &&
-    simParams.comboCount <= 0;
+  // Only the Paper scenario drops saved conditionals. A weapon page opened from a
+  // loadout passes its own sim zeros and must still read the saved stacks.
+  const isPaperScenario = options.scenario === "paper";
 
   const result: LoadoutStatsResult = {
     warframe: null,
@@ -722,6 +720,14 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
       // Primary Overcharge scales with this frame's real max energy.
       if (simParams.warframeMaxEnergy == null) {
         simParams = { ...simParams, warframeMaxEnergy: result.warframe!.stats.totalEnergy };
+      }
+      if (!isPaperScenario && wb.arcaneStacksById) {
+        const saved = wb.arcaneStacksById;
+        simParams = {
+          ...simParams,
+          arcaneStacksById: { ...saved, ...(simParams.arcaneStacksById ?? {}) },
+          applyInvisible: simParams.applyInvisible || (saved.arcane_crepuscular ?? 0) > 0,
+        };
       }
     }
   }
