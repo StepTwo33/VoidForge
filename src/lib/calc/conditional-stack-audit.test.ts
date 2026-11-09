@@ -326,11 +326,11 @@ describe("remaining trigger/on-kill conditionals (wiki max rank, Phase M17)", ()
     const lex = requireWeapon("lex");
     expect(build("braton", "catalyzer_link", {}).statusChance).toBeCloseTo(braton.statusChance, 5);
     expect(
-      build("braton", "catalyzer_link", { applyTriggerBuffs: true }).statusChance,
+      build("braton", "catalyzer_link", { applyAbilityCast: true, applyAiming: true }).statusChance,
     ).toBeCloseTo(braton.statusChance * 1.6, 5);
     expect(build("lex", "embedded_catalyzer", {}).statusChance).toBeCloseTo(lex.statusChance, 5);
     expect(
-      build("lex", "embedded_catalyzer", { applyTriggerBuffs: true }).statusChance,
+      build("lex", "embedded_catalyzer", { applyAbilityCast: true, applyAiming: true }).statusChance,
     ).toBeCloseTo(lex.statusChance * 1.9, 5);
   });
 
@@ -366,7 +366,7 @@ describe("Sim1 trigger-gated exclusives (wiki max rank)", () => {
       5,
     );
     expect(
-      build("braton", "spectral_serration", { applyTriggerBuffs: true }).moddedBaseDamage,
+      build("braton", "spectral_serration", { applyInvisible: true }).moddedBaseDamage,
     ).toBeCloseTo(weapon.damage * 4.3, 5);
 
     expect(build("braton", "soaring_strike", {}).fireRate).toBeCloseTo(weapon.fireRate, 5);

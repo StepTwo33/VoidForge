@@ -31,7 +31,7 @@ describe("Loadout Warframe Arcanes cross-slot weapon buffs", () => {
     },
   };
 
-  it("applies Arcane Rage (+180% Primary Damage) and Arcane Acceleration (+90% Primary FR) to AX-52 in midFight scenario", () => {
+  it("applies Arcane Rage and Acceleration only when those arcanes are explicitly active", () => {
     // Stock AX-52 stats with no arcanes on frame
     const bareLoadout: Loadout = {
       ...baseLoadout,
@@ -42,7 +42,12 @@ describe("Loadout Warframe Arcanes cross-slot weapon buffs", () => {
       },
     };
     const bareStats = calcLoadoutStats(bareLoadout, { scenario: "midFight" });
-    const buffedStats = calcLoadoutStats(baseLoadout, { scenario: "midFight" });
+    const untouched = calcLoadoutStats(baseLoadout, { scenario: "midFight" });
+    expect(untouched.primary!.stats.totalDamage).toBeCloseTo(bareStats.primary!.stats.totalDamage, 2);
+    const buffedStats = calcLoadoutStats(baseLoadout, {
+      scenario: "midFight",
+      simParams: { arcaneStacksById: { arcane_rage: 1, arcane_acceleration: 1 } },
+    });
 
     expect(bareStats.primary).toBeDefined();
     expect(buffedStats.primary).toBeDefined();
@@ -137,7 +142,10 @@ describe("Loadout Warframe Arcanes cross-slot weapon buffs", () => {
         mods: [],
       },
     };
-    const stats = calcLoadoutStats(shotgunLoadout, { scenario: "midFight" });
+    const stats = calcLoadoutStats(shotgunLoadout, {
+      scenario: "midFight",
+      simParams: { arcaneStacksById: { arcane_rage: 1, arcane_acceleration: 1 } },
+    });
     const bareShotgunLoadout: Loadout = {
       ...shotgunLoadout,
       warframeBuild: {
@@ -175,7 +183,10 @@ describe("Loadout Warframe Arcanes cross-slot weapon buffs", () => {
         arcaneIds: [null, null],
       },
     };
-    const stats = calcLoadoutStats(secLoadout, { scenario: "midFight" });
+    const stats = calcLoadoutStats(secLoadout, {
+      scenario: "midFight",
+      simParams: { arcaneStacksById: { arcane_velocity: 1, arcane_precision: 1 } },
+    });
     const bareStats = calcLoadoutStats(bareLoadout, { scenario: "midFight" });
 
     // Lex (secondary) gets +120% fire rate and +300% damage
@@ -206,7 +217,10 @@ describe("Loadout Warframe Arcanes cross-slot weapon buffs", () => {
         arcaneIds: [null, null],
       },
     };
-    const stats = calcLoadoutStats(avengerLoadout, { scenario: "midFight" });
+    const stats = calcLoadoutStats(avengerLoadout, {
+      scenario: "midFight",
+      simParams: { arcaneStacksById: { arcane_avenger: 1 } },
+    });
     const bareStats = calcLoadoutStats(bareLoadout, { scenario: "midFight" });
 
     // +45% flat crit chance on primary, secondary, and melee

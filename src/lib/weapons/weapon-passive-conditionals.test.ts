@@ -164,13 +164,26 @@ describe("Weapon passive conditionals and external buffs", () => {
 
   it("AX-52 Aimed Headshots grants +400% Critical Chance, and Hip-fire grants +75% Ammo Efficiency", () => {
     const ax52 = findWeapon("ax_52");
+    const aimedBody = resolveStandaloneExternalBuffs(ax52, {
+      ...DEFAULT_SIM_PARAMS,
+      applyAiming: true,
+      weaponPassiveState: { ax_52_aimed_headshot: 1 },
+    });
+    expect(aimedBody.find((b) => b.id === "passive_ax_52_aimed_headshot")).toBeUndefined();
+    expect(aimedBody.find((b) => b.id === "passive_ax_52_hipfire")).toBeUndefined();
+
     const aimedBuffs = resolveStandaloneExternalBuffs(ax52, {
       ...DEFAULT_SIM_PARAMS,
+      applyAiming: true,
+      applyHeadshots: true,
       weaponPassiveState: { ax_52_aimed_headshot: 1 },
     });
     const marksman = aimedBuffs.find((b) => b.id === "passive_ax_52_aimed_headshot");
     expect(marksman).toBeDefined();
     expect(marksman?.critChanceBonus).toBe(4.0);
+
+    const defaultHip = resolveStandaloneExternalBuffs(ax52, DEFAULT_SIM_PARAMS);
+    expect(defaultHip.find((b) => b.id === "passive_ax_52_hipfire")?.ammoEfficiency).toBe(0.75);
 
     const hipfireBuffs = resolveStandaloneExternalBuffs(ax52, {
       ...DEFAULT_SIM_PARAMS,
