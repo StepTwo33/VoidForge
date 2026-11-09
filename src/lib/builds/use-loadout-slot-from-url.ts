@@ -100,15 +100,17 @@ export function useLoadoutSlotFromUrl(
 
     appliedKey.current = key;
     const slot = resolveSlot(kind, slotParam, data);
-    apply({
-      id: "",
-      name: `${loadout.name} (${loadoutSlotLabel(slot)})`,
-      type: kind,
-      createdAt: loadout.createdAt,
-      updatedAt: loadout.updatedAt,
-      data,
+    queueMicrotask(() => {
+      apply({
+        id: "",
+        name: `${loadout.name} (${loadoutSlotLabel(slot)})`,
+        type: kind,
+        createdAt: loadout.createdAt,
+        updatedAt: loadout.updatedAt,
+        data,
+      });
+      setContext({ loadoutId: loadout.id, loadoutName: loadout.name, kind, slot });
     });
-    setContext({ loadoutId: loadout.id, loadoutName: loadout.name, kind, slot });
     // ?loadout=&slot= stay in the URL, so a refresh reopens the same slot with its banner.
   }, [kind, apply, ready, loadoutId, slotParam]);
 
