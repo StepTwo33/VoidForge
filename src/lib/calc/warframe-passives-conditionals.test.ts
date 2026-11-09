@@ -219,6 +219,49 @@ describe("Warframe Builder passive simulation & default-off conditionals", () =>
     expect(cyteWp.criticalChance).toBeCloseTo(cyteOff.criticalChance * 3, 4);
   });
 
+  it("Cyte-09 weak-point kills do not apply the headshot damage model on body shots", () => {
+    const neutralizer = getPrimaryExaltedWeapon("cyte_09", allWeapons)!;
+    const opts = (kills: number) => ({
+      abilityStrength: 1,
+      externalBuffs: resolveExaltedPassiveBuffs("cyte_09", neutralizer, { cyteWeakPointKills: kills }),
+    });
+    const body0 = calculateWeaponBuild(neutralizer, [], modsMap, undefined, { ...DEFAULT_SIM_PARAMS }, opts(0));
+    const body1 = calculateWeaponBuild(neutralizer, [], modsMap, undefined, { ...DEFAULT_SIM_PARAMS }, opts(1));
+    expect(body1.burstDps).toBeCloseTo(body0.burstDps, 4);
+    expect(body1.totalDamage).toBeCloseTo(body0.totalDamage, 4);
+
+    const weak0 = calculateWeaponBuild(
+      neutralizer,
+      [],
+      modsMap,
+      undefined,
+      { ...DEFAULT_SIM_PARAMS, applyWeakPoints: true },
+      opts(0),
+    );
+    const weak1 = calculateWeaponBuild(
+      neutralizer,
+      [],
+      modsMap,
+      undefined,
+      { ...DEFAULT_SIM_PARAMS, applyWeakPoints: true },
+      opts(1),
+    );
+    expect(weak1.criticalChance).toBeGreaterThan(weak0.criticalChance);
+    expect(weak1.criticalChance - weak0.criticalChance).toBeLessThan(0.02);
+    expect(weak1.burstDps / weak0.burstDps).toBeLessThan(1.05);
+
+    const head0 = calculateWeaponBuild(
+      neutralizer,
+      [],
+      modsMap,
+      undefined,
+      { ...DEFAULT_SIM_PARAMS, applyHeadshots: true },
+      opts(0),
+    );
+    expect(head0.burstDps).toBeGreaterThan(body0.burstDps * 1.5);
+    expect(weak0.burstDps).toBeLessThan(head0.burstDps);
+  });
+
   it("defaults conditional Warframe arcanes to 0 stacks in Warframe Builder while preserving passive arcanes and user overrides", () => {
     const moltAugmented = warframeArcanes.find((a) => a.id === "molt_augmented")!;
     const moltEfficiency = warframeArcanes.find((a) => a.id === "molt_efficiency")!;

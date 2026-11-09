@@ -59,7 +59,7 @@ import {
   WeaponCalculationOptions,
   SimulationParams,
 } from "@/lib/types";
-import { DEFAULT_SIM_PARAMS } from "@/lib/types";
+import { DEFAULT_SIM_PARAMS, type SimulationParams } from "@/lib/types";
 import { Zap, Flag, Gem, Save, FolderOpen, Share2, Check, Upload, Shield, ArrowLeftRight } from "lucide-react";
 import { warframeArcanes } from "@/data/arcanes";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
@@ -183,6 +183,7 @@ export default function WarframeBuilderPage() {
   const [wfArcaneStacksById, setWfArcaneStacksById] = useState<Record<string, number>>({});
   const [wfConditionalModStacksById, setWfConditionalModStacksById] = useState<Record<string, number>>({});
   const [wfPassiveSim, setWfPassiveSim] = useState<WarframePassiveSimState>(DEFAULT_WARFRAME_PASSIVE_SIM);
+  const [exaltedUserSim, setExaltedUserSim] = useState<SimulationParams>(DEFAULT_SIM_PARAMS);
   const [helminthPickerSlot, setHelminthPickerSlot] = useState(0);
   const [modPickerMode, setModPickerMode] = useState<"mods" | "arcanes">("mods");
   const [equippedArcanes, setEquippedArcanes] = useState<(Mod | null)[]>([null, null]);
@@ -420,6 +421,7 @@ export default function WarframeBuilderPage() {
     setWfArcaneStacksById(d.arcaneStacksById ?? {});
     setWfConditionalModStacksById(d.conditionalModStacksById ?? {});
     setWfPassiveSim(DEFAULT_WARFRAME_PASSIVE_SIM);
+    setExaltedUserSim(DEFAULT_SIM_PARAMS);
     setSelectedWarframe(wf);
     setHasOrokinReactor(d.hasOrokinReactor);
     setExaltedMods(dropUnknownMods(d.exaltedMods, modsMap).map((m) => {
@@ -619,16 +621,13 @@ export default function WarframeBuilderPage() {
     return withShardsAndArcanes;
   }, [selectedWarframe, dualFormConfig, activeDualFormId, equippedMods, equippedShards, equippedArcanes, equippedArcaneRanks, modsMap, helminthSlot, helminthAbility, effectiveWfArcaneStacksById, wfConditionalModStacksById, wfPassiveSim, loadoutCtx]);
 
-  /** Primary Overcharge on an exalted weapon reads the host frame's max energy; Cyte-09 WP Kills enables weak-point crit preview on Neutralizer. */
+  /** Primary Overcharge reads max energy. Hit location stays on the exalted sim; Cyte weak-point kills do not force headshots. */
   const exaltedSimParams = useMemo<SimulationParams>(
     () => ({
-      ...DEFAULT_SIM_PARAMS,
+      ...exaltedUserSim,
       warframeMaxEnergy: calculatedStats?.totalEnergy,
-      ...(selectedWarframe?.id === "cyte_09" && wfPassiveSim.cyteWeakPointKills > 0
-        ? { applyHeadshots: true }
-        : {}),
     }),
-    [calculatedStats?.totalEnergy, selectedWarframe?.id, wfPassiveSim.cyteWeakPointKills],
+    [calculatedStats?.totalEnergy, exaltedUserSim],
   );
 
   const exaltedActiveArcanes = useMemo(
@@ -947,6 +946,7 @@ export default function WarframeBuilderPage() {
     setWfArcaneStacksById({});
     setWfConditionalModStacksById({});
     setWfPassiveSim(DEFAULT_WARFRAME_PASSIVE_SIM);
+    setExaltedUserSim(DEFAULT_SIM_PARAMS);
     setExaltedMods([]);
     setExaltedSlotPolarities({});
     setExaltedArcanes([null]);
@@ -1571,6 +1571,8 @@ export default function WarframeBuilderPage() {
                     exaltedStats={exaltedStats}
                     exaltedBaseStats={exaltedBaseStats}
                     exaltedContributionContext={exaltedContributionContext}
+                    simParams={exaltedSimParams}
+                    onSimParamsChange={setExaltedUserSim}
                     sectionTitle={exaltedMeleeWeapon ? "Exalted Primary" : "Exalted Weapon"}
                     hideSiblingNote={!!exaltedMeleeWeapon}
                     onAddMod={(i) => {
@@ -1620,6 +1622,8 @@ export default function WarframeBuilderPage() {
                     exaltedStats={exaltedMeleeStats}
                     exaltedBaseStats={exaltedMeleeBaseStats}
                     exaltedContributionContext={exaltedMeleeContributionContext}
+                    simParams={exaltedSimParams}
+                    onSimParamsChange={setExaltedUserSim}
                     sectionTitle="Exalted Melee"
                     hideSiblingNote
                     onAddMod={(i) => {

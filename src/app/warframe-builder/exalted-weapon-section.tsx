@@ -8,7 +8,7 @@ import { WeaponStatsPanel } from "@/components/stats-panel";
 import { GameAssetImage } from "@/components/game-asset-image";
 import { getWeaponImage } from "@/lib/display/images";
 import { cn } from "@/lib/utils";
-import type { CalculatedStats, EquippedMod, Mod, Weapon } from "@/lib/types";
+import type { CalculatedStats, EquippedMod, Mod, SimulationParams, Weapon } from "@/lib/types";
 import type { WeaponDpsCalcContext } from "@/lib/calc/dps-contributions";
 
 /** Matches weapon-builder: regular slots 0–7, Exilus at index 8. */
@@ -29,6 +29,8 @@ export function ExaltedWeaponSection({
   exaltedStats,
   exaltedBaseStats,
   exaltedContributionContext,
+  simParams,
+  onSimParamsChange,
   sectionTitle = "Exalted Weapon",
   hideSiblingNote = false,
   onAddMod,
@@ -54,6 +56,8 @@ export function ExaltedWeaponSection({
   exaltedStats: CalculatedStats | null;
   exaltedBaseStats: CalculatedStats | null;
   exaltedContributionContext: WeaponDpsCalcContext | null;
+  simParams?: SimulationParams;
+  onSimParamsChange?: (params: SimulationParams) => void;
   sectionTitle?: string;
   /** When true, skip the “Also moddable” note (sibling has its own grid). */
   hideSiblingNote?: boolean;
@@ -188,6 +192,8 @@ export function ExaltedWeaponSection({
             weapon={exaltedWeapon}
             isMelee={exaltedWeapon.category === "melee" || exaltedWeapon.triggerType === "Melee"}
             contributionContext={exaltedContributionContext}
+            simParams={simParams}
+            onSimParamsChange={onSimParamsChange}
           />
         </div>
       )}
