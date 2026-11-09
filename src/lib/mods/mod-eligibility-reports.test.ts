@@ -141,6 +141,13 @@ describe("shotgun vs rifle mod class filtering", () => {
     }
   });
 
+  it("treats beam shotguns stored as primary as shotguns", () => {
+    for (const weaponId of ["phantasma", "phantasma_prime", "phage", "convectrix"]) {
+      expect(primaryEligible(weaponId, "point_blank_r3"), weaponId).toBe(true);
+      expect(primaryEligible(weaponId, "serration_r3"), weaponId).toBe(false);
+    }
+  });
+
   it("Point Blank is categorized as shotgun", () => {
     expect(modsById.get("point_blank_r3")?.category).toBe("shotgun");
   });
