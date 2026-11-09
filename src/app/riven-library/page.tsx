@@ -87,7 +87,9 @@ export default function RivenLibraryPage() {
   }, []);
 
   useEffect(() => {
-    refreshRivens();
+    queueMicrotask(() => {
+      void refreshRivens();
+    });
   }, [refreshRivens]);
 
   // Actions

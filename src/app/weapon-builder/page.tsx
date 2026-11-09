@@ -945,6 +945,7 @@ export default function WeaponBuilderPage() {
         const modId = getRivenModIdForWeapon(weapon);
         const rivenMod = modId ? allMods.find((m) => m.id === modId) : undefined;
         if (rivenMod && parsedStats && Object.keys(parsedStats).length > 0) {
+          queueMicrotask(() => {
           setEquippedMods([
             {
               modId: rivenMod.id,
@@ -956,6 +957,7 @@ export default function WeaponBuilderPage() {
             },
           ]);
           setRivenStatsMap({ 0: parsedStats });
+          });
         }
       } catch {
         // Ignore malformed riven JSON in URL

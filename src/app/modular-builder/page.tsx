@@ -312,6 +312,7 @@ export default function ModularBuilderPage() {
     const rivenParam = params.get("riven");
     if (!typeParam && !partParam) return;
 
+    queueMicrotask(() => {
     const matchesChamber = (c: KitgunChamber, p: string) => {
       const slug = c.id.replace(/_chamber$/, "");
       return p === c.id || p === slug || p.includes(c.id) || p.includes(`kitgun_${slug}`);
@@ -386,6 +387,7 @@ export default function ModularBuilderPage() {
         }
       }
     }
+    });
   }, [allMods]);
 
   const buildModularData = useCallback((): ModularBuildData => {
@@ -526,7 +528,7 @@ export default function ModularBuilderPage() {
     setBuildIsPublic(build.isPublic ?? false);
     setShowSavedBuilds(false);
     toast.info("Build loaded", { description: build.name });
-  }, [markClean, modsMap]);
+  }, [markClean, modsMap, setShowSavedBuilds]);
 
   useCloudBuildFromUrl("modular", handleLoadBuild);
   const { context: loadoutCtx, clearContext: clearLoadoutCtx } = useLoadoutSlotFromUrl("modular", handleLoadBuild);

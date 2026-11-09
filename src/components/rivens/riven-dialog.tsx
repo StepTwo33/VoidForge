@@ -262,6 +262,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
   // Initialize or reset form when modal opens
   useEffect(() => {
     if (!open) return;
+    queueMicrotask(() => {
     setIsScaled9x(false);
     if (initialScannedRiven) {
       if (initialScannedRiven.weaponId) {
@@ -313,6 +314,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
       ]);
       setNegativeStat({ key: "zoom", value: 0.30 });
     }
+    });
   }, [open, initialRiven, initialScannedRiven, fixedWeaponId]);
 
   // Compute stat pools with ranges for reference hints
@@ -410,8 +412,8 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
       score: evalResult.score,
       grade: evalResult.grade,
       gradeColor: evalResult.color,
-      createdAt: initialRiven?.createdAt ?? Date.now(),
-      updatedAt: Date.now(),
+      createdAt: initialRiven?.createdAt ?? 0,
+      updatedAt: initialRiven?.updatedAt ?? 0,
     };
   }, [
     positiveStats,

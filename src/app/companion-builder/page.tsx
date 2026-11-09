@@ -34,7 +34,7 @@ import {
 import { ModSlotCard } from "@/components/mod-slot";
 import { ModPicker } from "@/components/mod-picker";
 import { useCompanions, useWeapons, useMods } from "@/lib/weapons/use-data";
-import { Companion, Mod, Weapon, EquippedMod, CompanionCalculatedStats, CompanionLinkedWarframe, DEFAULT_SIM_PARAMS, WeaponExternalBuff, WeaponCalculationOptions } from "@/lib/types";
+import { Companion, Mod, Weapon, EquippedMod, CompanionCalculatedStats, CompanionLinkedWarframe, DEFAULT_SIM_PARAMS, WeaponExternalBuff, WeaponCalculationOptions, type ModSlot } from "@/lib/types";
 import { calculateCompanionBuild } from "@/lib/calc/companion-calculator";
 import { calculateWeaponBuild } from "@/lib/calc/calculator";
 import { weaponSupportsHunterCompanionSet } from "@/lib/calc/set-bonuses";
@@ -392,18 +392,19 @@ export default function CompanionBuilderPage() {
       setSelectedWeapon(null);
     }
     const rivenMap: Record<number, Record<string, number>> = {};
-    for (const m of d.weaponMods || []) {
-      if ((m as any).rivenStats) rivenMap[m.slotIndex] = (m as any).rivenStats;
+    type LoadedWeaponMod = ModSlot & { modName?: string; polarity?: string; drain?: number };
+    const loadedWeaponMods = (d.weaponMods || []) as LoadedWeaponMod[];
+    for (const m of loadedWeaponMods) {
+      if (m.rivenStats) rivenMap[m.slotIndex] = m.rivenStats;
     }
     setWeaponRivenStatsMap(Object.keys(rivenMap).length > 0 ? rivenMap : undefined);
-    setWeaponMods(dropUnknownMods(d.weaponMods, modsMap).map((m) => {
+    setWeaponMods(dropUnknownMods(loadedWeaponMods, modsMap).map((m) => {
       const mod = modsMap.get(m.modId);
-      const anyM = m as any;
       return {
         ...m,
-        modName: anyM.modName || mod?.name || "",
-        polarity: anyM.polarity || mod?.polarity,
-        drain: typeof anyM.drain === "number" ? anyM.drain : mod?.drain,
+        modName: m.modName || mod?.name || "",
+        polarity: m.polarity || mod?.polarity,
+        drain: typeof m.drain === "number" ? m.drain : mod?.drain,
       };
     }));
     setHasReactor(d.hasReactor);
@@ -448,6 +449,7 @@ export default function CompanionBuilderPage() {
 
     const parts = defaultPartsForCompanion(companion) ?? null;
     const resolved = parts ? resolveCompanionParts(parts) : null;
+    queueMicrotask(() => {
     setSelectedCompanion(companion);
     setCompanionParts(parts);
     setSlotPolarities(resolved?.defaultSlotPolarities ?? {});
@@ -477,6 +479,7 @@ export default function CompanionBuilderPage() {
         // ignore bad JSON
       }
     }
+    });
   }, [allCompanions, allWeapons, allMods, searchParams]);
 
   const handleSaveDialog = useCallback(async (values: SaveBuildDialogValues) => {

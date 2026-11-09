@@ -100,7 +100,9 @@ export function RivenLibrary() {
   }, [allWeapons]);
 
   useEffect(() => {
-    refreshRivens();
+    queueMicrotask(() => {
+      void refreshRivens();
+    });
   }, [refreshRivens]);
 
   // /builds#rivens: re-scroll once content settles
