@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EnemyLevelControl } from "@/components/enemy-level-control";
-import { formatAbilityEfficiencyPct } from "@/lib/display/ability-efficiency";
+import { loadoutCombatStatCells } from "@/lib/builds/loadout-combat-stats";
 
 const SCENARIO_LABELS: Record<DamageScenario, string> = {
   paper: "Paper",
@@ -883,23 +883,19 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
                 {stats.warframe.forms.map((form) => (
                   <div key={form.id} className="rounded-md border border-purple-500/15 bg-background/30 px-2 py-1.5">
                     <p className="text-[10px] font-semibold text-purple-800/90 mb-1 dark:text-purple-300/90">{form.label}</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-x-3 gap-y-1">
-                      <MiniStat label="EHP" value={fmtDamageNum(form.stats?.effectiveHealth ?? 0)} />
-                      <MiniStat label="Sprint" value={(form.stats?.totalSprint ?? 0).toFixed(2)} />
-                      <MiniStat label="Strength" value={`${((form.stats?.abilityStrength ?? 0) * 100).toFixed(0)}%`} />
-                      <MiniStat label="Duration" value={`${((form.stats?.abilityDuration ?? 0) * 100).toFixed(0)}%`} />
-                      <MiniStat label="Efficiency" value={form.stats ? formatAbilityEfficiencyPct(form.stats.abilityEfficiency) : "0%"} />
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 sm:grid-cols-3 lg:grid-cols-6">
+                      {loadoutCombatStatCells(form.stats).map((cell) => (
+                        <MiniStat key={cell.label} label={cell.label} value={cell.value} />
+                      ))}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-x-3 gap-y-1">
-                <MiniStat label="EHP" value={fmtDamageNum(stats.warframe.stats?.effectiveHealth ?? 0)} />
-                <MiniStat label="Sprint" value={(stats.warframe.stats?.totalSprint ?? 0).toFixed(2)} />
-                <MiniStat label="Strength" value={`${((stats.warframe.stats?.abilityStrength ?? 0) * 100).toFixed(0)}%`} />
-                <MiniStat label="Duration" value={`${((stats.warframe.stats?.abilityDuration ?? 0) * 100).toFixed(0)}%`} />
-                <MiniStat label="Efficiency" value={stats.warframe.stats ? formatAbilityEfficiencyPct(stats.warframe.stats.abilityEfficiency) : "0%"} />
+              <div className="grid grid-cols-2 gap-x-3 gap-y-1 sm:grid-cols-3 lg:grid-cols-6">
+                {loadoutCombatStatCells(stats.warframe.stats).map((cell) => (
+                  <MiniStat key={cell.label} label={cell.label} value={cell.value} />
+                ))}
               </div>
             )}
           </div>
