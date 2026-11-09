@@ -1,7 +1,7 @@
 import { allHelminthAbilities } from "@/data/helminth";
 import { WIKI_WEAPON_CLASS } from "@/data/arcane-weapon-classes";
 import { getArcaneEffectDef } from "@/lib/calc/arcane-calculator";
-import { arcaneStackCap, scaleArcaneEffectLine } from "@/lib/calc/arcane-utils";
+import { scaleArcaneEffectLine } from "@/lib/calc/arcane-utils";
 import { helminthToAbility } from "@/lib/builds/helminth-resolve";
 import {
   computeWarframeAuraEffectivenessMult,
@@ -133,6 +133,8 @@ function emptyWeaponAcc(): WeaponModAccumulators {
     onKillPerStackCap: 4,
     heavyAttackWindUpBonus: 0,
     triggerStatBonuses: {},
+    invisibleStatBonuses: {},
+    abilityCastAimStatBonuses: {},
     slashOnCritChance: 0,
     extraElectricProcChance: 0,
     slashOnImpactProcChance: 0,
@@ -1713,19 +1715,20 @@ function resolveWarframePassiveBuffs(
  */
 export function resolveWeaponPassiveBuffs(
   weapon: Weapon,
-  state?: Record<string, number>,
+  simParams?: Pick<SimulationParams, "weaponPassiveState" | "applyHeadshots" | "applyAiming">,
 ): WeaponExternalBuff[] {
-  if (!state) return [];
+  const state = simParams?.weaponPassiveState ?? {};
   const buffs: WeaponExternalBuff[] = [];
   const wid = weapon.id;
 
-  if (wid === "athodai" && (state.athodai_overdrive ?? 0) > 0) {
+  if ((wid === "athodai" || wid === "athodai_prime") && (state.athodai_overdrive ?? 0) > 0) {
     buffs.push({
       id: "passive_athodai_overdrive",
       label: "Overdrive (Athodai Passive)",
       category: "other",
       fireRateBonus: 1.0,
-      nominal: "+100% Fire Rate & unlimited ammo on headshot kill",
+      infiniteAmmoUptime: 1,
+      nominal: "+100% Fire Rate and Infinite Ammo on weak point kill",
     });
   }
 
@@ -1796,7 +1799,9 @@ export function resolveWeaponPassiveBuffs(
   }
 
   if (wid === "ax_52") {
-    if ((state.ax_52_aimed_headshot ?? 0) > 0) {
+    const aimed = !!(simParams?.applyAiming || (state.ax_52_aimed_headshot ?? 0) > 0);
+    // Wiki AX-52: hip-fire is +75% ammo efficiency. +400% CC applies only to headshots while aiming.
+    if (aimed && simParams?.applyHeadshots) {
       buffs.push({
         id: "passive_ax_52_aimed_headshot",
         label: "Marksman (AX-52 Passive)",
@@ -1804,7 +1809,7 @@ export function resolveWeaponPassiveBuffs(
         critChanceBonus: 4.0,
         nominal: "+400% Critical Chance on aimed headshots",
       });
-    } else {
+    } else if (!aimed) {
       buffs.push({
         id: "passive_ax_52_hipfire",
         label: "Hip-fire (AX-52 Passive)",
@@ -1849,7 +1854,7 @@ export function resolveStandaloneExternalBuffs(
   simParams: SimulationParams,
 ): WeaponExternalBuff[] {
   const buffs: WeaponExternalBuff[] = [];
-  buffs.push(...resolveWeaponPassiveBuffs(weapon, simParams.weaponPassiveState));
+  buffs.push(...resolveWeaponPassiveBuffs(weapon, simParams));
   if (simParams.applyYareliCriticalFlow === true && isSecondaryWeapon(weapon)) {
     buffs.push({
       id: "passive_yareli_critical_flow",
@@ -1909,12 +1914,6 @@ function resolveWarframeArcaneBuffs(
   const buffs: WeaponExternalBuff[] = [];
   const ranks = ctx.warframeArcaneRanks ?? [];
 
-  const isPaper =
-    (simParams.arcaneStacks ?? 0) <= 0 &&
-    !simParams.applyTriggerBuffs &&
-    (simParams.killStacks ?? 0) <= 0 &&
-    (simParams.comboCount ?? 0) <= 0;
-
   for (let idx = 0; idx < arcaneIds.length; idx++) {
     const id = arcaneIds[idx];
     if (!id) continue;
@@ -1923,14 +1922,15 @@ function resolveWarframeArcaneBuffs(
 
     const rank = ranks[idx] != null && Number.isFinite(ranks[idx]) ? ranks[idx]! : def.maxRank;
 
+    // Each Warframe arcane follows its own toggle or event. Kill stacks, combo, and the
+    // generic trigger bucket do not turn the others on.
     let stacks = 0;
     if (simParams.arcaneStacksById && simParams.arcaneStacksById[id] != null) {
       stacks = simParams.arcaneStacksById[id];
-    } else if (isPaper) {
-      stacks = def.trigger === "passive" ? 1 : 0;
-    } else {
-      const cap = def.trigger === "stacks" ? (arcaneStackCap(def, rank) ?? 1) : 1;
-      stacks = cap > 1 && (simParams.arcaneStacks ?? 0) > 0 ? Math.min(cap, simParams.arcaneStacks) : cap;
+    } else if (id === "arcane_crepuscular" && simParams.applyInvisible) {
+      stacks = 1;
+    } else if (def.trigger === "passive") {
+      stacks = 1;
     }
 
     if (stacks <= 0) continue;
@@ -2135,12 +2135,28 @@ function resolveWarframeArcaneBuffs(
       }
 
       case "arcane_crepuscular": {
+        const cmLine = (def.effects ?? []).find((e) => e.stat === "criticalMultiplier");
+        const cm = cmLine ? scaleArcaneEffectLine(cmLine, rank, def.maxRank) : 3;
         buffs.push({
           id: buffId,
           label: def.name || "Arcane Crepuscular",
           category: "arcane",
-          critMultFlatBonus: 3.0,
-          nominal: "+3× final crit multiplier while invisible",
+          critMultFlatBonus: cm,
+          nominal: `+${cm}× final crit multiplier while invisible`,
+        });
+        break;
+      }
+
+      case "arcane_pistoleer": {
+        // Realized active window: Infinite Ammo on primaries and secondaries.
+        // Expected uptime from the proc chance stays in infiniteAmmoUptimeFromChance, not this toggle.
+        if (!isPrimaryWeapon(weapon) && !isGroundPrimaryWeapon(weapon) && !isSecondaryWeapon(weapon)) break;
+        buffs.push({
+          id: buffId,
+          label: def.name || "Arcane Pistoleer",
+          category: "arcane",
+          infiniteAmmoUptime: 1,
+          nominal: "Infinite Ammo (active window) on primary and secondary",
         });
         break;
       }
@@ -2182,7 +2198,7 @@ export function resolveWeaponExternalBuffs(
   ctx: WeaponBuffContext | undefined,
   simParams: SimulationParams,
 ): WeaponExternalBuff[] {
-  const passiveBuffs = resolveWeaponPassiveBuffs(weapon, simParams?.weaponPassiveState);
+  const passiveBuffs = resolveWeaponPassiveBuffs(weapon, simParams);
   if (!ctx) return passiveBuffs;
   return [
     ...passiveBuffs,

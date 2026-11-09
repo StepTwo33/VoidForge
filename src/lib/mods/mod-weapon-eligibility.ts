@@ -1,3 +1,4 @@
+import { WIKI_WEAPON_CLASS } from "@/data/arcane-weapon-classes";
 import type { Mod } from "@/lib/types";
 import {
   isMeleeWeaponExilusMod,
@@ -327,8 +328,11 @@ export const UNIVERSAL_PRIMARY_MOD_IDS = new Set([
  */
 export function resolvePrimaryWeaponClass(
   weaponCategory: string | undefined,
-  weaponProfile?: Pick<WeaponModProfile, "category" | "triggerType">,
+  weaponProfile?: Pick<WeaponModProfile, "category" | "triggerType" | "weaponId">,
 ): string | undefined {
+  const wikiClass = weaponProfile?.weaponId ? WIKI_WEAPON_CLASS[weaponProfile.weaponId] : undefined;
+  // Phantasma is stored as category "primary" / trigger "Held", but the wiki class is Shotgun.
+  if (wikiClass === "Shotgun" || wikiClass === "Dual Shotguns") return "shotgun";
   const cat = (weaponCategory || weaponProfile?.category || "").toLowerCase();
   if (cat === "shotgun") return "shotgun";
   const trigger = (weaponProfile?.triggerType || "").toLowerCase();

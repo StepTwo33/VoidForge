@@ -1008,6 +1008,8 @@ export function calculateWeaponBuild(
     onKillPerStackCap: 4,
     heavyAttackWindUpBonus: 0,
     triggerStatBonuses: {},
+    invisibleStatBonuses: {},
+    abilityCastAimStatBonuses: {},
     slashOnCritChance: 0,
     extraElectricProcChance: 0,
     slashOnImpactProcChance: 0,
@@ -1282,6 +1284,19 @@ export function calculateWeaponBuild(
   if (galvMultishotOnKillPerStack > 0 && galvMultishotStacks > 0) {
     multishotBonus += galvMultishotOnKillPerStack * galvMultishotStacks;
   }
+  // Clip Delegation (wiki): on reload, next magazine gains status and multishot per shot
+  // landed (5% at R0 … 15% at R5), max 15 stacks. Pellets do not add stacks.
+  const clipSlot = equippedMods.find((m) => m.modId === "clip_delegation");
+  if (clipSlot) {
+    const clipRank = Math.min(5, Math.max(0, Math.round(clipSlot.rank ?? 0)));
+    const perShot = 0.05 + clipRank * 0.02;
+    const shotsLanded = Math.min(15, Math.max(0, Math.floor(sim.clipDelegationShots ?? 0)));
+    const clipBonus = perShot * shotsLanded;
+    if (clipBonus > 0) {
+      statusBonus += clipBonus;
+      multishotBonus += clipBonus;
+    }
+  }
   stats.galvanizedMultishotOnKill = galvMultishotOnKillPerStack;
   stats.galvanizedMultishotStackCap = weaponModAcc.galvMultishotStackCap;
 
@@ -1292,6 +1307,11 @@ export function calculateWeaponBuild(
   const activeBuffPools: Record<string, number>[] = [];
   if (sim.killStacks > 0) activeBuffPools.push(onKill);
   if (sim.applyTriggerBuffs) activeBuffPools.push(trigger);
+  if (sim.applyInvisible) activeBuffPools.push(weaponModAcc.invisibleStatBonuses);
+  const aimingForCast = !!(sim.applyAiming || sim.applyTriggerBuffs);
+  if (sim.applyAbilityCast && aimingForCast) {
+    activeBuffPools.push(weaponModAcc.abilityCastAimStatBonuses);
+  }
   const triggerElementalTypes = [
     "heat",
     "cold",
@@ -1384,22 +1404,25 @@ export function calculateWeaponBuild(
     critChanceBonus += weaponModAcc.weakPointCritChanceBonus;
   }
 
-  // Apply Galvanized Scope/Crosshairs: crit while aiming only after headshots (sim toggle);
-  // headshot-kill stacks reuse the kill-stacks slider (in-game cap 5).
-  // Wiki: +120% CC when Aiming on Headshot; +40% CC when Aiming per Headshot Kill (max 5x).
-  // Both require Aiming (sim.applyTriggerBuffs).
+  // Galvanized Scope / Crosshairs (wiki body, Update 44.0): while aiming, a prior weak-point
+  // hit grants the base crit buff, and weak-point kills add stacks (max 5). This shot's
+  // location is separate: the base buff is up when the shot is a weak point or headshot
+  // (the hit that refreshes it) or when the user has marked the buff active via aiming
+  // plus that location. Kill stacks apply while aiming even if this shot is body.
   const galvCritOnHeadshotBase = weaponModAcc.galvCritOnHeadshotBase;
   const galvCritOnHeadshotPerStack = weaponModAcc.galvCritOnHeadshotPerStack;
-  if (galvCritOnHeadshotBase > 0 && sim.applyTriggerBuffs) {
+  const scopeAiming = !!(sim.applyAiming || sim.applyTriggerBuffs);
+  const scopeWeakPoint = !!(sim.applyHeadshots || sim.applyWeakPoints);
+  if ((galvCritOnHeadshotBase > 0 || galvCritOnHeadshotPerStack > 0) && scopeAiming) {
     const galvCritStacks = Math.min(killStacksFor("galvCrit"), 5);
-    const baseBonus = sim.applyHeadshots ? galvCritOnHeadshotBase : 0;
+    const baseBonus = scopeWeakPoint ? galvCritOnHeadshotBase : 0;
     const stackBonus = galvCritOnHeadshotPerStack * galvCritStacks;
     critChanceBonus += baseBonus + stackBonus;
   }
   if (galvCritOnHeadshotPerStack > 0) {
     killStackSources.push({
       id: "galvCrit",
-      label: "Galvanized headshot",
+      label: "Galvanized weak point",
       cap: 5,
       modName: galvCritModName,
     });
