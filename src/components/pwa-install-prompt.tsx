@@ -68,7 +68,7 @@ export function PWAInstallPrompt() {
   if (!visible || installed) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-sm z-50 animate-in slide-in-from-bottom-4 fade-in duration-300">
+    <div className="fixed z-40 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] left-3 right-3 max-w-sm sm:left-4 sm:right-auto lg:bottom-4 animate-in slide-in-from-bottom-4 fade-in duration-300">
       <div className="flex items-center gap-3 p-4 rounded-xl border border-primary/20 bg-card shadow-lg shadow-[var(--shadow-color)]">
         <div className="p-2 rounded-lg bg-primary/10 shrink-0">
           <Download className="h-5 w-5 text-primary" />

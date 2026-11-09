@@ -457,10 +457,10 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-      <div className="relative flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-purple-500/30 bg-[#120822] text-foreground shadow-2xl">
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+      <div className="relative flex max-h-[min(92dvh,100dvh-2rem)] min-h-0 w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-purple-500/30 bg-[#120822] text-foreground shadow-2xl">
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-purple-500/20 px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-purple-500/20 px-6 py-4">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-purple-400" />
             <h2 className="text-lg font-bold text-white">
@@ -477,7 +477,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
         </div>
 
         {/* Modal Body */}
-        <div className="grid grid-cols-1 gap-6 overflow-y-auto p-6 md:grid-cols-12">
+        <div className="grid min-h-0 flex-1 touch-manipulation grid-cols-1 gap-6 overflow-y-auto overscroll-contain p-6 md:grid-cols-12">
           {/* Controls Column */}
           <div className="space-y-4 md:col-span-7">
             {/* Screenshot Drop / Paste Zone */}
@@ -952,7 +952,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-purple-500/20 px-6 py-4">
+        <div className="flex shrink-0 items-center justify-end gap-3 border-t border-purple-500/20 px-6 py-4">
           <button
             type="button"
             onClick={onClose}
