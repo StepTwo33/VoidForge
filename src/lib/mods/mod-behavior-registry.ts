@@ -288,13 +288,6 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
         acc.invisibleStatBonuses[statKey] = (acc.invisibleStatBonuses[statKey] ?? 0) + modValue;
         return true;
       }
-      const bucket = TRIGGER_BUCKETS[ctx.modId];
-      if (bucket) {
-        const bag = acc.triggerBuckets[bucket] ?? {};
-        bag[statKey] = (bag[statKey] ?? 0) + modValue;
-        acc.triggerBuckets[bucket] = bag;
-        return true;
-      }
       if (ctx.modId === "catalyzer_link" || ctx.modId === "embedded_catalyzer") {
         acc.abilityCastAimStatBonuses[statKey] = (acc.abilityCastAimStatBonuses[statKey] ?? 0) + modValue;
         return true;
@@ -378,6 +371,13 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
       }
       if (ctx.modId === "fired_up" && key === "heat") {
         value = modValue * 20;
+      }
+      const bucket = TRIGGER_BUCKETS[ctx.modId];
+      if (bucket) {
+        const bag = acc.triggerBuckets[bucket] ?? {};
+        bag[key] = (bag[key] ?? 0) + value;
+        acc.triggerBuckets[bucket] = bag;
+        return true;
       }
       acc.triggerStatBonuses[key] = (acc.triggerStatBonuses[key] ?? 0) + value;
       return true;
