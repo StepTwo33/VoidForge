@@ -57,9 +57,7 @@ export function LoadoutEditBanner({
   const target = pendingHref ?? backHref;
 
   const go = (href: string) => {
-    // Another slot opens a builder (maybe this same page): do a full load so the slot is read fresh.
-    if (href === backHref) router.push(href);
-    else window.location.assign(href);
+    router.push(href);
   };
 
   const requestNavigate = (href: string) => {

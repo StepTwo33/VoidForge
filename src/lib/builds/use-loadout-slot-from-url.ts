@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { getLoadouts } from "@/lib/builds/loadouts";
 import type { SavedBuild } from "@/lib/builds/build-storage";
 import type { Loadout } from "@/lib/types";
@@ -56,6 +57,12 @@ function resolveSlot(kind: BuilderKind, slot: string | null, data: unknown): str
   return "primary";
 }
 
+/** Identity of the loadout slot in the URL. A different slot must re-apply without a full reload. */
+export function loadoutSlotApplyKey(loadoutId: string | null, slot: string | null): string | null {
+  if (!loadoutId) return null;
+  return `${loadoutId}:${slot ?? ""}`;
+}
+
 /** Remove `?loadout=&slot=` from the current URL, keeping any other params. */
 export function stripLoadoutParams(): void {
   const url = new URL(window.location.href);
@@ -77,39 +84,37 @@ export function useLoadoutSlotFromUrl(
   apply: (build: SavedBuild) => void,
   ready = true,
 ): { context: LoadoutEditContext | null; clearContext: () => void } {
-  const appliedRef = useRef(false);
+  const searchParams = useSearchParams();
+  const loadoutId = searchParams.get("loadout");
+  const slotParam = searchParams.get("slot");
+  const appliedKey = useRef<string | null>(null);
   const [context, setContext] = useState<LoadoutEditContext | null>(null);
 
   useEffect(() => {
-    if (!ready || appliedRef.current) return;
-    queueMicrotask(() => {
-      if (appliedRef.current) return;
-      const params = new URLSearchParams(window.location.search);
-      const loadoutId = params.get("loadout");
-      if (!loadoutId) return;
-      const slotParam = params.get("slot");
+    if (!ready) return;
+    const key = loadoutSlotApplyKey(loadoutId, slotParam);
+    if (!key || appliedKey.current === key) return;
+    const loadout = getLoadouts().find((l) => l.id === loadoutId);
+    const data = loadout ? extractSlotData(loadout, kind, slotParam) : undefined;
+    if (!loadout || !data) return;
 
-      const loadout = getLoadouts().find((l) => l.id === loadoutId);
-      const data = loadout ? extractSlotData(loadout, kind, slotParam) : undefined;
-      if (!loadout || !data) return;
-
-      appliedRef.current = true;
-      const slot = resolveSlot(kind, slotParam, data);
-      apply({
-        id: "",
-        name: `${loadout.name} (${loadoutSlotLabel(slot)})`,
-        type: kind,
-        createdAt: loadout.createdAt,
-        updatedAt: loadout.updatedAt,
-        data,
-      });
-      setContext({ loadoutId: loadout.id, loadoutName: loadout.name, kind, slot });
-      // ?loadout=&slot= stay in the URL, so a refresh reopens the same slot with its banner.
+    appliedKey.current = key;
+    const slot = resolveSlot(kind, slotParam, data);
+    apply({
+      id: "",
+      name: `${loadout.name} (${loadoutSlotLabel(slot)})`,
+      type: kind,
+      createdAt: loadout.createdAt,
+      updatedAt: loadout.updatedAt,
+      data,
     });
-  }, [kind, apply, ready]);
+    setContext({ loadoutId: loadout.id, loadoutName: loadout.name, kind, slot });
+    // ?loadout=&slot= stay in the URL, so a refresh reopens the same slot with its banner.
+  }, [kind, apply, ready, loadoutId, slotParam]);
 
   /** Detach from the loadout: drop the banner and the URL params (a refresh stays detached). */
   const clearContext = useCallback(() => {
+    appliedKey.current = null;
     setContext(null);
     stripLoadoutParams();
   }, []);
