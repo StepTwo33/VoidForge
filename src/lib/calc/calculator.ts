@@ -1012,6 +1012,7 @@ export function calculateWeaponBuild(
     abilityCastAimStatBonuses: {},
     reloadAimStatBonuses: {},
     reloadStatBonuses: {},
+    triggerBuckets: {},
     slashOnCritChance: 0,
     extraElectricProcChance: 0,
     slashOnImpactProcChance: 0,
@@ -1318,6 +1319,20 @@ export function calculateWeaponBuild(
     activeBuffPools.push(weaponModAcc.reloadAimStatBonuses);
   }
   if (sim.applyReload) activeBuffPools.push(weaponModAcc.reloadStatBonuses);
+  const buckets = weaponModAcc.triggerBuckets ?? {};
+  const bucketOn = (flag: boolean | undefined) => flag === true || (flag !== false && !!sim.applyTriggerBuffs);
+  if (bucketOn(sim.applyAiming)) activeBuffPools.push(buckets.aiming ?? {});
+  if (
+    (sim.applyAbilityCast === true && (sim.applyAiming === true || sim.applyTriggerBuffs === true)) ||
+    (sim.applyTriggerBuffs === true && sim.applyAbilityCast !== false)
+  ) {
+    activeBuffPools.push(buckets.castAim ?? {});
+  }
+  if (bucketOn(sim.applyCrouch)) activeBuffPools.push(buckets.crouch ?? {});
+  if (bucketOn(sim.applyWallLatch)) activeBuffPools.push(buckets.wall ?? {});
+  if (bucketOn(sim.applyAirborne)) activeBuffPools.push(buckets.air ?? {});
+  if (bucketOn(sim.applyAimGlide)) activeBuffPools.push(buckets.glide ?? {});
+  if (bucketOn(sim.applyDistance)) activeBuffPools.push(buckets.distance ?? {});
   const triggerElementalTypes = [
     "heat",
     "cold",

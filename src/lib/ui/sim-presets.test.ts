@@ -15,6 +15,8 @@ describe("shared simulation presets", () => {
       killStacks: 5,
       clipDelegationShots: 12,
       applyStanceMultiplier: true,
+      sniperZoomLevel: 2,
+      targetFaction: "Grineer",
       weaponPassiveState: { athodai_overdrive: 1, ax_52_aimed_headshot: 1 },
     });
     expect(paper.applyHeadshots).toBe(false);
@@ -27,6 +29,8 @@ describe("shared simulation presets", () => {
     expect(paper.clipDelegationShots).toBe(0);
     expect(paper.weaponPassiveState).toEqual({ athodai_overdrive: 0, ax_52_aimed_headshot: 0 });
     expect(paper.applyStanceMultiplier).toBe(true);
+    expect(paper.sniperZoomLevel).toBeUndefined();
+    expect(paper.targetFaction).toBeUndefined();
   });
 
   it("max stacks does not change hit location and turns the named events on", () => {

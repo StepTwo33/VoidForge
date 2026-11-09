@@ -197,7 +197,11 @@ export function WeaponSimControls({
                 ["applyInvisible", "Invisible", "Invisible. Arcane Crepuscular and Spectral Serration."],
                 ["applyAbilityCast", "Ability cast", "An ability was cast. Catalyzer Link also needs Aiming."],
                 ["applyReload", "Reload", "A reload just happened. Spring-Loaded mods also need Aiming."],
-                ["applyTriggerBuffs", "Other", "Distance, wall latch, crouch, and other triggers that are not the events above."],
+                ["applyCrouch", "Crouch", "Crouching. Lie In Wait."],
+                ["applyWallLatch", "Wall latch", "Holding a wall latch. Proton Jet and Proton Snap."],
+                ["applyAirborne", "Airborne", "In the air. Soaring Strike and Zazvat-Kar."],
+                ["applyAimGlide", "Aim glide", "Aim gliding. Aero Agility."],
+                ["applyDistance", "Distance", "Target is far. Range Advantage and Spring-Loaded Broadhead."],
               ] as const
             ).map(([key, label, title]) => (
               <label

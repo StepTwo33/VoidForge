@@ -73,6 +73,8 @@ export type WeaponModAccumulators = {
   reloadAimStatBonuses: Record<string, number>;
   /** On reload, without also requiring aim (Deadly Efficiency). */
   reloadStatBonuses: Record<string, number>;
+  /** Named situational buckets (crouch, wall latch, airborne, distance, aim glide, aiming). */
+  triggerBuckets: Record<string, Record<string, number>>;
   /** Chance to force a Slash proc on crits (Hunter Munitions). */
   slashOnCritChance: number;
   /** Chance to force an extra Electric proc on hit (Prototype Shock Coils; independent of damage types). */
@@ -129,6 +131,22 @@ const GALV_STACK_CAPS: Record<string, number> = {
   strain_infection: 8,
   galvanized_steel: 4,
   galvanized_elementalist: 4,
+};
+
+const TRIGGER_BUCKETS: Record<string, string> = {
+  lasting_purity: "aiming",
+  measured_burst: "aiming",
+  critical_focus: "aiming",
+  marked_target: "aiming",
+  nano_applicator: "castAim",
+  lie_in_wait: "crouch",
+  proton_jet: "wall",
+  proton_snap: "wall",
+  soaring_strike: "air",
+  zazvat_kar: "air",
+  aero_agility: "glide",
+  range_advantage: "distance",
+  spring_loaded_broadhead: "distance",
 };
 
 function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): boolean {
@@ -262,8 +280,19 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
       acc.onKillPerStackCap = GALV_STACK_CAPS[ctx.modId] ?? acc.onKillPerStackCap ?? 4;
       return true;
     case "conditional_stat_on_trigger": {
-      if (ctx.modId === "spectral_serration" || ctx.modId === "spectral_serration_r5") {
+      if (
+        ctx.modId === "spectral_serration" ||
+        ctx.modId === "spectral_serration_r5" ||
+        ctx.modId === "unseen_dread"
+      ) {
         acc.invisibleStatBonuses[statKey] = (acc.invisibleStatBonuses[statKey] ?? 0) + modValue;
+        return true;
+      }
+      const bucket = TRIGGER_BUCKETS[ctx.modId];
+      if (bucket) {
+        const bag = acc.triggerBuckets[bucket] ?? {};
+        bag[statKey] = (bag[statKey] ?? 0) + modValue;
+        acc.triggerBuckets[bucket] = bag;
         return true;
       }
       if (ctx.modId === "catalyzer_link" || ctx.modId === "embedded_catalyzer") {

@@ -719,6 +719,16 @@ export interface SimulationParams {
    * Distinct from the generic trigger bucket.
    */
   applyReload?: boolean;
+  /** Crouching. Lie In Wait. */
+  applyCrouch?: boolean;
+  /** Wall latch. Proton Jet and Proton Snap. */
+  applyWallLatch?: boolean;
+  /** Airborne. Soaring Strike and Zazvat-Kar. */
+  applyAirborne?: boolean;
+  /** Aim glide. Aero Agility. */
+  applyAimGlide?: boolean;
+  /** Target is far enough for distance mods (Range Advantage, Spring-Loaded Broadhead). */
+  applyDistance?: boolean;
   /**
    * Clip Delegation: shots landed with the current magazine before reload (0–15).
    * The next magazine's status and multishot bonus. Not pellets or punch-through.

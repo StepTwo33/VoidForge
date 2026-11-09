@@ -687,7 +687,7 @@ describe("Sim4 tendril / HP-cap exclusives (wiki max rank)", () => {
     const bareCm = calculateWeaponBuild(dread, [], modsMap()).criticalMultiplier;
     expect(build("dread", "unseen_dread", {}).criticalMultiplier).toBeCloseTo(bareCm, 5);
     expect(
-      build("dread", "unseen_dread", { applyTriggerBuffs: true }).criticalMultiplier,
+      build("dread", "unseen_dread", { applyInvisible: true }).criticalMultiplier,
     ).toBeCloseTo(bareCm * 2.75, 4);
   });
 

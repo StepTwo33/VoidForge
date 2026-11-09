@@ -40,6 +40,11 @@ function simSummaryChips(
   if (simParams.applyInvisible) chips.push("Invisible");
   if (simParams.applyAbilityCast) chips.push("Ability cast");
   if (simParams.applyReload) chips.push("Reload");
+  if (simParams.applyCrouch) chips.push("Crouch");
+  if (simParams.applyWallLatch) chips.push("Wall latch");
+  if (simParams.applyAirborne) chips.push("Airborne");
+  if (simParams.applyAimGlide) chips.push("Aim glide");
+  if (simParams.applyDistance) chips.push("Distance");
   if (simParams.applyTriggerBuffs) chips.push("Other triggers");
   if (simParams.applyYareliCriticalFlow) chips.push("Yareli +200% CC");
   if (simParams.applyZephyrAirborne) chips.push("Zephyr +150% CC");

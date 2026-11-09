@@ -137,6 +137,7 @@ function emptyWeaponAcc(): WeaponModAccumulators {
     abilityCastAimStatBonuses: {},
     reloadAimStatBonuses: {},
     reloadStatBonuses: {},
+    triggerBuckets: {},
     slashOnCritChance: 0,
     extraElectricProcChance: 0,
     slashOnImpactProcChance: 0,
