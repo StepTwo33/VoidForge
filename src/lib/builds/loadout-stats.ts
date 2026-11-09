@@ -569,22 +569,23 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
         mods: ModSlot[],
         arcanes: (Mod | null)[],
       ) => {
-        const arcaneStacksById: Record<string, number> = {
-          ...(isPaperScenario ? {} : wb.arcaneStacksById),
-        };
-        if (isPaperScenario) {
-          for (const arc of arcanes) {
-            if (!arc) continue;
-            const def = getArcaneEffectDef(arc.id);
-            if (
-              def &&
-              def.trigger !== "passive" &&
-              arc.id !== "arcane_intention" &&
-              arc.id !== "arcane_persistence"
-            ) {
-              arcaneStacksById[arc.id] = 0;
-            }
+        // Untouched conditional arcanes and mods stay off. A saved explicit value,
+        // including 0, is the build. Paper forces them off. Sim overrides win last.
+        const arcaneStacksById: Record<string, number> = {};
+        for (const arc of arcanes) {
+          if (!arc) continue;
+          const def = getArcaneEffectDef(arc.id);
+          if (
+            def &&
+            def.trigger !== "passive" &&
+            arc.id !== "arcane_intention" &&
+            arc.id !== "arcane_persistence"
+          ) {
+            arcaneStacksById[arc.id] = 0;
           }
+        }
+        if (!isPaperScenario && wb.arcaneStacksById) {
+          Object.assign(arcaneStacksById, wb.arcaneStacksById);
         }
         if (simParams.arcaneStacksById) {
           Object.assign(arcaneStacksById, simParams.arcaneStacksById);
@@ -594,7 +595,7 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
         for (const slot of mods) {
           const def = CONDITIONAL_WARFRAME_MOD_DEFS[slot.modId];
           if (!def) continue;
-          conditionalModStacksById[slot.modId] = isPaperScenario ? 0 : def.maxStacks;
+          conditionalModStacksById[slot.modId] = 0;
         }
         if (!isPaperScenario && wb.conditionalModStacksById) {
           Object.assign(conditionalModStacksById, wb.conditionalModStacksById);

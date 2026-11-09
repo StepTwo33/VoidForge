@@ -858,7 +858,7 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
     expect(full.burstDps).toBeCloseTo(bare.burstDps * (1 + 7 / lex.magazine), 2);
   });
 
-  it("Arcane Pistoleer: stacks>0 → 60% chance for Infinite Ammo for 12s at R5 (uptime 1 − 0.4^12), AE stat unchanged", () => {
+  it("Arcane Pistoleer active stacks are a realized Infinite Ammo window, not the proc-chance uptime", () => {
     const lex = allWeapons.find((w) => w.id === "lex")!;
     const pistoleer = allArcanes.find((a) => a.id === "arcane_pistoleer")!;
     const full = calculateWeaponBuildWithArcanes(
@@ -870,8 +870,7 @@ describe("Phase 6 — arcane passives on paper DPS", () => {
       { ...DEFAULT_SIM_PARAMS, arcaneStacks: 1 },
     );
     expect(full.ammoEfficiency ?? 0).toBeCloseTo(0, 4);
-    // 1 weak-point kill/s over a 12s window: 1 − (1 − 0.6)^12 = 0.9999832 (hand-worked).
-    expect(full.infiniteAmmoUptime).toBeCloseTo(1 - Math.pow(0.4, 12), 6);
+    expect(full.infiniteAmmoUptime).toBeCloseTo(1, 6);
   });
 
   it("Arcane Acceleration: stacks>0 → +90% FR on Braton; no FR on Hek (shotgun)", () => {
