@@ -1081,6 +1081,7 @@ export default function RailjackBuilderPage() {
                           rank={equipped?.rank ?? 0}
                           slotIndex={INTEGRATED_AURA_SLOT}
                           label="Aura"
+                          equippedModIds={integratedMods.map((m) => m.modId)}
                           slotPolarity={integratedPolarities[INTEGRATED_AURA_SLOT]}
                           onAdd={() => { setActiveSlotIndex(INTEGRATED_AURA_SLOT); setModPickerOpen(true); }}
                           onRemove={() => setIntegratedMods((prev) => prev.filter((m) => m.slotIndex !== INTEGRATED_AURA_SLOT))}
@@ -1104,6 +1105,7 @@ export default function RailjackBuilderPage() {
                           mod={mod}
                           rank={equipped?.rank ?? 0}
                           slotIndex={i}
+                          equippedModIds={integratedMods.map((m) => m.modId)}
                           slotPolarity={integratedPolarities[i]}
                           onAdd={() => { setActiveSlotIndex(i); setModPickerOpen(true); }}
                           onRemove={() => setIntegratedMods((prev) => prev.filter((m) => m.slotIndex !== i))}
@@ -1132,6 +1134,7 @@ export default function RailjackBuilderPage() {
                           rank={equipped?.rank ?? 0}
                           slotIndex={i}
                           label={PLEXUS_ABILITY_SLOT_LABELS[category]}
+                          equippedModIds={currentMods.map((m) => m.modId)}
                           slotPolarity={currentPolarities[i]}
                           onAdd={() => { setActiveSlotIndex(i); setModPickerOpen(true); }}
                           onRemove={() => setCurrentMods((prev) => prev.filter((m) => m.slotIndex !== i))}

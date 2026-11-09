@@ -1196,6 +1196,7 @@ export default function CompanionBuilderPage() {
                         label={isPrecept ? "Precept" : undefined}
                         slotPolarity={effectivePolarities[i]}
                         innatePolarity={isInnatePolarity(innatePolarities, slotPolarities, i)}
+                        equippedModIds={equippedModIds}
                         onAdd={() => handleOpenModPicker(i)}
                         onRemove={() => handleRemoveMod(i)}
                         onPolarize={(p) => setSlotPolarities((prev) => applyPolarityOverride(prev, innatePolarities, i, p))}
@@ -1364,6 +1365,7 @@ export default function CompanionBuilderPage() {
                                 innatePolarity={isInnatePolarity(innateWeaponPolarities, weaponSlotPolarities, i)}
                                 rivenStats={weaponRivenStatsMap?.[i]}
                                 weaponCategory={selectedWeapon.category}
+                                equippedModIds={weaponMods.map((m) => m.modId)}
                                 onAdd={() => handleOpenWeaponModPicker(i)}
                                 onRemove={() => handleRemoveWeaponMod(i)}
                                 onPolarize={(p) => setWeaponSlotPolarities((prev) => applyPolarityOverride(prev, innateWeaponPolarities, i, p))}
@@ -1388,6 +1390,7 @@ export default function CompanionBuilderPage() {
                                   rank={equipped?.rank ?? 0}
                                   slotIndex={i}
                                   label="Posture"
+                                  equippedModIds={weaponMods.map((m) => m.modId)}
                                   slotPolarity={effectiveWeaponPolarities[i]}
                         innatePolarity={isInnatePolarity(innateWeaponPolarities, weaponSlotPolarities, i)}
                                   onAdd={() => handleOpenWeaponModPicker(i)}

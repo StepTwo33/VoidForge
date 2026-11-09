@@ -16,6 +16,7 @@ import {
 } from "@/data/mod-exclusions";
 import { WIKI_INCOMPATIBLE_MOD_PAIRS } from "@/data/mod-incompatibilities";
 import { dropIncompatibleMods, dropIncompatibleModsDeep } from "@/lib/mods/mod-incompatibility";
+import { cleanLoadedMods, incompatiblePartnerName } from "@/lib/builds/incompatible-mod-warnings";
 import { buildArsenalData } from "@/lib/warframe-arsenal/normalize-payload";
 import { mapArsenalToImportPayload } from "@/lib/warframe-arsenal/map-import";
 
@@ -72,6 +73,17 @@ describe("mod incompatibility data", () => {
 });
 
 describe("loading builds with incompatible mods", () => {
+  it("names both sides of an illegal pair and cleanLoadedMods keeps them", () => {
+    const mods = [
+      { modId: "redirection_r3", rank: 10, slotIndex: 1 },
+      { modId: "primed_redirection", rank: 10, slotIndex: 2 },
+    ];
+    expect(incompatiblePartnerName(mods, "primed_redirection")).toBeTruthy();
+    expect(incompatiblePartnerName(mods, "redirection_r3")).toBeTruthy();
+    const kept = cleanLoadedMods(mods);
+    expect(kept.map((m) => m.modId)).toEqual(["redirection_r3", "primed_redirection"]);
+  });
+
   it("keeps the first mod by slot and drops the later one", () => {
     const { mods, dropped } = dropIncompatibleMods([
       { modId: "primed_redirection", rank: 10, slotIndex: 4 },

@@ -351,6 +351,7 @@ function BuildCompareTab() {
                           slotIndex={i}
                           mod={mod ?? null}
                           rank={equipped?.rank ?? 0}
+                          equippedModIds={build.mods.map((m) => m.modId)}
                           label={isExilus ? "Exilus" : undefined}
                           onAdd={() => {
                             setActiveSlot(side);

@@ -1146,6 +1146,7 @@ export default function ModularBuilderPage() {
                             slotPolarity={slotPolarities[i]}
                             rivenStats={rivenStatsMap[i]}
                             weaponCategory={assembledWeapon.category}
+                            equippedModIds={equippedMods.map((m) => m.modId)}
                             onAdd={() => openModSlot(i)}
                             onRemove={() => {
                               setEquippedMods((prev) => prev.filter((m) => m.slotIndex !== i));

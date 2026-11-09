@@ -489,6 +489,7 @@ export default function ArchwingBuilderPage() {
                         slotIndex={i}
                         slotPolarity={effectiveFramePolarities[i]}
                         innatePolarity={isInnatePolarity(innateFramePolarities, pols, i)}
+                        equippedModIds={mods.map((m) => m.modId)}
                         onAdd={() => {
                           if (mode === "archwing") { setArchwingActiveSlot(i); setArchwingModPickerOpen(true); }
                           else { setNecramechActiveSlot(i); setNecramechModPickerOpen(true); }
@@ -598,6 +599,7 @@ export default function ArchwingBuilderPage() {
                         slotIndex={i}
                         slotPolarity={effectiveWeaponPolarities[i]}
                         innatePolarity={isInnatePolarity(innateWeaponPolarities, weaponPolarities, i)}
+                        equippedModIds={weaponMods.map((m) => m.modId)}
                         onAdd={() => { setWeaponActiveSlot(i); setWeaponModPickerOpen(true); }}
                         onRemove={() => setWeaponMods((prev) => prev.filter((m) => m.slotIndex !== i))}
                         onPolarize={(p) => setWeaponPolarities((prev) => applyPolarityOverride(prev, innateWeaponPolarities, i, p))}

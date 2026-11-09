@@ -32,11 +32,28 @@ export function describeDroppedMods(dropped: readonly DroppedIncompatibleMod[]):
 
 export function warnDroppedIncompatibleMods(dropped: readonly DroppedIncompatibleMod[]): void {
   if (!dropped.length) return;
-  toast.warning(dropped.length === 1 ? "Removed 1 mod the game won't allow" : `Removed ${dropped.length} mods the game won't allow`, {
-    id: "incompatible-mods-dropped",
-    description: `${describeDroppedMods(dropped).join("; ")}. The first one in the build was kept.`,
-    duration: 9000,
-  });
+  toast.warning(
+    dropped.length === 1 ? "1 mod is illegal with another equipped mod" : `${dropped.length} mods are illegal together`,
+    {
+      id: "incompatible-mods-dropped",
+      description: `${describeDroppedMods(dropped).join("; ")}. They stay in the build and are marked illegal. New copies stay blocked in the picker.`,
+      duration: 9000,
+    },
+  );
+}
+
+/** Display name of the other mod in an illegal pair, if this mod is part of one. */
+export function incompatiblePartnerName(
+  mods: readonly { modId: string; slotIndex?: number }[],
+  modId: string | undefined,
+): string | undefined {
+  if (!modId) return undefined;
+  const { dropped } = dropIncompatibleMods(mods);
+  for (const row of dropped) {
+    if (row.modId === modId) return modName(row.keptModId);
+    if (row.keptModId === modId) return modName(row.modId);
+  }
+  return undefined;
 }
 
 /** "Link Shields → Link Redirection (Update 34)" lines for renamed mods found in an old build. */
@@ -109,7 +126,8 @@ export function cleanLoadedBuild(build: SavedBuild): SavedBuild {
   warnRetiredMods(retired.dropped);
   const incompatible = dropIncompatibleModsDeep(retired.data);
   warnDroppedIncompatibleMods(incompatible.dropped);
-  const { data, clamped } = clampModRanksDeep(incompatible.data, modsMap);
+  // Saved and shared builds keep the illegal mod. The slot marks it; the picker blocks new ones.
+  const { data, clamped } = clampModRanksDeep(retired.data, modsMap);
   warnClampedRanks(clamped);
   if (!incompatible.dropped.length && !renamed.migrated.length && !retired.dropped.length && !clamped.length) return build;
   return { ...build, data };
@@ -121,9 +139,9 @@ export function cleanLoadedMods<T extends { modId: string; slotIndex?: number; r
   warnMigratedMods(renamed.migrated);
   const retired = dropRetiredMods(renamed.mods, modsMap);
   warnRetiredMods(retired.dropped);
-  const { mods: kept, dropped } = dropIncompatibleMods(retired.mods);
+  const { dropped } = dropIncompatibleMods(retired.mods);
   warnDroppedIncompatibleMods(dropped);
-  const { mods: ranked, clamped } = clampModRanks(kept, modsMap);
+  const { mods: ranked, clamped } = clampModRanks(retired.mods, modsMap);
   warnClampedRanks(clamped);
   return ranked;
 }

@@ -1492,6 +1492,7 @@ export default function WeaponBuilderPage() {
                         innatePolarity={isInnatePolarity(innatePolarities, slotPolarities, i)}
                         rivenStats={rivenStatsMap[i]}
                         weaponCategory={selectedWeapon.category}
+                        equippedModIds={equippedModIds}
                         onAdd={() => handleOpenModPicker(i)}
                         onRemove={() => handleRemoveMod(i)}
                         onPolarize={(p) => setSlotPolarities((prev) => applyPolarityOverride(prev, innatePolarities, i, p))}
@@ -1521,6 +1522,7 @@ export default function WeaponBuilderPage() {
                         innatePolarity={isInnatePolarity(innatePolarities, slotPolarities, i)}
                           rivenStats={rivenStatsMap[i]}
                           weaponCategory={selectedWeapon.category}
+                          equippedModIds={equippedModIds}
                           onAdd={() => handleOpenModPicker(i)}
                           onRemove={() => handleRemoveMod(i)}
                           onPolarize={(p) => setSlotPolarities((prev) => applyPolarityOverride(prev, innatePolarities, i, p))}

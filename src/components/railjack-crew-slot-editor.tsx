@@ -520,6 +520,7 @@ export function CrewSlotEditor({
                     rank={equipped?.rank ?? 0}
                     slotIndex={i}
                     compact
+                    equippedModIds={weaponMods.map((m) => m.modId)}
                     slotPolarity={working.weaponLoadout?.slotPolarities?.[i]}
                     onAdd={() => {
                       setActiveModSlot(i);

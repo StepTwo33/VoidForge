@@ -15,6 +15,7 @@ import {
 } from "@/lib/calc/mod-capacity";
 import { cleanModDescription, formatModStatSpecial, formatModStatValue, isPanelOnlyModStat } from "@/lib/display/mod-display";
 import { PointerVerb } from "@/components/pointer-verb";
+import { incompatiblePartnerName } from "@/lib/builds/incompatible-mod-warnings";
 
 const rarityBorderColors: Record<string, string> = {
   common: "border-amber-700/40 dark:border-amber-900/50",
@@ -154,6 +155,10 @@ function PolarityPicker({
 
 export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innatePolarity = false, rivenStats, weaponCategory, onAdd, onRemove, onPolarize, onEditRiven, equippedModIds, compact, inlineForma = true }: ModSlotProps) {
   const [showPolarityPicker, setShowPolarityPicker] = useState(false);
+  const illegalWith = incompatiblePartnerName(
+    (equippedModIds ?? []).map((modId) => ({ modId })),
+    mod?.id,
+  );
 
   if (!mod) {
     return (
@@ -253,6 +258,11 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innateP
               {mod.name}
             </span>
           </div>
+          {illegalWith && (
+            <p className="text-[10px] font-medium leading-snug text-orange-700 dark:text-orange-400" data-testid="illegal-mod">
+              Illegal with {illegalWith}
+            </p>
+          )}
           {mod.subCategory === "riven" && rivenStats && Object.keys(rivenStats).length > 0 ? (
             <div className="mt-0.5 space-y-0.5 text-[11px] leading-snug text-purple-800 dark:text-purple-300">
               {Object.entries(rivenStats).map(([k, v]) => {

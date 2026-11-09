@@ -123,6 +123,7 @@ export function ExaltedWeaponSection({
               slotIndex={i}
               slotPolarity={exaltedSlotPolarities[i]}
               innatePolarity={isInnatePolarity(exaltedInnatePolarities ?? {}, exaltedSlotOverrides, i)}
+              equippedModIds={exaltedMods.map((m) => m.modId)}
               onAdd={() => onAddMod(i)}
               onRemove={() => onRemoveMod(i)}
               onPolarize={(p) => onPolarize(i, p)}
@@ -149,6 +150,7 @@ export function ExaltedWeaponSection({
                 label="Exilus"
                 slotPolarity={exaltedSlotPolarities[i]}
                 innatePolarity={isInnatePolarity(exaltedInnatePolarities ?? {}, exaltedSlotOverrides, i)}
+                equippedModIds={exaltedMods.map((m) => m.modId)}
                 onAdd={() => onAddMod(i)}
                 onRemove={() => onRemoveMod(i)}
                 onPolarize={(p) => onPolarize(i, p)}

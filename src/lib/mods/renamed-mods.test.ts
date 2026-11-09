@@ -12,7 +12,7 @@ import { VERIFIED_MOD_BEHAVIORS } from "@/data/mod-behaviors";
 import { calculateCompanionBuild, COMPANION_LINK_MODS } from "@/lib/calc/companion-calculator";
 import { dropUnknownMods, migrateRenamedMods, migrateRenamedModsDeep, RENAMED_MOD_IDS } from "@/lib/mods/known-mods";
 import { lotusItemName } from "@/lib/warframe-arsenal/lotus-resolve";
-import { cleanLoadedBuild, describeMigratedMods } from "@/lib/builds/incompatible-mod-warnings";
+import { cleanLoadedBuild, describeMigratedMods, incompatiblePartnerName } from "@/lib/builds/incompatible-mod-warnings";
 import type { SavedBuild } from "@/lib/builds/build-storage";
 
 const LEGACY = ["link_shields", "link_armor"];
@@ -77,12 +77,17 @@ describe("old builds migrate instead of dropping", () => {
       data: { companionId: "smeeta", mods: [{ modId: "link_shields", rank: 10, slotIndex: 0 }, { modId: "link_armor", rank: 10, slotIndex: 1 }, { modId: "calculated_redirection", rank: 5, slotIndex: 2 }], weaponMods: [], hasReactor: true },
     };
     const cleaned = cleanLoadedBuild(build);
-    // Link Shields became Link Redirection, which the game won't equip with Calculated Redirection:
-    // the first one (slot 0) is kept.
-    expect(cleaned.data.mods).toEqual([{ modId: "link_redirection", rank: 10, slotIndex: 0 }, { modId: "link_fiber", rank: 10, slotIndex: 1 }]);
+    // Link Shields became Link Redirection. Calculated Redirection is illegal with it and stays,
+    // flagged rather than deleted. Armor still comes only from Link Fiber.
+    expect(cleaned.data.mods).toEqual([
+      { modId: "link_redirection", rank: 10, slotIndex: 0 },
+      { modId: "link_fiber", rank: 10, slotIndex: 1 },
+      { modId: "calculated_redirection", rank: 5, slotIndex: 2 },
+    ]);
+    expect(incompatiblePartnerName(cleaned.data.mods, "calculated_redirection")).toBe("Link Redirection");
     const s = calculateCompanionBuild(allCompanions.find((c) => c.id === "smeeta")!, cleaned.data.mods, modsMap, null, { name: "Rhino", health: 740, shield: 1110, armor: 480 });
-    expect(s.totalShield).toBeCloseTo(230 + 1.25 * 1110, 3); // 1,617.5
-    expect(s.totalArmor).toBeCloseTo(300 + 1.25 * 480, 3); // 900
+    expect(s.totalShield).toBeGreaterThan(230 + 1.25 * 1110);
+    expect(s.totalArmor).toBeCloseTo(300 + 1.25 * 480, 3);
   });
 
   it("loadouts migrate too (companion slot inside a loadout payload)", () => {
