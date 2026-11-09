@@ -249,6 +249,8 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
       },
     });
   }, [wfArcaneOverrides, wfModOverrides, loadout]);
+
+  const wfFamily = (loadout.warframeBuild?.warframeId ?? "").replace(/_prime$/, "");
   const companionModIds = useMemo(
     () => (loadout.companionBuild?.mods ?? []).map((m) => m.modId),
     [loadout.companionBuild?.mods],
