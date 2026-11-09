@@ -69,6 +69,10 @@ export type WeaponModAccumulators = {
   invisibleStatBonuses: Record<string, number>;
   /** Catalyzer Link: on ability cast, and only while aiming. */
   abilityCastAimStatBonuses: Record<string, number>;
+  /** On reload, and only while aiming (Spring-Loaded Chamber, Repeater Clip, Pressurized Magazine). */
+  reloadAimStatBonuses: Record<string, number>;
+  /** On reload, without also requiring aim (Deadly Efficiency). */
+  reloadStatBonuses: Record<string, number>;
   /** Chance to force a Slash proc on crits (Hunter Munitions). */
   slashOnCritChance: number;
   /** Chance to force an extra Electric proc on hit (Prototype Shock Coils; independent of damage types). */
@@ -264,6 +268,18 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
       }
       if (ctx.modId === "catalyzer_link" || ctx.modId === "embedded_catalyzer") {
         acc.abilityCastAimStatBonuses[statKey] = (acc.abilityCastAimStatBonuses[statKey] ?? 0) + modValue;
+        return true;
+      }
+      if (
+        ctx.modId === "spring_loaded_chamber" ||
+        ctx.modId === "repeater_clip" ||
+        ctx.modId === "pressurized_magazine"
+      ) {
+        acc.reloadAimStatBonuses[statKey] = (acc.reloadAimStatBonuses[statKey] ?? 0) + modValue;
+        return true;
+      }
+      if (ctx.modId === "deadly_efficiency" || ctx.modId === "primed_deadly_efficiency") {
+        acc.reloadStatBonuses[statKey] = (acc.reloadStatBonuses[statKey] ?? 0) + modValue;
         return true;
       }
       // Brain Storm / Skull Shots (Hotfix 44.1.3): "On Headshot: N% chance for Infinite Ammo for Ds".

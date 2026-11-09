@@ -15,6 +15,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { maxStacksSimParams, paperSimParams } from "@/lib/ui/sim-presets";
 import { WeaponSimControls } from "./weapon-sim-controls";
 
 function simSummaryChips(
@@ -35,7 +36,11 @@ function simSummaryChips(
   if (simParams.killStacks > 0) chips.push(`${simParams.killStacks} kills`);
   if (simParams.statusTypesOnTarget > 0) chips.push(`${simParams.statusTypesOnTarget} status`);
   if (simParams.arcaneStacks > 0) chips.push(`${simParams.arcaneStacks} arcane`);
-  if (simParams.applyTriggerBuffs) chips.push("Trigger buffs");
+  if (simParams.applyAiming) chips.push("Aiming");
+  if (simParams.applyInvisible) chips.push("Invisible");
+  if (simParams.applyAbilityCast) chips.push("Ability cast");
+  if (simParams.applyReload) chips.push("Reload");
+  if (simParams.applyTriggerBuffs) chips.push("Other triggers");
   if (simParams.applyYareliCriticalFlow) chips.push("Yareli +200% CC");
   if (simParams.applyZephyrAirborne) chips.push("Zephyr +150% CC");
   if (simParams.applyGarudaDeathsGate) chips.push("Death's Gate");
@@ -103,25 +108,7 @@ export function WeaponSimPanel({
         <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={() =>
-              onSimParamsChange({
-                ...simParams,
-                comboCount: 0,
-                killStacks: 0,
-                killStacksBySource: undefined,
-                statusTypesOnTarget: 0,
-                arcaneStacks: 0,
-                arcaneStacksById: undefined,
-                applyHeadshots: false,
-                applyWeakPoints: false,
-                applyTriggerBuffs: false,
-                applyYareliCriticalFlow: false,
-                applyZephyrAirborne: false,
-                applyGarudaDeathsGate: false,
-                applyTenaciousBondCrit: false,
-                applyReinforcedBondFireRate: false,
-              })
-            }
+            onClick={() => onSimParamsChange(paperSimParams(simParams))}
             className="rounded border border-border px-1.5 py-0.5 text-[9px] text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
             title="Turn off all conditional stacks and buffs (Paper stats)"
           >
@@ -130,25 +117,13 @@ export function WeaponSimPanel({
           <button
             type="button"
             onClick={() =>
-              onSimParamsChange({
-                ...simParams,
-                comboCount: isMelee ? 220 : simParams.comboCount,
-                killStacks: 5,
-                killStacksBySource: undefined,
-                statusTypesOnTarget: Math.max(simParams.statusTypesOnTarget, 4),
-                arcaneStacks: arcaneMax,
-                arcaneStacksById: undefined,
-                applyTriggerBuffs: true,
-                ...(isLinkedLoadout
-                  ? {
-                      applyYareliCriticalFlow: true,
-                      applyZephyrAirborne: true,
-                      applyGarudaDeathsGate: true,
-                      applyTenaciousBondCrit: true,
-                      applyReinforcedBondFireRate: true,
-                    }
-                  : {}),
-              })
+              onSimParamsChange(
+                maxStacksSimParams(simParams, {
+                  isMelee,
+                  arcaneMax,
+                  linkedLoadout: isLinkedLoadout,
+                }),
+              )
             }
             className="rounded border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[9px] text-primary hover:bg-primary/20 transition-colors"
             title="Activate weapon stacks (Galvanized, Combo, Arcane, Trigger)"

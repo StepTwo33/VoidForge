@@ -24,6 +24,7 @@ import {
   weaponSupportsHunterCompanionSet,
 } from "@/lib/calc/set-bonuses";
 import { getModStatLabel } from "@/lib/overrides/override-stat-catalog";
+import { maxStacksSimParams, paperSimParams } from "@/lib/ui/sim-presets";
 import { CollapsibleSection, SimSlider } from "./stat-primitives";
 
 function comboTier(hits: number): number {
@@ -109,25 +110,7 @@ export function WeaponSimControls({
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                onClick={() =>
-                  onSimParamsChange({
-                    ...simParams,
-                    comboCount: 0,
-                    killStacks: 0,
-                    killStacksBySource: undefined,
-                    statusTypesOnTarget: 0,
-                    arcaneStacks: 0,
-                    arcaneStacksById: undefined,
-                    applyHeadshots: false,
-                    applyWeakPoints: false,
-                    applyTriggerBuffs: false,
-                    applyYareliCriticalFlow: false,
-                    applyZephyrAirborne: false,
-                    applyGarudaDeathsGate: false,
-                    applyTenaciousBondCrit: false,
-                    applyReinforcedBondFireRate: false,
-                  })
-                }
+                onClick={() => onSimParamsChange(paperSimParams(simParams))}
                 className="rounded border border-border px-2 py-0.5 text-[10px] text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
               >
                 All off (Paper)
@@ -135,27 +118,13 @@ export function WeaponSimControls({
               <button
                 type="button"
                 onClick={() =>
-                  onSimParamsChange({
-                    ...simParams,
-                    comboCount: isMelee ? 220 : simParams.comboCount,
-                    killStacks: 5,
-                    killStacksBySource: undefined,
-                    statusTypesOnTarget: Math.max(simParams.statusTypesOnTarget, 4),
-                    arcaneStacks: arcaneMax,
-                    arcaneStacksById: undefined,
-                    applyHeadshots: true,
-                    applyWeakPoints: false,
-                    applyTriggerBuffs: true,
-                    ...(isLinkedLoadout
-                      ? {
-                          applyYareliCriticalFlow: true,
-                          applyZephyrAirborne: true,
-                          applyGarudaDeathsGate: true,
-                          applyTenaciousBondCrit: true,
-                          applyReinforcedBondFireRate: true,
-                        }
-                      : {}),
-                  })
+                  onSimParamsChange(
+                    maxStacksSimParams(simParams, {
+                      isMelee,
+                      arcaneMax,
+                      linkedLoadout: isLinkedLoadout,
+                    }),
+                  )
                 }
                 className="rounded border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] text-primary hover:bg-primary/20 transition-colors"
               >
@@ -222,21 +191,41 @@ export function WeaponSimControls({
                 Weak Point
               </button>
             </div>
-            <label
-              className="flex items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground cursor-pointer"
-              title="Aiming, distance (>15m Spring-Loaded Broadhead, >10m Range Advantage), reload, cast, and wall latch conditionals"
-            >
-              <input
-                type="checkbox"
-                checked={!!simParams.applyTriggerBuffs}
-                onChange={(e) =>
-                  onSimParamsChange({ ...simParams, applyTriggerBuffs: e.target.checked })
-                }
-                className="h-3.5 w-3.5 rounded border-border accent-primary"
-              />
-              <span className="font-medium">Aim / Distance / Trigger</span>
-            </label>
+            {(
+              [
+                ["applyAiming", "Aiming", "Aiming down sights. Galvanized Scope and AX-52 aimed headshots."],
+                ["applyInvisible", "Invisible", "Invisible. Arcane Crepuscular and Spectral Serration."],
+                ["applyAbilityCast", "Ability cast", "An ability was cast. Catalyzer Link also needs Aiming."],
+                ["applyReload", "Reload", "A reload just happened. Spring-Loaded mods also need Aiming."],
+                ["applyTriggerBuffs", "Other", "Distance, wall latch, crouch, and other triggers that are not the events above."],
+              ] as const
+            ).map(([key, label, title]) => (
+              <label
+                key={key}
+                className="flex min-h-11 items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground cursor-pointer"
+                title={title}
+              >
+                <input
+                  type="checkbox"
+                  checked={!!simParams[key]}
+                  onChange={(e) => onSimParamsChange({ ...simParams, [key]: e.target.checked })}
+                  className="h-4 w-4 rounded border-border accent-primary"
+                />
+                <span className="font-medium">{label}</span>
+              </label>
+            ))}
           </div>
+
+          {(weapon?.id === "sobek" || weapon?.id === "kuva_sobek") && (
+            <SimSlider
+              label="Clip Delegation shots landed"
+              value={simParams.clipDelegationShots ?? 0}
+              min={0}
+              max={15}
+              onChange={(v) => onSimParamsChange({ ...simParams, clipDelegationShots: v })}
+              tooltip="Sobek and Kuva Sobek. On reload, the next magazine gains status chance and multishot per shot landed. Pellets do not add stacks. Does not change magazine size."
+            />
+          )}
 
           {isLinkedLoadout && (
             <div

@@ -59,7 +59,7 @@ import {
   WeaponCalculationOptions,
   SimulationParams,
 } from "@/lib/types";
-import { DEFAULT_SIM_PARAMS, type SimulationParams } from "@/lib/types";
+import { DEFAULT_SIM_PARAMS } from "@/lib/types";
 import { Zap, Flag, Gem, Save, FolderOpen, Share2, Check, Upload, Shield, ArrowLeftRight } from "lucide-react";
 import { warframeArcanes } from "@/data/arcanes";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";

@@ -339,11 +339,11 @@ describe("remaining trigger/on-kill conditionals (wiki max rank, Phase M17)", ()
     const lex = requireWeapon("lex");
     expect(build("braton", "spring_loaded_chamber", {}).fireRate).toBeCloseTo(braton.fireRate, 5);
     expect(
-      build("braton", "spring_loaded_chamber", { applyTriggerBuffs: true }).fireRate,
+      build("braton", "spring_loaded_chamber", { applyReload: true, applyAiming: true }).fireRate,
     ).toBeCloseTo(braton.fireRate * 1.75, 5);
     expect(build("lex", "pressurized_magazine", {}).fireRate).toBeCloseTo(lex.fireRate, 5);
     expect(
-      build("lex", "pressurized_magazine", { applyTriggerBuffs: true }).fireRate,
+      build("lex", "pressurized_magazine", { applyReload: true, applyAiming: true }).fireRate,
     ).toBeCloseTo(lex.fireRate * 1.9, 5);
   });
 
@@ -422,7 +422,7 @@ describe("Sim1 trigger-gated exclusives (wiki max rank)", () => {
 
     expect(build("braton", "repeater_clip", {}).fireRate).toBeCloseTo(braton.fireRate, 5);
     expect(
-      build("braton", "repeater_clip", { applyTriggerBuffs: true }).fireRate,
+      build("braton", "repeater_clip", { applyReload: true, applyAiming: true }).fireRate,
     ).toBeCloseTo(braton.fireRate * 2.05, 5);
 
     const bareCm = calculateWeaponBuild(braton, [], modsMap()).criticalMultiplier;

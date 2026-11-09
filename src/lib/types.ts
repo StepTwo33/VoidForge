@@ -715,6 +715,11 @@ export interface SimulationParams {
    */
   applyAbilityCast?: boolean;
   /**
+   * A reload just happened (realized). Spring-Loaded Chamber also requires aiming.
+   * Distinct from the generic trigger bucket.
+   */
+  applyReload?: boolean;
+  /**
    * Clip Delegation: shots landed with the current magazine before reload (0–15).
    * The next magazine's status and multishot bonus. Not pellets or punch-through.
    */

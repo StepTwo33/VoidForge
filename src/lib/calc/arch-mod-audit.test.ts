@@ -279,7 +279,7 @@ describe("archgun trigger conditionals (wiki max rank, Phase M17)", () => {
     expect(
       withMod("imperator", "deadly_efficiency", {
         ...DEFAULT_SIM_PARAMS,
-        applyTriggerBuffs: true,
+        applyReload: true,
       }).moddedBaseDamage,
     ).toBeCloseTo(weapon.damage * 2.2, 5);
     expect(withMod("imperator", "primed_deadly_efficiency").moddedBaseDamage).toBeCloseTo(
@@ -289,7 +289,7 @@ describe("archgun trigger conditionals (wiki max rank, Phase M17)", () => {
     expect(
       withMod("imperator", "primed_deadly_efficiency", {
         ...DEFAULT_SIM_PARAMS,
-        applyTriggerBuffs: true,
+        applyReload: true,
       }).moddedBaseDamage,
     ).toBeCloseTo(weapon.damage * 3.2, 5);
   });

@@ -1010,6 +1010,8 @@ export function calculateWeaponBuild(
     triggerStatBonuses: {},
     invisibleStatBonuses: {},
     abilityCastAimStatBonuses: {},
+    reloadAimStatBonuses: {},
+    reloadStatBonuses: {},
     slashOnCritChance: 0,
     extraElectricProcChance: 0,
     slashOnImpactProcChance: 0,
@@ -1312,6 +1314,10 @@ export function calculateWeaponBuild(
   if (sim.applyAbilityCast && aimingForCast) {
     activeBuffPools.push(weaponModAcc.abilityCastAimStatBonuses);
   }
+  if (sim.applyReload && aimingForCast) {
+    activeBuffPools.push(weaponModAcc.reloadAimStatBonuses);
+  }
+  if (sim.applyReload) activeBuffPools.push(weaponModAcc.reloadStatBonuses);
   const triggerElementalTypes = [
     "heat",
     "cold",

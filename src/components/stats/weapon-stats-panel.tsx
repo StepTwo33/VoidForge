@@ -80,10 +80,12 @@ const CONTRIBUTION_CATEGORY_COLORS: Record<DpsContributionCategory, string> = {
 
 function WeaponPassiveConditionals({
   weapon,
+  stats,
   simParams,
   onSimParamsChange,
 }: {
   weapon: Weapon;
+  stats?: CalculatedStats;
   simParams?: SimulationParams;
   onSimParamsChange?: (params: SimulationParams) => void;
 }) {
@@ -101,7 +103,7 @@ function WeaponPassiveConditionals({
     });
   };
 
-  if (wid === "athodai") {
+  if (wid === "athodai" || wid === "athodai_prime") {
     const active = (state.athodai_overdrive ?? 0) > 0;
     return (
       <div className="py-1 space-y-1 border-t border-border/60 mt-1">
@@ -111,14 +113,14 @@ function WeaponPassiveConditionals({
             type="checkbox"
             checked={active}
             onChange={(e) => updateState("athodai_overdrive", e.target.checked ? 1 : 0)}
-            className="h-3.5 w-3.5 rounded border-border accent-primary"
+            className="h-4 w-4 rounded border-border accent-primary"
           />
         </label>
         <StatRow
-          label="Overdrive Fire Rate"
-          value={active ? "+100%" : "Inactive"}
+          label="Overdrive"
+          value={active ? "+100% Fire Rate, Infinite Ammo" : "Inactive"}
           color={active ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
-          tooltip="Headshot kills trigger Overdrive: +100% Fire Rate & unlimited ammo."
+          tooltip="Weak point kills trigger Overdrive: +100% fire rate, no recoil, and Infinite Ammo for 8s. Alt-fire is locked while it is up."
         />
       </div>
     );
@@ -261,26 +263,30 @@ function WeaponPassiveConditionals({
   }
 
   if (wid === "ax_52") {
-    const isAimed = (state.ax_52_aimed_headshot ?? 0) > 0;
+    const aimed = !!(simParams.applyAiming || (state.ax_52_aimed_headshot ?? 0) > 0);
+    const aimedHeadshot = aimed && !!simParams.applyHeadshots;
+    const hipFire = !aimed;
+    const ammoPct = Math.min(75, Math.round((stats?.ammoEfficiency ?? (hipFire ? 0.75 : 0)) * 100));
+    const passiveValue = aimedHeadshot
+      ? "+400% Critical Chance"
+      : hipFire
+        ? `+${ammoPct}% Ammo Efficiency`
+        : "No hip-fire bonus while aiming";
     return (
       <div className="py-1 space-y-1 border-t border-border/60 mt-1">
-        <label className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-muted-foreground cursor-pointer">
-          <span>Aimed Mode (Marksman)</span>
-          <input
-            type="checkbox"
-            checked={isAimed}
-            onChange={(e) => updateState("ax_52_aimed_headshot", e.target.checked ? 1 : 0)}
-            className="h-3.5 w-3.5 rounded border-border accent-primary"
-          />
-        </label>
+        <p className="pt-0.5 text-[10px] text-muted-foreground">
+          Hip-fire is the default. Aimed headshots use Aiming and Headshot in the simulation.
+        </p>
         <StatRow
-          label="Mode Passive"
-          value={isAimed ? "+400% Headshot CC" : "+75% Ammo Efficiency"}
-          color={isAimed ? "text-red-700 dark:text-red-400" : "text-emerald-700 dark:text-emerald-400"}
+          label="Passive"
+          value={passiveValue}
+          color={aimedHeadshot ? "text-red-700 dark:text-red-400" : "text-emerald-700 dark:text-emerald-400"}
           tooltip={
-            isAimed
-              ? "Aimed mode: headshots gain +400% Critical Chance."
-              : "Hip-fire mode (default): +75% Ammo Efficiency (chance not to consume ammo)."
+            aimedHeadshot
+              ? "Aimed headshots gain +400% critical chance. Hip-fire ammo efficiency is off."
+              : hipFire
+                ? `Hip-fire: +${ammoPct}% ammo efficiency, matching the Ammo Efficiency row.`
+                : "Aiming a body shot is not a hip-fire shot and is not an aimed headshot."
           }
         />
       </div>
@@ -390,6 +396,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           <p className="text-[11px] text-muted-foreground leading-relaxed py-1">{weapon.passive}</p>
           <WeaponPassiveConditionals
             weapon={weapon}
+            stats={stats}
             simParams={simParams}
             onSimParamsChange={onSimParamsChange}
           />
