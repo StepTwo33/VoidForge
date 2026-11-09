@@ -52,8 +52,10 @@ import {
   type PlexusModTab,
 } from "@/lib/mods/railjack-plexus-mods";
 import { cn } from "@/lib/utils";
-import { Save, FolderOpen, Crosshair, Shield, Zap, Gauge, ChevronRight, Users, Lock } from "lucide-react";
-import { generateBuildId, SavedBuild, RailjackBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
+import { FolderOpen, Crosshair, Shield, Zap, Gauge, ChevronRight, Users, Lock } from "lucide-react";
+import { SavedBuild, RailjackBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
+import { saveIdentityId } from "@/lib/builds/quicksave";
+import { BuilderSaveControls } from "@/components/builder-save-controls";
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { BuildsReturnLink } from "@/components/builds-return-link";
 import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
@@ -123,6 +125,7 @@ export default function RailjackBuilderPage() {
   const { savedBuilds, refreshSavedBuilds, deleteSavedBuild } = useBuilderSavedBuilds("railjack");
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
+  const [saveAsNew, setSaveAsNew] = useState(false);
   const [buildName, setBuildName] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -216,7 +219,7 @@ export default function RailjackBuilderPage() {
   const hasProtectiveShots = integratedMods.some((m) => m.modId === "protective_shots");
 
   // Save
-  const handleSaveBuildConfirm = useCallback(async ({ name, isPublic }: SaveBuildDialogValues) => {
+  const handleSaveBuildConfirm = useCallback(async ({ name, isPublic, asNew = false }: SaveBuildDialogValues & { asNew?: boolean }) => {
     const data: RailjackBuildData = {
       reactorId: selectedReactor?.id,
       shieldId: selectedShield?.id,
@@ -245,7 +248,7 @@ export default function RailjackBuilderPage() {
       },
     };
     const build: SavedBuild = {
-      id: currentBuildId || generateBuildId(),
+      id: saveIdentityId(currentBuildId, asNew),
       name,
       isPublic,
       type: "railjack",
@@ -397,9 +400,13 @@ export default function RailjackBuilderPage() {
               placeholder="Build name..."
               className="h-11 w-full max-w-[12rem] rounded-lg border border-border bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground lg:pointer-fine:h-9 sm:w-40"
             />
-            <button onClick={() => setSaveDialogOpen(true)} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:min-w-0 sm:py-1.5" title="Save Build">
-              <Save className="h-3.5 w-3.5" /> <span>Save</span>
-            </button>
+            <BuilderSaveControls
+              canUpdate={!!currentBuildId}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:min-w-0 sm:py-1.5"
+              onUpdate={() => { void handleSaveBuildConfirm({ name: buildName || "Railjack Build", description: "", isPublic: buildIsPublic, tags: [], target: "new", asNew: false }); }}
+              onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
+              onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
+            />
             <button onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-9 sm:min-w-0 sm:py-1.5" title="Load Build">
               <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
             </button>
@@ -1369,7 +1376,7 @@ export default function RailjackBuilderPage() {
         defaultName={buildName || "Railjack Build"}
         defaultIsPublic={buildIsPublic}
         showDescription={false}
-        onSave={handleSaveBuildConfirm}
+        onSave={(values) => handleSaveBuildConfirm({ ...values, asNew: saveAsNew })}
       />
       <BuilderSectionNav sections={[{ id: "rj-components", label: "Parts" }, { id: "rj-armaments", label: "Guns" }, { id: "rj-plexus", label: "Plexus" }, { id: "rj-intrinsics", label: "Intrinsics" }, { id: "rj-stats", label: "Stats" }]} />
     </PageShell>

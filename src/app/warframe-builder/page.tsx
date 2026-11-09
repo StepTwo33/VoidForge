@@ -60,7 +60,7 @@ import {
   SimulationParams,
 } from "@/lib/types";
 import { DEFAULT_SIM_PARAMS } from "@/lib/types";
-import { Zap, Flag, Gem, Save, FolderOpen, Share2, Check, Upload, Shield, ArrowLeftRight } from "lucide-react";
+import { Zap, Flag, Gem, FolderOpen, Share2, Check, Upload, Shield, ArrowLeftRight } from "lucide-react";
 import { warframeArcanes } from "@/data/arcanes";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import { ArchonShardSlot } from "@/components/archon-shard-slot";
@@ -77,7 +77,7 @@ import {
   getMeleeExaltedWeapon,
   getPrimaryExaltedWeapon,
 } from "@/lib/weapons/exalted-weapons";
-import { generateBuildId, SavedBuild, WarframeBuildData, persistSavedBuild, resolveActiveArcaneList, resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
+import { SavedBuild, WarframeBuildData, persistSavedBuild, resolveActiveArcaneList, resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
 import { getLoadouts } from "@/lib/builds/loadouts";
 import { applyWeaponIncarnonMobilityToWarframe, setBonusLinkageFromLoadout } from "@/lib/builds/loadout-stats";
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
@@ -95,6 +95,8 @@ import { ImportCapacityNotice, useImportCapacityNotice } from "@/components/impo
 import { importCapacityToastText, isOverCapacity } from "@/lib/builds/import-capacity-notice";
 import { isAuraMod } from "@/lib/mods/aura-mods";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
+import { BuilderSaveControls } from "@/components/builder-save-controls";
+import { saveIdentityId } from "@/lib/builds/quicksave";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
@@ -213,6 +215,9 @@ export default function WarframeBuilderPage() {
   const [pickerTab, setPickerTab] = useState<"catalog" | "saved">("catalog");
   const [showImporter, setShowImporter] = useState(false);
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
+  const [buildTags, setBuildTags] = useState<string[]>([]);
+  const [buildCreatedAt, setBuildCreatedAt] = useState<number | null>(null);
+  const [saveAsNew, setSaveAsNew] = useState(false);
   const [buildName, setBuildName] = useState("");
   const [buildDescription, setBuildDescription] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
@@ -459,6 +464,8 @@ export default function WarframeBuilderPage() {
     setBuildName(build.name);
     setBuildDescription(build.description || "");
     setBuildIsPublic(build.isPublic ?? false);
+    setBuildTags(build.tags ?? []);
+    setBuildCreatedAt(build.createdAt || Date.now());
     setShowSavedBuilds(false);
     setShowWarframeList(false);
     if (!options?.silent) {
@@ -466,32 +473,47 @@ export default function WarframeBuilderPage() {
     }
   }, [markClean, modSlotsToEquipped]);
 
-  const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags }: SaveBuildDialogValues) => {
+  const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags, asNew = false }: SaveBuildDialogValues & { asNew?: boolean }) => {
     const data = buildWarframeData();
     if (!data || !selectedWarframe) return;
     const build: SavedBuild = {
-      id: currentBuildId || generateBuildId(),
+      id: saveIdentityId(currentBuildId, asNew),
       name,
       description,
       isPublic,
       tags,
       type: "warframe",
-      createdAt: Date.now(),
+      createdAt: asNew || !buildCreatedAt ? Date.now() : buildCreatedAt,
       updatedAt: Date.now(),
       data,
     };
     const result = await persistSavedBuild(build);
+    setSaveAsNew(false);
     setCurrentBuildId(result.id);
     setBuildName(name);
     setBuildDescription(description);
+    setBuildTags(tags);
+    setBuildCreatedAt(build.createdAt);
     setBuildIsPublic(result.isPublic);
     void refreshSavedBuilds();
     if (result.synced) {
-      toast.success(currentBuildId ? "Build saved" : "Saved as new build", { description: `${name} saved to your account` });
+      toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated", { description: `${name} saved to your account` });
     } else {
-      toast.success(currentBuildId ? "Build saved locally" : "Saved as new build", { description: currentBuildId ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
+      toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated on this device", { description: currentBuildId && !asNew ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
     }
-  }, [buildWarframeData, selectedWarframe, currentBuildId, refreshSavedBuilds]);
+  }, [buildWarframeData, selectedWarframe, currentBuildId, refreshSavedBuilds, buildCreatedAt]);
+
+  const handleQuickSave = useCallback(async () => {
+    if (!currentBuildId) return;
+    await handleSaveBuildConfirm({
+      name: buildName || (selectedWarframe ? `${selectedWarframe.name} Build` : "Warframe Build"),
+      description: buildDescription,
+      isPublic: buildIsPublic,
+      tags: buildTags,
+      target: "new",
+      asNew: false,
+    });
+  }, [currentBuildId, handleSaveBuildConfirm, buildName, selectedWarframe, buildDescription, buildIsPublic, buildTags]);
 
   const handleLoadCommunityBuild = useCallback(async (buildId: string) => {
     const build = await fetchCloudBuild(buildId);
@@ -538,10 +560,10 @@ export default function WarframeBuilderPage() {
       markClean();
       return true;
     }
-    await handleSaveBuildConfirm(values);
+    await handleSaveBuildConfirm({ ...values, asNew: saveAsNew });
     markClean();
     return true;
-  }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildWarframeData]);
+  }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildWarframeData, saveAsNew]);
 
   const handleDeleteBuild = useCallback((id: string) => {
     void deleteSavedBuild(id);
@@ -1178,18 +1200,24 @@ export default function WarframeBuilderPage() {
             >
               <BuilderActionBar>
                 <BuilderActionGroup>
-                  <button
-                    onClick={() => {
+                  <BuilderSaveControls
+                    canUpdate={!!currentBuildId}
+                    dirty={hasUnsavedChanges}
+                    dirtyClass={SAVE_DIRTY_CLASS}
+                    dotClass={SAVE_DIRTY_DOT_CLASS}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-green-500/10 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-0 lg:py-1.5"
+                    onUpdate={() => { void handleQuickSave(); }}
+                    onSaveNew={() => {
+                      setSaveAsNew(false);
                       setSaveDialogDefaultPublic(buildIsPublic);
                       setSaveDialogOpen(true);
                     }}
-                    className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:pointer-fine:min-h-0 lg:py-1.5 text-muted-foreground hover:text-green-700 dark:hover:text-green-400 hover:bg-green-500/10 transition-all font-medium", hasUnsavedChanges && SAVE_DIRTY_CLASS)}
-                    title={hasUnsavedChanges ? "Save Build (unsaved changes)" : "Save Build"}
-                    data-dirty={hasUnsavedChanges ? "true" : undefined}
-                  >
-                    <Save className="h-3.5 w-3.5" /> <span className="inline">Save</span>
-                    {hasUnsavedChanges && <span className={SAVE_DIRTY_DOT_CLASS} aria-hidden />}
-                  </button>
+                    onSaveAs={() => {
+                      setSaveAsNew(true);
+                      setSaveDialogDefaultPublic(false);
+                      setSaveDialogOpen(true);
+                    }}
+                  />
                   <button onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:pointer-fine:min-h-0 lg:py-1.5 text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium" title="Load Build">
                     <FolderOpen className="h-3.5 w-3.5" /> <span className="inline">Load</span>
                   </button>
@@ -1891,6 +1919,7 @@ export default function WarframeBuilderPage() {
         defaultName={buildName || (selectedWarframe ? `${selectedWarframe.name} Build` : "Warframe Build")}
         defaultDescription={buildDescription}
         defaultIsPublic={saveDialogDefaultPublic}
+        defaultTags={buildTags}
         onSave={handleSaveDialog}
         loadoutTarget={loadoutCtx ? { loadoutName: loadoutCtx.loadoutName, slotLabel: loadoutSlotLabel(loadoutCtx.slot) } : null}
       />

@@ -19,8 +19,10 @@ import { Weapon, Mod, EquippedMod, SimulationParams, DEFAULT_SIM_PARAMS, Modular
 import { getWeaponArcanes, arcanesForSlot, arcaneSlotLabel, type WeaponArcaneConfig } from "@/lib/weapons/weapon-arcane-config";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import type { SlotType } from "@/components/mod-picker";
-import { Zap, Wrench, ChevronRight, Save, FolderOpen, Gem, ArrowLeftRight } from "lucide-react";
-import { generateBuildId, SavedBuild, persistSavedBuild, resolveActiveArcaneList, resolveArcaneById } from "@/lib/builds/build-storage";
+import { Zap, Wrench, ChevronRight, FolderOpen, Gem, ArrowLeftRight } from "lucide-react";
+import { SavedBuild, persistSavedBuild, resolveActiveArcaneList, resolveArcaneById } from "@/lib/builds/build-storage";
+import { saveIdentityId } from "@/lib/builds/quicksave";
+import { BuilderSaveControls } from "@/components/builder-save-controls";
 import { getLoadouts } from "@/lib/builds/loadouts";
 import { calcLoadoutStats, setBonusLinkageFromLoadout } from "@/lib/builds/loadout-stats";
 import { resolveAbilitiesWithHelminth, resolveStandaloneExternalBuffs, resolveWeaponExternalBuffs, type WeaponBuffContext } from "@/lib/weapons/weapon-external-buffs";
@@ -227,6 +229,7 @@ export default function ModularBuilderPage() {
   const { savedBuilds, refreshSavedBuilds, deleteSavedBuild } = useBuilderSavedBuilds("modular");
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
+  const [saveAsNew, setSaveAsNew] = useState(false);
   const [buildName, setBuildName] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -445,10 +448,10 @@ export default function ModularBuilderPage() {
     return snapshotFromBuild("modular", buildName || assembledWeapon.name, buildModularData());
   }, [assembledWeapon, buildName, buildModularData]);
 
-  const handleSaveBuildConfirm = async ({ name, isPublic }: SaveBuildDialogValues) => {
+  const handleSaveBuildConfirm = async ({ name, isPublic, asNew = false }: SaveBuildDialogValues & { asNew?: boolean }) => {
     const data = buildModularData();
     const build: SavedBuild = {
-      id: currentBuildId || generateBuildId(),
+      id: saveIdentityId(currentBuildId, asNew),
       name,
       isPublic,
       type: "modular",
@@ -457,14 +460,15 @@ export default function ModularBuilderPage() {
       data,
     };
     const result = await persistSavedBuild(build);
+    setSaveAsNew(false);
     setCurrentBuildId(result.id);
     setBuildName(name);
     setBuildIsPublic(result.isPublic);
     void refreshSavedBuilds();
     if (result.synced) {
-      toast.success(currentBuildId ? "Build saved" : "Saved as new build", { description: `${name} saved to your account` });
+      toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated", { description: `${name} saved to your account` });
     } else {
-      toast.success(currentBuildId ? "Build saved locally" : "Saved as new build", { description: currentBuildId ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
+      toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated on this device", { description: currentBuildId && !asNew ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
     }
   };
 
@@ -651,7 +655,7 @@ export default function ModularBuilderPage() {
       markClean();
       return true;
     }
-    await handleSaveBuildConfirm(values);
+    await handleSaveBuildConfirm({ ...values, asNew: saveAsNew });
     markClean();
     return true;
   };
@@ -722,10 +726,16 @@ export default function ModularBuilderPage() {
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <h1 className="text-xl sm:text-3xl font-bold">Modular Builder</h1>
           <div className="flex items-center gap-2">
-            <button onClick={() => setSaveDialogOpen(true)} className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:py-1.5", hasUnsavedChanges && SAVE_DIRTY_CLASS)} title={hasUnsavedChanges ? "Save Build (unsaved changes)" : "Save Build"} data-dirty={hasUnsavedChanges ? "true" : undefined}>
-              <Save className="h-3.5 w-3.5" /> <span>Save</span>
-              {hasUnsavedChanges && <span className={SAVE_DIRTY_DOT_CLASS} aria-hidden />}
-            </button>
+            <BuilderSaveControls
+              canUpdate={!!currentBuildId}
+              dirty={hasUnsavedChanges}
+              dirtyClass={SAVE_DIRTY_CLASS}
+              dotClass={SAVE_DIRTY_DOT_CLASS}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:py-1.5"
+              onUpdate={() => { void handleSaveBuildConfirm({ name: buildName || "Modular Build", description: "", isPublic: buildIsPublic, tags: [], target: "new", asNew: false }); }}
+              onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
+              onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
+            />
             <button onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-9 sm:py-1.5" title="Load Build">
               <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
             </button>

@@ -54,7 +54,7 @@ import {
   PROGENITOR_BONUS_DEFAULT,
   normalizeProgenitorElement,
 } from "@/lib/weapons/weapon-progenitor";
-import { Zap, Flag, Flame, Plus, X, Gem, Save, FolderOpen, Share2, Check, Upload, Crosshair, Orbit, Swords, ArrowLeftRight } from "lucide-react";
+import { Zap, Flag, Flame, Plus, X, Gem, FolderOpen, Share2, Check, Upload, Crosshair, Orbit, Swords, ArrowLeftRight } from "lucide-react";
 import { isPrimaryWeaponCategory } from "@/lib/mods/mod-weapon-eligibility";
 import { isTomeWeapon } from "@/lib/weapons/tome-weapons";
 import { getWeaponArcanes, arcanesForSlot, arcaneSlotLabel } from "@/lib/weapons/weapon-arcane-config";
@@ -63,7 +63,6 @@ import { incarnonDataMap } from "@/data/incarnon";
 import { cn } from "@/lib/utils";
 import { appendReturnTo } from "@/lib/site/nav-return";
 import {
-  generateBuildId,
   SavedBuild,
   WeaponBuildData,
   persistSavedBuild,
@@ -100,6 +99,8 @@ import type { WeaponExternalBuff } from "@/lib/types";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
 import { hasBuildLinkParam, hrefForCatalogPick, hrefWithWeaponParam, weaponIdFromParams, WEAPON_URL_PARAM } from "@/lib/builds/weapon-url-param";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
+import { BuilderSaveControls } from "@/components/builder-save-controls";
+import { saveIdentityId } from "@/lib/builds/quicksave";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
@@ -208,6 +209,9 @@ export default function WeaponBuilderPage() {
   const [pickerTab, setPickerTab] = useState<"catalog" | "saved">("catalog");
   const [showImporter, setShowImporter] = useState(false);
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
+  const [buildTags, setBuildTags] = useState<string[]>([]);
+  const [buildCreatedAt, setBuildCreatedAt] = useState<number | null>(null);
+  const [saveAsNew, setSaveAsNew] = useState(false);
   const [simParams, setSimParams] = useState<SimulationParams>({ ...DEFAULT_SIM_PARAMS });
   const [progenitorElement, setProgenitorElement] = useState<string>("heat");
   const [progenitorBonusPercent, setProgenitorBonusPercent] = useState(PROGENITOR_BONUS_DEFAULT);
@@ -444,6 +448,8 @@ export default function WeaponBuilderPage() {
     setBuildName(build.name);
     setBuildDescription(build.description || "");
     setBuildIsPublic(build.isPublic ?? false);
+    setBuildTags(build.tags ?? []);
+    setBuildCreatedAt(build.createdAt || Date.now());
     setSelectedEvolutions(d.incarnonEvolutions ?? {});
     setIncarnonConditionals(d.incarnonConditionals ?? {});
     setGenesisInstalledOverride(d.incarnonGenesisInstalled ?? null);
@@ -459,32 +465,47 @@ export default function WeaponBuilderPage() {
     }
   }, [markClean, allWeapons, allMods, modsMap]);
 
-  const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags }: SaveBuildDialogValues) => {
+  const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags, asNew = false }: SaveBuildDialogValues & { asNew?: boolean }) => {
     const data = buildWeaponData();
     if (!data || !selectedWeapon) return;
     const build: SavedBuild = {
-      id: currentBuildId || generateBuildId(),
+      id: saveIdentityId(currentBuildId, asNew),
       name,
       description,
       isPublic,
       tags,
       type: "weapon",
-      createdAt: Date.now(),
+      createdAt: asNew || !buildCreatedAt ? Date.now() : buildCreatedAt,
       updatedAt: Date.now(),
       data,
     };
     const result = await persistSavedBuild(build);
+    setSaveAsNew(false);
     setCurrentBuildId(result.id);
     setBuildName(name);
     setBuildDescription(description);
+    setBuildTags(tags);
+    setBuildCreatedAt(build.createdAt);
     setBuildIsPublic(result.isPublic);
     void refreshSavedBuilds();
     if (result.synced) {
-      toast.success(currentBuildId ? "Build saved" : "Saved as new build", { description: `${name} saved to your account` });
+      toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated", { description: `${name} saved to your account` });
     } else {
-      toast.success(currentBuildId ? "Build saved locally" : "Saved as new build", { description: currentBuildId ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
+      toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated on this device", { description: currentBuildId && !asNew ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
     }
-  }, [buildWeaponData, selectedWeapon, currentBuildId, refreshSavedBuilds]);
+  }, [buildWeaponData, selectedWeapon, currentBuildId, refreshSavedBuilds, buildCreatedAt]);
+
+  const handleQuickSave = useCallback(async () => {
+    if (!currentBuildId) return;
+    await handleSaveBuildConfirm({
+      name: buildName || (selectedWeapon ? `${selectedWeapon.name} Build` : "Weapon Build"),
+      description: buildDescription,
+      isPublic: buildIsPublic,
+      tags: buildTags,
+      target: "new",
+      asNew: false,
+    });
+  }, [currentBuildId, handleSaveBuildConfirm, buildName, selectedWeapon, buildDescription, buildIsPublic, buildTags]);
 
   const handleLoadCommunityBuild = useCallback(async (buildId: string) => {
     const build = await fetchCloudBuild(buildId);
@@ -613,10 +634,10 @@ export default function WeaponBuilderPage() {
       markClean();
       return true;
     }
-    await handleSaveBuildConfirm(values);
+    await handleSaveBuildConfirm({ ...values, asNew: saveAsNew });
     markClean();
     return true;
-  }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildWeaponData]);
+  }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildWeaponData, saveAsNew]);
 
   const handleDeleteBuild = useCallback((id: string) => {
     void deleteSavedBuild(id);
@@ -1232,18 +1253,24 @@ export default function WeaponBuilderPage() {
             >
               <BuilderActionBar>
                 <BuilderActionGroup>
-                  <button
-                    onClick={() => {
+                  <BuilderSaveControls
+                    canUpdate={!!currentBuildId}
+                    dirty={hasUnsavedChanges}
+                    dirtyClass={SAVE_DIRTY_CLASS}
+                    dotClass={SAVE_DIRTY_DOT_CLASS}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-green-500/10 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-0 lg:py-1.5"
+                    onUpdate={() => { void handleQuickSave(); }}
+                    onSaveNew={() => {
+                      setSaveAsNew(false);
                       setSaveDialogDefaultPublic(buildIsPublic);
                       setSaveDialogOpen(true);
                     }}
-                    className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:pointer-fine:min-h-0 lg:py-1.5 text-muted-foreground hover:text-green-700 dark:hover:text-green-400 hover:bg-green-500/10 transition-all font-medium", hasUnsavedChanges && SAVE_DIRTY_CLASS)}
-                    title={hasUnsavedChanges ? "Save Build (unsaved changes)" : "Save Build"}
-                    data-dirty={hasUnsavedChanges ? "true" : undefined}
-                  >
-                    <Save className="h-3.5 w-3.5" /> <span className="inline">Save</span>
-                    {hasUnsavedChanges && <span className={SAVE_DIRTY_DOT_CLASS} aria-hidden />}
-                  </button>
+                    onSaveAs={() => {
+                      setSaveAsNew(true);
+                      setSaveDialogDefaultPublic(false);
+                      setSaveDialogOpen(true);
+                    }}
+                  />
                   <button
                     onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }}
                     className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:pointer-fine:min-h-0 lg:py-1.5 text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium"
@@ -1772,6 +1799,7 @@ export default function WeaponBuilderPage() {
         defaultName={buildName || (selectedWeapon ? `${selectedWeapon.name} Build` : "Weapon Build")}
         defaultDescription={buildDescription}
         defaultIsPublic={saveDialogDefaultPublic}
+        defaultTags={buildTags}
         onSave={handleSaveDialog}
         loadoutTarget={loadoutCtx ? { loadoutName: loadoutCtx.loadoutName, slotLabel: loadoutSlotLabel(loadoutCtx.slot) } : null}
       />

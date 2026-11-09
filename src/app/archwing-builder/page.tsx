@@ -27,8 +27,10 @@ import { WeaponStatsPanel, ArchwingStatsPanel } from "@/components/stats-panel";
 import { Weapon, EquippedMod, CalculatedStats, ArchwingCalculatedStats } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
-import { Zap, Save, FolderOpen, ArrowLeftRight } from "lucide-react";
-import { generateBuildId, SavedBuild, ArchwingBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
+import { Zap, FolderOpen, ArrowLeftRight } from "lucide-react";
+import { SavedBuild, ArchwingBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
+import { saveIdentityId } from "@/lib/builds/quicksave";
+import { BuilderSaveControls } from "@/components/builder-save-controls";
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { BuildsReturnLink } from "@/components/builds-return-link";
 import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
@@ -76,6 +78,7 @@ export default function ArchwingBuilderPage() {
   const { savedBuilds, refreshSavedBuilds, deleteSavedBuild } = useBuilderSavedBuilds("archwing");
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
+  const [saveAsNew, setSaveAsNew] = useState(false);
   const [buildName, setBuildName] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -102,10 +105,10 @@ export default function ArchwingBuilderPage() {
     useMemo(() => (hasSelection ? stableBuildSnapshot(buildArchwingData()) : null), [hasSelection, buildArchwingData]),
   );
 
-  const handleSaveBuildConfirm = async ({ name, isPublic }: SaveBuildDialogValues) => {
+  const handleSaveBuildConfirm = async ({ name, isPublic, asNew = false }: SaveBuildDialogValues & { asNew?: boolean }) => {
     const data = buildArchwingData();
     const build: SavedBuild = {
-      id: currentBuildId || generateBuildId(),
+      id: saveIdentityId(currentBuildId, asNew),
       name,
       isPublic,
       type: "archwing",
@@ -329,10 +332,16 @@ export default function ArchwingBuilderPage() {
         <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
           <h1 className="text-xl sm:text-3xl font-bold">Vehicle Builder</h1>
           <div className="flex items-center gap-2">
-            <button onClick={() => setSaveDialogOpen(true)} className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:py-1.5", hasUnsavedChanges && SAVE_DIRTY_CLASS)} title={hasUnsavedChanges ? "Save Build (unsaved changes)" : "Save Build"} data-dirty={hasUnsavedChanges ? "true" : undefined}>
-              <Save className="h-3.5 w-3.5" /> <span>Save</span>
-              {hasUnsavedChanges && <span className={SAVE_DIRTY_DOT_CLASS} aria-hidden />}
-            </button>
+            <BuilderSaveControls
+              canUpdate={!!currentBuildId}
+              dirty={hasUnsavedChanges}
+              dirtyClass={SAVE_DIRTY_CLASS}
+              dotClass={SAVE_DIRTY_DOT_CLASS}
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:py-1.5"
+              onUpdate={() => { void handleSaveBuildConfirm({ name: buildName || "Vehicle Build", description: "", isPublic: buildIsPublic, tags: [], target: "new", asNew: false }); }}
+              onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
+              onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
+            />
             <button onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-9 sm:py-1.5" title="Load Build">
               <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
             </button>
@@ -705,7 +714,7 @@ export default function ArchwingBuilderPage() {
         defaultName={buildName || `${(mode === "archwing" ? selectedArchwing?.name : selectedNecramech?.name) ?? mode} Build`}
         defaultIsPublic={buildIsPublic}
         showDescription={false}
-        onSave={handleSaveBuildConfirm}
+        onSave={(values) => handleSaveBuildConfirm({ ...values, asNew: saveAsNew })}
       />
       <BuilderSectionNav sections={[{ id: "aw-mods", label: "Mods" }, { id: "aw-stats", label: "Stats" }, { id: "ag-mods", label: "Gun mods" }, { id: "ag-stats", label: "Gun stats" }]} />
     </PageShell>

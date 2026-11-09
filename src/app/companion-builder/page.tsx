@@ -53,8 +53,8 @@ import {
 } from "@/lib/mods/companion-precept-eligibility";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Zap, Dog, Bot, Bug, Swords, Crosshair, Flag, Save, FolderOpen, ArrowLeftRight } from "lucide-react";
-import { generateBuildId, SavedBuild, CompanionBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
+import { Search, Zap, Dog, Bot, Bug, Swords, Crosshair, Flag, FolderOpen, ArrowLeftRight } from "lucide-react";
+import { SavedBuild, CompanionBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
 import { dropUnknownMods } from "@/lib/mods/known-mods";
@@ -117,6 +117,8 @@ import {
   SIGNATURE_COMPANION_BY_WEAPON_ID,
 } from "@/lib/weapons/companion-weapons";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
+import { BuilderSaveControls } from "@/components/builder-save-controls";
+import { saveIdentityId } from "@/lib/builds/quicksave";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
@@ -205,6 +207,9 @@ export default function CompanionBuilderPage() {
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [pickerTab, setPickerTab] = useState<"catalog" | "saved">("catalog");
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
+  const [buildTags, setBuildTags] = useState<string[]>([]);
+  const [buildCreatedAt, setBuildCreatedAt] = useState<number | null>(null);
+  const [saveAsNew, setSaveAsNew] = useState(false);
   const [buildName, setBuildName] = useState("");
   const [buildDescription, setBuildDescription] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
@@ -300,32 +305,47 @@ export default function CompanionBuilderPage() {
     return snapshotFromBuild("companion", buildName || selectedCompanion.name, data);
   }, [buildCompanionData, selectedCompanion, buildName]);
 
-  const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags }: SaveBuildDialogValues) => {
+  const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags, asNew = false }: SaveBuildDialogValues & { asNew?: boolean }) => {
     const data = buildCompanionData();
     if (!data || !selectedCompanion) return;
     const build: SavedBuild = {
-      id: currentBuildId || generateBuildId(),
+      id: saveIdentityId(currentBuildId, asNew),
       name,
       description,
       isPublic,
       tags,
       type: "companion",
-      createdAt: Date.now(),
+      createdAt: asNew || !buildCreatedAt ? Date.now() : buildCreatedAt,
       updatedAt: Date.now(),
       data,
     };
     const result = await persistSavedBuild(build);
+    setSaveAsNew(false);
     setCurrentBuildId(result.id);
     setBuildName(name);
     setBuildDescription(description);
+    setBuildTags(tags);
+    setBuildCreatedAt(build.createdAt);
     setBuildIsPublic(result.isPublic);
     void refreshSavedBuilds();
     if (result.synced) {
-      toast.success(currentBuildId ? "Build saved" : "Saved as new build", { description: `${name} saved to your account` });
+      toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated", { description: `${name} saved to your account` });
     } else {
-      toast.success(currentBuildId ? "Build saved locally" : "Saved as new build", { description: currentBuildId ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
+      toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated on this device", { description: currentBuildId && !asNew ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
     }
-  }, [buildCompanionData, selectedCompanion, currentBuildId, refreshSavedBuilds]);
+  }, [buildCompanionData, selectedCompanion, currentBuildId, refreshSavedBuilds, buildCreatedAt]);
+
+  const handleQuickSave = useCallback(async () => {
+    if (!currentBuildId) return;
+    await handleSaveBuildConfirm({
+      name: buildName || (selectedCompanion ? `${selectedCompanion.name} Build` : "Companion Build"),
+      description: buildDescription,
+      isPublic: buildIsPublic,
+      tags: buildTags,
+      target: "new",
+      asNew: false,
+    });
+  }, [currentBuildId, handleSaveBuildConfirm, buildName, selectedCompanion, buildDescription, buildIsPublic, buildTags]);
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildCompanionData()), [buildCompanionData]));
 
@@ -399,6 +419,8 @@ export default function CompanionBuilderPage() {
     setBuildName(build.name);
     setBuildDescription(build.description || "");
     setBuildIsPublic(build.isPublic ?? false);
+    setBuildTags(build.tags ?? []);
+    setBuildCreatedAt(build.createdAt || Date.now());
     setShowSavedBuilds(false);
     setShowCompanionList(false);
     toast.info("Build loaded", { description: build.name });
@@ -479,10 +501,10 @@ export default function CompanionBuilderPage() {
       markClean();
       return true;
     }
-    await handleSaveBuildConfirm(values);
+    await handleSaveBuildConfirm({ ...values, asNew: saveAsNew });
     markClean();
     return true;
-  }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildCompanionData]);
+  }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildCompanionData, saveAsNew]);
 
   const handleDeleteBuild = useCallback((id: string) => {
     void deleteSavedBuild(id);
@@ -1020,15 +1042,16 @@ export default function CompanionBuilderPage() {
             >
               <BuilderActionBar>
                 <BuilderActionGroup>
-                  <button
-                    onClick={() => setSaveDialogOpen(true)}
-                    className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-green-500/10 hover:text-green-700 dark:hover:text-green-400 sm:min-h-0 sm:py-1.5", hasUnsavedChanges && SAVE_DIRTY_CLASS)}
-                    title={hasUnsavedChanges ? "Save Build (unsaved changes)" : "Save Build"}
-                    data-dirty={hasUnsavedChanges ? "true" : undefined}
-                  >
-                    <Save className="h-3.5 w-3.5" /> <span>Save</span>
-                    {hasUnsavedChanges && <span className={SAVE_DIRTY_DOT_CLASS} aria-hidden />}
-                  </button>
+                  <BuilderSaveControls
+                    canUpdate={!!currentBuildId}
+                    dirty={hasUnsavedChanges}
+                    dirtyClass={SAVE_DIRTY_CLASS}
+                    dotClass={SAVE_DIRTY_DOT_CLASS}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-green-500/10 hover:text-green-700 dark:hover:text-green-400 sm:min-h-0 sm:py-1.5"
+                    onUpdate={() => { void handleQuickSave(); }}
+                    onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
+                    onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
+                  />
                   <button onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-0 sm:py-1.5" title="Load Build">
                     <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
                   </button>
@@ -1551,6 +1574,7 @@ export default function CompanionBuilderPage() {
         defaultName={buildName || (selectedCompanion ? `${selectedCompanion.name} Build` : "Companion Build")}
         defaultDescription={buildDescription}
         defaultIsPublic={buildIsPublic}
+        defaultTags={buildTags}
         onSave={handleSaveDialog}
         loadoutTarget={loadoutCtx ? { loadoutName: loadoutCtx.loadoutName, slotLabel: loadoutSlotLabel(loadoutCtx.slot) } : null}
       />
