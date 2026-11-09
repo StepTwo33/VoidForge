@@ -526,21 +526,21 @@ export default function WeaponBuilderPage() {
   useLocalBuildFromUrl("weapon", (build) => applyLoadedBuild(build, { silent: true }));
   const { context: loadoutCtx, clearContext: clearLoadoutCtx } = useLoadoutSlotFromUrl(
     "weapon",
-    useCallback((build) => applyLoadedBuild(build, { silent: true }), [applyLoadedBuild]),
+    useCallback((build) => {
+      applyLoadedBuild(build, { silent: true });
+      const loadoutId = new URLSearchParams(window.location.search).get("loadout");
+      const linked = loadoutId ? getLoadouts().find((l) => l.id === loadoutId) : undefined;
+      const saved = linked?.warframeBuild?.arcaneStacksById;
+      if (!saved && !linked?.simulation) return;
+      setSimParams((prev) => ({
+        ...prev,
+        ...(linked?.simulation ?? {}),
+        ...(saved ? { arcaneStacksById: { ...prev.arcaneStacksById, ...saved } } : {}),
+        ...((saved?.arcane_crepuscular ?? 0) > 0 || linked?.simulation?.applyInvisible ? { applyInvisible: true } : {}),
+      }));
+    }, [applyLoadedBuild]),
     allWeapons.length > 0,
   );
-  useEffect(() => {
-    if (!loadoutCtx) return;
-    const linked = getLoadouts().find((l) => l.id === loadoutCtx.loadoutId);
-    const saved = linked?.warframeBuild?.arcaneStacksById;
-    if (!saved && !linked?.simulation) return;
-    setSimParams((prev) => ({
-      ...prev,
-      ...(linked?.simulation ?? {}),
-      ...(saved ? { arcaneStacksById: { ...prev.arcaneStacksById, ...saved } } : {}),
-      ...((saved?.arcane_crepuscular ?? 0) > 0 || linked?.simulation?.applyInvisible ? { applyInvisible: true } : {}),
-    }));
-  }, [loadoutCtx]);
 
   const loadoutLinkState = useMemo<{
     buffs: WeaponExternalBuff[];
