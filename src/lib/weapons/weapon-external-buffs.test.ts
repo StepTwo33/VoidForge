@@ -1410,6 +1410,28 @@ describe("resolveWeaponExternalBuffs", () => {
     expect(withExternal.burstDps).toBeGreaterThan(withModOnly.burstDps);
   });
 
+  it("leaves Tenacious and Reinforced Bond off until the sim turns them on", () => {
+    const ctx = {
+      companionModSlots: [
+        { modId: "tenacious_bond", rank: 5, slotIndex: 0 },
+        { modId: "reinforced_bond", rank: 5, slotIndex: 1 },
+      ],
+      companionWeaponCritChance: 0.6,
+      allMods: modsMap,
+    };
+    const untouched = resolveWeaponExternalBuffs(testRifle, ctx, DEFAULT_SIM_PARAMS);
+    expect(untouched.find((b) => b.id === "companion:tenacious_bond")).toBeUndefined();
+    expect(untouched.find((b) => b.id === "companion:reinforced_bond")).toBeUndefined();
+
+    const on = resolveWeaponExternalBuffs(testRifle, ctx, {
+      ...DEFAULT_SIM_PARAMS,
+      applyTenaciousBondCrit: true,
+      applyReinforcedBondFireRate: true,
+    });
+    expect(on.find((b) => b.id === "companion:tenacious_bond")?.critMultFlatBonus).toBe(1.2);
+    expect(on.find((b) => b.id === "companion:reinforced_bond")?.fireRateBonus).toBe(0.6);
+  });
+
   it("applies Tenacious Bond crit mult when companion crit exceeds 50%", () => {
     const sim: SimulationParams = { ...DEFAULT_SIM_PARAMS, applyTenaciousBondCrit: true };
     const buffs = resolveWeaponExternalBuffs(testRifle, {

@@ -534,7 +534,7 @@ describe("round 57: Sirocco Amp arcanes, Virtuos rank scaling, Warframe conditio
       expect(activeStats.persistenceActive).toBe(true);
     }
 
-    // Loadout scenario: Paper turns Arcane Sculptor OFF (100% Eff), Mid-fight turns it ON (+175% Eff)
+    // Untouched conditionals stay off in mid-fight. Explicit saved stacks turn them on.
     const loadout: Loadout = {
       id: "test-sculptor-scenarios",
       name: "Sculptor Scenario Test",
@@ -543,6 +543,7 @@ describe("round 57: Sirocco Amp arcanes, Virtuos rank scaling, Warframe conditio
       warframeBuild: {
         warframeId: "volt",
         mods: [{ modId: "growing_power", rank: 5, slotIndex: 0 }],
+        shards: [],
         arcaneIds: ["arcane_sculptor", null],
         arcaneRanks: [5, 5],
         hasOrokinReactor: true,
@@ -552,8 +553,20 @@ describe("round 57: Sirocco Amp arcanes, Virtuos rank scaling, Warframe conditio
     const midFight = calcLoadoutStats(loadout, { scenario: "midFight" });
     expect(paper.warframe!.stats.abilityEfficiency).toBeCloseTo(1.0, 4);
     expect(paper.warframe!.stats.abilityStrength).toBeCloseTo(1.0, 4);
-    expect(midFight.warframe!.stats.abilityEfficiency).toBeGreaterThan(1.7);
-    expect(midFight.warframe!.stats.abilityStrength).toBeCloseTo(1.25, 4);
+    expect(midFight.warframe!.stats.abilityEfficiency).toBeCloseTo(1.0, 4);
+    expect(midFight.warframe!.stats.abilityStrength).toBeCloseTo(1.0, 4);
+
+    const saved: Loadout = {
+      ...loadout,
+      warframeBuild: {
+        ...loadout.warframeBuild!,
+        arcaneStacksById: { arcane_sculptor: 1 },
+        conditionalModStacksById: { growing_power: 1 },
+      },
+    };
+    const active = calcLoadoutStats(saved, { scenario: "midFight" });
+    expect(active.warframe!.stats.abilityEfficiency).toBeGreaterThan(1.7);
+    expect(active.warframe!.stats.abilityStrength).toBeCloseTo(1.25, 4);
   });
 
   it("keeps standalone Weapon Builder external buffs OFF by default and activates them when toggled ON", () => {

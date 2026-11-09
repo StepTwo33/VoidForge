@@ -458,8 +458,8 @@ function resolveCompanionBondBuffs(
   if (!slots?.length) return [];
 
   const buffs: WeaponExternalBuff[] = [];
-  const tenaciousActive = simParams.applyTenaciousBondCrit !== false;
-  const reinforcedActive = simParams.applyReinforcedBondFireRate !== false;
+  const tenaciousActive = simParams.applyTenaciousBondCrit === true;
+  const reinforcedActive = simParams.applyReinforcedBondFireRate === true;
 
   const tenaciousSlot = findCompanionMod(slots, "tenacious_bond");
   if (tenaciousSlot && tenaciousActive) {
