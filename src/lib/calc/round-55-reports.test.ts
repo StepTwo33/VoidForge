@@ -20,6 +20,28 @@ describe("Round 55 Bug Reports", () => {
       expect(shieldCost).toBe(500);
     });
 
+    it("scales subsumed shield cost with efficiency on Hildryn and Hildryn Prime", () => {
+      const ctx = { efficiency: 1.3, strength: 1, duration: 1, range: 1 };
+      for (const host of ["hildryn", "hildryn_prime"]) {
+        const lines = scaleAbilityMiscStats(
+          { shieldCost: 500 },
+          ctx,
+          { warframeId: "rhino", abilityName: "Roar", helminth: true, hostWarframeId: host },
+        );
+        expect(lines.find((l) => l.label === "Shield Cost")).toMatchObject({
+          base: "500",
+          scaled: "350",
+          scaleAttr: "efficiency",
+        });
+      }
+      const otherHost = scaleAbilityMiscStats(
+        { shieldCost: 500 },
+        ctx,
+        { warframeId: "rhino", abilityName: "Roar", helminth: true, hostWarframeId: "excalibur" },
+      );
+      expect(otherHost.find((l) => l.label === "Shield Cost")?.scaleAttr).toBeUndefined();
+    });
+
     it("converts energy drain labels to shield drain when hostWarframeId is Hildryn", () => {
       const lines = scaleAbilityMiscStats(
         { energyDrainPerEnemy: 0.75 },

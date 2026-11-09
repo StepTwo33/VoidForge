@@ -1974,15 +1974,19 @@ export function scaleAbilityMiscStats(
     if (SKIP_KEYS.has(key)) continue;
 
     const base = formatBaseValue(key, value);
-    const rule = display
-      ? getVerifiedMiscScaling(display.warframeId, display.abilityName, key, display.helminth)
-      : null;
-
     const isHildryn =
       display?.hostWarframeId === "hildryn" ||
       display?.hostWarframeId === "hildryn_prime" ||
       display?.warframeId === "hildryn" ||
       display?.warframeId === "hildryn_prime";
+    // Subsumed abilities store shieldCost without a per-ability rule. On Hildryn
+    // that cost uses the same cast-cost efficiency curve as energy (wiki Pillage).
+    let rule = display
+      ? getVerifiedMiscScaling(display.warframeId, display.abilityName, key, display.helminth)
+      : null;
+    if (!rule && isHildryn && key === "shieldCost") {
+      rule = { scale: "efficiency", formula: "cast_cost" };
+    }
     let label = humanizeKey(key);
     if (isHildryn) {
       label = label.replace(/\bEnergy\b/g, "Shield");
