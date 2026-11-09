@@ -185,7 +185,7 @@ export function ArcanePicker({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100%-2rem)] max-h-[80vh] flex flex-col p-0 sm:max-w-lg">
+      <DialogContent className="flex max-h-[85dvh] min-h-0 w-full max-w-[calc(100%-2rem)] flex-col overflow-hidden p-0 sm:max-w-lg max-lg:top-auto max-lg:bottom-0 max-lg:max-h-[85dvh] max-lg:max-w-none max-lg:translate-y-0 max-lg:rounded-b-none">
         <DialogHeader className="p-6 pb-0 sm:pl-6 sm:pr-12 lg:pl-6 lg:pr-12">
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -233,7 +233,7 @@ export function ArcanePicker({
           )}
           <p className="text-xs text-muted-foreground">{filtered.length} arcanes</p>
         </div>
-        <div className="flex-1 overflow-y-auto px-6 pb-6 min-h-0">
+        <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-6 pb-6">
           {filtered.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border/70 px-3 py-8 text-center">
               <p className="text-sm font-medium text-foreground">No arcanes match</p>

@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { EmptyState } from "@/components/page-shell";
 import { allHelminthAbilities, type HelminthAbility } from "@/data/helminth";
 import { PointerVerb } from "@/components/pointer-verb";
@@ -79,7 +78,7 @@ export function HelminthPickerDialog({
             )}
           </p>
         </div>
-        <ScrollArea className="min-h-0 flex-1 px-6 pb-6">
+        <div className="min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain px-6 pb-6" data-testid="helminth-ability-list">
           <div className="space-y-1.5">
             {filtered.length === 0 ? (
               <EmptyState
@@ -124,7 +123,7 @@ export function HelminthPickerDialog({
               ))
             )}
           </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
