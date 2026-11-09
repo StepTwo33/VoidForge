@@ -106,7 +106,14 @@ export async function POST(req: NextRequest) {
       if (count >= MAX_RIVENS_PER_USER) {
         return NextResponse.json({ error: "Riven library is full" }, { status: 400 });
       }
-      const created = await prisma.savedRiven.create({ data: { ...data, userId: session.user.id } });
+      const requestedId = typeof body.id === "string" ? body.id.trim() : "";
+      const created = await prisma.savedRiven.create({
+        data: {
+          ...data,
+          userId: session.user.id,
+          ...(requestedId ? { id: requestedId } : {}),
+        },
+      });
       return NextResponse.json(parseSavedRivenRow(created));
     });
   } catch (e) {

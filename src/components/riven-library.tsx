@@ -7,6 +7,7 @@ import { ContentPanel } from "@/components/page-shell";
 import { PolarityIcon } from "@/components/polarity-icon";
 import { useConfirmDialog } from "@/components/confirm-dialog-provider";
 import { hasClientSession } from "@/lib/auth/client-session";
+import { localRivenAfterCloudSave, rivenSaveId } from "@/lib/rivens/riven-save-id";
 import Link from "next/link";
 import {
   deleteSavedRiven as deleteCloudRiven,
@@ -116,8 +117,8 @@ export function RivenLibrary() {
         const weapon = weaponsById.get(saved.weaponId);
         const modId = rivenModIdFor(weapon);
         if (modId) {
-          await saveCloudRiven({
-            id: saved.id.startsWith("riven_") ? undefined : saved.id,
+          const cloud = await saveCloudRiven({
+            id: rivenSaveId(saved.id),
             weaponId: saved.weaponId,
             name: saved.name,
             modId,
@@ -125,6 +126,11 @@ export function RivenLibrary() {
             polarity: saved.polarity,
             drain: 18,
           });
+          const adopted = localRivenAfterCloudSave(saved, cloud?.id);
+          if (adopted.removedId) {
+            deleteLocalStorageRiven(adopted.removedId);
+            saveLocalStorageRiven(adopted.saved);
+          }
         }
       }
     } catch {

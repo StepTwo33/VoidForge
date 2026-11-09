@@ -36,7 +36,7 @@ import { cn } from "@/lib/utils";
 interface RivenDialogProps {
   open: boolean;
   onClose: () => void;
-  onSave: (riven: SavedRiven) => void;
+  onSave: (riven: SavedRiven) => void | Promise<void>;
   initialRiven?: SavedRiven | null;
   initialScannedRiven?: ParsedOcrRiven | null;
   fixedWeaponId?: string;
@@ -427,7 +427,10 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
     initialRiven,
   ]);
 
-  const handleSave = () => {
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (saving) return;
     if (positiveStats.length === 0) {
       toast.error("Please add at least 1 positive stat");
       return;
@@ -441,9 +444,14 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
       toast.error(valCheck.errors[0] ?? "Invalid riven stats");
       return;
     }
-    onSave(previewRiven);
-    toast.success(`Saved ${previewRiven.name} to Riven Library!`);
-    onClose();
+    setSaving(true);
+    try {
+      await onSave(previewRiven);
+      toast.success(`Saved ${previewRiven.name} to Riven Library!`);
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!open) return null;
@@ -954,10 +962,11 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
           </button>
           <button
             type="button"
-            onClick={handleSave}
-            className="rounded-lg bg-purple-600 px-5 py-2 text-sm font-bold text-white shadow-lg transition-colors hover:bg-purple-500"
+            onClick={() => { void handleSave(); }}
+            disabled={saving}
+            className="min-h-11 rounded-lg bg-purple-600 px-5 py-2 text-sm font-bold text-white shadow-lg transition-colors hover:bg-purple-500 disabled:opacity-60"
           >
-            Save to Library
+            {saving ? "Saving…" : "Save to Library"}
           </button>
         </div>
       </div>

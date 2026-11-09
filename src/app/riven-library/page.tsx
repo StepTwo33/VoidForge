@@ -14,6 +14,7 @@ import {
   type SavedRiven,
 } from "@/lib/rivens/riven-storage";
 import { hasClientSession } from "@/lib/auth/client-session";
+import { localRivenAfterCloudSave, rivenSaveId } from "@/lib/rivens/riven-save-id";
 import {
   getSavedRivens as getCloudRivens,
   saveRiven as saveCloudRiven,
@@ -97,8 +98,8 @@ export default function RivenLibraryPage() {
       if (signedIn) {
         const weapon = allWeapons.find((w) => w.id === riven.weaponId);
         const modId = getRivenModIdForWeapon(weapon) ?? `riven_${riven.weaponType.toLowerCase()}`;
-        await saveCloudRiven({
-          id: riven.id.startsWith("riven_") ? undefined : riven.id,
+        const cloud = await saveCloudRiven({
+          id: rivenSaveId(riven.id),
           weaponId: riven.weaponId,
           name: riven.name,
           modId,
@@ -106,6 +107,11 @@ export default function RivenLibraryPage() {
           polarity: riven.polarity,
           drain: 18,
         });
+        const adopted = localRivenAfterCloudSave(riven, cloud?.id);
+        if (adopted.removedId) {
+          deleteRiven(adopted.removedId);
+          saveRiven(adopted.saved);
+        }
       }
     } catch {
       // Local save succeeded
