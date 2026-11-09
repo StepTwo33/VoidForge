@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ExternalLink, Target, Zap } from "lucide-react";
 import { GameAssetImage } from "@/components/game-asset-image";
 import { EnemyLevelControl } from "@/components/enemy-level-control";
+import { PREVIEW_ENEMY_HINT, PREVIEW_ENEMY_LABEL } from "@/lib/ui/enemy-target-labels";
 import { getArcaneImage, getModImage } from "@/lib/display/images";
 import type { BuildPreviewChip, BuildPreviewData, LoadoutSlotPreview } from "@/lib/builds/build-preview";
 import { summarizeLoadoutSlots } from "@/lib/builds/build-preview";
@@ -625,7 +626,10 @@ export function LoadoutBuildPreview({
           {scenario === "vsEnemy" && (
             <div className="flex flex-wrap items-end gap-2">
               <div className="min-w-[140px] flex-1">
-                <label className="mb-0.5 block text-[10px] text-muted-foreground">Enemy</label>
+                <label className="mb-0.5 block text-[10px] text-muted-foreground">
+                  {PREVIEW_ENEMY_LABEL}
+                  <span className="ml-1 font-normal text-muted-foreground/80">{PREVIEW_ENEMY_HINT}</span>
+                </label>
                 <select
                   value={enemyId}
                   onChange={(e) => setEnemyId(e.target.value)}

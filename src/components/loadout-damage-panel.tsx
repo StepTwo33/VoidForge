@@ -40,6 +40,7 @@ import {
 import { cn } from "@/lib/utils";
 import { EnemyLevelControl } from "@/components/enemy-level-control";
 import { loadoutCombatStatCells } from "@/lib/builds/loadout-combat-stats";
+import { LOADOUT_ENEMY_HINT, LOADOUT_ENEMY_LABEL } from "@/lib/ui/enemy-target-labels";
 
 const SCENARIO_LABELS: Record<DamageScenario, string> = {
   paper: "Paper",
@@ -475,7 +476,10 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
         <div className="px-4 py-2.5 border-b border-border/40 space-y-2.5 bg-card/30">
           <div className="flex flex-wrap gap-2 items-end">
             <div className="flex-1 min-w-[150px]">
-              <label className="text-[10px] text-muted-foreground block mb-0.5">Enemy Target</label>
+              <label className="text-[10px] text-muted-foreground block mb-0.5">
+                {LOADOUT_ENEMY_LABEL}
+                <span className="ml-1 font-normal text-muted-foreground/80">{LOADOUT_ENEMY_HINT}</span>
+              </label>
               <select
                 value={enemyId}
                 onChange={(e) => setEnemyId(e.target.value)}
