@@ -1,4 +1,5 @@
 import { Loadout, ModularBuildData, ModSlot } from "../types";
+import { allWeapons } from "@/data/weapons";
 import { inferModularLoadoutSlot } from "./modular-resolve";
 import { companionsMap } from "@/data/companions";
 import { migrateClawModsFromCompanion, migratePostureToPostureSlot } from "@/lib/weapons/companion-weapons";
@@ -38,9 +39,10 @@ export function normalizeLoadoutBuildData(data: LoadoutBuildData): LoadoutBuildD
 
   const normalizeWeapon = (build: LoadoutBuildData["primaryBuild"]) => {
     if (!build) return build;
+    const isExalted = allWeapons.find((w) => w.id === build.weaponId)?.isExalted;
     return {
       ...build,
-      hasOrokinCatalyst: build.hasOrokinCatalyst ?? false,
+      hasOrokinCatalyst: isExalted ? true : (build.hasOrokinCatalyst ?? false),
       isMR30: build.isMR30 ?? false,
       slotPolarities: build.slotPolarities ?? {},
       arcaneIds: build.arcaneIds ?? [null, null],

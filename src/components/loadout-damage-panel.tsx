@@ -212,7 +212,22 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
   const [steelPath, setSteelPath] = useState(false);
   const [applyHeadshots, setApplyHeadshots] = useState(false);
   const [applyTriggerBuffs, setApplyTriggerBuffs] = useState(false);
-  const [activeAbilityBuffs, setActiveAbilityBuffs] = useState<string[]>([]);
+  const [activeAbilityBuffs, setActiveAbilityBuffs] = useState<string[]>(
+    () => loadout.simulation?.activeWeaponAbilityBuffs ?? [],
+  );
+
+  useEffect(() => {
+    const current = loadout.simulation?.activeWeaponAbilityBuffs ?? [];
+    if (JSON.stringify(current) === JSON.stringify(activeAbilityBuffs)) return;
+    saveLoadout({
+      ...loadout,
+      updatedAt: Date.now(),
+      simulation: {
+        ...(loadout.simulation ?? {}),
+        activeWeaponAbilityBuffs: activeAbilityBuffs,
+      },
+    });
+  }, [activeAbilityBuffs, loadout]);
 
   // Enemy debuff priming (Path-of-Building style combat configuration)
   const [primedViral, setPrimedViral] = useState(0);

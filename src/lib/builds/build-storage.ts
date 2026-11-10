@@ -54,7 +54,7 @@ export interface SavedBuild {
   name: string;
   description?: string;
   isPublic?: boolean;
-  type: "weapon" | "warframe" | "companion" | "modular" | "archwing" | "railjack" | "loadout";
+  type: "weapon" | "warframe" | "companion" | "modular" | "archwing" | "railjack" | "loadout" | "operator";
   /** Community meta tags (steel_path, budget, …). */
   tags?: string[];
   createdAt: number;

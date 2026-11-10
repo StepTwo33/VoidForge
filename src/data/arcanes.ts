@@ -2004,6 +2004,7 @@ export const secondaryArcanes = allArcanes.filter(a => a.subCategory === 'second
 export const meleeArcanes = allArcanes.filter(a => a.subCategory === 'melee');
 export const kitgunArcanes = allArcanes.filter(a => a.subCategory === 'kitgun' || a.subCategory === 'residual');
 export const ampArcanes = allArcanes.filter(a => a.subCategory === 'amp');
+export const operatorArcanes = allArcanes.filter(a => a.subCategory === 'operator');
 /** Exodia arcanes — Zaw-only slot (2nd melee arcane on modular Zaws). */
 export const exodiaArcanes = allArcanes.filter(a => a.subCategory === 'zaw');
 export const zawArcanes = exodiaArcanes;

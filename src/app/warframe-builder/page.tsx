@@ -77,7 +77,7 @@ import {
   getMeleeExaltedWeapon,
   getPrimaryExaltedWeapon,
 } from "@/lib/weapons/exalted-weapons";
-import { SavedBuild, WarframeBuildData, persistSavedBuild, resolveActiveArcaneList, resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
+import { SavedBuild, WarframeBuildData, WeaponBuildData, persistSavedBuild, resolveActiveArcaneList, resolveSavedArcaneSlots } from "@/lib/builds/build-storage";
 import { getLoadouts } from "@/lib/builds/loadouts";
 import { applyWeaponIncarnonMobilityToWarframe, setBonusLinkageFromLoadout } from "@/lib/builds/loadout-stats";
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
@@ -211,6 +211,9 @@ export default function WarframeBuilderPage() {
   const [activeDualFormId, setActiveDualFormId] = useState("sirius");
   const [dualFormBuilds, setDualFormBuilds] = useState<Record<string, DualFormBuildSlice>>({});
   const { savedBuilds, refreshSavedBuilds, deleteSavedBuild } = useBuilderSavedBuilds("warframe");
+  const { savedBuilds: savedWeaponBuilds, refreshSavedBuilds: refreshSavedWeaponBuilds } = useBuilderSavedBuilds("weapon");
+  const [exaltedActiveBuildName, setExaltedActiveBuildName] = useState<string | null>(null);
+  const [exaltedMeleeActiveBuildName, setExaltedMeleeActiveBuildName] = useState<string | null>(null);
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [pickerTab, setPickerTab] = useState<"catalog" | "saved">("catalog");
   const [showImporter, setShowImporter] = useState(false);
@@ -976,10 +979,12 @@ export default function WarframeBuilderPage() {
     setExaltedSlotPolarities({});
     setExaltedArcanes([null]);
     setExaltedArcaneRanks([5, 5]);
+    setExaltedActiveBuildName(null);
     setExaltedMeleeMods([]);
     setExaltedMeleeSlotPolarities({});
     setExaltedMeleeArcanes([null]);
     setExaltedMeleeArcaneRanks([5, 5]);
+    setExaltedMeleeActiveBuildName(null);
     setHelminthSlot(null);
     setHelminthAbility(null);
     setSlotPolarities({});
@@ -992,6 +997,108 @@ export default function WarframeBuilderPage() {
     setBuildDescription("");
     setShowWarframeList(false);
   }, []);
+
+  const handleLoadExaltedSavedBuild = useCallback((build: SavedBuild) => {
+    const d = build.data as WeaponBuildData;
+    const mods: EquippedMod[] = (d.mods || []).map((m: any, i: number) => {
+      const mid = m.modId ?? m.id;
+      const mod = modsMap.get(mid);
+      return {
+        modId: mid,
+        modName: mod?.name ?? "",
+        rank: m.rank,
+        slotIndex: typeof m.slotIndex === "number" ? m.slotIndex : i,
+        polarity: mod?.polarity,
+        drain: mod?.drain,
+      };
+    });
+    setExaltedMods(mods);
+    if (d.slotPolarities) setExaltedSlotPolarities(d.slotPolarities);
+    if (d.arcaneIds) {
+      const resolved = resolveSavedArcaneSlots(d.arcaneIds, exaltedArcaneConfig.slots);
+      setExaltedArcanes(resolved);
+      setExaltedArcaneRanks(resolved.map((a, i) => d.arcaneRanks?.[i] ?? a?.maxRank ?? 5));
+    }
+    setExaltedActiveBuildName(build.name);
+    toast.success(`Loaded “${build.name}” onto ${exaltedWeapon?.name ?? "Exalted Weapon"}`);
+  }, [modsMap, exaltedArcaneConfig.slots, exaltedWeapon?.name]);
+
+  const handleSaveExaltedAsWeaponBuild = useCallback(async (name: string) => {
+    if (!exaltedWeapon) return;
+    const weaponData: WeaponBuildData = {
+      weaponId: exaltedWeapon.id,
+      mods: exaltedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      arcaneIds: exaltedArcanes.map((a) => a?.id ?? null),
+      arcaneRanks: [...exaltedArcaneRanks],
+      hasOrokinCatalyst: true,
+      isMR30: false,
+      slotPolarities: exaltedSlotPolarities,
+    };
+    const now = Date.now();
+    await persistSavedBuild({
+      id: crypto.randomUUID(),
+      type: "weapon",
+      name,
+      isPublic: false,
+      data: weaponData,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await refreshSavedWeaponBuilds();
+    setExaltedActiveBuildName(name);
+    toast.success(`Saved “${name}” to Weapon Builder library`);
+  }, [exaltedWeapon, exaltedMods, exaltedArcanes, exaltedArcaneRanks, exaltedSlotPolarities, refreshSavedWeaponBuilds]);
+
+  const handleLoadExaltedMeleeSavedBuild = useCallback((build: SavedBuild) => {
+    const d = build.data as WeaponBuildData;
+    const mods: EquippedMod[] = (d.mods || []).map((m: any, i: number) => {
+      const mid = m.modId ?? m.id;
+      const mod = modsMap.get(mid);
+      return {
+        modId: mid,
+        modName: mod?.name ?? "",
+        rank: m.rank,
+        slotIndex: typeof m.slotIndex === "number" ? m.slotIndex : i,
+        polarity: mod?.polarity,
+        drain: mod?.drain,
+      };
+    });
+    setExaltedMeleeMods(mods);
+    if (d.slotPolarities) setExaltedMeleeSlotPolarities(d.slotPolarities);
+    if (d.arcaneIds) {
+      const resolved = resolveSavedArcaneSlots(d.arcaneIds, exaltedMeleeArcaneConfig.slots);
+      setExaltedMeleeArcanes(resolved);
+      setExaltedMeleeArcaneRanks(resolved.map((a, i) => d.arcaneRanks?.[i] ?? a?.maxRank ?? 5));
+    }
+    setExaltedMeleeActiveBuildName(build.name);
+    toast.success(`Loaded “${build.name}” onto ${exaltedMeleeWeapon?.name ?? "Exalted Melee"}`);
+  }, [modsMap, exaltedMeleeArcaneConfig.slots, exaltedMeleeWeapon?.name]);
+
+  const handleSaveExaltedMeleeAsWeaponBuild = useCallback(async (name: string) => {
+    if (!exaltedMeleeWeapon) return;
+    const weaponData: WeaponBuildData = {
+      weaponId: exaltedMeleeWeapon.id,
+      mods: exaltedMeleeMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      arcaneIds: exaltedMeleeArcanes.map((a) => a?.id ?? null),
+      arcaneRanks: [...exaltedMeleeArcaneRanks],
+      hasOrokinCatalyst: true,
+      isMR30: false,
+      slotPolarities: exaltedMeleeSlotPolarities,
+    };
+    const now = Date.now();
+    await persistSavedBuild({
+      id: crypto.randomUUID(),
+      type: "weapon",
+      name,
+      isPublic: false,
+      data: weaponData,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await refreshSavedWeaponBuilds();
+    setExaltedMeleeActiveBuildName(name);
+    toast.success(`Saved “${name}” to Weapon Builder library`);
+  }, [exaltedMeleeWeapon, exaltedMeleeMods, exaltedMeleeArcanes, exaltedMeleeArcaneRanks, exaltedMeleeSlotPolarities, refreshSavedWeaponBuilds]);
 
   const handleOpenModPicker = useCallback((slotIndex: number) => {
     setActiveSlotIndex(slotIndex);
@@ -1606,6 +1713,11 @@ export default function WarframeBuilderPage() {
                     onSimParamsChange={setExaltedUserSim}
                     sectionTitle={exaltedMeleeWeapon ? "Exalted Primary" : "Exalted Weapon"}
                     hideSiblingNote={!!exaltedMeleeWeapon}
+                    activeBuildName={exaltedActiveBuildName}
+                    savedWeaponBuilds={savedWeaponBuilds}
+                    onLoadSavedBuild={handleLoadExaltedSavedBuild}
+                    onSaveAsWeaponBuild={handleSaveExaltedAsWeaponBuild}
+                    onClearMods={() => setExaltedMods([])}
                     onAddMod={(i) => {
                       setExaltedActiveSlot(i);
                       setExaltedModPickerOpen(true);
@@ -1657,6 +1769,11 @@ export default function WarframeBuilderPage() {
                     onSimParamsChange={setExaltedUserSim}
                     sectionTitle="Exalted Melee"
                     hideSiblingNote
+                    activeBuildName={exaltedMeleeActiveBuildName}
+                    savedWeaponBuilds={savedWeaponBuilds}
+                    onLoadSavedBuild={handleLoadExaltedMeleeSavedBuild}
+                    onSaveAsWeaponBuild={handleSaveExaltedMeleeAsWeaponBuild}
+                    onClearMods={() => setExaltedMeleeMods([])}
                     onAddMod={(i) => {
                       setExaltedMeleeActiveSlot(i);
                       setExaltedMeleeModPickerOpen(true);

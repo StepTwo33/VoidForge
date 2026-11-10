@@ -15,6 +15,10 @@ import {
 import { getExaltedWeaponsForWarframe } from "@/lib/weapons/exalted-weapons";
 import { calcLoadoutStats } from "@/lib/builds/loadout-stats";
 import { DEFAULT_SIM_PARAMS, Loadout, Weapon } from "@/lib/types";
+import { headshotMultiplier } from "@/lib/calc/combat-multipliers";
+import { weaponModCapacity } from "@/lib/weapons/weapon-progenitor";
+import { encodeLoadoutShare, decodeLoadoutShare } from "@/lib/builds/loadout-share";
+import { allWarframes } from "@/data/warframes";
 
 describe("Community Reports Fixes: Amps, Exalted Slots, Operator & Necramechs", () => {
   describe("Report: Modular Amps in Weapon Slots", () => {
@@ -197,6 +201,131 @@ describe("Community Reports Fixes: Amps, Exalted Slots, Operator & Necramechs", 
         simParams: { activeWeaponAbilityBuffs: ["Hardened Wellspring"] },
       });
       expect(withWellspring.warframe?.stats.abilityStrength).toBeCloseTo(1.2, 2);
+    });
+  });
+
+  describe("Report: Exalted weapons innate Orokin Catalyst (60 capacity)", () => {
+    it("innately grants 60 mod capacity to exalted weapons regardless of hasCatalyst flag", () => {
+      const regulators = allWeapons.find((w) => w.id === "regulators")!;
+      expect(regulators.isExalted).toBe(true);
+
+      // Even when hasCatalyst is false, exalted weapons return 60
+      expect(weaponModCapacity(regulators, 0, false)).toBe(60);
+      expect(weaponModCapacity(regulators, 0, true)).toBe(60);
+
+      // Normal weapons return 30 without catalyst, 60 with catalyst
+      const braton = allWeapons.find((w) => w.id === "braton")!;
+      expect(weaponModCapacity(braton, 0, false)).toBe(30);
+      expect(weaponModCapacity(braton, 0, true)).toBe(60);
+    });
+  });
+
+  describe("Report: Headshot vs Non-Head Weak Point multipliers", () => {
+    it("applies 3x headshot multiplier + headshot bonus on headshots", () => {
+      // Body shot: 1.0x
+      expect(headshotMultiplier(false, 0, 0, null, false)).toBe(1.0);
+
+      // Headshot (3.0x base humanoid head, plus bonuses)
+      const hsNoBonus = headshotMultiplier(true, 0, 0, null, false);
+      expect(hsNoBonus).toBe(3.0);
+
+      // Headshot with +30% Deadhead / Target Acquired
+      const hsWithDeadhead = headshotMultiplier(true, 0.3, 0, null, false);
+      expect(hsWithDeadhead).toBeCloseTo(3.0 * 1.3, 4);
+
+      // Headshot with +50% Weak Point damage (applies at 1.5x on head)
+      const hsWithWeakPointBonus = headshotMultiplier(true, 0, 0.5, null, false);
+      expect(hsWithWeakPointBonus).toBeCloseTo(3.0 + 1.5 * 0.5, 4);
+    });
+
+    it("applies 2x body weak point multiplier on non-head weak points without headshot bonus", () => {
+      // Non-head weak point: 2.0x base body weak point
+      const wpNoBonus = headshotMultiplier(false, 0, 0, null, true);
+      expect(wpNoBonus).toBe(2.0);
+
+      // Non-head weak point gets weak point damage bonus
+      const wpWithBonus = headshotMultiplier(false, 0, 0.5, null, true);
+      expect(wpWithBonus).toBe(2.5);
+
+      // Non-head weak point does NOT get headshot damage bonus (Deadhead)
+      const wpWithDeadhead = headshotMultiplier(false, 0.3, 0, null, true);
+      expect(wpWithDeadhead).toBe(2.0);
+    });
+  });
+
+  describe("Report: Warframe debuffs & armor strip (Reap, Terrify, Tharros Strike)", () => {
+    it("scales armor strip from Terrify and Tharros Strike with ability strength", () => {
+      const nekros = allWarframes.find((w) => w.id === "nekros")!;
+      const terrify = nekros.abilities.find((a) => a.name === "Terrify")!;
+      expect(terrify.miscStats?.armorStrip).toBe(0.6);
+
+      // At 100% STR: 60% strip
+      expect(computeLoadoutAbilityArmorStripPct([terrify], 1.0, ["Terrify"])).toBe(60);
+      // At 167% STR: 100% full armor strip
+      expect(computeLoadoutAbilityArmorStripPct([terrify], 1.67, ["Terrify"])).toBe(100);
+
+      const styanax = allWarframes.find((w) => w.id === "styanax")!;
+      const tharros = styanax.abilities.find((a) => a.name === "Tharros Strike")!;
+      expect(tharros.miscStats?.armorStrip).toBe(0.5);
+
+      // At 100% STR: 50% strip
+      expect(computeLoadoutAbilityArmorStripPct([tharros], 1.0, ["Tharros Strike"])).toBe(50);
+      // At 200% STR: 100% full strip
+      expect(computeLoadoutAbilityArmorStripPct([tharros], 2.0, ["Tharros Strike"])).toBe(100);
+    });
+
+    it("resolves Sevagoth Reap +50% damage vulnerability debuff", () => {
+      const sevagoth = allWarframes.find((w) => w.id === "sevagoth")!;
+      const reap = sevagoth.abilities.find((a) => a.name === "Reap")!;
+      expect(reap.miscStats?.damageVulnerability).toBe(0.5);
+
+      const skana = allWeapons.find((w) => w.id === "skana")!;
+      const buffs = resolveWeaponExternalBuffs(
+        skana,
+        {
+          warframeId: "sevagoth",
+          warframeStats: { abilityStrength: 1.5 } as any,
+          warframeAbilities: [reap],
+        },
+        { ...DEFAULT_SIM_PARAMS, activeWeaponAbilityBuffs: ["Reap"] },
+      );
+
+      const vulnBuff = buffs.find((b) => b.label.includes("Reap"));
+      expect(vulnBuff).toBeDefined();
+      // 0.5 * 1.5 STR = 0.75 damage multiplier bonus
+      expect(vulnBuff?.damageMultBonus).toBeCloseTo(0.75, 2);
+    });
+  });
+
+  describe("Report: Loadout share encoding preserves operatorBuild", () => {
+    it("round-trips operatorBuild focusSchool and amp settings through encodeLoadoutShare", async () => {
+      const loadout: Loadout = {
+        id: "share-test-1",
+        name: "Operator Share Test",
+        createdAt: 1000,
+        updatedAt: 2000,
+        warframeBuild: {
+          warframeId: "ash",
+          mods: [],
+          hasOrokinReactor: true,
+          shards: [],
+        },
+        operatorBuild: {
+          focusSchool: "Madurai",
+          ampId: "sirocco",
+          ampName: "Sirocco",
+        },
+      };
+
+      const code = await encodeLoadoutShare(loadout);
+      expect(code).toBeTruthy();
+
+      const decoded = await decodeLoadoutShare(code!);
+      expect(decoded).not.toBeNull();
+      expect(decoded?.name).toBe("Operator Share Test");
+      expect(decoded?.data.operatorBuild).toBeDefined();
+      expect(decoded?.data.operatorBuild?.focusSchool).toBe("Madurai");
+      expect(decoded?.data.operatorBuild?.ampId).toBe("sirocco");
     });
   });
 });

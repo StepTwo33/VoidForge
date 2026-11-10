@@ -23,7 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const SWITCH_SLOTS: LoadoutSlotType[] = ["warframe", "primary", "secondary", "melee", "companion"];
+const SWITCH_SLOTS: LoadoutSlotType[] = ["warframe", "primary", "secondary", "melee", "companion", "operator"];
 
 /** Shown at the top of a builder opened from a loadout slot. */
 export function LoadoutEditBanner({

@@ -22,7 +22,7 @@ export const LOADOUT_SLOT_CONFIG: Record<
   secondary: { label: "Secondary", color: "cyan", builderPath: "/weapon-builder" },
   melee: { label: "Melee", color: "orange", builderPath: "/weapon-builder" },
   companion: { label: "Companion", color: "green", builderPath: "/companion-builder" },
-  operator: { label: "Operator", color: "amber", builderPath: "/modular-builder" },
+  operator: { label: "Operator", color: "amber", builderPath: "/operator-builder" },
 };
 
 /** Tailwind cannot compile dynamic `border-${color}` — use explicit classes. */
@@ -248,11 +248,7 @@ export function listSavedBuildsForSlot(
     });
   }
   if (slot === "operator") {
-    return getSavedBuilds("modular").filter((b) => {
-      if (b.type !== "modular") return false;
-      const d = b.data as ModularBuildData;
-      return d?.modularType === "amp";
-    });
+    return all.filter((b) => b.type === "operator");
   }
   const cats = getWeaponCategories(slot);
   return all.filter((b) => {
@@ -305,7 +301,7 @@ export function loadoutSlotEditHref(loadout: Loadout, slot: LoadoutSlotType): st
   const qs = `?loadout=${encodeURIComponent(loadout.id)}&slot=${slot}`;
   if (slot === "warframe") return loadout.warframeBuild?.warframeId ? `${LOADOUT_SLOT_CONFIG.warframe.builderPath}${qs}` : null;
   if (slot === "companion") return loadout.companionBuild?.companionId ? `${LOADOUT_SLOT_CONFIG.companion.builderPath}${qs}` : null;
-  if (slot === "operator") return loadout.operatorBuild ? `/modular-builder?type=amp` : null;
+  if (slot === "operator") return loadout.operatorBuild ? `${LOADOUT_SLOT_CONFIG.operator.builderPath}${qs}` : null;
   const p = getWeaponSlotPayload(loadout, slot);
   if (!p) return null;
   return `${p.kind === "modular" ? "/modular-builder" : LOADOUT_SLOT_CONFIG[slot].builderPath}${qs}`;
@@ -345,6 +341,10 @@ export function loadoutSlotsAsBuilds(
     }
   }
   if (loadout.companionBuild?.companionId) push("companion", "Companion", loadout.companionBuild);
-  if (loadout.operatorBuild?.ampModularBuild) push("modular", "Operator Amp", loadout.operatorBuild.ampModularBuild);
+  if (loadout.operatorBuild?.focusSchool) {
+    push("operator", "Operator", loadout.operatorBuild);
+  } else if (loadout.operatorBuild?.ampModularBuild) {
+    push("modular", "Operator Amp", loadout.operatorBuild.ampModularBuild);
+  }
   return out;
 }

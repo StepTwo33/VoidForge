@@ -370,7 +370,7 @@ export default function WeaponBuilderPage() {
       stanceModId: stanceMod?.id,
       arcaneIds: equippedArcanes.map((a) => a?.id ?? null),
       arcaneRanks: [...equippedArcaneRanks],
-      hasOrokinCatalyst,
+      hasOrokinCatalyst: selectedWeapon?.isExalted ? true : hasOrokinCatalyst,
       isMR30: false,
       ...(weaponSupportsProgenitor(selectedWeapon) && adversaryFormas > 0
         ? { adversaryFormas }
@@ -684,7 +684,7 @@ export default function WeaponBuilderPage() {
         mods: equippedMods.map((m) => ({ id: m.modId, rank: m.rank })),
         arcanes: equippedArcanes.map((a) => a?.id ?? ""),
         arcaneRanks: [...equippedArcaneRanks],
-        hasOrokinCatalyst,
+        hasOrokinCatalyst: selectedWeapon?.isExalted ? true : hasOrokinCatalyst,
         isMR30: false,
         ...(weaponSupportsProgenitor(selectedWeapon) && adversaryFormas > 0
           ? { adversaryFormas }

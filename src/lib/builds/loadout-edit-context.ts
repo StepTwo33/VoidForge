@@ -5,14 +5,14 @@ import type { CompanionBuildData, WarframeBuildData, WeaponBuildData } from "@/l
 import { normalizeWarframeBuild, withLoadoutModular } from "@/lib/builds/loadout-slot-helpers";
 import type { LoadoutWeaponSlot } from "@/lib/builds/modular-resolve";
 
-export type LoadoutBuilderKind = "weapon" | "warframe" | "companion" | "modular";
+export type LoadoutBuilderKind = "weapon" | "warframe" | "companion" | "modular" | "operator";
 
 /** Which loadout slot a builder was opened from (see useLoadoutSlotFromUrl). */
 export interface LoadoutEditContext {
   loadoutId: string;
   loadoutName: string;
   kind: LoadoutBuilderKind;
-  /** warframe | companion | primary | secondary | melee */
+  /** warframe | companion | primary | secondary | melee | operator */
   slot: string;
 }
 
@@ -22,6 +22,7 @@ const SLOT_LABELS: Record<string, string> = {
   primary: "Primary",
   secondary: "Secondary",
   melee: "Melee",
+  operator: "Operator",
 };
 
 export function loadoutSlotLabel(slot: string): string {
@@ -71,6 +72,15 @@ export function withLoadoutSlot(loadout: Loadout, ctx: LoadoutEditContext, data:
       if (ws === "secondary") delete next.secondaryBuild;
       if (ws === "melee") delete next.meleeBuild;
       return next;
+    }
+    case "operator": {
+      const d = data as NonNullable<Loadout["operatorBuild"]>;
+      return {
+        ...loadout,
+        operatorBuild: {
+          ...d,
+        },
+      };
     }
   }
 }

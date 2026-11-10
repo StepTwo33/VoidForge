@@ -26,6 +26,11 @@ import {
 import { getModStatLabel } from "@/lib/overrides/override-stat-catalog";
 import { maxStacksSimParams, paperSimParams } from "@/lib/ui/sim-presets";
 import { HIT_WINDOW_TRIGGERS } from "@/lib/ui/hit-window-triggers";
+import { allWarframes } from "@/data/warframes";
+import {
+  weaponDamageBuffAbilities,
+  formatAbilityBuffDebuffBadge,
+} from "@/lib/weapons/weapon-external-buffs";
 import { CollapsibleSection, SimSlider } from "./stat-primitives";
 
 function comboTier(hits: number): number {
@@ -81,6 +86,10 @@ export function WeaponSimControls({
   const hasReinforcedBond = Boolean(
     !isMelee && linkedCompanionModIds?.includes("reinforced_bond"),
   );
+  const linkedWf = linkedWarframeId
+    ? allWarframes.find((w) => w.id === linkedWarframeId || w.id === linkedWarframeId.replace(/_prime$/, ""))
+    : undefined;
+  const linkedWfAbilities = linkedWf ? weaponDamageBuffAbilities(linkedWf.abilities) : [];
 
   const linkedSetSummary: string[] = [];
   if (linkage) {
@@ -169,7 +178,7 @@ export function WeaponSimControls({
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
-                title="Headshot: 3× head multiplier, 2× critical headshot multiplier, headshot bonuses (Deadhead, Target Acquired, Covenant), and weak-point bonuses"
+                title="Headshot: in Warframe, all headshots are weak points. Applies 3× head multiplier, 2× critical headshot multiplier, headshot bonuses (Deadhead, Target Acquired), and all weak-point bonuses (Acuity, Cascadia Accuracy)."
               >
                 Headshot
               </button>
@@ -187,9 +196,9 @@ export function WeaponSimControls({
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
-                title="Non-head Weak Point (e.g. MOA backpack, Sonar spot): 2× weak-point multiplier and weak-point bonuses (Acuity, Cascadia Accuracy), without headshot bonuses"
+                title="Non-Head Weak Point (e.g. Banshee Sonar spot, MOA backpack, boss vulnerable spot): applies 2× weak-point multiplier and weak-point bonuses, without headshot multipliers or headshot-only bonuses."
               >
-                Weak Point
+                Weak Point (Non-Head)
               </button>
             </div>
             {(
@@ -433,6 +442,42 @@ export function WeaponSimControls({
                   />
                 </label>
               )}
+            </div>
+          )}
+          {linkedWfAbilities.length > 0 && (
+            <div className="rounded-md border border-border/60 bg-muted/20 px-2.5 py-1.5 space-y-1">
+              <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Warframe abilities & debuffs ({linkedWf?.name})
+              </div>
+              {linkedWfAbilities.map((a) => {
+                const active = (simParams.activeWeaponAbilityBuffs ?? []).includes(a.name);
+                const badge = formatAbilityBuffDebuffBadge(a, 1.0, linkedWf?.id);
+                return (
+                  <label
+                    key={a.name}
+                    className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer"
+                  >
+                    <span>
+                      {a.name} {badge ? `(${badge})` : ""}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={active}
+                      onChange={(e) => {
+                        const current = simParams.activeWeaponAbilityBuffs ?? [];
+                        const next = e.target.checked
+                          ? [...current.filter((x) => x !== a.name), a.name]
+                          : current.filter((x) => x !== a.name);
+                        onSimParamsChange({
+                          ...simParams,
+                          activeWeaponAbilityBuffs: next,
+                        });
+                      }}
+                      className="h-3.5 w-3.5 rounded border-border accent-primary"
+                    />
+                  </label>
+                );
+              })}
             </div>
           )}
           {isMelee && (
@@ -1216,46 +1261,26 @@ export function WeaponSimControls({
                 {Object.entries(stats.triggerStatBonuses ?? {}).map(([k, v]) => `+${(v * 100).toFixed(0)}% ${getModStatLabel(k)}`).join(", ")}
               </div>
             )}
-            {(stats.headshotDamageBonus ?? 0) > 0 && (
+            {stats.simParams.applyHeadshots && (stats.headshotDamageBonus ?? 0) > 0 && (
+              <div className="text-[10px] text-blue-700 dark:text-blue-400">
+                Headshot Multiplier: +{((stats.headshotDamageBonus ?? 0) * 100).toFixed(0)}% (Target Acquired / Headshot bonus active)
+              </div>
+            )}
+            {(stats.simParams.applyHeadshots || stats.simParams.applyWeakPoints) && (stats.weakPointDamageBonus ?? 0) > 0 && (
+              <div className="text-[10px] text-blue-700 dark:text-blue-400">
+                Weak Point Damage: +{((stats.weakPointDamageBonus ?? 0) * 100).toFixed(0)}% (active on {stats.simParams.applyHeadshots ? "Headshot" : "Weak Point"})
+              </div>
+            )}
+            {(stats.galvanizedCritOnHeadshot ?? 0) > 0 && stats.simParams.applyTriggerBuffs && (
               stats.simParams.applyHeadshots ? (
-                <div className="text-[10px] text-blue-700 dark:text-blue-400">
-                  Headshot Multiplier: +{((stats.headshotDamageBonus ?? 0) * 100).toFixed(0)}% (Target Acquired / Headshot bonus active)
-                </div>
-              ) : (
-                <div className="text-[10px] text-muted-foreground/70">
-                  Headshot Multiplier: inactive — select Headshot target to apply +{((stats.headshotDamageBonus ?? 0) * 100).toFixed(0)}% bonus
-                </div>
-              )
-            )}
-            {(stats.weakPointDamageBonus ?? 0) > 0 && (
-              (stats.simParams.applyHeadshots || stats.simParams.applyWeakPoints) ? (
-                <div className="text-[10px] text-blue-700 dark:text-blue-400">
-                  Weak Point Damage: +{((stats.weakPointDamageBonus ?? 0) * 100).toFixed(0)}% (active on {stats.simParams.applyHeadshots ? "Headshot" : "Weak Point"})
-                </div>
-              ) : (
-                <div className="text-[10px] text-muted-foreground/70">
-                  Weak Point Damage: inactive — select Headshot or Weak Point to apply +{((stats.weakPointDamageBonus ?? 0) * 100).toFixed(0)}% bonus
-                </div>
-              )
-            )}
-            {(stats.galvanizedCritOnHeadshot ?? 0) > 0 && (
-              !stats.simParams.applyTriggerBuffs ? (
-                <div className="text-[10px] text-muted-foreground/70">
-                  Galv. Crit: inactive — enable Aiming (Trigger buffs) to apply crit while aiming
-                </div>
-              ) : stats.simParams.applyHeadshots ? (
                 <div className="text-[10px] text-blue-700 dark:text-blue-400">
                   Galv. Crit: +{(((stats.galvanizedCritOnHeadshot ?? 0) + (stats.galvanizedCritOnHeadshotPerStack ?? 0) * Math.min(simKs("galvCrit"), 5)) * 100).toFixed(0)}% CC while aiming ({Math.min(simKs("galvCrit"), 5)} headshot-kill stacks)
                 </div>
               ) : simKs("galvCrit") > 0 ? (
                 <div className="text-[10px] text-blue-700 dark:text-blue-400">
-                  Galv. Crit: +{(((stats.galvanizedCritOnHeadshotPerStack ?? 0) * Math.min(simKs("galvCrit"), 5)) * 100).toFixed(0)}% CC while aiming ({Math.min(simKs("galvCrit"), 5)} headshot-kill stacks; enable Headshots for +{((stats.galvanizedCritOnHeadshot ?? 0) * 100).toFixed(0)}% base)
+                  Galv. Crit: +{(((stats.galvanizedCritOnHeadshotPerStack ?? 0) * Math.min(simKs("galvCrit"), 5)) * 100).toFixed(0)}% CC while aiming ({Math.min(simKs("galvCrit"), 5)} headshot-kill stacks)
                 </div>
-              ) : (
-                <div className="text-[10px] text-muted-foreground/70">
-                  Galv. Crit: inactive — enable Headshots to trigger +{((stats.galvanizedCritOnHeadshot ?? 0) * 100).toFixed(0)}% base CC
-                </div>
-              )
+              ) : null
             )}
             {stats.berserkerFuryBonus > 0 && (
               <div className="text-[10px] text-yellow-700 dark:text-yellow-400">Berserker Fury: +{(stats.berserkerFuryBonus * Math.min(simKs("berserker"), 2) * 100).toFixed(0)}% AS ({Math.min(simKs("berserker"), 2)}/2 stacks)</div>

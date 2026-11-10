@@ -721,7 +721,7 @@ function applyWeaponExternalBuffs(
       acc.critChanceBonus += buff.weakPointCritChanceBonus;
     }
     if (buff.critChanceFlatBonus && critChanceFlat) critChanceFlat.chance += buff.critChanceFlatBonus;
-    if (buff.weakPointCritChanceFlatBonus && critChanceFlat && sim?.applyHeadshots) {
+    if (buff.weakPointCritChanceFlatBonus && critChanceFlat && (sim?.applyHeadshots || sim?.applyWeakPoints)) {
       critChanceFlat.chance += buff.weakPointCritChanceFlatBonus;
     }
     if (buff.critMultBonus) acc.critMultBonus += buff.critMultBonus;

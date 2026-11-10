@@ -206,7 +206,7 @@ export default function ArchwingBuilderPage() {
     return allWeaponsData
       .filter((w: Weapon) => (w.category === "archgun" || w.category === "archmelee") && !w.isExalted)
       .map(enrichWeapon);
-  }, []);
+  }, [allWeaponsData]);
 
   const necramechExaltedInnatePolarities = useMemo(
     () => (necramechExaltedWeapon ? innateSlotPolarities("weapon", necramechExaltedWeapon.id) : {}),
@@ -848,7 +848,15 @@ export default function ArchwingBuilderPage() {
         showDescription={false}
         onSave={(values) => handleSaveBuildConfirm({ ...values, asNew: saveAsNew })}
       />
-      <BuilderSectionNav sections={[{ id: "aw-mods", label: "Mods" }, { id: "aw-stats", label: "Stats" }, { id: "ag-mods", label: "Gun mods" }, { id: "ag-stats", label: "Gun stats" }]} />
+      <BuilderSectionNav
+        sections={[
+          { id: "aw-mods", label: "Mods" },
+          { id: "aw-stats", label: "Stats" },
+          { id: "ag-mods", label: "Gun mods" },
+          { id: "ag-stats", label: "Gun stats" },
+          ...(mode === "necramech" && necramechExaltedWeapon ? [{ id: "necramech-exalted", label: "Exalted" }] : []),
+        ]}
+      />
     </PageShell>
   );
 }

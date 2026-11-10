@@ -27,7 +27,7 @@ import {
   fetchCloudBuild,
 } from "@/lib/builds/use-cloud-build-from-url";
 import { copyTextToClipboard } from "@/lib/display/clipboard";
-import { Loadout } from "@/lib/types";
+import { Loadout, LoadoutOperatorBuild } from "@/lib/types";
 import { modularBuildDisplayName, modularBuildMatchesLoadoutSlot } from "@/lib/builds/modular-resolve";
 import { allWarframes } from "@/data/warframes";
 import { isNecramechId } from "@/data/archwing";
@@ -131,11 +131,11 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
-/** Account share URL for a saved loadout (public build page, else the owner-only link). */
+/** Account share URL for a saved loadout (public build page, else null so it falls back to self-contained share). */
 function accountShareUrl(loadout: Pick<Loadout, "cloudId" | "isPublic">): string | null {
   if (!loadout.cloudId) return null;
   if (loadout.isPublic) return `${window.location.origin}/build/${loadout.cloudId}`;
-  return `${window.location.origin}/loadouts?buildId=${encodeURIComponent(loadout.cloudId)}`;
+  return null;
 }
 
 export default function LoadoutsPage() {
@@ -367,6 +367,12 @@ export default function LoadoutsPage() {
             description: loadout.cloudId
               ? "Link carries this loadout. To list in Community, click Publish."
               : "Anyone with this link can open a copy of this loadout.",
+            action: !loadout.isPublic
+              ? {
+                  label: "Publish to Community",
+                  onClick: () => void handlePublishToCommunity(loadout),
+                }
+              : undefined,
           });
           return;
         }
@@ -783,7 +789,10 @@ export default function LoadoutsPage() {
           hasCatalyst: d.hasCatalyst ?? false,
         };
       } else if (pickerSlot === "operator") {
-        if (build.type === "modular") {
+        if (build.type === "operator") {
+          const d = build.data as LoadoutOperatorBuild;
+          updated.operatorBuild = { ...d };
+        } else if (build.type === "modular") {
           const d = build.data as ModularBuildData;
           if (d.modularType === "amp") {
             updated.operatorBuild = {
@@ -948,20 +957,33 @@ export default function LoadoutsPage() {
     }
     if (pickerSlot === "operator") {
       const focusSchools = [
-        { id: "focus:madurai", name: "Madurai", detail: "Attack • +1000% Void Strike • +50% Casting Speed" },
-        { id: "focus:unairu", name: "Unairu", detail: "Ward • 100% Caustic Strike Armor Strip • Poise" },
-        { id: "focus:zenurik", name: "Zenurik", detail: "Energy • +20% Hardened Wellspring STR • Temporal Drag" },
-        { id: "focus:naramon", name: "Naramon", detail: "Tactics • +200% Lethal Levitation Melee DMG • Power Spike" },
-        { id: "focus:vazarin", name: "Vazarin", detail: "Defense • Protective Sling • Void Snare" },
+        {
+          id: "focus:madurai",
+          name: "Madurai",
+          detail: "Offense & Speed • +1000% Void Strike Mult • +40% Sling Strength STR • Phoenix Talons",
+        },
+        {
+          id: "focus:unairu",
+          name: "Unairu",
+          detail: "Defense & Shred • 100% Caustic Strike Armor Strip • 100% Magnetic Surge Shield Strip • Poise",
+        },
+        {
+          id: "focus:zenurik",
+          name: "Zenurik",
+          detail: "Energy & Casting • Wellspring Energy Regen • +20% Hardened Wellspring STR • Temporal Drag",
+        },
+        {
+          id: "focus:naramon",
+          name: "Naramon",
+          detail: "Melee Combat • +200% Lethal Levitation Melee DMG • Power Spike Decay • Opening Slam",
+        },
+        {
+          id: "focus:vazarin",
+          name: "Vazarin",
+          detail: "Healing & Support • Protective Sling Immunity & Heal • Void Snare Vortex • Squad Regen",
+        },
       ];
-      const amps = weapons
-        .filter((w) => (w.category === "amp" || w.id === "sirocco") && !w.isExalted)
-        .map((w) => ({
-          id: w.id,
-          name: w.name,
-          detail: `Amp • DMG ${w.damage} • CC ${(w.criticalChance * 100).toFixed(0)}%`,
-        }));
-      return [...focusSchools, ...amps].filter(
+      return focusSchools.filter(
         (entry) => !q || entry.name.toLowerCase().includes(q) || entry.detail.toLowerCase().includes(q),
       );
     }
@@ -1026,8 +1048,7 @@ export default function LoadoutsPage() {
   const showModularTab =
     pickerSlot === "primary" ||
     pickerSlot === "secondary" ||
-    pickerSlot === "melee" ||
-    pickerSlot === "operator";
+    pickerSlot === "melee";
 
   return (
     <PageShell>
@@ -1167,7 +1188,11 @@ export default function LoadoutsPage() {
                           </button>
                         </div>
                         {loadout.description ? (
-                          <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5 max-w-xl">
+                          <p
+                            onClick={() => handleStartEdit(loadout)}
+                            className="text-xs text-muted-foreground line-clamp-2 mt-0.5 max-w-xl cursor-pointer hover:text-foreground transition-colors"
+                            title="Click to edit description"
+                          >
                             {loadout.description}
                           </p>
                         ) : (

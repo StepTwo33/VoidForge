@@ -15,6 +15,7 @@ const SLOT_KEYS = [
   "modularBuilds",
   "modularBuild",
   "archwingBuild",
+  "operatorBuild",
 ] as const;
 
 export interface SharedLoadout {
