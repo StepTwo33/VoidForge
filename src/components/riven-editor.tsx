@@ -342,18 +342,19 @@ export function RivenEditor({
               </p>
             )}
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 sm:flex-nowrap">
               <select
                 value={rivenStatKey}
                 onChange={(e) => setRivenStatKey(e.target.value)}
-                className="min-h-11 min-w-0 flex-1 rounded border border-border bg-background px-2 py-2 text-xs sm:min-h-9 sm:py-1.5"
+                aria-label="Select riven stat"
+                className="min-h-11 min-w-0 basis-full rounded border border-border bg-background px-2 py-2 text-sm sm:min-h-9 sm:flex-1 sm:basis-auto sm:py-1.5 sm:text-xs"
               >
                 <option value="">
                   {q
                     ? filteredNormalStats.length + filteredSplicedStats.length > 0
-                      ? `Select stat (${filteredNormalStats.length + filteredSplicedStats.length} matching)...`
+                      ? `Select stat (${filteredNormalStats.length + filteredSplicedStats.length} matching)`
                       : "No matching stats"
-                    : "Select stat..."}
+                    : "Select a stat"}
                 </option>
                 {rivenStatKey && !filteredNormalStats.some((s) => s.key === rivenStatKey) && !filteredSplicedStats.some((s) => s.key === rivenStatKey) && selectedStatDef && (
                   <option value={selectedStatDef.key}>
@@ -387,7 +388,7 @@ export function RivenEditor({
                     handleAddRivenStat();
                   }
                 }}
-                className="h-11 w-24 shrink-0 rounded border border-border bg-background px-2 text-xs sm:h-9"
+                className="h-11 min-w-0 flex-1 rounded border border-border bg-background px-2 text-sm sm:h-9 sm:w-24 sm:flex-none sm:shrink-0 sm:text-xs"
               />
               <button
                 type="button"
