@@ -2826,7 +2826,7 @@ export function WarframeStatsPanel({
                 </div>
                 {def.maxStacks > 1 ? (
                   <SimSlider
-                    label="Health Orb stacks"
+                    label={def.stackLabel ?? `${def.label} stacks`}
                     value={currentStacks}
                     min={0}
                     max={def.maxStacks}

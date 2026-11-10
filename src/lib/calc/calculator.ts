@@ -2812,6 +2812,8 @@ export interface ConditionalWarframeModDef {
   label: string;
   maxStacks: number;
   maxRank: number;
+  /** Slider label when maxStacks > 1 (e.g. "Health Orb stacks"). */
+  stackLabel?: string;
   describeEffect: (rank: number, stacks: number, auraMult?: number) => string;
 }
 
@@ -2851,6 +2853,7 @@ export const CONDITIONAL_WARFRAME_MOD_DEFS: Record<string, ConditionalWarframeMo
     id: "augment_universal_health_conversion",
     label: "Health Conversion",
     maxStacks: 3,
+    stackLabel: "Health Orb stacks",
     maxRank: 5,
     describeEffect: (rank, stacks) => {
       const armor = 75 * (rank + 1) * Math.min(3, Math.max(0, Math.floor(stacks)));
