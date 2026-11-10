@@ -120,7 +120,7 @@ function WeaponPassiveConditionals({
           label="Overdrive"
           value={active ? "+100% Fire Rate, Infinite Ammo" : "Inactive"}
           color={active ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
-          tooltip="Weak point kills trigger Overdrive: +100% fire rate, no recoil, and Infinite Ammo for 8s. Alt-fire is locked while it is up."
+          tooltip="Weak point kills trigger Overdrive: +100% fire rate, -100% recoil (additive with mods), and Infinite Ammo for 8s (12s on Athodai Prime). Alt-fire is locked while it is up."
         />
       </div>
     );

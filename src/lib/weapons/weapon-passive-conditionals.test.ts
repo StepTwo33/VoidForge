@@ -1,44 +1,52 @@
 import { describe, expect, it } from "vitest";
 import { allWeapons } from "@/data/weapons";
+import { customWeapons } from "@/data/custom-items";
 import { modsMap } from "@/data/mods";
 import { calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
 import { DEFAULT_SIM_PARAMS, Weapon } from "@/lib/types";
 import { resolveStandaloneExternalBuffs } from "@/lib/weapons/weapon-external-buffs";
 
 function findWeapon(id: string): Weapon {
-  const w = allWeapons.find((x) => x.id === id);
+  const w = allWeapons.find((x) => x.id === id) ?? customWeapons.find((x) => x.id === id);
   if (!w) throw new Error(`Weapon not found: ${id}`);
   return w;
 }
 
 describe("Weapon passive conditionals and external buffs", () => {
-  it("Athodai Overdrive grants +100% Fire Rate", () => {
-    const athodai = findWeapon("athodai");
-    const stockBuffs = resolveStandaloneExternalBuffs(athodai, DEFAULT_SIM_PARAMS);
-    expect(stockBuffs.find((b) => b.id === "passive_athodai_overdrive")).toBeUndefined();
+  it("Athodai Overdrive grants +100% Fire Rate and -100% Recoil", () => {
+    // wiki.warframe.com/w/Athodai and /w/Athodai_Prime Characteristics + Notes:
+    // Overdrive decreases Recoil by -100%, additive to mods. Codex/infobox omit recoil; body wins.
+    for (const id of ["athodai", "athodai_prime"] as const) {
+      const weapon = findWeapon(id);
+      const stockBuffs = resolveStandaloneExternalBuffs(weapon, DEFAULT_SIM_PARAMS);
+      expect(stockBuffs.find((b) => b.id === "passive_athodai_overdrive")).toBeUndefined();
 
-    const activeBuffs = resolveStandaloneExternalBuffs(athodai, {
-      ...DEFAULT_SIM_PARAMS,
-      weaponPassiveState: { athodai_overdrive: 1 },
-    });
-    const overdrive = activeBuffs.find((b) => b.id === "passive_athodai_overdrive");
-    expect(overdrive).toBeDefined();
-    expect(overdrive?.fireRateBonus).toBe(1.0);
-
-    const stockStats = calculateWeaponBuildWithArcanes(athodai, [], modsMap, [], undefined, DEFAULT_SIM_PARAMS);
-    const activeStats = calculateWeaponBuildWithArcanes(
-      athodai,
-      [],
-      modsMap,
-      [],
-      undefined,
-      {
+      const activeBuffs = resolveStandaloneExternalBuffs(weapon, {
         ...DEFAULT_SIM_PARAMS,
         weaponPassiveState: { athodai_overdrive: 1 },
-      },
-      { externalBuffs: activeBuffs },
-    );
-    expect(activeStats.fireRate).toBeCloseTo(stockStats.fireRate * 2.0, 3);
+      });
+      const overdrive = activeBuffs.find((b) => b.id === "passive_athodai_overdrive");
+      expect(overdrive).toBeDefined();
+      expect(overdrive?.fireRateBonus).toBe(1.0);
+      expect(overdrive?.recoil).toBe(-1.0);
+
+      const stockStats = calculateWeaponBuildWithArcanes(weapon, [], modsMap, [], undefined, DEFAULT_SIM_PARAMS);
+      const activeStats = calculateWeaponBuildWithArcanes(
+        weapon,
+        [],
+        modsMap,
+        [],
+        undefined,
+        {
+          ...DEFAULT_SIM_PARAMS,
+          weaponPassiveState: { athodai_overdrive: 1 },
+        },
+        { externalBuffs: activeBuffs },
+      );
+      expect(activeStats.fireRate).toBeCloseTo(stockStats.fireRate * 2.0, 3);
+      expect(stockStats.recoil ?? 0).toBe(0);
+      expect(activeStats.recoil).toBeCloseTo(-1.0, 6);
+    }
   });
 
   it("Dual Toxocyst Frenzy grants +150% Fire Rate and +100% Damage", () => {

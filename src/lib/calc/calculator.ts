@@ -588,6 +588,20 @@ function applyAbilityCloudDps(
   stats.sustainedDps += cloud;
 }
 
+/** Display-only recoil from external buffs (negative = less recoil). */
+function applyExternalRecoil(
+  stats: CalculatedStats,
+  externalBuffs?: WeaponExternalBuff[],
+): void {
+  if (!externalBuffs?.length) return;
+  let bonus = 0;
+  for (const buff of externalBuffs) {
+    if (buff.recoil) bonus += buff.recoil;
+  }
+  if (bonus === 0) return;
+  stats.recoil = (stats.recoil ?? 0) + bonus;
+}
+
 /** Jet Stream (and similar) display-only projectile speed from external buffs. */
 function applyExternalProjectileSpeed(
   stats: CalculatedStats,
@@ -2400,6 +2414,7 @@ export function calculateWeaponBuild(
   );
   applyAbilityCloudDps(stats, calcOptions?.externalBuffs);
   applyExternalProjectileSpeed(stats, calcOptions?.externalBuffs);
+  applyExternalRecoil(stats, calcOptions?.externalBuffs);
   applyMechaSpreadDps(
     stats,
     sim,

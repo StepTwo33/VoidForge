@@ -434,6 +434,11 @@ export interface WeaponExternalBuff {
    */
   projectileSpeedBonus?: number;
   /**
+   * Recoil change fraction (negative = less recoil). Display-only — does not change DPS.
+   * Wiki: Athodai / Athodai Prime Overdrive decreases Recoil by -100%, additive to mods.
+   */
+  recoil?: number;
+  /**
    * Sprint / move speed bonus fraction (Jet Stream). Applied to warframe totals in loadout.
    */
   sprintSpeedBonus?: number;
