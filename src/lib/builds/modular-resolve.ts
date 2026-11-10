@@ -82,5 +82,5 @@ export function modularBuildMatchesLoadoutSlot(data: ModularBuildData, slot: Loa
     return ["secondary", "pistol", "dual_pistols"].includes(w.category);
   }
   // primary
-  return ["primary", "rifle", "shotgun", "bow", "launcher", "archgun"].includes(w.category) || w.category === "primary";
+  return ["primary", "rifle", "shotgun", "bow", "launcher"].includes(w.category) || w.category === "primary";
 }
