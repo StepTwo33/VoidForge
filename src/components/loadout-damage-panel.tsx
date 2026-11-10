@@ -814,8 +814,8 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
                   </button>
                 )}
                 {toggleableWarframeArcanes.map((arc) => {
-                  const defaultStacks = isPaperScenario ? 0 : arc.fullStacks;
-                  const currentStacks = wfArcaneOverrides[arc.id] ?? defaultStacks;
+                  const savedStacks = isPaperScenario ? 0 : loadout.warframeBuild?.arcaneStacksById?.[arc.id];
+                  const currentStacks = wfArcaneOverrides[arc.id] ?? savedStacks ?? 0;
                   const active = currentStacks > 0;
                   return (
                     <button
@@ -841,8 +841,8 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
                   );
                 })}
                 {toggleableWarframeMods.map((mod) => {
-                  const defaultStacks = isPaperScenario ? 0 : mod.maxStacks;
-                  const currentStacks = wfModOverrides[mod.id] ?? defaultStacks;
+                  const savedStacks = isPaperScenario ? 0 : loadout.warframeBuild?.conditionalModStacksById?.[mod.id];
+                  const currentStacks = wfModOverrides[mod.id] ?? savedStacks ?? 0;
                   const active = currentStacks > 0;
                   return (
                     <button
