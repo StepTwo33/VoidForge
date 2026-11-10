@@ -606,7 +606,7 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
           arcaneStacksById,
           conditionalModStacksById,
           equippedModSlots: mods,
-          abilities: resolveAbilitiesWithHelminth(abilities, wb.helminthAbilityId, wb.helminthSlot),
+          abilities: resolveAbilitiesWithHelminth(abilities, wb.helminthAbilityId, wb.helminthSlot, wb.warframeId),
           equippedModNames: mods
             .map((m) => modsMap.get(m.modId)?.name)
             .filter((n): n is string => !!n),
@@ -711,6 +711,7 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
           wf.abilities,
           loadout.warframeBuild.helminthAbilityId,
           loadout.warframeBuild.helminthSlot,
+          loadout.warframeBuild.warframeId,
         ),
         warframeModSlots: setLinkage.warframeMods,
         warframeArcaneIds: wb.arcaneIds,

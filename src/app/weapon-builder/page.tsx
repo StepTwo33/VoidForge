@@ -576,6 +576,7 @@ export default function WeaponBuilderPage() {
               wf?.abilities,
               wb.helminthAbilityId,
               wb.helminthSlot,
+              wb.warframeId,
             ),
             warframeModSlots: baseLinkage.warframeMods,
             warframeArcaneIds: wb.arcaneIds,

@@ -8,6 +8,8 @@ import { EmptyState } from "@/components/page-shell";
 import { allHelminthAbilities, type HelminthAbility } from "@/data/helminth";
 import { PointerVerb } from "@/components/pointer-verb";
 import { isHildrynFrame, HILDRYN_SUBSUME_SHIELD_MULTIPLIER } from "@/lib/calc/ability-augment-rows";
+import { getEffectiveWarframesMap } from "@/lib/weapons/effective-data";
+import { helminthDamageBuffRestrictionReason } from "@/lib/builds/helminth-damage-buff-restriction";
 
 export function HelminthPickerDialog({
   open,
@@ -36,6 +38,11 @@ export function HelminthPickerDialog({
         (a.sourceWarframe || "").toLowerCase().includes(q),
     );
   }, [search]);
+
+  const hostAbilities = useMemo(
+    () => (hostWarframeId ? (getEffectiveWarframesMap().get(hostWarframeId)?.abilities ?? []) : []),
+    [hostWarframeId],
+  );
 
   return (
     <Dialog
@@ -92,16 +99,30 @@ export function HelminthPickerDialog({
                 className="border-0 bg-transparent py-10"
               />
             ) : (
-              filtered.map((ability) => (
+              filtered.map((ability) => {
+                const restriction = helminthDamageBuffRestrictionReason({
+                  helminthAbilityName: ability.name,
+                  hostWarframeId,
+                  hostAbilities,
+                  slot: pickerSlot,
+                });
+                return (
                 <button
                   key={ability.id}
                   type="button"
+                  disabled={!!restriction}
+                  title={restriction ?? undefined}
                   onClick={() => {
+                    if (restriction) return;
                     onSelect(ability, pickerSlot);
                     setSearch("");
                     onOpenChange(false);
                   }}
-                  className="w-full rounded-lg border border-border p-3 text-left transition-all hover:border-green-500/50 hover:bg-green-500/5"
+                  className={`w-full rounded-lg border border-border p-3 text-left transition-all ${
+                    restriction
+                      ? "cursor-not-allowed opacity-50"
+                      : "hover:border-green-500/50 hover:bg-green-500/5"
+                  }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <span className="min-w-0 flex-1 truncate text-sm font-medium">{ability.name}</span>
@@ -120,7 +141,8 @@ export function HelminthPickerDialog({
                     </span>
                   )}
                 </button>
-              ))
+                );
+              })
             )}
           </div>
         </div>

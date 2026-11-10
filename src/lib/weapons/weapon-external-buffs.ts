@@ -3,6 +3,7 @@ import { WIKI_WEAPON_CLASS } from "@/data/arcane-weapon-classes";
 import { getArcaneEffectDef } from "@/lib/calc/arcane-calculator";
 import { scaleArcaneEffectLine } from "@/lib/calc/arcane-utils";
 import { helminthToAbility } from "@/lib/builds/helminth-resolve";
+import { canInfuseHelminthDamageBuff } from "@/lib/builds/helminth-damage-buff-restriction";
 import {
   computeWarframeAuraEffectivenessMult,
   computeWarframeAuraStrengthMult,
@@ -2271,6 +2272,17 @@ export function resolveAbilitiesWithHelminth(
   }
   const h = allHelminthAbilities.find((x) => x.id === helminthAbilityId);
   if (!h) return rows;
+  if (
+    hostWarframeId &&
+    !canInfuseHelminthDamageBuff({
+      helminthAbilityName: h.name,
+      hostWarframeId,
+      hostAbilities: rows,
+      slot: helminthSlot,
+    })
+  ) {
+    return rows;
+  }
   rows[helminthSlot] = helminthToAbility(h, hostWarframeId);
   return rows;
 }

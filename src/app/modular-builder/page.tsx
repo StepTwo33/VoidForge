@@ -567,6 +567,7 @@ export default function ModularBuilderPage() {
               wf?.abilities,
               wb.helminthAbilityId,
               wb.helminthSlot,
+              wb.warframeId,
             ),
             warframeModSlots: baseLinkage.warframeMods,
             warframeArcaneIds: wb.arcaneIds,

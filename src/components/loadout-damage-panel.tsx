@@ -301,7 +301,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
       if (!wb?.warframeId) return [];
       const wf = allWarframes.find((w) => w.id === wb.warframeId);
       return weaponDamageBuffAbilities(
-        resolveAbilitiesWithHelminth(wf?.abilities, wb.helminthAbilityId, wb.helminthSlot),
+        resolveAbilitiesWithHelminth(wf?.abilities, wb.helminthAbilityId, wb.helminthSlot, wb.warframeId),
       );
     } catch (err) {
       console.warn("Loadout ability buff options failed", err);

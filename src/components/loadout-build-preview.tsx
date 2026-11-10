@@ -509,7 +509,7 @@ export function LoadoutBuildPreview({
       const wb = loadout.warframeBuild;
       const wf = allWarframes.find((w) => w.id === wb.warframeId);
       return weaponDamageBuffAbilities(
-        resolveAbilitiesWithHelminth(wf?.abilities, wb.helminthAbilityId, wb.helminthSlot),
+        resolveAbilitiesWithHelminth(wf?.abilities, wb.helminthAbilityId, wb.helminthSlot, wb.warframeId),
       );
     } catch {
       return [];
