@@ -13,7 +13,8 @@ import {
   resolveWeaponExternalBuffs,
 } from "@/lib/weapons/weapon-external-buffs";
 import { getExaltedWeaponsForWarframe } from "@/lib/weapons/exalted-weapons";
-import { DEFAULT_SIM_PARAMS, Weapon } from "@/lib/types";
+import { calcLoadoutStats } from "@/lib/builds/loadout-stats";
+import { DEFAULT_SIM_PARAMS, Loadout, Weapon } from "@/lib/types";
 
 describe("Community Reports Fixes: Amps, Exalted Slots, Operator & Necramechs", () => {
   describe("Report: Modular Amps in Weapon Slots", () => {
@@ -93,7 +94,7 @@ describe("Community Reports Fixes: Amps, Exalted Slots, Operator & Necramechs", 
   describe("Report: Operator Focus School Buffs in Loadout Simulation", () => {
     it("returns correct focus abilities for each school", () => {
       const madurai = getOperatorBuffAbilities("Madurai");
-      expect(madurai.map((a) => a.name)).toEqual(["Void Strike"]);
+      expect(madurai.map((a) => a.name)).toEqual(["Void Strike", "Sling Strength"]);
 
       const unairu = getOperatorBuffAbilities("Unairu");
       expect(unairu.map((a) => a.name)).toEqual(["Caustic Strike"]);
@@ -106,10 +107,11 @@ describe("Community Reports Fixes: Amps, Exalted Slots, Operator & Necramechs", 
     });
 
     it("formats Operator ability badges clearly", () => {
-      expect(formatAbilityBuffDebuffBadge({ name: "Void Strike" }, 1)).toBe("+1000% dmg");
+      expect(formatAbilityBuffDebuffBadge({ name: "Void Strike" }, 1)).toBe("+1000% mult");
+      expect(formatAbilityBuffDebuffBadge({ name: "Sling Strength" }, 1)).toBe("+40% STR");
       expect(formatAbilityBuffDebuffBadge({ name: "Caustic Strike" }, 1)).toBe("-100% armor");
       expect(formatAbilityBuffDebuffBadge({ name: "Hardened Wellspring" }, 1)).toBe("+20% STR");
-      expect(formatAbilityBuffDebuffBadge({ name: "Lethal Levitation" }, 1)).toBe("+200% melee");
+      expect(formatAbilityBuffDebuffBadge({ name: "Lethal Levitation" }, 1)).toBe("+200% dmg");
     });
 
     it("resolves Caustic Strike 100% armor strip", () => {
@@ -117,7 +119,7 @@ describe("Community Reports Fixes: Amps, Exalted Slots, Operator & Necramechs", 
       expect(strip).toBe(100);
     });
 
-    it("resolves Madurai Void Strike +1000% damage bonus", () => {
+    it("resolves Madurai Void Strike +1000% multiplicative damage bonus and excludes archguns", () => {
       const rifle = allWeapons.find((w) => w.id === "braton")!;
       const buffs = resolveWeaponExternalBuffs(
         rifle,
@@ -131,10 +133,23 @@ describe("Community Reports Fixes: Amps, Exalted Slots, Operator & Necramechs", 
 
       const vs = buffs.find((b) => b.label.includes("Void Strike"));
       expect(vs).toBeDefined();
-      expect(vs?.damageBonus).toBe(10.0);
+      expect(vs?.damageMultBonus).toBe(10.0);
+
+      // Archguns are excluded from Void Strike (per wiki)
+      const archgun = allWeapons.find((w) => w.id === "imperator")!;
+      const agBuffs = resolveWeaponExternalBuffs(
+        archgun,
+        {
+          warframeId: "excalibur",
+          warframeStats: { abilityStrength: 1 } as any,
+          warframeAbilities: [{ name: "Void Strike" } as any],
+        },
+        { ...DEFAULT_SIM_PARAMS, activeWeaponAbilityBuffs: ["Void Strike"] },
+      );
+      expect(agBuffs.some((b) => b.label.includes("Void Strike"))).toBe(false);
     });
 
-    it("resolves Naramon Lethal Levitation +200% melee base damage bonus only on melee", () => {
+    it("resolves Naramon Lethal Levitation +200% base damage bonus", () => {
       const skana = allWeapons.find((w) => w.id === "skana")!;
       const meleeBuffs = resolveWeaponExternalBuffs(
         skana,
@@ -149,19 +164,39 @@ describe("Community Reports Fixes: Amps, Exalted Slots, Operator & Necramechs", 
       const ll = meleeBuffs.find((b) => b.label.includes("Lethal Levitation"));
       expect(ll).toBeDefined();
       expect(ll?.damageBonus).toBe(2.0);
+    });
 
-      // Does not apply to rifle
-      const rifle = allWeapons.find((w) => w.id === "braton")!;
-      const gunBuffs = resolveWeaponExternalBuffs(
-        rifle,
-        {
+    it("resolves Madurai Sling Strength (+40% STR) and Zenurik Hardened Wellspring (+20% STR)", () => {
+      const loadout: Loadout = {
+        id: "test",
+        name: "Focus Test",
+        createdAt: 0,
+        updatedAt: 0,
+        warframeBuild: {
           warframeId: "excalibur",
-          warframeStats: { abilityStrength: 1 } as any,
-          warframeAbilities: [{ name: "Lethal Levitation" } as any],
+          mods: [],
+          hasOrokinReactor: true,
+          shards: [],
         },
-        { ...DEFAULT_SIM_PARAMS, activeWeaponAbilityBuffs: ["Lethal Levitation"] },
-      );
-      expect(gunBuffs.some((b) => b.label.includes("Lethal Levitation"))).toBe(false);
+        operatorBuild: {
+          focusSchool: "Madurai",
+        },
+      };
+
+      const base = calcLoadoutStats(loadout, { scenario: "paper" });
+      expect(base.warframe?.stats.abilityStrength).toBe(1.0);
+
+      const withSling = calcLoadoutStats(loadout, {
+        scenario: "paper",
+        simParams: { activeWeaponAbilityBuffs: ["Sling Strength"] },
+      });
+      expect(withSling.warframe?.stats.abilityStrength).toBeCloseTo(1.4, 2);
+
+      const withWellspring = calcLoadoutStats(loadout, {
+        scenario: "paper",
+        simParams: { activeWeaponAbilityBuffs: ["Hardened Wellspring"] },
+      });
+      expect(withWellspring.warframe?.stats.abilityStrength).toBeCloseTo(1.2, 2);
     });
   });
 });

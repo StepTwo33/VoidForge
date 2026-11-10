@@ -706,6 +706,10 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
           result.warframe.stats.abilityStrength += 0.2;
           for (const form of result.warframe.forms ?? []) form.stats.abilityStrength += 0.2;
         }
+        if (simParams.activeWeaponAbilityBuffs?.includes("Sling Strength")) {
+          result.warframe.stats.abilityStrength += 0.4;
+          for (const form of result.warframe.forms ?? []) form.stats.abilityStrength += 0.4;
+        }
       }
 
       buffContext = {

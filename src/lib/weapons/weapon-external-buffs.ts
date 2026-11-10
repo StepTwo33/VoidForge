@@ -1241,21 +1241,26 @@ function resolveNamedAbilityWeaponBuff(
     case "Shroud Of Dynar":
       return resolveShroudOfDynarBuff(weapon, ability, strength);
     case "Void Strike":
+      // Wiki: Madurai Void Strike (+1000% damage, 8s, 40s CD) is a multiplicative damage multiplier
+      // applied after Serration/damage mods, compounding multiplicatively with Roar. Does not affect Archguns.
+      if (weapon.category === "archgun" || weapon.category === "archmelee") return null;
       return {
         id: "operator:void_strike",
         label: "Void Strike (Madurai)",
         category: "other",
-        damageBonus: 10.0,
-        nominal: "+1000% base damage (additive)",
+        damageMultBonus: 10.0,
+        nominal: "+1000% multiplicative damage (8s burst)",
       };
     case "Lethal Levitation":
-      if (!isMeleeWeapon(weapon)) return null;
+      // Wiki: Naramon Lethal Levitation (+50% weapon damage per Lifted enemy attacked, max 4 stacks -> +200%).
+      // Additive with base damage mods (Serration/Pressure Point).
+      if (weapon.category === "archgun" || weapon.category === "archmelee") return null;
       return {
         id: "operator:lethal_levitation",
         label: "Lethal Levitation (Naramon)",
         category: "other",
         damageBonus: 2.0,
-        nominal: "+200% melee base damage (4 stacks)",
+        nominal: "+200% base damage (4 stacks)",
       };
     default:
       return null;
@@ -2266,6 +2271,7 @@ const NAMED_WEAPON_BUFF_ABILITIES = new Set([
   "Radial Javelin",
   "Valence Formation",
   "Void Strike",
+  "Sling Strength",
   "Caustic Strike",
   "Hardened Wellspring",
   "Lethal Levitation",
@@ -2363,31 +2369,44 @@ export function computeLoadoutAbilityArmorStripPct(
 
 /** Operator Focus school abilities available for loadout combat simulation. */
 export function getOperatorBuffAbilities(focusSchool?: string): Ability[] {
-  const all: Record<string, Ability> = {
-    Madurai: {
-      name: "Void Strike",
-      description: "Madurai Void Strike: Grants +1000% weapon damage bonus on next attack/burst.",
-      energyCost: 0,
-    },
-    Unairu: {
-      name: "Caustic Strike",
-      description: "Unairu Caustic Strike: 100% Armor Strip in an 8m radius.",
-      energyCost: 0,
-      miscStats: { armorStrip: 1.0, armorStripCap: 1.0 },
-    },
-    Zenurik: {
-      name: "Hardened Wellspring",
-      description: "Zenurik Hardened Wellspring: +20% Ability Strength to Warframe abilities.",
-      energyCost: 0,
-    },
-    Naramon: {
-      name: "Lethal Levitation",
-      description: "Naramon Lethal Levitation: Void Sling through enemies grants up to +200% Melee Damage.",
-      energyCost: 0,
-    },
+  const all: Record<string, Ability[]> = {
+    Madurai: [
+      {
+        name: "Void Strike",
+        description: "Madurai Void Strike: Grants +1000% multiplicative weapon & Amp damage bonus for 8s (40s cooldown). Excludes archguns.",
+        energyCost: 0,
+      },
+      {
+        name: "Sling Strength",
+        description: "Madurai Sling Strength: Chained Void Sling grants +40% Ability Strength to Warframe for 20s.",
+        energyCost: 0,
+      },
+    ],
+    Unairu: [
+      {
+        name: "Caustic Strike",
+        description: "Unairu Caustic Strike: 100% Armor Strip in an 8m radius on contact.",
+        energyCost: 0,
+        miscStats: { armorStrip: 1.0, armorStripCap: 1.0 },
+      },
+    ],
+    Zenurik: [
+      {
+        name: "Hardened Wellspring",
+        description: "Zenurik Hardened Wellspring: +20% Ability Strength to Warframe abilities inside the wellspring.",
+        energyCost: 0,
+      },
+    ],
+    Naramon: [
+      {
+        name: "Lethal Levitation",
+        description: "Naramon Lethal Levitation: Attacks on Lifted enemies grant +50% weapon damage per stack (up to +200%, 60s).",
+        energyCost: 0,
+      },
+    ],
   };
-  if (focusSchool && all[focusSchool]) return [all[focusSchool]];
-  return Object.values(all);
+  if (focusSchool && all[focusSchool]) return all[focusSchool];
+  return Object.values(all).flat();
 }
 
 /** Formats a compact badge describing an active ability buff or enemy debuff. */
@@ -2396,10 +2415,11 @@ export function formatAbilityBuffDebuffBadge(
   strength: number,
   warframeId?: string,
 ): string | null {
-  if (ability.name === "Void Strike") return "+1000% dmg";
+  if (ability.name === "Void Strike") return "+1000% mult";
+  if (ability.name === "Sling Strength") return "+40% STR";
   if (ability.name === "Caustic Strike") return "-100% armor";
   if (ability.name === "Hardened Wellspring") return "+20% STR";
-  if (ability.name === "Lethal Levitation") return "+200% melee";
+  if (ability.name === "Lethal Levitation") return "+200% dmg";
   if (ability.damageBuff != null && ability.damageBuff > 0) {
     const bonus = scaledAbilityDamageBuff(warframeId, ability.name, ability.damageBuff, strength);
     return `+${((bonus ?? ability.damageBuff) * 100).toFixed(0)}% dmg`;
