@@ -6,23 +6,10 @@ import { Sparkles, Plus, Search, RefreshCw, Flame, ArrowUpDown, Camera } from "l
 import { Input } from "@/components/ui/input";
 import { RivenCard } from "@/components/rivens/riven-card";
 import { RivenDialog } from "@/components/rivens/riven-dialog";
-import {
-  getSavedRivens,
-  saveRiven,
-  deleteRiven,
-  evaluateSavedRiven,
-  type SavedRiven,
-} from "@/lib/rivens/riven-storage";
+import { getSavedRivens, type SavedRiven } from "@/lib/rivens/riven-storage";
 import { hasClientSession } from "@/lib/auth/client-session";
-import { localRivenAfterCloudSave, rivenSaveId } from "@/lib/rivens/riven-save-id";
-import {
-  getSavedRivens as getCloudRivens,
-  saveRiven as saveCloudRiven,
-  deleteSavedRiven as deleteCloudRiven,
-} from "@/lib/riven/saved-rivens";
-import { allWeapons } from "@/data/weapons";
-import { getRivenWeaponType, getRivenModIdForWeapon } from "@/lib/weapons/riven-weapon-type";
-import { getEffectiveRivenWeaponType } from "@/lib/weapons/riven-family";
+import { deleteLibraryRiven, mergeCloudRivens, saveLibraryRiven } from "@/lib/rivens/riven-library-sync";
+import { getSavedRivens as getCloudRivens } from "@/lib/riven/saved-rivens";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -47,36 +34,10 @@ export default function RivenLibraryPage() {
   const refreshRivens = useCallback(async () => {
     const local = getSavedRivens();
     try {
-      const signedIn = await hasClientSession();
-      if (signedIn) {
+      if (await hasClientSession()) {
         const cloud = await getCloudRivens();
         if (cloud.length > 0) {
-          const map = new Map<string, SavedRiven>(local.map((r) => [r.id, r]));
-          for (const c of cloud) {
-            const w = allWeapons.find((x) => x.id === c.weaponId);
-            const wType = w ? getEffectiveRivenWeaponType(w) ?? "Rifle" : "Rifle";
-            const evalRes = evaluateSavedRiven(w?.name ?? c.weaponId, wType, c.stats, 8, 0, c.polarity);
-            map.set(c.id, {
-              id: c.id,
-              name: c.name,
-              weaponId: c.weaponId,
-              weaponName: w?.name ?? c.weaponId,
-              weaponCategory: w?.category ?? "primary",
-              weaponType: wType,
-              polarity: c.polarity,
-              rank: 8,
-              rerolls: 0,
-              masteryRank: 12,
-              stats: c.stats,
-              displayStats: evalRes.displayStats,
-              score: evalRes.score,
-              grade: evalRes.grade,
-              gradeColor: evalRes.color,
-              createdAt: c.createdAt,
-              updatedAt: c.updatedAt,
-            });
-          }
-          setRivens(Array.from(map.values()));
+          setRivens(mergeCloudRivens(local, cloud));
           return;
         }
       }
@@ -94,43 +55,12 @@ export default function RivenLibraryPage() {
 
   // Actions
   const handleSaveRiven = async (riven: SavedRiven) => {
-    saveRiven(riven);
-    try {
-      const signedIn = await hasClientSession();
-      if (signedIn) {
-        const weapon = allWeapons.find((w) => w.id === riven.weaponId);
-        const modId = getRivenModIdForWeapon(weapon) ?? `riven_${riven.weaponType.toLowerCase()}`;
-        const cloud = await saveCloudRiven({
-          id: rivenSaveId(riven.id),
-          weaponId: riven.weaponId,
-          name: riven.name,
-          modId,
-          stats: riven.stats,
-          polarity: riven.polarity,
-          drain: 18,
-        });
-        const adopted = localRivenAfterCloudSave(riven, cloud?.id);
-        if (adopted.removedId) {
-          deleteRiven(adopted.removedId);
-          saveRiven(adopted.saved);
-        }
-      }
-    } catch {
-      // Local save succeeded
-    }
+    await saveLibraryRiven(riven);
     refreshRivens();
   };
 
   const handleDeleteRiven = async (id: string) => {
-    deleteRiven(id);
-    try {
-      const signedIn = await hasClientSession();
-      if (signedIn) {
-        await deleteCloudRiven(id);
-      }
-    } catch {
-      // Local delete succeeded
-    }
+    await deleteLibraryRiven(id);
     refreshRivens();
     toast.success("Riven deleted from library");
   };

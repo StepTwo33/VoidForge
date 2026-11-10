@@ -7,31 +7,15 @@ import { ContentPanel } from "@/components/page-shell";
 import { PolarityIcon } from "@/components/polarity-icon";
 import { useConfirmDialog } from "@/components/confirm-dialog-provider";
 import { hasClientSession } from "@/lib/auth/client-session";
-import { localRivenAfterCloudSave, rivenSaveId } from "@/lib/rivens/riven-save-id";
+import { deleteLibraryRiven, mergeCloudRivens, saveLibraryRiven } from "@/lib/rivens/riven-library-sync";
 import Link from "next/link";
-import {
-  deleteSavedRiven as deleteCloudRiven,
-  getSavedRivens as getCloudRivens,
-  saveRiven as saveCloudRiven,
-} from "@/lib/riven/saved-rivens";
-import {
-  getSavedRivens as getLocalSavedRivens,
-  saveRiven as saveLocalStorageRiven,
-  deleteRiven as deleteLocalStorageRiven,
-  evaluateSavedRiven,
-  type SavedRiven,
-} from "@/lib/rivens/riven-storage";
+import { getSavedRivens as getCloudRivens } from "@/lib/riven/saved-rivens";
+import { getSavedRivens as getLocalSavedRivens, type SavedRiven } from "@/lib/rivens/riven-storage";
 import { RivenDialog } from "@/components/rivens/riven-dialog";
-import { getRivenStatsForCategory, type Weapon } from "@/lib/types";
-import { getRivenWeaponType, isZawWeapon, isKitgunWeapon, getRivenModIdForWeapon } from "@/lib/weapons/riven-weapon-type";
-import { getEffectiveRivenWeaponType } from "@/lib/weapons/riven-family";
+import { getRivenStatsForCategory } from "@/lib/types";
+import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
 import { useWeapons } from "@/lib/weapons/use-data";
 import { cn } from "@/lib/utils";
-
-/** Riven catalog id for a weapon (null when the builder has no riven for it). */
-function rivenModIdFor(weapon: Weapon | Parameters<typeof getRivenWeaponType>[0] | undefined | null): string | null {
-  return getRivenModIdForWeapon(weapon);
-}
 
 export function formatRivenStatLine(key: string, value: number, category: string): string {
   const def = getRivenStatsForCategory(category).find((s) => s.key === key);
@@ -64,32 +48,7 @@ export function RivenLibrary() {
       if (ok) {
         const cloud = await getCloudRivens();
         if (cloud.length > 0) {
-          const map = new Map<string, SavedRiven>(local.map((r) => [r.id, r]));
-          for (const c of cloud) {
-            const w = allWeapons.find((x) => x.id === c.weaponId);
-            const wType = w ? getEffectiveRivenWeaponType(w) ?? "Rifle" : "Rifle";
-            const evalRes = evaluateSavedRiven(w?.name ?? c.weaponId, wType, c.stats, 8, 0, c.polarity);
-            map.set(c.id, {
-              id: c.id,
-              name: c.name,
-              weaponId: c.weaponId,
-              weaponName: w?.name ?? c.weaponId,
-              weaponCategory: w?.category ?? "primary",
-              weaponType: wType,
-              polarity: c.polarity,
-              rank: 8,
-              rerolls: 0,
-              masteryRank: 12,
-              stats: c.stats,
-              displayStats: evalRes.displayStats,
-              score: evalRes.score,
-              grade: evalRes.grade,
-              gradeColor: evalRes.color,
-              createdAt: c.createdAt,
-              updatedAt: c.updatedAt,
-            });
-          }
-          setRivens(Array.from(map.values()));
+          setRivens(mergeCloudRivens(local, cloud));
           return;
         }
       }
@@ -97,7 +56,7 @@ export function RivenLibrary() {
       // Fallback to local
     }
     setRivens(local);
-  }, [allWeapons]);
+  }, []);
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -113,31 +72,7 @@ export function RivenLibrary() {
   }, []);
 
   const handleSaveRiven = async (saved: SavedRiven) => {
-    saveLocalStorageRiven(saved);
-    try {
-      if (signedIn) {
-        const weapon = weaponsById.get(saved.weaponId);
-        const modId = rivenModIdFor(weapon);
-        if (modId) {
-          const cloud = await saveCloudRiven({
-            id: rivenSaveId(saved.id),
-            weaponId: saved.weaponId,
-            name: saved.name,
-            modId,
-            stats: saved.stats,
-            polarity: saved.polarity,
-            drain: 18,
-          });
-          const adopted = localRivenAfterCloudSave(saved, cloud?.id);
-          if (adopted.removedId) {
-            deleteLocalStorageRiven(adopted.removedId);
-            saveLocalStorageRiven(adopted.saved);
-          }
-        }
-      }
-    } catch {
-      // Local save succeeded
-    }
+    await saveLibraryRiven(saved);
     setDialogOpen(false);
     setEditingRiven(null);
     refreshRivens();
@@ -153,14 +88,7 @@ export function RivenLibrary() {
     });
     if (!ok) return;
     setDeletingId(riven.id);
-    deleteLocalStorageRiven(riven.id);
-    try {
-      if (signedIn) {
-        await deleteCloudRiven(riven.id);
-      }
-    } catch {
-      // Local delete succeeded
-    }
+    await deleteLibraryRiven(riven.id);
     setDeletingId(null);
     refreshRivens();
     toast.success("Riven deleted");
@@ -174,7 +102,9 @@ export function RivenLibrary() {
             <Sparkles className="h-4 w-4 text-purple-700 dark:text-purple-400" />
             Rivens
           </h2>
-          <p className="text-xs text-muted-foreground">Save your riven rolls once, then equip them from that weapon&apos;s mod picker.</p>
+          <p className="text-xs text-muted-foreground">Save your riven rolls once, then equip them from that weapon&apos;s mod picker.
+            {signedIn === false ? " Saved on this device; sign in to sync them to your account." : ""}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Link
