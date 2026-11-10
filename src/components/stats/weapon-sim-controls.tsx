@@ -31,6 +31,7 @@ import {
   weaponDamageBuffAbilities,
   formatAbilityBuffDebuffBadge,
 } from "@/lib/weapons/weapon-external-buffs";
+import { galvCritStatus } from "@/lib/ui/galv-crit-status";
 import { CollapsibleSection, SimSlider } from "./stat-primitives";
 
 function comboTier(hits: number): number {
@@ -1271,17 +1272,18 @@ export function WeaponSimControls({
                 Weak Point Damage: +{((stats.weakPointDamageBonus ?? 0) * 100).toFixed(0)}% (active on {stats.simParams.applyHeadshots ? "Headshot" : "Weak Point"})
               </div>
             )}
-            {(stats.galvanizedCritOnHeadshot ?? 0) > 0 && stats.simParams.applyTriggerBuffs && (
-              stats.simParams.applyHeadshots ? (
+            {(stats.galvanizedCritOnHeadshot ?? 0) > 0 && (() => {
+              const base = stats.galvanizedCritOnHeadshot ?? 0;
+              const g = galvCritStatus(stats.simParams, base, stats.galvanizedCritOnHeadshotPerStack ?? 0, simKs("galvCrit"));
+              // Only show the line when the buff is counted (inactive hints were dropped upstream).
+              if (!g.active) return null;
+              return (
                 <div className="text-[10px] text-blue-700 dark:text-blue-400">
-                  Galv. Crit: +{(((stats.galvanizedCritOnHeadshot ?? 0) + (stats.galvanizedCritOnHeadshotPerStack ?? 0) * Math.min(simKs("galvCrit"), 5)) * 100).toFixed(0)}% CC while aiming ({Math.min(simKs("galvCrit"), 5)} headshot-kill stacks)
+                  Galv. Crit: +{(g.bonus * 100).toFixed(0)}% CC while aiming ({g.stacks} weak-point kill stacks
+                  {g.baseOn ? ")" : `; pick Headshot or Weak Point for +${(base * 100).toFixed(0)}% base)`}
                 </div>
-              ) : simKs("galvCrit") > 0 ? (
-                <div className="text-[10px] text-blue-700 dark:text-blue-400">
-                  Galv. Crit: +{(((stats.galvanizedCritOnHeadshotPerStack ?? 0) * Math.min(simKs("galvCrit"), 5)) * 100).toFixed(0)}% CC while aiming ({Math.min(simKs("galvCrit"), 5)} headshot-kill stacks)
-                </div>
-              ) : null
-            )}
+              );
+            })()}
             {stats.berserkerFuryBonus > 0 && (
               <div className="text-[10px] text-yellow-700 dark:text-yellow-400">Berserker Fury: +{(stats.berserkerFuryBonus * Math.min(simKs("berserker"), 2) * 100).toFixed(0)}% AS ({Math.min(simKs("berserker"), 2)}/2 stacks)</div>
             )}
