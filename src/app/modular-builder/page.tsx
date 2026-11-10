@@ -450,6 +450,8 @@ export default function ModularBuilderPage() {
     return snapshotFromBuild("modular", buildName || assembledWeapon.name, buildModularData());
   }, [assembledWeapon, buildName, buildModularData]);
 
+  const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(assembledWeapon ? stableBuildSnapshot(buildModularData()) : null);
+
   const handleSaveBuildConfirm = async ({ name, isPublic, asNew = false }: SaveBuildDialogValues & { asNew?: boolean }) => {
     const data = buildModularData();
     const build: SavedBuild = {
@@ -467,14 +469,13 @@ export default function ModularBuilderPage() {
     setBuildName(name);
     setBuildIsPublic(result.isPublic);
     void refreshSavedBuilds();
+    markClean();
     if (result.synced) {
       toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated", { description: `${name} saved to your account` });
     } else {
       toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated on this device", { description: currentBuildId && !asNew ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
     }
   };
-
-  const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(assembledWeapon ? stableBuildSnapshot(buildModularData()) : null);
 
   const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
     markClean();
@@ -659,6 +660,7 @@ export default function ModularBuilderPage() {
       return true;
     }
     await handleSaveBuildConfirm({ ...values, asNew: saveAsNew });
+    if (loadoutCtx) clearLoadoutCtx();
     markClean();
     return true;
   };

@@ -23,7 +23,9 @@ import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-b
 import {
   useCloudBuildFromUrl,
   markCloudBuildLoaded,
+  fetchCloudBuild,
 } from "@/lib/builds/use-cloud-build-from-url";
+import { copyTextToClipboard } from "@/lib/display/clipboard";
 import { Loadout } from "@/lib/types";
 import { modularBuildDisplayName, modularBuildMatchesLoadoutSlot } from "@/lib/builds/modular-resolve";
 import { allWarframes } from "@/data/warframes";
@@ -141,6 +143,7 @@ export default function LoadoutsPage() {
   const [combatOpen, setCombatOpen] = useState<Record<string, boolean>>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerSlot, setPickerSlot] = useState<SlotType>("warframe");
   const [pickerLoadoutId, setPickerLoadoutId] = useState<string | null>(null);
@@ -169,12 +172,13 @@ export default function LoadoutsPage() {
 
   const refresh = useCallback(() => setLoadouts(getLoadouts()), []);
 
-  // ?shared=<code> adds the shared loadout to this device; ?highlight=<id> scrolls to a card.
+  // ?shared=<code> adds the shared loadout to this device; ?highlight=<id> scrolls to a card; ?buildId=<id> loads from account.
   useEffect(() => {
     const url = new URL(window.location.href);
     const shared = url.searchParams.get("shared");
     const hl = url.searchParams.get("highlight");
-    if (!shared && !hl) return;
+    const buildId = url.searchParams.get("buildId");
+    if (!shared && !hl && !buildId) return;
     let cancelled = false;
     void (async () => {
       let target = hl;
@@ -191,9 +195,26 @@ export default function LoadoutsPage() {
           toast.success(`Added “${decoded.name}”`, { description: "Shared loadout saved on this device." });
         }
       }
+      if (buildId) {
+        const cloud = await fetchCloudBuild(buildId);
+        if (cancelled) return;
+        if (cloud && cloud.type === "loadout" && cloud.data) {
+          const currentList = getLoadouts();
+          const existing = currentList.find((l) => l.cloudId === buildId || l.id === cloud.id);
+          if (existing) {
+            target = existing.id;
+          } else {
+            const loaded = loadoutFromSavedBuild(cloud);
+            saveLoadout(loaded);
+            target = loaded.id;
+            toast.success(`Loaded “${loaded.name}”`, { description: "Loadout opened from account link." });
+          }
+        }
+      }
       if (cancelled) return;
       url.searchParams.delete("shared");
       url.searchParams.delete("highlight");
+      url.searchParams.delete("buildId");
       window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
       setLoadouts(getLoadouts());
       if (target) setHighlightId(target);
@@ -321,45 +342,141 @@ export default function LoadoutsPage() {
     async (loadout: Loadout) => {
       if (loadout.isPublic && loadout.cloudId) {
         const url = `${window.location.origin}/build/${loadout.cloudId}`;
-        await navigator.clipboard.writeText(url);
-        setShareCopiedId(loadout.id);
-        setTimeout(() => setShareCopiedId(null), 2000);
-        toast.success("Share link copied!", { description: "Anyone can view and upvote this loadout." });
+        const ok = await copyTextToClipboard(url);
+        if (ok) {
+          setShareCopiedId(loadout.id);
+          setTimeout(() => setShareCopiedId(null), 2000);
+          toast.success("Community link copied!", { description: "Anyone can view and upvote this loadout." });
+        }
         return;
       }
 
-      if (loadout.cloudId) {
-        const url = `${window.location.origin}/loadouts?buildId=${encodeURIComponent(loadout.cloudId)}`;
-        await navigator.clipboard.writeText(url);
-        setShareCopiedId(loadout.id);
-        setTimeout(() => setShareCopiedId(null), 2000);
-        toast.success("Share link copied!", { description: "Private link — only you can open it when signed in." });
-        return;
-      }
-
-      const signedIn = await fetchSignedIn();
-      if (signedIn) {
-        // Save first; the link is copied automatically once the save succeeds.
-        await handleOpenSaveDialog(loadout.id, true);
-        shareAfterSaveRef.current = loadout.id;
-        return;
-      }
-      // Signed out: the link carries the loadout itself, so it works without an account.
+      // Self-contained hash link carries the loadout so anyone can open a copy without needing an account
       const code = await encodeLoadoutShare(loadout);
       const link = code ? `${window.location.origin}${loadoutSharePath(code)}` : null;
-      const copied = link ? await copyText(link) : false;
-      if (copied) {
-        setShareCopiedId(loadout.id);
-        setTimeout(() => setShareCopiedId(null), 2000);
+      if (link) {
+        const ok = await copyTextToClipboard(link);
+        if (ok) {
+          setShareCopiedId(loadout.id);
+          setTimeout(() => setShareCopiedId(null), 2000);
+          toast.success("Share link copied!", {
+            description: loadout.cloudId
+              ? "Link carries this loadout. To list in Community, click Publish."
+              : "Anyone with this link can open a copy of this loadout.",
+          });
+          return;
+        }
       }
-      toast.info(copied ? "Loadout link copied" : "Sign in to share", {
-        description: copied
-          ? "The link carries this loadout, so anyone can open a copy. Sign in to list it in Community."
-          : "Sign in to save this loadout to your account and share it.",
-        action: { label: "Sign in", onClick: () => router.push("/signin") },
-      });
+      toast.error("Could not copy share link");
     },
-    [handleOpenSaveDialog, router],
+    [],
+  );
+
+  const handleQuickUpdateLoadout = useCallback(
+    async (loadout: Loadout) => {
+      if (!loadout.cloudId) return;
+      try {
+        const now = Date.now();
+        const build: SavedBuild = {
+          id: loadout.cloudId,
+          name: loadout.name,
+          description: loadout.description,
+          isPublic: loadout.isPublic ?? false,
+          type: "loadout",
+          createdAt: loadout.createdAt,
+          updatedAt: now,
+          data: loadoutToBuildData(loadout),
+        };
+        const cloudResult = await saveCloudBuild(build);
+        const updated: Loadout = {
+          ...loadout,
+          updatedAt: now,
+          cloudId: cloudResult?.id ?? loadout.cloudId,
+          isPublic: cloudResult?.isPublic ?? loadout.isPublic,
+        };
+        saveLoadout(updated);
+        refresh();
+        if (cloudResult) {
+          toast.success("Loadout updated", {
+            description: updated.isPublic ? "Synced to Community and your account." : "Synced to your account.",
+          });
+        } else {
+          toast.warning("Saved on this device", {
+            description: "Account sync failed. Check your connection or sign in.",
+          });
+        }
+      } catch (err) {
+        console.error("Failed to update loadout", err);
+        toast.error("Could not update loadout");
+      }
+    },
+    [refresh],
+  );
+
+  const handlePublishToCommunity = useCallback(
+    async (loadout: Loadout) => {
+      if (!loadout.cloudId) {
+        handleOpenSaveDialog(loadout.id, true);
+        return;
+      }
+      try {
+        const now = Date.now();
+        const result = await saveCloudBuild({
+          id: loadout.cloudId,
+          name: loadout.name,
+          description: loadout.description,
+          isPublic: true,
+          type: "loadout",
+          createdAt: loadout.createdAt,
+          updatedAt: now,
+          data: loadoutToBuildData(loadout),
+        });
+        if (!result) {
+          toast.error("Could not publish", { description: "Sign in and try again." });
+          return;
+        }
+        const updated: Loadout = {
+          ...loadout,
+          isPublic: true,
+          updatedAt: now,
+        };
+        saveLoadout(updated);
+        refresh();
+        const url = `${window.location.origin}/build/${loadout.cloudId}`;
+        const ok = await copyTextToClipboard(url);
+        if (ok) {
+          setShareCopiedId(loadout.id);
+          setTimeout(() => setShareCopiedId(null), 2000);
+        }
+        toast.success("Published to Community! Link copied", {
+          description: "Anyone can view and upvote this loadout.",
+        });
+      } catch (err) {
+        console.error("Failed to publish loadout", err);
+        toast.error("Could not publish loadout");
+      }
+    },
+    [refresh, handleOpenSaveDialog],
+  );
+
+  const handleSaveAsLoadout = useCallback(
+    (loadout: Loadout) => {
+      const now = Date.now();
+      const copy: Loadout = {
+        ...JSON.parse(JSON.stringify(loadout)) as Loadout,
+        id: generateId(),
+        name: `${loadout.name} (copy)`,
+        cloudId: undefined,
+        isPublic: false,
+        createdAt: now,
+        updatedAt: now,
+      };
+      saveLoadout(copy);
+      refresh();
+      handleOpenSaveDialog(copy.id, false);
+      toast.success("Created new loadout copy", { description: "Save it to your account with a name." });
+    },
+    [refresh, handleOpenSaveDialog],
   );
 
   const handleCreate = useCallback(() => {
@@ -490,49 +607,62 @@ export default function LoadoutsPage() {
   const handleStartEdit = useCallback((loadout: Loadout) => {
     setEditingId(loadout.id);
     setEditName(loadout.name);
+    setEditDescription(loadout.description || "");
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingId(null);
+    setEditName("");
+    setEditDescription("");
   }, []);
 
   const handleSaveEdit = useCallback(
     async (id: string) => {
       const loadout = loadouts.find((l) => l.id === id);
       const name = editName.trim();
+      const description = editDescription.trim();
       if (!loadout || !name) {
         setEditingId(null);
+        setEditName("");
+        setEditDescription("");
         return;
       }
-      saveLoadout({ ...loadout, name });
+      const updated: Loadout = {
+        ...loadout,
+        name,
+        description: description || undefined,
+        updatedAt: Date.now(),
+      };
+      saveLoadout(updated);
       setEditingId(null);
+      setEditName("");
+      setEditDescription("");
       refresh();
 
       if (loadout.cloudId) {
         const cloudResult = await saveCloudBuild({
           id: loadout.cloudId,
           name,
-          description: loadout.description,
+          description: description || undefined,
           isPublic: loadout.isPublic,
           type: "loadout",
           createdAt: loadout.createdAt,
           updatedAt: Date.now(),
-          data: loadoutToBuildData({ ...loadout, name }),
+          data: loadoutToBuildData(updated),
         });
         if (!cloudResult) {
-          toast.success("Name updated on this device", {
+          toast.success("Updated on this device", {
             description: "Account sync failed — sign in and save again to update Community.",
           });
           return;
         }
-        toast.success("Name updated", { description: "Synced to your account." });
+        toast.success("Details updated", { description: "Synced to your account." });
         return;
       }
-      toast.success("Name updated");
+      toast.success("Details updated");
     },
-    [loadouts, editName, refresh]
+    [loadouts, editName, editDescription, refresh]
   );
-
-  const handleCancelEdit = useCallback(() => {
-    setEditingId(null);
-    setEditName("");
-  }, []);
 
   const handleOpenPicker = useCallback((loadoutId: string, slot: SlotType) => {
     setPickerLoadoutId(loadoutId);
@@ -864,68 +994,139 @@ export default function LoadoutsPage() {
               <ContentPanel className="p-5">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                     {editingId === loadout.id ? (
-                      <div className="flex items-center gap-2 flex-1 flex-wrap">
+                      <div className="flex flex-col gap-1.5 flex-1 min-w-0 max-w-md py-1">
+                        <div className="flex items-center gap-1.5">
+                          <Input
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") void handleSaveEdit(loadout.id);
+                              if (e.key === "Escape") handleCancelEdit();
+                            }}
+                            placeholder="Loadout name"
+                            className="w-full text-sm font-semibold h-9"
+                            autoFocus
+                            maxLength={120}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => void handleSaveEdit(loadout.id)}
+                            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-green-700 hover:bg-green-500/10 dark:text-green-400"
+                            aria-label="Save details"
+                          >
+                            <Check className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleCancelEdit}
+                            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-red-700 hover:bg-red-500/10 dark:text-red-400"
+                            aria-label="Cancel"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
                         <Input
-                          value={editName}
-                          onChange={(e) => setEditName(e.target.value)}
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
                           onKeyDown={(e) => {
-                            if (e.key === "Enter") handleSaveEdit(loadout.id);
+                            if (e.key === "Enter") void handleSaveEdit(loadout.id);
                             if (e.key === "Escape") handleCancelEdit();
                           }}
-                          className="w-full max-w-xs text-sm sm:h-9"
-                          autoFocus
+                          placeholder="Description / notes (optional)"
+                          className="w-full text-xs h-8"
+                          maxLength={500}
                         />
-                        <button
-                          type="button"
-                          onClick={() => handleSaveEdit(loadout.id)}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-green-700 hover:bg-green-500/10 dark:text-green-400 sm:h-10 sm:w-10"
-                          aria-label="Save name"
-                        >
-                          <Check className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleCancelEdit}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-red-700 hover:bg-red-500/10 dark:text-red-400 sm:h-10 sm:w-10"
-                          aria-label="Cancel"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 min-w-0">
-                        <h2 className="text-lg font-semibold truncate">{loadout.name}</h2>
-                        {loadout.isPublic && (
-                          <span className="text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
-                            Community
-                          </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <h2 className="text-lg font-semibold truncate">{loadout.name}</h2>
+                          {loadout.isPublic && (
+                            <span className="text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
+                              Community
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleStartEdit(loadout)}
+                            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
+                            aria-label="Edit name and description"
+                            title="Edit name and description"
+                          >
+                            <Edit2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                        {loadout.description ? (
+                          <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5 max-w-xl">
+                            {loadout.description}
+                          </p>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleStartEdit(loadout)}
+                            className="text-[11px] text-muted-foreground/60 hover:text-muted-foreground mt-0.5 inline-block"
+                          >
+                            + Add description
+                          </button>
                         )}
-                        <button
-                          type="button"
-                          onClick={() => handleStartEdit(loadout)}
-                          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted sm:h-9 sm:w-9"
-                          aria-label="Rename loadout"
-                        >
-                          <Edit2 className="h-3.5 w-3.5" />
-                        </button>
                       </div>
                     )}
                     <div className="flex shrink-0 flex-wrap items-center gap-1 sm:gap-2">
                       <span className="text-[10px] text-muted-foreground tabular-nums mr-2">
                         Updated {new Date(loadout.updatedAt).toLocaleDateString()}
                       </span>
+                      {loadout.cloudId ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => void handleQuickUpdateLoadout(loadout)}
+                            className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-green-500/10 hover:text-green-700 dark:hover:text-green-400 sm:h-9 sm:px-2.5"
+                            title="Update loadout on account (syncs changes in place)"
+                          >
+                            <Save className="h-4 w-4" /> <span>Update</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSaveAsLoadout(loadout)}
+                            className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground sm:h-9 sm:px-2"
+                            title="Save as a separate new loadout copy"
+                          >
+                            <span>Save as</span>
+                          </button>
+                          {loadout.isPublic ? (
+                            <button
+                              type="button"
+                              onClick={() => void handleMakePrivate(loadout)}
+                              className="hidden sm:inline-flex h-9 items-center justify-center rounded-lg px-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                              title="Make private (remove from Community)"
+                            >
+                              <EyeOff className="h-4 w-4" />
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => void handlePublishToCommunity(loadout)}
+                              className="hidden sm:inline-flex h-9 items-center justify-center gap-1 rounded-lg px-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                              title="Publish to Community"
+                            >
+                              <Globe className="h-4 w-4" /> <span className="hidden md:inline">Publish</span>
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenSaveDialog(loadout.id)}
+                          className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary sm:h-9 sm:px-2.5"
+                          title="Save to account"
+                        >
+                          <Save className="h-4 w-4" /> <span>Save</span>
+                        </button>
+                      )}
                       <button
                         type="button"
-                        onClick={() => handleOpenSaveDialog(loadout.id)}
-                        className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary sm:h-10 sm:w-10 sm:px-0"
-                        title="Save to account"
-                      >
-                        <Save className="h-4 w-4" /> <span className="sm:hidden">Save</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleShareLoadout(loadout)}
-                        className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary sm:h-10 sm:w-10 sm:px-0"
+                        onClick={() => void handleShareLoadout(loadout)}
+                        className="inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary sm:h-9 sm:px-2.5"
                         title="Copy share link"
                       >
                         {shareCopiedId === loadout.id ? (
@@ -933,7 +1134,7 @@ export default function LoadoutsPage() {
                         ) : (
                           <Share2 className="h-4 w-4" />
                         )}
-                        <span className="sm:hidden">Share</span>
+                        <span>{shareCopiedId === loadout.id ? "Copied!" : "Share"}</span>
                       </button>
                       {loadout.cloudId && (
                         <a
@@ -999,10 +1200,16 @@ export default function LoadoutsPage() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
-                                          <LoadoutCardOverflowMenu
+                      <LoadoutCardOverflowMenu
                         loadoutName={loadout.name}
                         actions={[
                           ...(loadout.cloudId ? [{ key: "view", label: "View build page", icon: <Globe className="h-4 w-4" />, href: `/build/${loadout.cloudId}` }] : []),
+                          ...(loadout.cloudId
+                            ? loadout.isPublic
+                              ? [{ key: "private", label: "Make private", icon: <EyeOff className="h-4 w-4" />, onSelect: () => void handleMakePrivate(loadout) }]
+                              : [{ key: "publish", label: "Publish to Community", icon: <Globe className="h-4 w-4" />, onSelect: () => void handlePublishToCommunity(loadout) }]
+                            : []),
+                          { key: "edit", label: "Edit details", icon: <Edit2 className="h-4 w-4" />, onSelect: () => handleStartEdit(loadout) },
                           { key: "duplicate", label: "Duplicate loadout", icon: <Copy className="h-4 w-4" />, onSelect: () => handleDuplicate(loadout) },
                           { key: "slots", label: "Save slots as builds", icon: <Layers className="h-4 w-4" />, onSelect: () => void handleSaveSlotsAsBuilds(loadout), disabled: bulkBusyId === loadout.id },
                           { key: "compare", label: "Compare with another loadout", icon: <ArrowLeftRight className="h-4 w-4" />, href: `/compare?tab=loadout&a=${encodeURIComponent(loadout.id)}` },

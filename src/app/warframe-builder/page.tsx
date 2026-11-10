@@ -496,12 +496,13 @@ export default function WarframeBuilderPage() {
     setBuildCreatedAt(build.createdAt);
     setBuildIsPublic(result.isPublic);
     void refreshSavedBuilds();
+    markClean();
     if (result.synced) {
       toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated", { description: `${name} saved to your account` });
     } else {
       toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated on this device", { description: currentBuildId && !asNew ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
     }
-  }, [buildWarframeData, selectedWarframe, currentBuildId, refreshSavedBuilds, buildCreatedAt]);
+  }, [buildWarframeData, selectedWarframe, currentBuildId, refreshSavedBuilds, buildCreatedAt, markClean]);
 
   const handleQuickSave = useCallback(async () => {
     if (!currentBuildId) return;
@@ -513,7 +514,8 @@ export default function WarframeBuilderPage() {
       target: "new",
       asNew: false,
     });
-  }, [currentBuildId, handleSaveBuildConfirm, buildName, selectedWarframe, buildDescription, buildIsPublic, buildTags]);
+    markClean();
+  }, [currentBuildId, handleSaveBuildConfirm, buildName, selectedWarframe, buildDescription, buildIsPublic, buildTags, markClean]);
 
   const handleLoadCommunityBuild = useCallback(async (buildId: string) => {
     const build = await fetchCloudBuild(buildId);
@@ -561,6 +563,7 @@ export default function WarframeBuilderPage() {
       return true;
     }
     await handleSaveBuildConfirm({ ...values, asNew: saveAsNew });
+    if (loadoutCtx) clearLoadoutCtx();
     markClean();
     return true;
   }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildWarframeData, saveAsNew]);

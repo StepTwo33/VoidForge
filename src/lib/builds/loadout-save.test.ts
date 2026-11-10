@@ -157,4 +157,21 @@ describe("loadout cloud save round-trip", () => {
     expect(stats.companion?.weapon?.name).toBeTruthy();
     expect(() => JSON.stringify({ ...local, data: payload })).not.toThrow();
   });
+
+  it("preserves description across loadoutToBuildData and loadoutFromSavedBuild", () => {
+    const local = importedLoadoutFixture();
+    local.description = "Steel Path endurance setup with slash procs";
+    const data = loadoutToBuildData(local);
+    const restored = loadoutFromSavedBuild({
+      id: "cloud_desc_1",
+      name: local.name,
+      description: local.description,
+      type: "loadout",
+      createdAt: local.createdAt,
+      updatedAt: local.updatedAt,
+      data,
+    });
+    expect(restored.description).toBe("Steel Path endurance setup with slash procs");
+    expect(restored.cloudId).toBe("cloud_desc_1");
+  });
 });

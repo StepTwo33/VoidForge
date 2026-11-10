@@ -305,6 +305,8 @@ export default function CompanionBuilderPage() {
     return snapshotFromBuild("companion", buildName || selectedCompanion.name, data);
   }, [buildCompanionData, selectedCompanion, buildName]);
 
+  const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildCompanionData()), [buildCompanionData]));
+
   const handleSaveBuildConfirm = useCallback(async ({ name, description, isPublic, tags, asNew = false }: SaveBuildDialogValues & { asNew?: boolean }) => {
     const data = buildCompanionData();
     if (!data || !selectedCompanion) return;
@@ -328,12 +330,13 @@ export default function CompanionBuilderPage() {
     setBuildCreatedAt(build.createdAt);
     setBuildIsPublic(result.isPublic);
     void refreshSavedBuilds();
+    markClean();
     if (result.synced) {
       toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated", { description: `${name} saved to your account` });
     } else {
       toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated on this device", { description: currentBuildId && !asNew ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
     }
-  }, [buildCompanionData, selectedCompanion, currentBuildId, refreshSavedBuilds, buildCreatedAt]);
+  }, [buildCompanionData, selectedCompanion, currentBuildId, refreshSavedBuilds, buildCreatedAt, markClean]);
 
   const handleQuickSave = useCallback(async () => {
     if (!currentBuildId) return;
@@ -345,9 +348,8 @@ export default function CompanionBuilderPage() {
       target: "new",
       asNew: false,
     });
-  }, [currentBuildId, handleSaveBuildConfirm, buildName, selectedCompanion, buildDescription, buildIsPublic, buildTags]);
-
-  const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildCompanionData()), [buildCompanionData]));
+    markClean();
+  }, [currentBuildId, handleSaveBuildConfirm, buildName, selectedCompanion, buildDescription, buildIsPublic, buildTags, markClean]);
 
   const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
     const build = cleanLoadedBuild(rawBuild);
@@ -505,6 +507,7 @@ export default function CompanionBuilderPage() {
       return true;
     }
     await handleSaveBuildConfirm({ ...values, asNew: saveAsNew });
+    if (loadoutCtx) clearLoadoutCtx();
     markClean();
     return true;
   }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildCompanionData, saveAsNew]);

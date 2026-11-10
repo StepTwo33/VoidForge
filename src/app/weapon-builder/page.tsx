@@ -488,12 +488,13 @@ export default function WeaponBuilderPage() {
     setBuildCreatedAt(build.createdAt);
     setBuildIsPublic(result.isPublic);
     void refreshSavedBuilds();
+    markClean();
     if (result.synced) {
       toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated", { description: `${name} saved to your account` });
     } else {
       toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated on this device", { description: currentBuildId && !asNew ? "Log in to sync builds to your account" : "Saved on this device. Log in to sync builds to your account." });
     }
-  }, [buildWeaponData, selectedWeapon, currentBuildId, refreshSavedBuilds, buildCreatedAt]);
+  }, [buildWeaponData, selectedWeapon, currentBuildId, refreshSavedBuilds, buildCreatedAt, markClean]);
 
   const handleQuickSave = useCallback(async () => {
     if (!currentBuildId) return;
@@ -505,7 +506,8 @@ export default function WeaponBuilderPage() {
       target: "new",
       asNew: false,
     });
-  }, [currentBuildId, handleSaveBuildConfirm, buildName, selectedWeapon, buildDescription, buildIsPublic, buildTags]);
+    markClean();
+  }, [currentBuildId, handleSaveBuildConfirm, buildName, selectedWeapon, buildDescription, buildIsPublic, buildTags, markClean]);
 
   const handleLoadCommunityBuild = useCallback(async (buildId: string) => {
     const build = await fetchCloudBuild(buildId);
@@ -648,6 +650,7 @@ export default function WeaponBuilderPage() {
       return true;
     }
     await handleSaveBuildConfirm({ ...values, asNew: saveAsNew });
+    if (loadoutCtx) clearLoadoutCtx();
     markClean();
     return true;
   }, [markClean, loadoutCtx, clearLoadoutCtx, handleSaveBuildConfirm, buildWeaponData, saveAsNew]);
