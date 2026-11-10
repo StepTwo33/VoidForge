@@ -1275,10 +1275,10 @@ export default function CompanionBuilderPage() {
                         </p>
                       )}
                       <div className="border-t border-border my-2" />
-                      <StatRow label="Melee Dmg" value={`+${(calculatedStats.meleeDamageBonus * 100).toFixed(0)}%`} />
-                      <StatRow label="Atk Speed" value={`+${(calculatedStats.attackSpeedBonus * 100).toFixed(0)}%`} />
-                      <StatRow label="Crit Chance" value={`+${(calculatedStats.critChanceBonus * 100).toFixed(0)}%`} />
-                      <StatRow label="Crit Dmg" value={`+${(calculatedStats.critDamageBonus * 100).toFixed(0)}%`} />
+                      <StatRow label="Melee Damage" value={`+${(calculatedStats.meleeDamageBonus * 100).toFixed(0)}%`} />
+                      <StatRow label="Attack Speed" value={`+${(calculatedStats.attackSpeedBonus * 100).toFixed(0)}%`} />
+                      <StatRow label="Critical Chance" value={`+${(calculatedStats.critChanceBonus * 100).toFixed(0)}%`} />
+                      <StatRow label="Critical Damage" value={`+${(calculatedStats.critDamageBonus * 100).toFixed(0)}%`} />
                       {calculatedStats.weakspotDamageBonus > 0 && (
                         <StatRow label="Weakspot Dmg" value={`+${(calculatedStats.weakspotDamageBonus * 100).toFixed(0)}%`} />
                       )}
@@ -1295,8 +1295,8 @@ export default function CompanionBuilderPage() {
                         <StatRow label="Revive Shield" value={calculatedStats.reviveShieldHealth.toFixed(0)} />
                       )}
                       <div className="border-t border-border my-2" />
-                      <StatRow label="Effective HP" value={calculatedStats.effectiveHealth.toFixed(0)} highlighted />
-                      <StatRow label="Dmg Reduction" value={`${calculatedStats.damageReduction.toFixed(1)}%`} highlighted />
+                      <StatRow label="Effective Health" value={calculatedStats.effectiveHealth.toFixed(0)} highlighted />
+                      <StatRow label="Damage Reduction" value={`${calculatedStats.damageReduction.toFixed(1)}%`} highlighted />
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">Pick a companion above to see body stats and precepts.</p>
@@ -1511,10 +1511,10 @@ export default function CompanionBuilderPage() {
                               );
                             })()}
                             <div className="border-t border-border my-2" />
-                            <StatRow label="Crit Chance" value={`${(weaponStats.criticalChance * 100).toFixed(1)}%`} />
-                            <StatRow label="Crit Multi" value={`${weaponStats.criticalMultiplier.toFixed(2)}x`} />
-                            <StatRow label="Status" value={`${(weaponStats.statusChancePerShot * 100).toFixed(1)}%`} />
-                            <StatRow label="Fire Rate" value={(weaponStats.effectiveFireRate ?? weaponStats.fireRate).toFixed(2)} />
+                            <StatRow label="Critical Chance" value={`${(weaponStats.criticalChance * 100).toFixed(1)}%`} />
+                            <StatRow label="Critical Multiplier" value={`${weaponStats.criticalMultiplier.toFixed(2)}x`} />
+                            <StatRow label="Status Chance" value={`${(weaponStats.statusChancePerShot * 100).toFixed(1)}%`} />
+                            <StatRow label="Fire Rate" value={`${(weaponStats.effectiveFireRate ?? weaponStats.fireRate).toFixed(2)}/s`} />
                             <StatRow label="Multishot" value={weaponStats.multishot.toFixed(2)} />
                             {weaponStats.magazine > 0 && (
                               <StatRow label="Magazine" value={`${weaponStats.magazine}`} />
