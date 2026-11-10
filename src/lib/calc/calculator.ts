@@ -588,18 +588,35 @@ function applyAbilityCloudDps(
   stats.sustainedDps += cloud;
 }
 
-/** Display-only recoil from external buffs (negative = less recoil). */
-function applyExternalRecoil(
+/** Slide-only recoil mods (wiki: "when firing while sliding"); not part of the always-on row. */
+const SLIDE_ONLY_RECOIL_MODS = new Set(["gun_glide", "strafing_slide", "double_barrel_drift"]);
+
+/**
+ * Display-only recoil (negative = less recoil): always-on mods such as Steady Hands and
+ * Stabilizer (catalog value is % per rank, so rank R gives value × (R + 1) / 100), plus external
+ * buffs such as Athodai Overdrive. Recoil can't drop below −100% (wiki Gun Glide: the excess
+ * reduction is not used), so the total is capped there.
+ */
+function applyRecoilSources(
   stats: CalculatedStats,
+  equippedMods: ModSlot[],
+  allMods: Map<string, Mod>,
   externalBuffs?: WeaponExternalBuff[],
 ): void {
-  if (!externalBuffs?.length) return;
   let bonus = 0;
-  for (const buff of externalBuffs) {
+  for (const slot of equippedMods) {
+    const mod = allMods.get(slot.modId);
+    const perRank = mod?.stats?.recoil;
+    if (!mod || !perRank || mod.category === "conclave" || SLIDE_ONLY_RECOIL_MODS.has(mod.id)) continue;
+    const rank = Math.min(Math.max(0, Math.round(slot.rank ?? mod.maxRank)), mod.maxRank);
+    bonus += (perRank * (rank + 1)) / 100;
+  }
+  for (const buff of externalBuffs ?? []) {
     if (buff.recoil) bonus += buff.recoil;
   }
-  if (bonus === 0) return;
-  stats.recoil = (stats.recoil ?? 0) + bonus;
+  if (bonus === 0 && stats.recoil == null) return;
+  const total = (stats.recoil ?? 0) + bonus;
+  stats.recoil = Math.max(-1, total);
 }
 
 /** Jet Stream (and similar) display-only projectile speed from external buffs. */
@@ -2426,7 +2443,7 @@ export function calculateWeaponBuild(
   );
   applyAbilityCloudDps(stats, calcOptions?.externalBuffs);
   applyExternalProjectileSpeed(stats, calcOptions?.externalBuffs);
-  applyExternalRecoil(stats, calcOptions?.externalBuffs);
+  applyRecoilSources(stats, equippedMods, allMods, calcOptions?.externalBuffs);
   applyMechaSpreadDps(
     stats,
     sim,

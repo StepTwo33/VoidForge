@@ -118,9 +118,9 @@ function WeaponPassiveConditionals({
         </label>
         <StatRow
           label="Overdrive"
-          value={active ? "+100% Fire Rate, Infinite Ammo" : "Inactive"}
+          value={active ? "+100% Fire Rate, -100% Recoil, Infinite Ammo" : "Inactive"}
           color={active ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
-          tooltip="Weak point kills trigger Overdrive: +100% fire rate, -100% recoil (additive with mods), and Infinite Ammo for 8s (12s on Athodai Prime). Alt-fire is locked while it is up."
+          tooltip={`Weak point kills trigger Overdrive: +100% fire rate and -100% recoil (both additive with mods), and Infinite Ammo for ${wid === "athodai_prime" ? 12 : 8}s. It can't be refreshed, and Alt-fire is locked while it is up.`}
         />
       </div>
     );
@@ -788,7 +788,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             label="Recoil"
             value={`${stats.recoil > 0 ? "+" : ""}${(stats.recoil * 100).toFixed(0)}%`}
             color={stats.recoil < 0 ? "text-green-700 dark:text-green-400" : undefined}
-            tooltip="Incarnon / riven recoil (display; negative = less recoil). Not modeled in DPS."
+            tooltip="Recoil from mods (Steady Hands, Stabilizer, ...), riven, Incarnon and buffs such as Athodai Overdrive. Negative = less recoil; capped at -100%. Slide-only mods (Gun Glide, Strafing Slide) are left out. Display only, not modeled in DPS."
           />
         )}
         {stats.zoom != null && stats.zoom !== 0 && (
