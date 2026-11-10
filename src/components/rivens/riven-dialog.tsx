@@ -19,7 +19,15 @@ import {
   type RivenStat,
 } from "@/lib/calc/riven-calculator";
 import { formatRivenName } from "@/lib/calc/riven-naming";
-import { validateRivenStats } from "@/lib/riven/riven-validation";
+import {
+  DEFAULT_RIVEN_POLARITY,
+  RIVEN_MAX_RANK,
+  RIVEN_POLARITIES,
+  rivenDrainFromRank,
+  rivenPolarityError,
+  validateRivenStats,
+} from "@/lib/riven/riven-validation";
+import { buildRivenStats, rivenDisplayName, splitRivenStats } from "@/lib/rivens/riven-form";
 import {
   evaluateSavedRiven,
   generateRivenId,
@@ -27,7 +35,7 @@ import {
   type SavedRivenStat,
 } from "@/lib/rivens/riven-storage";
 import { scanRivenImageFile, type ParsedOcrRiven } from "@/lib/rivens/riven-ocr";
-import { RivenCard, extractRivenAffix } from "./riven-card";
+import { RivenCard } from "./riven-card";
 import { Input } from "@/components/ui/input";
 import { getRivenStatsForCategory } from "@/lib/types";
 import { toast } from "sonner";
@@ -43,7 +51,7 @@ interface RivenDialogProps {
   hideWeaponSelect?: boolean;
 }
 
-export const POLARITIES = ["madurai", "vazarin", "naramon"];
+export const POLARITIES: readonly string[] = RIVEN_POLARITIES;
 const WEAPON_CATEGORIES = ["All", "Rifle", "Shotgun", "Pistol", "Melee", "Kitgun", "Zaw", "Companion", "Archgun"] as const;
 
 function formatRangeHint(stat: RivenStat | undefined, isCurse = false): string {
@@ -64,7 +72,8 @@ function formatRangeHint(stat: RivenStat | undefined, isCurse = false): string {
 
 function computeStatMidpoint(poolStat: RivenStat | undefined, isPercent: boolean, isFaction: boolean): number {
   if (poolStat) {
-    const mid = (poolStat.minValue + poolStat.maxValue) / 2;
+    // Magnitude only: the form keeps buffs unsigned (a recoil buff is stored negative on save).
+    const mid = Math.abs((poolStat.minValue + poolStat.maxValue) / 2);
     if (isFaction || poolStat.type === "percent") {
       return Math.round(mid * 10) / 1000;
     }
@@ -99,17 +108,18 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
       const base = getRivenBaseWeapon(fixedWeaponId);
       return base?.id ?? fixedWeaponId;
     }
-    return "torid";
+    return "";
   }, [initialRiven, initialScannedRiven, fixedWeaponId]);
 
   const [weaponId, setWeaponId] = useState<string>(initialTargetWeaponId);
   const [weaponCategoryFilter, setWeaponCategoryFilter] = useState<string>("All");
   const [weaponSearch, setWeaponSearch] = useState("");
-  const [polarity, setPolarity] = useState<string>("madurai");
-  const [masteryRank, setMasteryRank] = useState<number>(12);
+  const [polarity, setPolarity] = useState<string>(DEFAULT_RIVEN_POLARITY);
+  const [rank, setRank] = useState<number>(RIVEN_MAX_RANK);
+  const [masteryRank, setMasteryRank] = useState<number>(8);
   const [rerolls, setRerolls] = useState<number>(0);
-  const [customSuffix, setCustomSuffix] = useState<string>("");
-  const [isSuffixManual, setIsSuffixManual] = useState<boolean>(false);
+  /** Full riven name as typed; empty means "<Weapon> <auto suffix>". */
+  const [customName, setCustomName] = useState<string>("");
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [scanStatus, setScanStatus] = useState<string>("");
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -137,8 +147,8 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
         setRerolls(parsed.rerolls);
       }
       if (parsed.customSuffix) {
-        setCustomSuffix(parsed.customSuffix);
-        setIsSuffixManual(true);
+        const scannedWeapon = allWeapons.find((w) => w.id === parsed.weaponId);
+        setCustomName(scannedWeapon ? `${scannedWeapon.name} ${parsed.customSuffix}` : parsed.customSuffix);
       }
 
       let nextPos = parsed.positiveStats;
@@ -238,7 +248,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
   }, [open, handleScanFile]);
 
   const selectedWeapon = useMemo(
-    () => eligibleWeapons.find((w) => w.id === weaponId) ?? eligibleWeapons[0],
+    () => eligibleWeapons.find((w) => w.id === weaponId),
     [eligibleWeapons, weaponId],
   );
 
@@ -268,51 +278,40 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
       if (initialScannedRiven.weaponId) {
         setWeaponId(initialScannedRiven.weaponId);
       }
-      setPolarity(initialScannedRiven.polarity ?? "madurai");
-      setMasteryRank(initialScannedRiven.masteryRank ?? 12);
+      // OCR cannot read the polarity symbol, so the player picks it like in the builder.
+      setPolarity(DEFAULT_RIVEN_POLARITY);
+      setRank(RIVEN_MAX_RANK);
+      setMasteryRank(initialScannedRiven.masteryRank ?? 8);
       setRerolls(initialScannedRiven.rerolls ?? 0);
-      if (initialScannedRiven.customSuffix) {
-        setCustomSuffix(initialScannedRiven.customSuffix);
-        setIsSuffixManual(true);
-      } else {
-        setCustomSuffix("");
-        setIsSuffixManual(false);
-      }
+      const scannedWeapon = allWeapons.find((w) => w.id === initialScannedRiven.weaponId);
+      setCustomName(
+        initialScannedRiven.customSuffix
+          ? `${scannedWeapon?.name ?? ""} ${initialScannedRiven.customSuffix}`.trim()
+          : "",
+      );
       setPositiveStats(initialScannedRiven.positiveStats ?? []);
       setNegativeStat(initialScannedRiven.negativeStat ?? null);
     } else if (initialRiven) {
       setWeaponId(initialRiven.weaponId);
       setPolarity(initialRiven.polarity);
-      setMasteryRank(initialRiven.masteryRank);
-      setRerolls(initialRiven.rerolls);
-      const existingAffix = extractRivenAffix(initialRiven.name, initialRiven.weaponName);
-      setCustomSuffix(existingAffix);
-      setIsSuffixManual(true);
-
-      const pos: { key: string; value: number }[] = [];
-      let neg: { key: string; value: number } | null = null;
-      for (const [k, v] of Object.entries(initialRiven.stats)) {
-        if (v < 0) {
-          neg = { key: k, value: Math.abs(v) };
-        } else {
-          pos.push({ key: k, value: v });
-        }
-      }
-      setPositiveStats(pos);
-      setNegativeStat(neg);
+      setRank(initialRiven.rank ?? RIVEN_MAX_RANK);
+      setMasteryRank(initialRiven.masteryRank ?? 8);
+      setRerolls(initialRiven.rerolls ?? 0);
+      // Keep the saved name verbatim (rebuilding "<weapon> <suffix>" doubled custom names).
+      setCustomName(initialRiven.name);
+      const split = splitRivenStats(initialRiven.stats);
+      setPositiveStats(split.positives);
+      setNegativeStat(split.negative);
     } else {
-      const defaultId = fixedWeaponId ? (getRivenBaseWeapon(fixedWeaponId)?.id ?? fixedWeaponId) : "torid";
-      setWeaponId(defaultId);
-      setPolarity("madurai");
-      setMasteryRank(12);
+      // New riven: blank form, same as the builder (no example stats, polarity not chosen).
+      setWeaponId(fixedWeaponId ? (getRivenBaseWeapon(fixedWeaponId)?.id ?? fixedWeaponId) : "");
+      setPolarity(DEFAULT_RIVEN_POLARITY);
+      setRank(RIVEN_MAX_RANK);
+      setMasteryRank(8);
       setRerolls(0);
-      setCustomSuffix("");
-      setIsSuffixManual(false);
-      setPositiveStats([
-        { key: "criticalChance", value: 1.5 },
-        { key: "multishot", value: 0.9 },
-      ]);
-      setNegativeStat({ key: "zoom", value: 0.30 });
+      setCustomName("");
+      setPositiveStats([]);
+      setNegativeStat(null);
     }
     });
   }, [open, initialRiven, initialScannedRiven, fixedWeaponId]);
@@ -322,10 +321,10 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
     () => ({
       positiveCount: Math.max(1, positiveStats.length),
       hasNegative: !!negativeStat,
-      rank: 8,
+      rank,
       includeSpliced: true,
     }),
-    [positiveStats.length, negativeStat],
+    [positiveStats.length, negativeStat, rank],
   );
 
   const autoSuffix = useMemo(() => {
@@ -370,27 +369,14 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
 
   // Construct preview Riven object
   const previewRiven = useMemo<SavedRiven>(() => {
-    const statsMap: Record<string, number> = {};
-    const posKeys: string[] = [];
-
-    for (const p of positiveStats) {
-      if (!p.key) continue;
-      posKeys.push(p.key);
-      statsMap[p.key] = p.value;
-    }
-
-    if (negativeStat && negativeStat.key) {
-      statsMap[negativeStat.key] = -Math.abs(negativeStat.value);
-    }
-
-    const activeSuffix = isSuffixManual && customSuffix.trim() ? customSuffix.trim() : autoSuffix;
-    const finalName = `${selectedWeapon?.name ?? "Weapon"} ${activeSuffix}`;
+    const statsMap = buildRivenStats(positiveStats, negativeStat);
+    const finalName = rivenDisplayName(selectedWeapon?.name ?? "Weapon", autoSuffix, customName);
 
     const evalResult = evaluateSavedRiven(
       selectedWeapon?.name ?? "Weapon",
       statPoolCategory,
       statsMap,
-      8,
+      rank,
       rerolls,
       polarity,
     );
@@ -404,7 +390,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
       weaponType,
       statPoolCategory,
       polarity,
-      rank: 8,
+      rank,
       rerolls,
       masteryRank,
       stats: statsMap,
@@ -419,8 +405,9 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
     positiveStats,
     negativeStat,
     selectedWeapon,
-    customSuffix,
-    isSuffixManual,
+    customName,
+    autoSuffix,
+    rank,
     weaponType,
     statPoolCategory,
     rerolls,
@@ -433,6 +420,15 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
 
   const handleSave = async () => {
     if (saving) return;
+    if (!selectedWeapon) {
+      toast.error("Choose the riven's weapon");
+      return;
+    }
+    const polarityError = rivenPolarityError(polarity);
+    if (polarityError) {
+      toast.error(polarityError);
+      return;
+    }
     if (positiveStats.length === 0) {
       toast.error("Please add at least 1 positive stat");
       return;
@@ -581,8 +577,18 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
                       setPositiveStats([]);
                       setNegativeStat(null);
                     }}
-                    className="h-10 w-full rounded-lg border border-purple-500/30 bg-purple-950/40 px-3 text-sm text-white focus:border-purple-400 focus:outline-none"
+                    aria-label="Riven weapon"
+                    data-testid="riven-dialog-weapon"
+                    className={cn(
+                      "h-10 w-full rounded-lg border bg-purple-950/40 px-3 text-sm text-white focus:border-purple-400 focus:outline-none",
+                      selectedWeapon ? "border-purple-500/30" : "border-amber-400 ring-1 ring-amber-400/60",
+                    )}
                   >
+                    {!selectedWeapon && (
+                      <option value="" disabled className="bg-[#120822] text-white">
+                        Choose a weapon…
+                      </option>
+                    )}
                     {filteredWeapons.map((w) => (
                       <option key={w.id} value={w.id} className="bg-[#120822] text-white">
                         {w.name} ({getEffectiveRivenWeaponType(w)})
@@ -593,55 +599,58 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
               </div>
             )}
 
-            {/* Riven Suffix (Roll Name) */}
+            {/* Riven name */}
             <div>
               <div className="mb-1 flex items-center justify-between">
-                <label className="text-xs font-semibold uppercase tracking-wider text-purple-300">
-                  Riven Suffix (Roll Name)
+                <label htmlFor="riven-dialog-name" className="text-xs font-semibold uppercase tracking-wider text-purple-300">
+                  Riven name
                 </label>
-                {isSuffixManual && (
+                {customName.trim() !== "" && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsSuffixManual(false);
-                      setCustomSuffix("");
-                    }}
-                    className="text-[10px] text-purple-400 hover:text-white"
+                    onClick={() => setCustomName("")}
+                    className="min-h-11 px-1 text-[10px] text-purple-400 hover:text-white pointer-fine:min-h-0"
                   >
                     Reset to auto
                   </button>
                 )}
               </div>
-              <div className="flex items-center gap-2">
-                <span className="shrink-0 rounded-lg border border-purple-500/30 bg-purple-950/40 px-2.5 py-2 text-xs font-bold text-white">
-                  {selectedWeapon?.name}
-                </span>
-                <Input
-                  value={isSuffixManual ? customSuffix : autoSuffix}
-                  onChange={(e) => {
-                    setIsSuffixManual(true);
-                    setCustomSuffix(e.target.value);
-                  }}
-                  placeholder={autoSuffix}
-                  className="h-9 flex-1 border-purple-500/30 bg-purple-950/20 text-xs font-semibold uppercase text-purple-200 placeholder:text-muted-foreground focus:border-purple-400"
-                />
-              </div>
+              <Input
+                id="riven-dialog-name"
+                data-testid="riven-dialog-name"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                placeholder={`${selectedWeapon?.name ?? "Weapon"} ${autoSuffix}`}
+                maxLength={80}
+                className="h-9 border-purple-500/30 bg-purple-950/20 text-xs font-semibold text-purple-100 placeholder:text-purple-300/60 focus:border-purple-400"
+              />
               <p className="mt-1 text-[10px] text-muted-foreground">
-                {isSuffixManual
-                  ? "Custom suffix active. Click 'Reset to auto' to match stats."
-                  : "Auto-generated from positive stats (like in-game). You can edit it directly."}
+                {customName.trim()
+                  ? "Saved exactly as typed."
+                  : "Leave empty to use the in-game style name from the buffs."}
               </p>
             </div>
 
-            {/* Polarity, MR, Rerolls Row */}
-            <div className="grid grid-cols-3 gap-3">
+            {/* Polarity, rank, MR, rerolls */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div>
-                <label className="mb-1 block text-xs font-semibold text-purple-300">Polarity</label>
+                <label htmlFor="riven-dialog-polarity" className="mb-1 block text-xs font-semibold text-purple-300">Polarity</label>
                 <select
+                  id="riven-dialog-polarity"
+                  data-testid="riven-dialog-polarity"
                   value={polarity}
                   onChange={(e) => setPolarity(e.target.value)}
-                  className="h-9 w-full rounded border border-purple-500/30 bg-purple-950/40 px-2 text-xs text-white capitalize focus:outline-none"
+                  aria-invalid={!POLARITIES.includes(polarity)}
+                  className={cn(
+                    "h-9 w-full rounded border bg-purple-950/40 px-2 text-xs text-white capitalize focus:outline-none",
+                    POLARITIES.includes(polarity) ? "border-purple-500/30" : "border-amber-400 ring-1 ring-amber-400/60",
+                  )}
                 >
+                  {!POLARITIES.includes(polarity) && (
+                    <option value={DEFAULT_RIVEN_POLARITY} disabled className="bg-[#120822] text-white">
+                      Choose…
+                    </option>
+                  )}
                   {POLARITIES.map((p) => (
                     <option key={p} value={p} className="bg-[#120822] text-white capitalize">
                       {p}
@@ -650,23 +659,41 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-purple-300">MR Req</label>
+                <label htmlFor="riven-dialog-rank" className="mb-1 block text-xs font-semibold text-purple-300">Rank · drain</label>
+                <select
+                  id="riven-dialog-rank"
+                  data-testid="riven-dialog-rank"
+                  value={rank}
+                  onChange={(e) => setRank(parseInt(e.target.value, 10))}
+                  className="h-9 w-full rounded border border-purple-500/30 bg-purple-950/40 px-2 text-xs text-white focus:outline-none"
+                >
+                  {Array.from({ length: RIVEN_MAX_RANK + 1 }, (_, i) => RIVEN_MAX_RANK - i).map((r) => (
+                    <option key={r} value={r} className="bg-[#120822] text-white">
+                      Rank {r} · drain {rivenDrainFromRank(r)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="riven-dialog-mr" className="mb-1 block text-xs font-semibold text-purple-300">MR Req</label>
                 <Input
+                  id="riven-dialog-mr"
                   type="number"
                   min={8}
                   max={16}
                   value={masteryRank}
-                  onChange={(e) => setMasteryRank(parseInt(e.target.value) || 8)}
+                  onChange={(e) => setMasteryRank(Math.min(16, Math.max(8, parseInt(e.target.value) || 8)))}
                   className="h-9 border-purple-500/30 bg-purple-950/40 text-xs text-white"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-purple-300">Rerolls</label>
+                <label htmlFor="riven-dialog-rerolls" className="mb-1 block text-xs font-semibold text-purple-300">Rerolls</label>
                 <Input
+                  id="riven-dialog-rerolls"
                   type="number"
                   min={0}
                   value={rerolls}
-                  onChange={(e) => setRerolls(parseInt(e.target.value) || 0)}
+                  onChange={(e) => setRerolls(Math.max(0, parseInt(e.target.value) || 0))}
                   className="h-9 border-purple-500/30 bg-purple-950/40 text-xs text-white"
                 />
               </div>
