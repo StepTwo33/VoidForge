@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sheet";
 import { maxStacksSimParams, paperSimParams } from "@/lib/ui/sim-presets";
 import { WeaponSimControls } from "./weapon-sim-controls";
+import { HIT_WINDOW_TRIGGERS } from "@/lib/ui/hit-window-triggers";
 
 function simSummaryChips(
   simParams: SimulationParams,
@@ -45,6 +46,9 @@ function simSummaryChips(
   if (simParams.applyAirborne) chips.push("Airborne");
   if (simParams.applyAimGlide) chips.push("Aim glide");
   if (simParams.applyDistance) chips.push("Distance");
+  for (const t of HIT_WINDOW_TRIGGERS) {
+    if (simParams[t.flag]) chips.push(t.label);
+  }
   if (simParams.applyTriggerBuffs) chips.push("Other triggers");
   if (simParams.applyYareliCriticalFlow) chips.push("Yareli +200% CC");
   if (simParams.applyZephyrAirborne) chips.push("Zephyr +150% CC");

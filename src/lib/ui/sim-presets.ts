@@ -1,4 +1,5 @@
 import type { SimulationParams } from "@/lib/types";
+import { hitWindowFlags } from "@/lib/ui/hit-window-triggers";
 
 export interface MaxStacksOptions {
   isMelee?: boolean;
@@ -32,6 +33,7 @@ export function paperSimParams(sim: SimulationParams): SimulationParams {
     applyAimGlide: false,
     applyDistance: false,
     applyTriggerBuffs: false,
+    ...hitWindowFlags(false),
     sniperZoomLevel: undefined,
     sniperComboTier: undefined,
     targetFaction: undefined,
@@ -68,6 +70,7 @@ export function maxStacksSimParams(sim: SimulationParams, options: MaxStacksOpti
     applyAirborne: true,
     applyAimGlide: true,
     applyDistance: true,
+    ...hitWindowFlags(true),
     clipDelegationShots: Math.max(sim.clipDelegationShots ?? 0, 15),
     ...(options.linkedLoadout
       ? {

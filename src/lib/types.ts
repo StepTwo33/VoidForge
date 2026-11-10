@@ -734,6 +734,16 @@ export interface SimulationParams {
   applyAimGlide?: boolean;
   /** Target is far enough for distance mods (Range Advantage, Spring-Loaded Broadhead). */
   applyDistance?: boolean;
+  /** Double Tap on-hit stacks (sim uses the cap). Default off. */
+  applyDoubleTap?: boolean;
+  /** Triple Tap hit-window buff. Default off. */
+  applyTripleTap?: boolean;
+  /** Final Tap hit-window buff. Default off. */
+  applyFinalTap?: boolean;
+  /** Sudden Justice hit-window fire-rate buff. Default off. */
+  applySuddenJustice?: boolean;
+  /** Motus Setup after a Double or Bullet Jump land. Default off. */
+  applyMotusSetup?: boolean;
   /**
    * Clip Delegation: shots landed with the current magazine before reload (0–15).
    * The next magazine's status and multishot bonus. Not pellets or punch-through.
@@ -1012,6 +1022,8 @@ export interface CalculatedStats {
   onKillStatBonuses?: Record<string, number>;
   /** Aim/reload/cast trigger buffs (sim-gated), statKey → bonus. */
   triggerStatBonuses?: Record<string, number>;
+  /** Named trigger buckets (aiming, crouch, hit-window mods, …), even when that event is off. */
+  triggerBuckets?: Record<string, Record<string, number>>;
   /** Chance to force a Slash proc on critical hits (Hunter Munitions). */
   slashOnCritChance?: number;
   /** Chance to force an extra Electric proc on hit (Prototype Shock Coils). */

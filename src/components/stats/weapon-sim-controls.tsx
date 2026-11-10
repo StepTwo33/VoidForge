@@ -25,6 +25,7 @@ import {
 } from "@/lib/calc/set-bonuses";
 import { getModStatLabel } from "@/lib/overrides/override-stat-catalog";
 import { maxStacksSimParams, paperSimParams } from "@/lib/ui/sim-presets";
+import { HIT_WINDOW_TRIGGERS } from "@/lib/ui/hit-window-triggers";
 import { CollapsibleSection, SimSlider } from "./stat-primitives";
 
 function comboTier(hits: number): number {
@@ -216,6 +217,24 @@ export function WeaponSimControls({
                   className="h-4 w-4 rounded border-border accent-primary"
                 />
                 <span className="font-medium">{label}</span>
+              </label>
+            ))}
+            {HIT_WINDOW_TRIGGERS.filter((t) => {
+              const bag = stats.triggerBuckets?.[t.bucket];
+              return bag && Object.keys(bag).length > 0;
+            }).map((t) => (
+              <label
+                key={t.flag}
+                className="flex min-h-11 items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground cursor-pointer"
+                title={t.title}
+              >
+                <input
+                  type="checkbox"
+                  checked={simParams[t.flag] === true || (simParams[t.flag] !== false && !!simParams.applyTriggerBuffs)}
+                  onChange={(e) => onSimParamsChange({ ...simParams, [t.flag]: e.target.checked })}
+                  className="h-4 w-4 rounded border-border accent-primary"
+                />
+                <span className="font-medium">{t.label}</span>
               </label>
             ))}
           </div>

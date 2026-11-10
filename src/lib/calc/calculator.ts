@@ -1347,6 +1347,11 @@ export function calculateWeaponBuild(
   if (bucketOn(sim.applyAirborne)) activeBuffPools.push(buckets.air ?? {});
   if (bucketOn(sim.applyAimGlide)) activeBuffPools.push(buckets.glide ?? {});
   if (bucketOn(sim.applyDistance)) activeBuffPools.push(buckets.distance ?? {});
+  if (bucketOn(sim.applyDoubleTap)) activeBuffPools.push(buckets.doubleTap ?? {});
+  if (bucketOn(sim.applyTripleTap)) activeBuffPools.push(buckets.tripleTap ?? {});
+  if (bucketOn(sim.applyFinalTap)) activeBuffPools.push(buckets.finalTap ?? {});
+  if (bucketOn(sim.applySuddenJustice)) activeBuffPools.push(buckets.suddenJustice ?? {});
+  if (bucketOn(sim.applyMotusSetup)) activeBuffPools.push(buckets.motusSetup ?? {});
   const triggerElementalTypes = [
     "heat",
     "cold",
@@ -1424,6 +1429,7 @@ export function calculateWeaponBuild(
   }
   stats.onKillStatBonuses = { ...onKill };
   stats.triggerStatBonuses = { ...trigger };
+  stats.triggerBuckets = { ...weaponModAcc.triggerBuckets };
 
   // Hunter Munitions-style forced Slash procs on crits (adds to status proc DPS below).
   stats.slashOnCritChance = weaponModAcc.slashOnCritChance;

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_SIM_PARAMS } from "@/lib/types";
 import { maxStacksSimParams, paperSimParams } from "@/lib/ui/sim-presets";
+import { HIT_WINDOW_TRIGGERS, hitWindowFlags } from "@/lib/ui/hit-window-triggers";
 
 describe("shared simulation presets", () => {
   it("paper clears events, hit location, and weapon passives without turning stance off", () => {
@@ -12,6 +13,7 @@ describe("shared simulation presets", () => {
       applyAbilityCast: true,
       applyReload: true,
       applyTriggerBuffs: true,
+      ...hitWindowFlags(true),
       killStacks: 5,
       clipDelegationShots: 12,
       applyStanceMultiplier: true,
@@ -25,6 +27,7 @@ describe("shared simulation presets", () => {
     expect(paper.applyAbilityCast).toBe(false);
     expect(paper.applyReload).toBe(false);
     expect(paper.applyTriggerBuffs).toBe(false);
+    for (const ev of HIT_WINDOW_TRIGGERS) expect(paper[ev.flag]).toBe(false);
     expect(paper.killStacks).toBe(0);
     expect(paper.clipDelegationShots).toBe(0);
     expect(paper.weaponPassiveState).toEqual({ athodai_overdrive: 0, ax_52_aimed_headshot: 0 });
@@ -45,6 +48,7 @@ describe("shared simulation presets", () => {
     expect(next.applyAbilityCast).toBe(true);
     expect(next.applyReload).toBe(true);
     expect(next.applyTriggerBuffs).toBe(false);
+    for (const ev of HIT_WINDOW_TRIGGERS) expect(next[ev.flag]).toBe(true);
     expect(next.killStacks).toBe(5);
     expect(next.arcaneStacks).toBe(8);
     expect(next.clipDelegationShots).toBe(15);

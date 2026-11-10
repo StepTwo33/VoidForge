@@ -147,6 +147,11 @@ const TRIGGER_BUCKETS: Record<string, string> = {
   aero_agility: "glide",
   range_advantage: "distance",
   spring_loaded_broadhead: "distance",
+  double_tap: "doubleTap",
+  triple_tap: "tripleTap",
+  final_tap: "finalTap",
+  sudden_justice: "suddenJustice",
+  motus_setup: "motusSetup",
 };
 
 function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): boolean {
