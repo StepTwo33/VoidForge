@@ -1020,8 +1020,10 @@ export interface CalculatedStats {
   galvanizedCritOnHeadshotPerStack?: number;
   /** Non-stacking on-kill buffs (Bladed Rounds, Gorgon Frenzy, …), statKey → bonus. */
   onKillStatBonuses?: Record<string, number>;
-  /** Aim/reload/cast trigger buffs (sim-gated), statKey → bonus. */
+  /** Buffs behind the legacy "Other buffs" switch (sim.applyTriggerBuffs), statKey → bonus. */
   triggerStatBonuses?: Record<string, number>;
+  /** Equipped mods whose buffs sit behind the "Other buffs" switch (Critical Precision, Pain Points, …). */
+  triggerOtherModIds?: string[];
   /** Named trigger buckets (aiming, crouch, hit-window mods, …), even when that event is off. */
   triggerBuckets?: Record<string, Record<string, number>>;
   /** Chance to force a Slash proc on critical hits (Hunter Munitions). */

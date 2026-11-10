@@ -49,7 +49,7 @@ function simSummaryChips(
   for (const t of HIT_WINDOW_TRIGGERS) {
     if (simParams[t.flag]) chips.push(t.label);
   }
-  if (simParams.applyTriggerBuffs) chips.push("Other triggers");
+  if (simParams.applyTriggerBuffs) chips.push("Other buffs");
   if (simParams.applyYareliCriticalFlow) chips.push("Yareli +200% CC");
   if (simParams.applyZephyrAirborne) chips.push("Zephyr +150% CC");
   if (simParams.applyGarudaDeathsGate) chips.push("Death's Gate");
@@ -119,7 +119,7 @@ export function WeaponSimPanel({
             type="button"
             onClick={() => onSimParamsChange(paperSimParams(simParams))}
             className="rounded border border-border px-1.5 py-0.5 text-[9px] text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
-            title="Turn off all conditional stacks and buffs (Paper stats)"
+            title="Turn off all conditional stacks and buffs (paper stats)"
           >
             Paper
           </button>
@@ -135,7 +135,7 @@ export function WeaponSimPanel({
               )
             }
             className="rounded border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[9px] text-primary hover:bg-primary/20 transition-colors"
-            title="Activate weapon stacks (Galvanized, Combo, Arcane, Trigger)"
+            title="Max kill, status, combo and arcane stacks, and turn on the named situational switches. Hit location and Other buffs stay as they are."
           >
             Max stacks
           </button>
@@ -190,7 +190,7 @@ export function WeaponSimPanel({
           <SheetHeader className="border-b border-border shrink-0">
             <SheetTitle className="text-sm">Simulation</SheetTitle>
             <SheetDescription className="text-[11px]">
-              Adjust stacks and conditionals for paper DPS. Stats update live in the right sidebar.
+              Adjust stacks and conditionals for paper DPS. Weapon stats update live as you change them.
             </SheetDescription>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto px-4 py-2 min-h-0">

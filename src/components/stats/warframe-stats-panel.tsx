@@ -2774,7 +2774,7 @@ export function WarframeStatsPanel({
         <CollapsibleSection title="CONDITIONAL MODS" defaultOpen>
           {equippedConditionalMods.length > 1 && (
             <div className="flex items-center justify-between gap-1.5 py-1 border-b border-border/40">
-              <span className="text-[10px] text-muted-foreground">Quick toggle</span>
+              <span className="text-[10px] text-muted-foreground">Quick conditionals</span>
               <div className="flex items-center gap-1">
                 <button
                   type="button"
@@ -2785,7 +2785,7 @@ export function WarframeStatsPanel({
                   }}
                   className="rounded border border-border px-1.5 py-0.5 text-[9px] text-muted-foreground hover:text-foreground"
                 >
-                  All off
+                  Paper
                 </button>
                 <button
                   type="button"
@@ -2796,7 +2796,7 @@ export function WarframeStatsPanel({
                   }}
                   className="rounded border border-purple-500/40 bg-purple-500/10 px-1.5 py-0.5 text-[9px] text-purple-300 hover:bg-purple-500/20"
                 >
-                  All active
+                  Max stacks
                 </button>
               </div>
             </div>
@@ -2866,7 +2866,7 @@ export function WarframeStatsPanel({
                   }}
                   className="rounded border border-border px-1.5 py-0.5 text-[9px] text-muted-foreground hover:text-foreground"
                 >
-                  All off (Paper)
+                  Paper
                 </button>
                 <button
                   type="button"
@@ -2877,7 +2877,7 @@ export function WarframeStatsPanel({
                   }}
                   className="rounded border border-purple-500/40 bg-purple-500/10 px-1.5 py-0.5 text-[9px] text-purple-300 hover:bg-purple-500/20"
                 >
-                  All active
+                  Max stacks
                 </button>
               </div>
             </div>

@@ -65,6 +65,8 @@ export type WeaponModAccumulators = {
   heavyAttackWindUpBonus: number;
   /** Aim/reload/cast/latch buffs gated by sim.applyTriggerBuffs (statKey → summed bonus). */
   triggerStatBonuses: Record<string, number>;
+  /** Mods whose buffs landed in triggerStatBonuses (shown on the "Other buffs" switch). */
+  triggerOtherModIds?: string[];
   /** Spectral Serration and other invisibility buffs. Gated by sim.applyInvisible. */
   invisibleStatBonuses: Record<string, number>;
   /** Catalyzer Link: on ability cast, and only while aiming. */
@@ -318,6 +320,7 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
           durations.length - 1,
           Math.max(0, Math.round(modValue / INFINITE_AMMO_CHANCE_PER_RANK) - 1),
         );
+        (acc.triggerOtherModIds ??= []).push(ctx.modId);
         acc.triggerStatBonuses.infiniteAmmoUptime = combineInfiniteAmmoUptime(
           acc.triggerStatBonuses.infiniteAmmoUptime,
           infiniteAmmoUptimeFromChance(modValue, durations[rankIdx]),
@@ -326,12 +329,14 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
       }
       // HP-cap exclusives: catalog `health` is a placeholder; assume wiki +360% cap.
       if (ctx.modId === "dreadful_killshot" && statKey === "health") {
+        (acc.triggerOtherModIds ??= []).push(ctx.modId);
         acc.triggerStatBonuses.damage = (acc.triggerStatBonuses.damage ?? 0) + 3.6;
         acc.triggerStatBonuses.statusChance =
           (acc.triggerStatBonuses.statusChance ?? 0) + 3.6;
         return true;
       }
       if (ctx.modId === "necrophagic_vigor" && statKey === "health") {
+        (acc.triggerOtherModIds ??= []).push(ctx.modId);
         acc.triggerStatBonuses.criticalChance =
           (acc.triggerStatBonuses.criticalChance ?? 0) + 3.6;
         acc.triggerStatBonuses.criticalMultiplier =
@@ -385,6 +390,7 @@ function applyModeToWeaponAcc(mode: ItemApplyMode, ctx: ModApplyWeaponContext): 
         return true;
       }
       acc.triggerStatBonuses[key] = (acc.triggerStatBonuses[key] ?? 0) + value;
+      (acc.triggerOtherModIds ??= []).push(ctx.modId);
       return true;
     }
     case "slash_on_crit":

@@ -24,6 +24,7 @@ import {
   weaponSupportsHunterCompanionSet,
 } from "@/lib/calc/set-bonuses";
 import { getModStatLabel } from "@/lib/overrides/override-stat-catalog";
+import { modsMap as catalogModsMap } from "@/data/mods";
 import { maxStacksSimParams, paperSimParams } from "@/lib/ui/sim-presets";
 import { HIT_WINDOW_TRIGGERS } from "@/lib/ui/hit-window-triggers";
 import { allWarframes } from "@/data/warframes";
@@ -124,7 +125,7 @@ export function WeaponSimControls({
                 onClick={() => onSimParamsChange(paperSimParams(simParams))}
                 className="rounded border border-border px-2 py-0.5 text-[10px] text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
               >
-                All off (Paper)
+                Paper
               </button>
               <button
                 type="button"
@@ -1097,17 +1098,28 @@ export function WeaponSimControls({
                 </span>
               </span>
             </label>
-            {(Object.keys(stats.triggerStatBonuses ?? {}).length > 0) && (
-              <label className="flex items-center gap-2 text-[10px] text-muted-foreground cursor-pointer">
+            {((stats.triggerOtherModIds?.length ?? 0) > 0 || isLinkedLoadout || !!simParams.applyTriggerBuffs) && (
+              <label
+                className="flex min-h-11 items-center gap-2 text-[10px] text-muted-foreground cursor-pointer pointer-fine:min-h-0"
+                title="Buffs without a named switch above: on-hit and on-kill stacks (Critical Precision, Critical Mutation, Pain Points, Fired Up), headshot Infinite Ammo (Brain Storm, Skull Shots), health-scaled buffs (Dreadful Killshot, Necrophagic Vigor), Velox Conclusion, and on-equip buffs from a linked loadout (Holster Amp, Vigorous Swap). Max stacks leaves this switch as it is."
+                data-testid="other-buffs-switch"
+              >
                 <input
                   type="checkbox"
                   checked={!!simParams.applyTriggerBuffs}
                   onChange={(e) =>
                     onSimParamsChange({ ...simParams, applyTriggerBuffs: e.target.checked })
                   }
-                  className="h-3.5 w-3.5 rounded border-border accent-primary"
+                  className="h-4 w-4 rounded border-border accent-primary"
                 />
-                Trigger &amp; Distance buffs (aim / distance &gt;15m / reload / cast / latch)
+                <span>
+                  Other buffs
+                  {(stats.triggerOtherModIds?.length ?? 0) > 0 && (
+                    <span className="text-muted-foreground/80">
+                      {" "}({stats.triggerOtherModIds!.map((id) => catalogModsMap.get(id)?.name ?? id).join(", ")})
+                    </span>
+                  )}
+                </span>
               </label>
             )}
             {weapon &&
@@ -1121,7 +1133,7 @@ export function WeaponSimControls({
                   onChange={(v) =>
                     onSimParamsChange({ ...simParams, criticalPrecisionStacks: v })
                   }
-                  tooltip="Critical Precision: headshot stacks (max 50 = +500% CC at R5). Full-burst miss removes ~10 stacks. Needs Trigger buffs enabled."
+                  tooltip="Critical Precision: headshot stacks (max 50 = +500% CC at R5). Full-burst miss removes ~10 stacks. Needs Other buffs on."
                 />
               )}
             {weapon &&
@@ -1135,7 +1147,7 @@ export function WeaponSimControls({
                   onChange={(v) =>
                     onSimParamsChange({ ...simParams, criticalMutationStacks: v })
                   }
-                  tooltip="Critical Mutation: kill stacks (max 10 = +300% CC/CD at R5). Grenade hitting fewer than 3 enemies removes 1 stack. Needs Trigger buffs enabled."
+                  tooltip="Critical Mutation: kill stacks (max 10 = +300% CC/CD at R5). Grenade hitting fewer than 3 enemies removes 1 stack. Needs Other buffs on."
                 />
               )}
             {isMelee && (
@@ -1258,7 +1270,7 @@ export function WeaponSimControls({
             )}
             {triggerBuffTotal > 0 && (
               <div className={stats.simParams.applyTriggerBuffs ? "text-[10px] text-blue-700 dark:text-blue-400" : "text-[10px] text-muted-foreground/70"}>
-                Trigger / Distance buffs{stats.simParams.applyTriggerBuffs ? ": " : " (inactive — enable Aim/Distance buffs): "}
+                Other buffs{stats.simParams.applyTriggerBuffs ? ": " : " (inactive — turn on Other buffs): "}
                 {Object.entries(stats.triggerStatBonuses ?? {}).map(([k, v]) => `+${(v * 100).toFixed(0)}% ${getModStatLabel(k)}`).join(", ")}
               </div>
             )}

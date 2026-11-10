@@ -819,6 +819,9 @@ function applyNightwaveWeaponAugmentEffects(
       // Cap is always 100 hits × per-hit → R5 = +60% next cast.
       const perHitFraction = ((mod.stats.abilityStrength ?? 0) * mult) / 100;
       const maxBonus = perHitFraction * 100;
+      if (maxBonus > 0 && !(stats.triggerOtherModIds ?? []).includes(slot.modId)) {
+        stats.triggerOtherModIds = [...(stats.triggerOtherModIds ?? []), slot.modId];
+      }
       if (sim.applyTriggerBuffs && maxBonus > 0) {
         stats.abilityStrengthNextCastBonus =
           (stats.abilityStrengthNextCastBonus ?? 0) + maxBonus;
@@ -1429,6 +1432,9 @@ export function calculateWeaponBuild(
   }
   stats.onKillStatBonuses = { ...onKill };
   stats.triggerStatBonuses = { ...trigger };
+  stats.triggerOtherModIds = [
+    ...new Set([...(stats.triggerOtherModIds ?? []), ...(weaponModAcc.triggerOtherModIds ?? [])]),
+  ];
   stats.triggerBuckets = { ...weaponModAcc.triggerBuckets };
 
   // Hunter Munitions-style forced Slash procs on crits (adds to status proc DPS below).
