@@ -3,8 +3,10 @@ import { formatRivenName, RIVEN_AFFIX_TABLE } from "@/lib/calc/riven-naming";
 import {
   evaluateSavedRiven,
   generateRandomRiven,
-  STARTER_RIVENS,
+  LEGACY_STARTER_SEED,
+  stripUntouchedStarters,
   getSavedRivens,
+  type SavedRiven,
 } from "./riven-storage";
 import { extractRivenAffix, getRivenModArtImage } from "@/components/rivens/riven-card";
 
@@ -71,11 +73,19 @@ describe("Riven Storage & Evaluation", () => {
     expect(riven.name).toContain("Torid");
   });
 
-  it("returns starter rivens when no custom rivens exist", () => {
-    expect(STARTER_RIVENS.length).toBeGreaterThanOrEqual(3);
-    const torid = STARTER_RIVENS.find((r) => r.weaponId === "torid");
-    expect(torid).toBeDefined();
-    expect(torid?.name).toBe("Torid Sati-critacron");
+  it("no longer seeds example rivens (server side and empty storage read as empty)", () => {
+    expect(getSavedRivens()).toEqual([]);
+  });
+
+  it("strips only untouched legacy starter rivens", () => {
+    const mk = (id: string, updatedAt: number) => ({ id, updatedAt } as unknown as SavedRiven);
+    const list = [
+      mk("starter_torid", LEGACY_STARTER_SEED.starter_torid),
+      mk("starter_rubico", LEGACY_STARTER_SEED.starter_rubico + 5),
+      mk("riven_1", LEGACY_STARTER_SEED.starter_torid),
+      mk("starter_ceramic_dagger", LEGACY_STARTER_SEED.starter_ceramic_dagger),
+    ];
+    expect(stripUntouchedStarters(list).map((r) => r.id)).toEqual(["starter_rubico", "riven_1"]);
   });
 });
 

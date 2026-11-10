@@ -131,106 +131,44 @@ export function evaluateSavedRiven(
   return { score, grade, color, displayStats };
 }
 
-/** Starters shown when the user first visits the library with no saved rivens */
-export const STARTER_RIVENS: SavedRiven[] = [
-  {
-    id: "starter_torid",
-    name: "Torid Sati-critacron",
-    weaponId: "torid",
-    weaponName: "Torid",
-    weaponCategory: "primary",
-    weaponType: "Rifle",
-    polarity: "madurai",
-    rank: 8,
-    rerolls: 14,
-    masteryRank: 12,
-    stats: {
-      criticalChance: 1.482,
-      multishot: 0.945,
-      zoom: -0.48,
-    },
-    displayStats: [
-      { key: "criticalChance", label: "Critical Chance", value: 1.482, isPercent: true },
-      { key: "multishot", label: "Multishot", value: 0.945, isPercent: true },
-      { key: "zoom", label: "Zoom", value: -0.48, isPercent: true, isCurse: true },
-    ],
-    score: 4.85,
-    grade: "God Roll",
-    gradeColor: "#FFD700",
-    createdAt: 1730000000000,
-    updatedAt: 1730000000000,
-  },
-  {
-    id: "starter_rubico",
-    name: "Rubico Visi-acritis",
-    weaponId: "rubico",
-    weaponName: "Rubico",
-    weaponCategory: "primary",
-    weaponType: "Rifle",
-    polarity: "vazarin",
-    rank: 8,
-    rerolls: 28,
-    masteryRank: 14,
-    stats: {
-      damage: 1.624,
-      criticalMultiplier: 1.185,
-      ammoMax: -0.38,
-    },
-    displayStats: [
-      { key: "damage", label: "Damage", value: 1.624, isPercent: true },
-      { key: "criticalMultiplier", label: "Critical Damage", value: 1.185, isPercent: true },
-      { key: "ammoMax", label: "Ammo Maximum", value: -0.38, isPercent: true, isCurse: true },
-    ],
-    score: 4.62,
-    grade: "God Roll",
-    gradeColor: "#FFD700",
-    createdAt: 1730000001000,
-    updatedAt: 1730000001000,
-  },
-  {
-    id: "starter_ceramic_dagger",
-    name: "Ceramic Dagger Locti-visicron",
-    weaponId: "ceramic_dagger",
-    weaponName: "Ceramic Dagger",
-    weaponCategory: "melee",
-    weaponType: "Melee",
-    polarity: "naramon",
-    rank: 8,
-    rerolls: 9,
-    masteryRank: 10,
-    stats: {
-      range: 1.85,
-      criticalChance: 1.72,
-      damage: 1.55,
-      finisherDamage: -0.65,
-    },
-    displayStats: [
-      { key: "range", label: "Range", value: 1.85, isPercent: false },
-      { key: "criticalChance", label: "Critical Chance", value: 1.72, isPercent: true },
-      { key: "damage", label: "Damage", value: 1.55, isPercent: true },
-      { key: "finisherDamage", label: "Finisher Damage", value: -0.65, isPercent: true, isCurse: true },
-    ],
-    score: 4.1,
-    grade: "Excellent",
-    gradeColor: "#E91E63",
-    createdAt: 1730000002000,
-    updatedAt: 1730000002000,
-  },
-];
+/**
+ * Ids and seed timestamps of the three example rivens older builds wrote into every new library
+ * (Torid, Rubico, Ceramic Dagger). They looked like rolls the player owned, so they are no longer
+ * seeded. A copy is removed only while it is untouched: same id and the original seed time.
+ * Any example the player edited (saving bumps updatedAt) stays theirs.
+ */
+export const LEGACY_STARTER_SEED: Readonly<Record<string, number>> = {
+  starter_torid: 1730000000000,
+  starter_rubico: 1730000001000,
+  starter_ceramic_dagger: 1730000002000,
+};
+
+/** Drops untouched legacy example rivens; everything else is left alone. */
+export function stripUntouchedStarters(rivens: SavedRiven[]): SavedRiven[] {
+  return rivens.filter((r) => {
+    const seededAt = LEGACY_STARTER_SEED[r?.id];
+    return seededAt === undefined || r.updatedAt !== seededAt;
+  });
+}
 
 export function getSavedRivens(): SavedRiven[] {
-  if (typeof window === "undefined") return STARTER_RIVENS;
+  if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      // Seed with starters on first run
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(STARTER_RIVENS));
-      return STARTER_RIVENS;
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as SavedRiven[];
+    if (!Array.isArray(parsed)) return [];
+    const rivens = stripUntouchedStarters(parsed);
+    if (rivens.length !== parsed.length) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(rivens));
+      } catch {
+        // Read-only storage: just hide them this time.
+      }
     }
-    const rivens = JSON.parse(raw) as SavedRiven[];
-    return Array.isArray(rivens) ? rivens : [];
+    return rivens;
   } catch {
-    return STARTER_RIVENS;
+    return [];
   }
 }
 
