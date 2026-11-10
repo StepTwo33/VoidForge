@@ -2,7 +2,7 @@
  * Pure helpers for loadout slot labels, mod counts, and build pickers.
  */
 
-import { getSavedBuilds, type SavedBuild, type WarframeBuildData, type WeaponBuildData, type ModularBuildData } from "@/lib/builds/build-storage";
+import { getSavedBuilds, type SavedBuild, type WarframeBuildData, type WeaponBuildData, type ModularBuildData, type CompanionBuildData } from "@/lib/builds/build-storage";
 import type { Loadout, EquippedArchonShard, Weapon } from "@/lib/types";
 import { modularBuildDisplayName, modularBuildMatchesLoadoutSlot } from "@/lib/builds/modular-resolve";
 import type { LoadoutWeaponSlot } from "@/lib/builds/modular-resolve";
@@ -11,7 +11,7 @@ import { allCompanions } from "@/data/companions";
 import { getWarframeImage, getWeaponImage, getCompanionImage } from "@/lib/display/images";
 import { dualFormModCountSummary, isDualFormWarframe } from "@/lib/builds/dual-form-warframes";
 
-export type LoadoutSlotType = "warframe" | "primary" | "secondary" | "melee" | "companion";
+export type LoadoutSlotType = "warframe" | "primary" | "secondary" | "melee" | "companion" | "operator";
 
 export const LOADOUT_SLOT_CONFIG: Record<
   LoadoutSlotType,
@@ -22,6 +22,7 @@ export const LOADOUT_SLOT_CONFIG: Record<
   secondary: { label: "Secondary", color: "cyan", builderPath: "/weapon-builder" },
   melee: { label: "Melee", color: "orange", builderPath: "/weapon-builder" },
   companion: { label: "Companion", color: "green", builderPath: "/companion-builder" },
+  operator: { label: "Operator", color: "amber", builderPath: "/modular-builder" },
 };
 
 /** Tailwind cannot compile dynamic `border-${color}` — use explicit classes. */
@@ -31,6 +32,7 @@ export const LOADOUT_SLOT_CARD_STYLES: Record<LoadoutSlotType, string> = {
   secondary: "border-cyan-500/35 bg-cyan-500/[0.07]",
   melee: "border-orange-500/35 bg-orange-500/[0.07]",
   companion: "border-green-500/35 bg-green-500/[0.07]",
+  operator: "border-amber-500/35 bg-amber-500/[0.07]",
 };
 
 export const EMPTY_LOADOUT_SHARDS: (EquippedArchonShard | null)[] = [null, null, null, null, null];
@@ -103,6 +105,11 @@ export function getWeaponSlotPayload(
   return { kind: "weapon", weaponId };
 }
 
+export function isExaltedCompanionId(id: string | undefined): boolean {
+  if (!id) return false;
+  return id === "venari" || id === "venari_prime";
+}
+
 export function getSlotLabelName(
   loadout: Loadout,
   slot: LoadoutSlotType,
@@ -116,6 +123,15 @@ export function getSlotLabelName(
     case "companion": {
       const id = loadout.companionBuild?.companionId;
       return id ? allCompanions.find((c) => c.id === id)?.name ?? id : null;
+    }
+    case "operator": {
+      const ob = loadout.operatorBuild;
+      if (!ob) return null;
+      if (ob.focusSchool && ob.ampName) return `${ob.focusSchool} • ${ob.ampName}`;
+      if (ob.focusSchool) return `${ob.focusSchool} School`;
+      if (ob.ampName) return ob.ampName;
+      if (ob.ampModularBuild) return modularBuildDisplayName(ob.ampModularBuild);
+      return "Operator";
     }
     case "primary":
     case "secondary":
@@ -147,6 +163,11 @@ export function getSlotModCount(loadout: Loadout, slot: LoadoutSlotType): number
     }
     case "companion":
       return (loadout.companionBuild?.mods?.length ?? 0) + (loadout.companionBuild?.weaponMods?.length ?? 0);
+    case "operator": {
+      const ob = loadout.operatorBuild;
+      if (!ob) return 0;
+      return (ob.arcaneIds ?? []).filter(Boolean).length + (ob.ampArcaneIds ?? []).filter(Boolean).length;
+    }
     case "primary":
     case "secondary":
     case "melee": {
@@ -170,6 +191,13 @@ export function getSlotModLabel(loadout: Loadout, slot: LoadoutSlotType): string
   if (slot === "warframe" && loadout.warframeBuild && isDualFormWarframe(loadout.warframeBuild.warframeId)) {
     return dualFormModCountSummary(loadout.warframeBuild as WarframeBuildData);
   }
+  if (slot === "operator" && loadout.operatorBuild) {
+    const ob = loadout.operatorBuild;
+    if (ob.focusSchool && ob.ampName) return `${ob.focusSchool} • ${ob.ampName}`;
+    if (ob.focusSchool) return `${ob.focusSchool} School`;
+    if (ob.ampModularBuild || ob.ampName) return "Amp equipped";
+    return "Focus & Amp";
+  }
   const count = getSlotModCount(loadout, slot);
   return `${count} mod${count === 1 ? "" : "s"} filled`;
 }
@@ -186,6 +214,8 @@ export function getSlotImage(slot: LoadoutSlotType, name: string, weaponsMap: Ma
     }
     case "companion":
       return getCompanionImage(name);
+    case "operator":
+      return "";
   }
 }
 
@@ -197,6 +227,8 @@ export function getWeaponCategories(slot: LoadoutSlotType): string[] {
       return ["secondary", "pistol", "dual_pistols"];
     case "melee":
       return ["melee"];
+    case "operator":
+      return ["amp"];
     default:
       return [];
   }
@@ -208,13 +240,26 @@ export function listSavedBuildsForSlot(
 ): SavedBuild[] {
   const all = getSavedBuilds();
   if (slot === "warframe") return all.filter((b) => b.type === "warframe");
-  if (slot === "companion") return all.filter((b) => b.type === "companion");
+  if (slot === "companion") {
+    return all.filter((b) => {
+      if (b.type !== "companion") return false;
+      const d = b.data as CompanionBuildData;
+      return !isExaltedCompanionId(d?.companionId);
+    });
+  }
+  if (slot === "operator") {
+    return getSavedBuilds("modular").filter((b) => {
+      if (b.type !== "modular") return false;
+      const d = b.data as ModularBuildData;
+      return d?.modularType === "amp";
+    });
+  }
   const cats = getWeaponCategories(slot);
   return all.filter((b) => {
     if (b.type !== "weapon") return false;
     const d = b.data as WeaponBuildData;
     const w = weaponsMap.get(d.weaponId);
-    return !!w && cats.includes(w.category);
+    return !!w && cats.includes(w.category) && !w.isExalted;
   });
 }
 
@@ -260,6 +305,7 @@ export function loadoutSlotEditHref(loadout: Loadout, slot: LoadoutSlotType): st
   const qs = `?loadout=${encodeURIComponent(loadout.id)}&slot=${slot}`;
   if (slot === "warframe") return loadout.warframeBuild?.warframeId ? `${LOADOUT_SLOT_CONFIG.warframe.builderPath}${qs}` : null;
   if (slot === "companion") return loadout.companionBuild?.companionId ? `${LOADOUT_SLOT_CONFIG.companion.builderPath}${qs}` : null;
+  if (slot === "operator") return loadout.operatorBuild ? `/modular-builder?type=amp` : null;
   const p = getWeaponSlotPayload(loadout, slot);
   if (!p) return null;
   return `${p.kind === "modular" ? "/modular-builder" : LOADOUT_SLOT_CONFIG[slot].builderPath}${qs}`;
@@ -299,5 +345,6 @@ export function loadoutSlotsAsBuilds(
     }
   }
   if (loadout.companionBuild?.companionId) push("companion", "Companion", loadout.companionBuild);
+  if (loadout.operatorBuild?.ampModularBuild) push("modular", "Operator Amp", loadout.operatorBuild.ampModularBuild);
   return out;
 }

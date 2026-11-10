@@ -345,4 +345,7 @@ export interface ArchwingBuildData {
   weaponPolarities: Record<number, string>;
   /** Railjack Gunnery intrinsic rank (0–10) for Archwing/Necramech buffs. */
   railjackGunnery?: number;
+  /** Exalted weapon mods (Arquebex on Voidrig, Ironbride on Bonewidow). */
+  exaltedWeaponMods?: ModSlot[];
+  exaltedWeaponPolarities?: Record<number, string>;
 }

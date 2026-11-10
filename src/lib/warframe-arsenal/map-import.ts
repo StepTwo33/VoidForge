@@ -1017,6 +1017,10 @@ export function mapArsenalToImportPayload(
     resultLoadout.archwingBuild = archwingBuild;
   }
 
+  if (account.focusSchool) {
+    resultLoadout.operatorBuild = { focusSchool: account.focusSchool };
+  }
+
   // The game never lets incompatible mods share an item, but keep the import safe anyway.
   const cleaned = dropIncompatibleModsDeep(resultLoadout);
   for (const d of cleaned.dropped) {

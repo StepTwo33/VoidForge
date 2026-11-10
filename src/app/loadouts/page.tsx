@@ -12,6 +12,7 @@ import {
   deleteCloudBuild,
   persistSavedBuild,
   SavedBuild,
+  getSavedBuilds,
   WarframeBuildData,
   WeaponBuildData,
   CompanionBuildData,
@@ -91,8 +92,10 @@ import {
   loadoutCardDomId,
   loadoutSlotEditHref,
   loadoutSlotsAsBuilds,
+  isExaltedCompanionId,
 } from "@/lib/builds/loadout-slot-helpers";
 import { PointerVerb } from "@/components/pointer-verb";
+import { PolarityIcon } from "@/components/polarity-icon";
 
 type SlotType = LoadoutSlotType;
 
@@ -105,6 +108,7 @@ const SLOT_ICONS: Record<SlotType, React.ReactNode> = {
   secondary: <Crosshair className="h-4 w-4" />,
   melee: <Swords className="h-4 w-4" />,
   companion: <Dog className="h-4 w-4" />,
+  operator: <Sparkles className="h-4 w-4" />,
 };
 
 /** null = could not check (offline / error). */
@@ -731,6 +735,23 @@ export default function LoadoutsPage() {
             slotPolarities: {},
           };
           break;
+        case "operator":
+          if (itemId.startsWith("focus:")) {
+            const rawSchool = itemId.replace("focus:", "");
+            const capitalSchool = rawSchool.charAt(0).toUpperCase() + rawSchool.slice(1);
+            updated.operatorBuild = {
+              ...(updated.operatorBuild ?? {}),
+              focusSchool: capitalSchool,
+            };
+          } else {
+            const foundWeapon = weapons.find((w) => w.id === itemId);
+            updated.operatorBuild = {
+              ...(updated.operatorBuild ?? {}),
+              ampId: itemId,
+              ampName: foundWeapon?.name ?? itemId,
+            };
+          }
+          break;
       }
       saveLoadout(updated);
       refresh();
@@ -739,7 +760,7 @@ export default function LoadoutsPage() {
         description: "Empty build — attach a saved build or configure in the builder.",
       });
     },
-    [pickerLoadoutId, pickerSlot, loadouts, refresh]
+    [pickerLoadoutId, pickerSlot, loadouts, refresh, weapons]
   );
 
   const handleAttachSavedBuild = useCallback(
@@ -761,6 +782,32 @@ export default function LoadoutsPage() {
           weaponMods: d.weaponMods ?? [],
           hasCatalyst: d.hasCatalyst ?? false,
         };
+      } else if (pickerSlot === "operator") {
+        if (build.type === "modular") {
+          const d = build.data as ModularBuildData;
+          if (d.modularType === "amp") {
+            updated.operatorBuild = {
+              ...(updated.operatorBuild ?? {}),
+              ampModularBuild: d,
+              ampName: build.name,
+            };
+          } else {
+            toast.error("Only Amp modular builds can be attached to the Operator slot.");
+            return;
+          }
+        } else if (build.type === "weapon") {
+          const d = build.data as WeaponBuildData;
+          updated.operatorBuild = {
+            ...(updated.operatorBuild ?? {}),
+            ampId: d.weaponId,
+            ampName: build.name,
+            ampArcaneIds: d.arcaneIds,
+            ampArcaneRanks: d.arcaneRanks,
+          };
+        } else {
+          toast.error("Incompatible saved build for this slot.");
+          return;
+        }
       } else if (["primary", "secondary", "melee"].includes(pickerSlot) && build.type === "weapon") {
         const d = build.data as WeaponBuildData;
         const w = weaponsMap.get(d.weaponId);
@@ -796,6 +843,29 @@ export default function LoadoutsPage() {
   const handleAttachModularBuild = useCallback(
     (build: SavedBuild) => {
       if (!pickerLoadoutId || build.type !== "modular") return;
+      if (pickerSlot === "operator") {
+        const data = build.data as ModularBuildData;
+        if (data.modularType !== "amp") {
+          toast.error("Only Amp modular builds can be attached to the Operator slot.");
+          return;
+        }
+        const loadout = loadouts.find((l) => l.id === pickerLoadoutId);
+        if (!loadout) return;
+        const updated: Loadout = {
+          ...loadout,
+          updatedAt: Date.now(),
+          operatorBuild: {
+            ...(loadout.operatorBuild ?? {}),
+            ampModularBuild: data,
+            ampName: build.name,
+          },
+        };
+        saveLoadout(updated);
+        refresh();
+        setPickerOpen(false);
+        toast.success(`Attached “${build.name}”`, { description: "Operator Amp" });
+        return;
+      }
       const ws = pickerSlotToWeaponSlot(pickerSlot);
       if (!ws) return;
       const data = build.data as ModularBuildData;
@@ -849,6 +919,9 @@ export default function LoadoutsPage() {
         case "companion":
           delete updated.companionBuild;
           break;
+        case "operator":
+          delete updated.operatorBuild;
+          break;
       }
       saveLoadout(updated);
       refresh();
@@ -868,13 +941,33 @@ export default function LoadoutsPage() {
     }
     if (pickerSlot === "companion") {
       return allCompanions
+        .filter((c) => !isExaltedCompanionId(c.id))
         .filter((c) => !q || c.name.toLowerCase().includes(q))
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((c) => ({ id: c.id, name: c.name, detail: `${c.type} • HP ${c.health}` }));
     }
+    if (pickerSlot === "operator") {
+      const focusSchools = [
+        { id: "focus:madurai", name: "Madurai", detail: "Attack • +1000% Void Strike • +50% Casting Speed" },
+        { id: "focus:unairu", name: "Unairu", detail: "Ward • 100% Caustic Strike Armor Strip • Poise" },
+        { id: "focus:zenurik", name: "Zenurik", detail: "Energy • +20% Hardened Wellspring STR • Temporal Drag" },
+        { id: "focus:naramon", name: "Naramon", detail: "Tactics • +200% Lethal Levitation Melee DMG • Power Spike" },
+        { id: "focus:vazarin", name: "Vazarin", detail: "Defense • Protective Sling • Void Snare" },
+      ];
+      const amps = weapons
+        .filter((w) => (w.category === "amp" || w.id === "sirocco") && !w.isExalted)
+        .map((w) => ({
+          id: w.id,
+          name: w.name,
+          detail: `Amp • DMG ${w.damage} • CC ${(w.criticalChance * 100).toFixed(0)}%`,
+        }));
+      return [...focusSchools, ...amps].filter(
+        (entry) => !q || entry.name.toLowerCase().includes(q) || entry.detail.toLowerCase().includes(q),
+      );
+    }
     const cats = getWeaponCategories(pickerSlot);
     return weapons
-      .filter((w) => cats.includes(w.category))
+      .filter((w) => cats.includes(w.category) && !w.isExalted)
       .filter((w) => !q || w.name.toLowerCase().includes(q))
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((w) => ({
@@ -901,12 +994,25 @@ export default function LoadoutsPage() {
         const c = allCompanions.find((x) => x.id === (b.data as CompanionBuildData).companionId);
         return c?.name.toLowerCase().includes(q);
       }
+      if (b.type === "modular") {
+        const d = b.data as ModularBuildData;
+        return modularBuildDisplayName(d).toLowerCase().includes(q);
+      }
       return false;
     });
   }, [pickerSlot, pickerSearch, weaponsMap]);
 
   const pickerModularBuilds = useMemo(() => {
     const q = pickerSearch.toLowerCase();
+    if (pickerSlot === "operator") {
+      return getSavedBuilds("modular").filter((b: SavedBuild) => {
+        if (b.type !== "modular") return false;
+        const d = b.data as ModularBuildData;
+        if (d.modularType !== "amp") return false;
+        if (!q) return true;
+        return b.name.toLowerCase().includes(q) || modularBuildDisplayName(d).toLowerCase().includes(q);
+      });
+    }
     return listModularBuildsForWeaponSlot(pickerSlot).filter((b) => {
       if (!q) return true;
       if (b.name.toLowerCase().includes(q)) return true;
@@ -917,7 +1023,11 @@ export default function LoadoutsPage() {
 
   const savedCount = pickerSavedBuilds.length;
   const modularCount = pickerModularBuilds.length;
-  const showModularTab = pickerSlot === "primary" || pickerSlot === "secondary" || pickerSlot === "melee";
+  const showModularTab =
+    pickerSlot === "primary" ||
+    pickerSlot === "secondary" ||
+    pickerSlot === "melee" ||
+    pickerSlot === "operator";
 
   return (
     <PageShell>
@@ -1245,8 +1355,8 @@ export default function LoadoutsPage() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                    {(["warframe", "primary", "secondary", "melee", "companion"] as SlotType[]).map((slot) => {
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+                    {(["warframe", "primary", "secondary", "melee", "companion", "operator"] as SlotType[]).map((slot) => {
                       const cfg = SLOT_CONFIG[slot];
                       const itemName = getSlotLabelName(loadout, slot, weaponsMap);
                       const ws = pickerSlotToWeaponSlot(slot);
@@ -1275,7 +1385,15 @@ export default function LoadoutsPage() {
                       return (
                         <div key={slot} className={cn("relative rounded-xl border p-4 flex flex-col gap-2 min-h-[100px]", cardStyle)}>
                           <div className="flex items-start gap-2.5">
-                            {isModularSlot ? (
+                            {slot === "operator" ? (
+                              <span className="w-10 h-10 rounded-md flex items-center justify-center bg-amber-500/15 border border-amber-500/30 shrink-0">
+                                {loadout.operatorBuild?.focusSchool ? (
+                                  <PolarityIcon polarity={loadout.operatorBuild.focusSchool.toLowerCase()} size={24} />
+                                ) : (
+                                  <Sparkles className="h-5 w-5 text-amber-800/90 dark:text-amber-400/90" aria-hidden />
+                                )}
+                              </span>
+                            ) : isModularSlot ? (
                               <span className="w-10 h-10 rounded-md flex items-center justify-center bg-amber-500/15 border border-amber-500/30 shrink-0">
                                 <Wrench className="h-5 w-5 text-amber-800/90 dark:text-amber-400/90" aria-hidden />
                               </span>

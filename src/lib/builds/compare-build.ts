@@ -143,6 +143,13 @@ function archwingEquipment(d: ArchwingBuildData): CompareEquipment {
       }),
     );
   }
+  if ((d.exaltedWeaponMods?.length ?? 0) > 0) {
+    groups.push(
+      equipmentGroup("weapon", "Exalted Weapon", {
+        mods: d.exaltedWeaponMods ?? [],
+      }),
+    );
+  }
   return { groups };
 }
 

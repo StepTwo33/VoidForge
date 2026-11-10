@@ -702,6 +702,10 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
         };
         applyOnce(result.warframe.stats);
         for (const form of result.warframe.forms ?? []) applyOnce(form.stats);
+        if (simParams.activeWeaponAbilityBuffs?.includes("Hardened Wellspring")) {
+          result.warframe.stats.abilityStrength += 0.2;
+          for (const form of result.warframe.forms ?? []) form.stats.abilityStrength += 0.2;
+        }
       }
 
       buffContext = {

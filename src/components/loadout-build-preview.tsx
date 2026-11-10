@@ -29,6 +29,7 @@ import type { WarframeBuildData, WeaponBuildData } from "@/lib/builds/build-stor
 import { allWarframes } from "@/data/warframes";
 import {
   formatAbilityBuffDebuffBadge,
+  getOperatorBuffAbilities,
   resolveAbilitiesWithHelminth,
   weaponDamageBuffAbilities,
 } from "@/lib/weapons/weapon-external-buffs";
@@ -504,13 +505,16 @@ export function LoadoutBuildPreview({
   const others = slots.filter((s) => s.id !== "warframe");
 
   const abilityBuffOptions = useMemo(() => {
-    if (!loadout?.warframeBuild?.warframeId) return [];
     try {
-      const wb = loadout.warframeBuild;
-      const wf = allWarframes.find((w) => w.id === wb.warframeId);
-      return weaponDamageBuffAbilities(
-        resolveAbilitiesWithHelminth(wf?.abilities, wb.helminthAbilityId, wb.helminthSlot, wb.warframeId),
-      );
+      const wb = loadout?.warframeBuild;
+      const wf = wb?.warframeId ? allWarframes.find((w) => w.id === wb.warframeId) : undefined;
+      const base = wf
+        ? weaponDamageBuffAbilities(
+            resolveAbilitiesWithHelminth(wf.abilities, wb?.helminthAbilityId, wb?.helminthSlot, wb?.warframeId),
+          )
+        : [];
+      const opAbilities = getOperatorBuffAbilities(loadout?.operatorBuild?.focusSchool);
+      return [...base, ...opAbilities];
     } catch {
       return [];
     }
@@ -518,6 +522,7 @@ export function LoadoutBuildPreview({
     loadout?.warframeBuild?.warframeId,
     loadout?.warframeBuild?.helminthAbilityId,
     loadout?.warframeBuild?.helminthSlot,
+    loadout?.operatorBuild?.focusSchool,
   ]);
 
   const enemy = useMemo(

@@ -24,7 +24,7 @@ import { gunneryArchWeaponDamageBonus, MAX_INTRINSIC_RANK } from "@/data/railjac
 import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
 import { weaponModCapacity } from "@/lib/weapons/weapon-progenitor";
 import { WeaponStatsPanel, ArchwingStatsPanel } from "@/components/stats-panel";
-import { Weapon, EquippedMod, CalculatedStats, ArchwingCalculatedStats } from "@/lib/types";
+import { Weapon, EquippedMod, CalculatedStats, ArchwingCalculatedStats, DEFAULT_SIM_PARAMS } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { Zap, FolderOpen, ArrowLeftRight } from "lucide-react";
@@ -40,6 +40,9 @@ import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { snapshotFromBuild } from "@/lib/builds/compare-build";
 import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
+import { ExaltedWeaponSection } from "@/app/warframe-builder/exalted-weapon-section";
+import { getExaltedWeaponsForWarframe } from "@/lib/weapons/exalted-weapons";
+import { computeUsedCapacity } from "@/lib/calc/compute-used-capacity";
 
 type BuilderMode = "archwing" | "necramech";
 
@@ -63,6 +66,10 @@ export default function ArchwingBuilderPage() {
   const [necramechModPickerOpen, setNecramechModPickerOpen] = useState(false);
   const [necramechActiveSlot, setNecramechActiveSlot] = useState(0);
   const [necramechPolarities, setNecramechPolarities] = useState<Record<number, string>>({});
+  const [necramechExaltedMods, setNecramechExaltedMods] = useState<EquippedMod[]>([]);
+  const [necramechExaltedSlotPolarities, setNecramechExaltedSlotPolarities] = useState<Record<number, string>>({});
+  const [necramechExaltedModPickerOpen, setNecramechExaltedModPickerOpen] = useState(false);
+  const [necramechExaltedActiveSlot, setNecramechExaltedActiveSlot] = useState(0);
 
   // Weapon state (archgun/archmelee)
   const [selectedWeapon, setSelectedWeapon] = useState<Weapon | null>(null);
@@ -84,6 +91,11 @@ export default function ArchwingBuilderPage() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
 
+  const necramechExaltedWeapon = useMemo(() => {
+    if (mode !== "necramech" || !selectedNecramech) return null;
+    const owned = getExaltedWeaponsForWarframe(selectedNecramech.id, allWeaponsData);
+    return owned.length > 0 ? enrichWeapon(owned[0]) : null;
+  }, [mode, selectedNecramech, allWeaponsData]);
 
   const buildArchwingData = useCallback((): ArchwingBuildData => ({
     mode,
@@ -97,7 +109,13 @@ export default function ArchwingBuilderPage() {
     framePolarities: mode === "archwing" ? archwingPolarities : necramechPolarities,
     weaponPolarities,
     railjackGunnery,
-  }), [mode, selectedArchwing, selectedNecramech, archwingMods, necramechMods, selectedWeapon, weaponMods, hasReactor, hasCatalyst, archwingPolarities, necramechPolarities, weaponPolarities, railjackGunnery]);
+    exaltedWeaponMods: mode === "necramech" && necramechExaltedWeapon
+      ? necramechExaltedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }))
+      : undefined,
+    exaltedWeaponPolarities: mode === "necramech" && necramechExaltedWeapon
+      ? necramechExaltedSlotPolarities
+      : undefined,
+  }), [mode, selectedArchwing, selectedNecramech, archwingMods, necramechMods, selectedWeapon, weaponMods, hasReactor, hasCatalyst, archwingPolarities, necramechPolarities, weaponPolarities, railjackGunnery, necramechExaltedWeapon, necramechExaltedMods, necramechExaltedSlotPolarities]);
 
   // Same unsaved-changes tracking as the other builders; nothing picked yet = clean.
   const hasSelection = !!(mode === "archwing" ? selectedArchwing : selectedNecramech) || !!selectedWeapon;
@@ -152,6 +170,12 @@ export default function ArchwingBuilderPage() {
       setSelectedNecramech(necramechList.find((n) => n.name === d.frameId) ?? null);
       setNecramechMods(restoreMods(d.frameMods));
       setNecramechPolarities(d.framePolarities || {});
+      if (d.exaltedWeaponMods) {
+        setNecramechExaltedMods(restoreMods(d.exaltedWeaponMods));
+      } else {
+        setNecramechExaltedMods([]);
+      }
+      setNecramechExaltedSlotPolarities(d.exaltedWeaponPolarities || {});
     }
     if (d.weaponId) {
       const found = allWeaponsData.find((w) => w.id === d.weaponId);
@@ -177,12 +201,49 @@ export default function ArchwingBuilderPage() {
     toast.success("Build deleted");
   };
 
-  // Filter archguns/archmelee from weapon data
+  // Filter archguns/archmelee from weapon data (excluding exalted)
   const archWeapons = useMemo(() => {
     return allWeaponsData
-      .filter((w: Weapon) => w.category === "archgun" || w.category === "archmelee")
+      .filter((w: Weapon) => (w.category === "archgun" || w.category === "archmelee") && !w.isExalted)
       .map(enrichWeapon);
   }, []);
+
+  const necramechExaltedInnatePolarities = useMemo(
+    () => (necramechExaltedWeapon ? innateSlotPolarities("weapon", necramechExaltedWeapon.id) : {}),
+    [necramechExaltedWeapon],
+  );
+  const necramechExaltedEffectivePolarities = useMemo(
+    () => effectiveSlotPolarities(necramechExaltedInnatePolarities, necramechExaltedSlotPolarities),
+    [necramechExaltedInnatePolarities, necramechExaltedSlotPolarities],
+  );
+  const necramechExaltedCapacity = useMemo(
+    () => computeUsedCapacity(necramechExaltedMods, modsMap, necramechExaltedEffectivePolarities),
+    [necramechExaltedMods, modsMap, necramechExaltedEffectivePolarities],
+  );
+
+  const necramechExaltedStats = useMemo<CalculatedStats | null>(() => {
+    if (!necramechExaltedWeapon) return null;
+    return calculateWeaponBuild(necramechExaltedWeapon, necramechExaltedMods, modsMap);
+  }, [necramechExaltedWeapon, necramechExaltedMods, modsMap]);
+
+  const necramechExaltedBaseStats = useMemo<CalculatedStats | null>(() => {
+    if (!necramechExaltedWeapon) return null;
+    return calculateWeaponBuild(necramechExaltedWeapon, [], modsMap);
+  }, [necramechExaltedWeapon, modsMap]);
+
+  const necramechExaltedContributionContext = useMemo(() => {
+    if (!necramechExaltedWeapon) return null;
+    return buildWeaponContributionContext({
+      weapon: necramechExaltedWeapon,
+      modSlots: necramechExaltedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      allMods: modsMap,
+    });
+  }, [necramechExaltedWeapon, necramechExaltedMods, modsMap]);
+
+  const filteredNecramechExaltedMods = useMemo(() => {
+    if (!necramechExaltedWeapon) return [];
+    return allMods.filter((m) => m.category === necramechExaltedWeapon.category);
+  }, [allMods, necramechExaltedWeapon]);
 
   // Weapon stats
   const weaponStats = useMemo<CalculatedStats | null>(() => {
@@ -219,6 +280,12 @@ export default function ArchwingBuilderPage() {
       framePolarities: mode === "archwing" ? archwingPolarities : necramechPolarities,
       weaponPolarities,
       railjackGunnery,
+      exaltedWeaponMods: mode === "necramech" && necramechExaltedWeapon
+        ? necramechExaltedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }))
+        : undefined,
+      exaltedWeaponPolarities: mode === "necramech" && necramechExaltedWeapon
+        ? necramechExaltedSlotPolarities
+        : undefined,
     };
     return snapshotFromBuild("archwing", buildName || selectedFrame.name, data);
   }, [
@@ -235,6 +302,9 @@ export default function ArchwingBuilderPage() {
     weaponPolarities,
     railjackGunnery,
     buildName,
+    necramechExaltedWeapon,
+    necramechExaltedMods,
+    necramechExaltedSlotPolarities,
   ]);
 
   const frameStats = useMemo<ArchwingCalculatedStats | null>(() => {
@@ -366,6 +436,8 @@ export default function ArchwingBuilderPage() {
                 setMode(m);
                 setSelectedWeapon(null);
                 setWeaponMods([]);
+                setNecramechExaltedMods([]);
+                setNecramechExaltedSlotPolarities({});
                 setCurrentBuildId(null);
                 setBuildName("");
               }}
@@ -420,6 +492,8 @@ export default function ArchwingBuilderPage() {
                       setSelectedNecramech(nm);
                       setNecramechMods([]);
                       setNecramechPolarities({});
+                      setNecramechExaltedMods([]);
+                      setNecramechExaltedSlotPolarities({});
                       setCurrentBuildId(null);
                       setBuildName(`${nm.name} Build`);
                     }}
@@ -630,6 +704,45 @@ export default function ArchwingBuilderPage() {
                 )}
               </div>
             )}
+
+            {mode === "necramech" && necramechExaltedWeapon && (
+              <div id="necramech-exalted" className="mt-8">
+                <ExaltedWeaponSection
+                  exaltedWeapon={necramechExaltedWeapon}
+                  exaltedWeapons={[necramechExaltedWeapon]}
+                  exaltedCapacity={necramechExaltedCapacity}
+                  exaltedMods={necramechExaltedMods}
+                  modsMap={modsMap}
+                  exaltedSlotPolarities={necramechExaltedEffectivePolarities}
+                  exaltedSlotOverrides={necramechExaltedSlotPolarities}
+                  exaltedInnatePolarities={necramechExaltedInnatePolarities}
+                  exaltedArcaneConfig={{ slots: 0, label: "" }}
+                  exaltedArcanes={[]}
+                  exaltedArcaneRanks={[]}
+                  exaltedStats={necramechExaltedStats}
+                  exaltedBaseStats={necramechExaltedBaseStats}
+                  exaltedContributionContext={necramechExaltedContributionContext}
+                  simParams={DEFAULT_SIM_PARAMS}
+                  onSimParamsChange={() => {}}
+                  sectionTitle="Necramech Exalted Weapon"
+                  onAddMod={(slot) => {
+                    setNecramechExaltedActiveSlot(slot);
+                    setNecramechExaltedModPickerOpen(true);
+                  }}
+                  onRemoveMod={(slot) => {
+                    setNecramechExaltedMods((prev) => prev.filter((m) => m.slotIndex !== slot));
+                  }}
+                  onPolarize={(slot, polarity) => {
+                    setNecramechExaltedSlotPolarities((prev) =>
+                      applyPolarityOverride(prev, necramechExaltedInnatePolarities, slot, polarity),
+                    );
+                  }}
+                  onAddArcane={() => {}}
+                  onRemoveArcane={() => {}}
+                  onArcaneRankChange={() => {}}
+                />
+              </div>
+            )}
           </div>
         </div>
       </main>
@@ -683,6 +796,25 @@ export default function ArchwingBuilderPage() {
           });
         }}
       />
+
+      {/* Necramech Exalted Weapon Mod Picker */}
+      {necramechExaltedWeapon && (
+        <ModPicker
+          open={necramechExaltedModPickerOpen}
+          onClose={() => setNecramechExaltedModPickerOpen(false)}
+          mods={filteredNecramechExaltedMods}
+          category="_prefiltered"
+          statFilterCategory={necramechExaltedWeapon.category}
+          equippedModIds={necramechExaltedMods.map((m) => m.modId)}
+          slotNav={buildSlotNav(Array.from({ length: necramechExaltedWeapon.modSlots }, (_, i) => i), necramechExaltedActiveSlot, setNecramechExaltedActiveSlot)}
+          onSelect={(mod, rank) => {
+            setNecramechExaltedMods((prev) => {
+              const filtered = prev.filter((m) => m.slotIndex !== necramechExaltedActiveSlot);
+              return [...filtered, { modId: mod.id, modName: mod.name, rank, slotIndex: necramechExaltedActiveSlot, polarity: mod.polarity, drain: mod.drain }];
+            });
+          }}
+        />
+      )}
 
       <SavedBuildsDialog
         open={showSavedBuilds}

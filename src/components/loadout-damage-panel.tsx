@@ -22,6 +22,7 @@ import { CONDITIONAL_WARFRAME_MOD_DEFS } from "@/lib/calc/calculator";
 import {
   computeLoadoutAbilityArmorStripPct,
   formatAbilityBuffDebuffBadge,
+  getOperatorBuffAbilities,
   resolveAbilitiesWithHelminth,
   weaponDamageBuffAbilities,
 } from "@/lib/weapons/weapon-external-buffs";
@@ -298,11 +299,14 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
   const abilityBuffOptions = useMemo(() => {
     try {
       const wb = loadout.warframeBuild;
-      if (!wb?.warframeId) return [];
-      const wf = allWarframes.find((w) => w.id === wb.warframeId);
-      return weaponDamageBuffAbilities(
-        resolveAbilitiesWithHelminth(wf?.abilities, wb.helminthAbilityId, wb.helminthSlot, wb.warframeId),
-      );
+      const wf = wb?.warframeId ? allWarframes.find((w) => w.id === wb.warframeId) : undefined;
+      const base = wf
+        ? weaponDamageBuffAbilities(
+            resolveAbilitiesWithHelminth(wf.abilities, wb?.helminthAbilityId, wb?.helminthSlot, wb?.warframeId),
+          )
+        : [];
+      const opAbilities = getOperatorBuffAbilities(loadout.operatorBuild?.focusSchool);
+      return [...base, ...opAbilities];
     } catch (err) {
       console.warn("Loadout ability buff options failed", err);
       return [];
@@ -311,6 +315,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
     loadout.warframeBuild?.warframeId,
     loadout.warframeBuild?.helminthAbilityId,
     loadout.warframeBuild?.helminthSlot,
+    loadout.operatorBuild?.focusSchool,
   ]);
 
   const enemy = useMemo(

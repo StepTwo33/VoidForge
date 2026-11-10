@@ -72,6 +72,7 @@ export type LoadoutWeaponSlot = "primary" | "secondary" | "melee";
 
 /** Whether a modular saved build is valid for a loadout weapon column. */
 export function modularBuildMatchesLoadoutSlot(data: ModularBuildData, slot: LoadoutWeaponSlot): boolean {
+  if (data.modularType === "amp") return false;
   const w = weaponFromModularData(data);
   if (!w) return false;
   if (slot === "melee") {
@@ -81,6 +82,5 @@ export function modularBuildMatchesLoadoutSlot(data: ModularBuildData, slot: Loa
     return ["secondary", "pistol", "dual_pistols"].includes(w.category);
   }
   // primary
-  if (data.modularType === "amp") return true;
   return ["primary", "rifle", "shotgun", "bow", "launcher", "archgun"].includes(w.category) || w.category === "primary";
 }

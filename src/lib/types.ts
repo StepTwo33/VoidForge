@@ -1496,6 +1496,19 @@ export interface RailjackAbilityComputed {
   isSimulatedActive?: boolean;
 }
 
+export type FocusSchool = "Madurai" | "Vazarin" | "Naramon" | "Unairu" | "Zenurik";
+
+export interface LoadoutOperatorBuild {
+  focusSchool?: FocusSchool | string;
+  arcaneIds?: (string | null)[];
+  arcaneRanks?: number[];
+  ampId?: string;
+  ampName?: string;
+  ampModularBuild?: ModularBuildData;
+  ampArcaneIds?: (string | null)[];
+  ampArcaneRanks?: number[];
+}
+
 export interface Loadout {
   id: string;
   name: string;
@@ -1631,6 +1644,7 @@ export interface Loadout {
     hasReactor: boolean;
     hasCatalyst: boolean;
   };
+  operatorBuild?: LoadoutOperatorBuild;
 }
 
 export interface RivenStatDef {

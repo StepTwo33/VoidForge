@@ -1240,6 +1240,23 @@ function resolveNamedAbilityWeaponBuff(
     // wiki: Shroud of Dynar — flat melee CD × STR; flat CC/SC Misc-fixed (post-invis window)
     case "Shroud Of Dynar":
       return resolveShroudOfDynarBuff(weapon, ability, strength);
+    case "Void Strike":
+      return {
+        id: "operator:void_strike",
+        label: "Void Strike (Madurai)",
+        category: "other",
+        damageBonus: 10.0,
+        nominal: "+1000% base damage (additive)",
+      };
+    case "Lethal Levitation":
+      if (!isMeleeWeapon(weapon)) return null;
+      return {
+        id: "operator:lethal_levitation",
+        label: "Lethal Levitation (Naramon)",
+        category: "other",
+        damageBonus: 2.0,
+        nominal: "+200% melee base damage (4 stacks)",
+      };
     default:
       return null;
   }
@@ -2248,6 +2265,10 @@ const NAMED_WEAPON_BUFF_ABILITIES = new Set([
   "Breach Surge",
   "Radial Javelin",
   "Valence Formation",
+  "Void Strike",
+  "Caustic Strike",
+  "Hardened Wellspring",
+  "Lethal Levitation",
 ]);
 
 /** Helminth Empower is +Ability Strength, not a weapon damage buff. */
@@ -2323,7 +2344,9 @@ export function computeLoadoutAbilityArmorStripPct(
   strength: number,
   activeAbilityNames: string[],
 ): number {
-  if (!abilities?.length || !activeAbilityNames.length) return 0;
+  if (!activeAbilityNames.length) return 0;
+  if (activeAbilityNames.includes("Caustic Strike")) return 100;
+  if (!abilities?.length) return 0;
   let totalStrip = 0;
   for (const name of activeAbilityNames) {
     const ability = abilities.find((a) => a.name.toLowerCase() === name.toLowerCase());
@@ -2338,12 +2361,45 @@ export function computeLoadoutAbilityArmorStripPct(
   return Math.min(100, Math.round(totalStrip));
 }
 
+/** Operator Focus school abilities available for loadout combat simulation. */
+export function getOperatorBuffAbilities(focusSchool?: string): Ability[] {
+  const all: Record<string, Ability> = {
+    Madurai: {
+      name: "Void Strike",
+      description: "Madurai Void Strike: Grants +1000% weapon damage bonus on next attack/burst.",
+      energyCost: 0,
+    },
+    Unairu: {
+      name: "Caustic Strike",
+      description: "Unairu Caustic Strike: 100% Armor Strip in an 8m radius.",
+      energyCost: 0,
+      miscStats: { armorStrip: 1.0, armorStripCap: 1.0 },
+    },
+    Zenurik: {
+      name: "Hardened Wellspring",
+      description: "Zenurik Hardened Wellspring: +20% Ability Strength to Warframe abilities.",
+      energyCost: 0,
+    },
+    Naramon: {
+      name: "Lethal Levitation",
+      description: "Naramon Lethal Levitation: Void Sling through enemies grants up to +200% Melee Damage.",
+      energyCost: 0,
+    },
+  };
+  if (focusSchool && all[focusSchool]) return [all[focusSchool]];
+  return Object.values(all);
+}
+
 /** Formats a compact badge describing an active ability buff or enemy debuff. */
 export function formatAbilityBuffDebuffBadge(
   ability: Ability,
   strength: number,
   warframeId?: string,
 ): string | null {
+  if (ability.name === "Void Strike") return "+1000% dmg";
+  if (ability.name === "Caustic Strike") return "-100% armor";
+  if (ability.name === "Hardened Wellspring") return "+20% STR";
+  if (ability.name === "Lethal Levitation") return "+200% melee";
   if (ability.damageBuff != null && ability.damageBuff > 0) {
     const bonus = scaledAbilityDamageBuff(warframeId, ability.name, ability.damageBuff, strength);
     return `+${((bonus ?? ability.damageBuff) * 100).toFixed(0)}% dmg`;
