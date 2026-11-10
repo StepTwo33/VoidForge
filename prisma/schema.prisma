@@ -209,6 +209,10 @@ model SavedRiven {
   stats     String
   polarity  String   @default("universal")
   drain     Int      @default(10)
+  /** Times the player has cycled this riven (null = unknown, saved before this was stored). */
+  rerolls     Int?
+  /** Mastery rank requirement shown on the riven (null = unknown). */
+  masteryRank Int?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)

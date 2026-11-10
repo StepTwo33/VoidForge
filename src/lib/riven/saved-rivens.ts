@@ -10,6 +10,10 @@ export interface SavedRiven {
   stats: Record<string, number>;
   polarity: string;
   drain: number;
+  /** Times cycled; null when unknown (saved before rerolls were stored). */
+  rerolls?: number | null;
+  /** Mastery rank requirement; null when unknown. */
+  masteryRank?: number | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -26,6 +30,22 @@ export const RIVEN_MOD_IDS = [
   "archgun_riven_mod",
 ] as const;
 
+export const RIVEN_REROLLS_MAX = 9999;
+export const RIVEN_MASTERY_MIN = 8;
+export const RIVEN_MASTERY_MAX = 16;
+
+/** Whole reroll count 0–9999, or null when missing or not a number. */
+export function sanitizeRivenRerolls(raw: unknown): number | null {
+  if (typeof raw !== "number" || !Number.isFinite(raw)) return null;
+  return Math.min(RIVEN_REROLLS_MAX, Math.max(0, Math.round(raw)));
+}
+
+/** Riven mastery requirement 8–16, or null when missing or not a number. */
+export function sanitizeRivenMasteryRank(raw: unknown): number | null {
+  if (typeof raw !== "number" || !Number.isFinite(raw)) return null;
+  return Math.min(RIVEN_MASTERY_MAX, Math.max(RIVEN_MASTERY_MIN, Math.round(raw)));
+}
+
 /** Keep only finite numeric stats (max 4) so bad JSON never reaches the builder. */
 export function sanitizeRivenStats(raw: unknown): Record<string, number> | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
@@ -40,6 +60,7 @@ export function sanitizeRivenStats(raw: unknown): Record<string, number> | null 
 
 export function parseSavedRivenRow(row: {
   id: string; weaponId: string; name: string; modId: string; stats: string; polarity: string; drain: number;
+  rerolls?: number | null; masteryRank?: number | null;
   createdAt: Date; updatedAt: Date;
 }): SavedRiven {
   let stats: Record<string, number> = {};
@@ -56,6 +77,8 @@ export function parseSavedRivenRow(row: {
     stats,
     polarity: normalizeRivenPolarity(row.polarity),
     drain: clampRivenDrain(row.drain),
+    rerolls: sanitizeRivenRerolls(row.rerolls),
+    masteryRank: sanitizeRivenMasteryRank(row.masteryRank),
     createdAt: row.createdAt.getTime(),
     updatedAt: row.updatedAt.getTime(),
   };

@@ -12,6 +12,8 @@ import {
   RIVEN_MOD_IDS,
   SAVED_RIVEN_NAME_MAX,
   parseSavedRivenRow,
+  sanitizeRivenMasteryRank,
+  sanitizeRivenRerolls,
   sanitizeRivenStats,
 } from "@/lib/riven/saved-rivens";
 import { logServerError } from "@/lib/log-server-error";
@@ -87,6 +89,9 @@ export async function POST(req: NextRequest) {
     stats: JSON.stringify(stats),
     polarity: normalizeRivenPolarity(typeof body.polarity === "string" ? body.polarity : null),
     drain: clampRivenDrain(typeof body.drain === "number" ? body.drain : NaN),
+    // Only written when sent, so an older client never blanks values another device stored.
+    ...("rerolls" in body ? { rerolls: sanitizeRivenRerolls(body.rerolls) } : {}),
+    ...("masteryRank" in body ? { masteryRank: sanitizeRivenMasteryRank(body.masteryRank) } : {}),
   };
 
   try {

@@ -59,6 +59,10 @@ const TABLE_COLUMNS: Record<string, ColumnSpec[]> = {
       alter: `ALTER TABLE "Report" ADD COLUMN "screenshots" TEXT NOT NULL DEFAULT '[]'`,
     },
   ],
+  SavedRiven: [
+    { name: "rerolls", alter: 'ALTER TABLE "SavedRiven" ADD COLUMN "rerolls" INTEGER' },
+    { name: "masteryRank", alter: 'ALTER TABLE "SavedRiven" ADD COLUMN "masteryRank" INTEGER' },
+  ],
   SiteUpdate: [
     {
       name: "featured",
@@ -145,6 +149,11 @@ const REPAIRED_MIGRATIONS: Array<{
   {
     name: "20261106030000_add_report_screenshots",
     isAppliedInSchema: (db) => columnExists(db, "Report", "screenshots"),
+  },
+  {
+    name: "20261110120000_saved_riven_rerolls_mastery",
+    isAppliedInSchema: (db) =>
+      columnExists(db, "SavedRiven", "rerolls") && columnExists(db, "SavedRiven", "masteryRank"),
   },
 ];
 
