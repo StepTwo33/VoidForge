@@ -211,7 +211,8 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
   const [enemyLevel, setEnemyLevel] = useState(100);
   const [steelPath, setSteelPath] = useState(false);
   const [applyHeadshots, setApplyHeadshots] = useState(false);
-  const [applyTriggerBuffs, setApplyTriggerBuffs] = useState(false);
+  // null = follow the scenario (Full Ramp turns it on); true/false = the user's choice.
+  const [applyTriggerBuffs, setApplyTriggerBuffs] = useState<boolean | null>(null);
   const [activeAbilityBuffs, setActiveAbilityBuffs] = useState<string[]>(
     () => loadout.simulation?.activeWeaponAbilityBuffs ?? [],
   );
@@ -374,7 +375,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
       ...base,
       activeWeaponAbilityBuffs: activeAbilityBuffs,
       applyHeadshots: applyHeadshots || base.applyHeadshots,
-      applyTriggerBuffs: applyTriggerBuffs || base.applyTriggerBuffs,
+      applyTriggerBuffs: applyTriggerBuffs ?? !!base.applyTriggerBuffs,
       targetFaction: targetActive ? enemy.faction : base.targetFaction,
       ...(passiveYareliOverride != null ? { applyYareliCriticalFlow: passiveYareliOverride } : {}),
       ...(passiveZephyrOverride != null ? { applyZephyrAirborne: passiveZephyrOverride } : {}),
@@ -475,6 +476,7 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
               type="button"
               onClick={() => {
                 setScenario(key);
+                setApplyTriggerBuffs(null);
                 setPassiveYareliOverride(null);
                 setPassiveZephyrOverride(null);
                 setPassiveGarudaOverride(null);
@@ -552,11 +554,11 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
             </label>
             <label
               className="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-border/60 bg-background/60 px-2.5 py-1 text-[10px] text-muted-foreground cursor-pointer"
-              title="Enable short on-equip / while-aiming / on-reload buffs (Vigorous Swap, Holster Amp, Argon Scope, Bladed Rounds)"
+              title="On-equip buffs (Holster Amp, Vigorous Swap), Other buffs (Critical Precision, Pain Points, Brain Storm, …) and every situational switch this scenario leaves unset (aiming, reload, crouch, wall latch, airborne, distance, hit-window mods). On by default in Full Ramp; you can still turn it off."
             >
               <input
                 type="checkbox"
-                checked={applyTriggerBuffs || scenario === "fullRamp"}
+                checked={applyTriggerBuffs ?? !!scenarioSimParams(scenario).applyTriggerBuffs}
                 onChange={(e) => setApplyTriggerBuffs(e.target.checked)}
                 className="h-3.5 w-3.5 rounded border-border accent-amber-500"
               />
