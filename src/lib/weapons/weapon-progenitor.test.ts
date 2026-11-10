@@ -8,6 +8,14 @@ describe("adversary weapon mod capacity", () => {
     expect(weaponModCapacity({ id: "braton" }, 5, true)).toBe(60);
   });
 
+  it("gives exalted weapons innate 60 capacity", () => {
+    expect(weaponModCapacity({ id: "exalted_blade", isExalted: true }, 0, false)).toBe(60);
+    expect(weaponModCapacity({ id: "regulators", isExalted: true }, 0, false)).toBe(60);
+    expect(weaponModCapacity({ id: "arquebex", isExalted: true }, 0, false)).toBe(60);
+    expect(weaponModCapacity({ id: "venari_claws", isExalted: true }, 0, false)).toBe(60);
+    expect(weaponModCapacity({ id: "exalted_blade", isExalted: true }, 0, true)).toBe(60);
+  });
+
   it("raises Kuva, Tenet, and Coda capacity with Forma rank", () => {
     expect(adversaryRankFromFormas(0)).toBe(30);
     expect(adversaryRankFromFormas(5)).toBe(40);

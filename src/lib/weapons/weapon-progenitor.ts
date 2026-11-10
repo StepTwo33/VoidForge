@@ -70,10 +70,14 @@ export function adversaryRankFromFormas(formas: number): number {
  * Kuva, Tenet, Coda, and Paracesis capacity matches max rank (40 / 80 after five Formas).
  */
 export function weaponModCapacity(
-  weapon: { id: string } | null | undefined,
+  weapon: { id: string; isExalted?: boolean } | null | undefined,
   formas: number,
   hasCatalyst: boolean,
 ): number {
+  // Exalted weapons automatically come with an Orokin Catalyst equipped in-game (innate 60 capacity).
+  if (weapon?.isExalted) {
+    return 60;
+  }
   const rank = weapon && weaponSupportsRank40(weapon) ? adversaryRankFromFormas(formas) : 30;
   return hasCatalyst ? rank * 2 : rank;
 }

@@ -6,6 +6,7 @@ import {
   innateSlotPolarities,
   isInnatePolarity,
 } from "@/lib/builds/innate-polarities";
+import { isExaltedCompanionId } from "@/lib/builds/loadout-slot-helpers";
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { saveBuilderRivenToLibrary, useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
@@ -221,6 +222,9 @@ export default function CompanionBuilderPage() {
   const [activeWeaponSlotIndex, setActiveWeaponSlotIndex] = useState(0);
   const [hasCatalyst, setHasCatalyst] = useState(false);
   const [weaponSlotPolarities, setWeaponSlotPolarities] = useState<Record<number, string>>({});
+
+  const isExaltedCompanion = Boolean(selectedCompanion && isExaltedCompanionId(selectedCompanion.id));
+  const isExaltedCompanionWeapon = Boolean(selectedWeapon?.isExalted || isExaltedCompanion);
   const innatePolarities = useMemo(
     () => innateSlotPolarities("companion", selectedCompanion?.id),
     [selectedCompanion?.id],
@@ -291,8 +295,8 @@ export default function CompanionBuilderPage() {
       })),
       weaponSlotPolarities,
       arcaneIds: [],
-      hasReactor,
-      hasCatalyst,
+      hasReactor: isExaltedCompanion ? true : hasReactor,
+      hasCatalyst: isExaltedCompanionWeapon ? true : hasCatalyst,
       isMR30: false,
       slotPolarities,
       ...(companionParts ? { parts: companionParts } : {}),
@@ -409,8 +413,8 @@ export default function CompanionBuilderPage() {
         drain: typeof m.drain === "number" ? m.drain : mod?.drain,
       };
     }));
-    setHasReactor(d.hasReactor);
-    setHasCatalyst(d.hasCatalyst ?? false);
+    setHasReactor(isExaltedCompanionId(d.companionId) ? true : Boolean(d.hasReactor));
+    setHasCatalyst(isExaltedCompanionId(d.companionId) ? true : Boolean(d.hasCatalyst));
     const resolved = loadedParts ? resolveCompanionParts(loadedParts) : null;
     setSlotPolarities(
       Object.keys(d.slotPolarities || {}).length > 0
@@ -566,7 +570,7 @@ export default function CompanionBuilderPage() {
     return calculateCompanionBuild(selectedCompanion, equippedMods, modsMap, companionParts, linkedWarframe);
   }, [selectedCompanion, equippedMods, modsMap, companionParts, linkedWarframe]);
 
-  const baseCapacity = hasReactor ? 60 : 30;
+  const baseCapacity = hasReactor || isExaltedCompanion ? 60 : 30;
   const capacityUsed = useMemo(() => {
     return equippedMods.reduce((sum, m) => {
       const mod = modsMap.get(m.modId);
@@ -694,7 +698,7 @@ export default function CompanionBuilderPage() {
     );
   }, [selectedWeapon, weaponMods, weaponRivenStatsMap, modsMap, equippedMods, applyHunterVsSlash, loadoutLinkedCompanionWeaponBuffs]);
 
-  const weaponCapacity = hasCatalyst ? 60 : 30;
+  const weaponCapacity = hasCatalyst || isExaltedCompanionWeapon ? 60 : 30;
   const weaponCapacityUsed = useMemo(() => {
     return weaponMods.reduce((sum, m) => {
       const mod = modsMap.get(m.modId);
@@ -715,9 +719,10 @@ export default function CompanionBuilderPage() {
   }, [allMods, selectedWeapon, pickingPosture]);
 
   const handleSelectCompanion = useCallback((companion: Companion) => {
+    const isExalted = isExaltedCompanionId(companion.id);
     setSelectedCompanion(companion);
     setEquippedMods([]);
-    setHasReactor(false);
+    setHasReactor(isExalted);
     const parts = defaultPartsForCompanion(companion) ?? null;
     setCompanionParts(parts);
     const resolved = parts ? resolveCompanionParts(parts) : null;
@@ -732,16 +737,15 @@ export default function CompanionBuilderPage() {
         resolved?.weaponId ??
         resolveHoundWeaponId(companion) ??
         (companionHasFixedWeapon(companion) ? resolveCompanionClawId(companion) : undefined);
-      setSelectedWeapon(
-        weaponId
-          ? weaponCandidates.find((w) => w.id === weaponId) ??
-              (companionHasFixedWeapon(companion) ? resolveDefaultCompanionWeapon(companion, allWeapons) : null)
-          : companionHasFixedWeapon(companion)
-            ? resolveDefaultCompanionWeapon(companion, allWeapons)
-            : null,
-      );
+      const chosenWeapon = weaponId
+        ? weaponCandidates.find((w) => w.id === weaponId) ??
+            (companionHasFixedWeapon(companion) ? resolveDefaultCompanionWeapon(companion, allWeapons) : null)
+        : companionHasFixedWeapon(companion)
+          ? resolveDefaultCompanionWeapon(companion, allWeapons)
+          : null;
+      setSelectedWeapon(chosenWeapon);
       setWeaponMods([]);
-      setHasCatalyst(false);
+      setHasCatalyst(isExalted || Boolean(chosenWeapon?.isExalted));
       setWeaponSlotPolarities({});
       setWeaponRivenStatsMap(undefined);
     }
@@ -759,16 +763,17 @@ export default function CompanionBuilderPage() {
   const handleSelectWeaponFromPicker = useCallback((weapon: Weapon) => {
     const companion = resolvePreferredCompanionForWeapon(weapon, allCompanions);
     if (!companion) return;
+    const isExalted = isExaltedCompanionId(companion.id);
     setSelectedCompanion(companion);
     setEquippedMods([]);
-    setHasReactor(false);
+    setHasReactor(isExalted);
     const parts = defaultPartsForCompanion(companion) ?? null;
     setCompanionParts(parts);
     const resolved = parts ? resolveCompanionParts(parts) : null;
     setSlotPolarities(resolved?.defaultSlotPolarities ?? {});
     setSelectedWeapon(weapon);
     setWeaponMods([]);
-    setHasCatalyst(false);
+    setHasCatalyst(isExalted || Boolean(weapon.isExalted));
     setWeaponSlotPolarities({});
     setWeaponRivenStatsMap(undefined);
     setCurrentBuildId(null);
@@ -1071,20 +1076,33 @@ export default function CompanionBuilderPage() {
                 </BuilderActionGroup>
 
                 <BuilderActionGroup>
-                  <button
-                    onClick={() => setHasReactor(!hasReactor)}
-                    title="Orokin Reactor — doubles mod capacity"
-                    aria-pressed={hasReactor}
-                    className={cn(
-                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
-                      hasReactor
-                        ? "bg-yellow-500/10 text-yellow-400"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
-                  >
-                    <Zap className="h-3.5 w-3.5" />
-                    <span>Reactor</span>
-                  </button>
+                  {isExaltedCompanion ? (
+                    <button
+                      type="button"
+                      disabled
+                      title="Innate Orokin Reactor — exalted companions automatically come with a pre-installed Reactor (60 capacity)"
+                      aria-pressed={true}
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium bg-yellow-500/10 text-yellow-400 cursor-default opacity-90 sm:min-h-0 sm:py-1.5"
+                    >
+                      <Zap className="h-3.5 w-3.5" />
+                      <span>Innate Reactor</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setHasReactor(!hasReactor)}
+                      title="Orokin Reactor — doubles mod capacity"
+                      aria-pressed={hasReactor}
+                      className={cn(
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
+                        hasReactor
+                          ? "bg-yellow-500/10 text-yellow-400"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      )}
+                    >
+                      <Zap className="h-3.5 w-3.5" />
+                      <span>Reactor</span>
+                    </button>
+                  )}
                 </BuilderActionGroup>
 
                 <div className="flex-1" />
@@ -1293,20 +1311,33 @@ export default function CompanionBuilderPage() {
                   <Swords className="h-5 w-5 shrink-0 text-orange-700 dark:text-orange-400" />
                   <h2 className="min-w-0 flex-1 truncate text-lg font-bold">Companion Weapon</h2>
                   {selectedWeapon && (
-                    <button
-                      onClick={() => setHasCatalyst(!hasCatalyst)}
-                      title="Orokin Catalyst — doubles mod capacity"
-                      aria-pressed={hasCatalyst}
-                      className={cn(
-                        "ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
-                        hasCatalyst
-                          ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400"
-                          : "border-border text-muted-foreground"
-                      )}
-                    >
-                      <Zap className="h-3.5 w-3.5" />
-                      {hasCatalyst ? (<><span className="sm:hidden">Catalyst</span><span className="hidden sm:inline">Catalyst Installed</span></>) : "Orokin Catalyst"}
-                    </button>
+                    isExaltedCompanionWeapon ? (
+                      <button
+                        type="button"
+                        disabled
+                        title="Innate Orokin Catalyst — exalted companion weapons automatically come with an Orokin Catalyst equipped in-game (60 capacity)"
+                        aria-pressed={true}
+                        className="ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-xs font-medium text-blue-700 dark:text-blue-400 cursor-default opacity-90 sm:min-h-9 sm:py-1.5"
+                      >
+                        <Zap className="h-3.5 w-3.5" />
+                        <span>Innate Catalyst</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setHasCatalyst(!hasCatalyst)}
+                        title="Orokin Catalyst — doubles mod capacity"
+                        aria-pressed={hasCatalyst}
+                        className={cn(
+                          "ml-auto inline-flex min-h-11 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs transition-all sm:min-h-9 sm:py-1.5",
+                          hasCatalyst
+                            ? "bg-blue-500/10 border-blue-500/50 text-blue-700 dark:text-blue-400"
+                            : "border-border text-muted-foreground"
+                        )}
+                      >
+                        <Zap className="h-3.5 w-3.5" />
+                        {hasCatalyst ? (<><span className="sm:hidden">Catalyst</span><span className="hidden sm:inline">Catalyst Installed</span></>) : "Orokin Catalyst"}
+                      </button>
+                    )
                   )}
                 </div>
 

@@ -323,7 +323,11 @@ export default function WeaponBuilderPage() {
           setProgenitorElement(normalizeProgenitorElement(shared.progenitorElement));
         }
         if (shared.progenitorBonusPercent != null) setProgenitorBonusPercent(shared.progenitorBonusPercent);
-        if (shared.hasOrokinCatalyst != null) setHasOrokinCatalyst(shared.hasOrokinCatalyst);
+        if (shared.hasOrokinCatalyst != null) {
+          setHasOrokinCatalyst(weapon.isExalted ? true : shared.hasOrokinCatalyst);
+        } else if (weapon.isExalted) {
+          setHasOrokinCatalyst(true);
+        }
         setAdversaryFormas(
           shared.adversaryFormas != null
             ? clampAdversaryFormas(shared.adversaryFormas)
@@ -428,7 +432,7 @@ export default function WeaponBuilderPage() {
     setEquippedArcaneRanks(
       [0, 1].map((i) => d.arcaneRanks?.[i] ?? resolvedArcanes[i]?.maxRank ?? 5),
     );
-    setHasOrokinCatalyst(d.hasOrokinCatalyst);
+    setHasOrokinCatalyst(weapon.isExalted ? true : Boolean(d.hasOrokinCatalyst));
     setAdversaryFormas(
       d.adversaryFormas != null
         ? clampAdversaryFormas(d.adversaryFormas)
@@ -858,7 +862,7 @@ export default function WeaponBuilderPage() {
     setGravimagMode(false);
     setAlternateModeIndex(-1);
     setEquippedMods([]);
-    setHasOrokinCatalyst(false);
+    setHasOrokinCatalyst(Boolean(weapon.isExalted));
     setAdversaryFormas(weaponSupportsRank40(weapon) ? 5 : 0);
     setSelectedEvolutions({});
     setIncarnonConditionals({});
@@ -1347,20 +1351,33 @@ export default function WeaponBuilderPage() {
                       <span className="inline">Rank {adversaryRankFromFormas(adversaryFormas)}</span>
                     </button>
                   )}
-                  <button
-                    onClick={() => setHasOrokinCatalyst(!hasOrokinCatalyst)}
-                    title="Orokin Catalyst — doubles mod capacity"
-                    aria-pressed={hasOrokinCatalyst}
-                    className={cn(
-                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
-                      hasOrokinCatalyst
-                        ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
-                  >
-                    <Zap className="h-3.5 w-3.5" />
-                    <span className="inline">Catalyst</span>
-                  </button>
+                  {selectedWeapon?.isExalted ? (
+                    <button
+                      type="button"
+                      disabled
+                      title="Innate Orokin Catalyst — exalted weapons automatically come with an Orokin Catalyst equipped in-game (60 capacity)"
+                      aria-pressed={true}
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium bg-blue-500/10 text-blue-700 dark:text-blue-400 cursor-default opacity-90 lg:pointer-fine:min-h-0 lg:py-1.5"
+                    >
+                      <Zap className="h-3.5 w-3.5" />
+                      <span className="inline">Innate Catalyst</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setHasOrokinCatalyst(!hasOrokinCatalyst)}
+                      title="Orokin Catalyst — doubles mod capacity"
+                      aria-pressed={hasOrokinCatalyst}
+                      className={cn(
+                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
+                        hasOrokinCatalyst
+                          ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                      )}
+                    >
+                      <Zap className="h-3.5 w-3.5" />
+                      <span className="inline">Catalyst</span>
+                    </button>
+                  )}
                   {incarnonFormEvolution && (
                     <button
                       type="button"
