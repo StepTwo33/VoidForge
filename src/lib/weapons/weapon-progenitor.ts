@@ -75,6 +75,7 @@ export function weaponModCapacity(
   hasCatalyst: boolean,
 ): number {
   // Exalted weapons automatically come with an Orokin Catalyst equipped in-game (innate 60 capacity).
+  // Garuda Talons count as exalted here too (owner decision; the wiki lists them under Exalted melee).
   if (weapon?.isExalted) {
     return 60;
   }

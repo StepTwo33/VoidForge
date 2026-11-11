@@ -2289,7 +2289,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "garuda",
     "abilityName": "Passive",
     "isExalted": true
@@ -3589,7 +3589,7 @@ export const allWeapons: Weapon[] = [
     "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
-    "hasRivenSlot": true,
+    "hasRivenSlot": false,
     "warframeId": "garuda_prime",
     "abilityName": "Passive",
     "isExalted": true
