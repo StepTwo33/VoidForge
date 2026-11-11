@@ -7,7 +7,8 @@ import {
   isInnatePolarity,
 } from "@/lib/builds/innate-polarities";
 import { BuilderSectionNav } from "@/components/builder-section-nav";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
 import { ModSlotCard } from "@/components/mod-slot";
 import { ModPicker, buildSlotNav } from "@/components/mod-picker";
@@ -24,7 +25,7 @@ import { gunneryArchWeaponDamageBonus, MAX_INTRINSIC_RANK } from "@/data/railjac
 import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
 import { weaponModCapacity } from "@/lib/weapons/weapon-progenitor";
 import { WeaponStatsPanel, ArchwingStatsPanel } from "@/components/stats-panel";
-import { Weapon, EquippedMod, CalculatedStats, ArchwingCalculatedStats, DEFAULT_SIM_PARAMS } from "@/lib/types";
+import { Weapon, EquippedMod, CalculatedStats, ArchwingCalculatedStats, DEFAULT_SIM_PARAMS, type Mod, type ModSlot } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { Zap, FolderOpen, ArrowLeftRight } from "lucide-react";
@@ -43,10 +44,36 @@ import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 import { ExaltedWeaponSection } from "@/app/warframe-builder/exalted-weapon-section";
 import { getExaltedWeaponsForWarframe } from "@/lib/weapons/exalted-weapons";
 import { computeUsedCapacity } from "@/lib/calc/compute-used-capacity";
+import {
+  draftMatchesRivenWeapon,
+  isRivenModId,
+  loadoutFieldsForDraft,
+  parseRivenEquip,
+  placeLibraryRivenOnMods,
+  readBuilderDraft,
+  rivenCannotEquipReason,
+  saveBuilderDraft,
+  stripRivenEquipParams,
+} from "@/lib/rivens/riven-equip";
+import { getRivenModIdForWeapon } from "@/lib/weapons/riven-weapon-type";
+import { saveBuilderRivenToLibrary, useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
+import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-validation";
+import { mergeRivenStatChanges } from "@/lib/calc/weapon-stat-merges";
 
 type BuilderMode = "archwing" | "necramech";
 
+function withRivenRoll(eq: EquippedMod | undefined, mod: Mod | null): Mod | null {
+  if (!eq || !mod || !isRivenModId(eq.modId)) return mod;
+  return {
+    ...mod,
+    name: eq.modName && eq.modName !== mod.name ? eq.modName : mod.name,
+    polarity: eq.polarity || mod.polarity,
+    drain: rivenDrainFromRank(eq.rank),
+  };
+}
+
 export default function ArchwingBuilderPage() {
+  const searchParams = useSearchParams();
   const { mods: allMods, modsMap } = useMods();
   const allWeaponsData = useWeapons();
   const archwingList = useArchwings();
@@ -77,6 +104,24 @@ export default function ArchwingBuilderPage() {
   const [weaponModPickerOpen, setWeaponModPickerOpen] = useState(false);
   const [weaponActiveSlot, setWeaponActiveSlot] = useState(0);
   const [weaponPolarities, setWeaponPolarities] = useState<Record<number, string>>({});
+  const [weaponRivenStatsMap, setWeaponRivenStatsMap] = useState<Record<number, Record<string, number>>>();
+  const [editRivenSlot, setEditRivenSlot] = useState<number | null>(null);
+
+  const rivenLibraryState = useSavedRivenLibrary(selectedWeapon?.category === "archgun" ? selectedWeapon.id : undefined);
+  const savedRivens = rivenLibraryState.list;
+  const refreshSavedRivens = rivenLibraryState.refresh;
+  const rivenLibrary = useMemo(
+    () => ({
+      signedIn: rivenLibraryState.signedIn,
+      onSave: async (r: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number; id?: string }) => {
+        if (!selectedWeapon || selectedWeapon.category !== "archgun") return false;
+        const ok = await saveBuilderRivenToLibrary(selectedWeapon, r);
+        if (ok) refreshSavedRivens();
+        return ok;
+      },
+    }),
+    [rivenLibraryState.signedIn, selectedWeapon, refreshSavedRivens],
+  );
 
   // Shared
   const [hasReactor, setHasReactor] = useState(false);
@@ -102,7 +147,15 @@ export default function ArchwingBuilderPage() {
     frameId: mode === "archwing" ? selectedArchwing?.name : selectedNecramech?.name,
     frameMods: (mode === "archwing" ? archwingMods : necramechMods).map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
     weaponId: selectedWeapon?.id,
-    weaponMods: weaponMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+    weaponMods: weaponMods.map((m) => ({
+      modId: m.modId,
+      rank: m.rank,
+      slotIndex: m.slotIndex,
+      ...(m.modName ? { modName: m.modName } : {}),
+      ...(m.polarity ? { polarity: m.polarity } : {}),
+      ...(weaponRivenStatsMap?.[m.slotIndex] ? { rivenStats: weaponRivenStatsMap[m.slotIndex] } : {}),
+      ...(m.rivenId ? { rivenId: m.rivenId } : {}),
+    })),
     hasReactor,
     hasCatalyst,
     isMR30: false,
@@ -115,7 +168,7 @@ export default function ArchwingBuilderPage() {
     exaltedWeaponPolarities: mode === "necramech" && necramechExaltedWeapon
       ? necramechExaltedSlotPolarities
       : undefined,
-  }), [mode, selectedArchwing, selectedNecramech, archwingMods, necramechMods, selectedWeapon, weaponMods, hasReactor, hasCatalyst, archwingPolarities, necramechPolarities, weaponPolarities, railjackGunnery, necramechExaltedWeapon, necramechExaltedMods, necramechExaltedSlotPolarities]);
+  }), [mode, selectedArchwing, selectedNecramech, archwingMods, necramechMods, selectedWeapon, weaponMods, weaponRivenStatsMap, hasReactor, hasCatalyst, archwingPolarities, necramechPolarities, weaponPolarities, railjackGunnery, necramechExaltedWeapon, necramechExaltedMods, necramechExaltedSlotPolarities]);
 
   // Same unsaved-changes tracking as the other builders; nothing picked yet = clean.
   const hasSelection = !!(mode === "archwing" ? selectedArchwing : selectedNecramech) || !!selectedWeapon;
@@ -147,13 +200,24 @@ export default function ArchwingBuilderPage() {
     }
   };
 
-  const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
+  const handleLoadBuild = useCallback((rawBuild: SavedBuild, options?: { silent?: boolean }) => {
     const build = cleanLoadedBuild(rawBuild);
     const d = build.data as ArchwingBuildData;
     markClean();
     setMode(d.mode as BuilderMode);
-    const restoreMods = (slots: { modId: string; rank: number; slotIndex: number }[]) =>
-      slots.map((m) => { const mod = modsMap.get(m.modId); return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain }; });
+    const restoreMods = (slots: Array<ModSlot & { modName?: string; polarity?: string; drain?: number }>) =>
+      slots.map((m) => {
+        const mod = modsMap.get(m.modId);
+        const isRiven = isRivenModId(m.modId);
+        const rank = isRiven && !m.rank && typeof m.rivenDrain === "number" ? rivenRankFromDrain(m.rivenDrain) : m.rank;
+        return {
+          ...m,
+          rank,
+          modName: (isRiven && (m.rivenName || m.modName)) || m.modName || mod?.name || "",
+          polarity: isRiven && m.rivenPolarity ? m.rivenPolarity : (m.polarity || mod?.polarity),
+          drain: isRiven ? rivenDrainFromRank(rank) : mod?.drain,
+        };
+      });
     if (d.mode === "archwing") {
       setSelectedArchwing(
         archwingList.find(
@@ -180,7 +244,16 @@ export default function ArchwingBuilderPage() {
     if (d.weaponId) {
       const found = allWeaponsData.find((w) => w.id === d.weaponId);
       setSelectedWeapon(found ? enrichWeapon(found) : null);
-      setWeaponMods(restoreMods(d.weaponMods));
+      const rivenMap: Record<number, Record<string, number>> = {};
+      for (const m of d.weaponMods || []) {
+        if (m.rivenStats) rivenMap[m.slotIndex] = m.rivenStats;
+      }
+      setWeaponRivenStatsMap(Object.keys(rivenMap).length > 0 ? rivenMap : undefined);
+      setWeaponMods(restoreMods(d.weaponMods || []));
+    } else {
+      setSelectedWeapon(null);
+      setWeaponMods([]);
+      setWeaponRivenStatsMap(undefined);
     }
     setHasReactor(d.hasReactor);
     setHasCatalyst(d.hasCatalyst);
@@ -190,10 +263,137 @@ export default function ArchwingBuilderPage() {
     setBuildName(build.name);
     setBuildIsPublic(build.isPublic ?? false);
     setShowSavedBuilds(false);
-    toast.info("Build loaded", { description: build.name });
-  }, [markClean]);
+    if (!options?.silent) toast.info("Build loaded", { description: build.name });
+  }, [markClean, archwingList, necramechList, allWeaponsData, modsMap]);
 
   useCloudBuildFromUrl("archwing", handleLoadBuild);
+
+  // Per-tab draft so library Equip can add an archgun riven to this open archwing/necramech build.
+  useEffect(() => {
+    if (!selectedWeapon || selectedWeapon.category !== "archgun" || selectedWeapon.hasRivenSlot === false) {
+      saveBuilderDraft("archwing", null);
+      return;
+    }
+    saveBuilderDraft<ArchwingBuildData>("archwing", {
+      itemId: selectedWeapon.id,
+      buildId: currentBuildId,
+      name: buildName,
+      description: "",
+      isPublic: buildIsPublic,
+      tags: [],
+      createdAt: null,
+      data: buildArchwingData(),
+      ...loadoutFieldsForDraft(null),
+    });
+  }, [buildArchwingData, selectedWeapon, currentBuildId, buildName, buildIsPublic]);
+
+  const weaponParamSeenRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (allWeaponsData.length === 0) return;
+    const params = new URLSearchParams(searchParams.toString());
+    const weaponId = params.get("weapon")?.trim();
+    const rivenParam = params.get("riven");
+    const paramKey = weaponId ? `${weaponId}|${rivenParam ?? ""}` : null;
+    if (!weaponId || paramKey === weaponParamSeenRef.current) return;
+    weaponParamSeenRef.current = paramKey;
+
+    const weapon = allWeaponsData.find((w) => w.id === weaponId);
+    if (!weapon) return;
+
+    const stripEquip = (itemId: string) => {
+      const clean = stripRivenEquipParams(window.location.pathname + window.location.search + window.location.hash);
+      weaponParamSeenRef.current = `${itemId}|`;
+      const url = new URL(clean, "http://x");
+      url.searchParams.set("weapon", itemId);
+      const qs = url.searchParams.toString();
+      window.history.replaceState(window.history.state, "", `${url.pathname}${qs ? `?${qs}` : ""}${url.hash}`);
+    };
+
+    const startFreshWeapon = (opts?: { rivenMods?: { mods: ModSlot[]; stats: Record<number, Record<string, number>> } }) => {
+      setSelectedWeapon(enrichWeapon(weapon));
+      setWeaponPolarities({});
+      if (opts?.rivenMods) {
+        setWeaponMods(opts.rivenMods.mods.map((m) => ({
+          modId: m.modId,
+          modName: m.rivenName || `${weapon.name} Riven`,
+          rank: m.rank,
+          slotIndex: m.slotIndex,
+          polarity: m.rivenPolarity,
+          drain: rivenDrainFromRank(m.rank),
+          ...(m.rivenId ? { rivenId: m.rivenId } : {}),
+        })));
+        setWeaponRivenStatsMap(opts.rivenMods.stats);
+      } else if (!rivenParam) {
+        // Selecting via ?weapon= without Equip should not wipe an already-matching gun.
+        if (selectedWeapon?.id !== weapon.id) {
+          setWeaponMods([]);
+          setWeaponRivenStatsMap(undefined);
+        }
+      }
+      if (!buildName) setBuildName(`${weapon.name} Build`);
+    };
+
+    const equip = rivenParam ? parseRivenEquip(params) : null;
+    const blocked = equip ? rivenCannotEquipReason(weapon) : null;
+    if (equip && blocked) {
+      toast.error(blocked);
+      queueMicrotask(() => startFreshWeapon());
+      stripEquip(weapon.id);
+      return;
+    }
+
+    const rivenModId = equip && !blocked ? getRivenModIdForWeapon(weapon) : null;
+    const rivenMod = rivenModId ? allMods.find((m) => m.id === rivenModId) : undefined;
+
+    if (equip && rivenMod) {
+      const draft = readBuilderDraft<ArchwingBuildData>("archwing");
+      const useDraft = draft && draftMatchesRivenWeapon(draft.itemId, weapon.id);
+      const placed = placeLibraryRivenOnMods(
+        useDraft ? (draft.data.weaponMods || []) : [],
+        { ...equip, modId: rivenMod.id, fallbackName: `${weapon.name} Riven`, catalogDrain: rivenMod.drain },
+      );
+      if (useDraft && draft) {
+        const restored: SavedBuild = {
+          id: draft.buildId || "",
+          name: draft.name || `${weapon.name} Build`,
+          description: draft.description || "",
+          isPublic: draft.isPublic,
+          tags: draft.tags,
+          type: "archwing",
+          createdAt: draft.createdAt || Date.now(),
+          updatedAt: Date.now(),
+          data: { ...draft.data, weaponId: draft.data.weaponId || draft.itemId, weaponMods: placed.mods },
+        };
+        queueMicrotask(() => {
+          handleLoadBuild(restored, { silent: true });
+          if (!draft.buildId) setCurrentBuildId(null);
+          const label = equip.name || "Riven";
+          toast.success(`Added ${label} to ${restored.name}`, {
+            description: placed.replaced
+              ? `Slot ${placed.slotIndex + 1} was full, so it replaced ${modsMap.get(placed.replaced.modId)?.name ?? "that mod"}.`
+              : undefined,
+          });
+        });
+        stripEquip(draft.itemId);
+        return;
+      }
+      const stats: Record<number, Record<string, number>> = {};
+      for (const m of placed.mods) if (m.rivenStats) stats[m.slotIndex] = m.rivenStats;
+      queueMicrotask(() => {
+        startFreshWeapon({ rivenMods: { mods: placed.mods, stats } });
+        const label = equip.name || "Riven";
+        toast.success(`Equipped ${label}`, {
+          description: placed.replaced
+            ? `Slot ${placed.slotIndex + 1} was full, so it replaced ${modsMap.get(placed.replaced.modId)?.name ?? "that mod"}.`
+            : undefined,
+        });
+      });
+      stripEquip(weapon.id);
+      return;
+    }
+
+    queueMicrotask(() => startFreshWeapon());
+  }, [allWeaponsData, allMods, modsMap, searchParams, handleLoadBuild, selectedWeapon?.id, buildName]);
 
   const handleDeleteBuild = (id: string) => {
     void deleteSavedBuild(id);
@@ -245,6 +445,11 @@ export default function ArchwingBuilderPage() {
     return allMods.filter((m) => m.category === necramechExaltedWeapon.category);
   }, [allMods, necramechExaltedWeapon]);
 
+  const weaponRivenStatChanges = useMemo(
+    () => mergeRivenStatChanges(weaponRivenStatsMap, weaponMods),
+    [weaponRivenStatsMap, weaponMods],
+  );
+
   // Weapon stats
   const weaponStats = useMemo<CalculatedStats | null>(() => {
     if (!selectedWeapon) return null;
@@ -252,8 +457,8 @@ export default function ArchwingBuilderPage() {
     const calcOptions = gunneryDmg > 0
       ? { externalBuffs: [{ id: "railjack_gunnery", label: "Gunnery intrinsic", category: "other" as const, damageBonus: gunneryDmg }] }
       : undefined;
-    return calculateWeaponBuild(selectedWeapon, weaponMods, modsMap, undefined, undefined, calcOptions);
-  }, [selectedWeapon, weaponMods, railjackGunnery, mode]);
+    return calculateWeaponBuild(selectedWeapon, weaponMods, modsMap, undefined, undefined, calcOptions, undefined, weaponRivenStatChanges);
+  }, [selectedWeapon, weaponMods, modsMap, railjackGunnery, mode, weaponRivenStatChanges]);
 
   const weaponContributionContext = useMemo(() => {
     if (!selectedWeapon) return null;
@@ -261,8 +466,9 @@ export default function ArchwingBuilderPage() {
       weapon: selectedWeapon,
       modSlots: weaponMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
       allMods: modsMap,
+      rivenStatChanges: weaponRivenStatChanges,
     });
-  }, [selectedWeapon, weaponMods, modsMap]);
+  }, [selectedWeapon, weaponMods, modsMap, weaponRivenStatChanges]);
 
   const selectedFrame = mode === "archwing" ? selectedArchwing : selectedNecramech;
 
@@ -273,7 +479,15 @@ export default function ArchwingBuilderPage() {
       frameId: selectedFrame.name,
       frameMods: (mode === "archwing" ? archwingMods : necramechMods).map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
       weaponId: selectedWeapon?.id,
-      weaponMods: weaponMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      weaponMods: weaponMods.map((m) => ({
+      modId: m.modId,
+      rank: m.rank,
+      slotIndex: m.slotIndex,
+      ...(m.modName ? { modName: m.modName } : {}),
+      ...(m.polarity ? { polarity: m.polarity } : {}),
+      ...(weaponRivenStatsMap?.[m.slotIndex] ? { rivenStats: weaponRivenStatsMap[m.slotIndex] } : {}),
+      ...(m.rivenId ? { rivenId: m.rivenId } : {}),
+    })),
       hasReactor,
       hasCatalyst,
       isMR30: false,
@@ -295,6 +509,7 @@ export default function ArchwingBuilderPage() {
     necramechMods,
     selectedWeapon,
     weaponMods,
+    weaponRivenStatsMap,
     hasReactor,
     hasCatalyst,
     archwingPolarities,
@@ -364,11 +579,13 @@ export default function ArchwingBuilderPage() {
     return weaponMods.reduce((sum, m) => {
       const mod = modsMap.get(m.modId);
       if (!mod) return sum;
-      const baseDrain = modCapacityAtRank(mod.drain, m.rank);
+      const isRiven = isRivenModId(m.modId);
+      const baseDrain = isRiven ? rivenDrainFromRank(m.rank) : modCapacityAtRank(mod.drain, m.rank);
       const slotPol = effectiveWeaponPolarities[m.slotIndex];
-      return sum + modSlotCapacityCost(baseDrain, slotPol, mod.polarity);
+      const polarity = isRiven ? (m.polarity || mod.polarity) : mod.polarity;
+      return sum + modSlotCapacityCost(baseDrain, slotPol, polarity);
     }, 0);
-  }, [weaponMods, effectiveWeaponPolarities]);
+  }, [weaponMods, effectiveWeaponPolarities, modsMap]);
 
   // Archwing / necramech mod pools
   const filteredFrameMods = useMemo(() => {
@@ -617,6 +834,8 @@ export default function ArchwingBuilderPage() {
                       setSelectedWeapon(w);
                       setWeaponMods([]);
                       setWeaponPolarities({});
+                      setWeaponRivenStatsMap(undefined);
+                      setEditRivenSlot(null);
                       setCurrentBuildId(null);
                       setBuildName(`${w.name} Build`);
                     }}
@@ -673,7 +892,8 @@ export default function ArchwingBuilderPage() {
                 <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
                   {Array.from({ length: selectedWeapon.modSlots }, (_, i) => {
                     const equipped = weaponMods.find((m) => m.slotIndex === i);
-                    const mod = equipped ? modsMap.get(equipped.modId) ?? null : null;
+                    const mod = withRivenRoll(equipped, equipped ? modsMap.get(equipped.modId) ?? null : null);
+                    const canRiven = selectedWeapon.category === "archgun" && selectedWeapon.hasRivenSlot !== false;
                     return (
                       <ModSlotCard
                         key={i}
@@ -682,10 +902,22 @@ export default function ArchwingBuilderPage() {
                         slotIndex={i}
                         slotPolarity={effectiveWeaponPolarities[i]}
                         innatePolarity={isInnatePolarity(innateWeaponPolarities, weaponPolarities, i)}
+                        rivenStats={canRiven ? weaponRivenStatsMap?.[i] : undefined}
+                        weaponCategory={selectedWeapon.category}
                         equippedModIds={weaponMods.map((m) => m.modId)}
-                        onAdd={() => { setWeaponActiveSlot(i); setWeaponModPickerOpen(true); }}
-                        onRemove={() => setWeaponMods((prev) => prev.filter((m) => m.slotIndex !== i))}
+                        onAdd={() => { setWeaponActiveSlot(i); setEditRivenSlot(null); setWeaponModPickerOpen(true); }}
+                        onRemove={() => {
+                          setWeaponMods((prev) => prev.filter((m) => m.slotIndex !== i));
+                          setWeaponRivenStatsMap((prev) => {
+                            if (!prev) return prev;
+                            const n = { ...prev };
+                            delete n[i];
+                            return n;
+                          });
+                          setEditRivenSlot((cur) => (cur === i ? null : cur));
+                        }}
                         onPolarize={(p) => setWeaponPolarities((prev) => applyPolarityOverride(prev, innateWeaponPolarities, i, p))}
+                        onEditRiven={canRiven ? () => { setWeaponActiveSlot(i); setEditRivenSlot(i); setWeaponModPickerOpen(true); } : undefined}
                       />
                     );
                   })}
@@ -783,18 +1015,68 @@ export default function ArchwingBuilderPage() {
       {/* Weapon Mod Picker */}
       <ModPicker
         open={weaponModPickerOpen}
-        onClose={() => setWeaponModPickerOpen(false)}
+        onClose={() => { setWeaponModPickerOpen(false); setEditRivenSlot(null); }}
         mods={filteredWeaponMods}
         category="_prefiltered"
         statFilterCategory={selectedWeapon?.category}
         equippedModIds={weaponMods.map((m) => m.modId)}
+        activeSlotModId={weaponMods.find((m) => m.slotIndex === weaponActiveSlot)?.modId}
+        editRiven={(() => {
+          if (editRivenSlot == null || !weaponModPickerOpen) return null;
+          const eq = weaponMods.find((m) => m.slotIndex === editRivenSlot);
+          const mod = eq ? modsMap.get(eq.modId) : undefined;
+          if (!eq || !mod || !isRivenModId(eq.modId)) return null;
+          return {
+            mod,
+            stats: weaponRivenStatsMap?.[editRivenSlot] ?? {},
+            polarity: eq.polarity,
+            drain: rivenDrainFromRank(eq.rank),
+            name: eq.modName && eq.modName !== mod.name ? eq.modName : undefined,
+            libraryId: eq.rivenId,
+          };
+        })()}
+        savedRivens={selectedWeapon?.category === "archgun" ? savedRivens : undefined}
+        rivenLibrary={selectedWeapon?.category === "archgun" ? rivenLibrary : undefined}
+        weaponCategory={selectedWeapon?.category}
+        weapon={selectedWeapon ?? undefined}
         slotNav={buildSlotNav(Array.from({ length: selectedWeapon?.modSlots ?? 0 }, (_, i) => i), weaponActiveSlot, setWeaponActiveSlot)}
         onSelect={(mod, rank) => {
           setWeaponMods((prev) => {
             const filtered = prev.filter((m) => m.slotIndex !== weaponActiveSlot);
             return [...filtered, { modId: mod.id, modName: mod.name, rank, slotIndex: weaponActiveSlot, polarity: mod.polarity, drain: mod.drain }];
           });
+          setWeaponRivenStatsMap((prev) => {
+            if (!prev || !(weaponActiveSlot in prev)) return prev;
+            const n = { ...prev };
+            delete n[weaponActiveSlot];
+            return n;
+          });
+          setEditRivenSlot(null);
         }}
+        onSelectRiven={selectedWeapon?.category === "archgun" && selectedWeapon.hasRivenSlot !== false
+          ? (mod, stats, meta) => {
+              const rank = meta?.drain != null ? rivenRankFromDrain(meta.drain) : 8;
+              const polarity = meta?.polarity || mod.polarity;
+              const displayName = meta?.name || mod.name;
+              setWeaponMods((prev) => {
+                const filtered = prev.filter((m) => m.slotIndex !== weaponActiveSlot);
+                return [
+                  ...filtered,
+                  {
+                    modId: mod.id,
+                    modName: displayName,
+                    rank,
+                    slotIndex: weaponActiveSlot,
+                    polarity,
+                    drain: rivenDrainFromRank(rank),
+                    ...(meta?.id ? { rivenId: meta.id } : {}),
+                  },
+                ];
+              });
+              setEditRivenSlot(null);
+              setWeaponRivenStatsMap((prev) => ({ ...(prev || {}), [weaponActiveSlot]: stats }));
+            }
+          : undefined}
       />
 
       {/* Necramech Exalted Weapon Mod Picker */}

@@ -14,6 +14,7 @@ import {
   type WeaponCalculationOptions,
 } from "@/lib/types";
 import { mergeWeaponCalcOptions, resolveWeaponExternalBuffs, type WeaponBuffContext } from "@/lib/weapons/weapon-external-buffs";
+import { isRivenModId } from "@/lib/rivens/riven-equip";
 import {
   countSetModsInSlots,
   VIGILANTE_MOD_IDS,
@@ -204,7 +205,7 @@ function enumerateSources(ctx: WeaponDpsCalcContext): OmitSource[] {
     const mod = ctx.allMods.get(slot.modId);
     if (!mod) continue;
     const rank = Math.min(Math.max(slot.rank ?? 0, 0), mod.maxRank);
-    const isRiven = slot.modId.startsWith("riven_");
+    const isRiven = isRivenModId(slot.modId);
     sources.push({
       id: `mod:${slot.slotIndex}:${slot.modId}`,
       label: isRiven ? mod.name || "Riven" : mod.name,

@@ -283,7 +283,7 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
   /** This weapon's riven card, when it takes one (drives the always-visible "Saved rivens" group). */
   const weaponRivenMod = useMemo(() => {
     if (!onSelectRiven || slotType !== "regular" || !weaponCategory) return null;
-    return mods.find((m) => m.subCategory === "riven" && rivenModMatchesWeapon(m.id, weapon, weaponCategory)) ?? null;
+    return mods.find((m) => isRivenMod(m) && rivenModMatchesWeapon(m.id, weapon, weaponCategory)) ?? null;
   }, [mods, onSelectRiven, slotType, weapon, weaponCategory]);
   const showSavedRivenGroup =
     !!weaponRivenMod && (visibleSavedRivens.length > 0 || (!!rivenLibrary && !search.trim()));

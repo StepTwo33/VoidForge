@@ -170,3 +170,44 @@ describe("placeRiven", () => {
     ]);
   });
 });
+
+describe("archgun Equip routing", () => {
+  it("sends an archgun riven to the weapon builder when no archwing draft is open", () => {
+    const href = rivenEquipHref(
+      { weaponId: "imperator", weaponType: "Archgun", stats: { damage: 1 }, polarity: "madurai", rank: 8 },
+      { drafts: {} },
+    );
+    expect(href).toContain("/weapon-builder?weapon=imperator&");
+    expect(href).not.toContain("/archwing-builder");
+  });
+  it("returns an archgun riven to the open archwing build when that draft matches", () => {
+    const archwing: BuilderDraft<unknown> = {
+      itemId: "imperator",
+      buildId: "a1",
+      name: "Odonata Build",
+      description: "",
+      isPublic: false,
+      tags: [],
+      createdAt: 1,
+      data: { mode: "archwing", weaponId: "imperator" },
+    };
+    const href = rivenEquipHref(
+      { weaponId: "imperator", weaponType: "Archgun", stats: { damage: 1 }, polarity: "madurai", rank: 8, name: "Imperator Riven" },
+      { drafts: { archwing, weapon: { ...archwing, name: "Imperator WB" } } },
+    );
+    expect(href).toContain("/archwing-builder?weapon=imperator&");
+    expect(href).not.toContain("/weapon-builder");
+    expect(matchingDraftKind("imperator", { archwing })).toBe("archwing");
+  });
+  it("does not send an Imperator riven to an archwing draft that has a different archgun", () => {
+    const archwing: BuilderDraft<unknown> = {
+      itemId: "corvas", buildId: null, name: "Corvas", description: "", isPublic: false, tags: [], createdAt: 1, data: {},
+    };
+    const href = rivenEquipHref(
+      { weaponId: "imperator", weaponType: "Archgun", stats: { damage: 1 }, polarity: "madurai", rank: 8 },
+      { drafts: { archwing } },
+    );
+    expect(href).toContain("/weapon-builder?weapon=imperator&");
+    expect(matchingDraftKind("imperator", { archwing })).toBeNull();
+  });
+});

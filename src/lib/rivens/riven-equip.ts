@@ -36,9 +36,9 @@ export function rivenEquipQuery(r: RivenEquipPayload): string {
   return p.toString();
 }
 
-export type BuilderDraftKind = "weapon" | "companion" | "modular";
+export type BuilderDraftKind = "weapon" | "companion" | "modular" | "archwing";
 
-export const BUILDER_DRAFT_KINDS: readonly BuilderDraftKind[] = ["companion", "modular", "weapon"];
+export const BUILDER_DRAFT_KINDS: readonly BuilderDraftKind[] = ["archwing", "companion", "modular", "weapon"];
 
 export interface BuilderDraftLoadout {
   loadoutId: string;
@@ -122,6 +122,7 @@ function defaultBuilderPath(r: Pick<RivenEquipLinkInput, "weaponId" | "weaponTyp
 
 function pathForKind(kind: BuilderDraftKind, r: Pick<RivenEquipLinkInput, "weaponId" | "weaponType" | "weaponCategory">, itemId: string): string {
   const w = encodeURIComponent(itemId || r.weaponId);
+  if (kind === "archwing") return `/archwing-builder?weapon=${w}`;
   if (kind === "companion") return `/companion-builder?weapon=${w}`;
   if (kind === "modular") {
     if (r.weaponType === "Zaw" || r.weaponCategory === "zaw_strike") return `/modular-builder?type=zaw&part=${w}`;
@@ -177,13 +178,14 @@ export function readAllBuilderDrafts(): RivenEquipDrafts {
     weapon: readBuilderDraft("weapon"),
     companion: readBuilderDraft("companion"),
     modular: readBuilderDraft("modular"),
+    archwing: readBuilderDraft("archwing"),
   };
 }
 
 /**
  * Builder link that equips a library riven. When a matching build is open in this tab
- * (weapon, companion or modular), the link returns to that builder so the riven is added
- * to that build. Weapons that cannot take rivens should be blocked by {@link rivenCannotEquipReason}
+ * (weapon, companion, modular or archwing), the link returns to that builder so the riven is added
+ * to that build. Archguns fall back to the weapon builder when no archwing draft is open. Weapons that cannot take rivens should be blocked by {@link rivenCannotEquipReason}
  * before following the link.
  */
 export function rivenEquipHref(r: RivenEquipLinkInput, opts?: { drafts?: RivenEquipDrafts }): string {

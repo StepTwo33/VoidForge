@@ -3,11 +3,7 @@ import type { Mod } from "@/lib/types";
 import { isWeaponExclusiveMod } from "@/lib/mods/weapon-mod-tags";
 import { getExclusiveModIdsForWeapon } from "@/lib/mods/weapon-exclusive-mods";
 
-/** Universal archgun slot mods (excludes riven placeholder and mis-scraped entries). */
-const ARCHGUN_POOL_BLOCKLIST = new Set([
-  "archgun_riven_mod",
-]);
-
+/** Universal archgun slot mods, including the Archgun Riven placeholder. */
 /** Weapon-exclusive augments for this archgun (empty today — Warframe has none). */
 export function getArchgunWeaponAugmentModIds(weaponId: string): readonly string[] {
   return getExclusiveModIdsForWeapon(weaponId).filter((modId) => {
@@ -33,7 +29,7 @@ export function archgunModsForBuilder(weaponId: string | undefined): Mod[] {
       out.push(mod);
       continue;
     }
-    if (mod.category === "archgun" && !ARCHGUN_POOL_BLOCKLIST.has(mod.id)) {
+    if (mod.category === "archgun") {
       out.push(mod);
     }
   }

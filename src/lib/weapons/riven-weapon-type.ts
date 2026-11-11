@@ -99,14 +99,24 @@ export function rivenModMatchesWeapon(
     return modId === "kitgun_riven_mod";
   }
 
-  // 3. Sentinel / Companion weapons: ONLY match companion_weapon_riven_mod!
+  // 3. Sentinel / Hound / MOA weapons: ONLY match companion_weapon_riven_mod.
   const c = (target.category || "").toLowerCase();
   if (c === "sentinel_weapon" || c === "hound_weapon") {
     return modId === "companion_weapon_riven_mod";
   }
 
-  // 4. Deny zaw, kitgun, or companion weapon rivens on regular weapons:
-  if (modId === "zaw_riven_mod" || modId === "kitgun_riven_mod" || modId === "companion_weapon_riven_mod") {
+  // 4. Archguns use the catalog id archgun_riven_mod (not riven_archgun).
+  if (c === "archgun") {
+    return getRivenWeaponType(target) !== null && modId === "archgun_riven_mod";
+  }
+
+  // 5. Deny zaw, kitgun, companion, or archgun rivens on regular weapons:
+  if (
+    modId === "zaw_riven_mod" ||
+    modId === "kitgun_riven_mod" ||
+    modId === "companion_weapon_riven_mod" ||
+    modId === "archgun_riven_mod"
+  ) {
     return false;
   }
 
@@ -120,7 +130,8 @@ export function rivenModMatchesWeapon(
  * - Zaws -> zaw_riven_mod
  * - Kitguns -> kitgun_riven_mod
  * - Sentinel / Hound weapons -> companion_weapon_riven_mod
- * - Rifles, Shotguns, Pistols, Melee, Archguns -> riven_<type>
+ * - Archguns -> archgun_riven_mod
+ * - Rifles, Shotguns, Pistols, Melee -> riven_<type>
  */
 export function getRivenModIdForWeapon(
   weapon:
@@ -139,6 +150,7 @@ export function getRivenModIdForWeapon(
   const cat = (weapon.category || "").toLowerCase();
   if (cat === "sentinel_weapon" || cat === "hound_weapon") return "companion_weapon_riven_mod";
   const type = getRivenWeaponType(weapon);
+  if (type === "Archgun") return "archgun_riven_mod";
   return type ? `riven_${type.toLowerCase()}` : null;
 }
 
