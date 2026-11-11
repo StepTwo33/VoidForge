@@ -105,6 +105,7 @@ describe("warframe arsenal lotus resolve", () => {
     expect(mapped?.data.parts.prism).toBe("amp_lega");
     expect(mapped?.data.parts.scaffold).toBe("amp_pencha");
     expect(mapped?.data.parts.brace).toBe("amp_anspatha");
+    expect(mapped?.slot).toBeNull();
   });
 
   it("resolves companions by uniqueName even when itemName is a custom pet name", () => {

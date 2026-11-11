@@ -1,6 +1,6 @@
 import { Loadout, ModularBuildData, ModSlot } from "../types";
 import { allWeapons } from "@/data/weapons";
-import { inferModularLoadoutSlot } from "./modular-resolve";
+import { inferModularLoadoutSlot, modularBuildDisplayName } from "./modular-resolve";
 import { companionsMap } from "@/data/companions";
 import { migrateClawModsFromCompanion, migratePostureToPostureSlot } from "@/lib/weapons/companion-weapons";
 import type { SavedBuild } from "./build-storage";
@@ -227,10 +227,19 @@ function normalizeLoadout(raw: Loadout): Loadout {
       arcaneIds: m.arcaneIds as (string | null)[] | undefined,
       customName: (m.customName ?? m.name) as string | undefined,
     };
-    const slot =
-      (m.slot as "primary" | "secondary" | "melee" | undefined) ??
-      inferModularLoadoutSlot(partial);
-    if (!modularBuilds[slot]) modularBuilds[slot] = partial;
+    const explicit = m.slot as "primary" | "secondary" | "melee" | undefined;
+    const slot = explicit ?? inferModularLoadoutSlot(partial);
+    if (slot) {
+      // Keep a legacy Amp already stored on a weapon column; don't infer a new one there.
+      if (!modularBuilds[slot]) modularBuilds[slot] = partial;
+    } else if (partial.modularType === "amp" && !out.operatorBuild?.ampModularBuild) {
+      // Unslotted legacy Amp: park it on the Operator instead of a weapon column.
+      out.operatorBuild = {
+        ...(out.operatorBuild ?? {}),
+        ampModularBuild: partial,
+        ampName: modularBuildDisplayName(partial),
+      };
+    }
   }
 
   delete out.modularBuild;

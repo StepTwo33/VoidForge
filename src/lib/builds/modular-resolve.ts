@@ -57,18 +57,37 @@ export function modularBuildDisplayName(data: ModularBuildData): string {
   return `${data.modularType} build`;
 }
 
-/** Guess which loadout weapon slot this modular belongs in (for migration / defaults). */
-export function inferModularLoadoutSlot(data: ModularBuildData): "primary" | "secondary" | "melee" {
+export type LoadoutWeaponSlot = "primary" | "secondary" | "melee";
+
+/**
+ * Guess which loadout weapon slot this modular belongs in (for migration / defaults).
+ * Amps are Operator-only and never infer into a weapon column.
+ */
+export function inferModularLoadoutSlot(data: ModularBuildData): LoadoutWeaponSlot | null {
+  if (data.modularType === "amp") return null;
   const w = weaponFromModularData(data);
   if (data.modularType === "zaw") return "melee";
-  if (data.modularType === "amp") return "primary";
   if (!w) return "secondary";
   if (w.category === "melee" || w.triggerType === "Melee") return "melee";
   if (["secondary", "pistol", "dual_pistols"].includes(w.category)) return "secondary";
   return "primary";
 }
 
-export type LoadoutWeaponSlot = "primary" | "secondary" | "melee";
+export type ModularTypeName = "kitgun" | "zaw" | "amp";
+
+/**
+ * Type buttons shown in the Modular Builder. Amp is hidden while editing a
+ * weapon slot (Primary / Secondary / Melee). A legacy Amp already in that slot
+ * stays visible so the user can see it and switch away.
+ */
+export function visibleModularTypes(
+  currentType: ModularTypeName,
+  editingWeaponSlot: boolean,
+): ModularTypeName[] {
+  if (!editingWeaponSlot) return ["kitgun", "zaw", "amp"];
+  if (currentType === "amp") return ["kitgun", "zaw", "amp"];
+  return ["kitgun", "zaw"];
+}
 
 /** Whether a modular saved build is valid for a loadout weapon column. */
 export function modularBuildMatchesLoadoutSlot(data: ModularBuildData, slot: LoadoutWeaponSlot): boolean {

@@ -76,6 +76,9 @@ export function withLoadoutModular(
     }
   }
 
+  // Amps are Operator-only; never write one into a Primary / Secondary / Melee column.
+  if (data?.modularType === "amp") return loadout;
+
   if (data) modularBuilds[w] = { ...data };
   else delete modularBuilds[w];
 

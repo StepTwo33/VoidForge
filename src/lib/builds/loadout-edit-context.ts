@@ -68,7 +68,10 @@ export function withLoadoutSlot(loadout: Loadout, ctx: LoadoutEditContext, data:
     }
     case "modular": {
       const ws: LoadoutWeaponSlot = ctx.slot === "secondary" || ctx.slot === "melee" ? ctx.slot : "primary";
-      const next = withLoadoutModular(loadout, ws, data as ModularBuildData);
+      const d = data as ModularBuildData;
+      // Amps are Operator-only and must not replace the weapon in this column.
+      if (!d || d.modularType === "amp") return loadout;
+      const next = withLoadoutModular(loadout, ws, d);
       if (ws === "primary") delete next.primaryBuild;
       if (ws === "secondary") delete next.secondaryBuild;
       if (ws === "melee") delete next.meleeBuild;

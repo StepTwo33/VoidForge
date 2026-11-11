@@ -70,7 +70,7 @@ import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { snapshotFromBuild } from "@/lib/builds/compare-build";
 import { extractBuildItemId } from "@/lib/builds/build-types";
 import { keepLegalModularBuild } from "@/lib/builds/modular-part-edit";
-import { weaponFromModularData } from "@/lib/builds/modular-resolve";
+import { visibleModularTypes, weaponFromModularData } from "@/lib/builds/modular-resolve";
 import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 
 type ModularType = "kitgun" | "zaw" | "amp";
@@ -467,7 +467,15 @@ export default function ModularBuilderPage() {
     if (!options?.silent) toast.info("Build loaded", { description: build.name });
   }, [markClean, modsMap, setShowSavedBuilds]);
 
-  useCloudBuildFromUrl("modular", handleLoadBuild);
+  useCloudBuildFromUrl("modular", (rawBuild) => {
+    const d = rawBuild.data as ModularBuildData;
+    const slotParam = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("slot") : null;
+    if (d.modularType === "amp" && isLoadoutWeaponSlot(slotParam)) {
+      toast.error("Amps belong on the Operator and can't be used in a weapon slot.");
+      return;
+    }
+    handleLoadBuild(rawBuild);
+  });
   const { context: loadoutCtx, clearContext: clearLoadoutCtx, restoreContext: restoreLoadoutCtx } = useLoadoutSlotFromUrl("modular", handleLoadBuild);
   const { confirm } = useConfirmDialog();
   // Slot the loadout still holds this item in until we save a move (ctx.slot may already show the destination).
@@ -796,6 +804,10 @@ export default function ModularBuilderPage() {
     if (values.target === "loadout" && loadoutCtx) {
       const data = buildModularData();
       if (!data) return false;
+      if (data.modularType === "amp" && isLoadoutWeaponSlot(loadoutCtx.slot)) {
+        toast.error("Amps belong on the Operator and can't be saved in a weapon slot.");
+        return false;
+      }
       const originRaw = originSlotRef.current ?? loadoutCtx.slot;
       const origin = isLoadoutWeaponSlot(originRaw) ? originRaw : null;
       const dest = slotForModularBuild(data);
@@ -989,9 +1001,12 @@ export default function ModularBuilderPage() {
 
   const requestTypeChange = async (t: ModularType) => {
     if (t === modularType) return;
+    const originRaw = loadoutCtx ? (originSlotRef.current ?? loadoutCtx.slot) : null;
+    // Amps are Operator-only. The Amp type button is hidden on a weapon slot;
+    // ignore the switch if something still invokes it.
+    if (t === "amp" && isLoadoutWeaponSlot(originRaw)) return;
     if (loadoutCtx) {
-      const originRaw = originSlotRef.current ?? loadoutCtx.slot;
-      const originLabel = loadoutSlotLabel(originRaw);
+      const originLabel = loadoutSlotLabel(originRaw ?? loadoutCtx.slot);
       if (t === "zaw" && isLoadoutWeaponSlot(originRaw) && originRaw !== "melee") {
         const ok = await confirm({
           title: "Switch to Zaw?",
@@ -999,18 +1014,14 @@ export default function ModularBuilderPage() {
           confirmLabel: "Switch to Zaw",
         });
         if (!ok) return;
-      } else if (t === "amp") {
-        const ok = await confirm({
-          title: "Switch to Amp?",
-          description: "Amps are equipped on the Operator, not in a weapon slot. Saving this Amp will not update this loadout's weapon slot.",
-          confirmLabel: "Switch to Amp",
-        });
-        if (!ok) return;
       }
     }
     setModularType(t);
     resetMods();
   };
+
+  const editingWeaponSlot = !!(loadoutCtx && isLoadoutWeaponSlot(loadoutCtx.slot));
+  const typesToShow = visibleModularTypes(modularType, editingWeaponSlot);
 
   const openModSlot = (i: number) => {
     const isExilus = isSecondaryKitgun && i === SECONDARY_EXILUS_SLOT_INDEX;
@@ -1060,9 +1071,15 @@ export default function ModularBuilderPage() {
         </div>
         <p className="text-muted-foreground mb-6">Build custom Kitguns, Zaws, and Amps from parts</p>
 
+        {editingWeaponSlot && modularType === "amp" && (
+          <div role="note" className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
+            Amps belong on the Operator, not in a weapon slot. This one is from older data — switch to a Kitgun or Zaw, or clear the slot on the loadout. Saving this Amp will not write it back here.
+          </div>
+        )}
+
         {/* Type selector */}
         <div className="flex gap-2 mb-6">
-          {(Object.keys(typeLabels) as ModularType[]).map((t) => (
+          {typesToShow.map((t) => (
             <button
               key={t}
               onClick={() => { void requestTypeChange(t); }}
@@ -1703,7 +1720,14 @@ export default function ModularBuilderPage() {
           const d = build.data as ModularBuildData;
           return `${d.modularType} • ${d.mods?.length ?? 0} mods • ${new Date(build.updatedAt).toLocaleDateString()}`;
         }}
-        onLoad={handleLoadBuild}
+        onLoad={(build) => {
+          const d = build.data as ModularBuildData;
+          if (d.modularType === "amp" && loadoutCtx && isLoadoutWeaponSlot(loadoutCtx.slot)) {
+            toast.error("Amps belong on the Operator and can't be used in a weapon slot.");
+            return;
+          }
+          handleLoadBuild(build);
+        }}
         onDelete={handleDeleteBuild}
       />
 

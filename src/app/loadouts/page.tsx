@@ -1448,6 +1448,11 @@ export default function LoadoutsPage() {
                                 {getSlotModLabel(loadout, slot)}
                                 {isModularSlot ? " • Modular" : ""}
                               </span>
+                              {ws && getLoadoutModular(loadout, ws)?.modularType === "amp" && (
+                                <span className="mt-0.5 block text-[11px] text-amber-800 dark:text-amber-300">
+                                  Amp — Operator only. It does not belong in this slot.
+                                </span>
+                              )}
                             </div>
                           </div>
                           <div className="flex flex-col gap-1.5 mt-auto pt-1">

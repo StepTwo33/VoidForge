@@ -419,7 +419,7 @@ export function mapCompanionPartsFromArsenal(
 /** Map DE modularParts / parser parts to Voidforge modular build parts. */
 export function mapModularPartsFromArsenal(
   parts: Record<string, unknown> | undefined,
-): { data: ModularBuildData; slot: "primary" | "secondary" | "melee" } | undefined {
+): { data: ModularBuildData; slot: "primary" | "secondary" | "melee" | null } | undefined {
   if (!parts) return undefined;
 
   const collected: Partial<Record<string, string>> = {};
@@ -462,9 +462,11 @@ export function mapModularPartsFromArsenal(
     slotPolarities: {},
   };
 
+  // Amps are Operator-only — never report a weapon-column slot.
+  if (modularType === "amp") return { data, slot: null };
+
   let slot: "primary" | "secondary" | "melee" = "secondary";
   if (modularType === "zaw") slot = "melee";
-  else if (modularType === "amp") slot = "primary";
   else {
     const gripId = collected.grip;
     const grip = kitgunGrips.find((g) => g.id === gripId);

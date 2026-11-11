@@ -673,14 +673,21 @@ function weaponBuildFromArsenal(
     const { mods, stanceModId } = mapMods(modularExilus ? WEAPON_IMPORT_EXILUS_SLOT : null);
     const { arcaneIds } = mapArcaneIds(weapon.upgrades.arcanes, warnings);
     const customName = raw.itemName ? parseCustomItemName(raw.itemName) : weapon.name;
-    const build: ModularBuildData & { slot: "primary" | "secondary" | "melee" } = {
-      ...modularFromParts.data,
-      slot: modularFromParts.slot,
+    const shared = {
       mods,
       arcaneIds,
       hasOrokinCatalyst: rawHasDoubleCapacity(rawWeapon),
       customName: customName || undefined,
       isMR30: (weapon.xp ?? raw.xp ?? 0) >= 900_000,
+    };
+    // Amps never occupy a weapon column. Callers may attach the build to the Operator.
+    if (modularFromParts.data.modularType === "amp" || modularFromParts.slot == null) {
+      return { kind: "amp" as const, build: { ...modularFromParts.data, ...shared } };
+    }
+    const build: ModularBuildData & { slot: "primary" | "secondary" | "melee" } = {
+      ...modularFromParts.data,
+      slot: modularFromParts.slot,
+      ...shared,
     };
     if (stanceModId && modularFromParts.slot === "melee") {
       // Stance is tracked on melee weapon builds; modular zaws use stance in mods list.
@@ -787,8 +794,10 @@ function assignWeaponSlot(
   loadout: Omit<Loadout, "id" | "createdAt" | "updatedAt">,
   slot: "primary" | "secondary" | "melee",
   mapped: ReturnType<typeof weaponBuildFromArsenal>,
-) {
+): ModularBuildData | undefined {
   if (!mapped) return;
+  // Never put an Amp in a weapon column; the caller can park it on the Operator.
+  if (mapped.kind === "amp") return mapped.build;
   if (mapped.kind === "modular") {
     const builds = { ...(loadout.modularBuilds ?? {}) };
     if (!builds[slot]) {
@@ -983,21 +992,23 @@ export function mapArsenalToImportPayload(
     companionBuild,
   };
 
-  assignWeaponSlot(
+  const leftoverAmps: ModularBuildData[] = [];
+  const takeAmp = (amp?: ModularBuildData) => { if (amp) leftoverAmps.push(amp); };
+  takeAmp(assignWeaponSlot(
     resultLoadout,
     "primary",
     weaponBuildFromArsenal(loadout.primary, rawNormal?.primary, warnings),
-  );
-  assignWeaponSlot(
+  ));
+  takeAmp(assignWeaponSlot(
     resultLoadout,
     "secondary",
     weaponBuildFromArsenal(loadout.secondary, rawNormal?.secondary, warnings),
-  );
-  assignWeaponSlot(
+  ));
+  takeAmp(assignWeaponSlot(
     resultLoadout,
     "melee",
     weaponBuildFromArsenal(loadout.melee, rawNormal?.melee, warnings),
-  );
+  ));
 
   // Archgun (heavy) — import as primary when no primary is set.
   if (
@@ -1019,6 +1030,16 @@ export function mapArsenalToImportPayload(
 
   if (account.focusSchool) {
     resultLoadout.operatorBuild = { focusSchool: account.focusSchool };
+  }
+
+  // An Amp that landed in a weapon column of the payload belongs on the Operator.
+  const leftoverAmp = leftoverAmps[0];
+  if (leftoverAmp && !resultLoadout.operatorBuild?.ampModularBuild) {
+    resultLoadout.operatorBuild = {
+      ...(resultLoadout.operatorBuild ?? {}),
+      ampModularBuild: leftoverAmp,
+      ampName: leftoverAmp.customName,
+    };
   }
 
   // The game never lets incompatible mods share an item, but keep the import safe anyway.
