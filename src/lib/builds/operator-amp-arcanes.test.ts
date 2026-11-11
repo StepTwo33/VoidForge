@@ -76,3 +76,37 @@ describe("operator amp arcanes (wiki: Virtuos/Eternal slot on the Amp)", () => {
     ]);
   });
 });
+
+describe("Amp arcane edits write back to the saved Modular Amp (Terkeon report)", () => {
+  const saved = (id: string, name: string, data: ModularBuildData) => ({ id, name, type: "modular" as const, data });
+
+  it("finds the source Amp by ampId and writes the edited arcanes onto it", async () => {
+    const { ampArcaneWriteBack, modularAmpRefId } = await import("./operator-amp-arcanes");
+    const lib = [saved("a1", "Terkeon Amp", amp({ ids: ["virtuos_shadow", null], ranks: [5, 5] }))];
+    const out = ampArcaneWriteBack(
+      { ampId: modularAmpRefId("a1"), ampModularBuild: amp({ ids: ["virtuos_shadow", "eternal_eradicate"], ranks: [5, 3] }) },
+      lib,
+    );
+    expect(out?.id).toBe("a1");
+    expect((out?.data as ModularBuildData).arcaneIds).toEqual(["virtuos_shadow", "eternal_eradicate"]);
+    expect((out?.data as ModularBuildData).arcaneRanks).toEqual([5, 3]);
+    expect((out?.data as ModularBuildData).parts.prism).toBe("raplak_prism");
+  });
+
+  it("returns null when nothing changed or the Amp is a preset", async () => {
+    const { ampArcaneWriteBack } = await import("./operator-amp-arcanes");
+    const lib = [saved("a1", "Terkeon Amp", amp({ ids: ["virtuos_shadow", null], ranks: [5, 5] }))];
+    expect(ampArcaneWriteBack({ ampId: "modular_a1", ampModularBuild: amp({ ids: ["virtuos_shadow", null], ranks: [5, 5] }) }, lib)).toBeNull();
+    expect(ampArcaneWriteBack({ ampId: "sirocco" }, lib)).toBeNull();
+  });
+
+  it("falls back to a unique name + parts match for loadouts attached without an id", async () => {
+    const { findSourceModularAmp } = await import("./operator-amp-arcanes");
+    const lib = [
+      saved("a1", "Terkeon Amp", amp()),
+      saved("a2", "Other Amp", amp()),
+    ];
+    expect(findSourceModularAmp({ ampId: "sirocco", ampName: "Terkeon Amp", ampModularBuild: amp() }, lib)?.id).toBe("a1");
+    expect(findSourceModularAmp({ ampModularBuild: amp() }, lib)).toBeNull();
+  });
+});

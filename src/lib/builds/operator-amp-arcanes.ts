@@ -106,3 +106,58 @@ export function persistOperatorAmpArcanes(
     ampArcaneRanks: padded.ranks,
   };
 }
+
+/** `ampId` the operator builder gives an equipped saved Modular Amp. */
+export function modularAmpRefId(buildId: string): string {
+  return `modular_${buildId}`;
+}
+
+type SavedAmpLike = { id: string; name: string; type: string; data: unknown };
+
+function sameParts(a: ModularBuildData, b: ModularBuildData): boolean {
+  const keys = ["prism", "scaffold", "brace"] as const;
+  return keys.every((k) => (a.parts?.[k] ?? "") === (b.parts?.[k] ?? ""));
+}
+
+/**
+ * The saved Modular Amp an operator build / loadout points at: by `ampId` ("modular_<id>"),
+ * else (older loadouts attached before the id was kept) the only saved Amp with the same
+ * name and parts. Null for preset Amps or when it can't be told apart.
+ */
+export function findSourceModularAmp<T extends SavedAmpLike>(
+  ob: { ampId?: string; ampName?: string; ampModularBuild?: ModularBuildData | null },
+  saved: readonly T[],
+): T | null {
+  const amps = saved.filter((b) => b.type === "modular" && (b.data as ModularBuildData)?.modularType === "amp");
+  if (ob.ampId?.startsWith("modular_")) {
+    const id = ob.ampId.slice("modular_".length);
+    const byId = amps.find((b) => b.id === id);
+    if (byId) return byId;
+  }
+  const modular = ob.ampModularBuild;
+  if (!modular) return null;
+  const matches = amps.filter(
+    (b) => sameParts(b.data as ModularBuildData, modular) && (!ob.ampName || b.name === ob.ampName),
+  );
+  return matches.length === 1 ? matches[0] : null;
+}
+
+/**
+ * Report (Terkeon): editing Amp arcanes in the operator builder must update the Amp itself.
+ * Returns the saved Modular Amp with the operator's Amp arcanes written on it, or null when
+ * there is no saved source or its arcanes already match.
+ */
+export function ampArcaneWriteBack<T extends SavedAmpLike>(
+  ob: { ampId?: string; ampName?: string; ampModularBuild?: ModularBuildData | null },
+  saved: readonly T[],
+): T | null {
+  const modular = ob.ampModularBuild;
+  if (!modular) return null;
+  const source = findSourceModularAmp(ob, saved);
+  if (!source) return null;
+  const sourceData = source.data as ModularBuildData;
+  const want = padArcaneSlots(modular.arcaneIds, modular.arcaneRanks);
+  const have = padArcaneSlots(sourceData.arcaneIds, sourceData.arcaneRanks);
+  if (JSON.stringify(want) === JSON.stringify(have)) return null;
+  return { ...source, data: writeAmpArcanesOnModular(sourceData, want.ids, want.ranks) };
+}

@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useMemo, useRef, startTransition } fr
 import { useRouter } from "next/navigation";
 import { PageShell, PageMain, PageHero, ContentPanel, EmptyState } from "@/components/page-shell";
 import { getLoadouts, saveLoadout, deleteLoadout, generateId, loadoutToBuildData, loadoutFromSavedBuild, mergeCloudLoadoutPreservingSlots, moveLoadout } from "@/lib/builds/loadouts";
-import { migrateOperatorAmpArcanes } from "@/lib/builds/operator-amp-arcanes";
+import { migrateOperatorAmpArcanes, modularAmpRefId } from "@/lib/builds/operator-amp-arcanes";
 import { decodeLoadoutShare, encodeLoadoutShare, loadoutSharePath } from "@/lib/builds/loadout-share";
 import {
   generateBuildId,
@@ -800,6 +800,7 @@ export default function LoadoutsPage() {
             updated.operatorBuild = migrateOperatorAmpArcanes({
               ...prev,
               ampModularBuild: d,
+              ampId: modularAmpRefId(build.id),
               ampName: build.name,
               // Drop leftover operator-build amp arcanes so they don't leak onto a newly attached Amp.
               ampArcaneIds: undefined,
@@ -871,6 +872,7 @@ export default function LoadoutsPage() {
           operatorBuild: {
             ...(loadout.operatorBuild ?? {}),
             ampModularBuild: data,
+            ampId: modularAmpRefId(build.id),
             ampName: build.name,
           },
         };
