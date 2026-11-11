@@ -298,6 +298,10 @@ export interface ModSlot {
   rivenPolarity?: string;
   /** User-entered riven capacity drain (as shown in game); catalog default is 10. */
   rivenDrain?: number;
+  /** Riven name as saved in the Riven Library (kept through save / load). */
+  rivenName?: string;
+  /** Riven Library id, so saving an equipped library riven again updates it. */
+  rivenId?: string;
 }
 
 /** Optional other loadout slots so cross-slot mod sets (Augur, Hunter, Synth, …) count correctly. */
@@ -327,6 +331,8 @@ export interface EquippedMod {
   slotIndex: number;
   polarity?: string;
   drain?: number;
+  /** Riven Library id of an equipped saved riven (re-saving updates it instead of duplicating). */
+  rivenId?: string;
 }
 
 export interface StatusResistanceEntry {

@@ -1,5 +1,6 @@
 "use client";
 
+import { parseRivenEquip } from "@/lib/rivens/riven-equip";
 import {
   applyPolarityOverride,
   effectiveSlotPolarities,
@@ -255,7 +256,7 @@ export default function CompanionBuilderPage() {
   const rivenLibrary = useMemo(
     () => ({
       signedIn: rivenLibraryState.signedIn,
-      onSave: async (r: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number }) => {
+      onSave: async (r: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number; id?: string }) => {
         if (!selectedWeapon) return false;
         const ok = await saveBuilderRivenToLibrary(selectedWeapon, r);
         if (ok) refreshSavedRivens();
@@ -276,6 +277,7 @@ export default function CompanionBuilderPage() {
       polarity: eq.polarity,
       drain: rivenDrainFromRank(eq.rank),
       name: eq.modName && eq.modName !== mod.name ? eq.modName : undefined,
+      libraryId: eq.rivenId,
     };
   }, [editRivenSlot, modPickerOpen, modPickerTarget, weaponMods, modsMap, weaponRivenStatsMap]);
 
@@ -464,6 +466,8 @@ export default function CompanionBuilderPage() {
     setBuildName(`${companion.name} — ${weapon.name} Build`);
 
     const rivenParam = params.get("riven");
+    // Riven Library Equip links also carry polarity, rank, name and library id.
+    const equipMeta = rivenParam ? parseRivenEquip(params) : null;
     if (rivenParam) {
       try {
         const stats = sanitizeRivenStats(JSON.parse(rivenParam));
@@ -472,11 +476,12 @@ export default function CompanionBuilderPage() {
           setWeaponMods([
             {
               modId: rivenMod.id,
-              modName: `${weapon.name} Riven`,
-              rank: 8,
+              modName: equipMeta?.name || `${weapon.name} Riven`,
+              rank: equipMeta?.rank ?? 8,
               slotIndex: 0,
-              polarity: rivenMod.polarity || "madurai",
+              polarity: equipMeta?.polarity ?? rivenMod.polarity,
               drain: rivenMod.drain,
+              ...(equipMeta?.id ? { rivenId: equipMeta.id } : {}),
             },
           ]);
           setWeaponRivenStatsMap({ 0: stats });
@@ -866,7 +871,7 @@ export default function CompanionBuilderPage() {
     setEditRivenSlot((cur) => (cur === slotIndex ? null : cur));
   }, []);
 
-  const handleSelectWeaponRiven = useCallback((mod: Mod, stats: Record<string, number>, meta?: { polarity?: string; drain?: number; name?: string }) => {
+  const handleSelectWeaponRiven = useCallback((mod: Mod, stats: Record<string, number>, meta?: { polarity?: string; drain?: number; name?: string; id?: string }) => {
     const rank = meta?.drain != null ? rivenRankFromDrain(meta.drain) : 8;
     const polarity = meta?.polarity || mod.polarity;
     const displayName = meta?.name || mod.name;
@@ -881,6 +886,7 @@ export default function CompanionBuilderPage() {
           slotIndex: activeWeaponSlotIndex,
           polarity,
           drain: rivenDrainFromRank(rank),
+          ...(meta?.id ? { rivenId: meta.id } : {}),
         },
       ];
     });
@@ -1566,6 +1572,7 @@ export default function CompanionBuilderPage() {
         statFilterCategory={modPickerTarget === "weapon" ? "primary" : "companion"}
         slotType="regular"
         equippedModIds={equippedModIds}
+        activeSlotModId={modPickerTarget === "weapon" ? weaponMods.find((m) => m.slotIndex === activeWeaponSlotIndex)?.modId : undefined}
         onSelect={handleSelectMod}
         onSelectRiven={modPickerTarget === "weapon" && selectedWeapon?.category !== "beast_claw" ? handleSelectWeaponRiven : undefined}
         editRiven={editRivenTarget}

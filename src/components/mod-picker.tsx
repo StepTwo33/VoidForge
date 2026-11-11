@@ -30,6 +30,8 @@ import {
   validateRivenStats,
 } from "@/lib/riven/riven-validation";
 
+import { isRivenModId } from "@/lib/rivens/riven-equip";
+
 function isRivenMod(mod: Mod): boolean {
   return (
     mod.subCategory === "riven" ||
@@ -90,7 +92,9 @@ interface ModPickerProps {
   onSelect: (mod: Mod, rank: number) => void;
   onSelectRiven?: (mod: Mod, stats: Record<string, number>, meta?: RivenSelectMeta) => void;
   /** Open straight into the riven editor pre-filled (Edit riven). */
-  editRiven?: { mod: Mod; stats: Record<string, number>; polarity?: string; drain?: number; name?: string } | null;
+  editRiven?: { mod: Mod; stats: Record<string, number>; polarity?: string; drain?: number; name?: string; libraryId?: string } | null;
+  /** Mod in the slot this picker opened for (a riven there may be replaced; one elsewhere blocks a second). */
+  activeSlotModId?: string;
   /** Signed-in user's saved rivens for this weapon (Round 54 riven library). */
   savedRivens?: SavedRivenEntry[];
   /**
@@ -99,7 +103,8 @@ interface ModPickerProps {
    */
   rivenLibrary?: {
     signedIn: boolean;
-    onSave: (riven: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number }) => Promise<boolean>;
+    /** `id` updates that library riven instead of adding a copy. Resolves to the saved id (or true) on success. */
+    onSave: (riven: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number; id?: string }) => Promise<boolean | string>;
   };
   weaponCategory?: string; // for riven stat pool filtering
   /** When set, filters mods by beam / AoE / projectile wiki compatibility tags. */
@@ -135,6 +140,8 @@ export interface RivenSelectMeta {
   drain: number;
   /** Saved-riven name when equipped from the riven library. */
   name?: string;
+  /** Riven Library id when the riven came from (or was just saved to) the library. */
+  id?: string;
 }
 
 export interface SavedRivenEntry {
@@ -156,7 +163,7 @@ export interface ModPickerSlotNav {
   onNext?: () => void;
 }
 
-export function ModPicker({ open, onClose, mods, category, statFilterCategory, slotType = "regular", equippedModIds, onSelect, onSelectRiven, weaponCategory, weapon, incarnonFormTriggerType, warframeId, helminthAbility, archwingId, arcaneCatalog, pickerMode = "mods", initialBrowseTab = "mods", equippedArcaneIds = [], slotNav, editRiven, savedRivens, rivenLibrary, elsewhereMods }: ModPickerProps) {
+export function ModPicker({ open, onClose, mods, category, statFilterCategory, slotType = "regular", equippedModIds, onSelect, onSelectRiven, weaponCategory, weapon, incarnonFormTriggerType, warframeId, helminthAbility, archwingId, arcaneCatalog, pickerMode = "mods", initialBrowseTab = "mods", equippedArcaneIds = [], slotNav, editRiven, activeSlotModId, savedRivens, rivenLibrary, elsewhereMods }: ModPickerProps) {
   const [search, setSearch] = useState("");
   const [selectedMod, setSelectedMod] = useState<Mod | null>(null);
   const [selectedRank, setSelectedRank] = useState(0);
@@ -165,12 +172,16 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
   const [rivenStats, setRivenStats] = useState<Record<string, number>>({});
   const [rivenPolarity, setRivenPolarity] = useState<string>(DEFAULT_RIVEN_POLARITY);
   const [rivenDrain, setRivenDrain] = useState<number>(DEFAULT_RIVEN_DRAIN);
+  // Library copy of the riven in the editor (from Edit riven, or after Save to library), so a second
+  // save updates it and Equip keeps its id and name.
+  const [libraryCopy, setLibraryCopy] = useState<{ id: string; name: string } | null>(null);
   const rivenCategory = rivenPoolCategory(weapon, weaponCategory || category);
   // Edit riven: open straight into the editor pre-filled (adjust-state-during-render on open).
   const editKey = open && editRiven ? `${editRiven.mod.id}:${JSON.stringify(editRiven.stats)}:${editRiven.polarity}:${editRiven.drain}` : null;
   const [prevEditKey, setPrevEditKey] = useState<string | null>(null);
   if (prevEditKey !== editKey) {
     setPrevEditKey(editKey);
+    setLibraryCopy(editKey && editRiven?.libraryId ? { id: editRiven.libraryId, name: editRiven.name ?? "" } : null);
     if (editKey && editRiven) {
       setSelectedMod(editRiven.mod);
       setRivenStats(editRiven.stats);
@@ -276,17 +287,32 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
   }, [mods, onSelectRiven, slotType, weapon, weaponCategory]);
   const showSavedRivenGroup =
     !!weaponRivenMod && (visibleSavedRivens.length > 0 || (!!rivenLibrary && !search.trim()));
+  /** A weapon takes one riven: one equipped in another slot blocks adding a second from this slot. */
+  const rivenInOtherSlot = useMemo(() => {
+    const rivenCount = equippedModIds.filter((id) => isRivenModId(id)).length;
+    return rivenCount > (activeSlotModId && isRivenModId(activeSlotModId) ? 1 : 0);
+  }, [equippedModIds, activeSlotModId]);
 
   const [libraryName, setLibraryName] = useState("");
   const [librarySaving, setLibrarySaving] = useState(false);
   const saveToLibrary = async () => {
     if (!rivenLibrary || !selectedMod || !isRivenMod(selectedMod) || !rivenValidation.ok) return;
     setLibrarySaving(true);
-    const name = libraryName.trim() || editRiven?.name || `${weapon?.name ?? "Weapon"} riven`;
-    const ok = await rivenLibrary.onSave({ name, modId: selectedMod.id, stats: rivenStats, polarity: rivenPolarity, drain: rivenDrain });
+    const name = libraryName.trim() || libraryCopy?.name || editRiven?.name || `${weapon?.name ?? "Weapon"} riven`;
+    const ok = await rivenLibrary.onSave({
+      name,
+      modId: selectedMod.id,
+      stats: rivenStats,
+      polarity: rivenPolarity,
+      drain: rivenDrain,
+      ...(libraryCopy?.id ? { id: libraryCopy.id } : {}),
+    });
     setLibrarySaving(false);
     if (ok) {
-      toast.success(`Saved “${name}” to your riven library`);
+      const updated = !!libraryCopy?.id;
+      if (typeof ok === "string") setLibraryCopy({ id: ok, name });
+      else if (libraryCopy) setLibraryCopy({ ...libraryCopy, name });
+      toast.success(updated ? `Updated “${name}” in your riven library` : `Saved “${name}” to your riven library`);
       setLibraryName("");
     } else {
       toast.error("Could not save the riven. Try again.");
@@ -299,6 +325,7 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
       polarity: normalizeRivenPolarity(entry.polarity),
       drain: clampRivenDrain(entry.drain),
       name: entry.name,
+      id: entry.id,
     });
     setSelectedMod(null);
     setRivenStats({});
@@ -309,6 +336,7 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
   };
 
   const handleSelectMod = (mod: Mod) => {
+    setLibraryCopy(null);
     setSelectedMod(mod);
     setSelectedRank(mod.maxRank);
   };
@@ -317,10 +345,12 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
     if (selectedMod) {
       if (isRivenMod(selectedMod) && onSelectRiven) {
         if (!rivenValidation.ok) return;
+        const name = libraryCopy?.name || editRiven?.name;
         onSelectRiven(selectedMod, rivenStats, {
           polarity: rivenPolarity,
           drain: rivenDrain,
-          ...(editRiven?.name ? { name: editRiven.name } : {}),
+          ...(name ? { name } : {}),
+          ...(libraryCopy?.id ? { id: libraryCopy.id } : {}),
         });
       } else {
         onSelect(selectedMod, selectedRank);
@@ -336,6 +366,7 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
   };
 
   const handleClose = () => {
+    setLibraryCopy(null);
     setSelectedMod(null);
     setSelectedRank(0);
     setRivenStats({});
@@ -711,12 +742,17 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
                         Manage library
                       </Link>
                     </div>
+                    {rivenInOtherSlot && (
+                      <p className="px-1 text-xs text-orange-800 dark:text-orange-300" data-testid="riven-already-equipped">
+                        This weapon already has a riven. A weapon takes one riven: remove it or tap its slot to edit it.
+                      </p>
+                    )}
                     {visibleSavedRivens.length === 0 && (
                       <div className="flex flex-col gap-2 px-1 pb-1 sm:flex-row sm:items-center sm:justify-between">
                         <p className="text-xs text-muted-foreground">
                           {rivenLibrary?.signedIn
                             ? "None saved for this weapon yet. Fill in a riven and tap Save to library."
-                            : "Sign in to save rivens once and equip them on any build."}
+                            : "None saved for this weapon yet. Fill in a riven and tap Save to library to keep it on this device; sign in to sync it to your account."}
                         </p>
                         {weaponRivenMod && (
                           <Button
@@ -724,6 +760,7 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
                             size="sm"
                             variant="outline"
                             onClick={() => handleSelectMod(weaponRivenMod)}
+                            disabled={rivenInOtherSlot}
                             className="min-h-11 shrink-0 pointer-fine:min-h-8"
                           >
                             New riven
@@ -737,9 +774,10 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
                         type="button"
                         role="option"
                         aria-selected={false}
-                        disabled={!valid}
+                        aria-disabled={!valid || rivenInOtherSlot}
+                        disabled={!valid || rivenInOtherSlot}
                         onClick={() => equipSavedRiven(entry, mod)}
-                        title={valid ? "Equip this saved riven" : "This saved riven doesn't pass validation; edit it on My Builds"}
+                        title={valid ? "Equip this saved riven" : "This saved riven doesn't pass validation; edit it in the Riven Library"}
                         className="flex min-h-11 w-full items-start gap-2 rounded-md border border-border bg-background px-2.5 py-2 text-left transition-colors hover:border-purple-500/60 disabled:opacity-50"
                       >
                         <PolarityIcon polarity={entry.polarity} size={14} className="mt-0.5 shrink-0" />
@@ -749,6 +787,11 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
                             <span className="shrink-0 font-mono text-[11px] text-muted-foreground">R{rivenRankFromDrain(entry.drain)} · {clampRivenDrain(entry.drain)}</span>
                           </span>
                           <span className="block text-[11px] leading-snug text-purple-800 dark:text-purple-300">{lines.join(" · ")}</span>
+                          {!valid && (
+                            <span className="mt-0.5 block text-[11px] text-orange-800 dark:text-orange-300">
+                              Doesn&apos;t pass riven checks. Edit it in the Riven Library to use it.
+                            </span>
+                          )}
                         </span>
                       </button>
                     ))}

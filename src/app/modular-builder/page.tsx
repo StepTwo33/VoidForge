@@ -1,5 +1,6 @@
 "use client";
 
+import { parseRivenEquip } from "@/lib/rivens/riven-equip";
 import { BuilderSectionNav } from "@/components/builder-section-nav";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { PageShell } from "@/components/page-shell";
@@ -155,7 +156,7 @@ export default function ModularBuilderPage() {
   const rivenLibrary = useMemo(
     () => ({
       signedIn: rivenLibraryState.signedIn,
-      onSave: async (r: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number }) => {
+      onSave: async (r: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number; id?: string }) => {
         if (!assembledWeapon) return false;
         const ok = await saveBuilderRivenToLibrary(assembledWeapon, r);
         if (ok) refreshSavedRivens();
@@ -176,6 +177,7 @@ export default function ModularBuilderPage() {
       polarity: eq.polarity,
       drain: rivenDrainFromRank(eq.rank),
       name: eq.modName && eq.modName !== mod.name ? eq.modName : undefined,
+      libraryId: eq.rivenId,
     };
   }, [editRivenSlot, modPickerOpen, equippedMods, modsMap, rivenStatsMap]);
 
@@ -191,6 +193,7 @@ export default function ModularBuilderPage() {
           slotIndex: activeSlotIndex,
           polarity: meta?.polarity ?? mod.polarity,
           drain: mod.drain,
+          ...(meta?.id ? { rivenId: meta.id } : {}),
         },
       ];
     });
@@ -310,6 +313,8 @@ export default function ModularBuilderPage() {
     const typeParam = params.get("type")?.toLowerCase();
     const partParam = params.get("part")?.trim();
     const rivenParam = params.get("riven");
+    // Riven Library Equip links also carry polarity, rank, name and library id.
+    const equipMeta = rivenParam ? parseRivenEquip(params) : null;
     if (!typeParam && !partParam) return;
 
     queueMicrotask(() => {
@@ -341,11 +346,12 @@ export default function ModularBuilderPage() {
             setEquippedMods([
               {
                 modId: rivenMod.id,
-                modName: `${chamber.name} Riven`,
-                rank: 8,
+                modName: equipMeta?.name || `${chamber.name} Riven`,
+                rank: equipMeta?.rank ?? 8,
                 slotIndex: 0,
-                polarity: rivenMod.polarity || "madurai",
+                polarity: equipMeta?.polarity ?? rivenMod.polarity,
                 drain: rivenMod.drain,
+                ...(equipMeta?.id ? { rivenId: equipMeta.id } : {}),
               },
             ]);
             setRivenStatsMap({ 0: parsedStats });
@@ -373,11 +379,12 @@ export default function ModularBuilderPage() {
             setEquippedMods([
               {
                 modId: rivenMod.id,
-                modName: `${strike.name} Riven`,
-                rank: 8,
+                modName: equipMeta?.name || `${strike.name} Riven`,
+                rank: equipMeta?.rank ?? 8,
                 slotIndex: 0,
-                polarity: rivenMod.polarity || "madurai",
+                polarity: equipMeta?.polarity ?? rivenMod.polarity,
                 drain: rivenMod.drain,
+                ...(equipMeta?.id ? { rivenId: equipMeta.id } : {}),
               },
             ]);
             setRivenStatsMap({ 0: parsedStats });
@@ -1349,6 +1356,7 @@ export default function ModularBuilderPage() {
           weaponCategory={assembledWeapon.category}
           weapon={assembledWeapon}
           equippedModIds={equippedMods.map((m) => m.modId)}
+          activeSlotModId={equippedMods.find((m) => m.slotIndex === activeSlotIndex)?.modId}
           slotNav={buildSlotNav(Array.from({ length: totalModSlots }, (_, i) => i), activeSlotIndex, openModSlot)}
           onSelect={(mod, rank) => {
             setEquippedMods((prev) => {

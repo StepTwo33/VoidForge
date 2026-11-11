@@ -40,7 +40,9 @@ import {
   resolveIncarnonGenesisInstalled,
   incarnonGenesisFormTrigger,
 } from "@/lib/calc/incarnon-active-weapon";
-import { Weapon, Mod, CalculatedStats, EquippedMod, SetBonusLinkage, SimulationParams, DEFAULT_SIM_PARAMS, WeaponCalculationOptions } from "@/lib/types";
+import { Weapon, Mod, CalculatedStats, EquippedMod, SetBonusLinkage, SimulationParams, DEFAULT_SIM_PARAMS, WeaponCalculationOptions, type ModSlot } from "@/lib/types";
+import { parseRivenEquip, placeRiven, readBuilderDraft, saveBuilderDraft, stripRivenEquipParams } from "@/lib/rivens/riven-equip";
+import { getRivenFamilyWeaponIds } from "@/lib/weapons/riven-family";
 import { applyGravimagMode, weaponHasGravimagMode } from "@/lib/weapons/weapon-gravimag";
 import { applyAlternateMode, getAlternateModes, weaponHasStanceFormMode } from "@/lib/weapons/weapon-alternate-mode";
 import { computeAltFire } from "@/lib/weapons/alt-fire";
@@ -358,6 +360,7 @@ export default function WeaponBuilderPage() {
         const riven = isRivenSlotModId(m.modId) ? rivenStatsMap[m.slotIndex] : undefined;
         if (!riven) return { modId: m.modId, rank: m.rank, slotIndex: m.slotIndex };
         // Round 54: rivens keep their rolls, polarity and drain through save / load.
+        const catalogName = modsMap.get(m.modId)?.name;
         return {
           modId: m.modId,
           rank: m.rank,
@@ -365,6 +368,8 @@ export default function WeaponBuilderPage() {
           rivenStats: riven,
           ...(m.polarity ? { rivenPolarity: m.polarity } : {}),
           rivenDrain: rivenDrainFromRank(m.rank),
+          ...(m.modName && m.modName !== catalogName ? { rivenName: m.modName } : {}),
+          ...(m.rivenId ? { rivenId: m.rivenId } : {}),
         };
       }),
       stanceModId: stanceMod?.id,
@@ -385,9 +390,25 @@ export default function WeaponBuilderPage() {
       ...(Object.keys(selectedEvolutions).length > 0 ? { incarnonEvolutions: selectedEvolutions } : {}),
       ...incarnonExtrasForSave(incarnonConditionals, genesisInstalledOverride),
     };
-  }, [selectedWeapon, equippedMods, rivenStatsMap, stanceMod, equippedArcanes, equippedArcaneRanks, hasOrokinCatalyst, adversaryFormas, slotPolarities, progenitorOptions, selectedEvolutions, incarnonConditionals, genesisInstalledOverride]);
+  }, [selectedWeapon, equippedMods, rivenStatsMap, stanceMod, equippedArcanes, equippedArcaneRanks, hasOrokinCatalyst, adversaryFormas, slotPolarities, progenitorOptions, selectedEvolutions, incarnonConditionals, genesisInstalledOverride, modsMap]);
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildWeaponData()), [buildWeaponData]));
+
+  // Per-tab draft of the open build: Riven Library "Equip" adds its riven to this build.
+  useEffect(() => {
+    const data = buildWeaponData();
+    if (!data || !selectedWeapon) return;
+    saveBuilderDraft<WeaponBuildData>("weapon", {
+      itemId: selectedWeapon.id,
+      buildId: currentBuildId,
+      name: buildName,
+      description: buildDescription,
+      isPublic: buildIsPublic,
+      tags: buildTags,
+      createdAt: buildCreatedAt,
+      data,
+    });
+  }, [buildWeaponData, selectedWeapon, currentBuildId, buildName, buildDescription, buildIsPublic, buildTags, buildCreatedAt]);
 
   const applyLoadedBuild = useCallback((rawBuild: SavedBuild, options?: { silent?: boolean }) => {
     const build = cleanLoadedBuild(rawBuild);
@@ -416,9 +437,10 @@ export default function WeaponBuilderPage() {
       return {
         ...m,
         rank,
-        modName: mod?.name ?? "",
+        modName: (isRiven && m.rivenName) || mod?.name || "",
         polarity: isRiven && m.rivenPolarity ? m.rivenPolarity : mod?.polarity,
         drain: mod?.drain,
+        ...(isRiven && m.rivenId ? { rivenId: m.rivenId } : {}),
       };
     }));
     if (d.stanceModId) {
@@ -945,33 +967,68 @@ export default function WeaponBuilderPage() {
       setShowWeaponList(false);
       return;
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from the URL (an external system) on load and Back/Forward
-    handleSelectWeapon(weapon);
-    if (rivenParam && allMods.length > 0) {
-      try {
-        const parsedStats = sanitizeRivenStats(JSON.parse(rivenParam));
-        const modId = getRivenModIdForWeapon(weapon);
-        const rivenMod = modId ? allMods.find((m) => m.id === modId) : undefined;
-        if (rivenMod && parsedStats && Object.keys(parsedStats).length > 0) {
-          queueMicrotask(() => {
-          setEquippedMods([
-            {
-              modId: rivenMod.id,
-              modName: `${weapon.name} Riven`,
-              rank: 8,
-              slotIndex: 0,
-              polarity: rivenMod.polarity || "madurai",
-              drain: rivenDrainFromRank(8),
-            },
-          ]);
-          setRivenStatsMap({ 0: parsedStats });
-          });
-        }
-      } catch {
-        // Ignore malformed riven JSON in URL
-      }
+    const equip = rivenParam ? parseRivenEquip(params) : null;
+    const rivenModId = equip ? getRivenModIdForWeapon(weapon) : null;
+    const rivenMod = rivenModId ? allMods.find((m) => m.id === rivenModId) : undefined;
+    if (!equip || !rivenMod) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from the URL (an external system) on load and Back/Forward
+      handleSelectWeapon(weapon);
+      return;
     }
-  }, [allWeapons, allMods, searchParams, handleSelectWeapon]);
+    // Riven Library "Equip": add the riven to the build open in this tab (same weapon or a variant
+    // that takes this riven), keeping its polarity, rank and name; otherwise start a new build.
+    const family = new Set([weapon.id, ...getRivenFamilyWeaponIds(weapon.id)]);
+    const draft = readBuilderDraft<WeaponBuildData>("weapon");
+    const draftWeapon = draft && family.has(draft.itemId) ? allWeapons.find((w) => w.id === draft.itemId) : undefined;
+    const targetWeapon = draftWeapon ?? weapon;
+    const baseMods: ModSlot[] = draftWeapon && draft ? draft.data.mods : [];
+    const baseStats: Record<number, Record<string, number>> = {};
+    for (const m of baseMods) if (m.rivenStats) baseStats[m.slotIndex] = m.rivenStats;
+    const placed = placeRiven(
+      baseMods.map((m) => ({ ...m, modName: modsMap.get(m.modId)?.name ?? "" })),
+      baseStats,
+      { ...equip, modId: rivenMod.id, fallbackName: `${targetWeapon.name} Riven`, catalogDrain: rivenMod.drain },
+      { regularSlots: Math.min(targetWeapon.modSlots || 8, WEAPON_EXILUS_SLOT_INDEX), isRivenModId: isRivenSlotModId },
+    );
+    const mods: ModSlot[] = placed.mods.map((m) => {
+      if (m.slotIndex !== placed.slotIndex) return m;
+      return {
+        modId: m.modId,
+        rank: m.rank,
+        slotIndex: m.slotIndex,
+        rivenStats: equip.stats,
+        rivenPolarity: equip.polarity,
+        rivenDrain: rivenDrainFromRank(equip.rank),
+        ...(equip.name ? { rivenName: equip.name } : {}),
+        ...(equip.id ? { rivenId: equip.id } : {}),
+      };
+    });
+    const restored: SavedBuild = {
+      id: (draftWeapon && draft?.buildId) || "",
+      name: (draftWeapon && draft?.name) || `${targetWeapon.name} Build`,
+      description: (draftWeapon && draft?.description) || "",
+      isPublic: (draftWeapon && draft?.isPublic) || false,
+      tags: (draftWeapon && draft?.tags) || [],
+      type: "weapon",
+      createdAt: (draftWeapon && draft?.createdAt) || Date.now(),
+      updatedAt: Date.now(),
+      data: { ...(draftWeapon && draft ? draft.data : { weaponId: targetWeapon.id, mods: [] }), weaponId: targetWeapon.id, mods } as WeaponBuildData,
+    };
+    if (!draftWeapon) handleSelectWeapon(targetWeapon);
+    queueMicrotask(() => {
+      applyLoadedBuild(restored, { silent: true });
+      if (!draftWeapon) setCurrentBuildId(null);
+      const label = equip.name || "Riven";
+      toast.success(draftWeapon ? `Added ${label} to ${restored.name}` : `Equipped ${label}`, {
+        description: placed.replaced
+          ? `Slot ${placed.slotIndex + 1} was full, so it replaced ${modsMap.get(placed.replaced.modId)?.name ?? "that mod"}.`
+          : undefined,
+      });
+    });
+    const clean = stripRivenEquipParams(window.location.pathname + window.location.search + window.location.hash);
+    weaponParamSeenRef.current = `${targetWeapon.id}|`;
+    window.history.replaceState(window.history.state, "", hrefWithWeaponParam(clean, targetWeapon.id));
+  }, [allWeapons, allMods, modsMap, searchParams, handleSelectWeapon, applyLoadedBuild]);
 
   const handleOpenModPicker = useCallback((slotIndex: number) => {
     setActiveSlotIndex(slotIndex);
@@ -1022,6 +1079,7 @@ export default function WeaponBuilderPage() {
           slotIndex: activeSlotIndex,
           polarity: meta?.polarity ?? mod.polarity,
           drain: mod.drain,
+          ...(meta?.id ? { rivenId: meta.id } : {}),
         },
       ];
     });
@@ -1040,14 +1098,20 @@ export default function WeaponBuilderPage() {
   const rivenLibrary = useMemo(
     () => ({
       signedIn: rivenLibraryState.signedIn,
-      onSave: async (r: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number }) => {
+      onSave: async (r: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number; id?: string }) => {
         if (!selectedWeapon) return false;
-        const ok = await saveBuilderRivenToLibrary(selectedWeapon, r);
-        if (ok) refreshSavedRivens();
-        return ok;
+        const savedId = await saveBuilderRivenToLibrary(selectedWeapon, r);
+        if (savedId) {
+          refreshSavedRivens();
+          // The riven being edited is this library entry now: later saves update it.
+          if (editRivenSlot != null) {
+            setEquippedMods((prev) => prev.map((m) => (m.slotIndex === editRivenSlot && isRivenSlotModId(m.modId) ? { ...m, rivenId: savedId, modName: r.name } : m)));
+          }
+        }
+        return savedId;
       },
     }),
-    [rivenLibraryState.signedIn, selectedWeapon, refreshSavedRivens],
+    [rivenLibraryState.signedIn, selectedWeapon, refreshSavedRivens, editRivenSlot],
   );
   const editRivenTarget = useMemo(() => {
     if (editRivenSlot == null || !modPickerOpen) return null;
@@ -1060,6 +1124,7 @@ export default function WeaponBuilderPage() {
       polarity: eq.polarity,
       drain: rivenDrainFromRank(eq.rank),
       name: eq.modName && eq.modName !== mod.name ? eq.modName : undefined,
+      libraryId: eq.rivenId,
     };
   }, [editRivenSlot, modPickerOpen, equippedMods, modsMap, rivenStatsMap]);
   const modCategory = selectedWeapon ? getModCategory(selectedWeapon.category) : "primary";
@@ -1748,6 +1813,7 @@ export default function WeaponBuilderPage() {
         rivenLibrary={rivenLibrary}
         slotType={modPickerSlotType}
         equippedModIds={equippedModIds}
+        activeSlotModId={equippedMods.find((m) => m.slotIndex === activeSlotIndex)?.modId}
         onSelect={handleSelectMod}
         onSelectRiven={handleSelectRiven}
         weaponCategory={selectedWeapon?.category}

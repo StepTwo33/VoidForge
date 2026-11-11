@@ -11,10 +11,13 @@ import {
   evaluateSavedRiven,
   generateRivenId,
   getSavedRivens as getLocalSavedRivens,
+  deleteRiven as deleteLocalRiven,
   saveRiven as saveLocalRiven,
   type SavedRiven,
 } from "@/lib/rivens/riven-storage";
 import { rivenRankFromDrain } from "@/lib/riven/riven-validation";
+import { UNKNOWN_RIVEN_MASTERY } from "@/lib/rivens/riven-library-sync";
+import { rivenSaveId } from "@/lib/rivens/riven-save-id";
 import {
   getEffectiveRivenWeaponType,
   getRivenBaseWeapon,
@@ -59,8 +62,8 @@ export async function saveBuilderRivenToLibrary(
     kitgunChamberCategory?: Weapon["kitgunChamberCategory"];
     arcaneType?: string;
   },
-  riven: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number },
-): Promise<boolean> {
+  riven: { name: string; modId: string; stats: Record<string, number>; polarity: string; drain: number; id?: string },
+): Promise<string | false> {
   const resolved = resolveRivenWeapon(weapon.id);
   const baseWeapon = resolved ? getRivenBaseWeapon(resolved) : null;
   const canonicalId = baseWeapon?.id ?? resolved?.id ?? weapon.id;
@@ -69,10 +72,16 @@ export async function saveBuilderRivenToLibrary(
   const effType = getEffectiveRivenWeaponType(baseWeapon ?? resolved ?? weapon) ?? "Rifle";
   const statPool = getRivenWeaponType(baseWeapon ?? resolved ?? weapon) ?? "Rifle";
   const rank = rivenRankFromDrain(riven.drain);
+  // Saving a riven that came from the library updates that entry (keeping its rerolls / MR).
+  const existing = riven.id ? getLocalSavedRivens().find((r) => r.id === riven.id) : undefined;
+  const rerolls = existing?.rerolls ?? 0;
+  const masteryRank = existing?.masteryRank ?? UNKNOWN_RIVEN_MASTERY;
 
   let cloudSavedId: string | null = null;
   try {
     const cloudSaved = await saveCloudRiven({
+      ...(riven.id ? { id: rivenSaveId(riven.id) } : {}),
+      ...(existing ? { rerolls, masteryRank } : {}),
       weaponId: canonicalId,
       name: riven.name,
       modId: riven.modId,
@@ -87,8 +96,11 @@ export async function saveBuilderRivenToLibrary(
 
   try {
     const evalRes = evaluateSavedRiven(canonicalName, statPool, riven.stats, rank, 0, riven.polarity);
+    const id = cloudSavedId ?? riven.id ?? generateRivenId();
+    if (riven.id && cloudSavedId && cloudSavedId !== riven.id) deleteLocalRiven(riven.id);
     saveLocalRiven({
-      id: cloudSavedId ?? generateRivenId(),
+      ...(existing ?? {}),
+      id,
       weaponId: canonicalId,
       weaponName: canonicalName,
       weaponCategory: canonicalCategory,
@@ -98,17 +110,17 @@ export async function saveBuilderRivenToLibrary(
       displayStats: evalRes.displayStats,
       polarity: riven.polarity,
       rank,
-      rerolls: 0,
-      masteryRank: 12,
+      rerolls,
+      masteryRank,
       score: evalRes.score,
       grade: evalRes.grade,
       gradeColor: evalRes.color,
-      createdAt: Date.now(),
+      createdAt: existing?.createdAt ?? Date.now(),
       updatedAt: Date.now(),
     });
-    return true;
+    return id;
   } catch {
-    return cloudSavedId !== null;
+    return cloudSavedId ?? false;
   }
 }
 
