@@ -51,7 +51,8 @@ interface RivenDialogProps {
   hideWeaponSelect?: boolean;
 }
 
-export const POLARITIES: readonly string[] = RIVEN_POLARITIES;
+/** Same set as RIVEN_POLARITIES, in the order the dialog and library list them. */
+export const POLARITIES: readonly string[] = ["madurai", "vazarin", "naramon"] satisfies readonly (typeof RIVEN_POLARITIES)[number][];
 const WEAPON_CATEGORIES = ["All", "Rifle", "Shotgun", "Pistol", "Melee", "Kitgun", "Zaw", "Companion", "Archgun"] as const;
 
 function formatRangeHint(stat: RivenStat | undefined, isCurse = false): string {
