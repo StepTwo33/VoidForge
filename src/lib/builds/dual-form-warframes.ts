@@ -1,5 +1,6 @@
 import type { Ability, ModSlot, Warframe } from "@/lib/types";
 import type { WarframeBuildData } from "@/lib/builds/build-storage";
+import { SEVAGOTH_SHADOW_ABILITIES, SEVAGOTH_SHADOW_BASE_STATS } from "@/data/sevagoth-shadow";
 
 export const EMPTY_ARCANE_IDS: (string | null)[] = [null, null];
 export const DEFAULT_ARCANE_RANKS = [5, 5] as const;
@@ -14,18 +15,56 @@ export interface DualFormDef {
    * live in the rank-30 tables under `<warframeId>#<formId>`.
    */
   baseStats?: Pick<Warframe, "health" | "shield" | "armor" | "energy" | "sprintSpeed">;
+  /**
+   * The form's own four abilities (game slots 1-4) when they are not part of the
+   * warframe's `abilities` list (Sevagoth's Shadow). Helminth can't replace these.
+   */
+  abilities?: Ability[];
+  /** The form always has an Orokin Reactor installed (Sevagoth's Shadow). */
+  preinstalledReactor?: boolean;
 }
 
 export interface DualFormWarframeConfig {
   /** Stored in `mods` / `slotPolarities` on save. */
   defaultFormId: string;
   forms: DualFormDef[];
+  /** One-line builder hint shown under the form tabs. */
+  note: string;
+  /** Hint above the Archon Shard row (shards are shared across forms). */
+  shardsNote: string;
+  /**
+   * Form whose Ability Strength sets the exalted weapon's base damage, whichever form
+   * tab is open (Shadow Claws use Sevagoth's strength, not the Shadow's).
+   */
+  exaltedStrengthFormId?: string;
+}
+
+function sevagothConfig(): DualFormWarframeConfig {
+  return {
+    defaultFormId: "sevagoth",
+    exaltedStrengthFormId: "sevagoth",
+    note:
+      "Sevagoth's Shadow is modded separately in game: its own mods, Aura, Exilus and arcanes, with a built-in Orokin Reactor. Archon Shards (and Helminth invigorations) on Sevagoth apply to both. The Shadow's abilities use the Shadow's mods; the Shadow Claws' base damage uses Sevagoth's Ability Strength.",
+    shardsNote: "One shard set for Sevagoth and his Shadow — switching tabs keeps these equipped.",
+    forms: [
+      { id: "sevagoth", label: "Sevagoth" },
+      {
+        id: "shadow",
+        label: "Shadow",
+        baseStats: SEVAGOTH_SHADOW_BASE_STATS,
+        abilities: SEVAGOTH_SHADOW_ABILITIES,
+        preinstalledReactor: true,
+      },
+    ],
+  };
 }
 
 /** Warframes that occupy one slot but have independent mod configurations per form. */
 export const DUAL_FORM_WARFRAMES: Record<string, DualFormWarframeConfig> = {
   sirius_orion: {
     defaultFormId: "sirius",
+    note: "Sirius and Orion share one loadout slot. Mods and arcanes are saved per form; archon shards and Helminth apply to both.",
+    shardsNote: "One shard set for Sirius & Orion — switching forms keeps these equipped.",
     forms: [
       { id: "sirius", label: "Sirius", signatureMeleeId: "pride" },
       // wiki.warframe.com/w/Orion + WFCD OrionSuit: 350 HP / 270 SH / 300 AR / 200 EN, sprint 1.15.
@@ -37,7 +76,20 @@ export const DUAL_FORM_WARFRAMES: Record<string, DualFormWarframeConfig> = {
       },
     ],
   },
+  // wiki.warframe.com/w/Sevagoth/Abilities/Passive: the Shadow has separate Upgrade loadouts.
+  sevagoth: sevagothConfig(),
+  sevagoth_prime: sevagothConfig(),
 };
+
+export function getDualForm(warframeId: string, formId: string | undefined): DualFormDef | null {
+  if (!formId) return null;
+  return getDualFormConfig(warframeId)?.forms.find((f) => f.id === formId) ?? null;
+}
+
+/** Whether this form brings its own ability set (no Helminth on those slots). */
+export function dualFormHasOwnAbilities(warframeId: string, formId: string | undefined): boolean {
+  return !!getDualForm(warframeId, formId)?.abilities;
+}
 
 /**
  * The warframe record to calculate stats with for one form. Forms with their own
@@ -47,8 +99,12 @@ export const DUAL_FORM_WARFRAMES: Record<string, DualFormWarframeConfig> = {
 export function warframeForDualForm<T extends Warframe>(warframe: T, formId: string | undefined): T {
   if (!formId) return warframe;
   const form = getDualFormConfig(warframe.id)?.forms.find((f) => f.id === formId);
-  if (!form?.baseStats) return warframe;
-  return { ...warframe, ...form.baseStats, statFormId: formId };
+  if (!form?.baseStats && !form?.abilities) return warframe;
+  return {
+    ...warframe,
+    ...(form.baseStats ? { ...form.baseStats, statFormId: formId } : {}),
+    ...(form.abilities ? { abilities: form.abilities } : {}),
+  };
 }
 
 /** Indices into `warframe.abilities` per form (slot 4 = shared ultimate). */
@@ -64,6 +120,8 @@ export interface DualFormAbilityEntry {
   abilityIndex: number;
   ability: Ability;
   formLabel?: string;
+  /** Ability belongs to the form's own kit (not `warframe.abilities`); Helminth can't touch it. */
+  formOwned?: boolean;
 }
 
 export function getDualFormAbilities(
@@ -72,9 +130,20 @@ export function getDualFormAbilities(
   abilities: Ability[],
 ): DualFormAbilityEntry[] | null {
   const config = getDualFormConfig(warframeId);
+  if (!config) return null;
+  const form = config.forms.find((f) => f.id === formId);
+  if (form?.abilities) {
+    return form.abilities.map((ability, i) => ({
+      gameSlot: i + 1,
+      abilityIndex: i,
+      ability,
+      formLabel: form.label,
+      formOwned: true,
+    }));
+  }
   const indices = DUAL_FORM_ABILITY_INDICES[warframeId]?.[formId];
-  if (!config || !indices) return null;
-  const formLabel = config.forms.find((f) => f.id === formId)?.label;
+  if (!indices) return null;
+  const formLabel = form?.label;
   return indices.map((abilityIndex, i) => ({
     gameSlot: i + 1,
     abilityIndex,
@@ -94,6 +163,7 @@ export function buildAbilityDisplayEntries(
   abilityIndex: number;
   gameSlot: number;
   formLabel?: string;
+  formOwned?: boolean;
 }[] {
   if (dualFormActive) {
     const entries = getDualFormAbilities(warframe.id, activeDualFormId, warframe.abilities);
@@ -104,6 +174,7 @@ export function buildAbilityDisplayEntries(
         abilityIndex: entry.abilityIndex,
         gameSlot: entry.gameSlot,
         formLabel: entry.formLabel,
+        ...(entry.formOwned ? { formOwned: true } : {}),
       }));
     }
   }

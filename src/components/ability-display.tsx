@@ -331,8 +331,10 @@ export function AbilityCardShell({
 
 export function AbilitiesSectionHeader({
   formLabel,
+  subtitle = "Live with your build · one Helminth subsume",
 }: {
   formLabel?: string;
+  subtitle?: string;
 }) {
   return (
     <div className="mb-2.5 flex items-center gap-2.5">
@@ -347,7 +349,7 @@ export function AbilitiesSectionHeader({
           )}
         </h2>
         <p className="text-[10px] leading-tight text-muted-foreground">
-          Live with your build · one Helminth subsume
+          {subtitle}
         </p>
       </div>
     </div>

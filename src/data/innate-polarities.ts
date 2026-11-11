@@ -149,6 +149,8 @@ export const INNATE_POLARITIES: Readonly<Record<string, InnatePolarityEntry>> = 
   "warframe:saryn_prime": {"slots": ["naramon", "vazarin", "madurai"], "aura": "vazarin"},
   "warframe:sevagoth": {"slots": ["vazarin", "madurai"]},
   "warframe:sevagoth_prime": {"slots": ["vazarin", "naramon", "madurai"]},
+  "warframe:sevagoth#shadow": {"slots": ["madurai", "madurai"], "aura": "madurai"},
+  "warframe:sevagoth_prime#shadow": {"slots": ["vazarin", "naramon", "madurai", "madurai"], "aura": "madurai"},
   "warframe:sirius_orion#orion": {"slots": ["madurai", "naramon"], "aura": "naramon"},
   "warframe:sirius_orion#sirius": {"slots": ["vazarin", "naramon"], "aura": "vazarin"},
   "warframe:styanax": {"slots": ["vazarin", "naramon"], "aura": "naramon"},

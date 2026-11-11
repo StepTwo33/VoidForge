@@ -2197,18 +2197,21 @@ function wfArcaneStackSlider(id: string, name: string, fullStacks: number | unde
 function ShieldEnergyRows({
   stats,
   warframeId,
+  formId,
   equippedMods,
   freeModCapacity,
 }: {
   stats: WarframeCalculatedStats;
   warframeId?: string;
+  formId?: string;
   equippedMods?: EquippedMod[];
   freeModCapacity?: number;
 }) {
   const shields = stats.persistenceDamageCapPerSecond != null ? 0 : stats.totalShield;
   const id = warframeId ?? "";
   const harrow = id === "harrow" || id === "harrow_prime";
-  const baseStart = WARFRAME_STARTING_ENERGY[id];
+  const baseStart =
+    (formId ? WARFRAME_STARTING_ENERGY[`${id}#${formId}`] : undefined) ?? WARFRAME_STARTING_ENERGY[id];
   const startPct = stats.startingEnergyPct ?? 0;
   const start = startingEnergy({
     base: baseStart ?? 0,
@@ -2276,6 +2279,7 @@ function ShieldEnergyRows({
 export function WarframeStatsPanel({
   stats,
   warframe,
+  formId,
   equippedMods,
   allMods,
   equippedArcanes,
@@ -2296,6 +2300,8 @@ export function WarframeStatsPanel({
 }: {
   stats: WarframeCalculatedStats | null;
   warframe?: Warframe | null;
+  /** Dual-form tab with its own stat block (Sevagoth's Shadow): reads `<id>#<formId>` rows. */
+  formId?: string;
   equippedMods?: EquippedMod[];
   allMods?: Map<string, Mod>;
   equippedArcanes?: (Mod | null)[];
@@ -2610,6 +2616,7 @@ export function WarframeStatsPanel({
         <ShieldEnergyRows
           stats={stats}
           warframeId={warframe?.id}
+          formId={formId}
           equippedMods={equippedMods}
           freeModCapacity={freeModCapacity}
         />

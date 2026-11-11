@@ -1073,6 +1073,18 @@ const VERIFIED_MISC_SCALING: Record<string, MiscScalingTable> = {
     debuffDuration: { scale: "duration" },
   },
 
+  // wiki: Consume (Sevagoth's Shadow) — Radiation damage via damage × STR; heal 10/15/20/25% × STR
+  // (of the STR-scaled hit); target range × RNG; 30 m untargeted dash Misc-fixed
+  "sevagoth::Consume": {
+    healthHealPercent: { scale: "strength" },
+  },
+  // wiki: Death's Harvest (Sevagoth's Shadow) — vulnerability × STR; radius × RNG; duration × DUR;
+  // Death Well gain Misc-fixed
+  "sevagoth::Death's Harvest": {
+    damageVulnerability: { scale: "strength" },
+  },
+  // wiki: Embrace — range × RNG, duration × DUR via card fields; 80° pull angle Misc-fixed
+  // wiki: Reunite — Death Well drain to heal conversion Misc-fixed
   // wiki: Sow — True DPS via damage; Death Well / radial Misc-fixed
   // wiki: Exalted Shadow — Death Well threshold/drain / invuln Misc-fixed (claw dmg via damage)
 

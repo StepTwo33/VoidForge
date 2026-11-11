@@ -96,6 +96,8 @@ export const WARFRAME_STARTING_ENERGY: Record<string, number> = {
   "saryn_prime": 100,
   "sevagoth": 75,
   "sevagoth_prime": 100,
+  "sevagoth#shadow": 50,
+  "sevagoth_prime#shadow": 50,
   "styanax": 50,
   "styanax_prime": 75,
   "temple": 100,

@@ -199,6 +199,8 @@ const LABELS: Record<string, string> = {
   deathWellGainPerSecond: "Death Well Gain/s",
   deathWellThreshold: "Death Well Threshold",
   deathWellDrain: "Death Well Drain",
+  deathWellDrainHeal: "Heal per 1% Death Well",
+  untargetedDashRange: "Dash (no target)",
   radialDamagePercent: "Radial Damage",
   radialDamageRange: "Radial Damage Range",
   debuffDuration: "Debuff Duration",

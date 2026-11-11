@@ -95,6 +95,8 @@ export const WARFRAME_ARMOR_RANK30: Record<string, number> = {
   "saryn_prime": 315,
   "sevagoth": 160,
   "sevagoth_prime": 185,
+  "sevagoth#shadow": 475,
+  "sevagoth_prime#shadow": 475,
   "styanax": 265,
   "styanax_prime": 265,
   "temple": 325,

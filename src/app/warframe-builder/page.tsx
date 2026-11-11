@@ -110,6 +110,7 @@ import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
 import { getWeaponArcanes } from "@/lib/weapons/weapon-arcane-config";
 import {
   dualFormStatesFromBuild,
+  getDualForm,
   getDualFormConfig,
   warframeForDualForm,
   buildAbilityDisplayEntries,
@@ -240,6 +241,12 @@ export default function WarframeBuilderPage() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [saveDialogDefaultPublic, setSaveDialogDefaultPublic] = useState(false);
 
+  const activeDualForm = useMemo(
+    () => (selectedWarframe ? getDualForm(selectedWarframe.id, activeDualFormId) : null),
+    [selectedWarframe, activeDualFormId],
+  );
+  /** Ability set belongs to the active form (Sevagoth's Shadow): Helminth can't replace it. */
+  const formOwnsAbilities = !!activeDualForm?.abilities;
   const dualFormConfig = useMemo(
     () => (selectedWarframe ? getDualFormConfig(selectedWarframe.id) : null),
     [selectedWarframe],
@@ -277,6 +284,9 @@ export default function WarframeBuilderPage() {
         }
         setSelectedWarframe(wf);
         setShowWarframeList(false);
+        // Share links carry the default form only (Sirius / Sevagoth); other form tabs start empty.
+        setActiveDualFormId(getDualFormConfig(wf.id)?.defaultFormId ?? "sirius");
+        setDualFormBuilds({});
         setEquippedMods(dropUnknownMods(cleanLoadedMods(shared.mods.map((m, i) => ({ modId: m.id, rank: m.rank, slotIndex: m.slotIndex ?? i }))), modsMap).map((m) => {
           const mod = modsMap.get(m.modId);
           return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
@@ -671,7 +681,9 @@ export default function WarframeBuilderPage() {
     applyWarframePassivePreArcanes(statsWarframe.id, stats, wfPassiveSim);
     // Arcane Intention counts this build's channeled abilities (Helminth slot substituted).
     const abilities = (statsWarframe.abilities ?? []).map((a, i) =>
-      helminthSlot === i && helminthAbility ? helminthToAbility(helminthAbility, statsWarframe.id) : a,
+      !formOwnsAbilities && helminthSlot === i && helminthAbility
+        ? helminthToAbility(helminthAbility, statsWarframe.id)
+        : a,
     );
     const equippedModNames = equippedMods
       .map((m) => modsMap.get(m.modId)?.name)
@@ -688,7 +700,29 @@ export default function WarframeBuilderPage() {
       applyWeaponIncarnonMobilityToWarframe(withShardsAndArcanes, linkedLoadout);
     }
     return withShardsAndArcanes;
-  }, [selectedWarframe, dualFormConfig, activeDualFormId, equippedMods, equippedShards, equippedArcanes, equippedArcaneRanks, modsMap, helminthSlot, helminthAbility, effectiveWfArcaneStacksById, wfConditionalModStacksById, wfPassiveSim, loadoutCtx]);
+  }, [selectedWarframe, dualFormConfig, activeDualFormId, formOwnsAbilities, equippedMods, equippedShards, equippedArcanes, equippedArcaneRanks, modsMap, helminthSlot, helminthAbility, effectiveWfArcaneStacksById, wfConditionalModStacksById, wfPassiveSim, loadoutCtx]);
+
+  /**
+   * Ability Strength behind the exalted weapon's base damage. Usually the open form's; for
+   * Sevagoth it is always Sevagoth's own (wiki Shadow Claws: "not affected in any way by the
+   * ability strength of his shadow"), even while the Shadow tab is open.
+   */
+  const exaltedHostStrength = useMemo(() => {
+    const own = calculatedStats?.abilityStrength ?? 1;
+    const hostFormId = dualFormConfig?.exaltedStrengthFormId;
+    if (!selectedWarframe || !hostFormId || hostFormId === activeDualFormId) return own;
+    const slice = dualFormBuilds[hostFormId];
+    if (!slice) return own;
+    const hostWf = warframeForDualForm(selectedWarframe, hostFormId);
+    const hostStats = calculateWarframeBuild(hostWf, slice.mods, modsMap);
+    return applyWarframeShardsAndArcanes(
+      hostStats,
+      equippedShards,
+      resolveSavedArcaneSlots(slice.arcaneIds, 2),
+      slice.arcaneRanks,
+      { abilities: hostWf.abilities, equippedModSlots: slice.mods },
+    ).abilityStrength;
+  }, [calculatedStats?.abilityStrength, dualFormConfig, activeDualFormId, selectedWarframe, dualFormBuilds, modsMap, equippedShards]);
 
   /** Primary Overcharge reads max energy. Hit location stays on the exalted sim; Cyte weak-point kills do not force headshots. */
   const exaltedSimParams = useMemo<SimulationParams>(
@@ -723,30 +757,30 @@ export default function WarframeBuilderPage() {
       ? resolveExaltedPassiveBuffs(selectedWarframe?.id, exaltedWeapon, wfPassiveSim)
       : [];
     return {
-      abilityStrength: calculatedStats?.abilityStrength ?? 1,
+      abilityStrength: exaltedHostStrength,
       ...(exaltedActiveArcanes.arcanes.length > 0
         ? { arcaneRanks: exaltedActiveArcanes.arcaneRanks }
         : {}),
       ...(externalBuffs.length > 0 ? { externalBuffs } : {}),
     };
-  }, [calculatedStats?.abilityStrength, exaltedActiveArcanes, exaltedWeapon, selectedWarframe?.id, wfPassiveSim]);
+  }, [exaltedHostStrength, exaltedActiveArcanes, exaltedWeapon, selectedWarframe?.id, wfPassiveSim]);
 
   const exaltedMeleeCalcOptions = useMemo<WeaponCalculationOptions>(() => {
     const externalBuffs = exaltedMeleeWeapon
       ? resolveExaltedPassiveBuffs(selectedWarframe?.id, exaltedMeleeWeapon, wfPassiveSim)
       : [];
     return {
-      abilityStrength: calculatedStats?.abilityStrength ?? 1,
+      abilityStrength: exaltedHostStrength,
       ...(exaltedMeleeActiveArcanes.arcanes.length > 0
         ? { arcaneRanks: exaltedMeleeActiveArcanes.arcaneRanks }
         : {}),
       ...(externalBuffs.length > 0 ? { externalBuffs } : {}),
     };
-  }, [calculatedStats?.abilityStrength, exaltedMeleeActiveArcanes, exaltedMeleeWeapon, selectedWarframe?.id, wfPassiveSim]);
+  }, [exaltedHostStrength, exaltedMeleeActiveArcanes, exaltedMeleeWeapon, selectedWarframe?.id, wfPassiveSim]);
 
   const exaltedBaseCalcOptions = useMemo<WeaponCalculationOptions>(
-    () => ({ abilityStrength: calculatedStats?.abilityStrength ?? 1 }),
-    [calculatedStats?.abilityStrength],
+    () => ({ abilityStrength: exaltedHostStrength }),
+    [exaltedHostStrength],
   );
 
   const exaltedStats = useMemo<CalculatedStats | null>(() => {
@@ -905,6 +939,7 @@ export default function WarframeBuilderPage() {
     const rows = abilityDisplayEntries.map((entry) => {
       const slotIndex = entry.gameSlot - 1;
       if (
+        !entry.formOwned &&
         helminthSlot != null &&
         helminthAbility != null &&
         helminthSlot === slotIndex
@@ -954,7 +989,8 @@ export default function WarframeBuilderPage() {
     [innatePolarities, slotPolarities],
   );
 
-  const baseCapacity = warframeBaseCapacity(hasOrokinReactor);
+  // Sevagoth's Shadow comes with a pre-installed Orokin Reactor (wiki Sevagoth/Abilities/Passive).
+  const baseCapacity = warframeBaseCapacity(hasOrokinReactor || !!activeDualForm?.preinstalledReactor);
   const auraBonus = useMemo(
     () => computeWarframeAuraBonus(equippedMods, modsMap, effectivePolarities, auraSlotIndices),
     [equippedMods, modsMap, effectivePolarities, auraSlotIndices],
@@ -1466,7 +1502,7 @@ export default function WarframeBuilderPage() {
                         onChange={handleDualFormSwitch}
                       />
                       <p className="text-[11px] text-muted-foreground leading-relaxed">
-                        Sirius and Orion share one loadout slot. Mods and arcanes are saved per form; archon shards and Helminth apply to both.
+                        {dualFormConfig.note}
                       </p>
                     </div>
                   )}
@@ -1615,7 +1651,7 @@ export default function WarframeBuilderPage() {
                   </h2>
                   {dualFormConfig && (
                     <p className="mb-2 text-[10px] text-muted-foreground">
-                      One shard set for Sirius &amp; Orion — switching forms keeps these equipped.
+                      {dualFormConfig.shardsNote}
                     </p>
                   )}
                   <div className="flex flex-wrap items-start gap-2">
@@ -1665,6 +1701,9 @@ export default function WarframeBuilderPage() {
                 {abilityDisplayEntries.length > 0 && (
                   <div>
                     <AbilitiesSectionHeader
+                      {...(formOwnsAbilities
+                        ? { subtitle: "Scaled by the Shadow's own mods · Helminth can't replace these" }
+                        : {})}
                       formLabel={
                         dualFormConfig
                           ? dualFormConfig.forms.find((f) => f.id === activeDualFormId)?.label
@@ -1675,8 +1714,9 @@ export default function WarframeBuilderPage() {
                       {abilityDisplayEntries.map((entry) => {
                         const slotIndex = entry.gameSlot - 1;
                         const hasHelminth = helminthSlot != null && helminthAbility != null;
-                        const isHelminthed = hasHelminth && helminthSlot === slotIndex;
-                        const canSubsumeHere = !hasHelminth || isHelminthed;
+                        // Sevagoth's Shadow abilities can't be replaced by Helminth (wiki).
+                        const isHelminthed = !entry.formOwned && hasHelminth && helminthSlot === slotIndex;
+                        const canSubsumeHere = !entry.formOwned && (!hasHelminth || isHelminthed);
                         const openHelminthPicker = () => {
                           setHelminthPickerSlot(slotIndex);
                           setHelminthPickerOpen(true);
@@ -1883,6 +1923,7 @@ export default function WarframeBuilderPage() {
                   freeModCapacity={totalCapacity - capacityUsed}
                   stats={calculatedStats}
                   warframe={selectedWarframe}
+                  formId={activeDualForm?.baseStats ? activeDualFormId : undefined}
                   equippedMods={equippedMods}
                   allMods={modsMap}
                   equippedArcanes={equippedArcanes}
