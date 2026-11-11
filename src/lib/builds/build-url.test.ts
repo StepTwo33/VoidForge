@@ -9,6 +9,7 @@ import {
   isLocalBuildId,
   packShareableBuild,
   unpackShareableBuild,
+  shareExaltedToBuildSlice,
   shareFormToBuildSlice,
   warframeBuildToShare,
   type ShareableBuild,
@@ -209,5 +210,107 @@ describe("dual-form Warframe share links (Shadow / Orion)", () => {
     expect(slice.slotPolarities).toEqual({ 4: "madurai" });
     expect(slice.arcaneIds).toEqual(["arcane_grace", null]);
     expect(slice.arcaneRanks).toEqual([3, 5]);
+  });
+});
+
+describe("Helminth and exalted weapon share links", () => {
+  const mesa = warframeBuildToShare({
+    warframeId: "mesa_prime",
+    mods: [{ modId: "intensify_r3", rank: 5, slotIndex: 1 }],
+    arcaneIds: ["molt_augmented", null],
+    arcaneRanks: [5, 5],
+    hasOrokinReactor: true,
+    helminthSlot: 3,
+    helminthAbilityId: "helminth_nourish",
+    exaltedMods: [
+      { modId: "hornet_strike_r3", rank: 10, slotIndex: 0 },
+      { modId: "lethal_torrent_r3", rank: 5, slotIndex: 1 },
+    ],
+    exaltedSlotPolarities: { 0: "madurai" },
+    exaltedArcaneIds: ["arcane_acceleration", null],
+    exaltedArcaneRanks: [3, 5],
+    exaltedStanceModId: undefined,
+    exaltedMeleeMods: [{ modId: "pressure_point_r3", rank: 10, slotIndex: 0 }],
+    exaltedMeleeSlotPolarities: { 1: "naramon" },
+    exaltedMeleeArcaneIds: ["melee_exposure", null],
+    exaltedMeleeArcaneRanks: [2, 5],
+    exaltedMeleeStanceModId: "severing_spring",
+    arcaneStacksById: { molt_augmented: 200 },
+    conditionalModStacksById: { growing_power: 1 },
+  });
+
+  it("puts Helminth, exalted weapons, reactor and stacks on the share payload", () => {
+    expect(mesa.hasOrokinReactor).toBe(true);
+    expect(mesa.helminthSlot).toBe(3);
+    expect(mesa.helminthAbilityId).toBe("helminth_nourish");
+    expect(mesa.exalted?.mods.map((m) => m.id)).toEqual(["hornet_strike_r3", "lethal_torrent_r3"]);
+    expect(mesa.exalted?.arcanes).toEqual(["arcane_acceleration", ""]);
+    expect(mesa.exalted?.slotPolarities).toEqual({ "0": "madurai" });
+    expect(mesa.exaltedMelee?.mods[0]?.id).toBe("pressure_point_r3");
+    expect(mesa.exaltedMelee?.stanceModId).toBe("severing_spring");
+    expect(mesa.arcaneStacksById).toEqual({ molt_augmented: 200 });
+    expect(mesa.conditionalModStacksById).toEqual({ growing_power: 1 });
+  });
+
+  it("round-trips through pack / unpack and encode / decode", () => {
+    const packed = packShareableBuild(mesa);
+    const extras = packed[4] as Record<string, unknown>;
+    expect(extras.hr).toBe(1);
+    expect(extras.h).toEqual([3, "helminth_nourish"]);
+    expect(extras.x).toBeTruthy();
+    expect(extras.xm).toBeTruthy();
+    expect((extras.xm as Record<string, unknown>).st).toBe("severing_spring");
+    expect(extras.as).toEqual({ molt_augmented: 200 });
+    expect(extras.cm).toEqual({ growing_power: 1 });
+    const unpacked = unpackShareableBuild(packed);
+    expect(unpacked?.helminthSlot).toBe(3);
+    expect(unpacked?.helminthAbilityId).toBe("helminth_nourish");
+    expect(unpacked?.hasOrokinReactor).toBe(true);
+    expect(unpacked?.exalted?.mods).toEqual(mesa.exalted?.mods);
+    expect(unpacked?.exalted?.arcanes).toEqual(mesa.exalted?.arcanes);
+    expect(unpacked?.exaltedMelee?.stanceModId).toBe("severing_spring");
+    expect(unpacked?.arcaneStacksById).toEqual({ molt_augmented: 200 });
+    expect(decodeBuild(encodeBuild(mesa))).toEqual(unpacked);
+  });
+
+  it("shareExaltedToBuildSlice restores mods, polarities, arcanes and stance", () => {
+    const slice = shareExaltedToBuildSlice(mesa.exaltedMelee!);
+    expect(slice.mods).toEqual([{ modId: "pressure_point_r3", rank: 10, slotIndex: 0 }]);
+    expect(slice.slotPolarities).toEqual({ 1: "naramon" });
+    expect(slice.arcaneIds).toEqual(["melee_exposure", null]);
+    expect(slice.arcaneRanks).toEqual([2, 5]);
+    expect(slice.stanceModId).toBe("severing_spring");
+  });
+
+  it("omits empty Helminth / exalted / reactor from packed extras", () => {
+    const bare = warframeBuildToShare({
+      warframeId: "mesa",
+      mods: [{ modId: "intensify_r3", rank: 5, slotIndex: 1 }],
+    });
+    expect(bare.hasOrokinReactor).toBeUndefined();
+    expect(bare.helminthSlot).toBeUndefined();
+    expect(bare.exalted).toBeUndefined();
+    expect(bare.exaltedMelee).toBeUndefined();
+    const extras = packShareableBuild(bare)[4] as Record<string, unknown> | undefined;
+    expect(extras?.hr).toBeUndefined();
+    expect(extras?.h).toBeUndefined();
+    expect(extras?.x).toBeUndefined();
+    expect(extras?.xm).toBeUndefined();
+    expect(extras?.as).toBeUndefined();
+  });
+
+  it("still decodes older share links that have none of the new keys", () => {
+    const legacyPacked = [1, "f", "mesa", [["intensify_r3", 5, 1]], { a: ["molt_augmented"] }];
+    const fromLegacy = unpackShareableBuild(legacyPacked);
+    expect(fromLegacy).toEqual({
+      type: "warframe",
+      itemId: "mesa",
+      mods: [{ id: "intensify_r3", rank: 5, slotIndex: 1 }],
+      arcanes: ["molt_augmented"],
+    });
+    expect(fromLegacy?.helminthSlot).toBeUndefined();
+    expect(fromLegacy?.exalted).toBeUndefined();
+    expect(fromLegacy?.hasOrokinReactor).toBeUndefined();
+    expect(fromLegacy?.dualFormBuilds).toBeUndefined();
   });
 });

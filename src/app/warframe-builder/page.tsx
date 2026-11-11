@@ -83,7 +83,7 @@ import { applyWeaponIncarnonMobilityToWarframe, setBonusLinkageFromLoadout } fro
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
 import { cleanLoadedBuild, cleanLoadedMods } from "@/lib/builds/incompatible-mod-warnings";
-import { extractBuildFromUrlAsync, shareFormToBuildSlice, warframeBuildToShare } from "@/lib/builds/build-url";
+import { extractBuildFromUrlAsync, shareExaltedToBuildSlice, shareFormToBuildSlice, warframeBuildToShare } from "@/lib/builds/build-url";
 import { shareBuilderBuild } from "@/lib/builds/share-build";
 import { toast } from "sonner";
 import { getWarframeImage } from "@/lib/display/images";
@@ -333,6 +333,46 @@ export default function WarframeBuilderPage() {
           });
           setEquippedShards(restored);
         }
+        if (shared.hasOrokinReactor) setHasOrokinReactor(true);
+        if (shared.helminthSlot != null) {
+          setHelminthSlot(shared.helminthSlot);
+          setHelminthAbility(
+            shared.helminthAbilityId
+              ? allHelminthAbilities.find((a) => a.id === shared.helminthAbilityId) ?? null
+              : null,
+          );
+        }
+        const shareExaltedMods = (mods: { modId: string; rank: number; slotIndex: number }[]) =>
+          dropUnknownMods(mods, modsMap).map((m, i) => {
+            const mod = modsMap.get(m.modId);
+            return { ...m, slotIndex: m.slotIndex ?? i, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
+          });
+        if (shared.exalted) {
+          const slice = shareExaltedToBuildSlice(shared.exalted);
+          setExaltedMods(shareExaltedMods(slice.mods));
+          setExaltedSlotPolarities(slice.slotPolarities);
+          const resolvedEx = resolveSavedArcaneSlots(slice.arcaneIds, 2);
+          setExaltedArcanes(resolvedEx);
+          setExaltedArcaneRanks([
+            slice.arcaneRanks[0] ?? resolvedEx[0]?.maxRank ?? 5,
+            slice.arcaneRanks[1] ?? resolvedEx[1]?.maxRank ?? 5,
+          ]);
+          if (slice.stanceModId) setExaltedStanceId(slice.stanceModId);
+        }
+        if (shared.exaltedMelee) {
+          const slice = shareExaltedToBuildSlice(shared.exaltedMelee);
+          setExaltedMeleeMods(shareExaltedMods(slice.mods));
+          setExaltedMeleeSlotPolarities(slice.slotPolarities);
+          const resolvedExM = resolveSavedArcaneSlots(slice.arcaneIds, 2);
+          setExaltedMeleeArcanes(resolvedExM);
+          setExaltedMeleeArcaneRanks([
+            slice.arcaneRanks[0] ?? resolvedExM[0]?.maxRank ?? 5,
+            slice.arcaneRanks[1] ?? resolvedExM[1]?.maxRank ?? 5,
+          ]);
+          if (slice.stanceModId) setExaltedMeleeStanceId(slice.stanceModId);
+        }
+        if (shared.arcaneStacksById) setWfArcaneStacksById(shared.arcaneStacksById);
+        if (shared.conditionalModStacksById) setWfConditionalModStacksById(shared.conditionalModStacksById);
         setCurrentBuildId(null);
         setBuildName(`${wf.name} Build`);
         setBuildDescription("");
@@ -1279,20 +1319,37 @@ export default function WarframeBuilderPage() {
   const handleShareBuild = useCallback(async () => {
     if (!selectedWarframe) return;
 
-    const payload = buildWarframePayload();
+    const data = buildWarframeData();
+    if (!data) return;
     const outcome = await shareBuilderBuild({
       isPublic: buildIsPublic,
       buildId: currentBuildId,
       fallback: warframeBuildToShare({
-        warframeId: selectedWarframe.id,
-        mods: payload.mods,
-        arcaneIds: payload.arcaneIds,
-        arcaneRanks: payload.arcaneRanks,
-        slotPolarities: payload.slotPolarities,
-        shards: (payload.shards ?? [])
+        warframeId: data.warframeId,
+        mods: data.mods,
+        arcaneIds: data.arcaneIds,
+        arcaneRanks: data.arcaneRanks,
+        slotPolarities: data.slotPolarities,
+        shards: (data.shards ?? [])
           .filter((s): s is EquippedArchonShard => s !== null)
           .map((s) => ({ id: s.shardId, bonus: s.selectedBonus })),
-        dualFormBuilds: payload.dualFormBuilds,
+        dualFormBuilds: data.dualFormBuilds,
+        hasOrokinReactor: data.hasOrokinReactor,
+        isMR30: data.isMR30,
+        helminthSlot: data.helminthSlot,
+        helminthAbilityId: data.helminthAbilityId,
+        exaltedMods: data.exaltedMods,
+        exaltedSlotPolarities: data.exaltedSlotPolarities,
+        exaltedArcaneIds: data.exaltedArcaneIds,
+        exaltedArcaneRanks: data.exaltedArcaneRanks,
+        exaltedStanceModId: data.exaltedStanceModId,
+        exaltedMeleeMods: data.exaltedMeleeMods,
+        exaltedMeleeSlotPolarities: data.exaltedMeleeSlotPolarities,
+        exaltedMeleeArcaneIds: data.exaltedMeleeArcaneIds,
+        exaltedMeleeArcaneRanks: data.exaltedMeleeArcaneRanks,
+        exaltedMeleeStanceModId: data.exaltedMeleeStanceModId,
+        arcaneStacksById: data.arcaneStacksById,
+        conditionalModStacksById: data.conditionalModStacksById,
       }),
     });
 
@@ -1300,7 +1357,7 @@ export default function WarframeBuilderPage() {
       setShareCopied(true);
       setTimeout(() => setShareCopied(false), 2000);
     }
-  }, [selectedWarframe, buildWarframePayload, buildIsPublic, currentBuildId]);
+  }, [selectedWarframe, buildWarframeData, buildIsPublic, currentBuildId]);
 
   const equippedModIds = equippedMods.map((m) => m.modId);
 

@@ -30,6 +30,16 @@ export interface ShareableBuild {
    * form stays in `mods` / `arcanes` / `slotPolarities`. Absent on older share links.
    */
   dualFormBuilds?: Record<string, ShareableFormSlice>;
+  /** Warframe Orokin Reactor. Absent on older share links. */
+  hasOrokinReactor?: boolean;
+  helminthSlot?: number | null;
+  helminthAbilityId?: string | null;
+  /** Exalted weapon (Dex Pixia, Exalted Blade, …). Absent on older share links. */
+  exalted?: ShareableExaltedSlice;
+  /** Second exalted (Titania's Diwata). Absent on older share links. */
+  exaltedMelee?: ShareableExaltedSlice;
+  arcaneStacksById?: Record<string, number>;
+  conditionalModStacksById?: Record<string, number>;
 }
 
 export interface ShareableFormSlice {
@@ -37,6 +47,10 @@ export interface ShareableFormSlice {
   arcanes?: string[];
   arcaneRanks?: number[];
   slotPolarities?: Record<string, string>;
+}
+
+export interface ShareableExaltedSlice extends ShareableFormSlice {
+  stanceModId?: string;
 }
 
 /** Local offline ids look like `1730000000000_abc1234`; cloud rows use Prisma cuid. */
@@ -169,6 +183,25 @@ function formSliceHasContent(slice: ShareableFormSlice): boolean {
   );
 }
 
+function packExaltedSlice(slice: ShareableExaltedSlice): Record<string, unknown> | null {
+  const row = packFormSlice(slice) ?? {};
+  if (slice.stanceModId) row.st = slice.stanceModId;
+  return Object.keys(row).length > 0 ? row : null;
+}
+
+function unpackExaltedSlice(raw: unknown): ShareableExaltedSlice | null {
+  const slice = unpackFormSlice(raw);
+  if (!slice || !raw || typeof raw !== "object") return null;
+  const st = (raw as Record<string, unknown>).st;
+  const out: ShareableExaltedSlice = { ...slice };
+  if (typeof st === "string" && st) out.stanceModId = st;
+  return out;
+}
+
+function exaltedSliceHasContent(slice: ShareableExaltedSlice): boolean {
+  return formSliceHasContent(slice) || !!slice.stanceModId;
+}
+
 /**
  * Dense array form:
  * [1, typeCode, itemId, mods, extras?]
@@ -208,6 +241,24 @@ export function packShareableBuild(build: ShareableBuild): unknown[] {
       if (row) df[id] = row;
     }
     if (Object.keys(df).length > 0) extras.df = df;
+  }
+  if (build.hasOrokinReactor) extras.hr = 1;
+  if (build.helminthSlot != null || build.helminthAbilityId) {
+    extras.h = [build.helminthSlot ?? null, build.helminthAbilityId ?? null];
+  }
+  if (build.exalted) {
+    const row = packExaltedSlice(build.exalted);
+    if (row) extras.x = row;
+  }
+  if (build.exaltedMelee) {
+    const row = packExaltedSlice(build.exaltedMelee);
+    if (row) extras.xm = row;
+  }
+  if (build.arcaneStacksById && Object.keys(build.arcaneStacksById).length > 0) {
+    extras.as = build.arcaneStacksById;
+  }
+  if (build.conditionalModStacksById && Object.keys(build.conditionalModStacksById).length > 0) {
+    extras.cm = build.conditionalModStacksById;
   }
 
   const packed: unknown[] = [1, TYPE_TO_CODE[build.type], build.itemId, mods];
@@ -272,6 +323,36 @@ export function unpackShareableBuild(raw: unknown): ShareableBuild | null {
       }
       if (Object.keys(df).length > 0) build.dualFormBuilds = df;
     }
+    if (e.hr) build.hasOrokinReactor = true;
+    if (Array.isArray(e.h)) {
+      const slot = e.h[0];
+      const ability = e.h[1];
+      if (typeof slot === "number") build.helminthSlot = slot;
+      else if (slot === null) build.helminthSlot = null;
+      if (typeof ability === "string" && ability) build.helminthAbilityId = ability;
+    }
+    if (e.x) {
+      const slice = unpackExaltedSlice(e.x);
+      if (slice) build.exalted = slice;
+    }
+    if (e.xm) {
+      const slice = unpackExaltedSlice(e.xm);
+      if (slice) build.exaltedMelee = slice;
+    }
+    if (e.as && typeof e.as === "object" && !Array.isArray(e.as)) {
+      const as: Record<string, number> = {};
+      for (const [k, v] of Object.entries(e.as as Record<string, unknown>)) {
+        if (typeof v === "number") as[k] = v;
+      }
+      if (Object.keys(as).length > 0) build.arcaneStacksById = as;
+    }
+    if (e.cm && typeof e.cm === "object" && !Array.isArray(e.cm)) {
+      const cm: Record<string, number> = {};
+      for (const [k, v] of Object.entries(e.cm as Record<string, unknown>)) {
+        if (typeof v === "number") cm[k] = v;
+      }
+      if (Object.keys(cm).length > 0) build.conditionalModStacksById = cm;
+    }
   }
   return build;
 }
@@ -298,20 +379,55 @@ function arcanesToShare(ids?: (string | null)[]): string[] | undefined {
   return ids.map((id) => id ?? "");
 }
 
-/** Share payload for a Warframe, including any second form (Shadow, Orion). */
+type ShareMod = { modId: string; rank: number; slotIndex?: number };
+
+function exaltedToShare(
+  mods?: ShareMod[],
+  polarities?: Record<number | string, string>,
+  arcaneIds?: (string | null)[],
+  arcaneRanks?: number[],
+  stanceModId?: string,
+): ShareableExaltedSlice | undefined {
+  const slice: ShareableExaltedSlice = {
+    mods: modsToShare(mods ?? []),
+    arcanes: arcanesToShare(arcaneIds),
+    arcaneRanks,
+    slotPolarities: polaritiesToShare(polarities),
+  };
+  if (stanceModId) slice.stanceModId = stanceModId;
+  return exaltedSliceHasContent(slice) ? slice : undefined;
+}
+
+/** Share payload for a Warframe, including any second form, Helminth, and exalted weapons. */
 export function warframeBuildToShare(opts: {
   warframeId: string;
-  mods: { modId: string; rank: number; slotIndex?: number }[];
+  mods: ShareMod[];
   arcaneIds?: (string | null)[];
   arcaneRanks?: number[];
   slotPolarities?: Record<number | string, string>;
   shards?: { id: string; bonus: string }[];
   dualFormBuilds?: Record<string, {
-    mods: { modId: string; rank: number; slotIndex?: number }[];
+    mods: ShareMod[];
     arcaneIds?: (string | null)[];
     arcaneRanks?: number[];
     slotPolarities?: Record<number | string, string>;
   }>;
+  hasOrokinReactor?: boolean;
+  isMR30?: boolean;
+  helminthSlot?: number | null;
+  helminthAbilityId?: string | null;
+  exaltedMods?: ShareMod[];
+  exaltedSlotPolarities?: Record<number | string, string>;
+  exaltedArcaneIds?: (string | null)[];
+  exaltedArcaneRanks?: number[];
+  exaltedStanceModId?: string;
+  exaltedMeleeMods?: ShareMod[];
+  exaltedMeleeSlotPolarities?: Record<number | string, string>;
+  exaltedMeleeArcaneIds?: (string | null)[];
+  exaltedMeleeArcaneRanks?: number[];
+  exaltedMeleeStanceModId?: string;
+  arcaneStacksById?: Record<string, number>;
+  conditionalModStacksById?: Record<string, number>;
 }): ShareableBuild {
   const build: ShareableBuild = {
     type: "warframe",
@@ -324,6 +440,32 @@ export function warframeBuildToShare(opts: {
   const sp = polaritiesToShare(opts.slotPolarities);
   if (sp) build.slotPolarities = sp;
   if (opts.shards && opts.shards.length > 0) build.shards = opts.shards;
+  if (opts.hasOrokinReactor) build.hasOrokinReactor = true;
+  if (opts.isMR30) build.isMR30 = true;
+  if (opts.helminthSlot != null) build.helminthSlot = opts.helminthSlot;
+  if (opts.helminthAbilityId) build.helminthAbilityId = opts.helminthAbilityId;
+  const exalted = exaltedToShare(
+    opts.exaltedMods,
+    opts.exaltedSlotPolarities,
+    opts.exaltedArcaneIds,
+    opts.exaltedArcaneRanks,
+    opts.exaltedStanceModId,
+  );
+  if (exalted) build.exalted = exalted;
+  const exaltedMelee = exaltedToShare(
+    opts.exaltedMeleeMods,
+    opts.exaltedMeleeSlotPolarities,
+    opts.exaltedMeleeArcaneIds,
+    opts.exaltedMeleeArcaneRanks,
+    opts.exaltedMeleeStanceModId,
+  );
+  if (exaltedMelee) build.exaltedMelee = exaltedMelee;
+  if (opts.arcaneStacksById && Object.keys(opts.arcaneStacksById).length > 0) {
+    build.arcaneStacksById = opts.arcaneStacksById;
+  }
+  if (opts.conditionalModStacksById && Object.keys(opts.conditionalModStacksById).length > 0) {
+    build.conditionalModStacksById = opts.conditionalModStacksById;
+  }
   if (opts.dualFormBuilds) {
     const df: Record<string, ShareableFormSlice> = {};
     for (const [id, slice] of Object.entries(opts.dualFormBuilds)) {
@@ -338,6 +480,21 @@ export function warframeBuildToShare(opts: {
     if (Object.keys(df).length > 0) build.dualFormBuilds = df;
   }
   return build;
+}
+
+/** Convert a shared exalted slice back into the builder's slot records. */
+export function shareExaltedToBuildSlice(slice: ShareableExaltedSlice): {
+  mods: { modId: string; rank: number; slotIndex: number }[];
+  slotPolarities: Record<number, string>;
+  arcaneIds: (string | null)[];
+  arcaneRanks: number[];
+  stanceModId?: string;
+} {
+  const form = shareFormToBuildSlice(slice);
+  return {
+    ...form,
+    ...(slice.stanceModId ? { stanceModId: slice.stanceModId } : {}),
+  };
 }
 
 /** Convert a shared form slice back into the builder's dual-form record. */
