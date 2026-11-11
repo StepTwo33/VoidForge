@@ -13,12 +13,14 @@ import {
 
 type BuilderKind = LoadoutBuilderKind;
 
-function extractSlotData(loadout: Loadout, kind: BuilderKind, slot: string | null): unknown {
+export function extractSlotData(loadout: Loadout, kind: BuilderKind, slot: string | null): unknown {
   switch (kind) {
     case "warframe":
       return loadout.warframeBuild;
     case "companion":
       return loadout.companionBuild;
+    case "operator":
+      return loadout.operatorBuild;
     case "modular": {
       const ws =
         slot === "secondary" || slot === "melee" || slot === "primary" ? slot : null;
@@ -47,8 +49,8 @@ function extractSlotData(loadout: Loadout, kind: BuilderKind, slot: string | nul
   }
 }
 
-function resolveSlot(kind: BuilderKind, slot: string | null, data: unknown): string {
-  if (kind === "warframe" || kind === "companion") return kind;
+export function resolveSlot(kind: BuilderKind, slot: string | null, data: unknown): string {
+  if (kind === "warframe" || kind === "companion" || kind === "operator") return kind;
   if (slot === "primary" || slot === "secondary" || slot === "melee") return slot;
   if (kind === "modular") {
     const s = (data as { slot?: string } | undefined)?.slot;

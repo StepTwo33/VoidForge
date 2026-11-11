@@ -343,7 +343,8 @@ export function BuilderItemHeader({
   subtitle,
   children,
 }: {
-  onChange: () => void;
+  /** Omit for builders with no item list to go back to (Operator). */
+  onChange?: () => void;
   changeLabel?: string;
   image?: React.ReactNode;
   title: string;
@@ -353,13 +354,15 @@ export function BuilderItemHeader({
   return (
     <div className="mb-5 space-y-3 sm:mb-6 sm:space-y-4">
       <div className="flex flex-wrap items-center gap-2.5 rounded-xl border border-border/60 surface-panel p-3 shadow-sm ring-1 ring-border/30 sm:gap-3 sm:p-4">
-        <button
-          type="button"
-          onClick={onChange}
-          className="inline-flex min-h-11 items-center rounded-lg border border-border/70 bg-background/50 px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-        >
-          ← {changeLabel}
-        </button>
+        {onChange && (
+          <button
+            type="button"
+            onClick={onChange}
+            className="inline-flex min-h-11 items-center rounded-lg border border-border/70 bg-background/50 px-3 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+          >
+            ← {changeLabel}
+          </button>
+        )}
         {image}
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-lg font-bold tracking-tight sm:text-2xl">{title}</h1>
