@@ -5243,7 +5243,7 @@ export const allWeapons: Weapon[] = [
     "multishot": 1,
     "triggerType": "Semi-Auto",
     "modSlots": 0,
-    "hasPrimaryArcaneSlot": true,
+    "hasPrimaryArcaneSlot": false,
     "hasSecondaryArcaneSlot": false,
     "isIncarnon": false,
     "hasRivenSlot": false,
