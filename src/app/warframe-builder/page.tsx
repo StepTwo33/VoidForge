@@ -83,7 +83,7 @@ import { applyWeaponIncarnonMobilityToWarframe, setBonusLinkageFromLoadout } fro
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
 import { cleanLoadedBuild, cleanLoadedMods } from "@/lib/builds/incompatible-mod-warnings";
-import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
+import { extractBuildFromUrlAsync, shareFormToBuildSlice, warframeBuildToShare } from "@/lib/builds/build-url";
 import { shareBuilderBuild } from "@/lib/builds/share-build";
 import { toast } from "sonner";
 import { getWarframeImage } from "@/lib/display/images";
@@ -284,13 +284,30 @@ export default function WarframeBuilderPage() {
         }
         setSelectedWarframe(wf);
         setShowWarframeList(false);
-        // Share links carry the default form only (Sirius / Sevagoth); other form tabs start empty.
-        setActiveDualFormId(getDualFormConfig(wf.id)?.defaultFormId ?? "sirius");
-        setDualFormBuilds({});
+        const shareConfig = getDualFormConfig(wf.id);
+        setActiveDualFormId(shareConfig?.defaultFormId ?? "sirius");
+        if (shareConfig && shared.dualFormBuilds) {
+          const nonDefault: Record<string, DualFormBuildSlice> = {};
+          for (const form of shareConfig.forms) {
+            if (form.id === shareConfig.defaultFormId) continue;
+            const slice = shared.dualFormBuilds[form.id];
+            nonDefault[form.id] = slice
+              ? shareFormToBuildSlice(slice)
+              : { mods: [], slotPolarities: {}, arcaneIds: [...EMPTY_ARCANE_IDS], arcaneRanks: [...DEFAULT_ARCANE_RANKS] };
+          }
+          setDualFormBuilds(nonDefault);
+        } else {
+          setDualFormBuilds({});
+        }
         setEquippedMods(dropUnknownMods(cleanLoadedMods(shared.mods.map((m, i) => ({ modId: m.id, rank: m.rank, slotIndex: m.slotIndex ?? i }))), modsMap).map((m) => {
           const mod = modsMap.get(m.modId);
           return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
         }));
+        if (shared.slotPolarities) {
+          setSlotPolarities(
+            Object.fromEntries(Object.entries(shared.slotPolarities).map(([k, v]) => [Number(k), v])),
+          );
+        }
         if (shared.arcanes) {
           const restoredArcanes = resolveSavedArcaneSlots(shared.arcanes.map((id) => id || null), 2);
           setEquippedArcanes(restoredArcanes);
@@ -1262,26 +1279,28 @@ export default function WarframeBuilderPage() {
   const handleShareBuild = useCallback(async () => {
     if (!selectedWarframe) return;
 
+    const payload = buildWarframePayload();
     const outcome = await shareBuilderBuild({
       isPublic: buildIsPublic,
       buildId: currentBuildId,
-      fallback: {
-        type: "warframe",
-        itemId: selectedWarframe.id,
-        mods: equippedMods.map((m) => ({ id: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
-        arcanes: equippedArcanes.map((a) => a?.id ?? ""),
-        arcaneRanks: equippedArcaneRanks,
-        shards: equippedShards
+      fallback: warframeBuildToShare({
+        warframeId: selectedWarframe.id,
+        mods: payload.mods,
+        arcaneIds: payload.arcaneIds,
+        arcaneRanks: payload.arcaneRanks,
+        slotPolarities: payload.slotPolarities,
+        shards: (payload.shards ?? [])
           .filter((s): s is EquippedArchonShard => s !== null)
           .map((s) => ({ id: s.shardId, bonus: s.selectedBonus })),
-      },
+        dualFormBuilds: payload.dualFormBuilds,
+      }),
     });
 
     if (outcome.kind === "copied") {
       setShareCopied(true);
       setTimeout(() => setShareCopied(false), 2000);
     }
-  }, [selectedWarframe, equippedMods, equippedArcanes, equippedShards, buildIsPublic, currentBuildId]);
+  }, [selectedWarframe, buildWarframePayload, buildIsPublic, currentBuildId]);
 
   const equippedModIds = equippedMods.map((m) => m.modId);
 

@@ -25,6 +25,18 @@ export interface ShareableBuild {
   incarnonConditionals?: Record<string, boolean>;
   /** Round 47: explicit Genesis-installed choice (Cannonade). */
   incarnonGenesisInstalled?: boolean;
+  /**
+   * Other forms of a dual-form Warframe (Sevagoth's Shadow, Orion). The default
+   * form stays in `mods` / `arcanes` / `slotPolarities`. Absent on older share links.
+   */
+  dualFormBuilds?: Record<string, ShareableFormSlice>;
+}
+
+export interface ShareableFormSlice {
+  mods: ShareableBuild["mods"];
+  arcanes?: string[];
+  arcaneRanks?: number[];
+  slotPolarities?: Record<string, string>;
 }
 
 /** Local offline ids look like `1730000000000_abc1234`; cloud rows use Prisma cuid. */
@@ -108,15 +120,62 @@ const CODE_TO_TYPE: Record<string, ShareableBuild["type"]> = {
 
 type PackedMod = [string, number] | [string, number, number];
 
+function packMods(mods: ShareableBuild["mods"]): PackedMod[] {
+  return mods.map((m) => (m.slotIndex == null ? [m.id, m.rank] : [m.id, m.rank, m.slotIndex]));
+}
+
+function unpackMods(modsRaw: unknown): ShareableBuild["mods"] | null {
+  if (!Array.isArray(modsRaw)) return null;
+  const mods: ShareableBuild["mods"] = [];
+  for (const entry of modsRaw) {
+    if (!Array.isArray(entry) || typeof entry[0] !== "string" || typeof entry[1] !== "number") {
+      return null;
+    }
+    const mod: { id: string; rank: number; slotIndex?: number } = { id: entry[0], rank: entry[1] };
+    if (typeof entry[2] === "number") mod.slotIndex = entry[2];
+    mods.push(mod);
+  }
+  return mods;
+}
+
+function packFormSlice(slice: ShareableFormSlice): Record<string, unknown> | null {
+  const row: Record<string, unknown> = {};
+  if (slice.mods && slice.mods.length > 0) row.m = packMods(slice.mods);
+  if (slice.arcanes && slice.arcanes.some((id) => !!id)) row.a = slice.arcanes;
+  if (slice.arcaneRanks && slice.arcaneRanks.length > 0) row.ar = slice.arcaneRanks;
+  if (slice.slotPolarities && Object.keys(slice.slotPolarities).length > 0) row.sp = slice.slotPolarities;
+  return Object.keys(row).length > 0 ? row : null;
+}
+
+function unpackFormSlice(raw: unknown): ShareableFormSlice | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const e = raw as Record<string, unknown>;
+  const mods = e.m != null ? unpackMods(e.m) : [];
+  if (!mods) return null;
+  const slice: ShareableFormSlice = { mods };
+  if (Array.isArray(e.a) && e.a.every((x) => typeof x === "string")) slice.arcanes = e.a as string[];
+  if (Array.isArray(e.ar) && e.ar.every((x) => typeof x === "number")) slice.arcaneRanks = e.ar as number[];
+  if (e.sp && typeof e.sp === "object" && !Array.isArray(e.sp)) {
+    slice.slotPolarities = e.sp as Record<string, string>;
+  }
+  return slice;
+}
+
+function formSliceHasContent(slice: ShareableFormSlice): boolean {
+  return (
+    slice.mods.length > 0 ||
+    (slice.arcanes?.some((id) => !!id) ?? false) ||
+    (slice.slotPolarities != null && Object.keys(slice.slotPolarities).length > 0)
+  );
+}
+
 /**
  * Dense array form:
  * [1, typeCode, itemId, mods, extras?]
  * extras only present when needed: { a, s, pe, pb, mt, p, oc, mr, af, sp, ie }
  */
 export function packShareableBuild(build: ShareableBuild): unknown[] {
-  const mods: PackedMod[] = build.mods.map((m) =>
-    m.slotIndex == null ? [m.id, m.rank] : [m.id, m.rank, m.slotIndex],
-  );
+  const mods: PackedMod[] = packMods(build.mods);
 
   const extras: Record<string, unknown> = {};
   if (build.arcanes && build.arcanes.length > 0) extras.a = build.arcanes;
@@ -142,6 +201,14 @@ export function packShareableBuild(build: ShareableBuild): unknown[] {
   );
   if (onConditionals.length > 0) extras.ic = onConditionals;
   if (build.incarnonGenesisInstalled != null) extras.ig = build.incarnonGenesisInstalled ? 1 : 0;
+  if (build.dualFormBuilds) {
+    const df: Record<string, unknown> = {};
+    for (const [id, slice] of Object.entries(build.dualFormBuilds)) {
+      const row = packFormSlice(slice);
+      if (row) df[id] = row;
+    }
+    if (Object.keys(df).length > 0) extras.df = df;
+  }
 
   const packed: unknown[] = [1, TYPE_TO_CODE[build.type], build.itemId, mods];
   if (Object.keys(extras).length > 0) packed.push(extras);
@@ -155,18 +222,8 @@ export function unpackShareableBuild(raw: unknown): ShareableBuild | null {
   const type = CODE_TO_TYPE[typeCode];
   if (!type || !Array.isArray(modsRaw)) return null;
 
-  const mods: ShareableBuild["mods"] = [];
-  for (const entry of modsRaw) {
-    if (!Array.isArray(entry) || typeof entry[0] !== "string" || typeof entry[1] !== "number") {
-      return null;
-    }
-    const mod: { id: string; rank: number; slotIndex?: number } = {
-      id: entry[0],
-      rank: entry[1],
-    };
-    if (typeof entry[2] === "number") mod.slotIndex = entry[2];
-    mods.push(mod);
-  }
+  const mods = unpackMods(modsRaw);
+  if (!mods) return null;
 
   const build: ShareableBuild = { type, itemId, mods };
   if (extrasRaw && typeof extrasRaw === "object" && !Array.isArray(extrasRaw)) {
@@ -207,8 +264,106 @@ export function unpackShareableBuild(raw: unknown): ShareableBuild | null {
       build.incarnonConditionals = on;
     }
     if (e.ig === 0 || e.ig === 1) build.incarnonGenesisInstalled = e.ig === 1;
+    if (e.df && typeof e.df === "object" && !Array.isArray(e.df)) {
+      const df: Record<string, ShareableFormSlice> = {};
+      for (const [id, raw] of Object.entries(e.df as Record<string, unknown>)) {
+        const slice = unpackFormSlice(raw);
+        if (slice) df[id] = slice;
+      }
+      if (Object.keys(df).length > 0) build.dualFormBuilds = df;
+    }
   }
   return build;
+}
+
+function modsToShare(mods: { modId: string; rank: number; slotIndex?: number }[]): ShareableBuild["mods"] {
+  return mods.map((m) => ({
+    id: m.modId,
+    rank: m.rank,
+    ...(m.slotIndex != null ? { slotIndex: m.slotIndex } : {}),
+  }));
+}
+
+function polaritiesToShare(p?: Record<number | string, string>): Record<string, string> | undefined {
+  if (!p) return undefined;
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(p)) {
+    if (v) out[String(k)] = v;
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
+function arcanesToShare(ids?: (string | null)[]): string[] | undefined {
+  if (!ids || ids.length === 0) return undefined;
+  return ids.map((id) => id ?? "");
+}
+
+/** Share payload for a Warframe, including any second form (Shadow, Orion). */
+export function warframeBuildToShare(opts: {
+  warframeId: string;
+  mods: { modId: string; rank: number; slotIndex?: number }[];
+  arcaneIds?: (string | null)[];
+  arcaneRanks?: number[];
+  slotPolarities?: Record<number | string, string>;
+  shards?: { id: string; bonus: string }[];
+  dualFormBuilds?: Record<string, {
+    mods: { modId: string; rank: number; slotIndex?: number }[];
+    arcaneIds?: (string | null)[];
+    arcaneRanks?: number[];
+    slotPolarities?: Record<number | string, string>;
+  }>;
+}): ShareableBuild {
+  const build: ShareableBuild = {
+    type: "warframe",
+    itemId: opts.warframeId,
+    mods: modsToShare(opts.mods ?? []),
+  };
+  const arcanes = arcanesToShare(opts.arcaneIds);
+  if (arcanes) build.arcanes = arcanes;
+  if (opts.arcaneRanks && opts.arcaneRanks.length > 0) build.arcaneRanks = opts.arcaneRanks;
+  const sp = polaritiesToShare(opts.slotPolarities);
+  if (sp) build.slotPolarities = sp;
+  if (opts.shards && opts.shards.length > 0) build.shards = opts.shards;
+  if (opts.dualFormBuilds) {
+    const df: Record<string, ShareableFormSlice> = {};
+    for (const [id, slice] of Object.entries(opts.dualFormBuilds)) {
+      const shareSlice: ShareableFormSlice = {
+        mods: modsToShare(slice.mods ?? []),
+        arcanes: arcanesToShare(slice.arcaneIds),
+        arcaneRanks: slice.arcaneRanks,
+        slotPolarities: polaritiesToShare(slice.slotPolarities),
+      };
+      if (formSliceHasContent(shareSlice)) df[id] = shareSlice;
+    }
+    if (Object.keys(df).length > 0) build.dualFormBuilds = df;
+  }
+  return build;
+}
+
+/** Convert a shared form slice back into the builder's dual-form record. */
+export function shareFormToBuildSlice(slice: ShareableFormSlice): {
+  mods: { modId: string; rank: number; slotIndex: number }[];
+  slotPolarities: Record<number, string>;
+  arcaneIds: (string | null)[];
+  arcaneRanks: number[];
+} {
+  return {
+    mods: (slice.mods ?? []).map((m, i) => ({
+      modId: m.id,
+      rank: m.rank,
+      slotIndex: m.slotIndex ?? i,
+    })),
+    slotPolarities: Object.fromEntries(
+      Object.entries(slice.slotPolarities ?? {}).map(([k, v]) => [Number(k), v]),
+    ),
+    arcaneIds: [0, 1].map((i) => {
+      const id = slice.arcanes?.[i];
+      return id ? id : null;
+    }),
+    arcaneRanks: [0, 1].map((i) =>
+      typeof slice.arcaneRanks?.[i] === "number" ? slice.arcaneRanks![i]! : 5,
+    ),
+  };
 }
 
 function isLegacyShareObject(value: unknown): value is ShareableBuild {

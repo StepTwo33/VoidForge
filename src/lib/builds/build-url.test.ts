@@ -9,6 +9,8 @@ import {
   isLocalBuildId,
   packShareableBuild,
   unpackShareableBuild,
+  shareFormToBuildSlice,
+  warframeBuildToShare,
   type ShareableBuild,
 } from "@/lib/builds/build-url";
 
@@ -115,5 +117,97 @@ describe("isLocalBuildId", () => {
 
   it("rejects cloud cuid-style ids", () => {
     expect(isLocalBuildId("clxyz0123456789abcdefgh")).toBe(false);
+  });
+});
+
+describe("dual-form Warframe share links (Shadow / Orion)", () => {
+  const sevagoth = warframeBuildToShare({
+    warframeId: "sevagoth_prime",
+    mods: [{ modId: "intensify_r3", rank: 5, slotIndex: 1 }],
+    arcaneIds: ["molt_augmented", null],
+    arcaneRanks: [5, 5],
+    slotPolarities: { 3: "naramon" },
+    shards: [{ id: "tauforged_crimson_shard", bonus: "abilityStrength" }],
+    dualFormBuilds: {
+      shadow: {
+        mods: [
+          { modId: "stretch_r3", rank: 5, slotIndex: 1 },
+          { modId: "vitality_r3", rank: 10, slotIndex: 2 },
+        ],
+        arcaneIds: ["arcane_grace", null],
+        arcaneRanks: [3, 5],
+        slotPolarities: { 4: "madurai" },
+      },
+    },
+  });
+
+  it("puts the default form at the top level and the Shadow in dualFormBuilds", () => {
+    expect(sevagoth.itemId).toBe("sevagoth_prime");
+    expect(sevagoth.mods.map((m) => m.id)).toEqual(["intensify_r3"]);
+    expect(sevagoth.arcanes).toEqual(["molt_augmented", ""]);
+    expect(sevagoth.slotPolarities).toEqual({ "3": "naramon" });
+    expect(sevagoth.dualFormBuilds?.shadow.mods.map((m) => m.id)).toEqual(["stretch_r3", "vitality_r3"]);
+    expect(sevagoth.dualFormBuilds?.shadow.arcanes).toEqual(["arcane_grace", ""]);
+    expect(sevagoth.dualFormBuilds?.shadow.slotPolarities).toEqual({ "4": "madurai" });
+  });
+
+  it("round-trips through pack / unpack and encode / decode, including Orion", () => {
+    const packed = packShareableBuild(sevagoth);
+    const extras = packed[4] as Record<string, unknown>;
+    expect(extras.df).toBeTruthy();
+    const unpacked = unpackShareableBuild(packed);
+    expect(unpacked?.dualFormBuilds?.shadow.mods).toEqual(sevagoth.dualFormBuilds?.shadow.mods);
+    expect(unpacked?.mods).toEqual(sevagoth.mods);
+    expect(unpacked?.shards).toEqual(sevagoth.shards);
+    expect(decodeBuild(encodeBuild(sevagoth))).toEqual(unpacked);
+
+    const orion = warframeBuildToShare({
+      warframeId: "sirius_orion",
+      mods: [{ modId: "continuity_r3", rank: 5, slotIndex: 1 }],
+      dualFormBuilds: { orion: { mods: [{ modId: "vitality_r3", rank: 10, slotIndex: 2 }] } },
+    });
+    expect(decodeBuild(encodeBuild(orion))?.dualFormBuilds?.orion.mods[0]?.id).toBe("vitality_r3");
+    expect(decodeBuild(encodeBuild(orion))?.mods[0]?.id).toBe("continuity_r3");
+  });
+
+  it("still decodes older share links that have no second form", () => {
+    const old = packShareableBuild(sampleWarframe);
+    const extras = old[4] as Record<string, unknown> | undefined;
+    expect(extras?.df).toBeUndefined();
+    const unpacked = unpackShareableBuild(old);
+    expect(unpacked?.dualFormBuilds).toBeUndefined();
+    expect(unpacked?.itemId).toBe("qorvex");
+    expect(decodeBuild(encodeBuild(sampleWarframe))?.mods).toEqual(sampleWarframe.mods);
+    // A pre-built packed payload (the exact shape older clients emit) still unpacks.
+    const legacyPacked = [1, "f", "sevagoth", [["intensify_r3", 5, 1]], { a: ["molt_augmented"] }];
+    const fromLegacy = unpackShareableBuild(legacyPacked);
+    expect(fromLegacy).toEqual({
+      type: "warframe",
+      itemId: "sevagoth",
+      mods: [{ id: "intensify_r3", rank: 5, slotIndex: 1 }],
+      arcanes: ["molt_augmented"],
+    });
+    expect(fromLegacy?.dualFormBuilds).toBeUndefined();
+  });
+
+  it("omits an empty second form from the packed extras", () => {
+    const empty = warframeBuildToShare({
+      warframeId: "sevagoth",
+      mods: [{ modId: "intensify_r3", rank: 5, slotIndex: 1 }],
+      dualFormBuilds: { shadow: { mods: [], arcaneIds: [null, null], arcaneRanks: [5, 5], slotPolarities: {} } },
+    });
+    expect(empty.dualFormBuilds).toBeUndefined();
+    expect((packShareableBuild(empty)[4] as Record<string, unknown> | undefined)?.df).toBeUndefined();
+  });
+
+  it("shareFormToBuildSlice restores mods, polarities and arcanes for the builder", () => {
+    const slice = shareFormToBuildSlice(sevagoth.dualFormBuilds!.shadow);
+    expect(slice.mods).toEqual([
+      { modId: "stretch_r3", rank: 5, slotIndex: 1 },
+      { modId: "vitality_r3", rank: 10, slotIndex: 2 },
+    ]);
+    expect(slice.slotPolarities).toEqual({ 4: "madurai" });
+    expect(slice.arcaneIds).toEqual(["arcane_grace", null]);
+    expect(slice.arcaneRanks).toEqual([3, 5]);
   });
 });
