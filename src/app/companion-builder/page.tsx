@@ -275,6 +275,8 @@ export default function CompanionBuilderPage() {
     [rivenLibraryState.signedIn, selectedWeapon, refreshSavedRivens],
   );
 
+  const weaponAcceptsRiven = Boolean(selectedWeapon && getRivenModIdForWeapon(selectedWeapon));
+
   const editRivenTarget = useMemo(() => {
     if (editRivenSlot == null || !modPickerOpen || modPickerTarget !== "weapon") return null;
     const eq = weaponMods.find((m) => m.slotIndex === editRivenSlot);
@@ -1668,10 +1670,10 @@ export default function CompanionBuilderPage() {
         equippedModIds={equippedModIds}
         activeSlotModId={modPickerTarget === "weapon" ? weaponMods.find((m) => m.slotIndex === activeWeaponSlotIndex)?.modId : undefined}
         onSelect={handleSelectMod}
-        onSelectRiven={modPickerTarget === "weapon" && selectedWeapon?.category !== "beast_claw" ? handleSelectWeaponRiven : undefined}
+        onSelectRiven={modPickerTarget === "weapon" && weaponAcceptsRiven ? handleSelectWeaponRiven : undefined}
         editRiven={editRivenTarget}
-        savedRivens={modPickerTarget === "weapon" ? savedRivens : undefined}
-        rivenLibrary={modPickerTarget === "weapon" ? rivenLibrary : undefined}
+        savedRivens={modPickerTarget === "weapon" && weaponAcceptsRiven ? savedRivens : undefined}
+        rivenLibrary={modPickerTarget === "weapon" && weaponAcceptsRiven ? rivenLibrary : undefined}
         weaponCategory={modPickerTarget === "weapon" ? selectedWeapon?.category : undefined}
         weapon={modPickerTarget === "weapon" ? (selectedWeapon ?? undefined) : undefined}
         elsewhereMods={

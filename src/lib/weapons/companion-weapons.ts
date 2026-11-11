@@ -57,7 +57,8 @@ export function modFitsCompanionWeapon(
 ): boolean {
   const modClass = companionWeaponModClass(weapon);
   if (modClass === "beast_claw") {
-    // Beast companions cannot equip Riven mods (only sentinel weapons take companion rivens)
+    // Wiki Claws (Beast) Update 37.0: beast claws were not added to the Riven system.
+    // Robotic weapons (sentinel, MOA, hound) use Companion Weapon Rivens instead.
     if (mod.subCategory === "riven" || mod.id === "companion_weapon_riven_mod") return false;
     const familyRule = CLAW_MOD_FAMILY_RULES[mod.id];
     if (familyRule && !familyRule(weapon.id, weapon.companionType)) return false;
