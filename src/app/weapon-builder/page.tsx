@@ -30,7 +30,6 @@ import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-valida
 import { getRivenModIdForWeapon } from "@/lib/weapons/riven-weapon-type";
 import { useWeapons, useMods, useWarframes } from "@/lib/weapons/use-data";
 import { calculateWeaponBuild, calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
-import { modCapacityAtRank } from "@/lib/calc/mod-capacity";
 import { mergeIncarnonStatChanges, mergeRivenStatChanges } from "@/lib/calc/weapon-stat-merges";
 import {
   effectiveIncarnonEvolutions,
@@ -112,6 +111,7 @@ import { computeUsedCapacity } from "@/lib/calc/compute-used-capacity";
 import { WEAPON_CATEGORY_LABELS, getModCategory } from "@/lib/weapons/weapon-categories";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { StancePickerDialog } from "./stance-picker-dialog";
+import { stanceCapacityBonus, stanceSlotInfo, weaponStanceCapacity } from "@/lib/weapons/exalted-melee-slots";
 import { ProgenitorControls } from "./progenitor-controls";
 import { IncarnonEvolutionsSection } from "./incarnon-evolutions-section";
 
@@ -1134,7 +1134,10 @@ export default function WeaponBuilderPage() {
   const isSecondaryWeapon = selectedWeapon ? ["pistol", "secondary", "dual_pistols"].includes(selectedWeapon.category) : false;
   const isMeleeWeapon = selectedWeapon?.category === "melee";
   const hasWeaponExilusSlot = isPrimaryWeapon || isSecondaryWeapon || isMeleeWeapon;
-  const modCapacity = weaponModCapacity(selectedWeapon, adversaryFormas, hasOrokinCatalyst);
+  // wiki Stance: stances add capacity (5 maxed, 10 on a matching slot); exalted melee have a locked +10 stance.
+  const stanceSlot = stanceSlotInfo(selectedWeapon);
+  const modCapacity =
+    weaponModCapacity(selectedWeapon, adversaryFormas, hasOrokinCatalyst) + weaponStanceCapacity(selectedWeapon, stanceMod);
   const importEligibility = useMemo(
     () => (selectedWeapon ? weaponImportEligibility(selectedWeapon, modCategory) : null),
     [selectedWeapon, modCategory],
@@ -1664,7 +1667,15 @@ export default function WeaponBuilderPage() {
                 {selectedWeapon.category === "melee" && (
                   <div className="mt-6">
                     <h2 className="text-sm font-semibold tracking-wider text-muted-foreground mb-3">STANCE</h2>
-                    {stanceMod ? (
+                    {stanceSlot?.kind === "fixed" ? (
+                      <div
+                        className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3"
+                        title="Exalted stance: locked to the ability, Zenurik slot (wiki Update 38.5: +10 capacity)"
+                      >
+                        <span className="text-sm font-medium">{stanceSlot.stanceName}</span>
+                        <span className="text-[10px] text-amber-700 dark:text-amber-400">+{stanceSlot.capacity} capacity · locked</span>
+                      </div>
+                    ) : stanceMod ? (
                       <div className="relative border border-amber-500/30 rounded-lg p-3 bg-amber-500/5">
                         <button
                           type="button"
@@ -1677,7 +1688,7 @@ export default function WeaponBuilderPage() {
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium">{stanceMod.name}</span>
                           <span className="text-[10px] text-amber-700 dark:text-amber-400">
-                            +{Math.abs(modCapacityAtRank(stanceMod.drain, stanceMod.maxRank))} capacity
+                            +{stanceCapacityBonus(stanceMod, stanceSlot?.kind === "choice" ? stanceSlot.polarity : undefined)} capacity
                           </span>
                         </div>
                         <p className="text-[10px] text-muted-foreground mt-1 truncate">

@@ -2,10 +2,12 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Sparkles, FolderOpen, Save, ExternalLink, Trash2, Check, Search, Plus } from "lucide-react";
+import { Sparkles, FolderOpen, Save, ExternalLink, Trash2, Check, Search, Plus, Lock, X } from "lucide-react";
 import { ModSlotCard } from "@/components/mod-slot";
 import { isInnatePolarity } from "@/lib/builds/innate-polarities";
 import { ArcaneSlotCard } from "@/components/arcane-picker";
+import { PolarityIcon } from "@/components/polarity-icon";
+import { stanceCapacityBonus, type StanceSlotInfo } from "@/lib/weapons/exalted-melee-slots";
 import { WeaponStatsPanel } from "@/components/stats-panel";
 import { GameAssetImage } from "@/components/game-asset-image";
 import { getWeaponImage } from "@/lib/display/images";
@@ -24,6 +26,11 @@ export function ExaltedWeaponSection({
   exaltedWeapon,
   exaltedWeapons,
   exaltedCapacity,
+  exaltedMaxCapacity = 60,
+  stanceSlot = null,
+  stanceMod = null,
+  onPickStance,
+  onRemoveStance,
   exaltedMods,
   modsMap,
   exaltedSlotPolarities,
@@ -54,6 +61,13 @@ export function ExaltedWeaponSection({
   exaltedWeapon: Weapon;
   exaltedWeapons: Weapon[];
   exaltedCapacity: number;
+  /** Innate Catalyst (60) plus the stance's capacity. */
+  exaltedMaxCapacity?: number;
+  /** Locked Ability stance (most exalted melee) or a free stance choice (Garuda Talons); null = none. */
+  stanceSlot?: StanceSlotInfo | null;
+  stanceMod?: Mod | null;
+  onPickStance?: () => void;
+  onRemoveStance?: () => void;
   exaltedMods: EquippedMod[];
   modsMap: Map<string, Mod>;
   /** Effective polarities (innate defaults merged with overrides). */
@@ -155,10 +169,11 @@ export function ExaltedWeaponSection({
               <span
                 className={cn(
                   "font-mono font-medium",
-                  exaltedCapacity > 60 ? "text-red-700 dark:text-red-400" : "text-foreground",
+                  exaltedCapacity > exaltedMaxCapacity ? "text-red-700 dark:text-red-400" : "text-foreground",
                 )}
+                data-testid="exalted-capacity"
               >
-                {exaltedCapacity} / 60
+                {exaltedCapacity} / {exaltedMaxCapacity}
               </span>
               <span className="rounded bg-blue-500/10 px-1.5 py-0.2 text-[9px] font-medium text-blue-700 dark:text-blue-400">
                 Innate Catalyst
@@ -238,6 +253,56 @@ export function ExaltedWeaponSection({
           );
         })}
       </div>
+
+      {stanceSlot && (
+        <div className="mt-2.5" data-testid="exalted-stance">
+          <span className="mb-1 block text-[10px] font-semibold tracking-wider text-amber-700 dark:text-amber-400">
+            STANCE
+          </span>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            {stanceSlot.kind === "fixed" ? (
+              <div
+                className="flex min-h-14 items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3"
+                title="Exalted stance: locked to the ability, Zenurik slot (wiki Update 38.5: +10 capacity)"
+              >
+                <Lock className="h-3.5 w-3.5 shrink-0 text-amber-700 dark:text-amber-400" aria-hidden />
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">{stanceSlot.stanceName}</span>
+                <PolarityIcon polarity={stanceSlot.polarity} size={14} />
+                <span className="shrink-0 text-[10px] text-amber-700 dark:text-amber-400">+{stanceSlot.capacity}</span>
+              </div>
+            ) : stanceMod ? (
+              <div className="relative flex min-h-14 items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 pr-12 sm:pr-10">
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">{stanceMod.name}</span>
+                <PolarityIcon polarity={stanceMod.polarity} size={14} />
+                <span className="shrink-0 text-[10px] text-amber-700 dark:text-amber-400">
+                  +{stanceCapacityBonus(stanceMod, stanceSlot.polarity)}
+                </span>
+                {onRemoveStance && (
+                  <button
+                    type="button"
+                    onClick={onRemoveStance}
+                    className="absolute right-1 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive sm:h-8 sm:w-8"
+                    aria-label="Remove stance"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={onPickStance}
+                disabled={!onPickStance}
+                className="flex min-h-14 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-amber-500/30 text-muted-foreground transition-all hover:border-amber-500/50 hover:bg-amber-500/5 hover:text-amber-700 dark:hover:text-amber-400"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="text-xs">Add Stance</span>
+                {stanceSlot.polarity && <PolarityIcon polarity={stanceSlot.polarity} size={12} />}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {(() => {
         const i = WEAPON_EXILUS_SLOT_INDEX;

@@ -225,11 +225,14 @@ export interface WarframeBuildData {
   exaltedSlotPolarities?: Record<number, string>;
   exaltedArcaneIds?: (string | null)[];
   exaltedArcaneRanks?: number[];
+  /** Chosen stance when the exalted melee has a free stance slot (Garuda Talons). */
+  exaltedStanceModId?: string;
   /** Titania Diwata (melee) when Dex Pixia is the primary exalted. */
   exaltedMeleeMods?: ModSlot[];
   exaltedMeleeSlotPolarities?: Record<number, string>;
   exaltedMeleeArcaneIds?: (string | null)[];
   exaltedMeleeArcaneRanks?: number[];
+  exaltedMeleeStanceModId?: string;
   /** Non-default form configs for dual-form warframes (e.g. Orion on Sirius & Orion). */
   dualFormBuilds?: Record<string, {
     mods: ModSlot[];

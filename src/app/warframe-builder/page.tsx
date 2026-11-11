@@ -125,6 +125,9 @@ import { applyCostAugments } from "@/lib/calc/ability-augment-rows";
 import { ShardPickerDialog } from "./shard-picker-dialog";
 import { HelminthPickerDialog } from "./helminth-picker-dialog";
 import { ExaltedWeaponSection } from "./exalted-weapon-section";
+import { StancePickerDialog } from "../weapon-builder/stance-picker-dialog";
+import { STANCE_WEAPON_TYPE } from "@/data/stances";
+import { exaltedMaxCapacity, isStanceAllowed, stanceSlotInfo } from "@/lib/weapons/exalted-melee-slots";
 import {
   getWarframeAuraSlotIndices,
   WARFRAME_AURA_SLOT,
@@ -214,6 +217,10 @@ export default function WarframeBuilderPage() {
   const { savedBuilds: savedWeaponBuilds, refreshSavedBuilds: refreshSavedWeaponBuilds } = useBuilderSavedBuilds("weapon");
   const [exaltedActiveBuildName, setExaltedActiveBuildName] = useState<string | null>(null);
   const [exaltedMeleeActiveBuildName, setExaltedMeleeActiveBuildName] = useState<string | null>(null);
+  /** Chosen stance on an exalted melee with a free stance slot (Garuda Talons); locked exalted stances are derived. */
+  const [exaltedStanceId, setExaltedStanceId] = useState<string | null>(null);
+  const [exaltedMeleeStanceId, setExaltedMeleeStanceId] = useState<string | null>(null);
+  const [stancePickerTarget, setStancePickerTarget] = useState<"exalted" | "exaltedMelee" | null>(null);
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [pickerTab, setPickerTab] = useState<"catalog" | "saved">("catalog");
   const [showImporter, setShowImporter] = useState(false);
@@ -372,10 +379,12 @@ export default function WarframeBuilderPage() {
       exaltedSlotPolarities,
       exaltedArcaneIds: exaltedArcanes.map((a) => a?.id ?? null),
       exaltedArcaneRanks: [...exaltedArcaneRanks],
+      ...(exaltedStanceId ? { exaltedStanceModId: exaltedStanceId } : {}),
       exaltedMeleeMods: exaltedMeleeMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
       exaltedMeleeSlotPolarities,
       exaltedMeleeArcaneIds: exaltedMeleeArcanes.map((a) => a?.id ?? null),
       exaltedMeleeArcaneRanks: [...exaltedMeleeArcaneRanks],
+      ...(exaltedMeleeStanceId ? { exaltedMeleeStanceModId: exaltedMeleeStanceId } : {}),
     };
   }, [
     selectedWarframe,
@@ -393,6 +402,8 @@ export default function WarframeBuilderPage() {
     exaltedMeleeSlotPolarities,
     exaltedMeleeArcanes,
     exaltedMeleeArcaneRanks,
+    exaltedStanceId,
+    exaltedMeleeStanceId,
   ]);
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildWarframeData()), [buildWarframeData]));
@@ -437,6 +448,8 @@ export default function WarframeBuilderPage() {
       return { ...m, modName: mod?.name ?? "", polarity: mod?.polarity, drain: mod?.drain };
     }));
     setExaltedSlotPolarities(d.exaltedSlotPolarities || {});
+    setExaltedStanceId(d.exaltedStanceModId ?? null);
+    setExaltedMeleeStanceId(d.exaltedMeleeStanceModId ?? null);
     const resolvedExArcanes = resolveSavedArcaneSlots(d.exaltedArcaneIds, 2);
     setExaltedArcanes(resolvedExArcanes);
     setExaltedArcaneRanks([
@@ -599,6 +612,20 @@ export default function WarframeBuilderPage() {
     () => (exaltedWeapon ? getWeaponArcanes(exaltedWeapon) : { arcanes: [] as Mod[], slots: 0, label: "" }),
     [exaltedWeapon],
   );
+
+  const stanceTypeOf = useCallback((id: string) => STANCE_WEAPON_TYPE[id], []);
+  const exaltedStanceSlot = useMemo(() => stanceSlotInfo(exaltedWeapon), [exaltedWeapon]);
+  const exaltedMeleeStanceSlot = useMemo(() => stanceSlotInfo(exaltedMeleeWeapon), [exaltedMeleeWeapon]);
+  const exaltedStance = useMemo(() => {
+    const m = exaltedStanceId ? modsMap.get(exaltedStanceId) : undefined;
+    return m && isStanceAllowed(exaltedWeapon, m, stanceTypeOf) ? m : null;
+  }, [exaltedStanceId, modsMap, exaltedWeapon, stanceTypeOf]);
+  const exaltedMeleeStance = useMemo(() => {
+    const m = exaltedMeleeStanceId ? modsMap.get(exaltedMeleeStanceId) : undefined;
+    return m && isStanceAllowed(exaltedMeleeWeapon, m, stanceTypeOf) ? m : null;
+  }, [exaltedMeleeStanceId, modsMap, exaltedMeleeWeapon, stanceTypeOf]);
+  const exaltedMaxCap = exaltedMaxCapacity(exaltedWeapon, exaltedStance);
+  const exaltedMeleeMaxCap = exaltedMaxCapacity(exaltedMeleeWeapon, exaltedMeleeStance);
 
   const exaltedMeleeArcaneConfig = useMemo(
     () =>
@@ -985,6 +1012,8 @@ export default function WarframeBuilderPage() {
     setExaltedMeleeArcanes([null]);
     setExaltedMeleeArcaneRanks([5, 5]);
     setExaltedMeleeActiveBuildName(null);
+    setExaltedStanceId(null);
+    setExaltedMeleeStanceId(null);
     setHelminthSlot(null);
     setHelminthAbility(null);
     setSlotPolarities({});
@@ -1014,6 +1043,7 @@ export default function WarframeBuilderPage() {
     });
     setExaltedMods(mods);
     if (d.slotPolarities) setExaltedSlotPolarities(d.slotPolarities);
+    setExaltedStanceId(d.stanceModId ?? null);
     if (d.arcaneIds) {
       const resolved = resolveSavedArcaneSlots(d.arcaneIds, exaltedArcaneConfig.slots);
       setExaltedArcanes(resolved);
@@ -1028,6 +1058,7 @@ export default function WarframeBuilderPage() {
     const weaponData: WeaponBuildData = {
       weaponId: exaltedWeapon.id,
       mods: exaltedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      ...(exaltedStance ? { stanceModId: exaltedStance.id } : {}),
       arcaneIds: exaltedArcanes.map((a) => a?.id ?? null),
       arcaneRanks: [...exaltedArcaneRanks],
       hasOrokinCatalyst: true,
@@ -1047,7 +1078,7 @@ export default function WarframeBuilderPage() {
     await refreshSavedWeaponBuilds();
     setExaltedActiveBuildName(name);
     toast.success(`Saved “${name}” to Weapon Builder library`);
-  }, [exaltedWeapon, exaltedMods, exaltedArcanes, exaltedArcaneRanks, exaltedSlotPolarities, refreshSavedWeaponBuilds]);
+  }, [exaltedWeapon, exaltedMods, exaltedStance, exaltedArcanes, exaltedArcaneRanks, exaltedSlotPolarities, refreshSavedWeaponBuilds]);
 
   const handleLoadExaltedMeleeSavedBuild = useCallback((build: SavedBuild) => {
     const d = build.data as WeaponBuildData;
@@ -1065,6 +1096,7 @@ export default function WarframeBuilderPage() {
     });
     setExaltedMeleeMods(mods);
     if (d.slotPolarities) setExaltedMeleeSlotPolarities(d.slotPolarities);
+    setExaltedMeleeStanceId(d.stanceModId ?? null);
     if (d.arcaneIds) {
       const resolved = resolveSavedArcaneSlots(d.arcaneIds, exaltedMeleeArcaneConfig.slots);
       setExaltedMeleeArcanes(resolved);
@@ -1079,6 +1111,7 @@ export default function WarframeBuilderPage() {
     const weaponData: WeaponBuildData = {
       weaponId: exaltedMeleeWeapon.id,
       mods: exaltedMeleeMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      ...(exaltedMeleeStance ? { stanceModId: exaltedMeleeStance.id } : {}),
       arcaneIds: exaltedMeleeArcanes.map((a) => a?.id ?? null),
       arcaneRanks: [...exaltedMeleeArcaneRanks],
       hasOrokinCatalyst: true,
@@ -1098,7 +1131,7 @@ export default function WarframeBuilderPage() {
     await refreshSavedWeaponBuilds();
     setExaltedMeleeActiveBuildName(name);
     toast.success(`Saved “${name}” to Weapon Builder library`);
-  }, [exaltedMeleeWeapon, exaltedMeleeMods, exaltedMeleeArcanes, exaltedMeleeArcaneRanks, exaltedMeleeSlotPolarities, refreshSavedWeaponBuilds]);
+  }, [exaltedMeleeWeapon, exaltedMeleeMods, exaltedMeleeStance, exaltedMeleeArcanes, exaltedMeleeArcaneRanks, exaltedMeleeSlotPolarities, refreshSavedWeaponBuilds]);
 
   const handleOpenModPicker = useCallback((slotIndex: number) => {
     setActiveSlotIndex(slotIndex);
@@ -1698,6 +1731,11 @@ export default function WarframeBuilderPage() {
                     exaltedWeapon={exaltedWeapon}
                     exaltedWeapons={exaltedWeapons}
                     exaltedCapacity={exaltedCapacity}
+                    exaltedMaxCapacity={exaltedMaxCap}
+                    stanceSlot={exaltedStanceSlot}
+                    stanceMod={exaltedStance}
+                    onPickStance={() => setStancePickerTarget("exalted")}
+                    onRemoveStance={() => setExaltedStanceId(null)}
                     exaltedMods={exaltedMods}
                     modsMap={modsMap}
                     exaltedSlotPolarities={exaltedEffectivePolarities}
@@ -1754,6 +1792,11 @@ export default function WarframeBuilderPage() {
                     exaltedWeapon={exaltedMeleeWeapon}
                     exaltedWeapons={exaltedWeapons}
                     exaltedCapacity={exaltedMeleeCapacity}
+                    exaltedMaxCapacity={exaltedMeleeMaxCap}
+                    stanceSlot={exaltedMeleeStanceSlot}
+                    stanceMod={exaltedMeleeStance}
+                    onPickStance={() => setStancePickerTarget("exaltedMelee")}
+                    onRemoveStance={() => setExaltedMeleeStanceId(null)}
                     exaltedMods={exaltedMeleeMods}
                     modsMap={modsMap}
                     exaltedSlotPolarities={exaltedMeleeEffectivePolarities}
@@ -2042,6 +2085,21 @@ export default function WarframeBuilderPage() {
         defaultTags={buildTags}
         onSave={handleSaveDialog}
         loadoutTarget={loadoutCtx ? { loadoutName: loadoutCtx.loadoutName, slotLabel: loadoutSlotLabel(loadoutCtx.slot) } : null}
+      />
+      <StancePickerDialog
+        open={stancePickerTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setStancePickerTarget(null);
+        }}
+        allMods={allMods}
+        stanceType={
+          (stancePickerTarget === "exaltedMelee" ? exaltedMeleeWeapon : exaltedWeapon)?.stanceType
+        }
+        onSelect={(mod) => {
+          if (stancePickerTarget === "exaltedMelee") setExaltedMeleeStanceId(mod.id);
+          else setExaltedStanceId(mod.id);
+          setStancePickerTarget(null);
+        }}
       />
       <BuilderSectionNav sections={[{ id: "build-mods", label: "Mods" }, { id: "build-stats", label: "Stats" }]} />
     </PageShell>
