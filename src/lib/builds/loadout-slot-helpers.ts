@@ -10,6 +10,7 @@ import { allWarframes } from "@/data/warframes";
 import { allCompanions } from "@/data/companions";
 import { getWarframeImage, getWeaponImage, getCompanionImage } from "@/lib/display/images";
 import { dualFormModCountSummary, isDualFormWarframe } from "@/lib/builds/dual-form-warframes";
+import { resolveAmpArcanes } from "@/lib/builds/operator-amp-arcanes";
 
 export type LoadoutSlotType = "warframe" | "primary" | "secondary" | "melee" | "companion" | "operator";
 
@@ -166,7 +167,7 @@ export function getSlotModCount(loadout: Loadout, slot: LoadoutSlotType): number
     case "operator": {
       const ob = loadout.operatorBuild;
       if (!ob) return 0;
-      return (ob.arcaneIds ?? []).filter(Boolean).length + (ob.ampArcaneIds ?? []).filter(Boolean).length;
+      return (ob.arcaneIds ?? []).filter(Boolean).length + resolveAmpArcanes(ob).ids.filter(Boolean).length;
     }
     case "primary":
     case "secondary":

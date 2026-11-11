@@ -22,6 +22,12 @@ import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { getLoadouts, saveLoadout } from "@/lib/builds/loadouts";
 import { getSavedBuilds, resolveSavedArcaneSlots, type SavedBuild } from "@/lib/builds/build-storage";
+import {
+  migrateOperatorAmpArcanes,
+  persistOperatorAmpArcanes,
+  resolveAmpArcanes,
+  writeAmpArcanesOnModular,
+} from "@/lib/builds/operator-amp-arcanes";
 import { modularBuildDisplayName } from "@/lib/builds/modular-resolve";
 import { operatorArcanes, ampArcanes } from "@/data/arcanes";
 import { allWeapons } from "@/data/weapons";
@@ -74,7 +80,7 @@ export default function OperatorBuilderPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- loading the saved loadout from storage (external) on open
     setLoadout(found);
 
-    const ob = found.operatorBuild;
+    const ob = found.operatorBuild ? migrateOperatorAmpArcanes(found.operatorBuild) : null;
     if (ob) {
       if (ob.focusSchool) setFocusSchool(ob.focusSchool);
       if (ob.arcaneIds) {
@@ -87,13 +93,9 @@ export default function OperatorBuilderPage() {
       if (ob.ampId) setAmpId(ob.ampId);
       if (ob.ampName) setAmpName(ob.ampName);
       if (ob.ampModularBuild) setAmpModularBuild(ob.ampModularBuild);
-      if (ob.ampArcaneIds) {
-        const resolved = resolveSavedArcaneSlots(ob.ampArcaneIds, 2);
-        setAmpArcanesState(resolved);
-        setAmpArcaneRanks(
-          [0, 1].map((i) => ob.ampArcaneRanks?.[i] ?? resolved[i]?.maxRank ?? 5),
-        );
-      }
+      const amp = resolveAmpArcanes(ob);
+      setAmpArcanesState(resolveSavedArcaneSlots(amp.ids, 2));
+      setAmpArcaneRanks(amp.ranks);
     }
   }, [loadoutId]);
 
@@ -107,32 +109,43 @@ export default function OperatorBuilderPage() {
     setAmpId(id);
     setAmpName(name);
     setAmpModularBuild(null);
+    setAmpArcanesState([null, null]);
+    setAmpArcaneRanks([5, 5]);
     setDirty(true);
   }, []);
 
   // Select a saved modular amp
   const handleSelectModularAmp = useCallback((build: SavedBuild) => {
     const data = build.data as ModularBuildData;
+    const resolved = resolveAmpArcanes({ ampModularBuild: data });
     setAmpId(`modular_${build.id}`);
     setAmpName(build.name || modularBuildDisplayName(data));
     setAmpModularBuild(data);
+    setAmpArcanesState(resolveSavedArcaneSlots(resolved.ids, 2));
+    setAmpArcaneRanks(resolved.ranks);
     setDirty(true);
-    toast.success(`Attached Amp “${build.name}”`);
+    toast.success(`Attached Amp “${build.name}”`, {
+      description: resolved.ids.filter(Boolean).length
+        ? "Amp arcanes came with the Amp."
+        : undefined,
+    });
   }, []);
 
   // Handle saving to loadout
   const handleSaveToLoadout = useCallback(async (): Promise<boolean> => {
     if (!loadout) return false;
-    const operatorPayload: LoadoutOperatorBuild = {
+    const operatorPayload: LoadoutOperatorBuild = migrateOperatorAmpArcanes({
       focusSchool,
       arcaneIds: operatorArcanesState.map((a) => a?.id ?? null),
       arcaneRanks: operatorArcaneRanks,
       ampId,
       ampName,
-      ...(ampModularBuild ? { ampModularBuild } : {}),
-      ampArcaneIds: ampArcanesState.map((a) => a?.id ?? null),
-      ampArcaneRanks: ampArcaneRanks,
-    };
+      ...persistOperatorAmpArcanes(
+        ampModularBuild,
+        ampArcanesState.map((a) => a?.id ?? null),
+        ampArcaneRanks,
+      ),
+    });
 
     const updated: Loadout = {
       ...loadout,
@@ -179,21 +192,24 @@ export default function OperatorBuilderPage() {
           return next;
         });
       } else {
+        const nextIds = ampArcanesState.map((a) => a?.id ?? null);
+        const nextRanks = [...ampArcaneRanks];
+        nextIds[activeArcaneSlotIndex] = arcane.id;
+        nextRanks[activeArcaneSlotIndex] = rank ?? arcane.maxRank;
         setAmpArcanesState((prev) => {
           const next = [...prev];
           next[activeArcaneSlotIndex] = arcane;
           return next;
         });
-        setAmpArcaneRanks((prev) => {
-          const next = [...prev];
-          next[activeArcaneSlotIndex] = rank ?? arcane.maxRank;
-          return next;
-        });
+        setAmpArcaneRanks(nextRanks);
+        if (ampModularBuild) {
+          setAmpModularBuild(writeAmpArcanesOnModular(ampModularBuild, nextIds, nextRanks));
+        }
       }
       setDirty(true);
       setArcanePickerOpen(false);
     },
-    [arcanePickerTarget, activeArcaneSlotIndex],
+    [arcanePickerTarget, activeArcaneSlotIndex, ampArcanesState, ampArcaneRanks, ampModularBuild],
   );
 
   return (
@@ -316,9 +332,9 @@ export default function OperatorBuilderPage() {
 
             {/* OPERATOR ARCANES */}
             <ContentPanel padding>
-              <PanelHeading>2. Operator Arcanes (Magus)</PanelHeading>
+              <PanelHeading>2. Operator Arcanes (Magus / Emergence)</PanelHeading>
               <p className="text-xs text-muted-foreground mb-3">
-                Equip up to two Magus arcanes to boost Operator survivability, healing, or combat utilities.
+                Equip up to two Operator arcanes (Magus and Emergence). These slot on the Operator, not the Amp.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {operatorArcanesState.map((arcane, i) => (
@@ -504,11 +520,13 @@ export default function OperatorBuilderPage() {
               )}
             </ContentPanel>
 
-            {/* AMP ARCANES */}
+            {/* AMP ARCANES — one copy, stored on the Amp (wiki Virtuos / Eternal). */}
             <ContentPanel padding>
               <PanelHeading>4. Amp Arcanes (Virtuos / Eternal)</PanelHeading>
               <p className="text-xs text-muted-foreground mb-3">
-                Equip Amp arcanes (Eternal Eradicate, Eternal Onslaught, Virtuos Shadow) to multiply Amp DPS.
+                {ampModularBuild
+                  ? "These slot on the Amp. They were imported with this Modular Amp; editing them here updates that Amp (the same arcanes the Modular Builder stores)."
+                  : "These slot on the Amp (not the Operator). The second slot is unlocked in-game with an Amp Arcane Adapter."}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {ampArcanesState.map((arcane, i) => (
@@ -519,19 +537,26 @@ export default function OperatorBuilderPage() {
                     label={`Amp Arcane ${i + 1}`}
                     onAdd={() => handleOpenArcanePicker("amp", i)}
                     onRemove={() => {
+                      const nextIds = ampArcanesState.map((a, idx) => (idx === i ? null : a?.id ?? null));
+                      const nextRanks = [...ampArcaneRanks];
                       setAmpArcanesState((prev) => {
                         const next = [...prev];
                         next[i] = null;
                         return next;
                       });
+                      if (ampModularBuild) {
+                        setAmpModularBuild(writeAmpArcanesOnModular(ampModularBuild, nextIds, nextRanks));
+                      }
                       setDirty(true);
                     }}
                     onRankChange={(rank) => {
-                      setAmpArcaneRanks((prev) => {
-                        const next = [...prev];
-                        next[i] = rank;
-                        return next;
-                      });
+                      const nextIds = ampArcanesState.map((a) => a?.id ?? null);
+                      const nextRanks = [...ampArcaneRanks];
+                      nextRanks[i] = rank;
+                      setAmpArcaneRanks(nextRanks);
+                      if (ampModularBuild) {
+                        setAmpModularBuild(writeAmpArcanesOnModular(ampModularBuild, nextIds, nextRanks));
+                      }
                       setDirty(true);
                     }}
                   />
@@ -562,7 +587,7 @@ export default function OperatorBuilderPage() {
               : 5
           }
           onSelect={handlePickArcane}
-          title={arcanePickerTarget === "operator" ? "Select Operator Arcane (Magus)" : "Select Amp Arcane (Virtuos / Eternal)"}
+          title={arcanePickerTarget === "operator" ? "Select Operator Arcane (Magus / Emergence)" : "Select Amp Arcane (Virtuos / Eternal)"}
         />
       </PageMain>
     </PageShell>

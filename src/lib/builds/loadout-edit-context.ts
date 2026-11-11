@@ -4,6 +4,7 @@ import type { Loadout, ModularBuildData } from "@/lib/types";
 import type { CompanionBuildData, WarframeBuildData, WeaponBuildData } from "@/lib/builds/build-storage";
 import { normalizeWarframeBuild, withLoadoutModular } from "@/lib/builds/loadout-slot-helpers";
 import type { LoadoutWeaponSlot } from "@/lib/builds/modular-resolve";
+import { migrateOperatorAmpArcanes } from "@/lib/builds/operator-amp-arcanes";
 
 export type LoadoutBuilderKind = "weapon" | "warframe" | "companion" | "modular" | "operator";
 
@@ -74,7 +75,7 @@ export function withLoadoutSlot(loadout: Loadout, ctx: LoadoutEditContext, data:
       return next;
     }
     case "operator": {
-      const d = data as NonNullable<Loadout["operatorBuild"]>;
+      const d = migrateOperatorAmpArcanes(data as NonNullable<Loadout["operatorBuild"]>);
       return {
         ...loadout,
         operatorBuild: {

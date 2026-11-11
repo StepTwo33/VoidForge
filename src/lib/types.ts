@@ -1512,7 +1512,9 @@ export interface LoadoutOperatorBuild {
   arcaneRanks?: number[];
   ampId?: string;
   ampName?: string;
+  /** Modular Amp payload is the source of truth for Virtuos / Eternal arcanes. */
   ampModularBuild?: ModularBuildData;
+  /** Amp arcanes for a preset Amp (Sirocco, Mote). Legacy leftover is migrated onto ampModularBuild when present. */
   ampArcaneIds?: (string | null)[];
   ampArcaneRanks?: number[];
 }

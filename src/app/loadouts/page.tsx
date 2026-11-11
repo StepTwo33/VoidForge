@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useMemo, useRef, startTransition } fr
 import { useRouter } from "next/navigation";
 import { PageShell, PageMain, PageHero, ContentPanel, EmptyState } from "@/components/page-shell";
 import { getLoadouts, saveLoadout, deleteLoadout, generateId, loadoutToBuildData, loadoutFromSavedBuild, mergeCloudLoadoutPreservingSlots, moveLoadout } from "@/lib/builds/loadouts";
+import { migrateOperatorAmpArcanes } from "@/lib/builds/operator-amp-arcanes";
 import { decodeLoadoutShare, encodeLoadoutShare, loadoutSharePath } from "@/lib/builds/loadout-share";
 import {
   generateBuildId,
@@ -790,16 +791,20 @@ export default function LoadoutsPage() {
         };
       } else if (pickerSlot === "operator") {
         if (build.type === "operator") {
-          const d = build.data as LoadoutOperatorBuild;
+          const d = migrateOperatorAmpArcanes(build.data as LoadoutOperatorBuild);
           updated.operatorBuild = { ...d };
         } else if (build.type === "modular") {
           const d = build.data as ModularBuildData;
           if (d.modularType === "amp") {
-            updated.operatorBuild = {
-              ...(updated.operatorBuild ?? {}),
+            const prev = updated.operatorBuild ?? {};
+            updated.operatorBuild = migrateOperatorAmpArcanes({
+              ...prev,
               ampModularBuild: d,
               ampName: build.name,
-            };
+              // Drop leftover operator-build amp arcanes so they don't leak onto a newly attached Amp.
+              ampArcaneIds: undefined,
+              ampArcaneRanks: undefined,
+            });
           } else {
             toast.error("Only Amp modular builds can be attached to the Operator slot.");
             return;
