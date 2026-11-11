@@ -269,11 +269,13 @@ export default function ArchwingBuilderPage() {
   useCloudBuildFromUrl("archwing", handleLoadBuild);
 
   // Per-tab draft so library Equip can add an archgun riven to this open archwing/necramech build.
+  // Do not clear the draft while nothing is selected — that would wipe it on the way back from the library.
   useEffect(() => {
-    if (!selectedWeapon || selectedWeapon.category !== "archgun" || selectedWeapon.hasRivenSlot === false) {
+    if (selectedWeapon && (selectedWeapon.category !== "archgun" || selectedWeapon.hasRivenSlot === false)) {
       saveBuilderDraft("archwing", null);
       return;
     }
+    if (!selectedWeapon) return;
     saveBuilderDraft<ArchwingBuildData>("archwing", {
       itemId: selectedWeapon.id,
       buildId: currentBuildId,
@@ -289,7 +291,7 @@ export default function ArchwingBuilderPage() {
 
   const weaponParamSeenRef = useRef<string | null>(null);
   useEffect(() => {
-    if (allWeaponsData.length === 0) return;
+    if (allWeaponsData.length === 0 || allMods.length === 0) return;
     const params = new URLSearchParams(searchParams.toString());
     const weaponId = params.get("weapon")?.trim();
     const rivenParam = params.get("riven");
@@ -323,14 +325,11 @@ export default function ArchwingBuilderPage() {
           ...(m.rivenId ? { rivenId: m.rivenId } : {}),
         })));
         setWeaponRivenStatsMap(opts.rivenMods.stats);
-      } else if (!rivenParam) {
-        // Selecting via ?weapon= without Equip should not wipe an already-matching gun.
-        if (selectedWeapon?.id !== weapon.id) {
-          setWeaponMods([]);
-          setWeaponRivenStatsMap(undefined);
-        }
+      } else {
+        setWeaponMods([]);
+        setWeaponRivenStatsMap(undefined);
       }
-      if (!buildName) setBuildName(`${weapon.name} Build`);
+      setBuildName((prev) => prev || `${weapon.name} Build`);
     };
 
     const equip = rivenParam ? parseRivenEquip(params) : null;
@@ -393,7 +392,7 @@ export default function ArchwingBuilderPage() {
     }
 
     queueMicrotask(() => startFreshWeapon());
-  }, [allWeaponsData, allMods, modsMap, searchParams, handleLoadBuild, selectedWeapon?.id, buildName]);
+  }, [allWeaponsData, allMods, modsMap, searchParams, handleLoadBuild]);
 
   const handleDeleteBuild = (id: string) => {
     void deleteSavedBuild(id);
