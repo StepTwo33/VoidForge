@@ -432,7 +432,7 @@ export default function ModularBuilderPage() {
       return {
         ...m,
         rank,
-        modName: mod?.name ?? "",
+        modName: (isRiven && m.rivenName) || mod?.name || "",
         polarity: isRiven && m.rivenPolarity ? m.rivenPolarity : mod?.polarity,
         drain: mod?.drain,
       };

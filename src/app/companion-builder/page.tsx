@@ -417,11 +417,14 @@ export default function CompanionBuilderPage() {
     setWeaponRivenStatsMap(Object.keys(rivenMap).length > 0 ? rivenMap : undefined);
     setWeaponMods(dropUnknownMods(loadedWeaponMods, modsMap).map((m) => {
       const mod = modsMap.get(m.modId);
+      const isRiven = m.modId.startsWith("riven_") || m.modId === "companion_weapon_riven_mod";
+      const rank = isRiven && !m.rank && typeof m.rivenDrain === "number" ? rivenRankFromDrain(m.rivenDrain) : m.rank;
       return {
         ...m,
-        modName: m.modName || mod?.name || "",
-        polarity: m.polarity || mod?.polarity,
-        drain: typeof m.drain === "number" ? m.drain : mod?.drain,
+        rank,
+        modName: (isRiven && (m.rivenName || m.modName)) || m.modName || mod?.name || "",
+        polarity: isRiven && m.rivenPolarity ? m.rivenPolarity : (m.polarity || mod?.polarity),
+        drain: mod?.drain,
       };
     }));
     setHasReactor(isExaltedCompanionId(d.companionId) ? true : Boolean(d.hasReactor));
