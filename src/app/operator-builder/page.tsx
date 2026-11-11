@@ -21,7 +21,15 @@ import { PolarityIcon } from "@/components/polarity-icon";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { getLoadouts, saveLoadout } from "@/lib/builds/loadouts";
-import { getSavedBuilds, resolveSavedArcaneSlots, type SavedBuild } from "@/lib/builds/build-storage";
+import { persistSavedBuild, resolveSavedArcaneSlots, type SavedBuild } from "@/lib/builds/build-storage";
+import { saveIdentityId } from "@/lib/builds/quicksave";
+import { BuilderSaveControls } from "@/components/builder-save-controls";
+import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
+import { BuildsReturnLink } from "@/components/builds-return-link";
+import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
+import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
+import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
+import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
 import {
   migrateOperatorAmpArcanes,
   persistOperatorAmpArcanes,
@@ -64,13 +72,65 @@ export default function OperatorBuilderPage() {
   const [arcanePickerTarget, setArcanePickerTarget] = useState<"operator" | "amp">("operator");
   const [activeArcaneSlotIndex, setActiveArcaneSlotIndex] = useState(0);
 
-  // Saved modular amp builds
+  const { savedBuilds, refreshSavedBuilds, deleteSavedBuild } = useBuilderSavedBuilds("operator");
+  const { savedBuilds: modularSaved } = useBuilderSavedBuilds("modular");
+  const [showSavedBuilds, setShowSavedBuilds] = useState(false);
+  const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
+  const [saveAsNew, setSaveAsNew] = useState(false);
+  const [buildName, setBuildName] = useState("");
+  const [buildIsPublic, setBuildIsPublic] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+
   const savedModularAmps = useMemo(() => {
-    return getSavedBuilds("modular").filter((b) => {
+    return modularSaved.filter((b) => {
       const d = b.data as ModularBuildData;
       return d?.modularType === "amp";
     });
+  }, [modularSaved]);
+
+  const applyOperatorPayload = useCallback((ob: LoadoutOperatorBuild) => {
+    const migrated = migrateOperatorAmpArcanes(ob);
+    setFocusSchool(migrated.focusSchool || "Madurai");
+    const opSlots = resolveSavedArcaneSlots(migrated.arcaneIds, 2);
+    setOperatorArcanesState(opSlots);
+    setOperatorArcaneRanks(
+      [0, 1].map((i) => migrated.arcaneRanks?.[i] ?? opSlots[i]?.maxRank ?? 5),
+    );
+    setAmpId(migrated.ampId || "sirocco");
+    setAmpName(migrated.ampName || "Sirocco");
+    setAmpModularBuild(migrated.ampModularBuild ?? null);
+    const amp = resolveAmpArcanes(migrated);
+    setAmpArcanesState(resolveSavedArcaneSlots(amp.ids, 2));
+    setAmpArcaneRanks(amp.ranks);
   }, []);
+
+  const buildOperatorPayload = useCallback((): LoadoutOperatorBuild => {
+    return migrateOperatorAmpArcanes({
+      focusSchool,
+      arcaneIds: operatorArcanesState.map((a) => a?.id ?? null),
+      arcaneRanks: operatorArcaneRanks,
+      ampId,
+      ampName,
+      ...persistOperatorAmpArcanes(
+        ampModularBuild,
+        ampArcanesState.map((a) => a?.id ?? null),
+        ampArcaneRanks,
+      ),
+    });
+  }, [
+    focusSchool,
+    operatorArcanesState,
+    operatorArcaneRanks,
+    ampId,
+    ampName,
+    ampModularBuild,
+    ampArcanesState,
+    ampArcaneRanks,
+  ]);
+
+  const defaultOperatorBuildName = useCallback(() => {
+    return buildName.trim() || `${focusSchool} Operator`;
+  }, [buildName, focusSchool]);
 
   // Initialize from loadout if present
   useEffect(() => {
@@ -80,24 +140,8 @@ export default function OperatorBuilderPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- loading the saved loadout from storage (external) on open
     setLoadout(found);
 
-    const ob = found.operatorBuild ? migrateOperatorAmpArcanes(found.operatorBuild) : null;
-    if (ob) {
-      if (ob.focusSchool) setFocusSchool(ob.focusSchool);
-      if (ob.arcaneIds) {
-        const resolved = resolveSavedArcaneSlots(ob.arcaneIds, 2);
-        setOperatorArcanesState(resolved);
-        setOperatorArcaneRanks(
-          [0, 1].map((i) => ob.arcaneRanks?.[i] ?? resolved[i]?.maxRank ?? 5),
-        );
-      }
-      if (ob.ampId) setAmpId(ob.ampId);
-      if (ob.ampName) setAmpName(ob.ampName);
-      if (ob.ampModularBuild) setAmpModularBuild(ob.ampModularBuild);
-      const amp = resolveAmpArcanes(ob);
-      setAmpArcanesState(resolveSavedArcaneSlots(amp.ids, 2));
-      setAmpArcaneRanks(amp.ranks);
-    }
-  }, [loadoutId]);
+    if (found.operatorBuild) applyOperatorPayload(found.operatorBuild);
+  }, [loadoutId, applyOperatorPayload]);
 
   // Track active Amp weapon data
   const currentAmpWeapon = useMemo(() => {
@@ -134,18 +178,7 @@ export default function OperatorBuilderPage() {
   // Handle saving to loadout
   const handleSaveToLoadout = useCallback(async (): Promise<boolean> => {
     if (!loadout) return false;
-    const operatorPayload: LoadoutOperatorBuild = migrateOperatorAmpArcanes({
-      focusSchool,
-      arcaneIds: operatorArcanesState.map((a) => a?.id ?? null),
-      arcaneRanks: operatorArcaneRanks,
-      ampId,
-      ampName,
-      ...persistOperatorAmpArcanes(
-        ampModularBuild,
-        ampArcanesState.map((a) => a?.id ?? null),
-        ampArcaneRanks,
-      ),
-    });
+    const operatorPayload = buildOperatorPayload();
 
     const updated: Loadout = {
       ...loadout,
@@ -158,17 +191,56 @@ export default function OperatorBuilderPage() {
       description: `${focusSchool} • ${ampName}`,
     });
     return true;
-  }, [
-    loadout,
-    focusSchool,
-    operatorArcanesState,
-    operatorArcaneRanks,
-    ampId,
-    ampName,
-    ampModularBuild,
-    ampArcanesState,
-    ampArcaneRanks,
-  ]);
+  }, [loadout, buildOperatorPayload, focusSchool, ampName]);
+
+  const handleSaveBuildConfirm = useCallback(
+    async ({ name, isPublic, asNew = false }: SaveBuildDialogValues & { asNew?: boolean }) => {
+      const build: SavedBuild = {
+        id: saveIdentityId(currentBuildId, asNew),
+        name,
+        isPublic,
+        type: "operator",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        data: buildOperatorPayload(),
+      };
+      const result = await persistSavedBuild(build);
+      setCurrentBuildId(result.id);
+      setBuildName(name);
+      setBuildIsPublic(result.isPublic);
+      setDirty(false);
+      void refreshSavedBuilds();
+      if (result.synced) {
+        toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated", {
+          description: `${name} saved to your account`,
+        });
+      } else {
+        toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated on this device", {
+          description: "Log in to sync builds to your account",
+        });
+      }
+    },
+    [buildOperatorPayload, currentBuildId, refreshSavedBuilds],
+  );
+
+  const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
+    applyOperatorPayload(rawBuild.data as LoadoutOperatorBuild);
+    setCurrentBuildId(rawBuild.id);
+    setBuildName(rawBuild.name);
+    setBuildIsPublic(rawBuild.isPublic ?? false);
+    setShowSavedBuilds(false);
+    setDirty(false);
+    toast.info("Build loaded", { description: rawBuild.name });
+  }, [applyOperatorPayload]);
+
+  useCloudBuildFromUrl("operator", handleLoadBuild);
+  useLocalBuildFromUrl("operator", handleLoadBuild);
+
+  const handleDeleteBuild = useCallback((id: string) => {
+    void deleteSavedBuild(id);
+    if (currentBuildId === id) setCurrentBuildId(null);
+    toast.success("Build deleted");
+  }, [currentBuildId, deleteSavedBuild]);
 
   // Open Arcane picker
   const handleOpenArcanePicker = useCallback((target: "operator" | "amp", slotIndex: number) => {
@@ -215,6 +287,9 @@ export default function OperatorBuilderPage() {
   return (
     <PageShell>
       <PageMain maxWidth="xl">
+        <div className="mb-3 flex empty:hidden">
+          <BuildsReturnLink />
+        </div>
         {loadout && (
           <div className="mb-4">
             <LoadoutEditBanner
@@ -240,16 +315,60 @@ export default function OperatorBuilderPage() {
           title="Operator Builder"
           description="Configure Focus Schools, Amps, and Operator and Amp Arcanes."
           actions={
-            loadout ? (
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <input
+                type="text"
+                value={buildName}
+                onChange={(e) => setBuildName(e.target.value)}
+                placeholder="Build name..."
+                aria-label="Build name"
+                className="h-11 w-full max-w-[12rem] rounded-lg border border-border bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground lg:pointer-fine:h-9 sm:w-40"
+              />
+              <BuilderSaveControls
+                canUpdate={!!currentBuildId}
+                dirty={dirty && !loadout}
+                className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:min-w-0 sm:py-1.5"
+                onUpdate={() => {
+                  void handleSaveBuildConfirm({
+                    name: defaultOperatorBuildName(),
+                    description: "",
+                    isPublic: buildIsPublic,
+                    tags: [],
+                    target: "new",
+                    asNew: false,
+                  });
+                }}
+                onSaveNew={() => {
+                  setSaveAsNew(false);
+                  setSaveDialogOpen(true);
+                }}
+                onSaveAs={() => {
+                  setSaveAsNew(true);
+                  setSaveDialogOpen(true);
+                }}
+              />
               <button
                 type="button"
-                onClick={handleSaveToLoadout}
-                className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
+                onClick={() => {
+                  void refreshSavedBuilds();
+                  setShowSavedBuilds(true);
+                }}
+                className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-9 sm:min-w-0 sm:py-1.5"
+                title="Load Build"
               >
-                <Check className="h-4 w-4" />
-                Save to Loadout
+                <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
               </button>
-            ) : undefined
+              {loadout ? (
+                <button
+                  type="button"
+                  onClick={handleSaveToLoadout}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
+                >
+                  <Check className="h-4 w-4" />
+                  Save to Loadout
+                </button>
+              ) : null}
+            </div>
           }
         />
 
@@ -588,6 +707,32 @@ export default function OperatorBuilderPage() {
           }
           onSelect={handlePickArcane}
           title={arcanePickerTarget === "operator" ? "Select Operator Arcane (Magus / Emergence)" : "Select Amp Arcane (Virtuos / Eternal)"}
+        />
+
+        <SavedBuildsDialog
+          open={showSavedBuilds}
+          onOpenChange={setShowSavedBuilds}
+          title="Saved Operator Builds"
+          builds={savedBuilds}
+          accent="orange"
+          getSubtitle={(build) => {
+            const d = build.data as LoadoutOperatorBuild;
+            const amp = resolveAmpArcanes(d);
+            const opCount = (d.arcaneIds ?? []).filter(Boolean).length;
+            const ampCount = amp.ids.filter(Boolean).length;
+            return `${d.focusSchool ?? "Operator"} • ${d.ampName ?? d.ampId ?? "Amp"} • ${opCount + ampCount} arcanes`;
+          }}
+          onLoad={handleLoadBuild}
+          onDelete={handleDeleteBuild}
+        />
+
+        <SaveBuildDialog
+          open={saveDialogOpen}
+          onOpenChange={setSaveDialogOpen}
+          defaultName={defaultOperatorBuildName()}
+          defaultIsPublic={buildIsPublic}
+          showDescription={false}
+          onSave={(values) => handleSaveBuildConfirm({ ...values, asNew: saveAsNew })}
         />
       </PageMain>
     </PageShell>

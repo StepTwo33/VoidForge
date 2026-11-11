@@ -90,7 +90,11 @@ export function persistOperatorAmpArcanes(
   modular: ModularBuildData | null | undefined,
   ids: (string | null)[],
   ranks: number[],
-): Pick<OperatorAmpArcaneFields, "ampModularBuild" | "ampArcaneIds" | "ampArcaneRanks"> {
+): {
+  ampModularBuild?: ModularBuildData;
+  ampArcaneIds?: (string | null)[];
+  ampArcaneRanks?: number[];
+} {
   const padded = padArcaneSlots(ids, ranks);
   if (modular) {
     return {

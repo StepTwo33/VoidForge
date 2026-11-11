@@ -6,6 +6,7 @@ export const ALLOWED_BUILD_TYPES = new Set([
   "modular",
   "archwing",
   "railjack",
+  "operator",
   "loadout",
 ]);
 
@@ -49,6 +50,10 @@ export function extractBuildItemId(type: string, data: unknown): string {
     case "railjack":
       if (typeof d.reactorId === "string" && d.reactorId) return d.reactorId;
       return "railjack";
+    case "operator":
+      if (typeof d.ampId === "string" && d.ampId) return d.ampId;
+      if (typeof d.focusSchool === "string" && d.focusSchool) return d.focusSchool;
+      return "operator";
     case "loadout": {
       const wf = d.warframeBuild as { warframeId?: string } | undefined;
       if (typeof wf?.warframeId === "string" && wf.warframeId) return wf.warframeId;
