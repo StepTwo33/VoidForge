@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { X, Plus, Sparkles, RefreshCw, Camera, Loader2 } from "lucide-react";
 import { allWeapons } from "@/data/weapons";
 import type { Weapon } from "@/lib/types";
@@ -463,9 +464,10 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
     }
   };
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  // Portal to <body> so the page's stacking contexts (e.g. the footer) can't paint over the modal.
+  return createPortal(
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
       <div
         role="dialog"
@@ -1021,6 +1023,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
