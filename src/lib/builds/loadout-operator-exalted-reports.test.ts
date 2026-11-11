@@ -111,7 +111,7 @@ describe("Community Reports Fixes: Amps, Exalted Slots, Operator & Necramechs", 
     });
 
     it("formats Operator ability badges clearly", () => {
-      expect(formatAbilityBuffDebuffBadge({ name: "Void Strike" }, 1)).toBe("+1000% mult");
+      expect(formatAbilityBuffDebuffBadge({ name: "Void Strike" }, 1)).toBe("+1000% dmg");
       expect(formatAbilityBuffDebuffBadge({ name: "Sling Strength" }, 1)).toBe("+40% STR");
       expect(formatAbilityBuffDebuffBadge({ name: "Caustic Strike" }, 1)).toBe("-100% armor");
       expect(formatAbilityBuffDebuffBadge({ name: "Hardened Wellspring" }, 1)).toBe("+20% STR");
@@ -123,7 +123,7 @@ describe("Community Reports Fixes: Amps, Exalted Slots, Operator & Necramechs", 
       expect(strip).toBe(100);
     });
 
-    it("resolves Madurai Void Strike +1000% multiplicative damage bonus and excludes archguns", () => {
+    it("resolves Madurai Void Strike +1000% damage, additive with Serration (wiki body), and excludes archguns", () => {
       const rifle = allWeapons.find((w) => w.id === "braton")!;
       const buffs = resolveWeaponExternalBuffs(
         rifle,
@@ -137,7 +137,8 @@ describe("Community Reports Fixes: Amps, Exalted Slots, Operator & Necramechs", 
 
       const vs = buffs.find((b) => b.label.includes("Void Strike"));
       expect(vs).toBeDefined();
-      expect(vs?.damageMultBonus).toBe(10.0);
+      expect(vs?.damageBonus).toBe(10.0);
+      expect(vs?.damageMultBonus).toBeUndefined();
 
       // Archguns are excluded from Void Strike (per wiki)
       const archgun = allWeapons.find((w) => w.id === "imperator")!;

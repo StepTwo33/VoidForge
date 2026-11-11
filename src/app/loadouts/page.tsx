@@ -960,7 +960,7 @@ export default function LoadoutsPage() {
         {
           id: "focus:madurai",
           name: "Madurai",
-          detail: "Offense & Speed • +1000% Void Strike Mult • +40% Sling Strength STR • Phoenix Talons",
+          detail: "Offense & Speed • +1000% Void Strike Damage • +40% Sling Strength STR • Phoenix Talons",
         },
         {
           id: "focus:unairu",

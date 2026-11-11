@@ -51,8 +51,8 @@ const FOCUS_SCHOOLS: FocusSchoolDef[] = [
     perks: [
       {
         title: "Void Strike",
-        desc: "Empowers weapons with +1000% multiplicative damage for 8s (40s cooldown). Multiplies weapon damage by 11×, stacking with Roar.",
-        badge: "+1000% Mult",
+        desc: "First Ability at full energy: +1000% damage for 8s (40s cooldown). On Warframe weapons it is additive with Serration-type mods; it does not work on Archguns.",
+        badge: "+1000% DMG",
       },
       {
         title: "Sling Strength",
@@ -66,8 +66,8 @@ const FOCUS_SCHOOLS: FocusSchoolDef[] = [
       },
       {
         title: "Contamination Wave",
-        desc: "Emits a wave of Void energy making enemies take +50% Amp damage for 20s.",
-        badge: "+50% Amp Vuln",
+        desc: "Second Ability emits a Void wave that makes enemies take +50% Operator damage for 20s.",
+        badge: "+50% Operator Vuln",
       },
     ],
   },
@@ -91,7 +91,7 @@ const FOCUS_SCHOOLS: FocusSchoolDef[] = [
       },
       {
         title: "Poise",
-        desc: "Grants complete immunity to Slow, Stagger, and Knockdown effects for 40s after swapping from Operator.",
+        desc: "Immunity to slow, stagger and knockdown for 40s after transferring between Operator and Warframe.",
         badge: "Knockdown Immune",
       },
       {
@@ -116,7 +116,7 @@ const FOCUS_SCHOOLS: FocusSchoolDef[] = [
       },
       {
         title: "Hardened Wellspring",
-        desc: "Casting Wellspring inside an existing Wellspring doubles its radius and grants +20% Ability Strength to allies inside.",
+        desc: "Using First Ability inside a Wellspring makes it bigger, adds 20s to its duration and grants +20% Ability Strength to those inside.",
         badge: "+20% STR",
       },
       {
@@ -126,7 +126,7 @@ const FOCUS_SCHOOLS: FocusSchoolDef[] = [
       },
       {
         title: "Inner Might",
-        desc: "Allows casting an ability without consuming any energy once every 60s.",
+        desc: "Lets an Ability be cast without Energy or Shields; recharges in 60s.",
         badge: "Free Cast",
       },
     ],
@@ -141,12 +141,12 @@ const FOCUS_SCHOOLS: FocusSchoolDef[] = [
     perks: [
       {
         title: "Lethal Levitation",
-        desc: "Each lifted enemy hit grants +50% weapon damage for 20s, stacking up to 4 times (+200% additive base damage).",
+        desc: "Each Lifted enemy the Operator attacks grants +50% weapon damage for 60s, stacking up to 4 times (+200%, additive with Serration). Applies to Archguns and Exalted weapons too.",
         badge: "+200% DMG",
       },
       {
         title: "Power Spike",
-        desc: "Melee Combo Counter decays by 5 every few seconds instead of completely depleting on timeout.",
+        desc: "Out of combat, the Melee Combo Counter decays by 5 every few seconds instead of depleting completely.",
         badge: "Decaying Combo",
       },
       {
@@ -181,7 +181,7 @@ const FOCUS_SCHOOLS: FocusSchoolDef[] = [
       },
       {
         title: "Guardian Break",
-        desc: "When shields break, gain +150% shield recharge rate and -90% shield recharge delay for 8s.",
+        desc: "When the Guardian Shell breaks, Warframe shield regeneration is +150% and regeneration delay -80% for 12s.",
         badge: "+150% Shield Regen",
       },
       {

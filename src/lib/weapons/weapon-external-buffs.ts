@@ -1241,20 +1241,20 @@ function resolveNamedAbilityWeaponBuff(
     case "Shroud Of Dynar":
       return resolveShroudOfDynarBuff(weapon, ability, strength);
     case "Void Strike":
-      // Wiki: Madurai Void Strike (+1000% damage, 8s, 40s CD) is a multiplicative damage multiplier
-      // applied after Serration/damage mods, compounding multiplicatively with Roar. Does not affect Archguns.
+      // wiki.warframe.com/w/Focus/Madurai body, Void Strike: +1000% at full energy for 8s (max rank),
+      // "for warframe's weapons ... additive to base damage bonus, like Serration"; does not work on Archguns.
       if (weapon.category === "archgun" || weapon.category === "archmelee") return null;
       return {
         id: "operator:void_strike",
         label: "Void Strike (Madurai)",
         category: "other",
-        damageMultBonus: 10.0,
-        nominal: "+1000% multiplicative damage (8s burst)",
+        damageBonus: 10.0,
+        nominal: "+1000% damage, additive with Serration (8s at full energy)",
       };
     case "Lethal Levitation":
       // Wiki: Naramon Lethal Levitation (+50% weapon damage per Lifted enemy attacked, max 4 stacks -> +200%).
-      // Additive with base damage mods (Serration/Pressure Point).
-      if (weapon.category === "archgun" || weapon.category === "archmelee") return null;
+      // Additive with base damage mods (Serration/Pressure Point). The Focus/Naramon body says it applies
+      // to all equipped weapons "as well as Archguns and Exalted Weapons".
       return {
         id: "operator:lethal_levitation",
         label: "Lethal Levitation (Naramon)",
@@ -2374,7 +2374,7 @@ export function getOperatorBuffAbilities(focusSchool?: string): Ability[] {
     Madurai: [
       {
         name: "Void Strike",
-        description: "Madurai Void Strike: Grants +1000% multiplicative weapon & Amp damage bonus for 8s (40s cooldown). Excludes archguns.",
+        description: "Madurai Void Strike: +1000% weapon & Amp damage for 8s at full energy (40s cooldown), additive with Serration. Excludes archguns.",
         energyCost: 0,
       },
       {
@@ -2416,7 +2416,7 @@ export function formatAbilityBuffDebuffBadge(
   strength: number,
   warframeId?: string,
 ): string | null {
-  if (ability.name === "Void Strike") return "+1000% mult";
+  if (ability.name === "Void Strike") return "+1000% dmg";
   if (ability.name === "Sling Strength") return "+40% STR";
   if (ability.name === "Caustic Strike") return "-100% armor";
   if (ability.name === "Hardened Wellspring") return "+20% STR";
