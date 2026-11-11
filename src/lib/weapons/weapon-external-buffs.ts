@@ -1757,7 +1757,8 @@ export function resolveWeaponPassiveBuffs(
       // wiki.warframe.com/w/Athodai and /w/Athodai_Prime body + Notes: Overdrive
       // decreases Recoil by -100%, additive to mods. Codex/infobox omit recoil; body wins.
       recoil: -1.0,
-      nominal: "+100% Fire Rate, Infinite Ammo, and -100% Recoil on weak point kill",
+      // Duration (body): 8s on Athodai, 12s on Athodai Prime.
+      nominal: `+100% Fire Rate, Infinite Ammo, and -100% Recoil for ${wid === "athodai_prime" ? 12 : 8}s on weak point kill`,
     });
   }
 

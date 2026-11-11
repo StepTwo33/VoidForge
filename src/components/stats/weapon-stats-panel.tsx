@@ -118,7 +118,7 @@ function WeaponPassiveConditionals({
         </label>
         <StatRow
           label="Overdrive"
-          value={active ? "+100% Fire Rate, -100% Recoil, Infinite Ammo" : "Inactive"}
+          value={active ? `+100% Fire Rate, -100% Recoil, Infinite Ammo for ${wid === "athodai_prime" ? 12 : 8}s` : "Inactive"}
           color={active ? "text-amber-800 dark:text-amber-400" : "text-muted-foreground"}
           tooltip={`Weak point kills trigger Overdrive: +100% fire rate and -100% recoil (both additive with mods), and Infinite Ammo for ${wid === "athodai_prime" ? 12 : 8}s. It can't be refreshed, and Alt-fire is locked while it is up.`}
         />
