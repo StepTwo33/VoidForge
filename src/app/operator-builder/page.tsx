@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   FolderOpen,
   Plus,
@@ -23,9 +23,7 @@ import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import {
-  ampArcaneWriteBack,
   findSourceModularAmp,
-  padArcaneSlots,
   migrateOperatorAmpArcanes,
   modularAmpRefId,
   persistOperatorAmpArcanes,
@@ -62,17 +60,13 @@ export default function OperatorBuilderPage() {
   const [activeArcaneSlotIndex, setActiveArcaneSlotIndex] = useState(0);
 
   const { savedBuilds, refreshSavedBuilds, deleteSavedBuild } = useBuilderSavedBuilds("operator");
-  const { savedBuilds: modularSaved, refreshSavedBuilds: refreshModularSaved } = useBuilderSavedBuilds("modular");
+  const { savedBuilds: modularSaved } = useBuilderSavedBuilds("modular");
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
   const [saveAsNew, setSaveAsNew] = useState(false);
   const [buildName, setBuildName] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
-
-  /** Bumped on every build / loadout load so the saved Amp's arcanes are re-read once. */
-  const [ampLoadSeq, setAmpLoadSeq] = useState(0);
-  const ampSyncedSeq = useRef(-1);
 
   const savedModularAmps = useMemo(() => {
     return modularSaved.filter((b) => {
@@ -98,7 +92,6 @@ export default function OperatorBuilderPage() {
     const amp = resolveAmpArcanes(migrated);
     setAmpArcanesState(resolveSavedArcaneSlots(amp.ids, 2));
     setAmpArcaneRanks(amp.ranks);
-    setAmpLoadSeq((n) => n + 1);
   }, []);
 
   const buildOperatorPayload = useCallback((): LoadoutOperatorBuild => {
@@ -170,18 +163,6 @@ export default function OperatorBuilderPage() {
     });
   }, []);
 
-  /**
-   * Report (Terkeon): Amp arcanes edited here are saved onto the Modular Amp itself (the
-   * single copy the Modular Builder shows), not only into this operator build / loadout.
-   */
-  const writeBackAmpArcanes = useCallback(async (payload: LoadoutOperatorBuild): Promise<string | null> => {
-    const updated = ampArcaneWriteBack(payload, modularSaved);
-    if (!updated) return null;
-    await persistSavedBuild({ ...updated, updatedAt: Date.now() });
-    void refreshModularSaved();
-    return updated.name;
-  }, [modularSaved, refreshModularSaved]);
-
   const handleSaveBuildConfirm = useCallback(
     async ({ name, isPublic, asNew = false }: SaveBuildDialogValues & { asNew?: boolean }) => {
       const payload = buildOperatorPayload();
@@ -195,24 +176,22 @@ export default function OperatorBuilderPage() {
         data: payload,
       };
       const result = await persistSavedBuild(build);
-      const ampUpdated = await writeBackAmpArcanes(payload);
       setCurrentBuildId(result.id);
       setBuildName(name);
       setBuildIsPublic(result.isPublic);
       markClean();
       void refreshSavedBuilds();
-      const ampNote = ampUpdated ? ` Amp arcanes saved on ${ampUpdated}.` : "";
       if (result.synced) {
         toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated", {
-          description: `${name} saved to your account.${ampNote}`,
+          description: `${name} saved to your account.`,
         });
       } else {
         toast.success(asNew || !currentBuildId ? "Saved as new build" : "Build updated on this device", {
-          description: `Log in to sync builds to your account.${ampNote}`,
+          description: "Log in to sync builds to your account.",
         });
       }
     },
-    [buildOperatorPayload, currentBuildId, refreshSavedBuilds, markClean, writeBackAmpArcanes],
+    [buildOperatorPayload, currentBuildId, refreshSavedBuilds, markClean],
   );
 
   const handleLoadBuild = useCallback((rawBuild: SavedBuild, options?: { silent?: boolean }) => {
@@ -239,15 +218,13 @@ export default function OperatorBuilderPage() {
         clearLoadoutCtx();
         return false;
       }
-      const ampUpdated = await writeBackAmpArcanes(payload);
-      const ampNote = ampUpdated ? ` Amp arcanes saved on ${ampUpdated}.` : "";
       if (res.cloud === "failed") {
         toast.warning(`Saved to ${loadoutCtx.loadoutName} on this device`, {
-          description: `Account sync failed. Open Loadouts and save the loadout again to sync it.${ampNote}`,
+          description: "Account sync failed. Open Loadouts and save the loadout again to sync it.",
         });
       } else {
         toast.success(`Saved to ${loadoutCtx.loadoutName} loadout`, {
-          description: `${loadoutSlotLabel(loadoutCtx.slot)} slot updated${res.cloud === "synced" ? " and synced to your account" : ""}.${ampNote}`,
+          description: `${loadoutSlotLabel(loadoutCtx.slot)} slot updated${res.cloud === "synced" ? " and synced to your account" : ""}.`,
         });
       }
       markClean();
@@ -309,21 +286,6 @@ export default function OperatorBuilderPage() {
     () => (ampModularBuild ? findSourceModularAmp({ ampId, ampName, ampModularBuild }, modularSaved) : null),
     [ampId, ampName, ampModularBuild, modularSaved],
   );
-
-  // One copy of the Amp arcanes: an operator build or loadout opened later shows the saved
-  // Modular Amp's current arcanes, not an older copy, so saving can't roll the Amp back.
-  useEffect(() => {
-    if (ampSyncedSeq.current === ampLoadSeq || !ampModularBuild || !sourceAmp) return;
-    ampSyncedSeq.current = ampLoadSeq;
-    const src = sourceAmp.data as ModularBuildData;
-    const lib = padArcaneSlots(src.arcaneIds, src.arcaneRanks);
-    const cur = padArcaneSlots(ampArcanesState.map((a) => a?.id ?? null), ampArcaneRanks);
-    if (JSON.stringify(lib) === JSON.stringify(cur)) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- adopting the saved Amp (external storage) once per load
-    setAmpArcanesState(resolveSavedArcaneSlots(lib.ids, 2));
-    setAmpArcaneRanks(lib.ranks);
-    setAmpModularBuild(writeAmpArcanesOnModular(ampModularBuild, lib.ids, lib.ranks));
-  }, [ampLoadSeq, ampModularBuild, sourceAmp, ampArcanesState, ampArcaneRanks]);
 
   const activeSchool = FOCUS_SCHOOLS.find((s) => s.id === focusSchool) ?? FOCUS_SCHOOLS[0];
 
@@ -649,14 +611,14 @@ export default function OperatorBuilderPage() {
               )}
             </ContentPanel>
 
-            {/* AMP ARCANES — one copy, stored on the Amp (wiki Virtuos / Eternal). */}
+            {/* AMP ARCANES — Virtuos / Eternal; stored on this operator build / loadout (wiki: they slot on the Amp). */}
             <ContentPanel padding>
               <PanelHeading>4. Amp Arcanes (Virtuos / Eternal)</PanelHeading>
               <p className="text-xs text-muted-foreground mb-3">
                 {ampModularBuild
                   ? sourceAmp
-                    ? `These slot on the Amp and came with ${sourceAmp.name}. When you save, changes here are saved on that Amp too, so the Modular Builder shows the same arcanes.`
-                    : "These slot on the Amp and came with this Modular Amp. Its saved copy wasn't found, so changes here are saved with this build only."
+                    ? `These slot on the Amp and were pre-filled from ${sourceAmp.name}. Edits stay on this ${loadoutCtx ? "loadout" : "build"} and don't change the saved Amp.`
+                    : "These slot on the Amp. Edits stay on this build (or loadout) and don't change a saved Amp."
                   : "These slot on the Amp (not the Operator). The second slot is unlocked in-game with an Amp Arcane Adapter."}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

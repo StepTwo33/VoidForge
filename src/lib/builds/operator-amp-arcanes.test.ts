@@ -77,35 +77,37 @@ describe("operator amp arcanes (wiki: Virtuos/Eternal slot on the Amp)", () => {
   });
 });
 
-describe("Amp arcane edits write back to the saved Modular Amp (Terkeon report)", () => {
-  const saved = (id: string, name: string, data: ModularBuildData) => ({ id, name, type: "modular" as const, data });
-
-  it("finds the source Amp by ampId and writes the edited arcanes onto it", async () => {
-    const { ampArcaneWriteBack, modularAmpRefId } = await import("./operator-amp-arcanes");
-    const lib = [saved("a1", "Terkeon Amp", amp({ ids: ["virtuos_shadow", null], ranks: [5, 5] }))];
-    const out = ampArcaneWriteBack(
-      { ampId: modularAmpRefId("a1"), ampModularBuild: amp({ ids: ["virtuos_shadow", "eternal_eradicate"], ranks: [5, 3] }) },
-      lib,
-    );
-    expect(out?.id).toBe("a1");
-    expect((out?.data as ModularBuildData).arcaneIds).toEqual(["virtuos_shadow", "eternal_eradicate"]);
-    expect((out?.data as ModularBuildData).arcaneRanks).toEqual([5, 3]);
-    expect((out?.data as ModularBuildData).parts.prism).toBe("raplak_prism");
+describe("Amp arcanes stay on the operator build or loadout (not a shared library copy)", () => {
+  it("persistOperatorAmpArcanes writes onto the operator's own modular copy, not a shared object", () => {
+    const original: ModularBuildData = {
+      modularType: "amp",
+      parts: { prism: "raplak_prism", scaffold: "propa_scaffold", brace: "certus_brace" },
+      mods: [],
+      hasOrokinCatalyst: false,
+      arcaneIds: ["virtuos_shadow", null],
+      arcaneRanks: [5, 5],
+    };
+    const snapshot = structuredClone(original);
+    const out = persistOperatorAmpArcanes(original, ["virtuos_fury", "eternal_eradicate"], [2, 1]);
+    expect(out.ampModularBuild?.arcaneIds).toEqual(["virtuos_fury", "eternal_eradicate"]);
+    expect(out.ampModularBuild?.arcaneRanks).toEqual([2, 1]);
+    // The input object is not mutated; a loadout and a standalone build can keep different copies.
+    expect(original).toEqual(snapshot);
+    expect(original.arcaneIds).toEqual(["virtuos_shadow", null]);
   });
 
-  it("returns null when nothing changed or the Amp is a preset", async () => {
-    const { ampArcaneWriteBack } = await import("./operator-amp-arcanes");
-    const lib = [saved("a1", "Terkeon Amp", amp({ ids: ["virtuos_shadow", null], ranks: [5, 5] }))];
-    expect(ampArcaneWriteBack({ ampId: "modular_a1", ampModularBuild: amp({ ids: ["virtuos_shadow", null], ranks: [5, 5] }) }, lib)).toBeNull();
-    expect(ampArcaneWriteBack({ ampId: "sirocco" }, lib)).toBeNull();
-  });
-
-  it("falls back to a unique name + parts match for loadouts attached without an id", async () => {
-    const { findSourceModularAmp } = await import("./operator-amp-arcanes");
-    const lib = [
-      saved("a1", "Terkeon Amp", amp()),
-      saved("a2", "Other Amp", amp()),
-    ];
+  it("finds the source Amp by id or a unique name+parts match (import pre-fill, not write-back)", async () => {
+    const { findSourceModularAmp, modularAmpRefId } = await import("./operator-amp-arcanes");
+    const saved = (id: string, name: string, data: ModularBuildData) => ({ id, name, type: "modular" as const, data });
+    const amp = (ids?: (string | null)[]): ModularBuildData => ({
+      modularType: "amp",
+      parts: { prism: "raplak_prism", scaffold: "propa_scaffold", brace: "certus_brace" },
+      mods: [],
+      hasOrokinCatalyst: false,
+      ...(ids ? { arcaneIds: ids, arcaneRanks: [5, 5] } : {}),
+    });
+    const lib = [saved("a1", "Terkeon Amp", amp(["virtuos_shadow", null])), saved("a2", "Other Amp", amp())];
+    expect(findSourceModularAmp({ ampId: modularAmpRefId("a1"), ampModularBuild: amp() }, lib)?.id).toBe("a1");
     expect(findSourceModularAmp({ ampId: "sirocco", ampName: "Terkeon Amp", ampModularBuild: amp() }, lib)?.id).toBe("a1");
     expect(findSourceModularAmp({ ampModularBuild: amp() }, lib)).toBeNull();
   });

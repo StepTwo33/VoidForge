@@ -141,23 +141,3 @@ export function findSourceModularAmp<T extends SavedAmpLike>(
   );
   return matches.length === 1 ? matches[0] : null;
 }
-
-/**
- * Report (Terkeon): editing Amp arcanes in the operator builder must update the Amp itself.
- * Returns the saved Modular Amp with the operator's Amp arcanes written on it, or null when
- * there is no saved source or its arcanes already match.
- */
-export function ampArcaneWriteBack<T extends SavedAmpLike>(
-  ob: { ampId?: string; ampName?: string; ampModularBuild?: ModularBuildData | null },
-  saved: readonly T[],
-): T | null {
-  const modular = ob.ampModularBuild;
-  if (!modular) return null;
-  const source = findSourceModularAmp(ob, saved);
-  if (!source) return null;
-  const sourceData = source.data as ModularBuildData;
-  const want = padArcaneSlots(modular.arcaneIds, modular.arcaneRanks);
-  const have = padArcaneSlots(sourceData.arcaneIds, sourceData.arcaneRanks);
-  if (JSON.stringify(want) === JSON.stringify(have)) return null;
-  return { ...source, data: writeAmpArcanesOnModular(sourceData, want.ids, want.ranks) };
-}

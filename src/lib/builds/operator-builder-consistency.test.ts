@@ -45,8 +45,11 @@ describe("operator builder matches the other builders (Terkeon reports)", () => 
     expect(next.operatorBuild?.focusSchool).toBe("Zenurik");
   });
 
-  it("writes edited Amp arcanes back onto the saved Modular Amp on save", () => {
-    expect(page).toMatch(/ampArcaneWriteBack\(payload, modularSaved\)/);
-    expect(page.match(/writeBackAmpArcanes\(payload\)/g)?.length).toBe(2);
+  it("does not write Amp arcane edits back onto the saved Modular Amp", () => {
+    expect(page).not.toMatch(/ampArcaneWriteBack/);
+    expect(page).not.toMatch(/writeBackAmpArcanes/);
+    expect(page).not.toMatch(/Amp arcanes saved on/);
+    expect(page).toMatch(/Edits stay on this/);
+    expect(page).toMatch(/don't change the saved Amp/);
   });
 });
