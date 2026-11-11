@@ -965,7 +965,7 @@ export default function LoadoutsPage() {
         {
           id: "focus:unairu",
           name: "Unairu",
-          detail: "Defense & Shred • 100% Caustic Strike Armor Strip • 100% Magnetic Surge Shield Strip • Poise",
+          detail: "Defense & Shred • 100% Caustic Strike Armor Strip • Magnetic Flare Shield Disable • Poise",
         },
         {
           id: "focus:zenurik",
@@ -975,7 +975,7 @@ export default function LoadoutsPage() {
         {
           id: "focus:naramon",
           name: "Naramon",
-          detail: "Melee Combat • +200% Lethal Levitation Melee DMG • Power Spike Decay • Opening Slam",
+          detail: "Melee Combat • +200% Lethal Levitation Weapon DMG • Power Spike Decay • Opening Slam",
         },
         {
           id: "focus:vazarin",
