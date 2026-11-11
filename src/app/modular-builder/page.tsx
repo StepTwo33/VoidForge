@@ -61,6 +61,8 @@ import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { snapshotFromBuild } from "@/lib/builds/compare-build";
 import { extractBuildItemId } from "@/lib/builds/build-types";
+import { keepLegalModularBuild } from "@/lib/builds/modular-part-edit";
+import { weaponFromModularData } from "@/lib/builds/modular-resolve";
 import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 
 type ModularType = "kitgun" | "zaw" | "amp";
@@ -784,6 +786,61 @@ export default function ModularBuilderPage() {
     setBuildName("");
   };
 
+  /**
+   * Part edits keep the build (same saved build, mods, arcanes, Catalyst) and drop only what the
+   * new weapon can't hold. Switching Kitgun / Zaw / Amp still starts fresh via resetMods().
+   */
+  type PartEdit = {
+    chamber?: KitgunChamber; grip?: KitgunGrip; loader?: KitgunLoader;
+    strike?: ZawStrike; zawGrip?: ZawGrip; link?: ZawLink;
+    prism?: Weapon; scaffold?: AmpScaffold; brace?: AmpBrace;
+  };
+  const editPart = (edit: PartEdit) => {
+    if (edit.chamber) setKitgunChamber(edit.chamber);
+    if (edit.grip) setKitgunGrip(edit.grip);
+    if (edit.loader) setKitgunLoader(edit.loader);
+    if (edit.strike) setZawStrike(edit.strike);
+    if (edit.zawGrip) setZawGripSel(edit.zawGrip);
+    if (edit.link) setZawLinkSel(edit.link);
+    if (edit.prism) setAmpPrism(edit.prism);
+    if (edit.scaffold) setAmpScaffold(edit.scaffold);
+    if (edit.brace) setAmpBrace(edit.brace);
+    const next = weaponFromModularData({
+      modularType,
+      parts: modularType === "kitgun"
+        ? { chamber: (edit.chamber ?? kitgunChamber)?.id ?? "", grip: (edit.grip ?? kitgunGrip)?.id ?? "", loader: (edit.loader ?? kitgunLoader)?.id ?? "" }
+        : modularType === "zaw"
+          ? { strike: (edit.strike ?? zawStrike)?.id ?? "", grip: (edit.zawGrip ?? zawGripSel)?.id ?? "", link: (edit.link ?? zawLinkSel)?.id ?? "" }
+          : { prism: (edit.prism ?? ampPrism)?.id ?? "" },
+      mods: [],
+      hasOrokinCatalyst: false,
+    });
+    if (!next) return;
+    const rivenWeaponChanged =
+      (!!edit.chamber && !!kitgunChamber && edit.chamber.id !== kitgunChamber.id) ||
+      (!!edit.strike && !!zawStrike && edit.strike.id !== zawStrike.id);
+    const kept = keepLegalModularBuild({
+      weapon: next,
+      modularType,
+      mods: equippedMods,
+      rivenStats: rivenStatsMap,
+      arcanes: equippedArcanes,
+      arcaneRanks: equippedArcaneRanks,
+      slotPolarities,
+      modsMap,
+      rivenWeaponChanged,
+    });
+    if (kept.dropped.length === 0) return;
+    setEquippedMods(kept.mods);
+    setRivenStatsMap(kept.rivenStats);
+    setEquippedArcanes(kept.arcanes);
+    setEquippedArcaneRanks(kept.arcaneRanks);
+    setSlotPolarities(kept.slotPolarities);
+    toast.info(`Removed ${kept.dropped.length === 1 ? "1 item" : `${kept.dropped.length} items`} the new part can't use`, {
+      description: kept.dropped.join(", "),
+    });
+  };
+
   const applyRecommended = useCallback((parts: string[]) => {
     const [a, b, c] = parts;
     resetMods();
@@ -927,7 +984,7 @@ export default function ModularBuilderPage() {
                     {kitgunChambers.map((c) => (
                       <button
                         key={c.id}
-                        onClick={() => { setKitgunChamber(c); resetMods(); }}
+                        onClick={() => editPart({ chamber: c })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           kitgunChamber?.id === c.id
@@ -951,7 +1008,7 @@ export default function ModularBuilderPage() {
                     {kitgunGrips.map((g) => (
                       <button
                         key={g.id}
-                        onClick={() => { setKitgunGrip(g); resetMods(); }}
+                        onClick={() => editPart({ grip: g })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           kitgunGrip?.id === g.id
@@ -987,7 +1044,7 @@ export default function ModularBuilderPage() {
                     {kitgunLoaders.map((l) => (
                       <button
                         key={l.id}
-                        onClick={() => { setKitgunLoader(l); resetMods(); }}
+                        onClick={() => editPart({ loader: l })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           kitgunLoader?.id === l.id
@@ -1023,7 +1080,7 @@ export default function ModularBuilderPage() {
                     {zawStrikes.map((s) => (
                       <button
                         key={s.id}
-                        onClick={() => { setZawStrike(s); resetMods(); }}
+                        onClick={() => editPart({ strike: s })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           zawStrike?.id === s.id
@@ -1047,7 +1104,7 @@ export default function ModularBuilderPage() {
                     {zawGrips.map((g) => (
                       <button
                         key={g.id}
-                        onClick={() => { setZawGripSel(g); resetMods(); }}
+                        onClick={() => editPart({ zawGrip: g })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           zawGripSel?.id === g.id
@@ -1072,7 +1129,7 @@ export default function ModularBuilderPage() {
                     {zawLinks.map((l) => (
                       <button
                         key={l.id}
-                        onClick={() => { setZawLinkSel(l); resetMods(); }}
+                        onClick={() => editPart({ link: l })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           zawLinkSel?.id === l.id
@@ -1105,7 +1162,7 @@ export default function ModularBuilderPage() {
                     {ampPrisms.map((p) => (
                       <button
                         key={p.id}
-                        onClick={() => { setAmpPrism(p); resetMods(); }}
+                        onClick={() => editPart({ prism: p })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           ampPrism?.id === p.id
@@ -1129,7 +1186,7 @@ export default function ModularBuilderPage() {
                     {ampScaffolds.map((s) => (
                       <button
                         key={s.id}
-                        onClick={() => setAmpScaffold(s)}
+                        onClick={() => editPart({ scaffold: s })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           ampScaffold?.id === s.id
@@ -1153,7 +1210,7 @@ export default function ModularBuilderPage() {
                     {ampBraces.map((b) => (
                       <button
                         key={b.id}
-                        onClick={() => setAmpBrace(b)}
+                        onClick={() => editPart({ brace: b })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           ampBrace?.id === b.id
