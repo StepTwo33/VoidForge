@@ -417,8 +417,33 @@ export function summarizeBuildPreview(type: string, data: unknown): BuildPreview
         modSummary: count === 0 ? "No mods equipped" : `${count} mod${count === 1 ? "" : "s"}`,
       };
     }
+    case "operator": {
+      const focus = typeof d.focusSchool === "string" && d.focusSchool ? d.focusSchool : "Operator";
+      const ampName = typeof d.ampName === "string" && d.ampName ? d.ampName : undefined;
+      const ampId = typeof d.ampId === "string" ? d.ampId : "";
+      const weapon = ampId ? weaponsMap.get(ampId) : undefined;
+      const opIds = Array.isArray(d.arcaneIds) ? d.arcaneIds.filter(Boolean) : [];
+      const modular = d.ampModularBuild as { arcaneIds?: (string | null)[] } | undefined;
+      const ampIds = Array.isArray(modular?.arcaneIds) && modular.arcaneIds.some(Boolean)
+        ? modular.arcaneIds.filter(Boolean)
+        : Array.isArray(d.ampArcaneIds)
+          ? d.ampArcaneIds.filter(Boolean)
+          : [];
+      const arcaneCount = opIds.length + ampIds.length;
+      if (ampName || weapon?.name) extraLines.push(`Amp: ${ampName ?? weapon?.name}`);
+      return {
+        itemName: focus,
+        itemImage: weapon ? getWeaponImage(weapon.name, { category: weapon.category }) : null,
+        typeLabel: "Operator",
+        modChips: [],
+        arcaneChips: [],
+        extraLines,
+        modSummary: arcaneCount === 0 ? "No arcanes equipped" : `${arcaneCount} arcane${arcaneCount === 1 ? "" : "s"}`,
+      };
+    }
     case "loadout": {
       const ld = data as Record<string, unknown>;
+
       const wfBuild = ld.warframeBuild as WarframeBuildData | undefined;
       const wf = wfBuild ? warframesMap.get(wfBuild.warframeId) : undefined;
       const filledSlots = summarizeLoadoutSlots(data).length;

@@ -7,6 +7,7 @@ const BUILDER_LABELS: Record<string, string> = {
   modular: "Open Modular Builder",
   archwing: "Open Vehicle Builder",
   railjack: "Open Railjack Builder",
+  operator: "Open Operator Builder",
   loadout: "Open Loadouts",
 };
 

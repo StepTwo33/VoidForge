@@ -27,6 +27,7 @@ const TYPE_LABELS: Record<string, string> = {
   modular: "Modular",
   archwing: "Vehicle",
   railjack: "Railjack",
+  operator: "Operator",
   loadout: "Loadout",
 };
 
@@ -134,6 +135,24 @@ export function resolveBuildItemDisplay(type: string, itemId: string): BuildItem
         };
       }
       return { itemName: null, itemImage: null, typeLabel };
+    }
+    case "operator": {
+      if (itemId === "operator") {
+        return { itemName: "Operator", itemImage: null, typeLabel };
+      }
+      const weapon = weaponsMap.get(itemId);
+      if (weapon) {
+        return {
+          itemName: weapon.name,
+          itemImage: getWeaponImage(weapon.name, { category: weapon.category }),
+          typeLabel,
+        };
+      }
+      if (itemId.startsWith("modular_")) {
+        return { itemName: "Modular Amp", itemImage: null, typeLabel };
+      }
+      const school = itemId.charAt(0).toUpperCase() + itemId.slice(1);
+      return { itemName: school, itemImage: null, typeLabel };
     }
     case "railjack": {
       if (itemId === "railjack") {

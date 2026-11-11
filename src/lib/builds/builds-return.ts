@@ -19,6 +19,7 @@ export const LIBRARY_TYPE_FILTERS = [
   "modular",
   "archwing",
   "railjack",
+  "operator",
   "loadout",
 ] as const;
 

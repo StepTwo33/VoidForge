@@ -386,6 +386,7 @@ const BUILDER_PATHS: Record<string, string> = {
   modular: "/modular-builder",
   archwing: "/archwing-builder",
   railjack: "/railjack-builder",
+  operator: "/operator-builder",
   loadout: "/loadouts",
 };
 

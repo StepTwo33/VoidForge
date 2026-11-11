@@ -57,6 +57,7 @@ const TYPE_FILTERS: { id: TypeFilter; label: string }[] = [
   { id: "modular", label: "Modular" },
   { id: "archwing", label: "Archwing" },
   { id: "railjack", label: "Railjack" },
+  { id: "operator", label: "Operator" },
   { id: "loadout", label: "Loadout" },
 ];
 

@@ -3,7 +3,7 @@ import { builderCtaForFilter } from "./builder-cta";
 
 describe("builderCtaForFilter (Round 54b /builds CTAs)", () => {
   it("sends each type chip to a distinct, matching builder", () => {
-    const types = ["weapon", "warframe", "companion", "modular", "archwing", "railjack", "loadout"];
+    const types = ["weapon", "warframe", "companion", "modular", "archwing", "railjack", "operator", "loadout"];
     const hrefs = types.map((t) => builderCtaForFilter(t).href);
     expect(hrefs).toEqual([
       "/weapon-builder",
@@ -12,6 +12,7 @@ describe("builderCtaForFilter (Round 54b /builds CTAs)", () => {
       "/modular-builder",
       "/archwing-builder",
       "/railjack-builder",
+      "/operator-builder",
       "/loadouts",
     ]);
     expect(new Set(hrefs).size).toBe(types.length);
