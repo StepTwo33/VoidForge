@@ -7,6 +7,7 @@ import { GameAssetImage } from "@/components/game-asset-image";
 import { getWeaponImage } from "@/lib/display/images";
 import { type SavedRiven } from "@/lib/rivens/riven-storage";
 import { cn } from "@/lib/utils";
+import { rivenEquipHref } from "@/lib/rivens/riven-equip";
 
 interface RivenCardProps {
   riven: SavedRiven;
@@ -41,15 +42,7 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
   const weaponName = riven.weaponName || "Weapon";
   const rollSuffix = extractRivenAffix(riven.name, weaponName) || "Riven";
 
-  const encodedStats = encodeURIComponent(JSON.stringify(riven.stats));
-  const equipUrl =
-    riven.weaponType === "Companion"
-      ? `/companion-builder?weapon=${encodeURIComponent(riven.weaponId)}&riven=${encodedStats}`
-      : riven.weaponType === "Kitgun" || riven.weaponCategory === "kitgun_chamber"
-        ? `/modular-builder?type=kitgun&part=${encodeURIComponent(riven.weaponId)}&riven=${encodedStats}`
-        : riven.weaponType === "Zaw" || riven.weaponCategory === "zaw_strike"
-          ? `/modular-builder?type=zaw&part=${encodeURIComponent(riven.weaponId)}&riven=${encodedStats}`
-          : `/weapon-builder?weapon=${encodeURIComponent(riven.weaponId)}&riven=${encodedStats}`;
+  const equipUrl = rivenEquipHref(riven);
 
   const hasActions = Boolean(onEdit || onDelete);
 
@@ -177,7 +170,7 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
         <div className="flex items-center justify-between text-[11px] text-purple-300/80">
           <span className="flex items-center gap-1 font-medium">
             <RefreshCw className="h-3 w-3 text-purple-400" />
-            <span>{riven.rerolls || 0} Cycles</span>
+            <span>{riven.rerolls || 0} {riven.rerolls === 1 ? "reroll" : "rerolls"}</span>
           </span>
 
           {/* 8 Rank Diamond Pips */}
@@ -201,7 +194,7 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
           <div className="mt-2.5 flex items-center gap-1.5 pt-1">
             <Link
               href={equipUrl}
-              title="Equip in Weapon Builder"
+              title="Add to the build open in the builder"
               className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-600/30 px-2.5 text-xs font-semibold text-purple-200 shadow-sm transition-all hover:border-purple-400 hover:bg-purple-600 hover:text-white"
             >
               <ExternalLink className="h-3.5 w-3.5" />
@@ -213,6 +206,7 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
                 type="button"
                 onClick={() => onEdit(riven)}
                 title="Edit Riven"
+                aria-label={`Edit ${riven.name}`}
                 className="flex h-11 w-11 items-center justify-center rounded-lg border border-purple-500/30 bg-purple-950/60 text-purple-300 shadow-sm transition-all hover:border-purple-400 hover:bg-purple-800 hover:text-white"
               >
                 <Edit3 className="h-3.5 w-3.5" />
@@ -224,6 +218,7 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
                 type="button"
                 onClick={() => onDelete(riven.id)}
                 title="Delete Riven"
+                aria-label={`Delete ${riven.name}`}
                 className="flex h-11 w-11 items-center justify-center rounded-lg border border-red-500/30 bg-red-950/40 text-red-400 shadow-sm transition-all hover:border-red-400 hover:bg-red-600 hover:text-white"
               >
                 <Trash2 className="h-3.5 w-3.5" />

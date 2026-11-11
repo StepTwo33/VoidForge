@@ -16,6 +16,7 @@ import { getRivenStatsForCategory } from "@/lib/types";
 import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
 import { useWeapons } from "@/lib/weapons/use-data";
 import { cn } from "@/lib/utils";
+import { rivenEquipHref } from "@/lib/rivens/riven-equip";
 
 export function formatRivenStatLine(key: string, value: number, category: string): string {
   const def = getRivenStatsForCategory(category).find((s) => s.key === key);
@@ -111,7 +112,7 @@ export function RivenLibrary() {
             href="/riven-library"
             className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-500/5 px-3 py-1.5 text-xs font-medium text-purple-700 transition-colors hover:bg-purple-500/10 pointer-fine:min-h-9 dark:text-purple-300"
           >
-            Open Card Grid & Details <ExternalLink className="h-3.5 w-3.5" />
+            Open Riven Library <ExternalLink className="h-3.5 w-3.5" />
           </Link>
           <button
             type="button"
@@ -157,7 +158,7 @@ export function RivenLibrary() {
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {r.weaponName || weapon?.name || r.weaponId} · MR {r.masteryRank} · {r.rerolls} rolls
+                        {r.weaponName || weapon?.name || r.weaponId} · MR {r.masteryRank} · {r.rerolls ?? 0} {r.rerolls === 1 ? "reroll" : "rerolls"}
                       </p>
                     </div>
                     <button
@@ -189,10 +190,11 @@ export function RivenLibrary() {
                     ))}
                   </ul>
                   <Link
-                    href={`/weapon-builder?weapon=${encodeURIComponent(r.weaponId)}`}
+                    href={rivenEquipHref(r)}
+                    title="Add this riven to the build open in the builder"
                     className="mt-auto inline-flex min-h-11 items-center self-start text-xs text-primary hover:underline pointer-fine:min-h-0"
                   >
-                    Open {r.weaponName || weapon?.name || "weapon"} in builder →
+                    Equip on {r.weaponName || weapon?.name || "weapon"} →
                   </Link>
                 </ContentPanel>
               </li>

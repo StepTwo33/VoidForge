@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { PageShell, PageMain, PageHero, FilterChip, EmptyState } from "@/components/page-shell";
 import { Sparkles, Plus, Search, RefreshCw, Flame, ArrowUpDown, Camera } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,8 @@ import { hasClientSession } from "@/lib/auth/client-session";
 import { deleteLibraryRiven, mergeCloudRivens, saveLibraryRiven } from "@/lib/rivens/riven-library-sync";
 import { getSavedRivens as getCloudRivens } from "@/lib/riven/saved-rivens";
 import { toast } from "sonner";
+import { useConfirmDialog } from "@/components/confirm-dialog-provider";
+import { PolarityIcon } from "@/components/polarity-icon";
 import { cn } from "@/lib/utils";
 
 const WEAPON_TYPES = ["All", "Rifle", "Shotgun", "Pistol", "Melee", "Kitgun", "Zaw", "Companion", "Archgun"];
@@ -29,12 +31,18 @@ export default function RivenLibraryPage() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRiven, setEditingRiven] = useState<SavedRiven | null>(null);
+  const [scanFile, setScanFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { confirm } = useConfirmDialog();
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
 
   // Load from local storage and cloud if signed in
   const refreshRivens = useCallback(async () => {
     const local = getSavedRivens();
     try {
-      if (await hasClientSession()) {
+      const ok = await hasClientSession();
+      setSignedIn(ok);
+      if (ok) {
         const cloud = await getCloudRivens();
         if (cloud.length > 0) {
           setRivens(mergeCloudRivens(local, cloud));
@@ -57,15 +65,31 @@ export default function RivenLibraryPage() {
   const handleSaveRiven = async (riven: SavedRiven) => {
     await saveLibraryRiven(riven);
     refreshRivens();
+    toast.success(`Saved “${riven.name}”. It shows up in the weapon mod picker.`);
   };
 
   const handleDeleteRiven = async (id: string) => {
+    const riven = rivens.find((r) => r.id === id);
+    const ok = await confirm({
+      title: "Delete riven?",
+      description: `“${riven?.name ?? "This riven"}” will be removed from your saved rivens. Builds that already use it keep their stats.`,
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (!ok) return;
     await deleteLibraryRiven(id);
     refreshRivens();
-    toast.success("Riven deleted from library");
+    toast.success("Riven deleted");
+  };
+
+  const openNewRiven = () => {
+    setEditingRiven(null);
+    setScanFile(null);
+    setDialogOpen(true);
   };
 
   const handleEditRiven = (riven: SavedRiven) => {
+    setScanFile(null);
     setEditingRiven(riven);
     setDialogOpen(true);
   };
@@ -120,7 +144,7 @@ export default function RivenLibraryPage() {
           icon={Sparkles}
           accent="purple"
           title="Riven Library"
-          description="Your personal Warframe Riven collection. Generate high-resolution card thumbnails, test new rolls, and equip directly into the Weapon Builder."
+          description={`Your Warframe riven collection. Grade rolls, then equip a riven straight into the build you have open.${signedIn === false ? " Saved on this device; sign in to sync them to your account." : ""}`}
         />
 
         {/* Top Action Toolbar */}
@@ -128,22 +152,31 @@ export default function RivenLibraryPage() {
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => {
-                setEditingRiven(null);
-                setDialogOpen(true);
-              }}
+              onClick={openNewRiven}
               className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-purple-600 px-3.5 text-xs font-bold text-white shadow-md transition-colors hover:bg-purple-500"
             >
-              <Plus className="h-4 w-4" /> Add Riven
+              <Plus className="h-4 w-4" /> New riven
             </button>
 
-            <button
-              type="button"
-              onClick={() => {
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/jpg"
+              className="hidden"
+              data-testid="riven-import-file"
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                e.target.value = "";
+                if (!file) return;
                 setEditingRiven(null);
+                setScanFile(file);
                 setDialogOpen(true);
               }}
-              title="Import a Riven by pasting a screenshot or browsing an image"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              title="Pick a riven screenshot; its stats are read into a new riven for you to check"
               className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-950/40 px-3 text-xs font-semibold text-purple-200 transition-colors hover:bg-purple-900/60 hover:text-white"
             >
               <Camera className="h-3.5 w-3.5 text-purple-400" />
@@ -188,7 +221,7 @@ export default function RivenLibraryPage() {
               <option value="updated">Recently Updated</option>
               <option value="name">Weapon Name (A–Z)</option>
               <option value="score">Grade Score (High to Low)</option>
-              <option value="rerolls">Cycles (High to Low)</option>
+              <option value="rerolls">Rerolls (High to Low)</option>
             </select>
           </div>
         </div>
@@ -205,6 +238,25 @@ export default function RivenLibraryPage() {
               onClick={() => setSelectedType(t)}
             >
               {t}
+            </FilterChip>
+          ))}
+        </div>
+
+        {/* Filter Chips: Polarity */}
+        <div className="mb-3 flex flex-wrap items-center gap-1.5">
+          <span className="mr-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Polarity:
+          </span>
+          {POLARITIES.map((p) => (
+            <FilterChip
+              key={p}
+              active={selectedPolarity === p}
+              onClick={() => setSelectedPolarity(p)}
+            >
+              <span className="inline-flex items-center gap-1 capitalize">
+                {p !== "All" && <PolarityIcon polarity={p} size={12} />}
+                {p}
+              </span>
             </FilterChip>
           ))}
         </div>
@@ -232,18 +284,15 @@ export default function RivenLibraryPage() {
             title={rivens.length === 0 ? "Your Riven Library is Empty" : "No Matching Rivens Found"}
             description={
               rivens.length === 0
-                ? "Start your collection by creating custom Rivens or importing in-game screenshots."
+                ? "Start your collection with New riven, or import an in-game screenshot."
                 : "Try adjusting your search query or filter chips above."
             }
             action={
               rivens.length === 0
                 ? {
-                    label: "Add Your First Riven",
+                    label: "New riven",
                     icon: Plus,
-                    onClick: () => {
-                      setEditingRiven(null);
-                      setDialogOpen(true);
-                    },
+                    onClick: openNewRiven,
                   }
                 : undefined
             }
@@ -267,9 +316,11 @@ export default function RivenLibraryPage() {
           onClose={() => {
             setDialogOpen(false);
             setEditingRiven(null);
+            setScanFile(null);
           }}
           onSave={handleSaveRiven}
           initialRiven={editingRiven}
+          initialScanFile={scanFile}
         />
       </PageMain>
     </PageShell>

@@ -49,6 +49,8 @@ interface RivenDialogProps {
   initialScannedRiven?: ParsedOcrRiven | null;
   fixedWeaponId?: string;
   hideWeaponSelect?: boolean;
+  /** Screenshot picked before opening (Riven Library "Import screenshot"): scanned once on open. */
+  initialScanFile?: File | null;
 }
 
 /** Same set as RIVEN_POLARITIES, in the order the dialog and library list them. */
@@ -96,7 +98,7 @@ function computeNegMidpoint(poolStat: RivenStat | undefined, isPercent: boolean,
   return isPercent ? 0.45 : 1.0;
 }
 
-export function RivenDialog({ open, onClose, onSave, initialRiven, initialScannedRiven, fixedWeaponId, hideWeaponSelect }: RivenDialogProps) {
+export function RivenDialog({ open, onClose, onSave, initialRiven, initialScannedRiven, fixedWeaponId, hideWeaponSelect, initialScanFile }: RivenDialogProps) {
   const eligibleWeapons = useMemo(
     () => getBaseRivenWeapons().sort((a, b) => a.name.localeCompare(b.name)),
     [],
@@ -316,6 +318,14 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
     }
     });
   }, [open, initialRiven, initialScannedRiven, fixedWeaponId]);
+
+  // Runs after the blank-form reset above (that one is queued first), so the scan fills the new form.
+  useEffect(() => {
+    if (!open || !initialScanFile) return;
+    queueMicrotask(() => {
+      void handleScanFile(initialScanFile);
+    });
+  }, [open, initialScanFile, handleScanFile]);
 
   // Compute stat pools with ranges for reference hints
   const rangeOpts = useMemo(
