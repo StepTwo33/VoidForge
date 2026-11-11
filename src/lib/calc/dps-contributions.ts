@@ -117,7 +117,7 @@ function cloneCtx(ctx: WeaponDpsCalcContext): WeaponDpsCalcContext {
   };
 }
 
-function calcWeaponStats(ctx: WeaponDpsCalcContext): CalculatedStats {
+export function calcWeaponStats(ctx: WeaponDpsCalcContext): CalculatedStats {
   const sim = ctx.simParams ?? DEFAULT_SIM_PARAMS;
   const arcanes = ctx.arcanes ?? [];
   if (arcanes.length > 0) {

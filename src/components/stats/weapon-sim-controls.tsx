@@ -27,6 +27,7 @@ import { getModStatLabel } from "@/lib/overrides/override-stat-catalog";
 import { modsMap as catalogModsMap } from "@/data/mods";
 import { maxStacksSimParams, paperSimParams } from "@/lib/ui/sim-presets";
 import { HIT_WINDOW_TRIGGERS } from "@/lib/ui/hit-window-triggers";
+import type { SimRelevanceKey } from "@/lib/ui/sim-relevance";
 import { allWarframes } from "@/data/warframes";
 import {
   weaponDamageBuffAbilities,
@@ -59,6 +60,7 @@ export function WeaponSimControls({
   linkage,
   linkedWarframeId,
   linkedCompanionModIds,
+  relevantKeys,
 }: {
   stats: CalculatedStats;
   simParams: SimulationParams;
@@ -71,7 +73,10 @@ export function WeaponSimControls({
   linkage?: SetBonusLinkage;
   linkedWarframeId?: string;
   linkedCompanionModIds?: string[];
+  /** Sim controls that change a number for this build (see relevantSimKeys); undefined = show all. */
+  relevantKeys?: ReadonlySet<SimRelevanceKey>;
 }) {
+  const shows = (key: SimRelevanceKey) => !relevantKeys || relevantKeys.has(key);
   const killSources = stats.killStackSources ?? [];
   const arcaneSources = stats.arcaneStackSources ?? [];
   const ks = (src: KillStackSource) => Math.max(0, simParams.killStacksBySource?.[src] ?? simParams.killStacks);
@@ -138,6 +143,7 @@ export function WeaponSimControls({
                     }),
                   )
                 }
+                title="Max kill, status, combo and arcane stacks, and turn on the named situational switches. Hit location and Other buffs stay as they are."
                 className="rounded border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] text-primary hover:bg-primary/20 transition-colors"
               >
                 Max stacks
@@ -215,7 +221,7 @@ export function WeaponSimControls({
                 ["applyAimGlide", "Aim glide", "Aim gliding. Aero Agility."],
                 ["applyDistance", "Distance", "Target is far. Range Advantage and Spring-Loaded Broadhead."],
               ] as const
-            ).map(([key, label, title]) => (
+            ).filter(([key]) => shows(key)).map(([key, label, title]) => (
               <label
                 key={key}
                 className="flex min-h-11 items-center gap-1.5 text-[10px] text-muted-foreground hover:text-foreground cursor-pointer"
@@ -250,7 +256,7 @@ export function WeaponSimControls({
             ))}
           </div>
 
-          {(weapon?.id === "sobek" || weapon?.id === "kuva_sobek") && (
+          {(weapon?.id === "sobek" || weapon?.id === "kuva_sobek") && shows("clipDelegationShots") && (
             <SimSlider
               label="Clip Delegation shots landed"
               value={simParams.clipDelegationShots ?? 0}
@@ -482,7 +488,7 @@ export function WeaponSimControls({
               })}
             </div>
           )}
-          {isMelee && (
+          {isMelee && shows("comboCount") && (
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between border-b border-border/40 pb-1">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -513,6 +519,7 @@ export function WeaponSimControls({
             </div>
           )}
 
+          {shows("killStacks") && (
           <div className="space-y-2 pt-1">
             <div className="flex items-center justify-between border-b border-border/40 pb-1">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -575,13 +582,16 @@ export function WeaponSimControls({
               </div>
             )}
           </div>
+          )}
 
+          {(shows("statusTypesOnTarget") || shows("arcaneStacks")) && (
           <div className="space-y-2 pt-1">
             <div className="flex items-center justify-between border-b border-border/40 pb-1">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Target Status & Arcanes
               </span>
             </div>
+            {shows("statusTypesOnTarget") && (
             <SimSlider
               label="Status Types on Target"
               subtitle={
@@ -602,6 +612,8 @@ export function WeaponSimControls({
               ]}
               tooltip="Unique status types on target — Condition Overload, Galvanized Aptitude/Savvy/Shot. No in-game cap; 14 = every status type including Tau (wiki.warframe.com lists Tau, fandom does not)."
             />
+            )}
+            {shows("arcaneStacks") && (
             <SimSlider
               label={singleArcane ? (singleArcane.modName ?? singleArcane.label) : "Arcane Stacks"}
               subtitle={
@@ -635,7 +647,8 @@ export function WeaponSimControls({
                   : "Stack count for stacking arcanes like Primary/Secondary/Melee Merciless (max 12). The max follows the equipped arcane's cap."
               }
             />
-            {arcaneSources.length > 1 && (
+            )}
+            {shows("arcaneStacks") && arcaneSources.length > 1 && (
               <div className="space-y-1.5 border-l-2 border-primary/30 pl-2.5 my-1.5" data-testid="arcane-stack-sources">
                 <span className="block text-[10px] font-medium text-muted-foreground">
                   Per-Arcane Stacks:
@@ -660,6 +673,7 @@ export function WeaponSimControls({
               </div>
             )}
           </div>
+          )}
 
           {/* Off-weapon what-if set bonuses (Gladiator, Vigilante, Tek, Synth, Overcharge) */}
           {(!isLinkedLoadout && (isMelee || (weapon && weaponSupportsPrimaryStyleSets(weapon)) || (weapon && weaponAcceptsSynthReloadBonus(weapon)) || stats.usesWarframeMaxEnergy)) && (
@@ -1098,7 +1112,7 @@ export function WeaponSimControls({
                 </span>
               </span>
             </label>
-            {((stats.triggerOtherModIds?.length ?? 0) > 0 || isLinkedLoadout || !!simParams.applyTriggerBuffs) && (
+            {((stats.triggerOtherModIds?.length ?? 0) > 0 || isLinkedLoadout || !!simParams.applyTriggerBuffs || !!relevantKeys?.has("applyTriggerBuffs")) && shows("applyTriggerBuffs") && (
               <label
                 className="flex min-h-11 items-center gap-2 text-[10px] text-muted-foreground cursor-pointer pointer-fine:min-h-0"
                 title="Buffs without a named switch above: on-hit and on-kill stacks (Critical Precision, Critical Mutation, Pain Points, Fired Up), headshot Infinite Ammo (Brain Storm, Skull Shots), health-scaled buffs (Dreadful Killshot, Necrophagic Vigor), Velox Conclusion, and on-equip buffs from a linked loadout (Holster Amp, Vigorous Swap). Max stacks leaves this switch as it is."

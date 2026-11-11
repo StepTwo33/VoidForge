@@ -8,11 +8,13 @@ import { cleanModDescription, getModStatDisplayLines } from "@/lib/display/mod-d
 import { getModStatLabel } from "@/lib/overrides/override-stat-catalog";
 import { getArcaneDisplayInfo } from "@/lib/display/arcane-display";
 import {
+  calcWeaponStats,
   computeDpsContributions,
   formatMarginalPct,
   type DpsContributionCategory,
   type WeaponDpsCalcContext,
 } from "@/lib/calc/dps-contributions";
+import { relevantSimKeys } from "@/lib/ui/sim-relevance";
 import { avgCritMultiplier, critTierDamage, critTiersToShow, critTierLabel, critTierColorClass, exceedsWarframeInt32 } from "@/lib/calc/crit-utils";
 import { CollapsibleSection, SimSlider, StatRow, toLightSafeTextColor } from "./stat-primitives";
 import type { AltFireResult } from "@/lib/weapons/alt-fire";
@@ -355,6 +357,14 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
     () => (contributionContext ? computeDpsContributions(contributionContext) : []),
     [contributionContext],
   );
+  // Sim switches / sliders that change a number for this build (hides the rest; never one that matters).
+  const relevantKeys = useMemo(
+    () =>
+      contributionContext && simParams
+        ? relevantSimKeys(simParams, (sim) => calcWeaponStats({ ...contributionContext, simParams: sim }))
+        : undefined,
+    [contributionContext, simParams],
+  );
   const flash = useSimStatChangeFlash(stats, simParams);
 
   if (!stats) {
@@ -594,6 +604,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
           linkage={contributionContext?.linkage}
           linkedWarframeId={contributionContext?.warframeId}
           linkedCompanionModIds={contributionContext?.companionModIds}
+          relevantKeys={relevantKeys}
         />
       )}
       {stats.setBonusSummary && stats.setBonusSummary.length > 0 && (
@@ -813,7 +824,7 @@ export function WeaponStatsPanel({ stats, baseStats, weapon, isMelee, selectedEv
             value={`+${((stats.abilityStrengthNextCastBonus ?? 0) * 100).toFixed(0)}%`}
             color="text-amber-300"
             changed={flash.has("abilityStrengthNextCastBonus")}
-            tooltip="Velox Conclusion: Ability Strength for the next ability cast (sim Trigger buffs = max stacks). Consumed on cast."
+            tooltip="Velox Conclusion: Ability Strength for the next ability cast (Other buffs on = max stacks). Consumed on cast."
           />
         )}
         {stats.instantReloadOnKillChance != null && stats.instantReloadOnKillChance > 0 && (

@@ -18,13 +18,18 @@ import {
 import { maxStacksSimParams, paperSimParams } from "@/lib/ui/sim-presets";
 import { WeaponSimControls } from "./weapon-sim-controls";
 import { HIT_WINDOW_TRIGGERS } from "@/lib/ui/hit-window-triggers";
+import type { SimRelevanceKey } from "@/lib/ui/sim-relevance";
 
-function simSummaryChips(
+export function simSummaryChips(
   simParams: SimulationParams,
   isMelee?: boolean,
   weaponId?: string,
+  relevant?: ReadonlySet<SimRelevanceKey>,
+  triggerBuckets?: CalculatedStats["triggerBuckets"],
 ): string[] {
   const chips: string[] = [];
+  // Only list switches and stacks that change a number for this build (all of them when unknown).
+  const counts = (key: SimRelevanceKey) => !relevant || relevant.has(key);
   const sniper = weaponId ? SNIPER_DATA[weaponId] : undefined;
   if (sniper) {
     const zoom = sniper.zooms[(simParams.sniperZoomLevel ?? 0) - 1];
@@ -33,23 +38,24 @@ function simSummaryChips(
       chips.push(`${sniperComboMultiplier(simParams.sniperComboTier ?? 0)}× shot combo`);
     }
   }
-  if (isMelee && simParams.comboCount > 0) chips.push(`${simParams.comboCount} combo`);
-  if (simParams.killStacks > 0) chips.push(`${simParams.killStacks} kills`);
-  if (simParams.statusTypesOnTarget > 0) chips.push(`${simParams.statusTypesOnTarget} status`);
-  if (simParams.arcaneStacks > 0) chips.push(`${simParams.arcaneStacks} arcane`);
-  if (simParams.applyAiming) chips.push("Aiming");
-  if (simParams.applyInvisible) chips.push("Invisible");
-  if (simParams.applyAbilityCast) chips.push("Ability cast");
-  if (simParams.applyReload) chips.push("Reload");
-  if (simParams.applyCrouch) chips.push("Crouch");
-  if (simParams.applyWallLatch) chips.push("Wall latch");
-  if (simParams.applyAirborne) chips.push("Airborne");
-  if (simParams.applyAimGlide) chips.push("Aim glide");
-  if (simParams.applyDistance) chips.push("Distance");
+  if (isMelee && simParams.comboCount > 0 && counts("comboCount")) chips.push(`${simParams.comboCount} combo`);
+  if (simParams.killStacks > 0 && counts("killStacks")) chips.push(`${simParams.killStacks} kills`);
+  if (simParams.statusTypesOnTarget > 0 && counts("statusTypesOnTarget")) chips.push(`${simParams.statusTypesOnTarget} status`);
+  if (simParams.arcaneStacks > 0 && counts("arcaneStacks")) chips.push(`${simParams.arcaneStacks} arcane`);
+  if (simParams.applyAiming && counts("applyAiming")) chips.push("Aiming");
+  if (simParams.applyInvisible && counts("applyInvisible")) chips.push("Invisible");
+  if (simParams.applyAbilityCast && counts("applyAbilityCast")) chips.push("Ability cast");
+  if (simParams.applyReload && counts("applyReload")) chips.push("Reload");
+  if (simParams.applyCrouch && counts("applyCrouch")) chips.push("Crouch");
+  if (simParams.applyWallLatch && counts("applyWallLatch")) chips.push("Wall latch");
+  if (simParams.applyAirborne && counts("applyAirborne")) chips.push("Airborne");
+  if (simParams.applyAimGlide && counts("applyAimGlide")) chips.push("Aim glide");
+  if (simParams.applyDistance && counts("applyDistance")) chips.push("Distance");
   for (const t of HIT_WINDOW_TRIGGERS) {
-    if (simParams[t.flag]) chips.push(t.label);
+    const used = !relevant || Object.keys(triggerBuckets?.[t.bucket] ?? {}).length > 0;
+    if (simParams[t.flag] && used) chips.push(t.label);
   }
-  if (simParams.applyTriggerBuffs) chips.push("Other buffs");
+  if (simParams.applyTriggerBuffs && counts("applyTriggerBuffs")) chips.push("Other buffs");
   if (simParams.applyYareliCriticalFlow) chips.push("Yareli +200% CC");
   if (simParams.applyZephyrAirborne) chips.push("Zephyr +150% CC");
   if (simParams.applyGarudaDeathsGate) chips.push("Death's Gate");
@@ -74,6 +80,7 @@ export function WeaponSimPanel({
   linkage,
   linkedWarframeId,
   linkedCompanionModIds,
+  relevantKeys,
 }: {
   stats: CalculatedStats;
   simParams: SimulationParams;
@@ -86,12 +93,14 @@ export function WeaponSimPanel({
   linkage?: SetBonusLinkage;
   linkedWarframeId?: string;
   linkedCompanionModIds?: string[];
+  /** Sim controls that change a number for this build; undefined = show all. */
+  relevantKeys?: ReadonlySet<SimRelevanceKey>;
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const chips = useMemo(
-    () => simSummaryChips(simParams, isMelee, weapon?.id),
-    [simParams, isMelee, weapon?.id],
+    () => simSummaryChips(simParams, isMelee, weapon?.id, relevantKeys, stats.triggerBuckets),
+    [simParams, isMelee, weapon?.id, relevantKeys, stats.triggerBuckets],
   );
   const isLinkedLoadout = Boolean(linkage);
   const arcaneSources = stats.arcaneStackSources ?? [];
@@ -206,6 +215,7 @@ export function WeaponSimPanel({
               linkage={linkage}
               linkedWarframeId={linkedWarframeId}
               linkedCompanionModIds={linkedCompanionModIds}
+              relevantKeys={relevantKeys}
             />
           </div>
           <SheetFooter className="border-t border-border shrink-0 sm:flex-col">
