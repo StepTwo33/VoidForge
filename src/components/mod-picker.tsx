@@ -730,7 +730,7 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
             >
               <div className="space-y-1">
                 {!isArcaneBrowse && showSavedRivenGroup && (
-                  <div className="mb-2 space-y-1 rounded-lg border border-purple-500/30 bg-purple-500/5 p-2" data-testid="saved-rivens-in-picker">
+                  <div className="mb-2 space-y-1 rounded-lg border border-purple-500/30 bg-purple-500/5 p-2" data-testid="saved-rivens-in-picker" role="group" aria-label="Saved rivens">
                     <div className="flex items-center justify-between gap-2 px-1">
                       <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-700 dark:text-purple-300">
                         Saved rivens
@@ -834,6 +834,10 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
                   return (
                     <button
                       key={arcane.id}
+                      type="button"
+                      role="option"
+                      aria-selected={false}
+                      aria-disabled={isEquipped}
                       onClick={() => !isEquipped && handleSelectMod(arcane)}
                       disabled={isEquipped}
                       className={cn(
@@ -868,6 +872,10 @@ export function ModPicker({ open, onClose, mods, category, statFilterCategory, s
                   return (
                     <button
                       key={mod.id}
+                      type="button"
+                      role="option"
+                      aria-selected={false}
+                      aria-disabled={isDisabled}
                       onClick={() => !isDisabled && handleSelectMod(mod)}
                       disabled={isDisabled}
                       className={cn(

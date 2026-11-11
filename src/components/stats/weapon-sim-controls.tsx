@@ -128,7 +128,7 @@ export function WeaponSimControls({
               <button
                 type="button"
                 onClick={() => onSimParamsChange(paperSimParams(simParams))}
-                className="rounded border border-border px-2 py-0.5 text-[10px] text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+                className="min-h-11 rounded border border-border px-2 py-0.5 text-[10px] text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors pointer-fine:min-h-0 lg:min-h-0"
               >
                 Paper
               </button>
@@ -144,7 +144,7 @@ export function WeaponSimControls({
                   )
                 }
                 title="Max kill, status, combo and arcane stacks, and turn on the named situational switches. Hit location and Other buffs stay as they are."
-                className="rounded border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] text-primary hover:bg-primary/20 transition-colors"
+                className="min-h-11 rounded border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] text-primary hover:bg-primary/20 transition-colors pointer-fine:min-h-0 lg:min-h-0"
               >
                 Max stacks
               </button>
@@ -163,7 +163,7 @@ export function WeaponSimControls({
                     applyWeakPoints: false,
                   })
                 }
-                className={`rounded px-1.5 py-0.5 font-medium transition-colors ${
+                className={`min-h-11 rounded px-1.5 py-0.5 font-medium transition-colors pointer-fine:min-h-0 lg:min-h-0 ${
                   !simParams.applyHeadshots && !simParams.applyWeakPoints
                     ? "bg-background text-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -181,7 +181,7 @@ export function WeaponSimControls({
                     applyWeakPoints: false,
                   })
                 }
-                className={`rounded px-1.5 py-0.5 font-medium transition-colors ${
+                className={`min-h-11 rounded px-1.5 py-0.5 font-medium transition-colors pointer-fine:min-h-0 lg:min-h-0 ${
                   simParams.applyHeadshots
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -199,7 +199,7 @@ export function WeaponSimControls({
                     applyWeakPoints: true,
                   })
                 }
-                className={`rounded px-1.5 py-0.5 font-medium transition-colors ${
+                className={`min-h-11 rounded px-1.5 py-0.5 font-medium transition-colors pointer-fine:min-h-0 lg:min-h-0 ${
                   !simParams.applyHeadshots && simParams.applyWeakPoints
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -290,7 +290,7 @@ export function WeaponSimControls({
                   Loadout passives & bonds
                 </div>
                 {wfFamily === "yareli" && isSecondaryWeapon && (
-                  <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                  <label className="flex min-h-11 items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer pointer-fine:min-h-0 lg:min-h-0">
                     <span>Yareli Critical Flow (+200% CC while moving)</span>
                     <input
                       type="checkbox"
@@ -306,7 +306,7 @@ export function WeaponSimControls({
                   </label>
                 )}
                 {wfFamily === "zephyr" && (
-                  <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                  <label className="flex min-h-11 items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer pointer-fine:min-h-0 lg:min-h-0">
                     <span>Zephyr Aerodynamic (+150% CC while airborne)</span>
                     <input
                       type="checkbox"
@@ -322,7 +322,7 @@ export function WeaponSimControls({
                   </label>
                 )}
                 {wfFamily === "garuda" && (
-                  <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                  <label className="flex min-h-11 items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer pointer-fine:min-h-0 lg:min-h-0">
                     <span>Garuda Death&apos;s Gate (+100% Damage)</span>
                     <input
                       type="checkbox"
@@ -338,7 +338,7 @@ export function WeaponSimControls({
                   </label>
                 )}
                 {hasTenaciousBond && (
-                  <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                  <label className="flex min-h-11 items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer pointer-fine:min-h-0 lg:min-h-0">
                     <span>Tenacious Bond (+1.2× Crit Damage)</span>
                     <input
                       type="checkbox"
@@ -354,7 +354,7 @@ export function WeaponSimControls({
                   </label>
                 )}
                 {hasReinforcedBond && (
-                  <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                  <label className="flex min-h-11 items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer pointer-fine:min-h-0 lg:min-h-0">
                     <span>Reinforced Bond (+60% Fire Rate)</span>
                     <input
                       type="checkbox"
@@ -377,7 +377,7 @@ export function WeaponSimControls({
                 External passives & bonds (what-if)
               </div>
               {isSecondaryWeapon && (
-                <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                <label className="flex min-h-11 items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer pointer-fine:min-h-0 lg:min-h-0">
                   <span>Yareli Critical Flow (+200% CC while moving)</span>
                   <input
                     type="checkbox"
@@ -392,7 +392,7 @@ export function WeaponSimControls({
                   />
                 </label>
               )}
-              <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+              <label className="flex min-h-11 items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer pointer-fine:min-h-0 lg:min-h-0">
                 <span>Zephyr Aerodynamic (+150% CC while airborne)</span>
                 <input
                   type="checkbox"
@@ -406,7 +406,7 @@ export function WeaponSimControls({
                   className="h-3.5 w-3.5 rounded border-border accent-primary"
                 />
               </label>
-              <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+              <label className="flex min-h-11 items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer pointer-fine:min-h-0 lg:min-h-0">
                 <span>Garuda Death&apos;s Gate (+100% Damage)</span>
                 <input
                   type="checkbox"
@@ -420,7 +420,7 @@ export function WeaponSimControls({
                   className="h-3.5 w-3.5 rounded border-border accent-primary"
                 />
               </label>
-              <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+              <label className="flex min-h-11 items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer pointer-fine:min-h-0 lg:min-h-0">
                 <span>Tenacious Bond (+1.2× Crit Damage)</span>
                 <input
                   type="checkbox"
@@ -435,7 +435,7 @@ export function WeaponSimControls({
                 />
               </label>
               {!isMelee && (
-                <label className="flex items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer">
+                <label className="flex min-h-11 items-center justify-between gap-2 text-[10px] text-muted-foreground cursor-pointer pointer-fine:min-h-0 lg:min-h-0">
                   <span>Reinforced Bond (+60% Fire Rate)</span>
                   <input
                     type="checkbox"

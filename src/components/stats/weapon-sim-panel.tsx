@@ -127,7 +127,7 @@ export function WeaponSimPanel({
           <button
             type="button"
             onClick={() => onSimParamsChange(paperSimParams(simParams))}
-            className="rounded border border-border px-1.5 py-0.5 text-[9px] text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+            className="min-h-11 rounded border border-border px-1.5 py-0.5 text-[9px] text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors pointer-fine:min-h-0 lg:min-h-0"
             title="Turn off all conditional stacks and buffs (paper stats)"
           >
             Paper
@@ -143,7 +143,7 @@ export function WeaponSimPanel({
                 }),
               )
             }
-            className="rounded border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[9px] text-primary hover:bg-primary/20 transition-colors"
+            className="min-h-11 rounded border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[9px] text-primary hover:bg-primary/20 transition-colors pointer-fine:min-h-0 lg:min-h-0"
             title="Max kill, status, combo and arcane stacks, and turn on the named situational switches. Hit location and Other buffs stay as they are."
           >
             Max stacks
@@ -199,7 +199,9 @@ export function WeaponSimPanel({
           <SheetHeader className="border-b border-border shrink-0">
             <SheetTitle className="text-sm">Simulation</SheetTitle>
             <SheetDescription className="text-[11px]">
-              Adjust stacks and conditionals for paper DPS. Weapon stats update live as you change them.
+              Adjust stacks and conditionals for paper DPS.{" "}
+              <span className="lg:hidden">Close this sheet to see the updated stats.</span>
+              <span className="max-lg:hidden">Weapon stats update live as you change them.</span>
             </SheetDescription>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto px-4 py-2 min-h-0">

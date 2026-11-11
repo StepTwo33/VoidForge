@@ -454,12 +454,20 @@ export function RivenEditor({
         <label className="space-y-1 text-[11px] text-muted-foreground">
           <span className="block">Polarity</span>
           <div className="flex items-center gap-1.5">
-            <PolarityIcon polarity={polarity} size={16} className="shrink-0" />
+            {RIVEN_POLARITIES.includes(polarity as (typeof RIVEN_POLARITIES)[number]) && (
+              <PolarityIcon polarity={polarity} size={16} className="shrink-0" />
+            )}
             <select
               value={polarity}
               onChange={(e) => onPolarityChange(e.target.value)}
-              className="min-h-11 min-w-0 flex-1 rounded border border-border bg-background px-2 text-xs text-foreground pointer-fine:min-h-9"
+              className={cn(
+                "min-h-11 min-w-0 flex-1 rounded border bg-background px-2 text-xs text-foreground pointer-fine:min-h-9",
+                RIVEN_POLARITIES.includes(polarity as (typeof RIVEN_POLARITIES)[number])
+                  ? "border-border"
+                  : "border-amber-400 ring-1 ring-amber-400/60",
+              )}
               aria-label="Riven polarity"
+              aria-invalid={!RIVEN_POLARITIES.includes(polarity as (typeof RIVEN_POLARITIES)[number])}
             >
               {!RIVEN_POLARITIES.includes(polarity as (typeof RIVEN_POLARITIES)[number]) && (
                 <option value={DEFAULT_RIVEN_POLARITY} disabled>Choose…</option>
