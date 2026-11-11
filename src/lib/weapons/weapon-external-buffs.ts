@@ -1254,7 +1254,9 @@ function resolveNamedAbilityWeaponBuff(
     case "Lethal Levitation":
       // Wiki: Naramon Lethal Levitation (+50% weapon damage per Lifted enemy attacked, max 4 stacks -> +200%).
       // Additive with base damage mods (Serration/Pressure Point). The Focus/Naramon body says it applies
-      // to all equipped weapons "as well as Archguns and Exalted Weapons".
+      // to all equipped weapons "as well as Archguns and Exalted Weapons". Arch-melee is not listed, so
+      // only the exalted one (Bonewidow's Ironbride) keeps it.
+      if (weapon.category === "archmelee" && !weapon.isExalted) return null;
       return {
         id: "operator:lethal_levitation",
         label: "Lethal Levitation (Naramon)",

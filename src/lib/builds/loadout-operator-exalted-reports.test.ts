@@ -169,6 +169,23 @@ describe("Community Reports Fixes: Amps, Exalted Slots, Operator & Necramechs", 
       const ll = meleeBuffs.find((b) => b.label.includes("Lethal Levitation"));
       expect(ll).toBeDefined();
       expect(ll?.damageBonus).toBe(2.0);
+
+      // wiki.warframe.com/w/Focus/Naramon: "all equipped weapons (Primary, Secondary, Melee, Amp) as well
+      // as Archguns and Exalted Weapons". Arch-melee is not listed; Ironbride is an Exalted Weapon.
+      const llOn = (id: string) =>
+        resolveWeaponExternalBuffs(
+          allWeapons.find((w) => w.id === id)!,
+          {
+            warframeId: "excalibur",
+            warframeStats: { abilityStrength: 1 } as never,
+            warframeAbilities: [{ name: "Lethal Levitation" } as never],
+          },
+          { ...DEFAULT_SIM_PARAMS, activeWeaponAbilityBuffs: ["Lethal Levitation"] },
+        ).some((b) => b.label.includes("Lethal Levitation"));
+      expect(llOn("braton")).toBe(true);
+      expect(llOn("imperator")).toBe(true);
+      expect(llOn("ironbride")).toBe(true);
+      expect(llOn("kaszas")).toBe(false);
     });
 
     it("resolves Madurai Sling Strength (+40% STR) and Zenurik Hardened Wellspring (+20% STR)", () => {
