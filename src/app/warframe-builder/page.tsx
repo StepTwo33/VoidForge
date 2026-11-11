@@ -59,7 +59,7 @@ import {
   WeaponCalculationOptions,
   SimulationParams,
 } from "@/lib/types";
-import { DEFAULT_SIM_PARAMS } from "@/lib/types";
+import { DEFAULT_SIM_PARAMS, type ModSlot } from "@/lib/types";
 import { Zap, Flag, Gem, FolderOpen, Share2, Check, Upload, Shield, ArrowLeftRight } from "lucide-react";
 import { warframeArcanes } from "@/data/arcanes";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
@@ -1000,7 +1000,7 @@ export default function WarframeBuilderPage() {
 
   const handleLoadExaltedSavedBuild = useCallback((build: SavedBuild) => {
     const d = build.data as WeaponBuildData;
-    const mods: EquippedMod[] = (d.mods || []).map((m: any, i: number) => {
+    const mods: EquippedMod[] = (d.mods || []).map((m: ModSlot & { id?: string }, i: number) => {
       const mid = m.modId ?? m.id;
       const mod = modsMap.get(mid);
       return {
@@ -1051,7 +1051,7 @@ export default function WarframeBuilderPage() {
 
   const handleLoadExaltedMeleeSavedBuild = useCallback((build: SavedBuild) => {
     const d = build.data as WeaponBuildData;
-    const mods: EquippedMod[] = (d.mods || []).map((m: any, i: number) => {
+    const mods: EquippedMod[] = (d.mods || []).map((m: ModSlot & { id?: string }, i: number) => {
       const mid = m.modId ?? m.id;
       const mod = modsMap.get(mid);
       return {

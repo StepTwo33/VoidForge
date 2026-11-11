@@ -232,6 +232,7 @@ export default function OperatorBuilderPage() {
     if (!loadoutId) return;
     const found = getLoadouts().find((l) => l.id === loadoutId);
     if (!found) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loading the saved loadout from storage (external) on open
     setLoadout(found);
 
     const ob = found.operatorBuild;

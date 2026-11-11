@@ -342,87 +342,6 @@ export default function LoadoutsPage() {
     [saveDialogLoadoutId, loadouts, refresh],
   );
 
-  const handleShareLoadout = useCallback(
-    async (loadout: Loadout) => {
-      if (loadout.isPublic && loadout.cloudId) {
-        const url = `${window.location.origin}/build/${loadout.cloudId}`;
-        const ok = await copyTextToClipboard(url);
-        if (ok) {
-          setShareCopiedId(loadout.id);
-          setTimeout(() => setShareCopiedId(null), 2000);
-          toast.success("Community link copied!", { description: "Anyone can view and upvote this loadout." });
-        }
-        return;
-      }
-
-      // Self-contained hash link carries the loadout so anyone can open a copy without needing an account
-      const code = await encodeLoadoutShare(loadout);
-      const link = code ? `${window.location.origin}${loadoutSharePath(code)}` : null;
-      if (link) {
-        const ok = await copyTextToClipboard(link);
-        if (ok) {
-          setShareCopiedId(loadout.id);
-          setTimeout(() => setShareCopiedId(null), 2000);
-          toast.success("Share link copied!", {
-            description: loadout.cloudId
-              ? "Link carries this loadout. To list in Community, click Publish."
-              : "Anyone with this link can open a copy of this loadout.",
-            action: !loadout.isPublic
-              ? {
-                  label: "Publish to Community",
-                  onClick: () => void handlePublishToCommunity(loadout),
-                }
-              : undefined,
-          });
-          return;
-        }
-      }
-      toast.error("Could not copy share link");
-    },
-    [],
-  );
-
-  const handleQuickUpdateLoadout = useCallback(
-    async (loadout: Loadout) => {
-      if (!loadout.cloudId) return;
-      try {
-        const now = Date.now();
-        const build: SavedBuild = {
-          id: loadout.cloudId,
-          name: loadout.name,
-          description: loadout.description,
-          isPublic: loadout.isPublic ?? false,
-          type: "loadout",
-          createdAt: loadout.createdAt,
-          updatedAt: now,
-          data: loadoutToBuildData(loadout),
-        };
-        const cloudResult = await saveCloudBuild(build);
-        const updated: Loadout = {
-          ...loadout,
-          updatedAt: now,
-          cloudId: cloudResult?.id ?? loadout.cloudId,
-          isPublic: cloudResult?.isPublic ?? loadout.isPublic,
-        };
-        saveLoadout(updated);
-        refresh();
-        if (cloudResult) {
-          toast.success("Loadout updated", {
-            description: updated.isPublic ? "Synced to Community and your account." : "Synced to your account.",
-          });
-        } else {
-          toast.warning("Saved on this device", {
-            description: "Account sync failed. Check your connection or sign in.",
-          });
-        }
-      } catch (err) {
-        console.error("Failed to update loadout", err);
-        toast.error("Could not update loadout");
-      }
-    },
-    [refresh],
-  );
-
   const handlePublishToCommunity = useCallback(
     async (loadout: Loadout) => {
       if (!loadout.cloudId) {
@@ -467,6 +386,87 @@ export default function LoadoutsPage() {
       }
     },
     [refresh, handleOpenSaveDialog],
+  );
+
+  const handleShareLoadout = useCallback(
+    async (loadout: Loadout) => {
+      if (loadout.isPublic && loadout.cloudId) {
+        const url = `${window.location.origin}/build/${loadout.cloudId}`;
+        const ok = await copyTextToClipboard(url);
+        if (ok) {
+          setShareCopiedId(loadout.id);
+          setTimeout(() => setShareCopiedId(null), 2000);
+          toast.success("Community link copied!", { description: "Anyone can view and upvote this loadout." });
+        }
+        return;
+      }
+
+      // Self-contained hash link carries the loadout so anyone can open a copy without needing an account
+      const code = await encodeLoadoutShare(loadout);
+      const link = code ? `${window.location.origin}${loadoutSharePath(code)}` : null;
+      if (link) {
+        const ok = await copyTextToClipboard(link);
+        if (ok) {
+          setShareCopiedId(loadout.id);
+          setTimeout(() => setShareCopiedId(null), 2000);
+          toast.success("Share link copied!", {
+            description: loadout.cloudId
+              ? "Link carries this loadout. To list in Community, click Publish."
+              : "Anyone with this link can open a copy of this loadout.",
+            action: !loadout.isPublic
+              ? {
+                  label: "Publish to Community",
+                  onClick: () => void handlePublishToCommunity(loadout),
+                }
+              : undefined,
+          });
+          return;
+        }
+      }
+      toast.error("Could not copy share link");
+    },
+    [handlePublishToCommunity],
+  );
+
+  const handleQuickUpdateLoadout = useCallback(
+    async (loadout: Loadout) => {
+      if (!loadout.cloudId) return;
+      try {
+        const now = Date.now();
+        const build: SavedBuild = {
+          id: loadout.cloudId,
+          name: loadout.name,
+          description: loadout.description,
+          isPublic: loadout.isPublic ?? false,
+          type: "loadout",
+          createdAt: loadout.createdAt,
+          updatedAt: now,
+          data: loadoutToBuildData(loadout),
+        };
+        const cloudResult = await saveCloudBuild(build);
+        const updated: Loadout = {
+          ...loadout,
+          updatedAt: now,
+          cloudId: cloudResult?.id ?? loadout.cloudId,
+          isPublic: cloudResult?.isPublic ?? loadout.isPublic,
+        };
+        saveLoadout(updated);
+        refresh();
+        if (cloudResult) {
+          toast.success("Loadout updated", {
+            description: updated.isPublic ? "Synced to Community and your account." : "Synced to your account.",
+          });
+        } else {
+          toast.warning("Saved on this device", {
+            description: "Account sync failed. Check your connection or sign in.",
+          });
+        }
+      } catch (err) {
+        console.error("Failed to update loadout", err);
+        toast.error("Could not update loadout");
+      }
+    },
+    [refresh],
   );
 
   const handleSaveAsLoadout = useCallback(
