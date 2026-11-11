@@ -467,18 +467,29 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
 
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-      <div className="relative flex max-h-[min(92dvh,100dvh-2rem)] min-h-0 w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-purple-500/30 bg-[#120822] text-foreground shadow-2xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="riven-dialog-title"
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            e.stopPropagation();
+            onClose();
+          }
+        }}
+        className="relative flex max-h-[min(92dvh,100dvh-2rem)] min-h-0 w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-purple-500/30 bg-[#120822] text-foreground shadow-2xl">
         {/* Modal Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-purple-500/20 px-6 py-4">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-purple-400" />
-            <h2 className="text-lg font-bold text-white">
+            <h2 id="riven-dialog-title" className="text-lg font-bold text-white">
               {initialRiven ? "Edit Riven Roll" : "Create Riven"}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close"
             className="rounded-lg p-1 text-muted-foreground hover:bg-purple-500/10 hover:text-white"
           >
             <X className="h-5 w-5" />
@@ -680,7 +691,7 @@ export function RivenDialog({ open, onClose, onSave, initialRiven, initialScanne
                 >
                   {Array.from({ length: RIVEN_MAX_RANK + 1 }, (_, i) => RIVEN_MAX_RANK - i).map((r) => (
                     <option key={r} value={r} className="bg-[#120822] text-white">
-                      Rank {r} · drain {rivenDrainFromRank(r)}
+                      {r} · {rivenDrainFromRank(r)}
                     </option>
                   ))}
                 </select>
