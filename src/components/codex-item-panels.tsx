@@ -679,7 +679,10 @@ export function ArcaneDetailPanel({
             {effects.effects.map((line) => {
               const scaled = scaleArcaneEffectLine(line, rank, effects.maxRank);
               const suffix = line.flat ? "" : "%";
-              const display = `${scaled > 0 && !line.flat ? "+" : ""}${Number.isInteger(scaled) ? scaled : scaled.toFixed(1)}${suffix}`;
+              const display =
+                line.maxRankOnly && rank < effects.maxRank
+                  ? `— (R${effects.maxRank} only)`
+                  : `${scaled > 0 && !line.flat ? "+" : ""}${Number.isInteger(scaled) ? scaled : scaled.toFixed(1)}${suffix}`;
               return (
                 <div key={line.stat} className="flex justify-between gap-2 text-xs">
                   <span className="truncate text-muted-foreground">{getArcaneStatLabel(line.stat)}</span>

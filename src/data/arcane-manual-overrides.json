@@ -459,12 +459,16 @@
       {
         "stat": "headshotMultiplier",
         "maxValue": 30,
-        "baseValue": 30
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "+30% to Headshot Multiplier"
       },
       {
         "stat": "recoilReduction",
         "maxValue": 50,
-        "baseValue": 50
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "-50% Weapon Recoil"
       }
     ]
   },
@@ -483,7 +487,9 @@
         "stat": "comboDuration",
         "maxValue": 7.5,
         "flat": true,
-        "baseValue": 7.5
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "+7.5s Combo Duration"
       }
     ]
   },
@@ -495,8 +501,9 @@
       {
         "stat": "reloadSpeed",
         "maxValue": 30,
-        "stacking": true,
-        "baseValue": 0
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "+30% Reload Speed."
       },
       {
         "stat": "damage",
@@ -591,12 +598,16 @@
       {
         "stat": "headshotMultiplier",
         "maxValue": 30,
-        "baseValue": 0
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "+30% to Headshot Multiplier"
       },
       {
         "stat": "recoilReduction",
         "maxValue": 50,
-        "baseValue": 0
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "-50% Weapon Recoil"
       }
     ]
   },
@@ -615,7 +626,9 @@
         "stat": "comboDuration",
         "maxValue": 7.5,
         "flat": true,
-        "baseValue": 0
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "+7.5s Combo Duration"
       }
     ]
   },
@@ -627,8 +640,9 @@
       {
         "stat": "reloadSpeed",
         "maxValue": 30,
-        "stacking": true,
-        "baseValue": 0
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "+30% Reload Speed."
       },
       {
         "stat": "damage",

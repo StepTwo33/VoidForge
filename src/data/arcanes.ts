@@ -838,7 +838,7 @@ export const allArcanes: Mod[] = [
     category: "arcane",
     subCategory: "secondary",
     stats: {"holsterDamage": 0, "holsterSpeed": 0},
-    description: "On Melee Kill: +60% Damage for 20s. Stacks up to 6x.\n+7.5 Combo Duration",
+    description: "On Melee Kill: +60% Damage for 20s. Stacks up to 6x.\n+7.5s Combo Duration",
     rarity: "rare",
   },
 {

@@ -17,6 +17,10 @@ export interface ArcaneEffectLineDraft {
   constantAtAllRanks: boolean;
   /** UI: edit explicit per-rank table instead of base + max. */
   usePerRankValues?: boolean;
+  /** Kept as-is (not edited in the dialog): max-rank-only / passive bonus metadata. */
+  maxRankOnly?: boolean;
+  passive?: boolean;
+  maxRankText?: string;
 }
 
 export function toEffectDrafts(raw: unknown): ArcaneEffectLineDraft[] {
@@ -35,6 +39,9 @@ export function toEffectDrafts(raw: unknown): ArcaneEffectLineDraft[] {
       stacking: Boolean(o.stacking),
       constantAtAllRanks: Boolean(o.constantAtAllRanks),
       usePerRankValues: Boolean(valuesByRank?.length),
+      ...(o.maxRankOnly ? { maxRankOnly: true } : {}),
+      ...(o.passive ? { passive: true } : {}),
+      ...(typeof o.maxRankText === "string" ? { maxRankText: o.maxRankText } : {}),
     };
   });
 }
@@ -46,6 +53,9 @@ export function draftToEffectLine(draft: ArcaneEffectLineDraft): ArcaneEffectLin
     ...(draft.flat ? { flat: true } : {}),
     ...(draft.stacking ? { stacking: true } : {}),
     ...(draft.constantAtAllRanks ? { constantAtAllRanks: true } : {}),
+    ...(draft.maxRankOnly ? { maxRankOnly: true } : {}),
+    ...(draft.passive ? { passive: true } : {}),
+    ...(draft.maxRankText ? { maxRankText: draft.maxRankText } : {}),
   };
   if (draft.usePerRankValues && draft.valuesByRank?.length) {
     line.valuesByRank = [...draft.valuesByRank];

@@ -33,6 +33,15 @@ export interface ArcaneEffectLine {
   stacking?: boolean;
   /** Value does not scale with arcane rank (proc chance, duration, etc.). */
   constantAtAllRanks?: boolean;
+  /**
+   * wiki: a bonus the arcane only has at max rank ("-" below it in the rank table), e.g.
+   * Merciless reload speed. 0 below max rank; wins over constantAtAllRanks.
+   */
+  maxRankOnly?: boolean;
+  /** Always active once equipped: never multiplied by the arcane's stacks. */
+  passive?: boolean;
+  /** Text of this bonus in the arcane description, dropped from the description below max rank. */
+  maxRankText?: string;
 }
 
 export interface ArcaneEffectDef {
@@ -2260,12 +2269,16 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
       {
         "stat": "headshotMultiplier",
         "maxValue": 30.0,
-        "baseValue": 5.0
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "+30% to Headshot Multiplier"
       },
       {
         "stat": "recoilReduction",
         "maxValue": 50.0,
-        "baseValue": 8.333333
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "-50% Weapon Recoil"
       }
     ],
     "stackCap": 3
@@ -2303,7 +2316,9 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
         "stat": "comboDuration",
         "maxValue": 7.5,
         "flat": true,
-        "constantAtAllRanks": true
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "+7.5s Combo Duration"
       }
     ],
     "stackCap": 6
@@ -2357,8 +2372,9 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
       {
         "stat": "reloadSpeed",
         "maxValue": 30.0,
-        "stacking": true,
-        "baseValue": 5.0
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "+30% Reload Speed."
       },
       {
         "stat": "damage",
@@ -2600,12 +2616,16 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
       {
         "stat": "headshotMultiplier",
         "maxValue": 30.0,
-        "baseValue": 5.0
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "+30% to Headshot Multiplier"
       },
       {
         "stat": "recoilReduction",
         "maxValue": 50.0,
-        "baseValue": 8.333333
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "-50% Weapon Recoil"
       }
     ],
     "stackCap": 3
@@ -2625,7 +2645,9 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
         "stat": "comboDuration",
         "maxValue": 7.5,
         "flat": true,
-        "constantAtAllRanks": true
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "+7.5s Combo Duration"
       }
     ],
     "stackCap": 6
@@ -2715,8 +2737,9 @@ export const ARCANE_EFFECTS: Record<string, ArcaneEffectDef> = {
       {
         "stat": "reloadSpeed",
         "maxValue": 30.0,
-        "stacking": true,
-        "baseValue": 5.0
+        "passive": true,
+        "maxRankOnly": true,
+        "maxRankText": "+30% Reload Speed."
       },
       {
         "stat": "damage",

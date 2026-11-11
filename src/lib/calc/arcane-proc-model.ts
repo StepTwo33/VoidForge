@@ -86,6 +86,7 @@ export function arcaneEffectStackMultiplier(
   line: ArcaneEffectLine,
   stacks: number,
 ): number {
+  if (line.passive) return 1;
   if (line.stacking) return Math.max(stacks, 1);
   if (line.constantAtAllRanks) return 1;
   // Window / radius / threshold metadata is never a per-stack multiplier.

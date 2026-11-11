@@ -5,6 +5,7 @@ import { shouldApplyArcaneLineToBuild } from "@/lib/calc/arcane-behavior-registr
 import {
   applyCustomArcaneToWarframe,
   applyCustomArcaneToWeapon,
+  MAX_RANK_PASSIVE_ARCANE_IDS,
   WarframeArcaneContext,
 } from "@/lib/calc/arcane-handlers";
 import { arcaneStackCap, getPersistenceDamageCap, scaleArcaneEffectLine } from "@/lib/calc/arcane-utils";
@@ -281,8 +282,9 @@ export function applyArcaneEffectsToWeapon(
   if (!def || def.effects.length === 0) return;
 
   const stacks = effectiveArcaneStacks(def, simStacks, true, rank);
-  // Zid-An Haras amp AE is always-on even at 0 sim stacks.
-  if (stacks <= 0 && arcaneId !== "zid_an_haras") return;
+  // Zid-An Haras amp AE is always-on even at 0 sim stacks; so are the max-rank passives of
+  // Merciless (reload) / Deadhead (headshot, recoil) / Dexterity (combo duration).
+  if (stacks <= 0 && arcaneId !== "zid_an_haras" && !MAX_RANK_PASSIVE_ARCANE_IDS.has(arcaneId)) return;
 
   const handlerCtx = {
     def,

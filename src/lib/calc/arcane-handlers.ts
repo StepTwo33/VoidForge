@@ -416,6 +416,16 @@ export const WARFRAME_CUSTOM_ARCANE_IDS = new Set([
   "arcane_universal_fallout",
 ]);
 
+/** Stacking arcanes whose max-rank bonus is always on, even with no stacks (wiki). */
+export const MAX_RANK_PASSIVE_ARCANE_IDS = new Set([
+  "arcane_primary_merciless",
+  "arcane_secondary_merciless",
+  "arcane_primary_deadhead",
+  "arcane_secondary_deadhead",
+  "arcane_primary_dexterity",
+  "arcane_secondary_dexterity",
+]);
+
 /** Stacking damage (+ optional reload) — Merciless, Deadhead, Dexterity, Cascadia Flare. */
 function applyStackingDamageHandler(
   stats: CalculatedStats,
@@ -423,10 +433,10 @@ function applyStackingDamageHandler(
   opts?: { reload?: boolean; bonusKey?: string },
 ): void {
   const { def, rank, stacks } = ctx;
-  const dmg = scaledLine(def, findEffect(def, "damage"), rank, stacks);
+  const dmg = stacks > 0 ? scaledLine(def, findEffect(def, "damage"), rank, stacks) : 0;
   if (dmg > 0) applyAdditiveBaseDamage(stats, dmg);
   if (opts?.reload) {
-    // Merciless reload is a Rank-5 passive (wiki), not per-stack — apply once at rank value.
+    // wiki Merciless: +30% Reload Speed only at max rank ("-" below), always on, never per stack.
     const reloadLine = findEffect(def, "reloadSpeed");
     const reload = reloadLine ? scaleArcaneEffectLine(reloadLine, rank, def.maxRank) : 0;
     if (reload > 0) applyAdditiveReloadSpeed(stats, reload); // additive with Quickdraw / Fast Hands
@@ -452,8 +462,9 @@ function trackAllEffects(
 /** Per-arcane weapon handlers — Zaw/Exodia, primary, secondary, melee. */
 export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHandlerContext): boolean {
   const { arcaneId, def, rank, stacks } = ctx;
-  // Zid-An Haras amp AE is always on; other customs no-op at 0 stacks.
-  if (stacks <= 0 && arcaneId !== "zid_an_haras") return true;
+  // Zid-An Haras amp AE is always on; Merciless / Deadhead / Dexterity keep their max-rank
+  // passives at 0 stacks (wiki); other customs no-op at 0 stacks.
+  if (stacks <= 0 && arcaneId !== "zid_an_haras" && !MAX_RANK_PASSIVE_ARCANE_IDS.has(arcaneId)) return true;
 
   switch (arcaneId) {
     case "arcane_primary_merciless":
@@ -463,15 +474,17 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
 
     case "arcane_primary_deadhead":
     case "arcane_secondary_deadhead": {
-      // Damage stacks; R5 headshot mult / recoil are passives (wiki — not per-stack).
-      const dmg = scaledLine(def, findEffect(def, "damage"), rank, stacks);
+      // Damage stacks; R5 headshot mult / recoil are max-rank passives (wiki — not per-stack).
+      const dmg = stacks > 0 ? scaledLine(def, findEffect(def, "damage"), rank, stacks) : 0;
       if (dmg > 0) applyAdditiveBaseDamage(stats, dmg);
       trackBonus(stats, "deadheadStacks", stacks);
       const hsLine = findEffect(def, "headshotMultiplier");
       if (hsLine) {
         const hs = scaleArcaneEffectLine(hsLine, rank, def.maxRank);
-        stats.headshotDamageBonus = (stats.headshotDamageBonus ?? 0) + hs / 100;
-        trackBonus(stats, "headshotMultiplier", hs);
+        if (hs > 0) {
+          stats.headshotDamageBonus = (stats.headshotDamageBonus ?? 0) + hs / 100;
+          trackBonus(stats, "headshotMultiplier", hs);
+        }
       }
       const recoilLine = findEffect(def, "recoilReduction");
       if (recoilLine) {
@@ -482,8 +495,8 @@ export function applyCustomArcaneToWeapon(stats: CalculatedStats, ctx: ArcaneHan
 
     case "arcane_primary_dexterity":
     case "arcane_secondary_dexterity": {
-      // Damage stacks; R5 combo duration is a flat passive (wiki — not per-stack).
-      const dmg = scaledLine(def, findEffect(def, "damage"), rank, stacks);
+      // Damage stacks; R5 combo duration is a flat max-rank passive (wiki — not per-stack).
+      const dmg = stacks > 0 ? scaledLine(def, findEffect(def, "damage"), rank, stacks) : 0;
       if (dmg > 0) applyAdditiveBaseDamage(stats, dmg);
       trackBonus(stats, "dexterityStacks", stacks);
       const comboLine = findEffect(def, "comboDuration");

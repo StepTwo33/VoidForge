@@ -15,6 +15,8 @@ export interface ArcaneEffectScaleOpts {
   baseValue?: number;
   /** Explicit value per rank (R0..Rmax). Overrides base/max interpolation. */
   valuesByRank?: number[];
+  /** Only at max rank (0 below it), e.g. Merciless reload speed. */
+  maxRankOnly?: boolean;
 }
 
 /** Scale arcane stat values by rank. */
@@ -24,6 +26,7 @@ export function scaleArcaneEffectValue(
   maxRank: number,
   opts?: ArcaneEffectScaleOpts,
 ): number {
+  if (opts?.maxRankOnly) return rank >= maxRank ? maxValue : 0;
   if (opts?.constantAtAllRanks) return maxValue;
 
   const r = Math.min(Math.max(rank, 0), maxRank);
@@ -44,7 +47,7 @@ export function scaleArcaneEffectValue(
 }
 
 export function scaleArcaneEffectLine(
-  line: Pick<ArcaneEffectLine, "maxValue" | "baseValue" | "constantAtAllRanks" | "valuesByRank">,
+  line: Pick<ArcaneEffectLine, "maxValue" | "baseValue" | "constantAtAllRanks" | "valuesByRank" | "maxRankOnly">,
   rank: number,
   maxRank: number,
 ): number {
@@ -52,6 +55,7 @@ export function scaleArcaneEffectLine(
     constantAtAllRanks: line.constantAtAllRanks,
     baseValue: line.baseValue,
     valuesByRank: line.valuesByRank,
+    maxRankOnly: line.maxRankOnly,
   });
 }
 

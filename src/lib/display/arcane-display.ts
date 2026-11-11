@@ -370,6 +370,20 @@ function buildLinesFromDef(
 
     const scaled = scaleArcaneEffectLine(line, rank, def.maxRank);
     const label = getArcaneStatLabel(line.stat);
+    // wiki Merciless / Deadhead / Dexterity: bonus only at max rank, always on, never per stack.
+    if (line.maxRankOnly || line.passive) {
+      const unlocked = !line.maxRankOnly || rank >= def.maxRank;
+      const shown = unlocked ? scaled : scaleArcaneEffectLine(line, def.maxRank, def.maxRank);
+      const signed = (line.stat === "recoilReduction" ? "-" : "+") + fmtStatValue(line.stat, shown, line.flat).replace(/^\+/, "");
+      const v = line.flat && line.stat === "comboDuration" ? `${signed}s` : signed;
+      applied.push({
+        label,
+        value: v,
+        active: unlocked,
+        note: unlocked ? "Always active (not per stack)" : `Rank ${def.maxRank} only`,
+      });
+      continue;
+    }
     const value = fmtStatValue(line.stat, scaled, line.flat);
     const proc = isProcStat(line.stat, def.trigger);
     const dedupeKey = `${line.stat}|${label}|${value}|${proc ? "c" : "a"}`;
@@ -454,6 +468,14 @@ export function formatArcaneRankDescription(arcane: Mod, rank: number): string {
 
   let desc = clean;
 
+  // wiki: max-rank-only bonuses (Merciless reload, Deadhead headshot / recoil, Dexterity combo
+  // duration) are not in the arcane below max rank, so drop their text.
+  for (const line of def.effects) {
+    if (!line.maxRankOnly || !line.maxRankText) continue;
+    desc = desc.replace(line.maxRankText, "");
+  }
+  desc = desc.replace(/[ \t]+\n/g, "\n").replace(/\n{2,}/g, "\n").replace(/[ \t]{2,}/g, " ").trim();
+
   // Scale stack cap if stackCapByRank exists
   if (def.stackCapByRank && def.stackCap) {
     const curCap = def.stackCapByRank[Math.min(rank, def.stackCapByRank.length - 1)];
@@ -464,7 +486,7 @@ export function formatArcaneRankDescription(arcane: Mod, rank: number): string {
 
   // Scale effect lines from ARCANE_EFFECTS
   for (const line of def.effects) {
-    if (line.constantAtAllRanks) continue;
+    if (line.constantAtAllRanks || line.maxRankOnly) continue;
     const scaled = scaleArcaneEffectLine(line, rank, def.maxRank);
     if (scaled === line.maxValue) continue;
 
