@@ -5,6 +5,7 @@ import {
   getEffectiveWeapons,
   getEffectiveWeaponsMap,
 } from "@/lib/weapons/effective-data";
+import { splitUnavailableSlotMods } from "@/lib/weapons/exalted-melee-slots";
 import { incarnonDataMap } from "@/data/incarnon";
 import type { WarframeBuildData } from "@/lib/builds/build-storage";
 import { allDualFormMods, getDualFormConfig, warframeForDualForm } from "@/lib/builds/dual-form-warframes";
@@ -931,15 +932,18 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
       return { name: base.name, stats: statsEx, ttk, isMelee, contributions };
     };
 
+    // Pseudo-exalted melee have no Exilus slot; a saved Exilus mod is ignored.
+    const primaryExalted = getPrimaryExaltedWeapon(loadout.warframeBuild.warframeId, weaponList);
+    const meleeExalted = getMeleeExaltedWeapon(loadout.warframeBuild.warframeId, weaponList);
     result.exalted = calcExaltedSlot(
-      getPrimaryExaltedWeapon(loadout.warframeBuild.warframeId, weaponList),
-      loadout.warframeBuild.exaltedMods || [],
+      primaryExalted,
+      splitUnavailableSlotMods(primaryExalted, loadout.warframeBuild.exaltedMods || []).kept,
       loadout.warframeBuild.exaltedArcaneIds,
       loadout.warframeBuild.exaltedArcaneRanks,
     );
     result.exaltedMelee = calcExaltedSlot(
-      getMeleeExaltedWeapon(loadout.warframeBuild.warframeId, weaponList),
-      loadout.warframeBuild.exaltedMeleeMods || [],
+      meleeExalted,
+      splitUnavailableSlotMods(meleeExalted, loadout.warframeBuild.exaltedMeleeMods || []).kept,
       loadout.warframeBuild.exaltedMeleeArcaneIds,
       loadout.warframeBuild.exaltedMeleeArcaneRanks,
     );

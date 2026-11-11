@@ -46,6 +46,22 @@ const FIXED_EXALTED_STANCES: Readonly<Record<string, string>> = {
   shadow_clones_prime: "Blade Storm",
 };
 
+/**
+ * Pseudo-Exalted melee (wiki.warframe.com/w/Exalted_Weapon § Pseudo-Exalted). Each weapon page:
+ * "Cannot perform blocking or heavy attacks ... and does not have an Exilus Slot." They keep Arcanes
+ * (Shattered Lash / Whipclaw: "can be modded and slotted with Arcane Enhancements").
+ */
+export const PSEUDO_EXALTED_MELEE_IDS: ReadonlySet<string> = new Set([
+  "landslide_fists",
+  "landslide_fists_prime",
+  "shattered_lash",
+  "shattered_lash_prime",
+  "whipclaw",
+  "whipclaw_prime",
+  "shadow_clones",
+  "shadow_clones_prime",
+]);
+
 export type StanceSlotInfo =
   | { kind: "fixed"; stanceName: string; polarity: "zenurik"; capacity: number }
   | { kind: "choice"; polarity: string | undefined; stanceType: string | undefined };
@@ -63,6 +79,11 @@ export function stanceSlotInfo(weapon: WeaponLike | null | undefined): StanceSlo
     polarity: getInnatePolarityEntry("weapon", weapon.id)?.stance,
     stanceType: weapon.stanceType,
   };
+}
+
+/** Whether the weapon has an Exilus slot (pseudo-exalted melee do not). */
+export function weaponHasExilusSlot(weapon: Pick<Weapon, "id"> | null | undefined): boolean {
+  return !weapon || !PSEUDO_EXALTED_MELEE_IDS.has(weapon.id);
 }
 
 /** Capacity a chosen stance adds at max rank on a slot of the given polarity (5 / 10 matched / 4 mismatched). */
@@ -93,6 +114,19 @@ export function exaltedMaxCapacity(
   chosenStance?: Pick<Mod, "drain" | "maxRank" | "polarity"> | null,
 ): number {
   return 60 + weaponStanceCapacity(weapon, chosenStance);
+}
+
+/** Splits saved mods into the ones the weapon can hold and ones in a slot it lacks (Exilus on pseudo-exalted). */
+export function splitUnavailableSlotMods<T extends { slotIndex: number }>(
+  weapon: Pick<Weapon, "id"> | null | undefined,
+  mods: readonly T[],
+  exilusSlotIndex = 8,
+): { kept: T[]; dropped: T[] } {
+  if (weaponHasExilusSlot(weapon)) return { kept: [...mods], dropped: [] };
+  return {
+    kept: mods.filter((m) => m.slotIndex !== exilusSlotIndex),
+    dropped: mods.filter((m) => m.slotIndex === exilusSlotIndex),
+  };
 }
 
 /** A chosen stance only counts when the weapon's stance slot is a free choice of the right type. */

@@ -5,6 +5,7 @@ import {
   getEffectiveWeapons,
   getEffectiveWeaponsMap,
 } from "@/lib/weapons/effective-data";
+import { splitUnavailableSlotMods } from "@/lib/weapons/exalted-melee-slots";
 import { allHelminthAbilities } from "@/data/helminth";
 import { helminthToAbility } from "@/lib/builds/helminth-resolve";
 import {
@@ -143,7 +144,7 @@ function resolveExaltedPreview(
   if (!exaltedWeapon) return null;
   return resolveExaltedWeaponPreview(
     exaltedWeapon,
-    data.exaltedMods ?? [],
+    splitUnavailableSlotMods(exaltedWeapon, data.exaltedMods ?? []).kept,
     data.exaltedArcaneIds,
     data.exaltedArcaneRanks,
     abilityStrength,
@@ -162,7 +163,7 @@ function resolveExaltedMeleePreview(
   if (!meleeWeapon) return null;
   return resolveExaltedWeaponPreview(
     meleeWeapon,
-    data.exaltedMeleeMods ?? [],
+    splitUnavailableSlotMods(meleeWeapon, data.exaltedMeleeMods ?? []).kept,
     data.exaltedMeleeArcaneIds,
     data.exaltedMeleeArcaneRanks,
     abilityStrength,

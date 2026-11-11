@@ -32,6 +32,8 @@ export function ExaltedWeaponSection({
   onPickStance,
   onRemoveStance,
   exaltedMods,
+  hasExilusSlot = true,
+  unavailableMods = [],
   modsMap,
   exaltedSlotPolarities,
   exaltedSlotOverrides,
@@ -69,6 +71,10 @@ export function ExaltedWeaponSection({
   onPickStance?: () => void;
   onRemoveStance?: () => void;
   exaltedMods: EquippedMod[];
+  /** False for pseudo-exalted melee (wiki: "does not have an Exilus Slot"). */
+  hasExilusSlot?: boolean;
+  /** Saved mods in a slot this weapon lacks; ignored by the maths and flagged here. */
+  unavailableMods?: EquippedMod[];
   modsMap: Map<string, Mod>;
   /** Effective polarities (innate defaults merged with overrides). */
   exaltedSlotPolarities: Record<number, string>;
@@ -304,7 +310,29 @@ export function ExaltedWeaponSection({
         </div>
       )}
 
-      {(() => {
+      {unavailableMods.length > 0 && (
+        <div
+          role="status"
+          className="mt-2.5 flex flex-wrap items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-900 dark:text-amber-200"
+        >
+          <span className="min-w-0 flex-1">
+            {exaltedWeapon.name} has no Exilus slot, so the saved{" "}
+            {unavailableMods.map((m) => modsMap.get(m.modId)?.name ?? m.modName ?? m.modId).join(", ")} is ignored.
+          </span>
+          {unavailableMods.map((m) => (
+            <button
+              key={`drop-${m.slotIndex}`}
+              type="button"
+              onClick={() => onRemoveMod(m.slotIndex)}
+              className="inline-flex min-h-8 items-center rounded-md border border-amber-500/40 px-2 font-medium hover:bg-amber-500/20"
+            >
+              Remove
+            </button>
+          ))}
+        </div>
+      )}
+
+      {hasExilusSlot && (() => {
         const i = WEAPON_EXILUS_SLOT_INDEX;
         const equipped = exaltedMods.find((m) => m.slotIndex === i);
         const mod = equipped ? (modsMap.get(equipped.modId) ?? null) : null;

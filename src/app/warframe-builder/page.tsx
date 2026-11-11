@@ -127,7 +127,13 @@ import { HelminthPickerDialog } from "./helminth-picker-dialog";
 import { ExaltedWeaponSection } from "./exalted-weapon-section";
 import { StancePickerDialog } from "../weapon-builder/stance-picker-dialog";
 import { STANCE_WEAPON_TYPE } from "@/data/stances";
-import { exaltedMaxCapacity, isStanceAllowed, stanceSlotInfo } from "@/lib/weapons/exalted-melee-slots";
+import {
+  exaltedMaxCapacity,
+  isStanceAllowed,
+  splitUnavailableSlotMods,
+  stanceSlotInfo,
+  weaponHasExilusSlot,
+} from "@/lib/weapons/exalted-melee-slots";
 import {
   getWarframeAuraSlotIndices,
   WARFRAME_AURA_SLOT,
@@ -624,6 +630,14 @@ export default function WarframeBuilderPage() {
     const m = exaltedMeleeStanceId ? modsMap.get(exaltedMeleeStanceId) : undefined;
     return m && isStanceAllowed(exaltedMeleeWeapon, m, stanceTypeOf) ? m : null;
   }, [exaltedMeleeStanceId, modsMap, exaltedMeleeWeapon, stanceTypeOf]);
+  // Pseudo-exalted melee have no Exilus slot: a saved Exilus mod is ignored (and flagged in the panel).
+  const exaltedSplit = useMemo(() => splitUnavailableSlotMods(exaltedWeapon, exaltedMods), [exaltedWeapon, exaltedMods]);
+  const exaltedModsActive = exaltedSplit.kept;
+  const exaltedMeleeSplit = useMemo(
+    () => splitUnavailableSlotMods(exaltedMeleeWeapon, exaltedMeleeMods),
+    [exaltedMeleeWeapon, exaltedMeleeMods],
+  );
+  const exaltedMeleeModsActive = exaltedMeleeSplit.kept;
   const exaltedMaxCap = exaltedMaxCapacity(exaltedWeapon, exaltedStance);
   const exaltedMeleeMaxCap = exaltedMaxCapacity(exaltedMeleeWeapon, exaltedMeleeStance);
 
@@ -737,7 +751,7 @@ export default function WarframeBuilderPage() {
 
   const exaltedStats = useMemo<CalculatedStats | null>(() => {
     if (!exaltedWeapon) return null;
-    const slots = exaltedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
+    const slots = exaltedModsActive.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
     const activeArcanes = exaltedActiveArcanes.arcanes;
     if (activeArcanes.length > 0) {
       return calculateWeaponBuildWithArcanes(
@@ -758,11 +772,11 @@ export default function WarframeBuilderPage() {
       exaltedSimParams,
       exaltedCalcOptions,
     );
-  }, [exaltedWeapon, exaltedMods, exaltedActiveArcanes.arcanes, modsMap, exaltedCalcOptions, exaltedSimParams]);
+  }, [exaltedWeapon, exaltedModsActive, exaltedActiveArcanes.arcanes, modsMap, exaltedCalcOptions, exaltedSimParams]);
 
   const exaltedMeleeStats = useMemo<CalculatedStats | null>(() => {
     if (!exaltedMeleeWeapon) return null;
-    const slots = exaltedMeleeMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
+    const slots = exaltedMeleeModsActive.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
     const activeArcanes = exaltedMeleeActiveArcanes.arcanes;
     if (activeArcanes.length > 0) {
       return calculateWeaponBuildWithArcanes(
@@ -785,7 +799,7 @@ export default function WarframeBuilderPage() {
     );
   }, [
     exaltedMeleeWeapon,
-    exaltedMeleeMods,
+    exaltedMeleeModsActive,
     exaltedMeleeActiveArcanes.arcanes,
     modsMap,
     exaltedMeleeCalcOptions,
@@ -820,25 +834,25 @@ export default function WarframeBuilderPage() {
     if (!exaltedWeapon) return null;
     return {
       baseWeapon: exaltedWeapon,
-      modSlots: exaltedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      modSlots: exaltedModsActive.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
       allMods: modsMap,
       arcanes: exaltedActiveArcanes.arcanes,
       calcOptions: exaltedCalcOptions,
     };
-  }, [exaltedWeapon, exaltedMods, exaltedActiveArcanes.arcanes, modsMap, exaltedCalcOptions]);
+  }, [exaltedWeapon, exaltedModsActive, exaltedActiveArcanes.arcanes, modsMap, exaltedCalcOptions]);
 
   const exaltedMeleeContributionContext = useMemo(() => {
     if (!exaltedMeleeWeapon) return null;
     return {
       baseWeapon: exaltedMeleeWeapon,
-      modSlots: exaltedMeleeMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+      modSlots: exaltedMeleeModsActive.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
       allMods: modsMap,
       arcanes: exaltedMeleeActiveArcanes.arcanes,
       calcOptions: exaltedMeleeCalcOptions,
     };
   }, [
     exaltedMeleeWeapon,
-    exaltedMeleeMods,
+    exaltedMeleeModsActive,
     exaltedMeleeActiveArcanes.arcanes,
     modsMap,
     exaltedMeleeCalcOptions,
@@ -863,13 +877,13 @@ export default function WarframeBuilderPage() {
   );
 
   const exaltedCapacity = useMemo(
-    () => computeUsedCapacity(exaltedMods, modsMap, exaltedEffectivePolarities),
-    [exaltedMods, exaltedEffectivePolarities, modsMap],
+    () => computeUsedCapacity(exaltedModsActive, modsMap, exaltedEffectivePolarities),
+    [exaltedModsActive, exaltedEffectivePolarities, modsMap],
   );
 
   const exaltedMeleeCapacity = useMemo(
-    () => computeUsedCapacity(exaltedMeleeMods, modsMap, exaltedMeleeEffectivePolarities),
-    [exaltedMeleeMods, exaltedMeleeEffectivePolarities, modsMap],
+    () => computeUsedCapacity(exaltedMeleeModsActive, modsMap, exaltedMeleeEffectivePolarities),
+    [exaltedMeleeModsActive, exaltedMeleeEffectivePolarities, modsMap],
   );
 
   const filteredWarframes = useMemo(() => {
@@ -1737,6 +1751,8 @@ export default function WarframeBuilderPage() {
                     onPickStance={() => setStancePickerTarget("exalted")}
                     onRemoveStance={() => setExaltedStanceId(null)}
                     exaltedMods={exaltedMods}
+                    hasExilusSlot={weaponHasExilusSlot(exaltedWeapon)}
+                    unavailableMods={exaltedSplit.dropped}
                     modsMap={modsMap}
                     exaltedSlotPolarities={exaltedEffectivePolarities}
                     exaltedSlotOverrides={exaltedSlotPolarities}
@@ -1798,6 +1814,8 @@ export default function WarframeBuilderPage() {
                     onPickStance={() => setStancePickerTarget("exaltedMelee")}
                     onRemoveStance={() => setExaltedMeleeStanceId(null)}
                     exaltedMods={exaltedMeleeMods}
+                    hasExilusSlot={weaponHasExilusSlot(exaltedMeleeWeapon)}
+                    unavailableMods={exaltedMeleeSplit.dropped}
                     modsMap={modsMap}
                     exaltedSlotPolarities={exaltedMeleeEffectivePolarities}
                     exaltedSlotOverrides={exaltedMeleeSlotPolarities}

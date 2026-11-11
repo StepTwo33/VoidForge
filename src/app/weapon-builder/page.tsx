@@ -111,7 +111,13 @@ import { computeUsedCapacity } from "@/lib/calc/compute-used-capacity";
 import { WEAPON_CATEGORY_LABELS, getModCategory } from "@/lib/weapons/weapon-categories";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { StancePickerDialog } from "./stance-picker-dialog";
-import { stanceCapacityBonus, stanceSlotInfo, weaponStanceCapacity } from "@/lib/weapons/exalted-melee-slots";
+import {
+  splitUnavailableSlotMods,
+  stanceCapacityBonus,
+  stanceSlotInfo,
+  weaponHasExilusSlot,
+  weaponStanceCapacity,
+} from "@/lib/weapons/exalted-melee-slots";
 import { ProgenitorControls } from "./progenitor-controls";
 import { IncarnonEvolutionsSection } from "./incarnon-evolutions-section";
 
@@ -570,6 +576,10 @@ export default function WeaponBuilderPage() {
     allWeapons.length > 0,
   );
 
+  // Pseudo-exalted melee have no Exilus slot (wiki): a saved Exilus mod is ignored by the maths and flagged.
+  const exilusSplit = useMemo(() => splitUnavailableSlotMods(selectedWeapon, equippedMods), [selectedWeapon, equippedMods]);
+  const activeEquippedMods = exilusSplit.kept;
+
   const loadoutLinkState = useMemo<{
     buffs: WeaponExternalBuff[];
     linkage?: SetBonusLinkage;
@@ -584,7 +594,7 @@ export default function WeaponBuilderPage() {
     if (!loadout) return { buffs: standaloneBuffs() };
 
     const baseLinkage = setBonusLinkageFromLoadout(loadout);
-    const liveSlots = equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
+    const liveSlots = activeEquippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
     const linkage: SetBonusLinkage = {
       ...baseLinkage,
       ...(loadoutCtx.slot === "primary" ? { primaryMods: liveSlots } : {}),
@@ -626,7 +636,7 @@ export default function WeaponBuilderPage() {
       companionModIds: (baseLinkage.companionMods ?? []).map((m) => m.modId),
       warframeMaxEnergy: stats.warframe?.stats.totalEnergy,
     };
-  }, [loadoutCtx, selectedWeapon, activeWeapon, equippedMods, simParams, allWarframes, modsMap]);
+  }, [loadoutCtx, selectedWeapon, activeWeapon, activeEquippedMods, simParams, allWarframes, modsMap]);
 
   const effectiveSimParams = useMemo<SimulationParams>(() => {
     if (loadoutLinkState.warframeMaxEnergy == null || simParams.warframeMaxEnergy != null) {
@@ -703,7 +713,7 @@ export default function WeaponBuilderPage() {
       fallback: {
         type: "weapon",
         itemId: selectedWeapon.id,
-        mods: equippedMods.map((m) => ({ id: m.modId, rank: m.rank })),
+        mods: activeEquippedMods.map((m) => ({ id: m.modId, rank: m.rank })),
         arcanes: equippedArcanes.map((a) => a?.id ?? ""),
         arcaneRanks: [...equippedArcaneRanks],
         hasOrokinCatalyst: selectedWeapon?.isExalted ? true : hasOrokinCatalyst,
@@ -731,7 +741,7 @@ export default function WeaponBuilderPage() {
     }
   }, [
     selectedWeapon,
-    equippedMods,
+    activeEquippedMods,
     equippedArcanes,
     equippedArcaneRanks,
     hasOrokinCatalyst,
@@ -828,7 +838,7 @@ export default function WeaponBuilderPage() {
 
   const calculatedStats = useMemo<CalculatedStats | null>(() => {
     if (!activeWeapon) return null;
-    const modSlots = equippedMods.map((m) => ({
+    const modSlots = activeEquippedMods.map((m) => ({
       modId: m.modId,
       rank: m.rank,
       slotIndex: m.slotIndex,
@@ -838,11 +848,11 @@ export default function WeaponBuilderPage() {
       return calculateWeaponBuildWithArcanes(activeWeapon, modSlots, modsMap, activeArcanes, incarnonStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, rivenStatChanges);
     }
     return calculateWeaponBuild(activeWeapon, modSlots, modsMap, incarnonStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, rivenStatChanges);
-  }, [activeWeapon, equippedMods, activeArcaneState.arcanes, incarnonStatChanges, rivenStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, modsMap]);
+  }, [activeWeapon, activeEquippedMods, activeArcaneState.arcanes, incarnonStatChanges, rivenStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, modsMap]);
 
   // ALT FIRE: other firing modes, shown read-only in the stats panel (never selected, never summed into DPS).
   const altFireResults = useMemo(() => {
-    const modSlots = equippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
+    const modSlots = activeEquippedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex }));
     const activeArcanes = activeArcaneState.arcanes;
     return computeAltFire(activeWeapon, (w) =>
       activeArcanes.length > 0
@@ -851,13 +861,13 @@ export default function WeaponBuilderPage() {
       // Archguns: Gravimag on means the alt-fire modes use their atmosphere numbers too.
       { atmosphere: gravimagMode && weaponHasGravimagMode(selectedWeapon) },
     );
-  }, [activeWeapon, selectedWeapon, gravimagMode, equippedMods, activeArcaneState.arcanes, incarnonStatChanges, rivenStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, modsMap]);
+  }, [activeWeapon, selectedWeapon, gravimagMode, activeEquippedMods, activeArcaneState.arcanes, incarnonStatChanges, rivenStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, modsMap]);
 
   const contributionContext = useMemo(() => {
     if (!activeWeapon) return null;
     return {
       baseWeapon: activeWeapon,
-      modSlots: equippedMods.map((m) => ({
+      modSlots: activeEquippedMods.map((m) => ({
         modId: m.modId,
         rank: m.rank,
         slotIndex: m.slotIndex,
@@ -872,7 +882,7 @@ export default function WeaponBuilderPage() {
       warframeId: loadoutLinkState.warframeId,
       companionModIds: loadoutLinkState.companionModIds,
     };
-  }, [activeWeapon, equippedMods, activeArcaneState.arcanes, incarnonStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, rivenStatChanges, modsMap, loadoutLinkState.warframeId, loadoutLinkState.companionModIds]);
+  }, [activeWeapon, activeEquippedMods, activeArcaneState.arcanes, incarnonStatChanges, effectiveSimParams, weaponCalcOptions, loadoutLinkState.linkage, rivenStatChanges, modsMap, loadoutLinkState.warframeId, loadoutLinkState.companionModIds]);
 
   const baseStats = useMemo<CalculatedStats | null>(() => {
     if (!activeWeapon) return null;
@@ -1133,7 +1143,7 @@ export default function WeaponBuilderPage() {
   const isPrimaryWeapon = selectedWeapon ? isPrimaryWeaponCategory(selectedWeapon.category) : false;
   const isSecondaryWeapon = selectedWeapon ? ["pistol", "secondary", "dual_pistols"].includes(selectedWeapon.category) : false;
   const isMeleeWeapon = selectedWeapon?.category === "melee";
-  const hasWeaponExilusSlot = isPrimaryWeapon || isSecondaryWeapon || isMeleeWeapon;
+  const hasWeaponExilusSlot = (isPrimaryWeapon || isSecondaryWeapon || isMeleeWeapon) && weaponHasExilusSlot(selectedWeapon);
   // wiki Stance: stances add capacity (5 maxed, 10 on a matching slot); exalted melee have a locked +10 stance.
   const stanceSlot = stanceSlotInfo(selectedWeapon);
   const modCapacity =
@@ -1143,7 +1153,7 @@ export default function WeaponBuilderPage() {
     [selectedWeapon, modCategory],
   );
   const importRegularSlots = useMemo(() => Array.from({ length: numSlots }, (_, i) => i), [numSlots]);
-  const weaponCapacityUsed = computeUsedCapacity(equippedMods, modsMap, effectivePolarities);
+  const weaponCapacityUsed = computeUsedCapacity(activeEquippedMods, modsMap, effectivePolarities);
   const importCapacityNotice = useImportCapacityNotice(selectedWeapon?.id ?? "", weaponCapacityUsed, modCapacity);
   const importCapacityAfter = useCallback(
     (mods: EquippedMod[]) => ({
@@ -1631,6 +1641,25 @@ export default function WeaponBuilderPage() {
                     );
                   })}
                 </div>
+                {exilusSplit.dropped.length > 0 && (
+                  <div
+                    role="status"
+                    data-testid="unavailable-exilus-notice"
+                    className="mt-2.5 flex flex-wrap items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-900 dark:text-amber-200"
+                  >
+                    <span className="min-w-0 flex-1">
+                      {selectedWeapon.name} has no Exilus slot, so the saved{" "}
+                      {exilusSplit.dropped.map((m) => modsMap.get(m.modId)?.name ?? m.modName ?? m.modId).join(", ")} is ignored.
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => exilusSplit.dropped.forEach((m) => handleRemoveMod(m.slotIndex))}
+                      className="inline-flex min-h-8 items-center rounded-md border border-amber-500/40 px-2 font-medium hover:bg-amber-500/20"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
                 {hasWeaponExilusSlot && (() => {
                   const i = WEAPON_EXILUS_SLOT_INDEX;
                   const equipped = equippedMods.find((m) => m.slotIndex === i);
