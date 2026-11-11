@@ -62,14 +62,7 @@ export interface BuilderDraft<D> {
   loadout?: BuilderDraftLoadout;
 }
 
-export type RivenCatalogWeapon = {
-  name: string;
-  category: string;
-  hasRivenSlot?: boolean;
-  kitgunChamberCategory?: string;
-  arcaneType?: string;
-  id?: string;
-};
+type RivenCatalogWeapon = Parameters<typeof getRivenModIdForWeapon>[0];
 
 /**
  * Why Equip must not run for this weapon, or null when it can take a riven.

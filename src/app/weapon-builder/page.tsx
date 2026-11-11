@@ -40,7 +40,7 @@ import {
   incarnonGenesisFormTrigger,
 } from "@/lib/calc/incarnon-active-weapon";
 import { Weapon, Mod, CalculatedStats, EquippedMod, SetBonusLinkage, SimulationParams, DEFAULT_SIM_PARAMS, WeaponCalculationOptions, type ModSlot } from "@/lib/types";
-import { parseRivenEquip, placeRiven, readBuilderDraft, saveBuilderDraft, stripRivenEquipParams } from "@/lib/rivens/riven-equip";
+import { loadoutFieldsForDraft, parseRivenEquip, placeRiven, readBuilderDraft, rivenCannotEquipReason, saveBuilderDraft, stripRivenEquipParams } from "@/lib/rivens/riven-equip";
 import { getRivenFamilyWeaponIds } from "@/lib/weapons/riven-family";
 import { applyGravimagMode, weaponHasGravimagMode } from "@/lib/weapons/weapon-gravimag";
 import { applyAlternateMode, getAlternateModes, weaponHasStanceFormMode } from "@/lib/weapons/weapon-alternate-mode";
@@ -400,22 +400,6 @@ export default function WeaponBuilderPage() {
 
   const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(useMemo(() => stableBuildSnapshot(buildWeaponData()), [buildWeaponData]));
 
-  // Per-tab draft of the open build: Riven Library "Equip" adds its riven to this build.
-  useEffect(() => {
-    const data = buildWeaponData();
-    if (!data || !selectedWeapon) return;
-    saveBuilderDraft<WeaponBuildData>("weapon", {
-      itemId: selectedWeapon.id,
-      buildId: currentBuildId,
-      name: buildName,
-      description: buildDescription,
-      isPublic: buildIsPublic,
-      tags: buildTags,
-      createdAt: buildCreatedAt,
-      data,
-    });
-  }, [buildWeaponData, selectedWeapon, currentBuildId, buildName, buildDescription, buildIsPublic, buildTags, buildCreatedAt]);
-
   const applyLoadedBuild = useCallback((rawBuild: SavedBuild, options?: { silent?: boolean }) => {
     const build = cleanLoadedBuild(rawBuild);
     const d = build.data as WeaponBuildData;
@@ -558,7 +542,7 @@ export default function WeaponBuilderPage() {
 
   useCloudBuildFromUrl("weapon", (build) => applyLoadedBuild(build, { silent: true }));
   useLocalBuildFromUrl("weapon", (build) => applyLoadedBuild(build, { silent: true }));
-  const { context: loadoutCtx, clearContext: clearLoadoutCtx } = useLoadoutSlotFromUrl(
+  const { context: loadoutCtx, clearContext: clearLoadoutCtx, restoreContext: restoreLoadoutCtx } = useLoadoutSlotFromUrl(
     "weapon",
     useCallback((build) => {
       applyLoadedBuild(build, { silent: true });
@@ -575,6 +559,24 @@ export default function WeaponBuilderPage() {
     }, [applyLoadedBuild]),
     allWeapons.length > 0,
   );
+
+  // Per-tab draft of the open build: Riven Library "Equip" adds its riven to this build.
+  useEffect(() => {
+    const data = buildWeaponData();
+    if (!data || !selectedWeapon) return;
+    saveBuilderDraft<WeaponBuildData>("weapon", {
+      itemId: selectedWeapon.id,
+      buildId: currentBuildId,
+      name: buildName,
+      description: buildDescription,
+      isPublic: buildIsPublic,
+      tags: buildTags,
+      createdAt: buildCreatedAt,
+      data,
+      ...loadoutFieldsForDraft(loadoutCtx),
+    });
+  }, [buildWeaponData, selectedWeapon, currentBuildId, buildName, buildDescription, buildIsPublic, buildTags, buildCreatedAt, loadoutCtx]);
+
 
   // Pseudo-exalted melee have no Exilus slot (wiki): a saved Exilus mod is ignored by the maths and flagged.
   const exilusSplit = useMemo(() => splitUnavailableSlotMods(selectedWeapon, equippedMods), [selectedWeapon, equippedMods]);
@@ -978,11 +980,25 @@ export default function WeaponBuilderPage() {
       return;
     }
     const equip = rivenParam ? parseRivenEquip(params) : null;
-    const rivenModId = equip ? getRivenModIdForWeapon(weapon) : null;
+    const blocked = equip ? rivenCannotEquipReason(weapon) : null;
+    const rivenModId = equip && !blocked ? getRivenModIdForWeapon(weapon) : null;
     const rivenMod = rivenModId ? allMods.find((m) => m.id === rivenModId) : undefined;
+    const stripEquip = (itemId: string) => {
+      const clean = stripRivenEquipParams(window.location.pathname + window.location.search + window.location.hash);
+      weaponParamSeenRef.current = `${itemId}|`;
+      window.history.replaceState(window.history.state, "", hrefWithWeaponParam(clean, itemId));
+    };
+    if (blocked) {
+      toast.error(blocked);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from the URL (an external system) on load and Back/Forward
+      handleSelectWeapon(weapon);
+      stripEquip(weapon.id);
+      return;
+    }
     if (!equip || !rivenMod) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from the URL (an external system) on load and Back/Forward
       handleSelectWeapon(weapon);
+      if (rivenParam) stripEquip(weapon.id);
       return;
     }
     // Riven Library "Equip": add the riven to the build open in this tab (same weapon or a variant
@@ -1028,6 +1044,14 @@ export default function WeaponBuilderPage() {
     queueMicrotask(() => {
       applyLoadedBuild(restored, { silent: true });
       if (!draftWeapon) setCurrentBuildId(null);
+      if (draftWeapon && draft?.loadout) {
+        restoreLoadoutCtx({
+          loadoutId: draft.loadout.loadoutId,
+          loadoutName: draft.loadout.loadoutName,
+          kind: "weapon",
+          slot: draft.loadout.slot,
+        });
+      }
       const label = equip.name || "Riven";
       toast.success(draftWeapon ? `Added ${label} to ${restored.name}` : `Equipped ${label}`, {
         description: placed.replaced
@@ -1038,7 +1062,7 @@ export default function WeaponBuilderPage() {
     const clean = stripRivenEquipParams(window.location.pathname + window.location.search + window.location.hash);
     weaponParamSeenRef.current = `${targetWeapon.id}|`;
     window.history.replaceState(window.history.state, "", hrefWithWeaponParam(clean, targetWeapon.id));
-  }, [allWeapons, allMods, modsMap, searchParams, handleSelectWeapon, applyLoadedBuild]);
+  }, [allWeapons, allMods, modsMap, searchParams, handleSelectWeapon, applyLoadedBuild, restoreLoadoutCtx]);
 
   const handleOpenModPicker = useCallback((slotIndex: number) => {
     setActiveSlotIndex(slotIndex);

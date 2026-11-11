@@ -1,8 +1,19 @@
 "use client";
 
-import { parseRivenEquip } from "@/lib/rivens/riven-equip";
+import {
+  draftMatchesRivenWeapon,
+  loadoutFieldsForDraft,
+  parseRivenEquip,
+  placeLibraryRivenOnMods,
+  readBuilderDraft,
+  rivenCannotEquipReason,
+  RIVEN_REGULAR_SLOTS,
+  saveBuilderDraft,
+  stripRivenEquipParams,
+} from "@/lib/rivens/riven-equip";
 import { BuilderSectionNav } from "@/components/builder-section-nav";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
 import { ModSlotCard } from "@/components/mod-slot";
 import { WeaponStatsPanel } from "@/components/stats-panel";
@@ -10,7 +21,6 @@ import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
 import { weaponStatSummary } from "@/lib/ui/mobile-stat-summary";
 import { ModPicker, buildSlotNav, type RivenSelectMeta } from "@/components/mod-picker";
 import { saveBuilderRivenToLibrary, useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
-import { sanitizeRivenStats } from "@/lib/riven/saved-rivens";
 import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-validation";
 import { mergeRivenStatChanges } from "@/lib/calc/weapon-stat-merges";
 import { useMods, useWarframes } from "@/lib/weapons/use-data";
@@ -305,97 +315,6 @@ export default function ModularBuilderPage() {
     };
   }, [modsMap]);
 
-  // Support deep-link from Riven Library: /modular-builder?type=kitgun|zaw&part=<id>&riven=<json>
-  useEffect(() => {
-    if (allMods.length === 0) return;
-    const params = new URLSearchParams(window.location.search);
-    if (hasBuildLinkParam(params)) return;
-    const typeParam = params.get("type")?.toLowerCase();
-    const partParam = params.get("part")?.trim();
-    const rivenParam = params.get("riven");
-    // Riven Library Equip links also carry polarity, rank, name and library id.
-    const equipMeta = rivenParam ? parseRivenEquip(params) : null;
-    if (!typeParam && !partParam) return;
-
-    queueMicrotask(() => {
-    const matchesChamber = (c: KitgunChamber, p: string) => {
-      const slug = c.id.replace(/_chamber$/, "");
-      return p === c.id || p === slug || p.includes(c.id) || p.includes(`kitgun_${slug}`);
-    };
-    const matchesStrike = (s: ZawStrike, p: string) => {
-      const slug = s.id.replace(/^zaw_/, "");
-      return p === s.id || p === slug || p.includes(s.id) || p.includes(`zaw_${slug}`);
-    };
-
-    if (typeParam === "kitgun" || (!typeParam && partParam && kitgunChambers.some((c) => matchesChamber(c, partParam)))) {
-      const chamber =
-        (partParam
-          ? [...kitgunChambers]
-              .sort((a, b) => b.id.length - a.id.length)
-              .find((c) => matchesChamber(c, partParam))
-          : undefined) ?? kitgunChambers[0] ?? null;
-      setModularType("kitgun");
-      setKitgunChamber(chamber);
-      setKitgunGrip((prev) => prev ?? kitgunGrips.find((g) => g.id.includes("haymaker")) ?? kitgunGrips[0] ?? null);
-      setKitgunLoader((prev) => prev ?? kitgunLoaders.find((l) => l.id.includes("splat")) ?? kitgunLoaders[0] ?? null);
-      if (rivenParam && chamber) {
-        try {
-          const parsedStats = sanitizeRivenStats(JSON.parse(rivenParam));
-          const rivenMod = allMods.find((m) => m.id === "kitgun_riven_mod");
-          if (rivenMod && parsedStats && Object.keys(parsedStats).length > 0) {
-            setEquippedMods([
-              {
-                modId: rivenMod.id,
-                modName: equipMeta?.name || `${chamber.name} Riven`,
-                rank: equipMeta?.rank ?? 8,
-                slotIndex: 0,
-                polarity: equipMeta?.polarity ?? rivenMod.polarity,
-                drain: rivenMod.drain,
-                ...(equipMeta?.id ? { rivenId: equipMeta.id } : {}),
-              },
-            ]);
-            setRivenStatsMap({ 0: parsedStats });
-          }
-        } catch {
-          // Ignore malformed riven JSON
-        }
-      }
-    } else if (typeParam === "zaw" || (!typeParam && partParam && zawStrikes.some((s) => matchesStrike(s, partParam)))) {
-      const strike =
-        (partParam
-          ? [...zawStrikes]
-              .sort((a, b) => b.id.length - a.id.length)
-              .find((s) => matchesStrike(s, partParam))
-          : undefined) ?? zawStrikes[0] ?? null;
-      setModularType("zaw");
-      setZawStrike(strike);
-      setZawGripSel((prev) => prev ?? zawGrips.find((g) => g.id.includes("peye")) ?? zawGrips[0] ?? null);
-      setZawLinkSel((prev) => prev ?? zawLinks.find((l) => l.id.includes("vargeet_2_jai")) ?? zawLinks[0] ?? null);
-      if (rivenParam && strike) {
-        try {
-          const parsedStats = sanitizeRivenStats(JSON.parse(rivenParam));
-          const rivenMod = allMods.find((m) => m.id === "zaw_riven_mod");
-          if (rivenMod && parsedStats && Object.keys(parsedStats).length > 0) {
-            setEquippedMods([
-              {
-                modId: rivenMod.id,
-                modName: equipMeta?.name || `${strike.name} Riven`,
-                rank: equipMeta?.rank ?? 8,
-                slotIndex: 0,
-                polarity: equipMeta?.polarity ?? rivenMod.polarity,
-                drain: rivenMod.drain,
-                ...(equipMeta?.id ? { rivenId: equipMeta.id } : {}),
-              },
-            ]);
-            setRivenStatsMap({ 0: parsedStats });
-          }
-        } catch {
-          // Ignore malformed riven JSON
-        }
-      }
-    }
-    });
-  }, [allMods]);
 
   const buildModularData = useCallback((): ModularBuildData => {
     const parts: Record<string, string> = {};
@@ -484,7 +403,7 @@ export default function ModularBuilderPage() {
     }
   };
 
-  const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
+  const handleLoadBuild = useCallback((rawBuild: SavedBuild, options?: { silent?: boolean }) => {
     markClean();
     const build = cleanLoadedBuild(rawBuild);
     const d = build.data as ModularBuildData;
@@ -535,11 +454,187 @@ export default function ModularBuilderPage() {
     setBuildName(build.name);
     setBuildIsPublic(build.isPublic ?? false);
     setShowSavedBuilds(false);
-    toast.info("Build loaded", { description: build.name });
+    if (!options?.silent) toast.info("Build loaded", { description: build.name });
   }, [markClean, modsMap, setShowSavedBuilds]);
 
   useCloudBuildFromUrl("modular", handleLoadBuild);
-  const { context: loadoutCtx, clearContext: clearLoadoutCtx } = useLoadoutSlotFromUrl("modular", handleLoadBuild);
+  const { context: loadoutCtx, clearContext: clearLoadoutCtx, restoreContext: restoreLoadoutCtx } = useLoadoutSlotFromUrl("modular", handleLoadBuild);
+  const searchParams = useSearchParams();
+
+  // Per-tab draft of the open kitgun/zaw: Riven Library "Equip" adds its riven to this build.
+  useEffect(() => {
+    if (modularType === "amp") return;
+    const partId = modularType === "kitgun" ? kitgunChamber?.id : zawStrike?.id;
+    if (!partId) return;
+    const data = buildModularData();
+    saveBuilderDraft<ModularBuildData>("modular", {
+      itemId: partId,
+      buildId: currentBuildId,
+      name: buildName,
+      description: "",
+      isPublic: buildIsPublic,
+      tags: [],
+      createdAt: null,
+      data,
+      ...loadoutFieldsForDraft(loadoutCtx),
+    });
+  }, [modularType, kitgunChamber, zawStrike, buildModularData, currentBuildId, buildName, buildIsPublic, loadoutCtx]);
+
+  const modularEquipSeenRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (allMods.length === 0) return;
+    const params = new URLSearchParams(searchParams.toString());
+    if (hasBuildLinkParam(params)) return;
+    const typeParam = params.get("type")?.toLowerCase();
+    const partParam = params.get("part")?.trim();
+    const rivenParam = params.get("riven");
+    const paramKey = `${typeParam ?? ""}|${partParam ?? ""}|${rivenParam ?? ""}`;
+    if (!typeParam && !partParam) return;
+    if (paramKey === modularEquipSeenRef.current) return;
+    modularEquipSeenRef.current = paramKey;
+
+    const matchesChamber = (c: KitgunChamber, p: string) => {
+      const slug = c.id.replace(/_chamber$/, "");
+      return p === c.id || p === slug || p.includes(c.id) || p.includes(`kitgun_${slug}`);
+    };
+    const matchesStrike = (s: ZawStrike, p: string) => {
+      const slug = s.id.replace(/^zaw_/, "");
+      return p === s.id || p === slug || p.includes(s.id) || p.includes(`zaw_${slug}`);
+    };
+
+    const stripEquip = (type: string, part: string) => {
+      const clean = stripRivenEquipParams(window.location.pathname + window.location.search + window.location.hash);
+      modularEquipSeenRef.current = `${type}|${part}|`;
+      const url = new URL(clean, "http://x");
+      url.searchParams.set("type", type);
+      if (part) url.searchParams.set("part", part);
+      const qs = url.searchParams.toString();
+      window.history.replaceState(window.history.state, "", `${url.pathname}${qs ? `?${qs}` : ""}${url.hash}`);
+    };
+
+    const equip = rivenParam ? parseRivenEquip(params) : null;
+
+    if (typeParam === "amp") {
+      if (equip) {
+        toast.error("Amps cannot use Rivens.");
+        stripEquip("amp", partParam ?? "");
+      }
+      return;
+    }
+
+    const isKitgun = typeParam === "kitgun" || (!typeParam && !!partParam && kitgunChambers.some((c) => matchesChamber(c, partParam)));
+    const isZaw = typeParam === "zaw" || (!typeParam && !!partParam && zawStrikes.some((s) => matchesStrike(s, partParam)));
+
+    const chamber = isKitgun
+      ? ((partParam
+          ? [...kitgunChambers].sort((a, b) => b.id.length - a.id.length).find((c) => matchesChamber(c, partParam))
+          : undefined) ?? kitgunChambers[0] ?? null)
+      : null;
+    const strike = isZaw
+      ? ((partParam
+          ? [...zawStrikes].sort((a, b) => b.id.length - a.id.length).find((s) => matchesStrike(s, partParam))
+          : undefined) ?? zawStrikes[0] ?? null)
+      : null;
+
+    const target = isKitgun && chamber
+      ? { kind: "kitgun" as const, id: chamber.id, name: chamber.name, catalog: { name: chamber.name, category: "kitgun_chamber", id: chamber.id }, rivenModId: "kitgun_riven_mod" }
+      : isZaw && strike
+        ? { kind: "zaw" as const, id: strike.id, name: strike.name, catalog: { name: strike.name, category: "zaw_strike", id: strike.id }, rivenModId: "zaw_riven_mod" }
+        : null;
+    if (!target) return;
+
+    const startFreshParts = () => {
+      if (target.kind === "kitgun") {
+        setModularType("kitgun");
+        setKitgunChamber(chamber);
+        setKitgunGrip((prev) => prev ?? kitgunGrips.find((g) => g.id.includes("haymaker")) ?? kitgunGrips[0] ?? null);
+        setKitgunLoader((prev) => prev ?? kitgunLoaders.find((l) => l.id.includes("splat")) ?? kitgunLoaders[0] ?? null);
+      } else {
+        setModularType("zaw");
+        setZawStrike(strike);
+        setZawGripSel((prev) => prev ?? zawGrips.find((g) => g.id.includes("peye")) ?? zawGrips[0] ?? null);
+        setZawLinkSel((prev) => prev ?? zawLinks.find((l) => l.id.includes("vargeet_2_jai")) ?? zawLinks[0] ?? null);
+      }
+    };
+
+    const blocked = equip ? rivenCannotEquipReason(target.catalog, target.name) : null;
+    if (equip && blocked) {
+      toast.error(blocked);
+      queueMicrotask(startFreshParts);
+      stripEquip(target.kind, target.id);
+      return;
+    }
+
+    if (equip) {
+      const rivenMod = allMods.find((m) => m.id === target.rivenModId);
+      if (!rivenMod) {
+        queueMicrotask(startFreshParts);
+        stripEquip(target.kind, target.id);
+        return;
+      }
+      const draft = readBuilderDraft<ModularBuildData>("modular");
+      const useDraft = draft && draftMatchesRivenWeapon(draft.itemId, target.id);
+      const placed = placeLibraryRivenOnMods(
+        useDraft ? (draft.data.mods || []) : [],
+        { ...equip, modId: rivenMod.id, fallbackName: `${target.name} Riven`, catalogDrain: rivenMod.drain },
+        RIVEN_REGULAR_SLOTS,
+      );
+      if (useDraft && draft) {
+        const restored: SavedBuild = {
+          id: draft.buildId || "",
+          name: draft.name || `${target.name} Build`,
+          description: draft.description || "",
+          isPublic: draft.isPublic,
+          tags: draft.tags,
+          type: "modular",
+          createdAt: draft.createdAt || Date.now(),
+          updatedAt: Date.now(),
+          data: { ...draft.data, mods: placed.mods },
+        };
+        queueMicrotask(() => {
+          handleLoadBuild(restored, { silent: true });
+          if (!draft.buildId) setCurrentBuildId(null);
+          if (draft.loadout) {
+            restoreLoadoutCtx({
+              loadoutId: draft.loadout.loadoutId,
+              loadoutName: draft.loadout.loadoutName,
+              kind: "modular",
+              slot: draft.loadout.slot,
+            });
+          }
+          const label = equip.name || "Riven";
+          toast.success(`Added ${label} to ${restored.name}`, {
+            description: placed.replaced
+              ? `Slot ${placed.slotIndex + 1} was full, so it replaced ${modsMap.get(placed.replaced.modId)?.name ?? "that mod"}.`
+              : undefined,
+          });
+        });
+        stripEquip(target.kind, draft.itemId);
+        return;
+      }
+      const stats: Record<number, Record<string, number>> = {};
+      for (const m of placed.mods) if (m.rivenStats) stats[m.slotIndex] = m.rivenStats;
+      queueMicrotask(() => {
+        startFreshParts();
+        setEquippedMods(placed.mods.map((m) => ({
+          modId: m.modId,
+          modName: m.rivenName || m.modId,
+          rank: m.rank,
+          slotIndex: m.slotIndex,
+          polarity: m.rivenPolarity,
+          drain: rivenMod.drain,
+          ...(m.rivenId ? { rivenId: m.rivenId } : {}),
+        })));
+        setRivenStatsMap(stats);
+        const label = equip.name || "Riven";
+        toast.success(`Equipped ${label}`);
+      });
+      stripEquip(target.kind, target.id);
+      return;
+    }
+
+    queueMicrotask(startFreshParts);
+  }, [allMods, modsMap, searchParams, handleLoadBuild, restoreLoadoutCtx]);
 
   const loadoutLinkState = useMemo<{
     buffs: WeaponExternalBuff[];

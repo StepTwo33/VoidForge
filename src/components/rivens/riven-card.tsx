@@ -7,7 +7,9 @@ import { GameAssetImage } from "@/components/game-asset-image";
 import { getWeaponImage } from "@/lib/display/images";
 import { type SavedRiven } from "@/lib/rivens/riven-storage";
 import { cn } from "@/lib/utils";
-import { rivenEquipHref } from "@/lib/rivens/riven-equip";
+import { toast } from "sonner";
+import { rivenCannotEquipReason, rivenEquipHref } from "@/lib/rivens/riven-equip";
+import { useWeapons } from "@/lib/weapons/use-data";
 
 interface RivenCardProps {
   riven: SavedRiven;
@@ -39,8 +41,11 @@ export function extractRivenAffix(fullName: string, weaponName: string): string 
 }
 
 export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
+  const allWeapons = useWeapons();
   const weaponName = riven.weaponName || "Weapon";
   const rollSuffix = extractRivenAffix(riven.name, weaponName) || "Riven";
+  const catalogWeapon = allWeapons.find((w) => w.id === riven.weaponId);
+  const cannotEquip = rivenCannotEquipReason(catalogWeapon, riven.weaponName);
 
   const equipUrl = rivenEquipHref(riven);
 
@@ -192,14 +197,27 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
         {/* Action Button Bar */}
         {hasActions && (
           <div className="mt-2.5 flex items-center gap-1.5 pt-1">
-            <Link
-              href={equipUrl}
-              title="Add to the build open in the builder"
-              className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-600/30 px-2.5 text-xs font-semibold text-purple-200 shadow-sm transition-all hover:border-purple-400 hover:bg-purple-600 hover:text-white"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              <span>Equip</span>
-            </Link>
+            {cannotEquip ? (
+              <button
+                type="button"
+                title={cannotEquip}
+                aria-label={cannotEquip}
+                onClick={() => toast.error(cannotEquip)}
+                className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-purple-500/20 bg-purple-950/40 px-2.5 text-xs font-semibold text-purple-300/70 shadow-sm"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span>Equip</span>
+              </button>
+            ) : (
+              <Link
+                href={equipUrl}
+                title="Add to the build open in the builder"
+                className="flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-lg border border-purple-500/40 bg-purple-600/30 px-2.5 text-xs font-semibold text-purple-200 shadow-sm transition-all hover:border-purple-400 hover:bg-purple-600 hover:text-white"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span>Equip</span>
+              </Link>
+            )}
 
             {onEdit && (
               <button

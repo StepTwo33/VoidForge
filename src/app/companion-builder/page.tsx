@@ -1,6 +1,16 @@
 "use client";
 
-import { parseRivenEquip } from "@/lib/rivens/riven-equip";
+import {
+  draftMatchesRivenWeapon,
+  loadoutFieldsForDraft,
+  parseRivenEquip,
+  placeLibraryRivenOnMods,
+  readBuilderDraft,
+  rivenCannotEquipReason,
+  saveBuilderDraft,
+  stripRivenEquipParams,
+} from "@/lib/rivens/riven-equip";
+import { getRivenModIdForWeapon } from "@/lib/weapons/riven-weapon-type";
 import {
   applyPolarityOverride,
   effectiveSlotPolarities,
@@ -11,7 +21,6 @@ import { isExaltedCompanionId } from "@/lib/builds/loadout-slot-helpers";
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { saveBuilderRivenToLibrary, useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
-import { sanitizeRivenStats } from "@/lib/riven/saved-rivens";
 import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-validation";
 import { hasBuildLinkParam } from "@/lib/builds/weapon-url-param";
 
@@ -357,7 +366,7 @@ export default function CompanionBuilderPage() {
     markClean();
   }, [currentBuildId, handleSaveBuildConfirm, buildName, selectedCompanion, buildDescription, buildIsPublic, buildTags, markClean]);
 
-  const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
+  const handleLoadBuild = useCallback((rawBuild: SavedBuild, options?: { silent?: boolean }) => {
     const build = cleanLoadedBuild(rawBuild);
     const d0 = build.data as CompanionBuildData;
     const comp = allCompanions.find((c) => c.id === d0.companionId);
@@ -432,12 +441,29 @@ export default function CompanionBuilderPage() {
     setBuildCreatedAt(build.createdAt || Date.now());
     setShowSavedBuilds(false);
     setShowCompanionList(false);
-    toast.info("Build loaded", { description: build.name });
+    if (!options?.silent) toast.info("Build loaded", { description: build.name });
   }, [markClean, allCompanions, allWeapons]);
 
   useCloudBuildFromUrl("companion", handleLoadBuild);
   useLocalBuildFromUrl("companion", handleLoadBuild);
-  const { context: loadoutCtx, clearContext: clearLoadoutCtx } = useLoadoutSlotFromUrl("companion", handleLoadBuild, allCompanions.length > 0);
+  const { context: loadoutCtx, clearContext: clearLoadoutCtx, restoreContext: restoreLoadoutCtx } = useLoadoutSlotFromUrl("companion", handleLoadBuild, allCompanions.length > 0);
+
+  // Per-tab draft of the open build: Riven Library "Equip" adds its riven to this companion + weapon.
+  useEffect(() => {
+    const data = buildCompanionData();
+    if (!data || !selectedCompanion || !selectedWeapon) return;
+    saveBuilderDraft<CompanionBuildData>("companion", {
+      itemId: selectedWeapon.id,
+      buildId: currentBuildId,
+      name: buildName,
+      description: buildDescription,
+      isPublic: buildIsPublic,
+      tags: buildTags,
+      createdAt: buildCreatedAt,
+      data,
+      ...loadoutFieldsForDraft(loadoutCtx),
+    });
+  }, [buildCompanionData, selectedCompanion, selectedWeapon, currentBuildId, buildName, buildDescription, buildIsPublic, buildTags, buildCreatedAt, loadoutCtx]);
 
   const weaponParamSeenRef = useRef<string | null>(null);
   useEffect(() => {
@@ -445,53 +471,118 @@ export default function CompanionBuilderPage() {
     const params = new URLSearchParams(searchParams.toString());
     if (hasBuildLinkParam(params)) return;
     const weaponId = params.get("weapon")?.trim();
-    if (!weaponId || weaponId === weaponParamSeenRef.current) return;
-    weaponParamSeenRef.current = weaponId;
+    const rivenParam = params.get("riven");
+    const paramKey = weaponId ? `${weaponId}|${rivenParam ?? ""}` : null;
+    if (!weaponId || paramKey === weaponParamSeenRef.current) return;
+    weaponParamSeenRef.current = paramKey;
 
     const weapon = allWeapons.find((w) => w.id === weaponId);
     if (!weapon) return;
 
-    // Find signature or compatible companion that can equip this weapon
     const companion = resolvePreferredCompanionForWeapon(weapon, allCompanions);
     if (!companion) return;
 
-    const parts = defaultPartsForCompanion(companion) ?? null;
-    const resolved = parts ? resolveCompanionParts(parts) : null;
-    queueMicrotask(() => {
-    setSelectedCompanion(companion);
-    setCompanionParts(parts);
-    setSlotPolarities(resolved?.defaultSlotPolarities ?? {});
-    setShowCompanionList(false);
-    setSelectedWeapon(weapon);
-    setBuildName(`${companion.name} — ${weapon.name} Build`);
+    const stripEquip = (itemId: string) => {
+      const clean = stripRivenEquipParams(window.location.pathname + window.location.search + window.location.hash);
+      weaponParamSeenRef.current = `${itemId}|`;
+      const url = new URL(clean, "http://x");
+      url.searchParams.set("weapon", itemId);
+      const qs = url.searchParams.toString();
+      window.history.replaceState(window.history.state, "", `${url.pathname}${qs ? `?${qs}` : ""}${url.hash}`);
+    };
 
-    const rivenParam = params.get("riven");
-    // Riven Library Equip links also carry polarity, rank, name and library id.
-    const equipMeta = rivenParam ? parseRivenEquip(params) : null;
-    if (rivenParam) {
-      try {
-        const stats = sanitizeRivenStats(JSON.parse(rivenParam));
-        const rivenMod = allMods.find((m) => m.id === "companion_weapon_riven_mod");
-        if (rivenMod && stats && Object.keys(stats).length > 0) {
-          setWeaponMods([
-            {
-              modId: rivenMod.id,
-              modName: equipMeta?.name || `${weapon.name} Riven`,
-              rank: equipMeta?.rank ?? 8,
-              slotIndex: 0,
-              polarity: equipMeta?.polarity ?? rivenMod.polarity,
-              drain: rivenMod.drain,
-              ...(equipMeta?.id ? { rivenId: equipMeta.id } : {}),
-            },
-          ]);
-          setWeaponRivenStatsMap({ 0: stats });
-        }
-      } catch {
-        // ignore bad JSON
+    const startFreshCompanion = (opts?: { rivenMods?: { mods: ModSlot[]; stats: Record<number, Record<string, number>> } }) => {
+      const parts = defaultPartsForCompanion(companion) ?? null;
+      const resolved = parts ? resolveCompanionParts(parts) : null;
+      setSelectedCompanion(companion);
+      setCompanionParts(parts);
+      setSlotPolarities(resolved?.defaultSlotPolarities ?? {});
+      setShowCompanionList(false);
+      setSelectedWeapon(weapon);
+      setBuildName(`${companion.name} — ${weapon.name} Build`);
+      if (opts?.rivenMods) {
+        setWeaponMods(opts.rivenMods.mods.map((m) => ({
+          modId: m.modId,
+          modName: m.rivenName || `${weapon.name} Riven`,
+          rank: m.rank,
+          slotIndex: m.slotIndex,
+          polarity: m.rivenPolarity,
+          ...(m.rivenId ? { rivenId: m.rivenId } : {}),
+        })));
+        setWeaponRivenStatsMap(opts.rivenMods.stats);
       }
+    };
+
+    const equip = rivenParam ? parseRivenEquip(params) : null;
+    const blocked = equip ? rivenCannotEquipReason(weapon) : null;
+    if (equip && blocked) {
+      toast.error(blocked);
+      queueMicrotask(() => startFreshCompanion());
+      stripEquip(weapon.id);
+      return;
     }
-    });
-  }, [allCompanions, allWeapons, allMods, searchParams]);
+
+    const rivenModId = equip && !blocked ? getRivenModIdForWeapon(weapon) : null;
+    const rivenMod = rivenModId ? allMods.find((m) => m.id === rivenModId) : undefined;
+
+    if (equip && rivenMod) {
+      const draft = readBuilderDraft<CompanionBuildData>("companion");
+      const useDraft = draft && draftMatchesRivenWeapon(draft.itemId, weapon.id);
+      const placed = placeLibraryRivenOnMods(
+        useDraft ? (draft.data.weaponMods || []) : [],
+        { ...equip, modId: rivenMod.id, fallbackName: `${weapon.name} Riven`, catalogDrain: rivenMod.drain },
+        COMPANION_WEAPON_REGULAR_SLOT_COUNT,
+      );
+      if (useDraft && draft) {
+        const restored: SavedBuild = {
+          id: draft.buildId || "",
+          name: draft.name || `${companion.name} — ${weapon.name} Build`,
+          description: draft.description || "",
+          isPublic: draft.isPublic,
+          tags: draft.tags,
+          type: "companion",
+          createdAt: draft.createdAt || Date.now(),
+          updatedAt: Date.now(),
+          data: { ...draft.data, weaponId: draft.data.weaponId || draft.itemId, weaponMods: placed.mods },
+        };
+        queueMicrotask(() => {
+          handleLoadBuild(restored, { silent: true });
+          if (!draft.buildId) setCurrentBuildId(null);
+          if (draft.loadout) {
+            restoreLoadoutCtx({
+              loadoutId: draft.loadout.loadoutId,
+              loadoutName: draft.loadout.loadoutName,
+              kind: "companion",
+              slot: draft.loadout.slot,
+            });
+          }
+          const label = equip.name || "Riven";
+          toast.success(`Added ${label} to ${restored.name}`, {
+            description: placed.replaced
+              ? `Slot ${placed.slotIndex + 1} was full, so it replaced ${modsMap.get(placed.replaced.modId)?.name ?? "that mod"}.`
+              : undefined,
+          });
+        });
+        stripEquip(draft.itemId);
+        return;
+      }
+      const stats: Record<number, Record<string, number>> = {};
+      for (const m of placed.mods) if (m.rivenStats) stats[m.slotIndex] = m.rivenStats;
+      queueMicrotask(() => {
+        startFreshCompanion({ rivenMods: { mods: placed.mods, stats } });
+        const label = equip.name || "Riven";
+        toast.success(`Equipped ${label}`, {
+          description: placed.replaced
+            ? `Slot ${placed.slotIndex + 1} was full, so it replaced ${modsMap.get(placed.replaced.modId)?.name ?? "that mod"}.`
+            : undefined,
+        });
+      });
+      stripEquip(weapon.id);
+      return;
+    }
+
+    queueMicrotask(() => startFreshCompanion());
+  }, [allCompanions, allWeapons, allMods, modsMap, searchParams, handleLoadBuild, restoreLoadoutCtx]);
 
   const handleSaveDialog = useCallback(async (values: SaveBuildDialogValues) => {
     if (values.target === "loadout" && loadoutCtx) {

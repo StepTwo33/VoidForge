@@ -16,7 +16,7 @@ import { getRivenStatsForCategory } from "@/lib/types";
 import { getRivenWeaponType } from "@/lib/weapons/riven-weapon-type";
 import { useWeapons } from "@/lib/weapons/use-data";
 import { cn } from "@/lib/utils";
-import { rivenEquipHref } from "@/lib/rivens/riven-equip";
+import { rivenCannotEquipReason, rivenEquipHref } from "@/lib/rivens/riven-equip";
 
 export function formatRivenStatLine(key: string, value: number, category: string): string {
   const def = getRivenStatsForCategory(category).find((s) => s.key === key);
@@ -136,6 +136,7 @@ export function RivenLibrary() {
           {rivens.map((r) => {
             const weapon = weaponsById.get(r.weaponId);
             const category = weapon ? getRivenWeaponType(weapon)?.toLowerCase() ?? "rifle" : "rifle";
+            const cannotEquip = rivenCannotEquipReason(weapon, r.weaponName);
             return (
               <li key={r.id}>
                 <ContentPanel className="flex h-full flex-col gap-2 !p-3">
@@ -189,13 +190,25 @@ export function RivenLibrary() {
                       </li>
                     ))}
                   </ul>
-                  <Link
-                    href={rivenEquipHref(r)}
-                    title="Add this riven to the build open in the builder"
-                    className="mt-auto inline-flex min-h-11 items-center self-start text-xs text-primary hover:underline pointer-fine:min-h-0"
-                  >
-                    Equip on {r.weaponName || weapon?.name || "weapon"} →
-                  </Link>
+                  {cannotEquip ? (
+                    <button
+                      type="button"
+                      title={cannotEquip}
+                      aria-label={cannotEquip}
+                      onClick={() => toast.error(cannotEquip)}
+                      className="mt-auto inline-flex min-h-11 items-center self-start text-xs text-muted-foreground pointer-fine:min-h-0"
+                    >
+                      {cannotEquip}
+                    </button>
+                  ) : (
+                    <Link
+                      href={rivenEquipHref(r)}
+                      title="Add this riven to the build open in the builder"
+                      className="mt-auto inline-flex min-h-11 items-center self-start text-xs text-primary hover:underline pointer-fine:min-h-0"
+                    >
+                      Equip on {r.weaponName || weapon?.name || "weapon"} →
+                    </Link>
+                  )}
                 </ContentPanel>
               </li>
             );

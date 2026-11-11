@@ -83,7 +83,7 @@ export function useLoadoutSlotFromUrl(
   kind: BuilderKind,
   apply: (build: SavedBuild) => void,
   ready = true,
-): { context: LoadoutEditContext | null; clearContext: () => void } {
+): { context: LoadoutEditContext | null; clearContext: () => void; restoreContext: (ctx: LoadoutEditContext) => void } {
   const searchParams = useSearchParams();
   const loadoutId = searchParams.get("loadout");
   const slotParam = searchParams.get("slot");
@@ -120,5 +120,20 @@ export function useLoadoutSlotFromUrl(
     setContext(null);
     stripLoadoutParams();
   }, []);
-  return { context, clearContext };
+
+  /**
+   * Keep the loadout banner after Riven Library Equip without re-loading the saved slot
+   * (that would overwrite the riven just added to the open, unsaved build).
+   */
+  const restoreContext = useCallback((ctx: LoadoutEditContext) => {
+    appliedKey.current = loadoutSlotApplyKey(ctx.loadoutId, ctx.slot);
+    setContext(ctx);
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("loadout", ctx.loadoutId);
+    if (ctx.slot) url.searchParams.set("slot", ctx.slot);
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+  }, []);
+
+  return { context, clearContext, restoreContext };
 }
