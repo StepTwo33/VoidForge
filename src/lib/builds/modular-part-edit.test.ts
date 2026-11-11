@@ -113,6 +113,7 @@ describe("modular builder page wiring", () => {
     const fs = await import("node:fs");
     const src = fs.readFileSync("src/app/modular-builder/page.tsx", "utf8");
     expect(src).not.toMatch(/set(KitgunChamber|KitgunGrip|KitgunLoader|ZawStrike|ZawGripSel|ZawLinkSel|AmpPrism)\([a-z]\); resetMods\(\)/);
-    expect(src).toMatch(/editPart\(\{ prism: p \}\)/);
+    expect(src).toMatch(/requestEditPart\(\{ prism: p \}\)/);
+    expect(src).toMatch(/maybeConfirmSlotMove/);
   });
 });

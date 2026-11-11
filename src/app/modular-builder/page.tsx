@@ -56,7 +56,15 @@ import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
-import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
+import { loadoutSlotLabel, persistLoadoutUpdate, updateLoadoutSlot, type LoadoutEditContext } from "@/lib/builds/loadout-edit-context";
+import { useConfirmDialog } from "@/components/confirm-dialog-provider";
+import {
+  applyModularSlotMove,
+  isLoadoutWeaponSlot,
+  planModularSlotMove,
+  slotForModularBuild,
+  type ModularSlotMovePlan,
+} from "@/lib/builds/modular-slot-move";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { snapshotFromBuild } from "@/lib/builds/compare-build";
@@ -461,6 +469,18 @@ export default function ModularBuilderPage() {
 
   useCloudBuildFromUrl("modular", handleLoadBuild);
   const { context: loadoutCtx, clearContext: clearLoadoutCtx, restoreContext: restoreLoadoutCtx } = useLoadoutSlotFromUrl("modular", handleLoadBuild);
+  const { confirm } = useConfirmDialog();
+  // Slot the loadout still holds this item in until we save a move (ctx.slot may already show the destination).
+  const originSlotRef = useRef<string | null>(null);
+  const confirmedMoveRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (loadoutCtx) {
+      if (originSlotRef.current == null) originSlotRef.current = loadoutCtx.slot;
+    } else {
+      originSlotRef.current = null;
+      confirmedMoveRef.current = null;
+    }
+  }, [loadoutCtx]);
   const searchParams = useSearchParams();
 
   // Per-tab draft of the open kitgun/zaw: Riven Library "Equip" adds its riven to this build.
@@ -741,25 +761,79 @@ export default function ModularBuilderPage() {
     };
   }, [assembledWeapon, equippedMods, activeArcaneState.arcanes, effectiveSimParams, modularCalcOptions, loadoutLinkState.linkage, rivenStatChanges, modsMap, loadoutLinkState.warframeId, loadoutLinkState.companionModIds]);
 
+  const reportLoadoutSave = (
+    res: Awaited<ReturnType<typeof persistLoadoutUpdate>>,
+    plan?: ModularSlotMovePlan,
+  ) => {
+    if (!res.ok) {
+      toast.error("Loadout not found", { description: "It may have been deleted. Use Save as new build instead." });
+      clearLoadoutCtx();
+      return false;
+    }
+    if (plan) {
+      if (res.cloud === "failed") {
+        toast.warning(`${plan.toastTitle} on this device`, {
+          description: `${plan.toastDescription} Account sync failed. Open Loadouts and save the loadout again to sync it.`,
+        });
+      } else {
+        toast.success(plan.toastTitle, {
+          description: `${plan.toastDescription}${res.cloud === "synced" ? " Synced to your account." : ""}`,
+        });
+      }
+    } else if (res.cloud === "failed") {
+      toast.warning(`Saved to ${loadoutCtx?.loadoutName} on this device`, {
+        description: "Account sync failed. Open Loadouts and save the loadout again to sync it.",
+      });
+    } else {
+      toast.success(`Saved to ${loadoutCtx?.loadoutName} loadout`, {
+        description: `${loadoutSlotLabel(loadoutCtx?.slot ?? "")} slot updated${res.cloud === "synced" ? " and synced to your account" : ""}.`,
+      });
+    }
+    return true;
+  };
+
   const handleSaveDialog = async (values: SaveBuildDialogValues) => {
     if (values.target === "loadout" && loadoutCtx) {
       const data = buildModularData();
       if (!data) return false;
-      const res = await updateLoadoutSlot(loadoutCtx, data);
-      if (!res.ok) {
-        toast.error("Loadout not found", { description: "It may have been deleted. Use Save as new build instead." });
-        clearLoadoutCtx();
-        return false;
+      const originRaw = originSlotRef.current ?? loadoutCtx.slot;
+      const origin = isLoadoutWeaponSlot(originRaw) ? originRaw : null;
+      const dest = slotForModularBuild(data);
+      if (origin && dest && dest !== origin) {
+        const current = getLoadouts().find((l) => l.id === loadoutCtx.loadoutId);
+        if (!current) {
+          toast.error("Loadout not found", { description: "It may have been deleted. Use Save as new build instead." });
+          clearLoadoutCtx();
+          return false;
+        }
+        const plan = planModularSlotMove(current, origin, data, { loadoutName: loadoutCtx.loadoutName });
+        if (plan) {
+          const key = `${plan.action}:${plan.from}:${plan.to}:${plan.displaced?.name ?? ""}`;
+          if (confirmedMoveRef.current !== key) {
+            const ok = await confirm({
+              title: plan.title,
+              description: plan.description,
+              confirmLabel: plan.confirmLabel,
+              destructive: plan.destructive,
+            });
+            if (!ok) return false;
+            confirmedMoveRef.current = key;
+          }
+          const res = await persistLoadoutUpdate(applyModularSlotMove(current, plan, data));
+          if (!reportLoadoutSave(res, plan)) return false;
+          originSlotRef.current = dest;
+          restoreLoadoutCtx({ ...loadoutCtx, slot: dest });
+          markClean();
+          return true;
+        }
       }
-      if (res.cloud === "failed") {
-        toast.warning(`Saved to ${loadoutCtx.loadoutName} on this device`, {
-          description: "Account sync failed. Open Loadouts and save the loadout again to sync it.",
-        });
-      } else {
-        toast.success(`Saved to ${loadoutCtx.loadoutName} loadout`, {
-          description: `${loadoutSlotLabel(loadoutCtx.slot)} slot updated${res.cloud === "synced" ? " and synced to your account" : ""}.`,
-        });
-      }
+      const saveCtx: LoadoutEditContext = dest && isLoadoutWeaponSlot(dest) && dest !== loadoutCtx.slot
+        ? { ...loadoutCtx, slot: dest }
+        : loadoutCtx;
+      const res = await updateLoadoutSlot(saveCtx, data);
+      if (!reportLoadoutSave(res)) return false;
+      if (saveCtx.slot !== loadoutCtx.slot) restoreLoadoutCtx(saveCtx);
+      if (isLoadoutWeaponSlot(saveCtx.slot)) originSlotRef.current = saveCtx.slot;
       markClean();
       return true;
     }
@@ -841,8 +915,54 @@ export default function ModularBuilderPage() {
     });
   };
 
-  const applyRecommended = useCallback((parts: string[]) => {
+  const previewPartsAfter = (edit: PartEdit): ModularBuildData => ({
+    modularType,
+    parts: modularType === "kitgun"
+      ? { chamber: (edit.chamber ?? kitgunChamber)?.id ?? "", grip: (edit.grip ?? kitgunGrip)?.id ?? "", loader: (edit.loader ?? kitgunLoader)?.id ?? "" }
+      : modularType === "zaw"
+        ? { strike: (edit.strike ?? zawStrike)?.id ?? "", grip: (edit.zawGrip ?? zawGripSel)?.id ?? "", link: (edit.link ?? zawLinkSel)?.id ?? "" }
+        : { prism: (edit.prism ?? ampPrism)?.id ?? "", scaffold: (edit.scaffold ?? ampScaffold)?.id ?? "", brace: (edit.brace ?? ampBrace)?.id ?? "" },
+    mods: [],
+    hasOrokinCatalyst: false,
+  });
+
+  const maybeConfirmSlotMove = async (data: ModularBuildData, reason?: string): Promise<boolean> => {
+    if (!loadoutCtx) return true;
+    const originRaw = originSlotRef.current ?? loadoutCtx.slot;
+    if (!isLoadoutWeaponSlot(originRaw)) return true;
+    const current = getLoadouts().find((l) => l.id === loadoutCtx.loadoutId);
+    if (!current) return true;
+    const plan = planModularSlotMove(current, originRaw, data, { loadoutName: loadoutCtx.loadoutName, reason });
+    if (!plan) return true;
+    const ok = await confirm({
+      title: plan.title,
+      description: plan.description,
+      confirmLabel: plan.confirmLabel,
+      destructive: plan.destructive,
+    });
+    if (!ok) return false;
+    confirmedMoveRef.current = `${plan.action}:${plan.from}:${plan.to}:${plan.displaced?.name ?? ""}`;
+    restoreLoadoutCtx({ ...loadoutCtx, slot: plan.to });
+    return true;
+  };
+
+  const requestEditPart = async (edit: PartEdit) => {
+    const data = previewPartsAfter(edit);
+    const reason = edit.grip
+      ? (edit.grip.type === "secondary" ? "Changing to a secondary grip" : "Changing to a primary grip")
+      : undefined;
+    if (!(await maybeConfirmSlotMove(data, reason))) return;
+    editPart(edit);
+  };
+
+  const applyRecommended = async (parts: string[]) => {
     const [a, b, c] = parts;
+    const preview: ModularBuildData | null = modularType === "kitgun"
+      ? { modularType, parts: { chamber: kitgunChambers.find((p) => p.name === a)?.id ?? "", grip: kitgunGrips.find((p) => p.name === b)?.id ?? "", loader: kitgunLoaders.find((p) => p.name === c)?.id ?? "" }, mods: [], hasOrokinCatalyst: false }
+      : modularType === "zaw"
+        ? { modularType, parts: { strike: zawStrikes.find((p) => p.name === a)?.id ?? "", grip: zawGrips.find((p) => p.name === b)?.id ?? "", link: zawLinks.find((p) => p.name === c)?.id ?? "" }, mods: [], hasOrokinCatalyst: false }
+        : null;
+    if (preview && !(await maybeConfirmSlotMove(preview, "Using this recommended build"))) return;
     resetMods();
     if (modularType === "kitgun") {
       setKitgunChamber(kitgunChambers.find((p) => p.name === a) ?? null);
@@ -859,13 +979,38 @@ export default function ModularBuilderPage() {
     setAmpPrism(ampPrisms.find((p) => p.name === a) ?? null);
     setAmpScaffold(ampScaffolds.find((p) => p.name === b) ?? null);
     setAmpBrace(ampBraces.find((p) => p.name === c) ?? null);
-  }, [modularType]);
+  };
 
   const hasKitSummary = modularType === "kitgun"
     ? Boolean(kitgunChamber || kitgunGrip || kitgunLoader)
     : modularType === "zaw"
       ? Boolean(zawStrike || zawGripSel || zawLinkSel)
       : Boolean(ampPrism || ampScaffold || ampBrace);
+
+  const requestTypeChange = async (t: ModularType) => {
+    if (t === modularType) return;
+    if (loadoutCtx) {
+      const originRaw = originSlotRef.current ?? loadoutCtx.slot;
+      const originLabel = loadoutSlotLabel(originRaw);
+      if (t === "zaw" && isLoadoutWeaponSlot(originRaw) && originRaw !== "melee") {
+        const ok = await confirm({
+          title: "Switch to Zaw?",
+          description: `A Zaw belongs in the Melee slot. When you save, it will move there from the ${originLabel} slot of “${loadoutCtx.loadoutName}”.`,
+          confirmLabel: "Switch to Zaw",
+        });
+        if (!ok) return;
+      } else if (t === "amp") {
+        const ok = await confirm({
+          title: "Switch to Amp?",
+          description: "Amps are equipped on the Operator, not in a weapon slot. Saving this Amp will not update this loadout's weapon slot.",
+          confirmLabel: "Switch to Amp",
+        });
+        if (!ok) return;
+      }
+    }
+    setModularType(t);
+    resetMods();
+  };
 
   const openModSlot = (i: number) => {
     const isExilus = isSecondaryKitgun && i === SECONDARY_EXILUS_SLOT_INDEX;
@@ -920,10 +1065,7 @@ export default function ModularBuilderPage() {
           {(Object.keys(typeLabels) as ModularType[]).map((t) => (
             <button
               key={t}
-              onClick={() => {
-                setModularType(t);
-                resetMods();
-              }}
+              onClick={() => { void requestTypeChange(t); }}
               className={cn(
                 "inline-flex min-h-11 items-center px-4 py-2.5 rounded-lg text-sm font-medium border transition-all lg:pointer-fine:min-h-9 sm:py-2",
                 modularType === t
@@ -984,7 +1126,7 @@ export default function ModularBuilderPage() {
                     {kitgunChambers.map((c) => (
                       <button
                         key={c.id}
-                        onClick={() => editPart({ chamber: c })}
+                        onClick={() => void requestEditPart({ chamber: c })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           kitgunChamber?.id === c.id
@@ -1008,7 +1150,7 @@ export default function ModularBuilderPage() {
                     {kitgunGrips.map((g) => (
                       <button
                         key={g.id}
-                        onClick={() => editPart({ grip: g })}
+                        onClick={() => void requestEditPart({ grip: g })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           kitgunGrip?.id === g.id
@@ -1044,7 +1186,7 @@ export default function ModularBuilderPage() {
                     {kitgunLoaders.map((l) => (
                       <button
                         key={l.id}
-                        onClick={() => editPart({ loader: l })}
+                        onClick={() => void requestEditPart({ loader: l })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           kitgunLoader?.id === l.id
@@ -1080,7 +1222,7 @@ export default function ModularBuilderPage() {
                     {zawStrikes.map((s) => (
                       <button
                         key={s.id}
-                        onClick={() => editPart({ strike: s })}
+                        onClick={() => void requestEditPart({ strike: s })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           zawStrike?.id === s.id
@@ -1104,7 +1246,7 @@ export default function ModularBuilderPage() {
                     {zawGrips.map((g) => (
                       <button
                         key={g.id}
-                        onClick={() => editPart({ zawGrip: g })}
+                        onClick={() => void requestEditPart({ zawGrip: g })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           zawGripSel?.id === g.id
@@ -1129,7 +1271,7 @@ export default function ModularBuilderPage() {
                     {zawLinks.map((l) => (
                       <button
                         key={l.id}
-                        onClick={() => editPart({ link: l })}
+                        onClick={() => void requestEditPart({ link: l })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           zawLinkSel?.id === l.id
@@ -1162,7 +1304,7 @@ export default function ModularBuilderPage() {
                     {ampPrisms.map((p) => (
                       <button
                         key={p.id}
-                        onClick={() => editPart({ prism: p })}
+                        onClick={() => void requestEditPart({ prism: p })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           ampPrism?.id === p.id
@@ -1186,7 +1328,7 @@ export default function ModularBuilderPage() {
                     {ampScaffolds.map((s) => (
                       <button
                         key={s.id}
-                        onClick={() => editPart({ scaffold: s })}
+                        onClick={() => void requestEditPart({ scaffold: s })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           ampScaffold?.id === s.id
@@ -1210,7 +1352,7 @@ export default function ModularBuilderPage() {
                     {ampBraces.map((b) => (
                       <button
                         key={b.id}
-                        onClick={() => editPart({ brace: b })}
+                        onClick={() => void requestEditPart({ brace: b })}
                         className={cn(
                           "min-h-11 rounded-lg border p-2.5 text-left text-sm transition-all",
                           ampBrace?.id === b.id
@@ -1238,7 +1380,7 @@ export default function ModularBuilderPage() {
                     <button
                       key={i}
                       type="button"
-                      onClick={() => applyRecommended(b.parts)}
+                      onClick={() => void applyRecommended(b.parts)}
                       className="p-3 rounded-lg border border-border hover:border-cyan-500/30 transition-all text-left"
                     >
                       <div className="font-medium text-sm">{b.name}</div>

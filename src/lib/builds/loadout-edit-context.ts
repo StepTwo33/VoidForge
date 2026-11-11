@@ -95,10 +95,8 @@ export type UpdateLoadoutSlotResult =
  * copy; when the loadout is saved to the account (cloudId), re-saves it through
  * the existing build save endpoint (same call the Loadouts page uses).
  */
-export async function updateLoadoutSlot(ctx: LoadoutEditContext, data: unknown): Promise<UpdateLoadoutSlotResult> {
-  const current = getLoadouts().find((l) => l.id === ctx.loadoutId);
-  if (!current) return { ok: false, reason: "missing" };
-  const updated = withLoadoutSlot(current, ctx, data);
+/** Persist a loadout that has already been updated (local + optional cloud). */
+export async function persistLoadoutUpdate(updated: Loadout): Promise<UpdateLoadoutSlotResult> {
   saveLoadout(updated);
   if (!updated.cloudId) return { ok: true, loadout: updated, cloud: "local-only" };
 
@@ -118,4 +116,10 @@ export async function updateLoadoutSlot(ctx: LoadoutEditContext, data: unknown):
   } catch {
     return { ok: true, loadout: updated, cloud: "failed" };
   }
+}
+
+export async function updateLoadoutSlot(ctx: LoadoutEditContext, data: unknown): Promise<UpdateLoadoutSlotResult> {
+  const current = getLoadouts().find((l) => l.id === ctx.loadoutId);
+  if (!current) return { ok: false, reason: "missing" };
+  return persistLoadoutUpdate(withLoadoutSlot(current, ctx, data));
 }
