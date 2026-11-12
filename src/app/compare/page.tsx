@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { getWeaponImage, getWarframeImage, getCompanionImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
 import { BuildSourcePicker } from "@/components/compare/build-source-picker";
+import { CompareSuggestedBuilds } from "@/components/compare/suggested-builds";
 import { snapshotFromBuild, equipmentFromLoadoutSlot, type CompareKind, type CompareSnapshot } from "@/lib/builds/compare-build";
 import { compareIdsTaken, isSameCompareSelection } from "@/lib/builds/compare-same-id";
 import type { SavedBuild } from "@/lib/builds/build-storage";
@@ -213,6 +214,15 @@ function BuildCompareTab() {
           Archwing
         </FilterChip>
       </div>
+      <CompareSuggestedBuilds
+        key={kind}
+        type={kind}
+        excludeIds={loadedIds}
+        onSelect={(build) => {
+          const side: 0 | 1 = loaded[0] == null ? 0 : 1;
+          loadSavedOrCommunity(side, build);
+        }}
+      />
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:gap-2 md:gap-6" data-testid="compare-build-columns">
         {([0, 1] as const).map((side) => {
           const build = builds[side];
@@ -229,7 +239,7 @@ function BuildCompareTab() {
                     <button
                       type="button"
                       onClick={() => clearLoaded(side)}
-                      className="inline-flex h-9 items-center rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+                      className="inline-flex min-h-11 items-center rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground lg:pointer-fine:h-9 lg:pointer-fine:min-h-0"
                     >
                       Clear
                     </button>
@@ -241,7 +251,7 @@ function BuildCompareTab() {
                       <button
                         type="button"
                         onClick={() => setSourceOpen(null)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+                        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:text-foreground lg:pointer-fine:h-8 lg:pointer-fine:w-8 lg:pointer-fine:min-h-0 lg:pointer-fine:min-w-0"
                         aria-label="Close build picker"
                       >
                         <X className="h-4 w-4" />
@@ -747,7 +757,7 @@ function LoadoutCompareTab({ initialA }: { initialA?: string | null }) {
               <button
                 type="button"
                 onClick={() => setPickerOpen(null)}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md text-muted-foreground hover:text-foreground lg:pointer-fine:h-8 lg:pointer-fine:w-8 lg:pointer-fine:min-h-0 lg:pointer-fine:min-w-0"
                 aria-label="Close loadout picker"
               >
                 <X className="h-4 w-4" />
@@ -777,6 +787,14 @@ function LoadoutCompareTab({ initialA }: { initialA?: string | null }) {
 
   return (
     <div className="max-w-3xl mx-auto">
+      <CompareSuggestedBuilds
+        type="loadout"
+        excludeIds={[sides[0]?.id, sides[0]?.cloudId, sides[1]?.id, sides[1]?.cloudId]}
+        onSelect={(build) => {
+          const side: 0 | 1 = sides[0] == null ? 0 : 1;
+          pickLoadout(side, build, "yours");
+        }}
+      />
       <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-3 sm:gap-4 items-start mb-6">
         {renderSide(0)}
         <div className="pt-5 hidden sm:flex sm:items-center sm:justify-center">
