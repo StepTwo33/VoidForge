@@ -2,13 +2,20 @@
 
 import { dropUnknownMods } from "@/lib/mods/known-mods";
 import {
+  WARFRAME_URL_PARAM,
+  hasBuildLinkParam,
+  hrefForWarframeCatalogPick,
+  hrefWithWarframeParam,
+  warframeIdFromParams,
+} from "@/lib/builds/warframe-url-param";
+import {
   applyPolarityOverride,
   effectiveSlotPolarities,
   innateSlotPolarities,
   isInnatePolarity,
 } from "@/lib/builds/innate-polarities";
 import { BuilderSectionNav } from "@/components/builder-section-nav";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { PageShell } from "@/components/page-shell";
 import {
@@ -1134,6 +1141,80 @@ export default function WarframeBuilderPage() {
     setShowWarframeList(false);
   }, []);
 
+  const warframeParamSeenRef = useRef<string | null>(null);
+  const handlePickWarframeFromCatalog = useCallback((warframe: Warframe) => {
+    handleSelectWarframe(warframe);
+    const next = hrefForWarframeCatalogPick(
+      window.location.pathname + window.location.search + window.location.hash,
+      warframe.id,
+    );
+    if (hasBuildLinkParam(new URL(next, window.location.origin).searchParams)) return;
+    clearCloudBuildInUrl();
+    warframeParamSeenRef.current = warframe.id;
+    if (next !== window.location.pathname + window.location.search + window.location.hash) {
+      window.history.pushState(null, "", next);
+    }
+  }, [handleSelectWarframe]);
+
+  const selectedWarframeId = selectedWarframe?.id ?? null;
+  useEffect(() => {
+    if (!selectedWarframeId) return;
+    const params = new URLSearchParams(window.location.search);
+    if (hasBuildLinkParam(params)) return;
+    if (params.get(WARFRAME_URL_PARAM) === selectedWarframeId) return;
+    warframeParamSeenRef.current = selectedWarframeId;
+    window.history.replaceState(
+      window.history.state,
+      "",
+      hrefWithWarframeParam(
+        window.location.pathname + window.location.search + window.location.hash,
+        selectedWarframeId,
+      ),
+    );
+  }, [selectedWarframeId]);
+
+  const selectedWarframeRef = useRef<Warframe | null>(selectedWarframe);
+  useEffect(() => {
+    selectedWarframeRef.current = selectedWarframe;
+  }, [selectedWarframe]);
+
+  useEffect(() => {
+    if (allWarframes.length === 0) return;
+    const params = new URLSearchParams(searchParams.toString());
+    if (hasBuildLinkParam(params)) {
+      if (params.has(WARFRAME_URL_PARAM)) {
+        window.history.replaceState(
+          window.history.state,
+          "",
+          hrefWithWarframeParam(
+            window.location.pathname + window.location.search + window.location.hash,
+            null,
+          ),
+        );
+      }
+      warframeParamSeenRef.current = null;
+      return;
+    }
+    const id = warframeIdFromParams(params);
+    if (id === warframeParamSeenRef.current) return;
+    const previous = warframeParamSeenRef.current;
+    warframeParamSeenRef.current = id;
+    const current = selectedWarframeRef.current;
+    if (!id) {
+      if (previous && current) setShowWarframeList(true);
+      return;
+    }
+    const wf = allWarframes.find((w) => w.id === id);
+    if (!wf) return;
+    if (current?.id === id) {
+      setShowWarframeList(false);
+      return;
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from the URL on load and Back/Forward
+    handleSelectWarframe(wf);
+  }, [allWarframes, searchParams, handleSelectWarframe]);
+
+
   const handleLoadExaltedSavedBuild = useCallback((build: SavedBuild) => {
     const d = build.data as WeaponBuildData;
     const mods: EquippedMod[] = (d.mods || []).map((m: ModSlot & { id?: string }, i: number) => {
@@ -1421,7 +1502,7 @@ export default function WarframeBuilderPage() {
               <ItemPickerRow
                 key={wf.id}
                 accent="purple"
-                onClick={() => handleSelectWarframe(wf)}
+                onClick={() => handlePickWarframeFromCatalog(wf)}
                 image={
                   <GameAssetImage
                     src={getWarframeImage(wf.name)}
