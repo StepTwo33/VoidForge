@@ -1,6 +1,6 @@
 /**
- * Arch weapons accuracy (B13 Space + B21 Atmosphere + B23 Arbucep cycle).
- * Arbucep default = 1st Attack (Blast); modes 2–6 via applyArbucepAttackMode.
+ * Arch weapons accuracy (B13 Space + B21 Atmosphere + B23 Arbucep volley).
+ * Arbucep default = all six simultaneous missiles; modes 1–6 isolate one element.
  * Wiki Module:Weapons/data/archwing Space → ARCH_BARE_GOLDENS;
  * Atmosphere / Gravimag overlays → ARCH_ATMOSPHERE_GOLDENS.
  */
@@ -12,6 +12,7 @@ import { ARCH_ATMOSPHERE_GOLDENS } from "@/lib/calc/arch-atmosphere-goldens";
 import { ARCH_BARE_GOLDENS } from "@/lib/calc/arch-bare-goldens";
 import { applyGravimagMode, weaponHasGravimagMode } from "@/lib/weapons/weapon-gravimag";
 import { getWeaponRadialAttacks } from "@/lib/weapons/weapon-radial-utils";
+import { avgCritMultiplier } from "@/lib/calc/crit-utils";
 import type { Mod, Weapon } from "@/lib/types";
 
 const ARCH_CATS = new Set(["archgun", "archmelee"]);
@@ -180,8 +181,14 @@ describe("arch Atmosphere / Gravimag goldens (B21)", () => {
       "puncture",
       "slash",
       "heat",
+      "cold",
+      "toxin",
+      "electricity",
       "radiation",
+      "viral",
+      "corrosive",
       "blast",
+      "gas",
       "magnetic",
     ] as const) {
       const expected = (g as Record<string, number | undefined>)[key];
@@ -191,46 +198,89 @@ describe("arch Atmosphere / Gravimag goldens (B21)", () => {
     }
   });
 
-  it("Arbucep Gravimag doubles 1st Attack blast and radial", () => {
+  it("Arbucep default paper is all six simultaneous missiles, and Gravimag doubles the volley", () => {
     const w = allWeapons.find((x) => x.id === "arbucep")!;
-    expect(w.damage).toBe(16);
-    expect(getWeaponRadialAttacks(w)[0]?.totalDamage).toBeCloseTo(114, 5);
+    expect(w.damage).toBe(96);
+    for (const el of ["blast", "corrosive", "gas", "magnetic", "radiation", "viral"] as const) {
+      expect(w[el], el).toBe(16);
+    }
+    const radials = getWeaponRadialAttacks(w);
+    expect(radials).toHaveLength(6);
+    expect(radials.reduce((s, r) => s + r.totalDamage, 0)).toBeCloseTo(684, 5);
+    for (const r of radials) {
+      expect(r.radius).toBe(4);
+      expect(r.falloffReduction).toBeUndefined();
+    }
     const atmos = applyGravimagMode(w);
-    expect(atmos.damage).toBe(32);
+    expect(atmos.damage).toBe(192);
     expect(atmos.blast).toBe(32);
+    expect(atmos.viral).toBe(32);
     expect(atmos.reloadTime).toBe(2);
-    expect(getWeaponRadialAttacks(atmos)[0]?.totalDamage).toBeCloseTo(228, 5);
+    const atmoRadials = getWeaponRadialAttacks(atmos);
+    expect(atmoRadials).toHaveLength(6);
+    expect(atmoRadials.reduce((s, r) => s + r.totalDamage, 0)).toBeCloseTo(1368, 5);
     const stats = calculateWeaponBuild(atmos, [], modsMap());
-    expect(stats.moddedBaseDamage).toBeCloseTo(32, 3);
+    expect(stats.moddedBaseDamage).toBeCloseTo(192, 3);
+  });
+
+  it("Arbucep Space DPS counts every missile's direct hit and radial explosion", () => {
+    const w = allWeapons.find((x) => x.id === "arbucep")!;
+    const stats = calculateWeaponBuild(w, [], modsMap());
+    const avgCrit = avgCritMultiplier(stats.criticalChance, stats.criticalMultiplier);
+    const efr = stats.effectiveFireRate ?? stats.fireRate;
+    expect(stats.totalDamage).toBeCloseTo(96, 3);
+    expect(stats.moddedBaseDamage).toBeCloseTo(96, 3);
+    expect(efr).toBeCloseTo(1.5, 6);
+    // Direct Burst DPS excludes radials; radials are reported separately and folded into burstDps.
+    expect(stats.burstDps - (stats.radialBurstDps ?? 0)).toBeCloseTo(96 * efr * avgCrit, 3);
+    expect(stats.radialBurstDps).toBeCloseTo(684 * efr * avgCrit, 3);
+    expect(stats.burstDps).toBeCloseTo((96 + 684) * efr * avgCrit, 3);
+    expect(stats.radialAttacks).toHaveLength(6);
   });
 
   it.each([
+    [1, "blast"],
     [2, "corrosive"],
     [3, "gas"],
     [4, "magnetic"],
     [5, "radiation"],
     [6, "viral"],
-  ] as const)("Arbucep mode %i swaps Space paper to %s", async (mode, element) => {
+  ] as const)("Arbucep isolate mode %i keeps a single %s missile", async (mode, element) => {
     const { applyArbucepAttackMode } = await import("@/lib/weapons/weapon-arbucep-mode");
     const w = allWeapons.find((x) => x.id === "arbucep")!;
     const swapped = applyArbucepAttackMode(w, mode);
     expect(swapped.damage).toBe(16);
     expect(swapped[element]).toBe(16);
-    expect(swapped.blast ?? 0).toBe(0);
-    const radial = getWeaponRadialAttacks(swapped)[0]!;
-    expect(radial.totalDamage).toBeCloseTo(114, 5);
-    expect(radial[element]).toBeCloseTo(114, 5);
+    for (const other of ["blast", "corrosive", "gas", "magnetic", "radiation", "viral"] as const) {
+      if (other !== element) expect(swapped[other] ?? 0, other).toBe(0);
+    }
+    const radials = getWeaponRadialAttacks(swapped);
+    expect(radials).toHaveLength(1);
+    expect(radials[0]!.totalDamage).toBeCloseTo(114, 5);
+    expect(radials[0]![element]).toBeCloseTo(114, 5);
     const stats = calculateWeaponBuild(swapped, [], modsMap());
     expect(stats.elements.some((e) => e.type === element)).toBe(true);
+    expect(stats.moddedBaseDamage).toBeCloseTo(16, 3);
   });
 
-  it("Arbucep mode 4 under Gravimag uses Atmosphere magnitudes", async () => {
+  it("Arbucep isolate mode 4 under Gravimag uses Atmosphere magnitudes", async () => {
     const { applyArbucepAttackMode } = await import("@/lib/weapons/weapon-arbucep-mode");
     const w = applyGravimagMode(allWeapons.find((x) => x.id === "arbucep")!);
     const swapped = applyArbucepAttackMode(w, 4, { atmosphere: true });
     expect(swapped.damage).toBe(32);
     expect(swapped.magnetic).toBe(32);
     expect(swapped.blast ?? 0).toBe(0);
+    expect(getWeaponRadialAttacks(swapped)).toHaveLength(1);
     expect(getWeaponRadialAttacks(swapped)[0]?.magnetic).toBeCloseTo(228, 5);
+  });
+
+  it("unset / mode 0 is the full six-missile volley, not a single Blast shot", async () => {
+    const { applyArbucepAttackMode } = await import("@/lib/weapons/weapon-arbucep-mode");
+    const w = allWeapons.find((x) => x.id === "arbucep")!;
+    for (const mode of [undefined, 0] as const) {
+      const applied = applyArbucepAttackMode(w, mode);
+      expect(applied.damage, String(mode)).toBe(96);
+      expect(getWeaponRadialAttacks(applied)).toHaveLength(6);
+    }
   });
 });

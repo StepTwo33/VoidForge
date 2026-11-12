@@ -4940,6 +4940,36 @@ export const WEAPON_RADIAL_ATTACKS: Record<string, WeaponRadialAttack[]> =
       "blast": 114.0,
       "totalDamage": 114.0,
       "radius": 4.0
+    },
+    {
+      "name": "2nd Attack Radial Attack",
+      "corrosive": 114.0,
+      "totalDamage": 114.0,
+      "radius": 4.0
+    },
+    {
+      "name": "3rd Attack Radial Attack",
+      "gas": 114.0,
+      "totalDamage": 114.0,
+      "radius": 4.0
+    },
+    {
+      "name": "4th Attack Radial Attack",
+      "magnetic": 114.0,
+      "totalDamage": 114.0,
+      "radius": 4.0
+    },
+    {
+      "name": "5th Attack Radial Attack",
+      "radiation": 114.0,
+      "totalDamage": 114.0,
+      "radius": 4.0
+    },
+    {
+      "name": "6th Attack Radial Attack",
+      "viral": 114.0,
+      "totalDamage": 114.0,
+      "radius": 4.0
     }
   ],
   "grattler": [

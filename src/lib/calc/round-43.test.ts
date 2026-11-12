@@ -71,7 +71,8 @@ describe("R43 item 2: exact situational-radial names (Staticor)", () => {
     expect(isSituationalRadial("Charged Shot Explosion", true)).toBe(false);
     expect(isSituationalRadial("Alt-Fire Explosion", true)).toBe(true);
     expect(isSituationalRadial("charged throw recall explosion", true)).toBe(true);
-    expect(isSituationalRadial("3rd Attack Radial Attack", false)).toBe(true);
+    // Arbucep: all six missiles fire at once, so their radials are not situational.
+    expect(isSituationalRadial("3rd Attack Radial Attack", false)).toBe(false);
     expect(isSituationalRadial("Explosion", false)).toBe(false);
   });
 });

@@ -31,15 +31,13 @@ function isManualSlam(name: string): boolean {
  * Exact names (case-insensitive), not substrings: a substring match on
  * "charged" once caught Staticor's "Uncharged Explosion" and dropped its
  * normal-fire AoE from DPS. A radial whose name is not listed here counts.
+ *
+ * Arbucep's "Nth Attack Radial Attack" names used to be listed here when the
+ * missiles were modeled as a one-at-a-time cycle. The wiki page body says all
+ * six fire simultaneously, so those radials now count at primary fire rate.
  */
 const SITUATIONAL_RADIAL_NAMES = new Set(
   [
-    "1st Attack Radial Attack",
-    "2nd Attack Radial Attack",
-    "3rd Attack Radial Attack",
-    "4th Attack Radial Attack",
-    "5th Attack Radial Attack",
-    "6th Attack Radial Attack",
     "Air Burst Explosion",
     "Alt-Fire AoE",
     "Alt-Fire Damage over Time",

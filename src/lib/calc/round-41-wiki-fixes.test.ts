@@ -24,10 +24,14 @@ describe("Round 41 wiki fixes", () => {
 
   it("Arbucep explosion: 4 m with no AoE falloff (wiki Falloff 1500-2003 m / 200-270 m is shot range)", () => {
     const w = byId("arbucep");
-    expect(getWeaponRadialAttacks(w)[0]).toMatchObject({ totalDamage: 114, radius: 4 });
-    expect(getWeaponRadialAttacks(w)[0]?.falloffReduction).toBeUndefined();
-    const atmo = applyGravimagMode(w);
-    expect(getWeaponRadialAttacks(atmo)[0]).toMatchObject({ totalDamage: 228, radius: 4 });
+    const space = getWeaponRadialAttacks(w);
+    expect(space).toHaveLength(6);
+    expect(space[0]).toMatchObject({ totalDamage: 114, radius: 4 });
+    expect(space.every((r) => r.falloffReduction == null)).toBe(true);
+    const atmo = getWeaponRadialAttacks(applyGravimagMode(w));
+    expect(atmo).toHaveLength(6);
+    expect(atmo[0]).toMatchObject({ totalDamage: 228, radius: 4 });
+    expect(getWeaponRadialAttacks(applyArbucepAttackMode(w, 3))).toHaveLength(1);
     expect(getWeaponRadialAttacks(applyArbucepAttackMode(w, 3))[0]).toMatchObject({ gas: 114, radius: 4 });
     expect(getWeaponRadialAttacks(applyArbucepAttackMode(w, 3))[0]?.falloffReduction).toBeUndefined();
   });

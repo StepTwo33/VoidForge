@@ -1,7 +1,7 @@
 /**
  * Wiki-locked Gravimag / Atmosphere paper for archguns with atmosphereStats (B21).
  * Source: Module:Weapons/data/archwing `*(Atmosphere)` default/charged attack
- * (Corvas + Velocitus lock Charged Shot; Morgha Auto-Burst; Arbucep 1st Attack).
+ * (Corvas + Velocitus lock Charged Shot; Morgha Auto-Burst; Arbucep all six missiles).
  * Corvas Prime omitted — Atmosphere Charged == Space Charged (no overlay).
  * Generated from catalog after per-id wiki patches — do not blanket-edit.
  */
@@ -30,8 +30,13 @@ export const ARCH_ATMOSPHERE_GOLDENS: Array<{
 }> = [
   {
     id: "arbucep",
-    damage: 32.0,
+    damage: 192.0,
     blast: 32.0,
+    corrosive: 32.0,
+    gas: 32.0,
+    magnetic: 32.0,
+    radiation: 32.0,
+    viral: 32.0,
     criticalChance: 0.1,
     criticalMultiplier: 2.9,
     statusChance: 0.349,

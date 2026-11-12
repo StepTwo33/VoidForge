@@ -14871,11 +14871,16 @@ export const allWeapons: Weapon[] = [
     "id": "arbucep",
     "name": "Arbucep",
     "category": "archgun",
-    "damage": 16,
+    "damage": 96,
     "impact": 0,
     "puncture": 0,
     "slash": 0,
     "blast": 16,
+    "corrosive": 16,
+    "gas": 16,
+    "magnetic": 16,
+    "radiation": 16,
+    "viral": 16,
     "fireRate": 1.5,
     "criticalChance": 0.1,
     "criticalMultiplier": 2.9,
@@ -14884,13 +14889,48 @@ export const allWeapons: Weapon[] = [
     "reloadTime": 1.72,
     "multishot": 1,
     "atmosphereStats": {
-      "damage": 32,
+      "damage": 192,
       "blast": 32,
+      "corrosive": 32,
+      "gas": 32,
+      "magnetic": 32,
+      "radiation": 32,
+      "viral": 32,
       "reloadTime": 2,
       "radialAttacks": [
         {
           "name": "1st Attack Radial Attack",
           "blast": 228.0,
+          "totalDamage": 228.0,
+          "radius": 4.0
+        },
+        {
+          "name": "2nd Attack Radial Attack",
+          "corrosive": 228.0,
+          "totalDamage": 228.0,
+          "radius": 4.0
+        },
+        {
+          "name": "3rd Attack Radial Attack",
+          "gas": 228.0,
+          "totalDamage": 228.0,
+          "radius": 4.0
+        },
+        {
+          "name": "4th Attack Radial Attack",
+          "magnetic": 228.0,
+          "totalDamage": 228.0,
+          "radius": 4.0
+        },
+        {
+          "name": "5th Attack Radial Attack",
+          "radiation": 228.0,
+          "totalDamage": 228.0,
+          "radius": 4.0
+        },
+        {
+          "name": "6th Attack Radial Attack",
+          "viral": 228.0,
           "totalDamage": 228.0,
           "radius": 4.0
         }

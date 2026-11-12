@@ -15,6 +15,7 @@ import { Mod, Weapon, Warframe, ModSlot, CalculatedStats, WarframeCalculatedStat
 import { avgCritMultiplier, quantizeBaseCritMultiplier } from './crit-utils';
 import { resolveEffectiveFireRate } from './effective-fire-rate';
 import { evolutionExtraRadials, scaleRadialAttacksWithDps } from './weapon-radial-dps';
+import { arbucepProjectileCount } from '../weapons/weapon-arbucep-mode';
 import {
   applyMeleeComboToStats,
   resolveEffectiveComboCount,
@@ -500,8 +501,10 @@ export function quantizeDamageValue(value: number, scale: number): number {
   return Math.round(value / scale) * scale;
 }
 
-function quantizeStatsDamage(stats: CalculatedStats, moddedBaseDamage: number): void {
-  const scale = moddedBaseDamage / 32;
+function quantizeStatsDamage(stats: CalculatedStats, moddedBaseDamage: number, projectileCount = 1): void {
+  // Independent projectiles (Arbucep's six missiles) quantize against each
+  // projectile's own base, not the summed volley — matching in-game hits.
+  const scale = (moddedBaseDamage / Math.max(1, projectileCount)) / 32;
   if (scale <= 0) return;
   // Preserve unallocated residual (weapons missing IPS/element breakdown) before re-summing.
   const prePhys = stats.impact + stats.puncture + stats.slash;
@@ -2300,9 +2303,10 @@ export function calculateWeaponBuild(
   };
 
   // Quantize IPS + elements to nearest 1/32 of modded base damage (game network precision).
+  // Arbucep's six missiles are independent hits, so each quantizes against its own base.
   const moddedBaseDamage = baseWeapon.damage * damageMultTotal;
   stats.moddedBaseDamage = moddedBaseDamage;
-  quantizeStatsDamage(stats, moddedBaseDamage);
+  quantizeStatsDamage(stats, moddedBaseDamage, arbucepProjectileCount(baseWeapon));
 
   // Sniper Shot Combo Counter: total damage × (1.5 + 0.5·(tier−1)) while scoped (wiki, both wikis).
   // Final multiplier on quantized hits (like Tek/faction it is outside the 1/32 grid).

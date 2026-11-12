@@ -1278,7 +1278,7 @@ describe("ALT FIRE: Batch 8 archguns, hand-worked against wiki.warframe.com (Mod
     }
   });
 
-  it("Arbucep gets no ALT FIRE: its six element attacks cycle per shot (the Arbucep attack picker)", () => {
+  it("Arbucep gets no ALT FIRE: its six elemental missiles fire as one volley (the Arbucep picker only isolates)", () => {
     expect(getAltFireModes(byId("arbucep"))).toEqual([]);
   });
 });

@@ -874,25 +874,26 @@ export function WeaponSimControls({
             {weapon?.id === "arbucep" && (
               <label
                 className="block text-[10px] text-muted-foreground"
-                title="Wiki Arbucep attack cycle — Space 16/114; Atmosphere (Gravimag) 32/228"
+                title="Wiki page body: all six elemental missiles fire at once — Space 16+114 each (96+684 per volley); Atmosphere (Gravimag) doubles. Modes 1–6 isolate a single missile. This switch is a sim control and is not saved on the build."
               >
-                Arbucep attack
+                Arbucep volley
                 <select
-                  value={simParams.arbucepAttackMode ?? 1}
+                  value={simParams.arbucepAttackMode ?? 0}
                   onChange={(e) =>
                     onSimParamsChange({
                       ...simParams,
-                      arbucepAttackMode: Number(e.target.value) as 1 | 2 | 3 | 4 | 5 | 6,
+                      arbucepAttackMode: Number(e.target.value) as 0 | 1 | 2 | 3 | 4 | 5 | 6,
                     })
                   }
                   className="mt-0.5 h-7 w-full rounded border border-border bg-background px-1.5 text-[11px]"
                 >
-                  <option value={1}>1st Attack (Blast)</option>
-                  <option value={2}>2nd Attack (Corrosive)</option>
-                  <option value={3}>3rd Attack (Gas)</option>
-                  <option value={4}>4th Attack (Magnetic)</option>
-                  <option value={5}>5th Attack (Radiation)</option>
-                  <option value={6}>6th Attack (Viral)</option>
+                  <option value={0}>All six missiles</option>
+                  <option value={1}>Isolate Blast</option>
+                  <option value={2}>Isolate Corrosive</option>
+                  <option value={3}>Isolate Gas</option>
+                  <option value={4}>Isolate Magnetic</option>
+                  <option value={5}>Isolate Radiation</option>
+                  <option value={6}>Isolate Viral</option>
                 </select>
               </label>
             )}
