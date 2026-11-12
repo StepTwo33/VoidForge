@@ -73,14 +73,14 @@ function FormaPolarizeButton({
         inline ? "relative" : "absolute bottom-1.5 right-1.5 z-10",
         polarized
           ? cn(
-              "h-11 w-11 p-1.5 sm:h-8 sm:w-8",
+              "h-11 w-11 p-1.5 lg:pointer-fine:h-8 lg:pointer-fine:w-8",
               innate && "border-dashed",
               active
                 ? "border-primary/50 bg-primary/10 ring-1 ring-primary/30"
                 : "border-border/60 bg-card/80 text-muted-foreground hover:border-primary/35 hover:bg-secondary/70 hover:text-foreground"
             )
           : cn(
-              "h-11 min-w-11 gap-1 px-2 text-xs sm:text-[10px] font-medium leading-none text-muted-foreground sm:pointer-fine:h-7 sm:pointer-fine:min-w-0",
+              "h-11 min-w-11 gap-1 px-2 text-xs sm:text-[10px] font-medium leading-none text-muted-foreground lg:pointer-fine:h-7 lg:pointer-fine:min-w-0",
               active
                 ? "border-amber-600/70 bg-amber-500/15 text-amber-950 ring-1 ring-amber-500/30 dark:border-amber-400/60 dark:bg-amber-500/20 dark:text-amber-200"
                 : "border-border/70 bg-muted/30 hover:border-amber-600/40 hover:bg-amber-500/10 hover:text-amber-900 dark:hover:border-amber-500/40 dark:hover:text-amber-300"
@@ -131,7 +131,7 @@ function PolarityPicker({
             type="button"
             onClick={() => { onPolarize(p); onClose(); }}
             className={cn(
-              "flex min-h-11 min-w-11 items-center justify-center rounded border p-2 transition-all sm:min-h-0 sm:min-w-0 sm:p-1.5",
+              "flex min-h-11 min-w-11 items-center justify-center rounded border p-2 transition-all lg:pointer-fine:min-h-0 lg:pointer-fine:min-w-0 lg:pointer-fine:p-1.5",
               slotPolarity === p ? "border-yellow-500/60 bg-yellow-500/15" : "border-border hover:border-yellow-500/40"
             )}
             title={polarityNames[p] || p}
@@ -144,7 +144,7 @@ function PolarityPicker({
         <button
           type="button"
           onClick={() => { onPolarize(null); onClose(); }}
-          className="mt-1.5 inline-flex min-h-11 w-full items-center justify-center rounded-md py-2 text-xs sm:text-[10px] text-red-700 hover:bg-destructive/10 hover:text-red-600 sm:min-h-8 dark:text-red-400 dark:hover:text-red-300"
+          className="mt-1.5 inline-flex min-h-11 w-full items-center justify-center rounded-md py-2 text-xs sm:text-[10px] text-red-700 hover:bg-destructive/10 hover:text-red-600 lg:pointer-fine:min-h-8 dark:text-red-400 dark:hover:text-red-300"
         >
           Remove polarity
         </button>
@@ -233,7 +233,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innateP
     )}>
       <button
         onClick={onRemove}
-        className="absolute top-1 right-1 z-10 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive sm:h-8 sm:w-8"
+        className="absolute top-1 right-1 z-10 inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive lg:pointer-fine:h-8 lg:pointer-fine:w-8"
         aria-label="Remove mod"
       >
         <X className="h-3.5 w-3.5" />
@@ -322,7 +322,7 @@ export function ModSlotCard({ mod, rank, slotIndex, label, slotPolarity, innateP
             ⚡{effectiveDrain}
           </span>
           {mod.subCategory === "riven" && onEditRiven && (
-            <button onClick={(e) => { e.stopPropagation(); onEditRiven(); }} className="inline-flex h-6 w-6 items-center justify-center rounded text-purple-700 transition-colors hover:bg-purple-500/10 hover:text-purple-600 dark:text-purple-400 dark:hover:text-purple-300" title="Edit Riven Stats" aria-label="Edit riven stats">
+            <button onClick={(e) => { e.stopPropagation(); onEditRiven(); }} className="inline-flex min-h-11 min-w-11 items-center justify-center rounded text-purple-700 transition-colors hover:bg-purple-500/10 hover:text-purple-600 dark:text-purple-400 dark:hover:text-purple-300 lg:pointer-fine:h-6 lg:pointer-fine:w-6 lg:pointer-fine:min-h-0 lg:pointer-fine:min-w-0" title="Edit Riven Stats" aria-label="Edit riven stats">
               <Pencil className="h-3 w-3" />
             </button>
           )}

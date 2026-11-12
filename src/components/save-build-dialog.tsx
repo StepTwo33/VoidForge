@@ -238,7 +238,7 @@ export function SaveBuildDialog({
                         type="button"
                         onClick={() => toggleTag(t.id)}
                         className={cn(
-                          "inline-flex min-h-11 items-center rounded-full border px-3 py-2 text-[11px] transition-colors sm:min-h-0 sm:px-2.5 sm:py-0.5",
+                          "inline-flex min-h-11 items-center rounded-full border px-3 py-2 text-[11px] transition-colors lg:pointer-fine:min-h-0 lg:pointer-fine:px-2.5 lg:pointer-fine:py-0.5",
                           on
                             ? "border-primary bg-primary/15 text-primary"
                             : "border-border text-muted-foreground hover:border-primary/40",

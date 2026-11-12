@@ -13,7 +13,7 @@ type NavBackProps = {
 };
 
 const navBackClassName =
-  "inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border/60 px-2.5 py-2 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted/40 hover:text-foreground sm:min-h-0 sm:py-1.5";
+  "inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border/60 px-2.5 py-2 text-xs text-muted-foreground transition-colors hover:border-border hover:bg-muted/40 hover:text-foreground lg:pointer-fine:min-h-0 lg:pointer-fine:py-1.5";
 
 export function NavBack({ href, label = "Back", className, onClick }: NavBackProps) {
   const router = useRouter();

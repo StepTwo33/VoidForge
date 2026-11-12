@@ -135,7 +135,7 @@ export function ThemePicker() {
                 key={theme.id}
                 onClick={() => selectTheme(theme.id)}
                 className={cn(
-                  "flex min-h-11 w-full items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left transition-all sm:min-h-0 sm:py-2",
+                  "flex min-h-11 w-full items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-left transition-all lg:pointer-fine:min-h-0 lg:pointer-fine:py-2",
                   current === theme.id
                     ? "bg-primary/10 text-foreground"
                     : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"

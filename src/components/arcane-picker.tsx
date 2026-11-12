@@ -103,7 +103,7 @@ export function ArcaneSlotCard({ arcane, rank, label, onAdd, onRemove, onRankCha
                   onClick={() => onRankChange(Math.max(0, effectiveRank - 1))}
                   disabled={effectiveRank <= 0}
                   aria-label="Decrease arcane rank"
-                  className="inline-flex h-5 w-5 items-center justify-center rounded border border-purple-500/30 bg-background/70 text-muted-foreground transition-colors hover:border-purple-500/60 hover:text-foreground disabled:opacity-35"
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded border border-purple-500/30 bg-background/70 text-muted-foreground transition-colors hover:border-purple-500/60 hover:text-foreground disabled:opacity-35 lg:pointer-fine:h-5 lg:pointer-fine:w-5 lg:pointer-fine:min-h-0 lg:pointer-fine:min-w-0"
                 >
                   <Minus className="h-2.5 w-2.5" />
                 </button>
@@ -111,7 +111,7 @@ export function ArcaneSlotCard({ arcane, rank, label, onAdd, onRemove, onRankCha
                   value={effectiveRank}
                   onChange={(e) => onRankChange(parseInt(e.target.value, 10))}
                   aria-label={`${arcane.name} rank`}
-                  className="h-5 rounded border border-purple-500/30 bg-background/70 px-1 text-[10px] font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  className="min-h-11 rounded border border-purple-500/30 bg-background/70 px-1 text-[10px] font-mono text-foreground focus:outline-none focus:ring-1 focus:ring-purple-500 lg:pointer-fine:h-5 lg:pointer-fine:min-h-0"
                 >
                   {Array.from({ length: arcane.maxRank + 1 }, (_, r) => arcane.maxRank - r).map((r) => (
                     <option key={r} value={r}>
@@ -124,7 +124,7 @@ export function ArcaneSlotCard({ arcane, rank, label, onAdd, onRemove, onRankCha
                   onClick={() => onRankChange(Math.min(arcane.maxRank, effectiveRank + 1))}
                   disabled={effectiveRank >= arcane.maxRank}
                   aria-label="Increase arcane rank"
-                  className="inline-flex h-5 w-5 items-center justify-center rounded border border-purple-500/30 bg-background/70 text-muted-foreground transition-colors hover:border-purple-500/60 hover:text-foreground disabled:opacity-35"
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center rounded border border-purple-500/30 bg-background/70 text-muted-foreground transition-colors hover:border-purple-500/60 hover:text-foreground disabled:opacity-35 lg:pointer-fine:h-5 lg:pointer-fine:w-5 lg:pointer-fine:min-h-0 lg:pointer-fine:min-w-0"
                 >
                   <Plus className="h-2.5 w-2.5" />
                 </button>
@@ -217,7 +217,7 @@ export function ArcanePicker({
                       type="button"
                       onClick={() => setSelectedRank(r)}
                       className={cn(
-                        "inline-flex h-6 min-w-7 items-center justify-center rounded px-1.5 text-[11px] font-mono font-medium transition-colors",
+                        "inline-flex min-h-11 min-w-11 items-center justify-center rounded px-1.5 text-[11px] font-mono font-medium transition-colors lg:pointer-fine:h-6 lg:pointer-fine:min-h-0 lg:pointer-fine:min-w-7",
                         active
                           ? "bg-purple-600 text-white shadow-xs"
                           : "border border-border/70 bg-background text-muted-foreground hover:border-purple-500/50 hover:text-foreground",

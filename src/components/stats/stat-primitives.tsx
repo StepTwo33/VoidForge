@@ -189,7 +189,7 @@ export function SimSlider({
             type="button"
             disabled={safeVal <= min}
             onClick={() => onChange(clamp(safeVal - step))}
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border/70 bg-background text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground active:scale-95 disabled:pointer-events-none disabled:opacity-30 transition-all"
+            className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded border border-border/70 bg-background text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground active:scale-95 disabled:pointer-events-none disabled:opacity-30 transition-all lg:pointer-fine:h-6 lg:pointer-fine:w-6 lg:pointer-fine:min-h-0 lg:pointer-fine:min-w-0"
             aria-label={`Decrease ${label}`}
           >
             <Minus className="h-3 w-3" />
@@ -214,7 +214,7 @@ export function SimSlider({
             type="button"
             disabled={safeVal >= max}
             onClick={() => onChange(clamp(safeVal + step))}
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border/70 bg-background text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground active:scale-95 disabled:pointer-events-none disabled:opacity-30 transition-all"
+            className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded border border-border/70 bg-background text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground active:scale-95 disabled:pointer-events-none disabled:opacity-30 transition-all lg:pointer-fine:h-6 lg:pointer-fine:w-6 lg:pointer-fine:min-h-0 lg:pointer-fine:min-w-0"
             aria-label={`Increase ${label}`}
           >
             <Plus className="h-3 w-3" />
