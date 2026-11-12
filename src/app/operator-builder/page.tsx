@@ -14,6 +14,10 @@ import { BuilderActionBar, BuilderActionGroup, BuilderItemHeader } from "@/compo
 import { persistSavedBuild, resolveSavedArcaneSlots, type SavedBuild } from "@/lib/builds/build-storage";
 import { saveIdentityId } from "@/lib/builds/quicksave";
 import { BuilderSaveControls } from "@/components/builder-save-controls";
+import { BuilderToolbar, BuilderToolbarButton, BUILDER_REPORT_CLASS } from "@/components/builder-toolbar";
+import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
+import { operatorStatSummary } from "@/lib/ui/mobile-stat-summary";
+import { BuilderSavedEmpty } from "@/components/builder-saved-empty";
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
@@ -303,47 +307,36 @@ export default function OperatorBuilderPage() {
           title="Operator"
           subtitle={`${focusSchool} • ${ampName}`}
         >
-          <BuilderActionBar>
-            <BuilderActionGroup>
-              <BuilderSaveControls
-                canUpdate={!!currentBuildId}
-                dirty={hasUnsavedChanges}
-                dirtyClass={SAVE_DIRTY_CLASS}
-                dotClass={SAVE_DIRTY_DOT_CLASS}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-green-500/10 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-0 lg:py-1.5"
-                onUpdate={() => {
-                  void handleSaveBuildConfirm({
-                    name: defaultOperatorBuildName(),
-                    description: "",
-                    isPublic: buildIsPublic,
-                    tags: [],
-                    target: "new",
-                    asNew: false,
-                  });
-                }}
-                onSaveNew={() => {
-                  setSaveAsNew(false);
-                  setSaveDialogOpen(true);
-                }}
-                onSaveAs={() => {
-                  setSaveAsNew(true);
-                  setSaveDialogOpen(true);
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  void refreshSavedBuilds();
-                  setShowSavedBuilds(true);
-                }}
-                className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-0 lg:py-1.5"
-                title="Load Build"
-              >
-                <FolderOpen className="h-3.5 w-3.5" /> <span className="inline">Load</span>
-              </button>
-            </BuilderActionGroup>
-          </BuilderActionBar>
+          <BuilderToolbar
+            canUpdate={!!currentBuildId}
+            dirty={hasUnsavedChanges}
+            onUpdate={() => {
+              void handleSaveBuildConfirm({
+                name: defaultOperatorBuildName(),
+                description: "",
+                isPublic: buildIsPublic,
+                tags: [],
+                target: "new",
+                asNew: false,
+              });
+            }}
+            onSaveNew={() => {
+              setSaveAsNew(false);
+              setSaveDialogOpen(true);
+            }}
+            onSaveAs={() => {
+              setSaveAsNew(true);
+              setSaveDialogOpen(true);
+            }}
+            onLoad={() => {
+              void refreshSavedBuilds();
+              setShowSavedBuilds(true);
+            }}
+          />
         </BuilderItemHeader>
+        <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 bg-background pb-1 backdrop-blur-md supports-[backdrop-filter]:bg-background lg:hidden">
+          <MobileStatSummary items={operatorStatSummary(currentAmpWeapon ?? null)} />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* FOCUS SCHOOL SELECTOR (LEFT COLUMN) */}
@@ -529,7 +522,7 @@ export default function OperatorBuilderPage() {
 
                 {savedModularAmps.length === 0 ? (
                   <div className="rounded-lg border border-dashed border-border/80 p-3 text-center">
-                    <p className="text-xs text-muted-foreground">No saved Modular Amps found.</p>
+                    <BuilderSavedEmpty title="No saved Modular Amps found" description="Save a Modular Amp in the Modular Builder to attach it here." />
                     <Link
                       href="/modular-builder?type=amp"
                       className="mt-1 inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline"

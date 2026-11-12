@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type HTMLAttributes, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { ArrowLeft, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -367,7 +367,7 @@ export function BuilderItemHeader({
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-lg font-bold tracking-tight sm:text-2xl">{title}</h1>
           {subtitle && (
-            <p className="mt-0.5 text-xs capitalize text-muted-foreground sm:text-sm">{subtitle}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">{subtitle}</p>
           )}
         </div>
         {/* Round 55: full row on phones, right end of the header from sm up. */}
@@ -378,13 +378,14 @@ export function BuilderItemHeader({
   );
 }
 
-export function BuilderActionBar({ children, className }: { children: React.ReactNode; className?: string }) {
+export function BuilderActionBar({ children, className, ...rest }: { children: ReactNode; className?: string } & HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       className={cn(
         "flex flex-wrap items-center gap-2 sm:gap-3",
         className,
       )}
+      {...rest}
     >
       {children}
     </div>

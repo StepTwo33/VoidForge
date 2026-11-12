@@ -5,6 +5,7 @@ import { withLoadoutSlot } from "@/lib/builds/loadout-edit-context";
 import type { Loadout } from "@/lib/types";
 
 const page = readFileSync("src/app/operator-builder/page.tsx", "utf8");
+const toolbar = readFileSync("src/components/builder-toolbar.tsx", "utf8");
 
 const loadout: Loadout = {
   id: "l1",
@@ -17,8 +18,9 @@ const loadout: Loadout = {
 describe("operator builder matches the other builders (Terkeon reports)", () => {
   it("Save shows the same unsaved-changes highlight and dot as the other builders", () => {
     expect(page).toMatch(/useUnsavedChanges\(stableBuildSnapshot\(buildOperatorPayload\(\)\)\)/);
-    expect(page).toMatch(/dirtyClass=\{SAVE_DIRTY_CLASS\}/);
-    expect(page).toMatch(/dotClass=\{SAVE_DIRTY_DOT_CLASS\}/);
+    expect(page).toMatch(/dirty=\{hasUnsavedChanges\}/);
+    expect(toolbar).toMatch(/dirtyClass=\{SAVE_DIRTY_CLASS\}/);
+    expect(toolbar).toMatch(/dotClass=\{SAVE_DIRTY_DOT_CLASS\}/);
     expect(page).not.toMatch(/dirty && !loadout/);
   });
 
@@ -30,7 +32,8 @@ describe("operator builder matches the other builders (Terkeon reports)", () => 
 
   it("uses the shared builder header and save dialog instead of a separate Save to Loadout button", () => {
     expect(page).toMatch(/<BuilderItemHeader/);
-    expect(page).toMatch(/<BuilderActionGroup>/);
+    expect(page).toMatch(/<BuilderToolbar/);
+    expect(toolbar).toMatch(/BuilderActionGroup/);
     expect(page).not.toMatch(/PageHero/);
     expect(page).not.toMatch(/>\s*Save to Loadout\s*</);
     expect(page).toMatch(/loadoutTarget=\{loadoutCtx \?/);

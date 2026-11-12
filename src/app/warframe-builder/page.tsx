@@ -103,6 +103,8 @@ import { importCapacityToastText, isOverCapacity } from "@/lib/builds/import-cap
 import { isAuraMod } from "@/lib/mods/aura-mods";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { BuilderSaveControls } from "@/components/builder-save-controls";
+import { BuilderToolbar, BuilderToolbarButton, BUILDER_REPORT_CLASS } from "@/components/builder-toolbar";
+import { BuilderSavedEmpty } from "@/components/builder-saved-empty";
 import { saveIdentityId } from "@/lib/builds/quicksave";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
@@ -1471,9 +1473,7 @@ export default function WarframeBuilderPage() {
             }}
             savedPanel={
               savedBuilds.length === 0 ? (
-                <p className="px-2 py-6 text-center text-xs text-muted-foreground">
-                  No saved warframe builds yet. Save a build from the builder to see it here.
-                </p>
+                <BuilderSavedEmpty typeLabel="warframe" />
               ) : (
                 savedBuilds.map((build) => {
                   const d = build.data as WarframeBuildData;
@@ -1548,94 +1548,69 @@ export default function WarframeBuilderPage() {
               }
               title={selectedWarframe.name}
             >
-              <BuilderActionBar>
-                <BuilderActionGroup>
-                  <BuilderSaveControls
-                    canUpdate={!!currentBuildId}
-                    dirty={hasUnsavedChanges}
-                    dirtyClass={SAVE_DIRTY_CLASS}
-                    dotClass={SAVE_DIRTY_DOT_CLASS}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-green-500/10 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-0 lg:py-1.5"
-                    onUpdate={() => { void handleQuickSave(); }}
-                    onSaveNew={() => {
-                      setSaveAsNew(false);
-                      setSaveDialogDefaultPublic(buildIsPublic);
-                      setSaveDialogOpen(true);
-                    }}
-                    onSaveAs={() => {
-                      setSaveAsNew(true);
-                      setSaveDialogDefaultPublic(false);
-                      setSaveDialogOpen(true);
-                    }}
-                  />
-                  <button onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:pointer-fine:min-h-0 lg:py-1.5 text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium" title="Load Build">
-                    <FolderOpen className="h-3.5 w-3.5" /> <span className="inline">Load</span>
-                  </button>
-                  <div className="w-px h-4 bg-border mx-1" />
-                  <button
-                    onClick={() => setShowImporter(!showImporter)}
-                    className={cn(
-                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
-                      showImporter
-                        ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
-                        : "text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10"
-                    )}
-                    title="Import mods from a pasted mod list or a screenshot. You choose to replace or add, and can undo it"
-                  >
-                    <Upload className="h-3.5 w-3.5" /> <span className="inline">Import mods</span>
-                  </button>
-                  <button
-                    onClick={handleShareBuild}
-                    className={cn(
-                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
-                      shareCopied
-                        ? "bg-green-500/10 text-green-700 dark:text-green-400"
-                        : "text-muted-foreground hover:text-purple-700 dark:hover:text-purple-400 hover:bg-purple-500/10"
-                    )}
-                    title="Copy shareable link"
-                  >
-                    {shareCopied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
-                    <span className="inline">{shareCopied ? "Copied!" : "Share"}</span>
-                  </button>
-                  <button
-                    onClick={() => setCompareOpen(true)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-400 lg:pointer-fine:min-h-0 lg:py-1.5"
-                    title="Compare this build to a saved or posted build"
-                  >
-                    <ArrowLeftRight className="h-3.5 w-3.5" />
-                    <span className="inline">Compare</span>
-                  </button>
-                </BuilderActionGroup>
-
-                <BuilderActionGroup>
-                  <button
+              <BuilderToolbar
+                canUpdate={!!currentBuildId}
+                dirty={hasUnsavedChanges}
+                onUpdate={() => { void handleQuickSave(); }}
+                onSaveNew={() => {
+                  setSaveAsNew(false);
+                  setSaveDialogDefaultPublic(buildIsPublic);
+                  setSaveDialogOpen(true);
+                }}
+                onSaveAs={() => {
+                  setSaveAsNew(true);
+                  setSaveDialogDefaultPublic(false);
+                  setSaveDialogOpen(true);
+                }}
+                onLoad={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }}
+                onShare={handleShareBuild}
+                shareCopied={shareCopied}
+                extras={
+                  <>
+                    <BuilderToolbarButton
+                      onClick={() => setShowImporter(!showImporter)}
+                      title="Import mods from a pasted mod list or a screenshot. You choose to replace or add, and can undo it"
+                      active={showImporter}
+                      activeClass="bg-blue-500/10 text-blue-700 dark:text-blue-400"
+                      hoverClass="hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10"
+                    >
+                      <Upload className="h-3.5 w-3.5" /> <span className="inline">Import mods</span>
+                    </BuilderToolbarButton>
+                    <BuilderToolbarButton
+                      onClick={() => setCompareOpen(true)}
+                      title="Compare this build to a saved or posted build"
+                      hoverClass="hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-400"
+                    >
+                      <ArrowLeftRight className="h-3.5 w-3.5" />
+                      <span className="inline">Compare</span>
+                    </BuilderToolbarButton>
+                  </>
+                }
+                secondary={
+                  <BuilderToolbarButton
                     onClick={() => setHasOrokinReactor(!hasOrokinReactor)}
                     title="Orokin Reactor — doubles mod capacity"
                     aria-pressed={hasOrokinReactor}
-                    className={cn(
-                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
-                      hasOrokinReactor
-                        ? "bg-yellow-500/10 text-yellow-400"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
+                    active={hasOrokinReactor}
+                    activeClass="bg-yellow-500/10 text-yellow-400"
+                    hoverClass="hover:text-foreground hover:bg-accent"
                   >
                     <Zap className="h-3.5 w-3.5" />
                     <span className="inline">Reactor</span>
-                  </button>
-                </BuilderActionGroup>
-
-                <div className="flex-1" />
-
-                <a
-                  href={appendReturnTo(
-                    `/report-issue?type=warframe&name=${encodeURIComponent(selectedWarframe.name)}&id=${encodeURIComponent(selectedWarframe.id)}`,
-                    builderReturnTo,
-                  )}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-2 text-xs font-medium text-amber-800 transition-colors hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 lg:pointer-fine:min-h-0 lg:py-1.5"
-                >
-                  <Flag className="h-3 w-3" /> <span className="inline">Report</span>
-                </a>
-              </BuilderActionBar>
+                  </BuilderToolbarButton>
+                }
+                trailing={
+                  <a
+                    href={appendReturnTo(
+                      `/report-issue?type=warframe&name=${encodeURIComponent(selectedWarframe.name)}&id=${encodeURIComponent(selectedWarframe.id)}`,
+                      builderReturnTo,
+                    )}
+                    className={BUILDER_REPORT_CLASS}
+                  >
+                    <Flag className="h-3 w-3" /> <span className="inline">Report</span>
+                  </a>
+                }
+              />
             </BuilderItemHeader>
 
             <div className="mb-6">
@@ -1663,7 +1638,7 @@ export default function WarframeBuilderPage() {
                       </p>
                     </div>
                   )}
-                  <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                  <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
                     <h2 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">
                       MOD CONFIGURATION{dualFormConfig ? ` — ${dualFormConfig.forms.find((f) => f.id === activeDualFormId)?.label ?? ""}` : ""}
                     </h2>

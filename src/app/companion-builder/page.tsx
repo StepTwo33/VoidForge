@@ -129,6 +129,10 @@ import {
 } from "@/lib/weapons/companion-weapons";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { BuilderSaveControls } from "@/components/builder-save-controls";
+import { BuilderToolbar, BuilderToolbarButton, BUILDER_REPORT_CLASS } from "@/components/builder-toolbar";
+import { BuilderSavedEmpty } from "@/components/builder-saved-empty";
+import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
+import { companionStatSummary } from "@/lib/ui/mobile-stat-summary";
 import { saveIdentityId } from "@/lib/builds/quicksave";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
@@ -1023,9 +1027,7 @@ export default function CompanionBuilderPage() {
             }}
             savedPanel={
               savedBuilds.length === 0 ? (
-                <p className="px-2 py-6 text-center text-xs text-muted-foreground">
-                  No saved companion builds yet. Save a build from the builder to see it here.
-                </p>
+                <BuilderSavedEmpty typeLabel="companion" />
               ) : (
                 savedBuilds.map((build) => {
                   const d = build.data as CompanionBuildData;
@@ -1153,72 +1155,60 @@ export default function CompanionBuilderPage() {
               title={selectedCompanion.name}
               subtitle={selectedWeapon ? `${selectedCompanion.type} • ${selectedWeapon.name}` : selectedCompanion.type}
             >
-              <BuilderActionBar>
-                <BuilderActionGroup>
-                  <BuilderSaveControls
-                    canUpdate={!!currentBuildId}
-                    dirty={hasUnsavedChanges}
-                    dirtyClass={SAVE_DIRTY_CLASS}
-                    dotClass={SAVE_DIRTY_DOT_CLASS}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-green-500/10 hover:text-green-700 dark:hover:text-green-400 sm:min-h-0 sm:py-1.5"
-                    onUpdate={() => { void handleQuickSave(); }}
-                    onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
-                    onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
-                  />
-                  <button onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-blue-500/10 hover:text-blue-700 dark:hover:text-blue-400 sm:min-h-0 sm:py-1.5" title="Load Build">
-                    <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
-                  </button>
-                  <button
+              <BuilderToolbar
+                canUpdate={!!currentBuildId}
+                dirty={hasUnsavedChanges}
+                onUpdate={() => { void handleQuickSave(); }}
+                onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
+                onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
+                onLoad={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }}
+                extras={
+                  <BuilderToolbarButton
                     onClick={() => setCompareOpen(true)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-400 sm:min-h-0 sm:py-1.5"
                     title="Compare this build to a saved or posted build"
+                    hoverClass="hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-400"
                   >
-                    <ArrowLeftRight className="h-3.5 w-3.5" /> <span>Compare</span>
-                  </button>
-                </BuilderActionGroup>
-
-                <BuilderActionGroup>
-                  {isExaltedCompanion ? (
-                    <button
-                      type="button"
+                    <ArrowLeftRight className="h-3.5 w-3.5" /> <span className="inline">Compare</span>
+                  </BuilderToolbarButton>
+                }
+                secondary={
+                  isExaltedCompanion ? (
+                    <BuilderToolbarButton
                       disabled
                       title="Innate Orokin Reactor — exalted companions automatically come with a pre-installed Reactor (60 capacity)"
                       aria-pressed={true}
-                      className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium bg-yellow-500/10 text-yellow-400 cursor-default opacity-90 sm:min-h-0 sm:py-1.5"
+                      active
+                      activeClass="bg-yellow-500/10 text-yellow-400 cursor-default opacity-90"
                     >
                       <Zap className="h-3.5 w-3.5" />
-                      <span>Innate Reactor</span>
-                    </button>
+                      <span className="inline">Innate Reactor</span>
+                    </BuilderToolbarButton>
                   ) : (
-                    <button
+                    <BuilderToolbarButton
                       onClick={() => setHasReactor(!hasReactor)}
                       title="Orokin Reactor — doubles mod capacity"
                       aria-pressed={hasReactor}
-                      className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all sm:min-h-0 sm:py-1.5",
-                        hasReactor
-                          ? "bg-yellow-500/10 text-yellow-400"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      )}
+                      active={hasReactor}
+                      activeClass="bg-yellow-500/10 text-yellow-400"
+                      hoverClass="hover:text-foreground hover:bg-accent"
                     >
                       <Zap className="h-3.5 w-3.5" />
-                      <span>Reactor</span>
-                    </button>
-                  )}
-                </BuilderActionGroup>
-
-                <div className="flex-1" />
-
-                <a
-                  href={appendReturnTo(
-                    `/report-issue?type=companion&name=${encodeURIComponent(selectedCompanion.name)}&id=${encodeURIComponent(selectedCompanion.id)}`,
-                    builderReturnTo,
-                  )}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-2 text-xs font-medium text-amber-800 transition-colors hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 sm:min-h-0 sm:py-1.5"
-                >
-                  <Flag className="h-3 w-3" /> <span>Report</span>
-                </a>
-              </BuilderActionBar>
+                      <span className="inline">Reactor</span>
+                    </BuilderToolbarButton>
+                  )
+                }
+                trailing={
+                  <a
+                    href={appendReturnTo(
+                      `/report-issue?type=companion&name=${encodeURIComponent(selectedCompanion.name)}&id=${encodeURIComponent(selectedCompanion.id)}`,
+                      builderReturnTo,
+                    )}
+                    className={BUILDER_REPORT_CLASS}
+                  >
+                    <Flag className="h-3 w-3" /> <span className="inline">Report</span>
+                  </a>
+                }
+              />
             </BuilderItemHeader>
 
             <div className="mb-6">
@@ -1314,7 +1304,7 @@ export default function CompanionBuilderPage() {
 
             <div className="grid lg:grid-cols-[1fr_320px] gap-6">
               <div>
-                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
                   <h2 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">
                     MOD CONFIGURATION
                   </h2>
@@ -1330,6 +1320,7 @@ export default function CompanionBuilderPage() {
                       {capacityUsed} / {baseCapacity}
                     </span>
                   </div>
+                  <MobileStatSummary items={companionStatSummary(calculatedStats)} />
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
                   {Array.from({ length: COMPANION_MOD_SLOT_COUNT }, (_, i) => {
@@ -1503,7 +1494,7 @@ export default function CompanionBuilderPage() {
 
                     <div className="space-y-6">
                       <div>
-                        <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                        <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
                           <h3 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">WEAPON MODS</h3>
                           <span className={cn(
                             "inline-flex items-center gap-1.5 text-xs font-mono tabular-nums",

@@ -56,6 +56,11 @@ import { FolderOpen, Crosshair, Shield, Zap, Gauge, ChevronRight, Users, Lock } 
 import { SavedBuild, RailjackBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
 import { saveIdentityId } from "@/lib/builds/quicksave";
 import { BuilderSaveControls } from "@/components/builder-save-controls";
+import { BuilderToolbar } from "@/components/builder-toolbar";
+import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
+import { railjackStatSummary } from "@/lib/ui/mobile-stat-summary";
+import { BuilderItemHeader } from "@/components/item-picker";
+import { stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { BuildsReturnLink } from "@/components/builds-return-link";
 import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
@@ -218,35 +223,41 @@ export default function RailjackBuilderPage() {
   const hasCruisingSpeed = integratedMods.some((m) => m.modId === "cruising_speed");
   const hasProtectiveShots = integratedMods.some((m) => m.modId === "protective_shots");
 
+  const buildRailjackData = useCallback((): RailjackBuildData => ({
+    reactorId: selectedReactor?.id,
+    shieldId: selectedShield?.id,
+    engineId: selectedEngine?.id,
+    platingId: selectedPlating?.id,
+    reactorTraitId,
+    shieldTraitId,
+    engineTraitId,
+    turretIds: selectedTurrets.map((t) => t?.id),
+    ordnanceId: selectedOrdnance?.id,
+    integratedMods: integratedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+    battleMods: battleMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+    tacticalMods: tacticalMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
+    integratedPolarities,
+    battlePolarities,
+    tacticalPolarities,
+    crewSlots,
+    intrinsics,
+    simulation: {
+      crimsonFugueStacks,
+      cruisingSpeedActive,
+      protectiveShotsActive,
+      shieldsDepleted,
+      activeBattleAbilityId,
+      activeTacticalAbilityId,
+    },
+  }), [selectedReactor, selectedShield, selectedEngine, selectedPlating, reactorTraitId, shieldTraitId, engineTraitId, selectedTurrets, selectedOrdnance, integratedMods, battleMods, tacticalMods, integratedPolarities, battlePolarities, tacticalPolarities, crewSlots, intrinsics, crimsonFugueStacks, cruisingSpeedActive, protectiveShotsActive, shieldsDepleted, activeBattleAbilityId, activeTacticalAbilityId]);
+
+  const { dirty: hasUnsavedChanges, markClean } = useUnsavedChanges(
+    useMemo(() => stableBuildSnapshot(buildRailjackData()), [buildRailjackData]),
+  );
+
   // Save
   const handleSaveBuildConfirm = useCallback(async ({ name, isPublic, asNew = false }: SaveBuildDialogValues & { asNew?: boolean }) => {
-    const data: RailjackBuildData = {
-      reactorId: selectedReactor?.id,
-      shieldId: selectedShield?.id,
-      engineId: selectedEngine?.id,
-      platingId: selectedPlating?.id,
-      reactorTraitId,
-      shieldTraitId,
-      engineTraitId,
-      turretIds: selectedTurrets.map((t) => t?.id),
-      ordnanceId: selectedOrdnance?.id,
-      integratedMods: integratedMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
-      battleMods: battleMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
-      tacticalMods: tacticalMods.map((m) => ({ modId: m.modId, rank: m.rank, slotIndex: m.slotIndex })),
-      integratedPolarities,
-      battlePolarities,
-      tacticalPolarities,
-      crewSlots,
-      intrinsics,
-      simulation: {
-        crimsonFugueStacks,
-        cruisingSpeedActive,
-        protectiveShotsActive,
-        shieldsDepleted,
-        activeBattleAbilityId,
-        activeTacticalAbilityId,
-      },
-    };
+    const data: RailjackBuildData = buildRailjackData();
     const build: SavedBuild = {
       id: saveIdentityId(currentBuildId, asNew),
       name,
@@ -266,7 +277,8 @@ export default function RailjackBuilderPage() {
     } else {
       toast.success("Build saved locally", { description: "Log in to sync builds to your account" });
     }
-  }, [selectedReactor, selectedShield, selectedEngine, selectedPlating, reactorTraitId, shieldTraitId, engineTraitId, selectedTurrets, selectedOrdnance, integratedMods, battleMods, tacticalMods, integratedPolarities, battlePolarities, tacticalPolarities, crewSlots, intrinsics, crimsonFugueStacks, cruisingSpeedActive, protectiveShotsActive, shieldsDepleted, activeBattleAbilityId, activeTacticalAbilityId, currentBuildId, refreshSavedBuilds]);
+    markClean();
+  }, [buildRailjackData, currentBuildId, refreshSavedBuilds, markClean]);
 
   const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
     const build = cleanLoadedBuild(rawBuild);
@@ -322,7 +334,8 @@ export default function RailjackBuilderPage() {
     setBuildIsPublic(build.isPublic ?? false);
     setShowSavedBuilds(false);
     toast.info("Build loaded", { description: build.name });
-  }, [modsMap]);
+    markClean();
+  }, [modsMap, markClean]);
 
   useCloudBuildFromUrl("railjack", handleLoadBuild);
 
@@ -384,35 +397,33 @@ export default function RailjackBuilderPage() {
 
   return (
     <PageShell>
-      <main className="container mx-auto px-4 pt-8 pb-24 lg:pb-8">
-        {/* Round 55: back to /builds (same filter + scroll) or Your builds when signed in. */}
-        <div className="mb-3 flex empty:hidden">
-          <BuildsReturnLink />
+      <main className="container mx-auto flex-1 px-3.5 pt-5 pb-24 sm:px-4 sm:pt-6 lg:pb-6">
+        <BuilderItemHeader
+          title="Railjack Builder"
+          subtitle="Configure your Railjack components, armaments, and Plexus mods"
+        >
+          <BuilderToolbar
+            canUpdate={!!currentBuildId}
+            dirty={hasUnsavedChanges}
+            onUpdate={() => { void handleSaveBuildConfirm({ name: buildName || "Railjack Build", description: "", isPublic: buildIsPublic, tags: [], target: "new", asNew: false }); }}
+            onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
+            onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
+            onLoad={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }}
+            leading={
+              <input
+                type="text"
+                value={buildName}
+                onChange={(e) => setBuildName(e.target.value)}
+                placeholder="Build name..."
+                aria-label="Build name"
+                className="h-11 w-full max-w-[12rem] rounded-md border border-border bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground lg:pointer-fine:h-9 sm:w-40"
+              />
+            }
+          />
+        </BuilderItemHeader>
+        <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 -mx-0.5 mb-3 bg-background pb-1 backdrop-blur-md supports-[backdrop-filter]:bg-background lg:hidden">
+          <MobileStatSummary items={railjackStatSummary(computedStats)} />
         </div>
-        {/* Title bar */}
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h1 className="min-w-0 text-xl font-bold sm:text-3xl">Railjack Builder</h1>
-          <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <input
-              type="text"
-              value={buildName}
-              onChange={(e) => setBuildName(e.target.value)}
-              placeholder="Build name..."
-              className="h-11 w-full max-w-[12rem] rounded-lg border border-border bg-background px-3 text-xs text-foreground placeholder:text-muted-foreground lg:pointer-fine:h-9 sm:w-40"
-            />
-            <BuilderSaveControls
-              canUpdate={!!currentBuildId}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:min-w-0 sm:py-1.5"
-              onUpdate={() => { void handleSaveBuildConfirm({ name: buildName || "Railjack Build", description: "", isPublic: buildIsPublic, tags: [], target: "new", asNew: false }); }}
-              onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
-              onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
-            />
-            <button onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-9 sm:min-w-0 sm:py-1.5" title="Load Build">
-              <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
-            </button>
-          </div>
-        </div>
-        <p className="text-muted-foreground mb-4">Configure your Railjack components, armaments, and Plexus mods</p>
 
         {/* Reference ships: one-tap loads of the in-game reference Railjack loadouts (components, turrets, ordnance, max-rank Plexus). */}
         <div className="mb-6 flex flex-wrap items-center gap-2" data-testid="railjack-reference-ships">
@@ -1051,7 +1062,7 @@ export default function RailjackBuilderPage() {
 
               {/* Capacity — Integrated only */}
               {plexusTab === "integrated" && (
-                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
                   <h3 className="min-w-0 truncate text-sm font-semibold uppercase tracking-wider text-muted-foreground">Integrated</h3>
                   <div className="flex flex-wrap items-center gap-2">
                     {auraBonus > 0 && (

@@ -101,6 +101,8 @@ import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
 import { hasBuildLinkParam, hrefForCatalogPick, hrefWithWeaponParam, weaponIdFromParams, WEAPON_URL_PARAM } from "@/lib/builds/weapon-url-param";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { BuilderSaveControls } from "@/components/builder-save-controls";
+import { BuilderToolbar, BuilderToolbarButton, BUILDER_REPORT_CLASS } from "@/components/builder-toolbar";
+import { BuilderSavedEmpty } from "@/components/builder-saved-empty";
 import { saveIdentityId } from "@/lib/builds/quicksave";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
@@ -1243,9 +1245,7 @@ export default function WeaponBuilderPage() {
             }}
             savedPanel={
               savedBuilds.length === 0 ? (
-                <p className="px-2 py-6 text-center text-xs text-muted-foreground">
-                  No saved weapon builds yet. Save a build from the builder to see it here.
-                </p>
+                <BuilderSavedEmpty typeLabel="weapon" />
               ) : (
                 savedBuilds.map((build) => {
                   const d = build.data as WeaponBuildData;
@@ -1375,114 +1375,83 @@ export default function WeaponBuilderPage() {
               title={selectedWeapon.name}
               subtitle={`${selectedWeapon.category} • ${selectedWeapon.triggerType}`}
             >
-              <BuilderActionBar>
-                <BuilderActionGroup>
-                  <BuilderSaveControls
-                    canUpdate={!!currentBuildId}
-                    dirty={hasUnsavedChanges}
-                    dirtyClass={SAVE_DIRTY_CLASS}
-                    dotClass={SAVE_DIRTY_DOT_CLASS}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-green-500/10 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-0 lg:py-1.5"
-                    onUpdate={() => { void handleQuickSave(); }}
-                    onSaveNew={() => {
-                      setSaveAsNew(false);
-                      setSaveDialogDefaultPublic(buildIsPublic);
-                      setSaveDialogOpen(true);
-                    }}
-                    onSaveAs={() => {
-                      setSaveAsNew(true);
-                      setSaveDialogDefaultPublic(false);
-                      setSaveDialogOpen(true);
-                    }}
-                  />
-                  <button
-                    onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs lg:pointer-fine:min-h-0 lg:py-1.5 text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10 transition-all font-medium"
-                    title="Load Build"
-                  >
-                    <FolderOpen className="h-3.5 w-3.5" /> <span className="inline">Load</span>
-                  </button>
-                  <div className="w-px h-4 bg-border mx-1" />
-                  <button
-                    onClick={() => setShowImporter(!showImporter)}
-                    className={cn(
-                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
-                      showImporter
-                        ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
-                        : "text-muted-foreground hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10"
-                    )}
-                    title="Import mods from a pasted mod list or a screenshot. You choose to replace or add, and can undo it"
-                  >
-                    <Upload className="h-3.5 w-3.5" /> <span className="inline">Import mods</span>
-                  </button>
-                  <button
-                    onClick={handleShareBuild}
-                    className={cn(
-                      "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
-                      shareCopied
-                        ? "bg-green-500/10 text-green-700 dark:text-green-400"
-                        : "text-muted-foreground hover:text-purple-700 dark:hover:text-purple-400 hover:bg-purple-500/10"
-                    )}
-                    title="Copy shareable link"
-                  >
-                    {shareCopied ? <Check className="h-3.5 w-3.5" /> : <Share2 className="h-3.5 w-3.5" />}
-                    <span className="inline">{shareCopied ? "Copied!" : "Share"}</span>
-                  </button>
-                  <button
-                    onClick={() => setCompareOpen(true)}
-                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium text-muted-foreground transition-all hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-400 lg:pointer-fine:min-h-0 lg:py-1.5"
-                    title="Compare this build to a saved or posted build"
-                  >
-                    <ArrowLeftRight className="h-3.5 w-3.5" />
-                    <span className="inline">Compare</span>
-                  </button>
-                </BuilderActionGroup>
-
-                <BuilderActionGroup>
+              <BuilderToolbar
+                canUpdate={!!currentBuildId}
+                dirty={hasUnsavedChanges}
+                onUpdate={() => { void handleQuickSave(); }}
+                onSaveNew={() => {
+                  setSaveAsNew(false);
+                  setSaveDialogDefaultPublic(buildIsPublic);
+                  setSaveDialogOpen(true);
+                }}
+                onSaveAs={() => {
+                  setSaveAsNew(true);
+                  setSaveDialogDefaultPublic(false);
+                  setSaveDialogOpen(true);
+                }}
+                onLoad={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }}
+                onShare={handleShareBuild}
+                shareCopied={shareCopied}
+                extras={
+                  <>
+                    <BuilderToolbarButton
+                      onClick={() => setShowImporter(!showImporter)}
+                      title="Import mods from a pasted mod list or a screenshot. You choose to replace or add, and can undo it"
+                      active={showImporter}
+                      activeClass="bg-blue-500/10 text-blue-700 dark:text-blue-400"
+                      hoverClass="hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-500/10"
+                    >
+                      <Upload className="h-3.5 w-3.5" /> <span className="inline">Import mods</span>
+                    </BuilderToolbarButton>
+                    <BuilderToolbarButton
+                      onClick={() => setCompareOpen(true)}
+                      title="Compare this build to a saved or posted build"
+                      hoverClass="hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-400"
+                    >
+                      <ArrowLeftRight className="h-3.5 w-3.5" />
+                      <span className="inline">Compare</span>
+                    </BuilderToolbarButton>
+                  </>
+                }
+                secondary={
+                  <>
                   {showAdversaryRank && (
-                    <button
+                    <BuilderToolbarButton
                       onClick={() => setAdversaryFormas((n) => (n >= 5 ? 0 : n + 1))}
-                      className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
-                        adversaryFormas > 0
-                          ? "bg-amber-500/10 text-amber-800 dark:text-amber-400"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      )}
                       title="Each Forma raises max rank by 2, up to 40. Mod capacity matches that rank."
+                      active={adversaryFormas > 0}
+                      activeClass="bg-amber-500/10 text-amber-800 dark:text-amber-400"
+                      hoverClass="hover:text-foreground hover:bg-accent"
                     >
                       <span className="inline">Rank {adversaryRankFromFormas(adversaryFormas)}</span>
-                    </button>
+                    </BuilderToolbarButton>
                   )}
                   {selectedWeapon?.isExalted ? (
-                    <button
-                      type="button"
+                    <BuilderToolbarButton
                       disabled
                       title="Innate Orokin Catalyst — exalted weapons automatically come with an Orokin Catalyst equipped in-game (60 capacity)"
                       aria-pressed={true}
-                      className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium bg-blue-500/10 text-blue-700 dark:text-blue-400 cursor-default opacity-90 lg:pointer-fine:min-h-0 lg:py-1.5"
+                      active
+                      activeClass="bg-blue-500/10 text-blue-700 dark:text-blue-400 cursor-default opacity-90"
                     >
                       <Zap className="h-3.5 w-3.5" />
                       <span className="inline">Innate Catalyst</span>
-                    </button>
+                    </BuilderToolbarButton>
                   ) : (
-                    <button
+                    <BuilderToolbarButton
                       onClick={() => setHasOrokinCatalyst(!hasOrokinCatalyst)}
                       title="Orokin Catalyst — doubles mod capacity"
                       aria-pressed={hasOrokinCatalyst}
-                      className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
-                        hasOrokinCatalyst
-                          ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      )}
+                      active={hasOrokinCatalyst}
+                      activeClass="bg-blue-500/10 text-blue-700 dark:text-blue-400"
+                      hoverClass="hover:text-foreground hover:bg-accent"
                     >
                       <Zap className="h-3.5 w-3.5" />
                       <span className="inline">Catalyst</span>
-                    </button>
+                    </BuilderToolbarButton>
                   )}
                   {incarnonFormEvolution && (
-                    <button
-                      type="button"
+                    <BuilderToolbarButton
                       onClick={toggleIncarnonForm}
                       aria-pressed={incarnonFormActive}
                       data-testid="toolbar-incarnon-form-toggle"
@@ -1491,33 +1460,27 @@ export default function WeaponBuilderPage() {
                           ? "Incarnon Form is on — click to switch back to the normal weapon. The other evolution picks keep applying (adapter stays installed)."
                           : "Normal weapon form — click to turn Incarnon Form back on. Evolution picks 2–4 apply either way while the adapter is installed."
                       }
-                      className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
-                        incarnonFormActive
-                          ? "bg-orange-500/15 text-orange-700 dark:text-orange-400"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      )}
+                      active={incarnonFormActive}
+                      activeClass="bg-orange-500/15 text-orange-700 dark:text-orange-400"
+                      hoverClass="hover:text-foreground hover:bg-accent"
                     >
                       <Flame className="h-3.5 w-3.5" />
                       <span className="inline">{incarnonFormActive ? "Incarnon Form ON" : "Incarnon Form OFF"}</span>
-                    </button>
+                    </BuilderToolbarButton>
                   )}
                   {weaponHasGravimagMode(selectedWeapon) && (
-                    <button
+                    <BuilderToolbarButton
                       onClick={() => setGravimagMode((v) => !v)}
-                      className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
-                        gravimagMode
-                          ? "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      )}
                       title={gravimagMode
                         ? "Gravimag deployed — showing atmosphere stats. Click for Archwing (space) stats."
                         : "Showing Archwing (space) stats. Click to deploy via Gravimag (atmosphere stats)."}
+                      active={gravimagMode}
+                      activeClass="bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
+                      hoverClass="hover:text-foreground hover:bg-accent"
                     >
                       <Orbit className="h-3.5 w-3.5" />
                       <span className="inline">Gravimag</span>
-                    </button>
+                    </BuilderToolbarButton>
                   )}
                   {weaponHasStanceFormMode(selectedWeapon) && (() => {
                     const modes = getAlternateModes(selectedWeapon);
@@ -1526,7 +1489,7 @@ export default function WeaponBuilderPage() {
                     const currentLabel = alternateMode ? modes[alternateModeIndex]!.label : (selectedWeapon.defaultModeLabel ?? "Default");
                     const nextLabel = nextIndex >= 0 ? modes[nextIndex]!.label : (selectedWeapon.defaultModeLabel ?? "default form");
                     return (
-                    <button
+                    <BuilderToolbarButton
                       onClick={() => {
                         setAlternateModeIndex((i) => {
                           const next = i + 1 >= modes.length ? -1 : i + 1;
@@ -1539,12 +1502,6 @@ export default function WeaponBuilderPage() {
                           return next;
                         });
                       }}
-                      className={cn(
-                        "inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all lg:pointer-fine:min-h-0 lg:py-1.5",
-                        alternateMode
-                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                      )}
                       title={
                         multi
                           ? `${currentLabel} mode — click for ${nextLabel}. Modes: ${[selectedWeapon.defaultModeLabel ?? "Default", ...modes.map((m) => m.label)].join(" → ")}.`
@@ -1552,38 +1509,41 @@ export default function WeaponBuilderPage() {
                             ? `${modes[0]!.label} mode on — click for default form.`
                             : `Default form — click for ${modes[0]!.label}.`
                       }
+                      active={!!alternateMode}
+                      activeClass="bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                      hoverClass="hover:text-foreground hover:bg-accent"
                     >
                       <Swords className="h-3.5 w-3.5" />
                       <span className="inline">
                         {multi ? currentLabel : modes[0]!.label}
                       </span>
-                    </button>
+                    </BuilderToolbarButton>
                     );
                   })()}
-                </BuilderActionGroup>
-
-                {selectedWeapon && weaponSupportsProgenitor(selectedWeapon) && (
-                  <ProgenitorControls
-                    progenitorElement={progenitorElement}
-                    progenitorBonusPercent={progenitorBonusPercent}
-                    onElementChange={setProgenitorElement}
-                    onBonusChange={setProgenitorBonusPercent}
-                  />
-                )}
-
-                <div className="flex-1" />
-
-                {/* meta */}
-                <a
-                  href={appendReturnTo(
-                    `/report-issue?type=weapon&name=${encodeURIComponent(selectedWeapon.name)}&id=${encodeURIComponent(selectedWeapon.id)}`,
-                    builderReturnTo,
-                  )}
-                  className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-amber-500/30 px-3 py-2 text-xs font-medium text-amber-800 transition-colors hover:bg-amber-500/5 hover:text-amber-900 dark:text-amber-400/70 dark:hover:text-amber-400 lg:pointer-fine:min-h-0 lg:py-1.5"
-                >
-                  <Flag className="h-3 w-3" /> <span className="inline">Report</span>
-                </a>
-              </BuilderActionBar>
+                  </>
+                }
+                aside={
+                  selectedWeapon && weaponSupportsProgenitor(selectedWeapon) ? (
+                    <ProgenitorControls
+                      progenitorElement={progenitorElement}
+                      progenitorBonusPercent={progenitorBonusPercent}
+                      onElementChange={setProgenitorElement}
+                      onBonusChange={setProgenitorBonusPercent}
+                    />
+                  ) : null
+                }
+                trailing={
+                  <a
+                    href={appendReturnTo(
+                      `/report-issue?type=weapon&name=${encodeURIComponent(selectedWeapon.name)}&id=${encodeURIComponent(selectedWeapon.id)}`,
+                      builderReturnTo,
+                    )}
+                    className={BUILDER_REPORT_CLASS}
+                  >
+                    <Flag className="h-3 w-3" /> <span className="inline">Report</span>
+                  </a>
+                }
+              />
             </BuilderItemHeader>
 
             <div className="mb-6">
@@ -1597,7 +1557,7 @@ export default function WeaponBuilderPage() {
 
             <div className="grid lg:grid-cols-[1fr_320px] gap-6">
               <div id="build-mods" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
-                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
                   <h2 className="min-w-0 truncate text-sm font-semibold tracking-wider text-muted-foreground">
                     MOD CONFIGURATION
                   </h2>
@@ -1936,7 +1896,7 @@ export default function WeaponBuilderPage() {
         open={showSavedBuilds}
         onOpenChange={setShowSavedBuilds}
         title="Saved Weapon Builds"
-        emptyMessage="No saved builds yet. Build a weapon and click Save!"
+        emptyMessage="No saved weapon builds yet"
         builds={savedBuilds}
         accent="cyan"
         getSubtitle={(build) => {

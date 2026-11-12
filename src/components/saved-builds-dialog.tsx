@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { SavedBuild } from "@/lib/builds/build-storage";
 import { cn } from "@/lib/utils";
+import { BuilderSavedEmpty } from "@/components/builder-saved-empty";
 
 export function SavedBuildsDialog({
   open,
@@ -45,12 +46,7 @@ export function SavedBuildsDialog({
         </DialogHeader>
         <div className="flex-1 overflow-y-auto px-6 pb-6 min-h-0">
           {builds.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-border/70 px-3 py-8 text-center">
-              <p className="text-sm font-medium text-foreground">{emptyMessage}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Save a build from the builder to see it here.
-              </p>
-            </div>
+            <BuilderSavedEmpty title={emptyMessage} />
           ) : (
             <div className="space-y-2">
               {builds.map((build) => (

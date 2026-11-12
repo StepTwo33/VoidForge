@@ -1,5 +1,7 @@
 "use client";
 
+import { BuilderItemHeader } from "@/components/item-picker";
+
 import {
   applyPolarityOverride,
   effectiveSlotPolarities,
@@ -32,6 +34,10 @@ import { Zap, FolderOpen, ArrowLeftRight } from "lucide-react";
 import { SavedBuild, ArchwingBuildData, persistSavedBuild } from "@/lib/builds/build-storage";
 import { saveIdentityId } from "@/lib/builds/quicksave";
 import { BuilderSaveControls } from "@/components/builder-save-controls";
+import { BuilderToolbar, BuilderToolbarButton, BUILDER_REPORT_CLASS } from "@/components/builder-toolbar";
+import { BuilderSavedEmpty } from "@/components/builder-saved-empty";
+import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
+import { archwingStatSummary } from "@/lib/ui/mobile-stat-summary";
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { BuildsReturnLink } from "@/components/builds-return-link";
 import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
@@ -610,38 +616,30 @@ export default function ArchwingBuilderPage() {
 
   return (
     <PageShell>
-      <main className="container mx-auto px-4 pt-8 pb-24 lg:pb-8">
-        {/* Round 55: back to /builds (same filter + scroll) or Your builds when signed in. */}
-        <div className="mb-3 flex empty:hidden">
-          <BuildsReturnLink />
-        </div>
-        <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
-          <h1 className="text-xl sm:text-3xl font-bold">Vehicle Builder</h1>
-          <div className="flex items-center gap-2">
-            <BuilderSaveControls
-              canUpdate={!!currentBuildId}
-              dirty={hasUnsavedChanges}
-              dirtyClass={SAVE_DIRTY_CLASS}
-              dotClass={SAVE_DIRTY_DOT_CLASS}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-green-500/50 hover:text-green-700 dark:hover:text-green-400 lg:pointer-fine:min-h-9 sm:py-1.5"
-              onUpdate={() => { void handleSaveBuildConfirm({ name: buildName || "Vehicle Build", description: "", isPublic: buildIsPublic, tags: [], target: "new", asNew: false }); }}
-              onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
-              onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
-            />
-            <button onClick={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-blue-500/50 hover:text-blue-700 dark:hover:text-blue-400 lg:pointer-fine:min-h-9 sm:py-1.5" title="Load Build">
-              <FolderOpen className="h-3.5 w-3.5" /> <span>Load</span>
-            </button>
-            <button
-              onClick={() => setCompareOpen(true)}
-              disabled={!selectedFrame}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground transition-all hover:border-teal-500/50 hover:text-teal-700 disabled:pointer-events-none disabled:opacity-40 dark:hover:text-teal-400 lg:pointer-fine:min-h-9 sm:py-1.5"
-              title={selectedFrame ? "Compare this build to a saved or posted build" : "Select an archwing or necramech first"}
-            >
-              <ArrowLeftRight className="h-3.5 w-3.5" /> <span>Compare</span>
-            </button>
-          </div>
-        </div>
-        <p className="text-muted-foreground mb-6">Build Archwings, Necramechs, and their weapons</p>
+      <main className="container mx-auto flex-1 px-3.5 pt-5 pb-24 sm:px-4 sm:pt-6 lg:pb-6">
+        <BuilderItemHeader
+          title="Vehicle Builder"
+          subtitle="Build Archwings, Necramechs, and their weapons"
+        >
+          <BuilderToolbar
+            canUpdate={!!currentBuildId}
+            dirty={hasUnsavedChanges}
+            onUpdate={() => { void handleSaveBuildConfirm({ name: buildName || "Vehicle Build", description: "", isPublic: buildIsPublic, tags: [], target: "new", asNew: false }); }}
+            onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
+            onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
+            onLoad={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }}
+            extras={
+              <BuilderToolbarButton
+                onClick={() => setCompareOpen(true)}
+                disabled={!selectedFrame}
+                title={selectedFrame ? "Compare this build to a saved or posted build" : "Select an archwing or necramech first"}
+                hoverClass="hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-400"
+              >
+                <ArrowLeftRight className="h-3.5 w-3.5" /> <span className="inline">Compare</span>
+              </BuilderToolbarButton>
+            }
+          />
+        </BuilderItemHeader>
 
         {/* Mode selector */}
         <div className="mb-6 flex flex-wrap gap-2">
@@ -733,7 +731,7 @@ export default function ArchwingBuilderPage() {
             {/* Frame mod slots */}
             {((mode === "archwing" && selectedArchwing) || (mode === "necramech" && selectedNecramech)) && (
               <div id="aw-mods" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
-                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
                   <h2 className="min-w-0 truncate section-title">
                     {mode === "archwing" ? "Archwing Mods" : "Necramech Mods"}
                   </h2>
@@ -773,6 +771,7 @@ export default function ArchwingBuilderPage() {
                       {frameModsUsed} / {frameCapacity}
                     </span>
                   </div>
+                  <MobileStatSummary items={archwingStatSummary(frameStats)} />
                 </div>
                 <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
                   {Array.from({ length: mode === "necramech" ? 12 : 8 }, (_, i) => {
@@ -865,7 +864,7 @@ export default function ArchwingBuilderPage() {
 
             {selectedWeapon && (
               <div id="ag-mods" className="scroll-mt-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)]">
-                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/95 px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/85 lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
+                <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card lg:static lg:z-auto lg:mb-0 lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none lg:backdrop-blur-none">
                   <h2 className="min-w-0 truncate section-title">Weapon Mods</h2>
                   <div className="flex flex-wrap items-center gap-2">
                     <button
