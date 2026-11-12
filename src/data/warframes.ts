@@ -9,7 +9,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 100,
     "sprintSpeed": 1.15,
-    "description": "Launches seeking shuriken that deal Slash damage and pin enemies to walls.",
+    "description": "Behold the patron saint of the Orokin school of political assassination. Ash specializes in stealth. The edge of his blade is sooner felt than seen.",
     "passive": "<DT_SLASH_COLOR>Slash Status Effects inflicted on enemies do 25% increased damage and last 50% longer.",
     "abilities": [
       {
@@ -70,7 +70,7 @@ export const allWarframes: Warframe[] = [
     "armor": 185,
     "energy": 100,
     "sprintSpeed": 1.2,
-    "description": "Launches seeking shuriken that deal Slash damage and pin enemies to walls.",
+    "description": "Distraction and subterfuge become lethal weapons with Ash Prime. Featuring altered mod polarities for greater customization.",
     "passive": "<DT_SLASH>Slash Status Effects inflicted on enemies do 25% increased damage and last 50% longer.",
     "abilities": [
       {
@@ -421,7 +421,7 @@ export const allWarframes: Warframe[] = [
     "armor": 185,
     "energy": 200,
     "sprintSpeed": 1.2,
-    "description": "Dodge all incoming projectiles, but only while not attacking. Use again to deactivate this ability.",
+    "description": "Beware the fury of the truly patient. Baruuk boasts survivability and crowd control. Pushed beyond his restraint, he unleashes the storm within.",
     "passive": "Each projectile dodged, each enemy lulled or disarmed, erodes Baruuk's restraint and fuels the storm within. As Baruuk's restraint is diminished he becomes up to 50% more resistant to damage.",
     "abilities": [
       {
@@ -489,7 +489,7 @@ export const allWarframes: Warframe[] = [
     "armor": 240,
     "energy": 200,
     "sprintSpeed": 1.2,
-    "description": "Dodge all incoming projectiles, but only while not attacking. Use again to deactivate this ability.",
+    "description": "Doomed are the fools who attack the peace and exhaust the restraint of this reluctant warrior.",
     "passive": "Each projectile dodged, each enemy lulled or disarmed, erodes Baruuk's restraint and fuels the storm within. As Baruuk's restraint is diminished he becomes up to 50% more resistant to damage.",
     "abilities": [
       {
@@ -557,7 +557,7 @@ export const allWarframes: Warframe[] = [
     "armor": 480,
     "energy": 175,
     "sprintSpeed": 1.1,
-    "description": "Skewer and hold a target, siphoning their health. Use again to hurl the victim damaging them and anyone near the impact site.",
+    "description": "This fearsome Necramech, fashioned in honor of the Entrati matriarch, is a robust front-line fighter. Favoring armor and health over shield strength, Bonewidow can grab and hurl enemies, deploy a heavy shield for personal defense, and cleave through opposing ranks with a massive warblade.",
     "passive": "",
         "abilities": [
       {
@@ -777,7 +777,7 @@ export const allWarframes: Warframe[] = [
     "armor": 370,
     "energy": 175,
     "sprintSpeed": 1,
-    "description": "Exhale a deep breath of elemental destruction. Tap to cycle through elements, hold to cast. The chosen element applies to all of Chroma's abilities.",
+    "description": "Unleash the draconic. Chroma employs Heat, Electricity, Toxin, and Cold to deal high damage while maintaining survivability. Soar with winged fury.",
     "passive": "Wings sprout for an additional jump and bullet jump.",
     "abilities": [
       {
@@ -888,7 +888,7 @@ export const allWarframes: Warframe[] = [
     "armor": 450,
     "energy": 200,
     "sprintSpeed": 1,
-    "description": "Exhale a deep breath of elemental destruction. Tap to cycle through elements, hold to cast. The chosen element applies to all of Chroma's abilities.",
+    "description": "Bind the elements and unleash untold destruction with Chroma Prime. Featuring altered mod polarities for greater customization.",
     "passive": "Wings sprout for an additional jump and bullet jump.",
     "abilities": [
       {
@@ -1143,7 +1143,7 @@ export const allWarframes: Warframe[] = [
     "armor": 150,
     "energy": 180,
     "sprintSpeed": 1.1,
-    "description": "Plant an antenna that projects a forward wave scan. Detected enemies take increased Weak Point Damage, and become visible through walls. Weapons gain Punch through.",
+    "description": "Move like a shadow, strike with force. The Orokin created a Warframe that marries damage and stealth to eliminate sensitive problems, but he disappeared in the chaos of their demise. All that remains is a batch name: Cyte-09.",
     "passive": "Weak Point Kills increase Cyte-09's Weak Point Critical Chance by 1% up to 300% for the duration of the current mission.",
     "abilities": [
       {
@@ -1292,7 +1292,7 @@ export const allWarframes: Warframe[] = [
     "armor": 145,
     "energy": 200,
     "sprintSpeed": 1.15,
-    "description": "Open Noctua, Dante's Exalted Tome, and unleash a tale of woe upon his enemies.",
+    "description": "Seeker of knowledge. Keeper of history. Daring researcher of Leverian lore. Dante composes arcane tales to support allies and devastate enemies.",
     "passive": "Noctua scans targets, recording information for your Codex. Status Chance increases by 50% on fully scanned targets.",
     "abilities": [
       {
@@ -1512,7 +1512,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 175,
     "sprintSpeed": 1.15,
-    "description": "Switch forms, temporarily gaining bonus Shields and Armor in Night-Form, or bonus Damage and Speed in Day-Form.",
+    "description": "Equinox rises from the edge of day and night. Her Day form offers offensive support while her Night form offers defensive support. She thrives between realms.",
     "passive": "10% of Health Orbs are converted into Energy, and 10% of Energy Orbs are converted into Health.",
     "abilities": [
       {
@@ -1583,7 +1583,7 @@ export const allWarframes: Warframe[] = [
     "armor": 160,
     "energy": 200,
     "sprintSpeed": 1.15,
-    "description": "Switch forms, temporarily gaining bonus Shields and Armor in Night-Form, or bonus Damage and Speed in Day-Form.",
+    "description": "Night and Day in final balance; the graceful perfection of the one that walks the borders.",
     "passive": "10% of Health Orbs are converted into Energy, and 10% of Energy Orbs are converted into Health.",
     "abilities": [
       {
@@ -1654,7 +1654,7 @@ export const allWarframes: Warframe[] = [
     "armor": 240,
     "energy": 100,
     "sprintSpeed": 1,
-    "description": "Slash and dash through enemies alongside a radial specter. The powerful Exalted Blade's slashes inflict Slash Status.",
+    "description": "Excalibur epitomizes the warrior spirit. His master swordsmanship deals high damage. He is the embodiment of martial excellence.",
     "passive": "Excalibur deals 10% increased damage and attacks 10% faster when wielding swords.",
     "abilities": [
       {
@@ -1710,7 +1710,7 @@ export const allWarframes: Warframe[] = [
     "armor": 315,
     "energy": 175,
     "sprintSpeed": 1,
-    "description": "Slash and dash through enemies alongside a radial specter. The powerful Exalted Blade's slashes inflict Slash Status.",
+    "description": "Excalibur Prime is the epitome of mobility and offense, and features the same abilities as Excalibur, but has unique mod polarities installed allowing for greater customization.",
     "passive": "Excalibur Prime deals 10% increased damage and attacks 10% faster when wielding swords.",
     "abilities": [
       {
@@ -1766,7 +1766,7 @@ export const allWarframes: Warframe[] = [
     "armor": 315,
     "energy": 175,
     "sprintSpeed": 1,
-    "description": "Slash and dash through enemies alongside a radial specter. The powerful Exalted Blade\u2019s slashes inflict <DT_SLASH_COLOR>Slash Status.",
+    "description": "From the shadow of the long night emerges a new Excalibur.",
     "passive": "Umbra exhibits sentience in combat without Transference control. Attacks 10% faster and deals 10% more damage while wielding swords.",
     "abilities": [
       {
@@ -1822,7 +1822,7 @@ export const allWarframes: Warframe[] = [
     "armor": 325,
     "energy": 175,
     "sprintSpeed": 0.95,
-    "description": "Drop through an inky frame and emerge invulnerable at the aimed location in a splash of ink that inflicts Inkblot on nearby enemies.",
+    "description": "Follie, the merry, macabre Shadowgrapher, brings ink to life. Support her squad and control enemy crowds with a myriad of versatile sketches and tricks.",
     "passive": "INKBLOT: Follie's abilities splatter thick viscous ink onto enemies, applying a 50% slow for 10 seconds. While coated in ink, slain foes have a 20% chance to congeal an ink balloon that pops, dropping a random mixture of 3 Health and Energy Orbs.",
         "abilities": [
       {
@@ -2042,7 +2042,7 @@ export const allWarframes: Warframe[] = [
     "armor": 160,
     "energy": 175,
     "sprintSpeed": 1.15,
-    "description": "Lash out with stream of shattered glass, or hold for an arcing strike. Stats are boosted by the equipped mods on Shattered Lash.",
+    "description": "Enemies are made fragile by Gara’s deadly touch. Gara’s vitric abilities provide her and her allies with survivability and deal high damage. Shatter the foe.",
     "passive": "A 15% chance to create a radial blind lasting 10s when Gara casts Abilities.",
     "abilities": [
       {
@@ -2121,7 +2121,7 @@ export const allWarframes: Warframe[] = [
     "armor": 200,
     "energy": 175,
     "sprintSpeed": 1.15,
-    "description": "Lash out with stream of shattered glass, or hold for an arcing strike. Stats are boosted by the equipped mods on Shattered Lash.",
+    "description": "Continue the legend of the glass-armored warrior Gara. Dominate the battlefield with the power and purity of crystal.",
     "passive": "A 15% chance to create a radial blind lasting 10s when Gara casts Abilities.",
     "abilities": [
       {
@@ -2200,7 +2200,7 @@ export const allWarframes: Warframe[] = [
     "armor": 315,
     "energy": 140,
     "sprintSpeed": 1,
-    "description": "Rip the life force from an enemy and use it as a shield that captures damage, this kills significantly weakened enemies instantly. Charge to channel the captured damage into an explosive projectile.",
+    "description": "Death’s crimson maiden sharpens her talons. Garuda weaponizes the blood of her foes to deal high damage. Sanguine beauty complements her deadly power.",
     "passive": "Garuda's damage temporarily increases with each enemy she kills, to a maximum of 100%.  Slashes with her talons if no melee weapon is equipped.",
     "abilities": [
       {
@@ -2271,7 +2271,7 @@ export const allWarframes: Warframe[] = [
     "armor": 420,
     "energy": 220,
     "sprintSpeed": 1,
-    "description": "Rip the life force from an enemy and use it as a shield that captures damage, this kills significantly weakened enemies instantly. Charge to channel the captured damage into an explosive projectile.",
+    "description": "White, gold and deepest scarlet, the queen of gore in full regalia.",
     "passive": "Garuda's damage temporarily increases with each enemy she kills, to a maximum of 100%.  Slashes with her talons if no melee weapon is equipped.",
     "abilities": [
       {
@@ -2342,7 +2342,7 @@ export const allWarframes: Warframe[] = [
     "armor": 185,
     "energy": 175,
     "sprintSpeed": 1.4,
-    "description": "Burst into a hyper-sprint bowling over enemies and charging the battery. Crashing into solid objects generates a powerful shockwave. Hold to rush continuously.",
+    "description": "Take charge with the Saint of Altra. Gauss is fast, deals high damage, and has strong survivability. Movement charges his powerful battery, so never stop moving.",
     "passive": "Moving generates an electrical current that fills Gauss' battery. Shields recharge up to 120% faster while the Recharge Delay is up to 80% shorter, based on the battery level.",
     "abilities": [
       {
@@ -2421,7 +2421,7 @@ export const allWarframes: Warframe[] = [
     "armor": 185,
     "energy": 175,
     "sprintSpeed": 1.5,
-    "description": "Burst into a hyper-sprint bowling over enemies and charging the battery. Crashing into solid objects generates a powerful shockwave. Hold to rush continuously.",
+    "description": "Take charge with the Saint of Altra. Gauss is fast, deals high damage, and has strong survivability. Movement charges his powerful battery, so never stop moving.",
     "passive": "Moving generates an electrical current that fills Gauss' battery. Shields recharge up to 120% faster while the Recharge Delay is up to 80% shorter, based on the battery level.",
     "abilities": [
       {
@@ -2500,7 +2500,7 @@ export const allWarframes: Warframe[] = [
     "armor": 370,
     "energy": 175,
     "sprintSpeed": 0.94999999,
-    "description": "Swallow enemies whole and store them in Grendel's gut. Hold to vomit out stored enemies, covering them in toxic bile.",
+    "description": "Grendel sees every battlefield as a smorgasbord. His insatiable appetite rewards him with high survivability. Enemies will be eaten. And regurgitated.",
     "passive": "Each enemy consumed grants 250 bonus armor.",
     "abilities": [
       {
@@ -2578,7 +2578,7 @@ export const allWarframes: Warframe[] = [
     "armor": 400,
     "energy": 200,
     "sprintSpeed": 0.94999999,
-    "description": "Swallow enemies whole and store them in Grendel's gut. Hold to vomit out stored enemies, covering them in toxic bile.",
+    "description": "Grendel sees every battlefield as a smorgasbord. His insatiable appetite rewards him with high survivability. Enemies will be eaten. And regurgitated.",
     "passive": "Each enemy consumed grants 250 bonus armor.",
     "abilities": [
       {
@@ -2656,7 +2656,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 190,
     "sprintSpeed": 1,
-    "description": "Launch a Gyratory Sphere that will deal high damage on impact and periodically deal electrical shocks to nearby enemies. Hit multiple enemies at once with the initial launch to enhance damage.",
+    "description": "Annihilate enemies with the conductivity of coils and transmitters. Gyre’s electric attacks provide crowd control. She is the embodiment of elegant theory.",
     "passive": "Gyre's abilities have a 10% chance to deal critical damage for each Electrical status that affects the enemy.",
     "abilities": [
       {
@@ -2732,7 +2732,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 190,
     "sprintSpeed": 1.05,
-    "description": "Launch a Gyratory Sphere that will deal high damage on impact and periodically deal electrical shocks to nearby enemies. Hit multiple enemies at once with the initial launch to enhance damage.",
+    "description": "Annihilate enemies with the conductivity of coils and transmitters. Gyre’s electric attacks provide crowd control. She is the embodiment of elegant theory.",
     "passive": "Gyre's abilities have a 10% chance to deal critical damage for each Electrical status that affects the enemy.",
     "abilities": [
       {
@@ -2808,7 +2808,7 @@ export const allWarframes: Warframe[] = [
     "armor": 185,
     "energy": 100,
     "sprintSpeed": 1,
-    "description": "Cast a wave of energy that chains them where they stand. Each enemy held reinforces Harrow's shields.",
+    "description": "Achieve redemption through vengeance. The monastic Harrow increases damage to support allies. Defy enemies and ascend.",
     "passive": "Overshield capacity doubled. Start missions at maximum energy.",
     "abilities": [
       {
@@ -2875,7 +2875,7 @@ export const allWarframes: Warframe[] = [
     "armor": 185,
     "energy": 140,
     "sprintSpeed": 1,
-    "description": "Cast a wave of energy that chains them where they stand. Each enemy held reinforces Harrow's shields.",
+    "description": "The Inquisitor Eternal arises, hallowed by the Void, preaching a gospel of iron and flame.",
     "passive": "Overshield capacity doubled. Start missions at maximum energy.",
     "abilities": [
       {
@@ -2942,7 +2942,7 @@ export const allWarframes: Warframe[] = [
     "armor": 0,
     "energy": 0,
     "sprintSpeed": 1,
-    "description": "Increase the efficiency of your ammo consumption.",
+    "description": "The Helminth resides in the Orbiter Infirmary, where it repairs and maintains Warframes, subsumes them, and injects their abilities into others.",
     "passive": "",
     "abilities": [
       {
@@ -2975,7 +2975,7 @@ export const allWarframes: Warframe[] = [
     "armor": 315,
     "energy": 0,
     "sprintSpeed": 1,
-    "description": "Charge and launch devastating bolts of electricity.",
+    "description": "Strength is Hildryn’s virtue. Her unique high-damage abilities are powered by her Shields, which can be recharged with Energy. Hildryn proves that a strong offense is a good defense.",
     "passive": "Hildryn's full Shield Gate is high. After her Shields are depleted, she is invulnerable to damage up to 3.5s.",
     "abilities": [
       {
@@ -3048,7 +3048,7 @@ export const allWarframes: Warframe[] = [
     "armor": 315,
     "energy": 0,
     "sprintSpeed": 1.05,
-    "description": "Charge and launch devastating bolts of electricity.",
+    "description": "Hildryn Prime proves that power is discipline’s reward.",
     "passive": "Hildryn's full Shield Gate is high. After her Shields are depleted, she is invulnerable to damage up to 3.5s.",
     "abilities": [
       {
@@ -3121,7 +3121,7 @@ export const allWarframes: Warframe[] = [
     "armor": 240,
     "energy": 140,
     "sprintSpeed": 1.05,
-    "description": "Summon a tempest to rain down upon a target area.",
+    "description": "Hydroid summons the power of the ocean depths. He provides crowd control with aqueous attacks. His enemies will meet a watery demise.",
     "passive": "Enemies damaged by Hydroid are more vulnerable to Corrosive Status, with initial Status reducing Armor by 50%.",
     "abilities": [
       {
@@ -3193,7 +3193,7 @@ export const allWarframes: Warframe[] = [
     "armor": 290,
     "energy": 175,
     "sprintSpeed": 1.05,
-    "description": "Summon a tempest to rain down upon a target area.",
+    "description": "Command the ocean’s fury with this king of gold and silver. Featuring altered mod polarities for greater customization.",
     "passive": "Enemies damaged by Hydroid are more vulnerable to Corrosive Status, with initial Status reducing Armor by 50%.",
     "abilities": [
       {
@@ -3265,7 +3265,7 @@ export const allWarframes: Warframe[] = [
     "armor": 240,
     "energy": 100,
     "sprintSpeed": 1,
-    "description": "Blast enemies with a wave of cursed sand that blinds them and steals their health.",
+    "description": "Inaros commands the fearsome desert. He survives like the ever-shifting sands that empower him. Legend recalls Inaros as the Fear-Eater.",
     "passive": "When Inaros takes lethal damage, he entombs himself in a sarcophagus and incarnates as sand to attack enemies, draining their lifeforce to revive himself.",
     "abilities": [
       {
@@ -3336,7 +3336,7 @@ export const allWarframes: Warframe[] = [
     "armor": 240,
     "energy": 140,
     "sprintSpeed": 1.05,
-    "description": "Blast enemies with a wave of cursed sand that blinds them and steals their health.",
+    "description": "Rise, eternal, to cast the fear of Inaros into them. Featuring altered mod polarities for greater customization.",
     "passive": "When Inaros takes lethal damage, he entombs himself in a sarcophagus and incarnates as sand to attack enemies, draining their lifeforce to revive himself.",
     "abilities": [
       {
@@ -3407,7 +3407,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 215,
     "sprintSpeed": 1.15,
-    "description": "Cycle through and shoot one of four tactical arrows. Cloak creates a stationary bubble that cloaks Ivara and allies. Dashwire creates a traversable zipline. Noise emits a high-pitched sound to attract enemies. Sleep puts enemies to sleep.",
+    "description": "The huntress draws her bow. Ivara is stealth itself. Her enemies live in fear of her sudden attacks.",
     "passive": "Senses nearby enemies within 50m.",
     "abilities": [
       {
@@ -3480,7 +3480,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 250,
     "sprintSpeed": 1.2,
-    "description": "Cycle through and shoot one of four tactical arrows. Cloak creates a stationary bubble that cloaks Ivara and allies. Dashwire creates a traversable zipline. Noise emits a high-pitched sound to attract enemies. Sleep puts enemies to sleep.",
+    "description": "As regal and lethal as a nighttime wood, this is the queen of the hunt in her ultimate form.",
     "passive": "Senses nearby enemies within 50m.",
     "abilities": [
       {
@@ -3553,7 +3553,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 150,
     "sprintSpeed": 1,
-    "description": "Create a well of light that heals allies and hurts enemies. Those who enter the well will be highlighted by Judgments.",
+    "description": "Become enraptured by the song of devastation. Through her, the Jade Light can be a force of destruction or a source of support.",
     "passive": "Jade's profound understanding of the relationship between life and death grants her two Aura Mod Slots. Some of her Abilities apply Judgments, increasing enemy damage vulnerability by 50% for 10s.",
     "abilities": [
       {
@@ -3634,7 +3634,7 @@ export const allWarframes: Warframe[] = [
     "armor": 290,
     "energy": 140,
     "sprintSpeed": 1.05,
-    "description": "Send enemies reeling with a deafening whipcrack. Stats are boosted by the equipped mods on Whipclaw.",
+    "description": "Khora is red in whip and claw. She works together with her Kavat companion, Venari, to deal high damage and provide crowd control. Two bodies, one will.",
     "passive": "The ferocious kavat, Venari, fights by Khora's side and provides her with a 15% speed boost while active. If killed, Venari will reappear after 45s.",
     "abilities": [
       {
@@ -3703,7 +3703,7 @@ export const allWarframes: Warframe[] = [
     "armor": 345,
     "energy": 175,
     "sprintSpeed": 1.05,
-    "description": "Send enemies reeling with a deafening whipcrack. Stats are boosted by the equipped mods on Whipclaw.",
+    "description": "A harmony of mistress and monster. The gilded huntress and her loyal Kavat, Venari, dominate the battlefield with their will.",
     "passive": "The ferocious kavat, Venari, fights by Khora's side and provides her with a 15% speed boost while active. If killed, Venari will reappear after 45s.",
     "abilities": [
       {
@@ -3911,7 +3911,7 @@ export const allWarframes: Warframe[] = [
     "armor": 575,
     "energy": 0,
     "sprintSpeed": 1.15,
-    "description": "Lash out with a toxic serpentine strike, consuming the target to heal Lavos. Hold to imbue all abilities with Toxin.",
+    "description": "The serpents of Lavos encourage him as he transmutes the battlefield. He uses Toxin, Cold, Electricity, and Heat to deal elemental damage. Harness the power of the dark alchemist.",
     "passive": "Energy and Universal Orbs give Lavos status immunity for 10s. Hold any ability to imbue the next cast with additional Elemental Damage and Status.",
     "abilities": [
       {
@@ -3988,7 +3988,7 @@ export const allWarframes: Warframe[] = [
     "armor": 575,
     "energy": 0,
     "sprintSpeed": 1.15,
-    "description": "Lash out with a toxic serpentine strike, consuming the target to heal Lavos. Hold to imbue all abilities with Toxin.",
+    "description": "Some Warframes were Prime from the start. Others ascended. Lavos, the master of transmutation, bowed to no one as he forged his own path to valor.",
     "passive": "Energy and Universal Orbs give Lavos status immunity for 10s. Hold any ability to imbue the next cast with additional Elemental Damage and Status.",
     "abilities": [
       {
@@ -4065,7 +4065,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 175,
     "sprintSpeed": 1.15,
-    "description": "Casts a wave of Rift energy that damages hostiles while pushing enemies and allies out of Limbo's current plane of existence.",
+    "description": "Master the rift between shadow and substance. Limbo disrupts time-space to provide crowd control. He is at home where others struggle with what is real.",
     "passive": "Dodge to enter and exit the Rift. Entering leaves behind a small Rift portal lasting 5s. Energy slowly recharges in the Rift, and each enemy killed in there also gives 10 Energy.",
     "abilities": [
       {
@@ -4133,7 +4133,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 215,
     "sprintSpeed": 1.15,
-    "description": "Casts a wave of Rift energy that damages hostiles while pushing enemies and allies out of Limbo's current plane of existence.",
+    "description": "Dance between realms with this golden rift walker. Featuring altered mod polarities for greater customization.",
     "passive": "Dodge to enter and exit the Rift. Entering leaves behind a small Rift portal lasting 5s. Energy slowly recharges in the Rift, and each enemy killed in there also gives 10 Energy.",
     "abilities": [
       {
@@ -4307,7 +4307,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 140,
     "sprintSpeed": 1,
-    "description": "Mag stuns enemies as she manifests a magnetic vortex. The vortex pulls in Polarize Shards and stunned enemies to place them directly in front of her.",
+    "description": "Take down your enemies with magnetic force. Mag alters magnetic fields to provide crowd control and strip enemy defenses. Few can resist her attraction or her repulsion.",
     "passive": "Nearby items gravitate toward Mag for easy collection.",
     "abilities": [
       {
@@ -4377,7 +4377,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 215,
     "sprintSpeed": 1,
-    "description": "Mag stuns enemies as she manifests a magnetic vortex. The vortex pulls in Polarize Shards and stunned enemies to place them directly in front of her.",
+    "description": "The exquisite Mag Prime offers the same abilities as Mag but with unique mod polarities for greater customization.",
     "passive": "Nearby items gravitate toward Mag for easy collection.",
     "abilities": [
       {
@@ -4447,7 +4447,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 100,
     "sprintSpeed": 1.1,
-    "description": "When activated, this power stores damage caused by guns. When triggered again, that damage is channelled through the next gunshot.",
+    "description": "The gunslinger has a steady deadly hand. Each shot deals high damage. Mesa is the fastest draw in the realm.",
     "passive": "Shoot dual-wielded sidearms 15% faster and reload single-handed sidearms 25% more rapidly. Gain 50 Bonus Health when not using Melee Weapons.",
     "abilities": [
       {
@@ -4511,7 +4511,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 140,
     "sprintSpeed": 1.1,
-    "description": "When activated, this power stores damage caused by guns. When triggered again, that damage is channelled through the next gunshot.",
+    "description": "Cast a long shadow with this lethal enforcer. Featuring altered mod polarities for greater customization.",
     "passive": "Shoot dual-wielded sidearms 15% faster and reload single-handed sidearms 25% more rapidly. Gain 50 Bonus Health when not using Melee Weapons.",
     "abilities": [
       {
@@ -4575,7 +4575,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 175,
     "sprintSpeed": 1.2,
-    "description": "Mirage creates an entourage of doppelgangers to confuse and distract the enemy.",
+    "description": "Mirage’s sleight of hand complements her might. Her dazzled foes take heavy damage. Doppelgangers, lasers, and traps are elements of her stagecraft.",
     "passive": "Sliding lasts 85% longer and acrobatic maneuvers are 50% faster.",
     "abilities": [
       {
@@ -4649,7 +4649,7 @@ export const allWarframes: Warframe[] = [
     "armor": 185,
     "energy": 175,
     "sprintSpeed": 1.2,
-    "description": "Mirage creates an entourage of doppelgangers to confuse and distract the enemy.",
+    "description": "Dazzle the opposition with this golden master of illusion and mayhem. Featuring altered mod polarities allow for greater customization.",
     "passive": "Sliding lasts 85% longer and acrobatic maneuvers are 50% faster.",
     "abilities": [
       {
@@ -4908,7 +4908,7 @@ export const allWarframes: Warframe[] = [
     "armor": 200,
     "energy": 175,
     "sprintSpeed": 1.15,
-    "description": "Blaze a trail of flames, scorching enemies and cleansing allies. Teleporting blasts the landing area with a ring of fire.",
+    "description": "The mercurial firemonger protects the innocent. Nezha’s multifaceted tactics give him high survivability as he inflicts damage and provides crowd control. His fire is the clarion of hope.",
     "passive": "Slide 60% faster and go 35% farther.",
     "abilities": [
       {
@@ -4985,7 +4985,7 @@ export const allWarframes: Warframe[] = [
     "armor": 265,
     "energy": 175,
     "sprintSpeed": 1.2,
-    "description": "Blaze a trail of flames, scorching enemies and cleansing allies. Teleporting blasts the landing area with a ring of fire.",
+    "description": "Behold: the Scion of the Burning Wind, now before you in most courtly accoutrement. Featuring altered mod polarities for greater customization.",
     "passive": "Slide 60% faster and go 35% farther.",
     "abilities": [
       {
@@ -5204,7 +5204,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 130,
     "sprintSpeed": 1.25,
-    "description": "Throw a mushroom that periodically sheds poisonous spores, inflicting Viral Damage and Status Effect upon nearby enemies while also lulling them to sleep.",
+    "description": "Spring into action with Nokko! With his strong roots and an array of tricky fungi this young defender will quickly grow on you",
     "passive": "Upon receiving fatal damage, Nokko reverts to his Sprodling form and his active mushrooms will glow, reviving Nokko when touched. Orbs spawned will grant a speed boost but not healing. If a glowing mushroom is not reached in time, Nokko will automatically use a self-revive.",
         "abilities": [
       {
@@ -5289,7 +5289,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 175,
     "sprintSpeed": 1.2,
-    "description": "Creates antimatter particles that orbit Nova and attack nearby targets. Each active particle reduces damage to Nova's Health and Shields.",
+    "description": "Harness antimatter. Nova uses antiparticles to provide crowd control and amplify damage output. She obliterates enemies by destabilizing matter itself.",
     "passive": "Enemies killed while slowed down have 15% to drop health orbs. Enemies killed while sped up have 15% to drop energy orbs.",
     "abilities": [
       {
@@ -5361,7 +5361,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 215,
     "sprintSpeed": 1.2,
-    "description": "Creates antimatter particles that orbit Nova and attack nearby targets. Each active particle reduces damage to Nova's Health and Shields.",
+    "description": "Nova Prime wreaks devastation on her enemies using volatile antimatter. Featuring altered mod polarities for greater customization.",
     "passive": "Enemies killed while slowed down have 15% to drop health orbs. Enemies killed while sped up have 15% to drop energy orbs.",
     "abilities": [
       {
@@ -5593,7 +5593,7 @@ export const allWarframes: Warframe[] = [
     "armor": 385,
     "energy": 175,
     "sprintSpeed": 1,
-    "description": "Focuses deadly energy within a target, dealing massive damage and removing all of its defenses, including Overguard. Enemies near the target also take a portion of the damage.",
+    "description": "Healing and suffering do Oberon’s bidding. His command of the natural world supports allies. Boon to his friends, bane of his foes.",
     "passive": "Oberon grants Righteous Negation to himself and his allies in Affinity Range when he collects Health Orbs, protecting players against the next instance of damage. Stacks up to 3 times.",
     "abilities": [
       {
@@ -5672,7 +5672,7 @@ export const allWarframes: Warframe[] = [
     "armor": 450,
     "energy": 215,
     "sprintSpeed": 1,
-    "description": "Focuses deadly energy within a target, dealing massive damage and removing all of its defenses, including Overguard. Enemies near the target also take a portion of the damage.",
+    "description": "Protect the balance with this regal forest guardian. Featuring altered mod polarities for greater customization.",
     "passive": "Oberon grants Righteous Negation to himself and his allies in Affinity Range when he collects Health Orbs, protecting players against the next instance of damage. Stacks up to 3 times.",
     "abilities": [
       {
@@ -5751,7 +5751,7 @@ export const allWarframes: Warframe[] = [
     "armor": 160,
     "energy": 175,
     "sprintSpeed": 1.05,
-    "description": "Rhythmically beats damage into nearby enemies and draws their fire. Damage inflicted on the Mallet increases its lethality.",
+    "description": "Octavia turns bass, beat, and melody into a symphony of devastation. The music of her Mandachord gives her high survivability and supports allies. Her composition means the enemy’s destruction.",
     "passive": "Replenish 1 energy per second over 30s for Octavia and allies within 15m when abilities are activated.",
     "abilities": [
       {
@@ -5817,7 +5817,7 @@ export const allWarframes: Warframe[] = [
     "armor": 160,
     "energy": 215,
     "sprintSpeed": 1.05,
-    "description": "Rhythmically beats damage into nearby enemies and draws their fire. Damage inflicted on the Mallet increases its lethality.",
+    "description": "Strike up a symphony of destruction with the mistress of music, Octavia, in her grandest and most spectacular form. Featuring altered mod polarities for greater customization.",
     "passive": "Replenish 1 energy per second over 30s for Octavia and allies within 15m when abilities are activated.",
     "abilities": [
       {
@@ -6117,7 +6117,7 @@ export const allWarframes: Warframe[] = [
     "armor": 875,
     "energy": 150,
     "sprintSpeed": 0.89999998,
-    "description": "Summon a Chyrinka Pillar that slows enemies. It pulses <DT_RADIATION_COLOR>Radiation Damage with a guaranteed Status Effect.",
+    "description": "Albrecht Entrati designed Qorvex to protect a Chosen Operator from the unique hazards of his lab. A Crucible Core gives Qorvex high survivability as he provides crowd control.",
     "passive": "Weapons wielded by Qorvex have an additional +3 Punch Through.",
     "abilities": [
       {
@@ -6199,7 +6199,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 140,
     "sprintSpeed": 1,
-    "description": "Convert a target into a zealous thrall. Thralls turn on their allies and enthrall through damage. On death, they disintegrate into a damaging pillar of energy.",
+    "description": "Macabre spectral power has risen. Infused with the essence of the Eidolon, Revenant has strong survivability and deals high damage. Enemies become his thralls.",
     "passive": "Shield depletion smashes enemies within 7.5m with a 100 Damage knockdown shockwave.",
     "abilities": [
       {
@@ -6270,7 +6270,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 175,
     "sprintSpeed": 1.1,
-    "description": "Convert a target into a zealous thrall. Thralls turn on their allies and enthrall through damage. On death, they disintegrate into a damaging pillar of energy.",
+    "description": "The lost one rises. Reify the essence of the Eidolon as you wield Revenant Prime’s power.",
     "passive": "Shield depletion smashes enemies within 7.5m with a 100 Damage knockdown shockwave.",
     "abilities": [
       {
@@ -6341,7 +6341,7 @@ export const allWarframes: Warframe[] = [
     "armor": 240,
     "energy": 100,
     "sprintSpeed": 0.94999999,
-    "description": "Rhino charges towards a target, clobbering any in his path and goring his victim.",
+    "description": "Rhino packs a punch. He boasts high survivability and crowd control. The wise would do well to stand clear when he charges.",
     "passive": "Emit a shockwave dealing 100 damage after landing from a great height.",
     "abilities": [
       {
@@ -6401,7 +6401,7 @@ export const allWarframes: Warframe[] = [
     "armor": 290,
     "energy": 100,
     "sprintSpeed": 1,
-    "description": "Rhino charges towards a target, clobbering any in his path and goring his victim.",
+    "description": "Takes Rhino's ground-shaking abilities to the next level with altered mod polarities that offer greater customization.",
     "passive": "Emit a shockwave dealing 100 damage after landing from a great height.",
     "abilities": [
       {
@@ -6765,7 +6765,7 @@ export const allWarframes: Warframe[] = [
     "armor": 265,
     "energy": 175,
     "sprintSpeed": 1,
-    "description": "Throw an Axios Javelin. When the javelin impales an enemy against a wall, surrounding enemies are pulled into the area and suffer a burst of damage.",
+    "description": "Styanax never wonders how many enemies he will face, only where he can find them. The hoplite deals high damage. Enemies tremble before his spear and shield.",
     "passive": "Styanax's critical chance increases with his shields and doubles for spearguns.",
     "abilities": [
       {
@@ -7076,7 +7076,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 175,
     "sprintSpeed": 1,
-    "description": "Enemies fumble their weapons as they are whisked into the air. Nearby allies become immune to Status Effects. Hold the ability to cast the immunity onto Titania.",
+    "description": "Titania’s fairy-like appearance belies her formidable regal power. The enchantress deals high damage and provides crowd control. She forces opponents to pay homage or perish.",
     "passive": "Titania generates Health for herself and nearby allies every time she casts an Ability.",
     "abilities": [
       {
@@ -7148,7 +7148,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 215,
     "sprintSpeed": 1,
-    "description": "Enemies fumble their weapons as they are whisked into the air. Nearby allies become immune to Status Effects. Hold the ability to cast the immunity onto Titania.",
+    "description": "Tempting and terrifying, this is Titania in her ultimate form.",
     "passive": "Titania generates Health for herself and nearby allies every time she casts an Ability.",
     "abilities": [
       {
@@ -7220,7 +7220,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 175,
     "sprintSpeed": 1,
-    "description": "Create a well of life on an enemy who will absorb Status Effect damage intended for nearby allies. Allies gain additional Health when they attack the target. If allies die, enemies in the well die in their stead.",
+    "description": "Trinity embodies redemption and health. Her extraordinary healing powers support allies. Where others destroy, she restores.",
     "passive": "Allies in Affinity Range gain 50% of Trinity's Max Energy as Health.",
     "abilities": [
       {
@@ -7289,7 +7289,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 175,
     "sprintSpeed": 1.1,
-    "description": "Create a well of life on an enemy who will absorb Status Effect damage intended for nearby allies. Allies gain additional Health when they attack the target. If allies die, enemies in the well die in their stead.",
+    "description": "Become the bastion that defends allies using powerful healing abilities with Trinity Prime. Featuring altered mod polarities for greater customization.",
     "passive": "Allies in Affinity Range gain 50% of Trinity's Max Energy as Health.",
     "abilities": [
       {
@@ -7444,7 +7444,7 @@ export const allWarframes: Warframe[] = [
     "armor": 855,
     "energy": 100,
     "sprintSpeed": 1.1,
-    "description": "Valkyr hurls forth a hook and pulls herself to whatever it hits. If it hits an enemy, nearby foes are pulled in as she unleashes a coordinated Melee attack.",
+    "description": "Valkyr was modified into a highly motivated and fearsome killer. She is adept at dealing damage and surviving. Her battle cry strikes terror into all who hear it.",
     "passive": "Valkyr accumulates Rage when hitting or killing enemies with melee weapons, increasing her Melee Damage up to 300%. Taking fatal damage when the Rage meter is above 150% consumes the meter, preventing death and granting 5s of invulnerability.",
     "abilities": [
       {
@@ -7512,7 +7512,7 @@ export const allWarframes: Warframe[] = [
     "armor": 1000,
     "energy": 175,
     "sprintSpeed": 1.1,
-    "description": "Valkyr hurls forth a hook and pulls herself to whatever it hits. If it hits an enemy, nearby foes are pulled in as she unleashes a coordinated Melee attack.",
+    "description": "A proud fighter emerges unscarred by time or malice. Featuring altered mod polarities allow for greater customization.",
     "passive": "Valkyr accumulates Rage when hitting or killing enemies with melee weapons, increasing her Melee Damage up to 300%. Taking fatal damage when the Rage meter is above 150% consumes the meter, preventing death and granting 5s of invulnerability.",
     "abilities": [
       {
@@ -7812,7 +7812,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 100,
     "sprintSpeed": 1,
-    "description": "Launch a voltaic projectile that stuns and damages its target. A chain of electricity extends from the target to shock nearby enemies.",
+    "description": "Electricity flows through Volt. His attacks deal high damage. Enemies will be shocked.",
     "passive": "Grounded movement generates an electrical charge building up 10 Damage per meter that is unleashed with the next attack.",
     "abilities": [
       {
@@ -7876,7 +7876,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 200,
     "sprintSpeed": 1,
-    "description": "Launch a voltaic projectile that stuns and damages its target. A chain of electricity extends from the target to shock nearby enemies.",
+    "description": "A glorious warrior from the past, Volt Prime features the same abilities as Volt but with unique mod polarities for greater customization.",
     "passive": "Grounded movement generates an electrical charge building up 10 Damage per meter that is unleashed with the next attack.",
     "abilities": [
       {
@@ -8086,7 +8086,7 @@ export const allWarframes: Warframe[] = [
     "armor": 185,
     "energy": 200,
     "sprintSpeed": 1.2,
-    "description": "Choose and summon a Reservoir filled with Motes that attach to and aid Wisp and her allies. Haste Mote grants increased movement and attack speed. Vitality Mote increases maximum Health and heals over time. Shock Mote stuns nearby enemies.",
+    "description": "Wisp floats between the material and the ethereal. She accesses multiple dimensions to support her allies. Her countenance is mysterious and enigmatic.",
     "passive": "Flowing between dimensions, Wisp becomes invisible to enemies while in the air.",
     "abilities": [
       {
@@ -8161,7 +8161,7 @@ export const allWarframes: Warframe[] = [
     "armor": 210,
     "energy": 200,
     "sprintSpeed": 1.25,
-    "description": "Choose and summon a Reservoir filled with Motes that attach to and aid Wisp and her allies. Haste Mote grants increased movement and attack speed. Vitality Mote increases maximum Health and heals over time. Shock Mote stuns nearby enemies.",
+    "description": "Wisp floats between the material and the ethereal. She accesses multiple dimensions to support her allies. Her countenance is mysterious and enigmatic.",
     "passive": "Flowing between dimensions, Wisp becomes invisible to enemies while in the air.",
     "abilities": [
       {
@@ -8236,7 +8236,7 @@ export const allWarframes: Warframe[] = [
     "armor": 265,
     "energy": 130,
     "sprintSpeed": 1,
-    "description": "Shedding part of himself, Wukong creates a twin to fight by his side. Attack at range and the twin will melee, pull a blade and the twin will lay down covering fire. Use again to command the twin to attack a target with increased damage.",
+    "description": "The simian warrior is a mountain of strength. Wukong deals heavy damage and has high survivability. His quick trickster tactics are unforgettable.",
     "passive": "After taking fatal damage Wukong automatically uses one of his mastered survival techniques. These techniques can only be invoked three times per mission.",
     "abilities": [
       {
@@ -8306,7 +8306,7 @@ export const allWarframes: Warframe[] = [
     "armor": 290,
     "energy": 145,
     "sprintSpeed": 1.05,
-    "description": "Shedding part of himself, Wukong creates a twin to fight by his side. Attack at range and the twin will melee, pull a blade and the twin will lay down covering fire. Use again to command the twin to attack a target with increased damage.",
+    "description": "The trickster-warrior ascends to his ultimate incarnation.",
     "passive": "After taking fatal damage Wukong automatically uses one of his mastered survival techniques. These techniques can only be invoked three times per mission.",
     "abilities": [
       {
@@ -8376,7 +8376,7 @@ export const allWarframes: Warframe[] = [
     "armor": 146,
     "energy": 160,
     "sprintSpeed": 1.02,
-    "description": "Wield Void Damage for all attacks from equipped weapons when activated.",
+    "description": "Broken Warframes adrift in the Void converged to create Xaku. Together, they deal high damage. Xaku proves that the sum of the whole is greater than its parts.",
     "passive": "25% Damage Reduction on AOE attacks and 25% chance to avoid incoming weapon damage.",
     "abilities": [
       {
@@ -8453,7 +8453,7 @@ export const allWarframes: Warframe[] = [
     "armor": 167,
     "energy": 181,
     "sprintSpeed": 1.0700001,
-    "description": "Wield Void Damage for all attacks from equipped weapons when activated.",
+    "description": "The child of war and void is reborn in gold. That which was once shattered may rise stronger than that which was never broken.",
     "passive": "25% Damage Reduction on AOE attacks and 25% chance to avoid incoming weapon damage.",
     "abilities": [
       {
@@ -8530,7 +8530,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 200,
     "sprintSpeed": 1,
-    "description": "Form five water globules that seek out enemies and expand on contact, simultaneously damaging and immobilizing their victims. Enemies hit by the globules take increased damage from all sources.",
+    "description": "The waverider can unleash a flood of destruction on the battlefield. Yareli’s aqueous attacks deal high damage. Surf’s up. Enemies down.",
     "passive": "Yareli gains +200% Critical Chance for Secondary weapons when she has been moving for at least 1.5s.",
     "abilities": [
       {
@@ -8606,7 +8606,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 215,
     "sprintSpeed": 1.1,
-    "description": "Form five water globules that seek out enemies and expand on contact, simultaneously damaging and immobilizing their victims. Enemies hit by the globules take increased damage from all sources.",
+    "description": "The Waverider arises, reborn from the ocean foam. In her original Orokin-era splendor she embodies the undying vigor of youth.",
     "passive": "Yareli gains +200% Critical Chance for Secondary weapons when she has been moving for at least 1.5s.",
     "abilities": [
       {
@@ -8682,7 +8682,7 @@ export const allWarframes: Warframe[] = [
     "armor": 105,
     "energy": 100,
     "sprintSpeed": 1.1,
-    "description": "Hold while airborne to hover Zephyr with reduced movement. From the air, tap to dash forward, or aim down to dive bomb enemies below.",
+    "description": "Command the power of the wind. Zephyr’s cyclonic abilities protect her, deal high damage, and provide crowd control. She swoops in from above and leaves a path of destruction.",
     "passive": "Zephyr moves faster and falls slower while airborne. Also gain 150% Critical Hit chance with weapons while airborne.",
     "abilities": [
       {
@@ -8754,7 +8754,7 @@ export const allWarframes: Warframe[] = [
     "armor": 135,
     "energy": 175,
     "sprintSpeed": 1.15,
-    "description": "Hold while airborne to hover Zephyr with reduced movement. From the air, tap to dash forward, or aim down to dive bomb enemies below.",
+    "description": "Take to the skies with this golden bird of destruction.",
     "passive": "Zephyr moves faster and falls slower while airborne. Also gain 150% Critical Hit chance with weapons while airborne.",
     "abilities": [
       {
