@@ -554,7 +554,7 @@ export function WarframeDetailPanel({
           <h2 className={cn("font-semibold leading-tight", compact && "text-sm")}>{warframe.name}</h2>
           {warframe.description && (
             <p className={cn("mt-1 text-muted-foreground", compact ? "text-[11px] leading-snug" : "text-sm")}>
-              {warframe.description}
+              {formatAbilityDescription(warframe.description)}
             </p>
           )}
         </div>
