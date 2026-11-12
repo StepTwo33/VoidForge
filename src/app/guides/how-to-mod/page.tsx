@@ -87,6 +87,7 @@ export default function HowToModOverviewPage() {
           <GuideCtaLink href="/weapon-builder">Weapon Builder</GuideCtaLink>
           <GuideCtaLink href="/warframe-builder">Warframe Builder</GuideCtaLink>
           <GuideCtaLink href="/modular-builder">Modular Builder</GuideCtaLink>
+          <GuideCtaLink href="/operator-builder">Operator Builder</GuideCtaLink>
           <GuideCtaLink href="/companion-builder">Companion Builder</GuideCtaLink>
           <GuideCtaLink href="/archwing-builder">Archwing &amp; Necramech</GuideCtaLink>
           <GuideCtaLink href="/railjack-builder">Railjack Builder</GuideCtaLink>
