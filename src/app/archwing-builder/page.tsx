@@ -51,6 +51,7 @@ import { useShareBuildFromUrl } from "@/lib/builds/use-share-build-from-url";
 import { snapshotFromBuild } from "@/lib/builds/compare-build";
 import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 import { ExaltedWeaponSection } from "@/app/warframe-builder/exalted-weapon-section";
+import { exaltedMaxCapacity, stanceSlotInfo, weaponHasExilusSlot } from "@/lib/weapons/exalted-melee-slots";
 import { getExaltedWeaponsForWarframe } from "@/lib/weapons/exalted-weapons";
 import { computeUsedCapacity } from "@/lib/calc/compute-used-capacity";
 import {
@@ -473,8 +474,24 @@ export default function ArchwingBuilderPage() {
 
   const filteredNecramechExaltedMods = useMemo(() => {
     if (!necramechExaltedWeapon) return [];
+    // Same pools the archgun / archmelee pickers use (wiki: Arquebex uses Arch-gun mods).
+    if (necramechExaltedWeapon.category === "archgun") {
+      return archgunModsForBuilder(necramechExaltedWeapon.id);
+    }
+    if (necramechExaltedWeapon.category === "archmelee") {
+      return filterArchmeleeMods(allMods);
+    }
     return allMods.filter((m) => m.category === necramechExaltedWeapon.category);
   }, [allMods, necramechExaltedWeapon]);
+
+  const necramechExaltedStance = useMemo(
+    () => stanceSlotInfo(necramechExaltedWeapon),
+    [necramechExaltedWeapon],
+  );
+  const necramechExaltedMaxCap = useMemo(
+    () => (necramechExaltedWeapon ? exaltedMaxCapacity(necramechExaltedWeapon) : 60),
+    [necramechExaltedWeapon],
+  );
 
   const weaponRivenStatChanges = useMemo(
     () => mergeRivenStatChanges(weaponRivenStatsMap, weaponMods),
@@ -848,6 +865,48 @@ export default function ArchwingBuilderPage() {
 
           {/* Right: Weapon selection + mods */}
           <div className="space-y-6">
+            {mode === "necramech" && necramechExaltedWeapon && (
+              <div id="necramech-exalted">
+                <ExaltedWeaponSection
+                  exaltedWeapon={necramechExaltedWeapon}
+                  exaltedWeapons={[necramechExaltedWeapon]}
+                  exaltedCapacity={necramechExaltedCapacity}
+                  exaltedMaxCapacity={necramechExaltedMaxCap}
+                  stanceSlot={necramechExaltedStance}
+                  hasExilusSlot={weaponHasExilusSlot(necramechExaltedWeapon)}
+                  exaltedMods={necramechExaltedMods}
+                  modsMap={modsMap}
+                  exaltedSlotPolarities={necramechExaltedEffectivePolarities}
+                  exaltedSlotOverrides={necramechExaltedSlotPolarities}
+                  exaltedInnatePolarities={necramechExaltedInnatePolarities}
+                  exaltedArcaneConfig={{ slots: 0, label: "" }}
+                  exaltedArcanes={[]}
+                  exaltedArcaneRanks={[]}
+                  exaltedStats={necramechExaltedStats}
+                  exaltedBaseStats={necramechExaltedBaseStats}
+                  exaltedContributionContext={necramechExaltedContributionContext}
+                  simParams={DEFAULT_SIM_PARAMS}
+                  onSimParamsChange={() => {}}
+                  sectionTitle="Necramech Exalted Weapon"
+                  onAddMod={(slot) => {
+                    setNecramechExaltedActiveSlot(slot);
+                    setNecramechExaltedModPickerOpen(true);
+                  }}
+                  onRemoveMod={(slot) => {
+                    setNecramechExaltedMods((prev) => prev.filter((m) => m.slotIndex !== slot));
+                  }}
+                  onPolarize={(slot, polarity) => {
+                    setNecramechExaltedSlotPolarities((prev) =>
+                      applyPolarityOverride(prev, necramechExaltedInnatePolarities, slot, polarity),
+                    );
+                  }}
+                  onAddArcane={() => {}}
+                  onRemoveArcane={() => {}}
+                  onArcaneRankChange={() => {}}
+                />
+              </div>
+            )}
+
             <div>
               <h2 className="section-title mb-3">
                 {mode === "archwing" ? "Archgun / Archmelee" : "Archgun (Necramech)"}
@@ -965,44 +1024,7 @@ export default function ArchwingBuilderPage() {
               </div>
             )}
 
-            {mode === "necramech" && necramechExaltedWeapon && (
-              <div id="necramech-exalted" className="mt-8">
-                <ExaltedWeaponSection
-                  exaltedWeapon={necramechExaltedWeapon}
-                  exaltedWeapons={[necramechExaltedWeapon]}
-                  exaltedCapacity={necramechExaltedCapacity}
-                  exaltedMods={necramechExaltedMods}
-                  modsMap={modsMap}
-                  exaltedSlotPolarities={necramechExaltedEffectivePolarities}
-                  exaltedSlotOverrides={necramechExaltedSlotPolarities}
-                  exaltedInnatePolarities={necramechExaltedInnatePolarities}
-                  exaltedArcaneConfig={{ slots: 0, label: "" }}
-                  exaltedArcanes={[]}
-                  exaltedArcaneRanks={[]}
-                  exaltedStats={necramechExaltedStats}
-                  exaltedBaseStats={necramechExaltedBaseStats}
-                  exaltedContributionContext={necramechExaltedContributionContext}
-                  simParams={DEFAULT_SIM_PARAMS}
-                  onSimParamsChange={() => {}}
-                  sectionTitle="Necramech Exalted Weapon"
-                  onAddMod={(slot) => {
-                    setNecramechExaltedActiveSlot(slot);
-                    setNecramechExaltedModPickerOpen(true);
-                  }}
-                  onRemoveMod={(slot) => {
-                    setNecramechExaltedMods((prev) => prev.filter((m) => m.slotIndex !== slot));
-                  }}
-                  onPolarize={(slot, polarity) => {
-                    setNecramechExaltedSlotPolarities((prev) =>
-                      applyPolarityOverride(prev, necramechExaltedInnatePolarities, slot, polarity),
-                    );
-                  }}
-                  onAddArcane={() => {}}
-                  onRemoveArcane={() => {}}
-                  onArcaneRankChange={() => {}}
-                />
-              </div>
-            )}
+
           </div>
         </div>
       </main>
