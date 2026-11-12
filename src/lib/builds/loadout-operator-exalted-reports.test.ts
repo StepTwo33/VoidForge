@@ -10,7 +10,9 @@ import {
   computeLoadoutAbilityArmorStripPct,
   formatAbilityBuffDebuffBadge,
   getOperatorBuffAbilities,
+  resolveAbilitiesWithHelminth,
   resolveWeaponExternalBuffs,
+  weaponDamageBuffAbilities,
 } from "@/lib/weapons/weapon-external-buffs";
 import { getExaltedWeaponsForWarframe } from "@/lib/weapons/exalted-weapons";
 import { calcLoadoutStats } from "@/lib/builds/loadout-stats";
@@ -345,5 +347,131 @@ describe("Community Reports Fixes: Amps, Exalted Slots, Operator & Necramechs", 
       expect(decoded?.data.operatorBuild?.focusSchool).toBe("Madurai");
       expect(decoded?.data.operatorBuild?.ampId).toBe("sirocco");
     });
+  });
+});
+
+
+describe("Loadout combat report: unmodded exalteds, Valkyr Warcry/Paralysis, operator gating", () => {
+  it("includes unmodded exalted weapons in the loadout weapon list at base stats", () => {
+    const regulators = allWeapons.find((w) => w.id === "regulators")!;
+    const stats = calcLoadoutStats(
+      {
+        id: "unmodded-exalted",
+        name: "unmodded-exalted",
+        createdAt: 0,
+        updatedAt: 0,
+        warframeBuild: { warframeId: "mesa", mods: [], hasOrokinReactor: true, exaltedMods: [] },
+      },
+      { simParams: DEFAULT_SIM_PARAMS },
+    );
+    expect(stats.exalted).not.toBeNull();
+    expect(stats.exalted!.name).toBe(regulators.name);
+    expect(stats.exalted!.stats.fireRate).toBeCloseTo(regulators.fireRate, 3);
+    expect(stats.exalted!.stats.criticalChance).toBeCloseTo(regulators.criticalChance, 3);
+  });
+
+  it("still applies Amalgam Furax Body Count +45% FR to an unmodded exalted secondary", () => {
+    const regulators = allWeapons.find((w) => w.id === "regulators")!;
+    const stats = calcLoadoutStats(
+      {
+        id: "unmodded-furax",
+        name: "unmodded-furax",
+        createdAt: 0,
+        updatedAt: 0,
+        warframeBuild: { warframeId: "mesa", mods: [], hasOrokinReactor: true, exaltedMods: [] },
+        meleeBuild: {
+          weaponId: "furax",
+          mods: [{ modId: "amalgam_furax_body_count", rank: 5, slotIndex: 0 }],
+          hasOrokinCatalyst: true,
+        },
+      },
+      { simParams: DEFAULT_SIM_PARAMS },
+    );
+    expect(stats.exalted!.stats.fireRate).toBeCloseTo(regulators.fireRate * 1.45, 3);
+  });
+
+  it("lists Warcry and Paralysis on Valkyr and Valkyr Prime with wiki-scaled badges", () => {
+    for (const id of ["valkyr", "valkyr_prime"] as const) {
+      const wf = allWarframes.find((w) => w.id === id)!;
+      const listed = weaponDamageBuffAbilities(wf.abilities);
+      expect(listed.map((a) => a.name)).toEqual(expect.arrayContaining(["Warcry", "Paralysis"]));
+      const warcry = wf.abilities.find((a) => a.name === "Warcry")!;
+      const paralysis = wf.abilities.find((a) => a.name === "Paralysis")!;
+      // wiki.warframe.com/w/Warcry rank 3: +50% Attack Speed, +50% Armor, both × Strength.
+      expect(formatAbilityBuffDebuffBadge(warcry, 1, id)).toBe("+50% attack speed, +50% armor");
+      expect(formatAbilityBuffDebuffBadge(warcry, 2, id)).toBe("+100% attack speed, +100% armor");
+      // wiki.warframe.com/w/Paralysis: 50% melee vuln × STR; 30% Slow × STR, cap 75%.
+      expect(formatAbilityBuffDebuffBadge(paralysis, 1, id)).toBe("+50% melee vuln, 30% slow");
+      expect(formatAbilityBuffDebuffBadge(paralysis, 3, id)).toBe("+150% melee vuln, 75% slow");
+    }
+  });
+
+  it("shows Helminth Warcry at 30% attack speed (wiki subsumed value), still × Strength", () => {
+    const excal = allWarframes.find((w) => w.id === "excalibur")!;
+    // Replace slot 1 (Radial Javelin is typically slot index — use a middle slot).
+    const infused = resolveAbilitiesWithHelminth(excal.abilities, "subsume_valkyr", 1, "excalibur");
+    const warcry = infused.find((a) => a.name === "Warcry")!;
+    expect(warcry.miscStats?.attackSpeedBuff).toBe(0.3);
+    expect(formatAbilityBuffDebuffBadge(warcry, 1, "excalibur")).toBe("+30% attack speed, +50% armor");
+    expect(formatAbilityBuffDebuffBadge(warcry, 2, "excalibur")).toBe("+60% attack speed, +100% armor");
+    expect(weaponDamageBuffAbilities(infused).some((a) => a.name === "Warcry")).toBe(true);
+  });
+
+  it("applies Warcry attack speed and Paralysis melee vuln to melee only", () => {
+    const valkyr = allWarframes.find((w) => w.id === "valkyr")!;
+    const skana = allWeapons.find((w) => w.id === "skana")!;
+    const braton = allWeapons.find((w) => w.id === "braton")!;
+    const ctx = {
+      warframeId: "valkyr",
+      warframeStats: { abilityStrength: 1 } as never,
+      warframeAbilities: valkyr.abilities,
+    };
+    const meleeWarcry = resolveWeaponExternalBuffs(
+      skana,
+      ctx,
+      { ...DEFAULT_SIM_PARAMS, activeWeaponAbilityBuffs: ["Warcry"] },
+    ).find((b) => b.label === "Warcry");
+    expect(meleeWarcry).toBeDefined();
+    expect(meleeWarcry!.fireRateBonus).toBeCloseTo(0.5, 5);
+    expect(
+      resolveWeaponExternalBuffs(
+        braton,
+        ctx,
+        { ...DEFAULT_SIM_PARAMS, activeWeaponAbilityBuffs: ["Warcry"] },
+      ).some((b) => b.label === "Warcry"),
+    ).toBe(false);
+
+    const meleePara = resolveWeaponExternalBuffs(
+      skana,
+      ctx,
+      { ...DEFAULT_SIM_PARAMS, activeWeaponAbilityBuffs: ["Paralysis"] },
+    ).find((b) => b.label === "Paralysis");
+    expect(meleePara).toBeDefined();
+    expect(meleePara!.damageMultBonus).toBeCloseTo(0.5, 5);
+    expect(
+      resolveWeaponExternalBuffs(
+        braton,
+        ctx,
+        { ...DEFAULT_SIM_PARAMS, activeWeaponAbilityBuffs: ["Paralysis"] },
+      ).some((b) => b.label === "Paralysis"),
+    ).toBe(false);
+
+    // × Strength
+    const strong = resolveWeaponExternalBuffs(
+      skana,
+      { ...ctx, warframeStats: { abilityStrength: 2 } as never },
+      { ...DEFAULT_SIM_PARAMS, activeWeaponAbilityBuffs: ["Warcry", "Paralysis"] },
+    );
+    expect(strong.find((b) => b.label === "Warcry")!.fireRateBonus).toBeCloseTo(1.0, 5);
+    expect(strong.find((b) => b.label === "Paralysis")!.damageMultBonus).toBeCloseTo(1.0, 5);
+  });
+
+  it("hides operator abilities when no operator (or no focus school) is equipped", () => {
+    expect(getOperatorBuffAbilities()).toEqual([]);
+    expect(getOperatorBuffAbilities(undefined)).toEqual([]);
+    expect(getOperatorBuffAbilities("")).toEqual([]);
+    expect(getOperatorBuffAbilities("UnknownSchool")).toEqual([]);
+    // Equipped operator still returns only that school (existing school lists unchanged).
+    expect(getOperatorBuffAbilities("Madurai").map((a) => a.name)).toEqual(["Void Strike", "Sling Strength"]);
   });
 });

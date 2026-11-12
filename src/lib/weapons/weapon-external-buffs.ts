@@ -1161,6 +1161,49 @@ function resolveAbsorbBuff(
   };
 }
 
+/** wiki.warframe.com/w/Warcry: +50% Attack Speed (Helminth 30%) × Strength, additive with Fury.
+ * Applied to melee / exalted melee only. Armor is a warframe stat (shown on the report badge). */
+function resolveWarcryBuff(
+  weapon: Weapon,
+  ability: Ability,
+  strength: number,
+): WeaponExternalBuff | null {
+  if (!isMeleeWeapon(weapon)) return null;
+  const base = typeof ability.miscStats?.attackSpeedBuff === "number" ? ability.miscStats.attackSpeedBuff : 0;
+  if (base <= 0) return null;
+  const bonus = base * strength;
+  return {
+    id: "ability:Warcry",
+    label: "Warcry",
+    category: "ability",
+    fireRateBonus: bonus,
+    nominal: `+${(bonus * 100).toFixed(0)}% attack speed (× Strength)`,
+  };
+}
+
+/** wiki.warframe.com/w/Paralysis: 50% Melee Damage Vulnerability × Strength (no cap listed);
+ * 30% Slow × Strength, cap 75%. Vulnerability applies to melee weapons only. */
+function resolveParalysisBuff(
+  weapon: Weapon,
+  ability: Ability,
+  strength: number,
+): WeaponExternalBuff | null {
+  if (!isMeleeWeapon(weapon)) return null;
+  const base =
+    typeof ability.miscStats?.meleeDamageVulnerability === "number"
+      ? ability.miscStats.meleeDamageVulnerability
+      : 0;
+  if (base <= 0) return null;
+  const bonus = base * strength;
+  return {
+    id: "ability:Paralysis",
+    label: "Paralysis",
+    category: "ability",
+    damageMultBonus: bonus,
+    nominal: `+${(bonus * 100).toFixed(0)}% melee damage vulnerability (× Strength)`,
+  };
+}
+
 function resolveNamedAbilityWeaponBuff(
   weapon: Weapon,
   ctx: WeaponBuffContext,
@@ -1251,6 +1294,10 @@ function resolveNamedAbilityWeaponBuff(
         damageBonus: 10.0,
         nominal: "+1000% damage, additive with Serration (8s at full energy)",
       };
+    case "Warcry":
+      return resolveWarcryBuff(weapon, ability, strength);
+    case "Paralysis":
+      return resolveParalysisBuff(weapon, ability, strength);
     case "Lethal Levitation":
       // Wiki: Naramon Lethal Levitation (+50% weapon damage per Lifted enemy attacked, max 4 stacks -> +200%).
       // Additive with base damage mods (Serration/Pressure Point). The Focus/Naramon body says it applies
@@ -2302,6 +2349,8 @@ const NAMED_WEAPON_BUFF_ABILITIES = new Set([
   "Caustic Strike",
   "Hardened Wellspring",
   "Lethal Levitation",
+  "Warcry",
+  "Paralysis",
 ]);
 
 /** Helminth Empower is +Ability Strength, not a weapon damage buff. */
@@ -2432,8 +2481,9 @@ export function getOperatorBuffAbilities(focusSchool?: string): Ability[] {
       },
     ],
   };
-  if (focusSchool && all[focusSchool]) return all[focusSchool];
-  return Object.values(all).flat();
+  // No operator / no focus school: do not list every school's abilities.
+  if (!focusSchool) return [];
+  return all[focusSchool] ?? [];
 }
 
 /** Formats a compact badge describing an active ability buff or enemy debuff. */
@@ -2476,6 +2526,31 @@ export function formatAbilityBuffDebuffBadge(
   if (ability.name === "Xata's Whisper") return "+Void";
   if (ability.name === "Vex Armor") return `+${(2.75 * strength * 100).toFixed(0)}% Fury`;
   if (ability.name === "Symphony Of Mercy") return `+${(0.3 * strength * 100).toFixed(0)}% dmg`;
+  if (ability.name === "Warcry") {
+    // wiki.warframe.com/w/Warcry: +50% Attack Speed and +50% Armor, both × Strength.
+    // Helminth subsumed Warcry attack speed is 30% (ability.miscStats already reflects that).
+    const asBase = Number(ability.miscStats?.attackSpeedBuff ?? 0.5);
+    const armorBase = Number(ability.miscStats?.armorBuff ?? 0.5);
+    const as = asBase * strength;
+    const armor = armorBase * strength;
+    const parts: string[] = [];
+    if (as > 0) parts.push(`+${(as * 100).toFixed(0)}% attack speed`);
+    if (armor > 0) parts.push(`+${(armor * 100).toFixed(0)}% armor`);
+    return parts.length ? parts.join(", ") : null;
+  }
+  if (ability.name === "Paralysis") {
+    // wiki.warframe.com/w/Paralysis: 50% Melee Damage Vulnerability × STR;
+    // 30% Slow × STR, cap 75%. Stun is a fixed 3s (not Duration).
+    const vulnBase = Number(ability.miscStats?.meleeDamageVulnerability ?? 0.5);
+    const slowBase = Number(ability.miscStats?.slowPercent ?? 0.3);
+    const slowCap = Number(ability.miscStats?.slowCap ?? 0.75);
+    const vuln = vulnBase * strength;
+    const slow = Math.min(slowCap, slowBase * strength);
+    const parts: string[] = [];
+    if (vuln > 0) parts.push(`+${(vuln * 100).toFixed(0)}% melee vuln`);
+    if (slow > 0) parts.push(`${(slow * 100).toFixed(0)}% slow`);
+    return parts.length ? parts.join(", ") : null;
+  }
   return null;
 }
 

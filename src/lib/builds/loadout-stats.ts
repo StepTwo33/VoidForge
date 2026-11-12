@@ -878,7 +878,7 @@ export function calcLoadoutStats(loadout: Loadout, options: CalcLoadoutStatsOpti
         arcaneRanks,
         2,
       );
-      if (modSlots.length === 0 && arcanes.length === 0) return null;
+      // Include unmodded exalteds in the loadout combat report at base stats.
       const base = weaponWithPassive(weapon);
       const externalBuffs = resolveWeaponExternalBuffs(base, buffContext, simParams);
       const calcOptions = {

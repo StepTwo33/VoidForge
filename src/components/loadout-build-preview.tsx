@@ -513,7 +513,9 @@ export function LoadoutBuildPreview({
             resolveAbilitiesWithHelminth(wf.abilities, wb?.helminthAbilityId, wb?.helminthSlot, wb?.warframeId),
           )
         : [];
-      const opAbilities = getOperatorBuffAbilities(loadout?.operatorBuild?.focusSchool);
+      const opAbilities = loadout?.operatorBuild
+        ? getOperatorBuffAbilities(loadout.operatorBuild.focusSchool)
+        : [];
       return [...base, ...opAbilities];
     } catch {
       return [];

@@ -321,7 +321,9 @@ export function LoadoutDamagePanel({ loadout }: { loadout: Loadout }) {
             resolveAbilitiesWithHelminth(wf.abilities, wb?.helminthAbilityId, wb?.helminthSlot, wb?.warframeId),
           )
         : [];
-      const opAbilities = getOperatorBuffAbilities(loadout.operatorBuild?.focusSchool);
+      const opAbilities = loadout.operatorBuild
+        ? getOperatorBuffAbilities(loadout.operatorBuild.focusSchool)
+        : [];
       return [...base, ...opAbilities];
     } catch (err) {
       console.warn("Loadout ability buff options failed", err);
