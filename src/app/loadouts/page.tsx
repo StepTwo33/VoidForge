@@ -1064,7 +1064,7 @@ export default function LoadoutsPage() {
           icon={FolderOpen}
           accent="green"
           title="Loadouts"
-          description="Group a warframe, weapons (including kitguns, zaws, and amps from the Modular tab), and a companion into one kit."
+          description="Group a warframe, weapons (including kitguns and zaws from the Modular tab), a companion, and an Operator Amp into one kit."
           actions={
             loadouts.length > 0 ? (
               <div className="flex flex-wrap items-center gap-2">
@@ -1088,8 +1088,8 @@ export default function LoadoutsPage() {
               <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary/80" />
               <div className="space-y-1">
                 <p>
-                  <span className="font-medium text-foreground/80" title="Kitguns, Zaws, and Amps saved in Modular Builder">Modular</span>
-                  {" "}— attach kitgun / zaw / amp presets per weapon slot (primary, secondary, and melee can each have one).
+                  <span className="font-medium text-foreground/80" title="Kitguns and Zaws saved in Modular Builder">Modular</span>
+                  {" "}— attach a kitgun to primary or secondary, and a zaw to melee. Amps go on the Operator slot, not on a weapon.
                 </p>
               </div>
             </div>
