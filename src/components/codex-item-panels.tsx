@@ -303,7 +303,6 @@ export function ModDetailPanel({ mod, compact, returnTo }: { mod: Mod; compact?:
         />
         <div className="min-w-0 flex-1">
           <h2 className={cn("font-semibold leading-tight", compact && "text-sm")}>{mod.name}</h2>
-          <p className="font-mono text-[10px] text-muted-foreground">{mod.id}</p>
           <div className="mt-1 flex flex-wrap gap-1">
             <Badge variant="outline" className="text-[10px] capitalize">
               {modBrowserCategoryLabel(mod)}
@@ -549,7 +548,6 @@ export function ArcaneDetailPanel({
         />
         <div className="min-w-0 flex-1">
           <h2 className={cn("font-semibold leading-tight", compact && "text-sm")}>{arcane.name}</h2>
-          <p className="font-mono text-[10px] text-muted-foreground">{arcane.id}</p>
           {effects && (
             <Badge variant="outline" className="mt-1 text-[10px]">
               {effects.trigger}
@@ -738,7 +736,6 @@ export function ShardDetailPanel({ shard, compact, returnTo }: { shard: ArchonSh
         />
         <div>
           <h2 className={cn("font-semibold leading-tight", compact && "text-sm")}>{shard.name}</h2>
-          <p className="font-mono text-[10px] text-muted-foreground">{shard.id}</p>
         </div>
       </div>
       <p className={cn("text-muted-foreground", compact ? "text-xs leading-snug" : "text-sm")}>

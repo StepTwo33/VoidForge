@@ -414,7 +414,7 @@ function CodexPageContent() {
         <aside className={cn("flex shrink-0 flex-col gap-3 lg:sticky lg:top-[calc(3.5rem+env(safe-area-inset-top,0px)+0.75rem)] lg:w-52 lg:max-h-[calc(100dvh-3.5rem-env(safe-area-inset-top,0px)-1.5rem)] lg:self-start lg:overflow-y-auto lg:overscroll-contain lg:pb-4", hasSelection && "hidden lg:flex")}>
           <ContentPanel className="shrink-0 overflow-visible p-2">
             <PanelHeading>Sections</PanelHeading>
-            <nav className="codex-chip-row mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
+            <nav className="codex-chip-row mt-2 flex flex-wrap gap-1 lg:block lg:space-y-0.5">
               {CODEX_SECTIONS.map((s) => {
                 const Icon = s.icon;
                 const active = section === s.id;
@@ -442,7 +442,7 @@ function CodexPageContent() {
           {section === "mods" && (
             <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Mod type</PanelHeading>
-              <nav className="codex-chip-row mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
+              <nav className="codex-chip-row mt-2 flex flex-wrap gap-1 lg:block lg:space-y-0.5">
                 {CODEX_MOD_CATEGORIES.map((cat) => (
                   <button
                     key={cat.id}
@@ -466,7 +466,7 @@ function CodexPageContent() {
           {section === "weapons" && (
             <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Weapon type</PanelHeading>
-              <nav className="codex-chip-row mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
+              <nav className="codex-chip-row mt-2 flex flex-wrap gap-1 lg:block lg:space-y-0.5">
                 {CODEX_WEAPON_CATEGORY_FILTERS.map((cat) => (
                   <button
                     key={cat.id}
@@ -486,7 +486,7 @@ function CodexPageContent() {
               </nav>
               <div className="mt-3 border-t border-border pt-2">
                 <PanelHeading>AoE filter</PanelHeading>
-                <nav className="codex-chip-row mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
+                <nav className="codex-chip-row mt-2 flex flex-wrap gap-1 lg:block lg:space-y-0.5">
                   <button
                     type="button"
                     aria-current={!weaponAoeOnly ? "true" : undefined}
@@ -521,7 +521,7 @@ function CodexPageContent() {
           {section === "companions" && (
             <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Companion type</PanelHeading>
-              <nav className="codex-chip-row mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
+              <nav className="codex-chip-row mt-2 flex flex-wrap gap-1 lg:block lg:space-y-0.5">
                 {CODEX_COMPANION_TYPE_FILTERS.map((cat) => (
                   <button
                     key={cat.id}
@@ -545,7 +545,7 @@ function CodexPageContent() {
           {section === "arcanes" && (
             <ContentPanel className="shrink-0 overflow-visible p-2">
               <PanelHeading>Slot</PanelHeading>
-              <nav className="codex-chip-row mt-2 flex gap-1 overflow-x-auto overscroll-x-contain lg:block lg:space-y-0.5 lg:overflow-visible">
+              <nav className="codex-chip-row mt-2 flex flex-wrap gap-1 lg:block lg:space-y-0.5">
                 <button
                   type="button"
                   aria-current={arcaneSlot === "all" ? "true" : undefined}
@@ -583,7 +583,7 @@ function CodexPageContent() {
         {/* Entry list — page scrolls; detail card floats in viewport */}
         <ContentPanel padding={false} className="min-w-0 flex-1 overflow-visible">
           <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-40 rounded-t-xl border-b border-border bg-card px-3 py-2 lg:static [@media(max-height:480px)]:static">
-            <div className="codex-chip-row flex flex-nowrap items-center gap-2 overflow-x-auto overscroll-x-contain lg:flex-wrap lg:overflow-visible [&>*]:shrink-0">
+            <div className="codex-chip-row flex flex-wrap items-center gap-2 [&>*]:shrink-0">
               <span className="text-xs text-muted-foreground">
                 <span className="font-mono font-medium text-foreground">{listCount}</span> entries
               </span>
@@ -595,7 +595,7 @@ function CodexPageContent() {
                       type="button"
                       onClick={() => setPolarityFilter(p)}
                       className={cn(
-                        "inline-flex min-h-11 items-center rounded px-2 py-0.5 text-[10px] capitalize transition-colors pointer-fine:min-h-0",
+                        "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded px-2 py-0.5 text-[10px] capitalize transition-colors pointer-fine:min-h-0",
                         polarityFilter === p
                           ? accentTone.indigo.chipStrong
                           : "text-muted-foreground hover:bg-muted/50",

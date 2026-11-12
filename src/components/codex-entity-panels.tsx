@@ -337,7 +337,6 @@ export function WeaponDetailPanel({ weapon, compact, returnTo }: { weapon: Weapo
         />
         <div className="min-w-0 flex-1">
           <h2 className={cn("font-semibold leading-tight", compact && "text-sm")}>{weapon.name}</h2>
-          <p className="font-mono text-[10px] text-muted-foreground">{weapon.id}</p>
           <div className="mt-1 flex flex-wrap gap-1">
             <Badge variant="outline" className="text-[10px] capitalize">
               {formatWeaponCategory(weapon.category)}
@@ -553,7 +552,6 @@ export function WarframeDetailPanel({
         />
         <div className="min-w-0 flex-1">
           <h2 className={cn("font-semibold leading-tight", compact && "text-sm")}>{warframe.name}</h2>
-          <p className="font-mono text-[10px] text-muted-foreground">{warframe.id}</p>
         </div>
       </div>
 
@@ -701,7 +699,6 @@ export function CompanionDetailPanel({ companion, compact, returnTo }: { compani
         />
         <div className="min-w-0 flex-1">
           <h2 className={cn("font-semibold leading-tight", compact && "text-sm")}>{companion.name}</h2>
-          <p className="font-mono text-[10px] text-muted-foreground">{companion.id}</p>
           <Badge variant="outline" className="mt-1 text-[10px] capitalize">
             {formatCompanionType(companion.type)}
           </Badge>
@@ -747,7 +744,6 @@ export function ArchwingDetailPanel({ archwing, compact, returnTo }: { archwing:
     <div className={cn("space-y-3", compact && "space-y-2")}>
       <div>
         <h2 className={cn("font-semibold leading-tight", compact && "text-sm")}>{archwing.name}</h2>
-        <p className="font-mono text-[10px] text-muted-foreground">{archwing.id}</p>
       </div>
 
       <p className={cn("text-muted-foreground", compact ? "text-xs leading-snug" : "text-sm")}>
@@ -782,7 +778,6 @@ export function NecramechDetailPanel({ necramech, compact, returnTo }: { necrame
     <div className={cn("space-y-3", compact && "space-y-2")}>
       <div>
         <h2 className={cn("font-semibold leading-tight", compact && "text-sm")}>{necramech.name}</h2>
-        <p className="font-mono text-[10px] text-muted-foreground">{necramech.id}</p>
       </div>
 
       <p className={cn("text-muted-foreground", compact ? "text-xs leading-snug" : "text-sm")}>
