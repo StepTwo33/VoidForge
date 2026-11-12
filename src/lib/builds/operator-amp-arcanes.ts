@@ -141,3 +141,40 @@ export function findSourceModularAmp<T extends SavedAmpLike>(
   );
   return matches.length === 1 ? matches[0] : null;
 }
+
+/**
+ * Whether the operator's in-memory Amp (after local arcane edits) no longer
+ * matches the saved Modular Amp it was imported from. Parts are not editable
+ * on the operator page; only arcane ids and ranks are compared. Empty slots
+ * ignore padded default ranks so a vacant slot does not look dirty.
+ */
+export function modularAmpDivergesFromSaved(
+  current: ModularBuildData | null | undefined,
+  saved: ModularBuildData | null | undefined,
+): boolean {
+  if (!current || !saved) return false;
+  const a = padArcaneSlots(current.arcaneIds, current.arcaneRanks);
+  const b = padArcaneSlots(saved.arcaneIds, saved.arcaneRanks);
+  for (let i = 0; i < AMP_ARCANE_SLOTS; i++) {
+    const aId = a.ids[i] ?? null;
+    const bId = b.ids[i] ?? null;
+    const aHas = typeof aId === "string" && aId.length > 0;
+    const bHas = typeof bId === "string" && bId.length > 0;
+    if (aHas !== bHas || aId !== bId) return true;
+    if (aHas && bHas && a.ranks[i] !== b.ranks[i]) return true;
+  }
+  return false;
+}
+
+export type ModularAmpSlotState = "idle" | "active" | "modified";
+
+/** Visual state of a saved Modular Amp card in the operator builder. */
+export function modularAmpSlotState(
+  equippedAmpId: string | null | undefined,
+  savedAmpId: string,
+  current: ModularBuildData | null | undefined,
+  savedData: ModularBuildData | null | undefined,
+): ModularAmpSlotState {
+  if (equippedAmpId !== modularAmpRefId(savedAmpId)) return "idle";
+  return modularAmpDivergesFromSaved(current, savedData) ? "modified" : "active";
+}

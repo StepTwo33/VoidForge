@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import type { ModularBuildData } from "@/lib/types";
 import {
   migrateOperatorAmpArcanes,
+  modularAmpDivergesFromSaved,
+  modularAmpSlotState,
   persistOperatorAmpArcanes,
   resolveAmpArcanes,
   writeAmpArcanesOnModular,
@@ -110,5 +112,58 @@ describe("Amp arcanes stay on the operator build or loadout (not a shared librar
     expect(findSourceModularAmp({ ampId: modularAmpRefId("a1"), ampModularBuild: amp() }, lib)?.id).toBe("a1");
     expect(findSourceModularAmp({ ampId: "sirocco", ampName: "Terkeon Amp", ampModularBuild: amp() }, lib)?.id).toBe("a1");
     expect(findSourceModularAmp({ ampModularBuild: amp() }, lib)).toBeNull();
+  });
+});
+
+describe("Imported Amp dirty state (arcane edits vs the saved Amp)", () => {
+  const savedAmp = (ids: (string | null)[] = [null, null], ranks: number[] = [5, 5]): ModularBuildData => ({
+    modularType: "amp",
+    parts: { prism: "raplak_prism", scaffold: "propa_scaffold", brace: "certus_brace" },
+    mods: [],
+    hasOrokinCatalyst: false,
+    arcaneIds: ids,
+    arcaneRanks: ranks,
+  });
+
+  it("is clean when arcanes and ranks still match the saved Amp", () => {
+    const saved = savedAmp(["virtuos_shadow", null], [5, 5]);
+    const current = writeAmpArcanesOnModular(saved, ["virtuos_shadow", null], [5, 5]);
+    expect(modularAmpDivergesFromSaved(current, saved)).toBe(false);
+    expect(modularAmpSlotState("modular_a1", "a1", current, saved)).toBe("active");
+  });
+
+  it("is dirty after an arcane is added, swapped, or ranked differently", () => {
+    const saved = savedAmp(["virtuos_shadow", null], [5, 5]);
+    expect(modularAmpDivergesFromSaved(writeAmpArcanesOnModular(saved, ["virtuos_fury", null], [5, 5]), saved)).toBe(true);
+    expect(modularAmpDivergesFromSaved(writeAmpArcanesOnModular(saved, ["virtuos_shadow", "eternal_onslaught"], [5, 3]), saved)).toBe(true);
+    expect(modularAmpDivergesFromSaved(writeAmpArcanesOnModular(saved, ["virtuos_shadow", null], [2, 5]), saved)).toBe(true);
+    expect(modularAmpSlotState("modular_a1", "a1", writeAmpArcanesOnModular(saved, ["virtuos_fury", null], [5, 5]), saved)).toBe("modified");
+  });
+
+  it("is dirty when a saved arcane is removed, and clean again if edits are undone", () => {
+    const saved = savedAmp(["virtuos_shadow", "eternal_onslaught"], [5, 3]);
+    const cleared = writeAmpArcanesOnModular(saved, [null, null], [5, 5]);
+    expect(modularAmpDivergesFromSaved(cleared, saved)).toBe(true);
+    const restored = writeAmpArcanesOnModular(cleared, ["virtuos_shadow", "eternal_onslaught"], [5, 3]);
+    expect(modularAmpDivergesFromSaved(restored, saved)).toBe(false);
+  });
+
+  it("treats vacant slots as matching even when padded ranks differ", () => {
+    const saved: ModularBuildData = {
+      modularType: "amp",
+      parts: { prism: "raplak_prism", scaffold: "propa_scaffold", brace: "certus_brace" },
+      mods: [],
+      hasOrokinCatalyst: false,
+    };
+    const current = writeAmpArcanesOnModular(saved, [null, null], [5, 5]);
+    expect(modularAmpDivergesFromSaved(current, saved)).toBe(false);
+  });
+
+  it("is idle when a different Amp is selected, and does not compare missing payloads", () => {
+    const saved = savedAmp(["virtuos_shadow", null]);
+    expect(modularAmpSlotState("modular_other", "a1", saved, saved)).toBe("idle");
+    expect(modularAmpSlotState("modular_a1", "a1", null, saved)).toBe("active");
+    expect(modularAmpDivergesFromSaved(null, saved)).toBe(false);
+    expect(modularAmpDivergesFromSaved(saved, null)).toBe(false);
   });
 });

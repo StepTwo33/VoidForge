@@ -32,11 +32,14 @@ import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsaved
 import {
   findSourceModularAmp,
   migrateOperatorAmpArcanes,
+  modularAmpDivergesFromSaved,
   modularAmpRefId,
+  modularAmpSlotState,
   persistOperatorAmpArcanes,
   resolveAmpArcanes,
   writeAmpArcanesOnModular,
 } from "@/lib/builds/operator-amp-arcanes";
+import { useConfirmDialog } from "@/components/confirm-dialog-provider";
 import { modularBuildDisplayName, weaponFromModularData } from "@/lib/builds/modular-resolve";
 import { operatorArcanes, ampArcanes } from "@/data/arcanes";
 import { allWeapons } from "@/data/weapons";
@@ -75,6 +78,7 @@ export default function OperatorBuilderPage() {
   const [buildName, setBuildName] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const { confirm } = useConfirmDialog();
 
   const savedModularAmps = useMemo(() => {
     return modularSaved.filter((b) => {
@@ -155,21 +159,37 @@ export default function OperatorBuilderPage() {
     setAmpArcaneRanks([5, 5]);
   }, []);
 
-  // Select a saved modular amp
-  const handleSelectModularAmp = useCallback((build: SavedBuild) => {
+  // Select a saved modular amp. Re-clicking the same card is a no-op when
+  // still in sync with the library Amp; when local arcane edits have diverged,
+  // confirm before restoring so unsaved edits are not silently discarded.
+  const handleSelectModularAmp = useCallback(async (build: SavedBuild) => {
     const data = build.data as ModularBuildData;
+    const alreadyEquipped = ampId === modularAmpRefId(build.id);
+    if (alreadyEquipped) {
+      if (!modularAmpDivergesFromSaved(ampModularBuild, data)) return;
+      const ok = await confirm({
+        title: "Restore saved Amp?",
+        description: `You've changed this Amp's arcanes. Restoring “${build.name}” will discard those unsaved edits. This does not change the saved Amp in your library.`,
+        confirmLabel: "Restore Amp",
+        cancelLabel: "Keep edits",
+        destructive: true,
+      });
+      if (!ok) return;
+    }
     const resolved = resolveAmpArcanes({ ampModularBuild: data });
     setAmpId(modularAmpRefId(build.id));
     setAmpName(build.name || modularBuildDisplayName(data));
     setAmpModularBuild(data);
     setAmpArcanesState(resolveSavedArcaneSlots(resolved.ids, 2));
     setAmpArcaneRanks(resolved.ranks);
-    toast.success(`Attached Amp “${build.name}”`, {
-      description: resolved.ids.filter(Boolean).length
-        ? "Amp arcanes came with the Amp."
-        : undefined,
+    toast.success(alreadyEquipped ? `Restored Amp “${build.name}”` : `Attached Amp “${build.name}”`, {
+      description: alreadyEquipped
+        ? "Unsaved arcane edits on this build were discarded."
+        : resolved.ids.filter(Boolean).length
+          ? "Amp arcanes came with the Amp."
+          : undefined,
     });
-  }, []);
+  }, [ampId, ampModularBuild, confirm]);
 
   const handleSaveBuildConfirm = useCallback(
     async ({ name, isPublic, asNew = false }: SaveBuildDialogValues & { asNew?: boolean }) => {
@@ -559,18 +579,22 @@ export default function OperatorBuilderPage() {
                 ) : (
                   <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
                     {savedModularAmps.map((b) => {
-                      const isEquipped = ampId === `modular_${b.id}`;
                       const d = b.data as ModularBuildData;
+                      const slotState = modularAmpSlotState(ampId, b.id, ampModularBuild, d);
+                      const isEquipped = slotState !== "idle";
+                      const isModified = slotState === "modified";
                       return (
                         <button
                           key={b.id}
                           type="button"
-                          onClick={() => handleSelectModularAmp(b)}
+                          onClick={() => { void handleSelectModularAmp(b); }}
                           className={cn(
                             "w-full flex items-center justify-between p-2.5 rounded-lg border text-left transition-all",
-                            isEquipped
-                              ? "bg-blue-500/15 border-blue-500 ring-1 ring-blue-500/30"
-                              : "bg-card border-border/70 hover:bg-muted/40",
+                            isModified
+                              ? "bg-amber-500/15 border-amber-500 ring-1 ring-amber-500/30"
+                              : isEquipped
+                                ? "bg-blue-500/15 border-blue-500 ring-1 ring-blue-500/30"
+                                : "bg-card border-border/70 hover:bg-muted/40",
                           )}
                         >
                           <div>
@@ -581,8 +605,19 @@ export default function OperatorBuilderPage() {
                               {ampBraces.find((x) => x.id === d.parts.brace)?.name ?? "Brace"}
                             </span>
                           </div>
-                          {isEquipped && (
-                            <span className="rounded bg-blue-500/20 px-2 py-0.5 text-[9px] font-bold text-blue-700 dark:text-blue-400">
+                          {isModified && (
+                            <span
+                              data-testid="amp-slot-modified"
+                              className="rounded bg-amber-500/20 px-2 py-0.5 text-[9px] font-bold text-amber-800 dark:text-amber-300"
+                            >
+                              Modified
+                            </span>
+                          )}
+                          {isEquipped && !isModified && (
+                            <span
+                              data-testid="amp-slot-active"
+                              className="rounded bg-blue-500/20 px-2 py-0.5 text-[9px] font-bold text-blue-700 dark:text-blue-400"
+                            >
                               Active
                             </span>
                           )}
