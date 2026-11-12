@@ -31,7 +31,7 @@ import {
   renameYoursBuild,
   setYoursBuildPublic,
 } from "@/lib/builds/yours-builds";
-import { Edit2, FolderOpen, Globe, Library, Loader2, Search, Sparkles, Trash2 } from "lucide-react";
+import { Crosshair, Dog, Edit2, FolderOpen, Globe, Hammer, Library, Loader2, Plane, Rocket, Search, Shield, Sparkles, Sun, Trash2, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { builderCtaForFilter } from "@/lib/builds/builder-cta";
 import { RivenLibrary } from "@/components/riven-library";
@@ -69,6 +69,18 @@ function formatUpdated(ts: number): string {
   if (diff < 30 * 86_400_000) return `${Math.floor(diff / 86_400_000)}d ago`;
   return new Date(ts).toLocaleDateString();
 }
+
+
+const BUILD_TYPE_ICONS: Record<string, typeof FolderOpen> = {
+  weapon: Crosshair,
+  warframe: Shield,
+  companion: Dog,
+  modular: Hammer,
+  archwing: Plane,
+  railjack: Rocket,
+  loadout: FolderOpen,
+  operator: Sun,
+};
 
 export default function BuildsLibraryPage() {
   const { confirm, prompt } = useConfirmDialog();
@@ -341,14 +353,15 @@ export default function BuildsLibraryPage() {
               const display = resolveBuildItemDisplay(build.type, itemId);
               const href = withFromBuilds(libraryOpenUrl(build));
               const badge = ownershipBadge(build.id);
+              const TypeIcon = BUILD_TYPE_ICONS[build.type] ?? Wrench;
               return (
                 <li key={`${build.type}:${build.id}`}>
                   <ContentPanel className="!p-0 overflow-hidden">
-                    <div className="flex items-stretch gap-0">
+                    <div className="flex flex-col sm:flex-row sm:items-stretch">
                       <Link
                         href={href}
                         onClick={() => rememberReturn(href)}
-                        className="flex min-w-0 flex-1 items-center gap-3 px-3 py-3 transition-colors hover:bg-accent/40 sm:px-4"
+                        className="flex min-w-0 flex-1 items-start gap-3 px-3 py-3 transition-colors hover:bg-accent/40 sm:items-center sm:px-4"
                       >
                         {display.itemImage ? (
                           <GameAssetImage
@@ -360,23 +373,38 @@ export default function BuildsLibraryPage() {
                             hideOnError
                           />
                         ) : (
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted/30 text-[10px] font-medium text-muted-foreground">
-                            {display.typeLabel.slice(0, 3)}
+                          <div
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted/30 text-muted-foreground"
+                            title={display.typeLabel}
+                            aria-hidden
+                          >
+                            <TypeIcon className="h-4 w-4" />
                           </div>
                         )}
                         <div className="min-w-0 flex-1">
-                          <div className="flex min-w-0 items-center gap-2">
-                            <p className="truncate text-sm font-medium">{build.name}</p>
+                          <div className="flex min-w-0 flex-wrap items-center gap-2">
+                            <p className="text-sm font-medium [overflow-wrap:anywhere] sm:truncate">{build.name}</p>
                             {build.isPublic && accountBuildId(build) && (
                               <span className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide bg-primary/10 text-primary">
                                 Community
                               </span>
                             )}
-                          </div>
-                          <p className="truncate text-[11px] text-muted-foreground">
                             <span
                               className={cn(
-                                "mr-1 rounded px-1 py-px font-medium",
+                                "shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium sm:hidden",
+                                badge === "Device"
+                                  ? "bg-muted text-muted-foreground"
+                                  : "bg-primary/10 text-primary",
+                              )}
+                              title={badge === "Device" ? "Saved in this browser only" : "Saved to your account"}
+                            >
+                              {badge === "Device" ? "This device" : "Synced"}
+                            </span>
+                          </div>
+                          <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground [overflow-wrap:anywhere] sm:truncate">
+                            <span
+                              className={cn(
+                                "mr-1 inline-block rounded px-1 py-px font-medium",
                                 build.type === "loadout"
                                   ? "bg-amber-500/15 text-amber-800 dark:text-amber-300"
                                   : "bg-muted text-foreground/80",
@@ -391,7 +419,7 @@ export default function BuildsLibraryPage() {
                         </div>
                         <span
                           className={cn(
-                            "shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium",
+                            "hidden shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium sm:inline",
                             badge === "Device"
                               ? "bg-muted text-muted-foreground"
                               : "bg-primary/10 text-primary",
@@ -401,6 +429,7 @@ export default function BuildsLibraryPage() {
                           {badge === "Device" ? "This device" : "Synced"}
                         </span>
                       </Link>
+                      <div className="flex shrink-0 border-t border-border/60 sm:border-t-0">
                       <button
                         type="button"
                         disabled={
@@ -466,6 +495,7 @@ export default function BuildsLibraryPage() {
                           <Trash2 className="h-4 w-4" />
                         )}
                       </button>
+                      </div>
                     </div>
                   </ContentPanel>
                 </li>
