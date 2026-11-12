@@ -340,6 +340,50 @@ function WeaponPassiveConditionals({
     );
   }
 
+  if (wid === "pride") {
+    const stacks = Math.min(10, Math.max(0, state.pride_coronal_ejection ?? 0));
+    return (
+      <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+        <SimSlider
+          label="Coronal Ejection stacks"
+          value={stacks}
+          min={0}
+          max={10}
+          onChange={(v) => updateState("pride_coronal_ejection", v)}
+          tooltip="Slam attacks grant Coronal Ejection: +15% Status Chance per enemy hit (additive to mods such as Melee Prowess), up to 10 stacks for +150%, lasting 10 seconds and refreshable. Galeforce Dawn's forward block combo includes a slam. Default 0 keeps paper stats."
+        />
+        <StatRow
+          label="Coronal Ejection SC"
+          value={stacks > 0 ? `+${(15 * stacks).toFixed(0)}% Status Chance` : "0 stacks"}
+          color={stacks > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
+          tooltip="wiki.warframe.com/w/Pride: +15% Status Chance per slam hit, additive, max 10 stacks."
+        />
+      </div>
+    );
+  }
+
+  if (wid === "wrath") {
+    const stacks = Math.min(10, Math.max(0, state.wrath_gravitic_slash ?? 0));
+    return (
+      <div className="py-1 space-y-1 border-t border-border/60 mt-1">
+        <SimSlider
+          label="Gravitic Slash stacks"
+          value={stacks}
+          min={0}
+          max={10}
+          onChange={(v) => updateState("wrath_gravitic_slash", v)}
+          tooltip="Slam attacks grant Gravitic Slash: +15% Critical Chance per enemy hit (additive to mods such as True Steel), up to 10 stacks for +150%, lasting 10 seconds and refreshable. Galeforce Dawn's forward block combo includes a slam. Default 0 keeps paper stats."
+        />
+        <StatRow
+          label="Gravitic Slash CC"
+          value={stacks > 0 ? `+${(15 * stacks).toFixed(0)}% Critical Chance` : "0 stacks"}
+          color={stacks > 0 ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}
+          tooltip="wiki.warframe.com/w/Wrath: +15% Critical Chance per slam hit, additive, max 10 stacks."
+        />
+      </div>
+    );
+  }
+
   return null;
 }
 

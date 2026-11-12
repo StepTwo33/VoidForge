@@ -1874,6 +1874,30 @@ export function resolveWeaponPassiveBuffs(
     });
   }
 
+  // wiki.warframe.com/w/Pride and /w/Wrath Characteristics: slam hits grant +15% SC / +15% CC
+  // per enemy, additive to mods (Melee Prowess / True Steel), 10 stacks, 10s, refreshable.
+  if (wid === "pride" && (state.pride_coronal_ejection ?? 0) > 0) {
+    const stacks = Math.min(10, Math.max(1, Math.round(state.pride_coronal_ejection)));
+    buffs.push({
+      id: "passive_pride_coronal_ejection",
+      label: `Coronal Ejection (${stacks}×) (Pride Passive)`,
+      category: "other",
+      statusBonus: 0.15 * stacks,
+      nominal: `+${(15 * stacks).toFixed(0)}% Status Chance for 10s after a slam`,
+    });
+  }
+
+  if (wid === "wrath" && (state.wrath_gravitic_slash ?? 0) > 0) {
+    const stacks = Math.min(10, Math.max(1, Math.round(state.wrath_gravitic_slash)));
+    buffs.push({
+      id: "passive_wrath_gravitic_slash",
+      label: `Gravitic Slash (${stacks}×) (Wrath Passive)`,
+      category: "other",
+      critChanceBonus: 0.15 * stacks,
+      nominal: `+${(15 * stacks).toFixed(0)}% Critical Chance for 10s after a slam`,
+    });
+  }
+
   return buffs;
 }
 

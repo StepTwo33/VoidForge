@@ -5,6 +5,7 @@ import { modsMap } from "@/data/mods";
 import { calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
 import { DEFAULT_SIM_PARAMS, Weapon } from "@/lib/types";
 import { resolveStandaloneExternalBuffs } from "@/lib/weapons/weapon-external-buffs";
+import { WEAPON_PASSIVES } from "@/data/weapon-passives";
 
 function findWeapon(id: string): Weapon {
   const w = allWeapons.find((x) => x.id === id) ?? customWeapons.find((x) => x.id === id);
@@ -242,5 +243,62 @@ describe("Weapon passive conditionals and external buffs", () => {
       DEFAULT_SIM_PARAMS,
     );
     expect(evoStatsBaseWithPerks.totalDamage).toBeGreaterThan(stockStats.totalDamage);
+  });
+});
+
+describe("Pride Coronal Ejection and Wrath Gravitic Slash slam passives", () => {
+  it("documents the slam-stacking passives and leaves paper stats alone at 0 stacks", () => {
+    expect(WEAPON_PASSIVES.pride).toMatch(/Coronal Ejection/);
+    expect(WEAPON_PASSIVES.pride).toMatch(/15%/);
+    expect(WEAPON_PASSIVES.wrath).toMatch(/Gravitic Slash/);
+    expect(WEAPON_PASSIVES.wrath).toMatch(/15%/);
+
+    const pride = findWeapon("pride");
+    const wrath = findWeapon("wrath");
+    expect(resolveStandaloneExternalBuffs(pride, DEFAULT_SIM_PARAMS).find((b) => b.id === "passive_pride_coronal_ejection")).toBeUndefined();
+    expect(resolveStandaloneExternalBuffs(wrath, DEFAULT_SIM_PARAMS).find((b) => b.id === "passive_wrath_gravitic_slash")).toBeUndefined();
+  });
+
+  it("Pride at 10 slam stacks adds +150% status chance, additive, and Wrath adds +150% crit chance", () => {
+    const pride = findWeapon("pride");
+    const prideBuffs = resolveStandaloneExternalBuffs(pride, {
+      ...DEFAULT_SIM_PARAMS,
+      weaponPassiveState: { pride_coronal_ejection: 10 },
+    });
+    const coronal = prideBuffs.find((b) => b.id === "passive_pride_coronal_ejection");
+    expect(coronal?.statusBonus).toBeCloseTo(1.5, 6);
+
+    const prideStock = calculateWeaponBuildWithArcanes(pride, [], modsMap, [], undefined, DEFAULT_SIM_PARAMS);
+    const prideHot = calculateWeaponBuildWithArcanes(
+      pride, [], modsMap, [], undefined,
+      { ...DEFAULT_SIM_PARAMS, weaponPassiveState: { pride_coronal_ejection: 10 } },
+      { externalBuffs: prideBuffs },
+    );
+    expect(prideHot.statusChance).toBeCloseTo(prideStock.statusChance * (1 + 1.5), 3);
+
+    const wrath = findWeapon("wrath");
+    const wrathBuffs = resolveStandaloneExternalBuffs(wrath, {
+      ...DEFAULT_SIM_PARAMS,
+      weaponPassiveState: { wrath_gravitic_slash: 10 },
+    });
+    const gravitic = wrathBuffs.find((b) => b.id === "passive_wrath_gravitic_slash");
+    expect(gravitic?.critChanceBonus).toBeCloseTo(1.5, 6);
+
+    const wrathStock = calculateWeaponBuildWithArcanes(wrath, [], modsMap, [], undefined, DEFAULT_SIM_PARAMS);
+    const wrathHot = calculateWeaponBuildWithArcanes(
+      wrath, [], modsMap, [], undefined,
+      { ...DEFAULT_SIM_PARAMS, weaponPassiveState: { wrath_gravitic_slash: 10 } },
+      { externalBuffs: wrathBuffs },
+    );
+    expect(wrathHot.criticalChance).toBeCloseTo(wrathStock.criticalChance * (1 + 1.5), 3);
+  });
+
+  it("caps slam stacks at 10", () => {
+    const pride = findWeapon("pride");
+    const buffs = resolveStandaloneExternalBuffs(pride, {
+      ...DEFAULT_SIM_PARAMS,
+      weaponPassiveState: { pride_coronal_ejection: 99 },
+    });
+    expect(buffs.find((b) => b.id === "passive_pride_coronal_ejection")?.statusBonus).toBeCloseTo(1.5, 6);
   });
 });
