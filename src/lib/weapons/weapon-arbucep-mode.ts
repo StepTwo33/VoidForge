@@ -120,8 +120,9 @@ export function applyArbucepAttackMode(
 }
 
 /** How many missiles this Arbucep volley fires (6 together, or 1 when isolated). */
-export function arbucepProjectileCount(weapon: Pick<Weapon, "id"> & Record<string, unknown>): number {
+export function arbucepProjectileCount(weapon: Pick<Weapon, "id">): number {
   if (weapon.id !== "arbucep") return 1;
-  const n = ARBUCEP_ELEMENTS.filter((e) => Number(weapon[e] ?? 0) > 0).length;
+  const rec = weapon as unknown as Record<string, unknown>;
+  const n = ARBUCEP_ELEMENTS.filter((e) => Number(rec[e] ?? 0) > 0).length;
   return Math.max(1, n);
 }
