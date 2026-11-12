@@ -195,7 +195,7 @@ const BUILD_TYPE_LABELS: Record<string, string> = {
   loadout: "Loadout",
 };
 
-function HeaderBuildSearch({ className, onNavigate }: { className?: string; onNavigate?: () => void }) {
+function HeaderBuildSearch({ className, onNavigate, autoFocus = false }: { className?: string; onNavigate?: () => void; autoFocus?: boolean }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -204,6 +204,12 @@ function HeaderBuildSearch({ className, onNavigate }: { className?: string; onNa
   const [loadingBuilds, setLoadingBuilds] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!autoFocus) return;
+    const id = window.requestAnimationFrame(() => inputRef.current?.focus());
+    return () => window.cancelAnimationFrame(id);
+  }, [autoFocus]);
 
   const catalogMatches = searchBuildCatalog(query, 5);
   const trimmed = query.trim();
@@ -470,6 +476,7 @@ export function Header() {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -542,11 +549,9 @@ export function Header() {
     <header className="page-ambient-ignore sticky top-0 z-50 border-b border-border/60 bg-card/70 shadow-sm shadow-[var(--shadow-color)] backdrop-blur-xl transition-colors duration-300 pt-[env(safe-area-inset-top,0px)]">
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
       <div className="flex h-14 w-full items-center gap-2 px-3.5 sm:px-5 lg:gap-3 lg:px-6">
-        <Link href="/" className="tap-target inline-flex min-h-11 min-w-0 shrink items-center gap-2 text-xl font-bold tracking-tight">
+        <Link href="/" aria-label="Voidforge home" className="tap-target inline-flex min-h-11 min-w-0 shrink-0 items-center gap-2 text-xl font-bold tracking-tight">
           <BrandMark size={28} className="shrink-0 ring-1 ring-primary/20" />
-          <span className="truncate">
-            <span className="text-primary">Voidforge</span>
-          </span>
+          <span className="hidden text-primary md:inline">Voidforge</span>
         </Link>
 
         {/* Desktop nav — sits left of center search */}
@@ -641,6 +646,21 @@ export function Header() {
             <span className="w-px h-5 bg-border mx-1" />
           </nav>
 
+          <button
+            type="button"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground md:hidden"
+            aria-label="Search"
+            aria-expanded={mobileSearchOpen}
+            aria-controls="header-mobile-search"
+            data-testid="header-mobile-search-toggle"
+            onClick={() => {
+              setMobileOpen(false);
+              setMobileSearchOpen((open) => !open);
+            }}
+          >
+            {mobileSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+          </button>
+
           <ThemePicker />
 
           {loading ? (
@@ -670,7 +690,10 @@ export function Header() {
           <button
             ref={mobileToggleRef}
             aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen(!mobileOpen)}
+            onClick={() => {
+              setMobileSearchOpen(false);
+              setMobileOpen(!mobileOpen);
+            }}
             className="tap-target inline-flex items-center justify-center rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:hidden"
             aria-label="Toggle menu"
           >
@@ -678,6 +701,15 @@ export function Header() {
           </button>
         </div>
       </div>
+
+      {mobileSearchOpen && (
+        <div
+          id="header-mobile-search"
+          className="border-t border-border bg-card px-3.5 py-2.5 md:hidden"
+        >
+          <HeaderBuildSearch autoFocus onNavigate={() => setMobileSearchOpen(false)} />
+        </div>
+      )}
 
       {/* Mobile nav drawer */}
       {mobileOpen && (
