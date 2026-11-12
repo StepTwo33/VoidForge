@@ -142,6 +142,9 @@ import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { getLoadouts } from "@/lib/builds/loadouts";
 import { calcLoadoutStats, setBonusLinkageFromLoadout } from "@/lib/builds/loadout-stats";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
+import { shareBuilderBuild } from "@/lib/builds/share-build";
+import { companionBuildToShare, companionShareToBuild, savedBuildFromShare } from "@/lib/builds/share-payload";
+import { useShareBuildFromUrl } from "@/lib/builds/use-share-build-from-url";
 import {
   houndBrackets,
   houndCores,
@@ -262,6 +265,7 @@ export default function CompanionBuilderPage() {
   const [companionParts, setCompanionParts] = useState<ModularCompanionParts | null>(null);
 
   const [compareOpen, setCompareOpen] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   const rivenLibraryState = useSavedRivenLibrary(selectedWeapon?.id);
   const savedRivens = rivenLibraryState.list;
@@ -455,6 +459,34 @@ export default function CompanionBuilderPage() {
 
   useCloudBuildFromUrl("companion", handleLoadBuild);
   useLocalBuildFromUrl("companion", handleLoadBuild);
+
+  const handleShareBuild = useCallback(async () => {
+    const data = buildCompanionData();
+    if (!data) return;
+    const outcome = await shareBuilderBuild({
+      isPublic: buildIsPublic,
+      buildId: currentBuildId,
+      fallback: companionBuildToShare(data),
+    });
+    if (outcome.kind === "copied") {
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  }, [buildCompanionData, buildIsPublic, currentBuildId]);
+
+  useShareBuildFromUrl("companion", (shared) => {
+    const data = companionShareToBuild(shared);
+    if (!data) return false;
+    if (!allCompanions.some((c) => c.id === data.companionId)) {
+      toast.error("Companion not found", {
+        description: "This shared build uses a companion that is no longer in the catalog.",
+      });
+      return false;
+    }
+    handleLoadBuild(savedBuildFromShare("companion", data, shared.customName || "Shared companion"), { silent: true });
+    setCurrentBuildId(null);
+  }, allCompanions.length > 0);
+
   const { context: loadoutCtx, clearContext: clearLoadoutCtx, restoreContext: restoreLoadoutCtx } = useLoadoutSlotFromUrl("companion", handleLoadBuild, allCompanions.length > 0);
 
   // Per-tab draft of the open build: Riven Library "Equip" adds its riven to this companion + weapon.
@@ -1162,6 +1194,8 @@ export default function CompanionBuilderPage() {
                 onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
                 onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
                 onLoad={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }}
+                onShare={handleShareBuild}
+                shareCopied={shareCopied}
                 extras={
                   <BuilderToolbarButton
                     onClick={() => setCompareOpen(true)}

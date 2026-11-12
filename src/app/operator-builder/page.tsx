@@ -23,6 +23,9 @@ import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-b
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
 import { useLocalBuildFromUrl } from "@/lib/builds/use-local-build-from-url";
+import { shareBuilderBuild } from "@/lib/builds/share-build";
+import { operatorBuildToShare, operatorShareToBuild, savedBuildFromShare } from "@/lib/builds/share-payload";
+import { useShareBuildFromUrl } from "@/lib/builds/use-share-build-from-url";
 import { useLoadoutSlotFromUrl } from "@/lib/builds/use-loadout-slot-from-url";
 import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-context";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
@@ -68,6 +71,7 @@ export default function OperatorBuilderPage() {
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
   const [saveAsNew, setSaveAsNew] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const [buildName, setBuildName] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -210,6 +214,26 @@ export default function OperatorBuilderPage() {
 
   useCloudBuildFromUrl("operator", handleLoadBuild);
   useLocalBuildFromUrl("operator", handleLoadBuild);
+
+  const handleShareBuild = useCallback(async () => {
+    const outcome = await shareBuilderBuild({
+      isPublic: buildIsPublic,
+      buildId: currentBuildId,
+      fallback: operatorBuildToShare(buildOperatorPayload()),
+    });
+    if (outcome.kind === "copied") {
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  }, [buildIsPublic, currentBuildId, buildOperatorPayload]);
+
+  useShareBuildFromUrl("operator", (shared) => {
+    const data = operatorShareToBuild(shared);
+    if (!data) return false;
+    handleLoadBuild(savedBuildFromShare("operator", data, shared.focusSchool || "Shared operator"), { silent: true });
+    setCurrentBuildId(null);
+  });
+
   // Same loadout-slot flow as the Warframe / weapon / companion builders (?loadout=&slot=operator).
   const { context: loadoutCtx, clearContext: clearLoadoutCtx } = useLoadoutSlotFromUrl("operator", handleLoadBuild);
 
@@ -332,6 +356,8 @@ export default function OperatorBuilderPage() {
               void refreshSavedBuilds();
               setShowSavedBuilds(true);
             }}
+            onShare={handleShareBuild}
+            shareCopied={shareCopied}
           />
         </BuilderItemHeader>
         <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 bg-background pb-1 backdrop-blur-md supports-[backdrop-filter]:bg-background lg:hidden">

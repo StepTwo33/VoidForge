@@ -45,6 +45,9 @@ import { toast } from "sonner";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
+import { shareBuilderBuild } from "@/lib/builds/share-build";
+import { archwingBuildToShare, archwingShareToBuild, savedBuildFromShare } from "@/lib/builds/share-payload";
+import { useShareBuildFromUrl } from "@/lib/builds/use-share-build-from-url";
 import { snapshotFromBuild } from "@/lib/builds/compare-build";
 import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 import { ExaltedWeaponSection } from "@/app/warframe-builder/exalted-weapon-section";
@@ -141,6 +144,7 @@ export default function ArchwingBuilderPage() {
   const [buildIsPublic, setBuildIsPublic] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   const necramechExaltedWeapon = useMemo(() => {
     if (mode !== "necramech" || !selectedNecramech) return null;
@@ -273,6 +277,28 @@ export default function ArchwingBuilderPage() {
   }, [markClean, archwingList, necramechList, allWeaponsData, modsMap]);
 
   useCloudBuildFromUrl("archwing", handleLoadBuild);
+
+  const handleShareBuild = useCallback(async () => {
+    const frame = mode === "archwing" ? selectedArchwing : selectedNecramech;
+    if (!frame) return;
+    const outcome = await shareBuilderBuild({
+      isPublic: buildIsPublic,
+      buildId: currentBuildId,
+      fallback: archwingBuildToShare(buildArchwingData()),
+    });
+    if (outcome.kind === "copied") {
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  }, [mode, selectedArchwing, selectedNecramech, buildIsPublic, currentBuildId, buildArchwingData]);
+
+  useShareBuildFromUrl("archwing", (shared) => {
+    const data = archwingShareToBuild(shared);
+    if (!data) return false;
+    handleLoadBuild(savedBuildFromShare("archwing", data, "Shared vehicle"), { silent: true });
+    setCurrentBuildId(null);
+  }, archwingList.length > 0 || necramechList.length > 0);
+
 
   // Per-tab draft so library Equip can add an archgun riven to this open archwing/necramech build.
   // Do not clear the draft while nothing is selected — that would wipe it on the way back from the library.
@@ -628,6 +654,10 @@ export default function ArchwingBuilderPage() {
             onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
             onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
             onLoad={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }}
+            onShare={handleShareBuild}
+            shareCopied={shareCopied}
+            shareDisabled={!selectedFrame}
+            shareTitle={selectedFrame ? "Copy a shareable link to this build" : "Select an archwing or necramech first"}
             extras={
               <BuilderToolbarButton
                 onClick={() => setCompareOpen(true)}

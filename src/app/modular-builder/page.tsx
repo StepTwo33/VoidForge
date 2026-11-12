@@ -54,9 +54,10 @@ import {
   KitgunChamber, KitgunGrip, KitgunLoader, ZawStrike, ZawGrip, ZawLink, AmpScaffold, AmpBrace,
 } from "@/data/modular-weapons";
 import { cn } from "@/lib/utils";
-import { reportUnreadableShareLink } from "@/lib/builds/share-link-errors";
-import { cleanLoadedBuild, cleanLoadedMods } from "@/lib/builds/incompatible-mod-warnings";
-import { extractBuildFromUrlAsync } from "@/lib/builds/build-url";
+import { shareBuilderBuild } from "@/lib/builds/share-build";
+import { modularBuildToShare, modularShareToBuild, savedBuildFromShare } from "@/lib/builds/share-payload";
+import { useShareBuildFromUrl } from "@/lib/builds/use-share-build-from-url";
+import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
@@ -261,74 +262,7 @@ export default function ModularBuilderPage() {
   const [buildIsPublic, setBuildIsPublic] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
-
-  // Load build from ?build= share link (e.g. from /build/[id] page)
-  useEffect(() => {
-    let cancelled = false;
-    queueMicrotask(() => {
-      void (async () => {
-        const params = new URLSearchParams(window.location.search);
-        const shared = await extractBuildFromUrlAsync(params);
-        if (cancelled) return;
-        if (!shared) {
-          reportUnreadableShareLink(params);
-          return;
-        }
-        if (shared.type !== "modular" || !shared.modularType || !shared.parts) return;
-        const mt = shared.modularType as ModularType;
-        setModularType(mt);
-        if (mt === "kitgun") {
-          setKitgunChamber(kitgunChambers.find((c) => c.id === shared.parts!.chamber) ?? null);
-          setKitgunGrip(kitgunGrips.find((g) => g.id === shared.parts!.grip) ?? null);
-          setKitgunLoader(kitgunLoaders.find((l) => l.id === shared.parts!.loader) ?? null);
-        } else if (mt === "zaw") {
-          setZawStrike(zawStrikes.find((s) => s.id === shared.parts!.strike) ?? null);
-          setZawGripSel(zawGrips.find((g) => g.id === shared.parts!.grip) ?? null);
-          setZawLinkSel(zawLinks.find((l) => l.id === shared.parts!.link) ?? null);
-        } else {
-          setAmpPrism(ampPrisms.find((p) => p.id === shared.parts!.prism) ?? null);
-          setAmpScaffold(ampScaffolds.find((s) => s.id === shared.parts!.scaffold) ?? null);
-          setAmpBrace(ampBraces.find((b) => b.id === shared.parts!.brace) ?? null);
-        }
-        setEquippedMods(
-          cleanLoadedMods(shared.mods.map((m, idx) => {
-            const mod = modsMap.get(m.id);
-            return {
-              modId: m.id,
-              modName: mod?.name ?? "",
-              rank: m.rank,
-              slotIndex: m.slotIndex ?? idx,
-              polarity: mod?.polarity,
-              drain: mod?.drain,
-            };
-          }))
-        );
-        setRivenStatsMap({});
-        setHasOrokinCatalyst(shared.hasOrokinCatalyst ?? false);
-        if (shared.arcanes?.length) {
-          const resolved = shared.arcanes.map((id) => (id ? resolveArcaneById(id) : null));
-          setEquippedArcanes(resolved);
-          setEquippedArcaneRanks([0, 1].map((i) => shared.arcaneRanks?.[i] ?? resolved[i]?.maxRank ?? 5));
-        } else {
-          setEquippedArcanes([null, null]);
-          setEquippedArcaneRanks([5, 5]);
-        }
-        const pol: Record<number, string> = {};
-        if (shared.slotPolarities) {
-          for (const [k, v] of Object.entries(shared.slotPolarities)) {
-            pol[Number(k)] = v;
-          }
-        }
-        setSlotPolarities(pol);
-        // ?build= stays in the URL (shareable, survives refresh). Runs once on mount.
-        toast.info("Build loaded from link", { description: "Modular configuration applied" });
-      })();
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [modsMap]);
-
+  const [shareCopied, setShareCopied] = useState(false);
 
   const buildModularData = useCallback((): ModularBuildData => {
     const parts: Record<string, string> = {};
@@ -481,6 +415,27 @@ export default function ModularBuilderPage() {
     handleLoadBuild(rawBuild);
   });
   const { context: loadoutCtx, clearContext: clearLoadoutCtx, restoreContext: restoreLoadoutCtx } = useLoadoutSlotFromUrl("modular", handleLoadBuild);
+
+  const handleShareBuild = useCallback(async () => {
+    if (!assembledWeapon) return;
+    const outcome = await shareBuilderBuild({
+      isPublic: buildIsPublic,
+      buildId: currentBuildId,
+      fallback: modularBuildToShare(buildModularData()),
+    });
+    if (outcome.kind === "copied") {
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  }, [assembledWeapon, buildIsPublic, currentBuildId, buildModularData]);
+
+  useShareBuildFromUrl("modular", (shared) => {
+    const data = modularShareToBuild(shared);
+    if (!data) return false;
+    handleLoadBuild(savedBuildFromShare("modular", data, shared.customName || "Shared modular"), { silent: true });
+    setCurrentBuildId(null);
+  });
+
   const { confirm } = useConfirmDialog();
   // Slot the loadout still holds this item in until we save a move (ctx.slot may already show the destination).
   const originSlotRef = useRef<string | null>(null);
@@ -1054,6 +1009,10 @@ export default function ModularBuilderPage() {
             onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
             onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
             onLoad={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }}
+            onShare={handleShareBuild}
+            shareCopied={shareCopied}
+            shareDisabled={!assembledWeapon}
+            shareTitle={assembledWeapon ? "Copy a shareable link to this build" : "Finish the parts before sharing"}
             extras={
               <BuilderToolbarButton
                 onClick={() => setCompareOpen(true)}

@@ -69,6 +69,9 @@ import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-b
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { CrewSlotEditor } from "@/components/railjack-crew-slot-editor";
 import { useCloudBuildFromUrl } from "@/lib/builds/use-cloud-build-from-url";
+import { shareBuilderBuild } from "@/lib/builds/share-build";
+import { railjackBuildToShare, railjackShareToBuild, savedBuildFromShare } from "@/lib/builds/share-payload";
+import { useShareBuildFromUrl } from "@/lib/builds/use-share-build-from-url";
 import {
   computeWarframeAuraBonus,
   computeWarframeCapacityUsed,
@@ -131,6 +134,7 @@ export default function RailjackBuilderPage() {
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
   const [currentBuildId, setCurrentBuildId] = useState<string | null>(null);
   const [saveAsNew, setSaveAsNew] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const [buildName, setBuildName] = useState("");
   const [buildIsPublic, setBuildIsPublic] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -280,7 +284,7 @@ export default function RailjackBuilderPage() {
     markClean();
   }, [buildRailjackData, currentBuildId, refreshSavedBuilds, markClean]);
 
-  const handleLoadBuild = useCallback((rawBuild: SavedBuild) => {
+  const handleLoadBuild = useCallback((rawBuild: SavedBuild, options?: { silent?: boolean }) => {
     const build = cleanLoadedBuild(rawBuild);
     const d = build.data as RailjackBuildData;
     const restoreMods = (
@@ -333,11 +337,31 @@ export default function RailjackBuilderPage() {
     setBuildName(build.name);
     setBuildIsPublic(build.isPublic ?? false);
     setShowSavedBuilds(false);
-    toast.info("Build loaded", { description: build.name });
+    if (!options?.silent) toast.info("Build loaded", { description: build.name });
     markClean();
   }, [modsMap, markClean]);
 
   useCloudBuildFromUrl("railjack", handleLoadBuild);
+
+  const handleShareBuild = useCallback(async () => {
+    const outcome = await shareBuilderBuild({
+      isPublic: buildIsPublic,
+      buildId: currentBuildId,
+      fallback: railjackBuildToShare(buildRailjackData()),
+    });
+    if (outcome.kind === "copied") {
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  }, [buildIsPublic, currentBuildId, buildRailjackData]);
+
+  useShareBuildFromUrl("railjack", (shared) => {
+    const data = railjackShareToBuild(shared);
+    if (!data) return false;
+    handleLoadBuild(savedBuildFromShare("railjack", data, "Shared railjack"), { silent: true });
+    setCurrentBuildId(null);
+  });
+
 
   const handleDeleteBuild = useCallback((id: string) => {
     void deleteSavedBuild(id);
@@ -409,6 +433,8 @@ export default function RailjackBuilderPage() {
             onSaveNew={() => { setSaveAsNew(false); setSaveDialogOpen(true); }}
             onSaveAs={() => { setSaveAsNew(true); setSaveDialogOpen(true); }}
             onLoad={() => { void refreshSavedBuilds(); setShowSavedBuilds(true); }}
+            onShare={handleShareBuild}
+            shareCopied={shareCopied}
             leading={
               <input
                 type="text"
