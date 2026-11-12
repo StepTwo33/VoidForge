@@ -1062,7 +1062,13 @@ export function applyCrossSlotMeleeWeaponBuffs(
           (acc.onKillStatBonuses.statusChance ?? 0) + pct("statusChance");
       }
       if (mod.id === "amalgam_furax_body_count") {
-        acc.fireRateBonus += pct("fireRate");
+        // wiki.warframe.com/w/Amalgam_Furax_Body_Count Notes (page body):
+        // +45% Fire Rate for Secondary Weapons at rank 5. Applies to Mesa's
+        // Regulators, Hildryn's Balefire Charger, Dante's Noctua and Jade's
+        // Glory. Does not apply to Titania's Dex Pixia (include Dex Pixia Prime).
+        if (weapon.id !== "dex_pixia" && weapon.id !== "dex_pixia_prime") {
+          acc.fireRateBonus += pct("fireRate");
+        }
       }
     }
     if (isShotgun && mod.id === "amalgam_ripkas_true_steel") {
