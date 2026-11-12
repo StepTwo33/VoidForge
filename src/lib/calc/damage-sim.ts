@@ -189,6 +189,19 @@ function typeVsLayer(
   return dmg;
 }
 
+
+/**
+ * Enemy Effective HP used by the Damage Simulator: shields (armor does not apply to
+ * shields) plus health ÷ (1 − armor DR). Player 50% Tenno shield reduction is not
+ * applied — this is an enemy target. Shield gating is not modeled.
+ */
+export function enemyEffectiveHP(health: number, armorDR: number, shield = 0): number {
+  const hp = Math.max(health, 0);
+  const sh = Math.max(shield, 0);
+  const dr = Math.min(Math.max(armorDR, 0), 0.999999);
+  return sh + (dr > 0 && dr < 1 ? hp / (1 - dr) : hp);
+}
+
 /**
  * Run the damage simulator.
  * Paper DPS / type breakdown use wiki helpers; TTK / shots come from calculateTTK.
@@ -333,7 +346,7 @@ export function runDamageSim(
     baseArmor,
     armor,
     armorDR,
-    effectiveHP: hp + shield,
+    effectiveHP: enemyEffectiveHP(hp, armorDR, shield),
     typeBreakdown,
     avgCrit: acm,
     rawPerShot,

@@ -9,7 +9,7 @@ import {
   heatArmorRemaining,
 } from "@/lib/calc/ttk";
 import { avgCritMultiplier } from "@/lib/calc/crit-utils";
-import { runDamageSim, simInputsToCalculatedStats } from "@/lib/calc/damage-sim";
+import { runDamageSim, simInputsToCalculatedStats, enemyEffectiveHP } from "@/lib/calc/damage-sim";
 
 const lancer = ENEMY_TYPES.find((e) => e.id === "lancer")!;
 
@@ -124,5 +124,42 @@ describe("damage sim Warframe math alignment", () => {
   it("300 enemy armor is 30% DR (0.9 × sqrt(300/2700), not 50% Tenno)", () => {
     expect(enemyArmorDamageReduction(300)).toBeCloseTo(0.3, 10);
     expect(300 / (300 + 300)).toBeCloseTo(0.5, 10);
+  });
+});
+
+describe("enemy Effective HP includes armor DR", () => {
+  it("is health when there is no armor and no shields", () => {
+    expect(enemyEffectiveHP(1000, 0, 0)).toBe(1000);
+  });
+
+  it("divides health by (1 − DR) and adds raw shields (armor does not apply to shields)", () => {
+    expect(enemyEffectiveHP(1000, 0.5, 0)).toBeCloseTo(2000, 10);
+    expect(enemyEffectiveHP(1000, 0.5, 400)).toBeCloseTo(2400, 10);
+    // 63.8% DR like a mid-level armored Grineer
+    expect(enemyEffectiveHP(28000, 0.638, 0)).toBeCloseTo(28000 / (1 - 0.638), 6);
+  });
+
+  it("does not use the Tenno 50% shield-damage taken rule", () => {
+    // playerEffectiveHealth would be 1000/(1-0.5) + 400/0.5 = 2800
+    expect(enemyEffectiveHP(1000, 0.5, 400)).toBeCloseTo(2400, 10);
+    expect(enemyEffectiveHP(1000, 0.5, 400)).not.toBeCloseTo(2800, 0);
+  });
+
+  it("runDamageSim reports EHP as shields + health / (1 − armorDR)", () => {
+    const simArmored = runDamageSim(
+      { ...baseInput, dmgTypes: { puncture: 200 }, statusChance: 0 },
+      lancer,
+      100,
+    )!;
+    expect(simArmored.armorDR).toBeGreaterThan(0.2);
+    expect(simArmored.effectiveHP).toBeCloseTo(
+      enemyEffectiveHP(simArmored.hp, simArmored.armorDR, simArmored.shield),
+      8,
+    );
+    expect(simArmored.effectiveHP).toBeGreaterThan(simArmored.hp + simArmored.shield + 1);
+    expect(simArmored.effectiveHP).toBeCloseTo(
+      simArmored.shield + simArmored.hp / (1 - simArmored.armorDR),
+      8,
+    );
   });
 });
