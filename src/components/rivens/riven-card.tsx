@@ -5,7 +5,7 @@ import { ExternalLink, RefreshCw, Trash2, Edit3 } from "lucide-react";
 import { PolarityIcon } from "@/components/polarity-icon";
 import { GameAssetImage } from "@/components/game-asset-image";
 import { getWeaponImage } from "@/lib/display/images";
-import { type SavedRiven } from "@/lib/rivens/riven-storage";
+import { rivenDisplayStats, type SavedRiven } from "@/lib/rivens/riven-storage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { rivenCannotEquipReason, rivenEquipHref } from "@/lib/rivens/riven-equip";
@@ -46,6 +46,7 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
   const rollSuffix = extractRivenAffix(riven.name, weaponName) || "Riven";
   const catalogWeapon = allWeapons.find((w) => w.id === riven.weaponId);
   const cannotEquip = rivenCannotEquipReason(catalogWeapon, riven.weaponName);
+  const displayStats = rivenDisplayStats(riven);
 
   const equipUrl = rivenEquipHref(riven);
 
@@ -137,9 +138,14 @@ export function RivenCard({ riven, onDelete, onEdit }: RivenCardProps) {
 
         {/* Stats Block */}
         <div className="space-y-1.5 py-1 text-center font-sans">
-          {riven.displayStats.map((s, idx) => {
+          {displayStats.length === 0 && (
+            <div className="text-xs font-medium leading-normal text-amber-200/90">
+              Stats on this riven couldn&apos;t be read. Edit or delete it.
+            </div>
+          )}
+          {displayStats.map((s, idx) => {
             const sign = s.value >= 0 ? "+" : "";
-            const isFaction = s.key.startsWith("faction") || s.label.startsWith("Damage to ") || s.label.startsWith("Damage vs ");
+            const isFaction = (s.key ?? "").startsWith("faction") || (s.label ?? "").startsWith("Damage to ") || (s.label ?? "").startsWith("Damage vs ");
             const formattedVal = isFaction
               ? `${(1 + s.value).toFixed(2)}x`
               : s.isPercent

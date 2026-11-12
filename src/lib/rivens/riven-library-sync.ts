@@ -9,7 +9,7 @@ import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-valida
 import { getRivenModIdForWeapon } from "@/lib/weapons/riven-weapon-type";
 import { getEffectiveRivenWeaponType, resolveRivenWeapon } from "@/lib/weapons/riven-family";
 import { localRivenAfterCloudSave, rivenSaveId } from "./riven-save-id";
-import { deleteRiven, evaluateSavedRiven, saveRiven, type SavedRiven } from "./riven-storage";
+import { coerceRivenStats, deleteRiven, evaluateSavedRiven, saveRiven, type SavedRiven } from "./riven-storage";
 
 /** Mastery rank shown when neither the account nor this device knows it. */
 export const UNKNOWN_RIVEN_MASTERY = 8;
@@ -26,7 +26,8 @@ export function cloudRivenToLocal(c: CloudSavedRiven, local?: SavedRiven): Saved
   const rank = rivenRankFromDrain(c.drain);
   const rerolls = c.rerolls ?? local?.rerolls ?? 0;
   const masteryRank = c.masteryRank ?? local?.masteryRank ?? UNKNOWN_RIVEN_MASTERY;
-  const evalRes = evaluateSavedRiven(weaponName, weaponType, c.stats, rank, rerolls, c.polarity);
+  const stats = coerceRivenStats(c.stats);
+  const evalRes = evaluateSavedRiven(weaponName, weaponType, stats, rank, rerolls, c.polarity);
   return {
     ...(local ?? {}),
     id: c.id,
@@ -39,7 +40,7 @@ export function cloudRivenToLocal(c: CloudSavedRiven, local?: SavedRiven): Saved
     rank,
     rerolls,
     masteryRank,
-    stats: c.stats,
+    stats,
     displayStats: evalRes.displayStats,
     score: evalRes.score,
     grade: evalRes.grade,

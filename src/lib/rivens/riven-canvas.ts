@@ -1,4 +1,4 @@
-import type { SavedRiven } from "./riven-storage";
+import { rivenDisplayStats, type SavedRiven } from "./riven-storage";
 
 /**
  * Draws a high-resolution, authentic Warframe Riven Card onto an HTML Canvas.
@@ -149,7 +149,7 @@ export async function renderRivenCardToCanvas(
   let statY = 190;
   ctx.textAlign = "center";
 
-  for (const s of riven.displayStats) {
+  for (const s of rivenDisplayStats(riven)) {
     const isCurse = s.isCurse;
     const isSpliced = s.spliced;
 

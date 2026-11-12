@@ -6,7 +6,7 @@ import { Sparkles, Plus, Search, RefreshCw, Flame, ArrowUpDown, Camera } from "l
 import { Input } from "@/components/ui/input";
 import { RivenCard } from "@/components/rivens/riven-card";
 import { RivenDialog } from "@/components/rivens/riven-dialog";
-import { getSavedRivens, type SavedRiven } from "@/lib/rivens/riven-storage";
+import { getSavedRivens, rivenDisplayStats, type SavedRiven } from "@/lib/rivens/riven-storage";
 import { hasClientSession } from "@/lib/auth/client-session";
 import { deleteLibraryRiven, mergeCloudRivens, saveLibraryRiven } from "@/lib/rivens/riven-library-sync";
 import { getSavedRivens as getCloudRivens } from "@/lib/riven/saved-rivens";
@@ -116,7 +116,7 @@ export default function RivenLibraryPage() {
         (r) =>
           r.name.toLowerCase().includes(q) ||
           r.weaponName.toLowerCase().includes(q) ||
-          r.displayStats.some((s) => s.label.toLowerCase().includes(q)) ||
+          rivenDisplayStats(r).some((s) => (s.label ?? "").toLowerCase().includes(q)) ||
           r.grade?.toLowerCase().includes(q),
       );
     }

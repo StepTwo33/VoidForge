@@ -6,6 +6,9 @@ import {
   LEGACY_STARTER_SEED,
   stripUntouchedStarters,
   getSavedRivens,
+  normalizeSavedRiven,
+  rivenDisplayStats,
+  coerceRivenStats,
   type SavedRiven,
 } from "./riven-storage";
 import { extractRivenAffix, getRivenModArtImage } from "@/components/rivens/riven-card";
@@ -107,5 +110,110 @@ describe("Riven Card Display & Affix Extraction", () => {
     expect(getRivenModArtImage("Zaw")).toBe("/images/mods/Zaw_Riven_Mod.png");
     expect(getRivenModArtImage("Companion")).toBe("/images/mods/Companion_Weapon_Riven_Mod.png");
     expect(getRivenModArtImage("Archgun")).toBe("/images/mods/Archgun_Riven_Mod.png");
+  });
+});
+
+describe("malformed riven records do not take down the library", () => {
+  class MemStorage {
+    m = new Map<string, string>();
+    getItem(k: string) { return this.m.get(k) ?? null; }
+    setItem(k: string, v: string) { this.m.set(k, v); }
+    removeItem(k: string) { this.m.delete(k); }
+  }
+
+  const wellFormed = {
+    id: "riven_ok",
+    name: "Torid Critacan",
+    weaponId: "torid",
+    weaponName: "Torid",
+    weaponCategory: "primary",
+    weaponType: "Rifle" as const,
+    polarity: "madurai",
+    rank: 8,
+    rerolls: 2,
+    masteryRank: 14,
+    stats: { criticalChance: 1.5, multishot: 0.9 },
+    displayStats: [
+      { key: "criticalChance", label: "Critical Chance", value: 1.5, isPercent: true },
+      { key: "multishot", label: "Multishot", value: 0.9, isPercent: true },
+    ],
+    score: 3,
+    grade: "Good",
+    gradeColor: "#fff",
+    createdAt: 1,
+    updatedAt: 1,
+  };
+
+  it("rivenDisplayStats is safe on undefined, null, and garbage", () => {
+    expect(rivenDisplayStats(undefined)).toEqual([]);
+    expect(rivenDisplayStats(null)).toEqual([]);
+    expect(rivenDisplayStats({} as SavedRiven)).toEqual([]);
+    expect(rivenDisplayStats({ displayStats: undefined } as SavedRiven)).toEqual([]);
+    expect(rivenDisplayStats({ displayStats: "nope" as never } as SavedRiven)).toEqual([]);
+    // Does not throw when mapping, which is what used to crash RivenCard.
+    expect(() => rivenDisplayStats({ displayStats: undefined } as SavedRiven).map((s) => s.label)).not.toThrow();
+  });
+
+  it("rebuilds displayStats from a stats map when they are missing", () => {
+    const raw = { ...wellFormed, displayStats: undefined };
+    const n = normalizeSavedRiven(raw);
+    expect(n).not.toBeNull();
+    expect(n!.displayStats.length).toBe(2);
+    expect(n!.displayStats.map((s) => s.key).sort()).toEqual(["criticalChance", "multishot"]);
+    expect(n!.grade).toBeTruthy();
+  });
+
+  it("coerces stats stored as an array (OCR / old shapes) and keeps the row", () => {
+    const raw = {
+      ...wellFormed,
+      stats: [
+        { key: "criticalChance", value: 1.5 },
+        { multishot: 0.9 },
+      ],
+      displayStats: undefined,
+    };
+    expect(coerceRivenStats(raw.stats)).toEqual({ criticalChance: 1.5, multishot: 0.9 });
+    const n = normalizeSavedRiven(raw);
+    expect(n).not.toBeNull();
+    expect(n!.stats).toEqual({ criticalChance: 1.5, multishot: 0.9 });
+    expect(n!.displayStats.length).toBe(2);
+  });
+
+  it("keeps a riven with no readable stats so the player can delete it, and drops records with no id", () => {
+    const empty = normalizeSavedRiven({
+      id: "riven_empty",
+      name: "Broken",
+      stats: "??? ",
+    });
+    expect(empty).not.toBeNull();
+    expect(empty!.id).toBe("riven_empty");
+    expect(empty!.stats).toEqual({});
+    expect(empty!.displayStats).toEqual([]);
+
+    expect(normalizeSavedRiven({ name: "no id", stats: { damage: 1 } })).toBeNull();
+    expect(normalizeSavedRiven(null)).toBeNull();
+    expect(normalizeSavedRiven("nope")).toBeNull();
+  });
+
+  it("getSavedRivens returns repaired rows and skips garbage, including a well-formed neighbor", () => {
+    const mem = new MemStorage();
+    (globalThis as unknown as { window: unknown }).window = globalThis;
+    (globalThis as unknown as { localStorage: MemStorage }).localStorage = mem;
+    mem.setItem("framehub_riven_library", JSON.stringify([
+      wellFormed,
+      { id: "riven_bad", name: "Old Torid", weaponId: "torid", weaponName: "Torid", weaponType: "Rifle", polarity: "madurai", rank: 8, rerolls: 0, masteryRank: 8, stats: [{ criticalChance: 1.1 }, { multishot: 0.8 }], createdAt: 2, updatedAt: 2 },
+      { name: "no-id-drop-me", stats: { damage: 1 } },
+      "totally invalid",
+    ]));
+
+    const list = getSavedRivens();
+    expect(list.map((r) => r.id).sort()).toEqual(["riven_bad", "riven_ok"]);
+    const bad = list.find((r) => r.id === "riven_bad")!;
+    expect(bad.stats).toEqual({ criticalChance: 1.1, multishot: 0.8 });
+    expect(bad.displayStats.length).toBe(2);
+    expect(list.find((r) => r.id === "riven_ok")!.displayStats).toHaveLength(2);
+
+    delete (globalThis as unknown as { window?: unknown }).window;
+    delete (globalThis as unknown as { localStorage?: unknown }).localStorage;
   });
 });

@@ -21,6 +21,7 @@ import { rivenCannotEquipReason, rivenEquipHref } from "@/lib/rivens/riven-equip
 export function formatRivenStatLine(key: string, value: number, category: string): string {
   const def = getRivenStatsForCategory(category).find((s) => s.key === key);
   const label = def?.label ?? key;
+  if (typeof value !== "number" || !Number.isFinite(value)) return `${label} (unreadable)`;
   const isFaction = key.startsWith("faction") || label.startsWith("Damage to ") || label.startsWith("Damage vs ");
   if (isFaction) {
     return `${(1 + value).toFixed(2)}x ${label}`;
@@ -184,11 +185,15 @@ export function RivenLibrary() {
                     </button>
                   </div>
                   <ul className="space-y-0.5 text-xs">
-                    {Object.entries(r.stats).map(([k, v]) => (
-                      <li key={k} className={cn("text-purple-800 dark:text-purple-300", v < 0 && "text-red-700 dark:text-red-400")}>
-                        {formatRivenStatLine(k, v, category)}
-                      </li>
-                    ))}
+                    {Object.entries(r.stats ?? {}).length === 0 ? (
+                      <li className="text-amber-800 dark:text-amber-300">Stats on this riven couldn&apos;t be read. Edit or delete it.</li>
+                    ) : (
+                      Object.entries(r.stats).map(([k, v]) => (
+                        <li key={k} className={cn("text-purple-800 dark:text-purple-300", typeof v === "number" && v < 0 && "text-red-700 dark:text-red-400")}>
+                          {formatRivenStatLine(k, v, category)}
+                        </li>
+                      ))
+                    )}
                   </ul>
                   {cannotEquip ? (
                     <button
