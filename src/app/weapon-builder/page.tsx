@@ -108,7 +108,7 @@ import { loadoutSlotLabel, updateLoadoutSlot } from "@/lib/builds/loadout-edit-c
 import { CommunityBuildsPanel } from "@/components/community-builds-panel";
 import { isCompanionWeaponCategory } from "@/lib/weapons/companion-weapons";
 import { computeUsedCapacity } from "@/lib/calc/compute-used-capacity";
-import { WEAPON_CATEGORY_LABELS, getModCategory } from "@/lib/weapons/weapon-categories";
+import { WEAPON_CATEGORY_LABELS, getModCategory, weaponMatchesCategoryFilter } from "@/lib/weapons/weapon-categories";
 import { SavedBuildsDialog } from "@/components/saved-builds-dialog";
 import { StancePickerDialog } from "./stance-picker-dialog";
 import {
@@ -769,7 +769,7 @@ export default function WeaponBuilderPage() {
     ];
     let weapons = allWeapons.filter((w) => !hiddenCategories.includes(w.category));
     if (weaponCategory !== "all") {
-      weapons = weapons.filter((w) => w.category === weaponCategory);
+      weapons = weapons.filter((w) => weaponMatchesCategoryFilter(w.category, weaponCategory));
     }
     if (weaponSearch.trim()) {
       const q = weaponSearch.toLowerCase();

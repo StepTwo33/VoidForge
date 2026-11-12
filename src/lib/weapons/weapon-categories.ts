@@ -1,11 +1,13 @@
+import { isPrimaryWeaponCategory, isSecondaryWeaponCategory } from "@/lib/mods/mod-weapon-eligibility";
+
 /** Display labels for weapon picker category filters. */
 export const WEAPON_CATEGORY_LABELS: Record<string, string> = {
   all: "All",
-  primary: "Primary",
+  primary: "All primary",
   rifle: "Rifles",
   shotgun: "Shotguns",
   bow: "Bows",
-  secondary: "Secondary",
+  secondary: "All secondary",
   pistol: "Pistols",
   melee: "Melee",
   launcher: "Launchers",
@@ -27,4 +29,18 @@ export function getModCategory(weaponCategory: string): string {
   if (weaponCategory === "sniper") return "primary";
   if (weaponCategory === "tektolyst") return "tektolyst";
   return weaponCategory;
+}
+
+/**
+ * Catalog chip match. "All primary" includes rifles, shotguns, bows, launchers, and
+ * anything else in the primary slot (not companion weapons). "Rifles" is the subset
+ * whose data category is rifle. Same idea for "All secondary" vs "Pistols".
+ */
+export function weaponMatchesCategoryFilter(category: string, filter: string): boolean {
+  if (!filter || filter === "all") return true;
+  if (filter === "primary") {
+    return isPrimaryWeaponCategory(category) && category !== "sentinel_weapon" && category !== "hound_weapon";
+  }
+  if (filter === "secondary") return isSecondaryWeaponCategory(category);
+  return category === filter;
 }

@@ -521,7 +521,7 @@ export default function OperatorBuilderPage() {
                   </span>
                   <Link
                     href="/modular-builder?type=amp"
-                    className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
+                    className="inline-flex min-h-11 items-center gap-1 py-2 text-xs text-primary hover:underline pointer-fine:min-h-0 pointer-fine:py-0"
                   >
                     Craft in Modular Builder <ExternalLink className="h-3 w-3" />
                   </Link>

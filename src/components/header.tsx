@@ -622,6 +622,7 @@ export function Header() {
               rel="noopener noreferrer"
               className="inline-flex min-h-11 min-w-11 items-center justify-center p-1.5 text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-secondary/50"
               title="Open source on GitHub"
+              aria-label="Open source on GitHub"
             >
               <Github className="h-4 w-4" />
             </a>
@@ -632,6 +633,7 @@ export function Header() {
               rel="noopener noreferrer"
               className="inline-flex min-h-11 min-w-11 items-center justify-center p-1.5 text-muted-foreground hover:text-[#5865F2] transition-colors rounded-lg hover:bg-secondary/50"
               title="Join Discord"
+              aria-label="Join Discord"
             >
               {DISCORD_SVG}
             </a>
@@ -644,7 +646,7 @@ export function Header() {
           {loading ? (
             <span className="w-7 h-7 rounded-full bg-muted animate-pulse ml-1" />
           ) : user ? (
-            <Link href="/profile" className="ml-1 inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-1 transition-opacity hover:opacity-80">
+            <Link href="/profile" aria-label="Your profile" className="ml-1 inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-1 transition-opacity hover:opacity-80">
               {user.image ? (
                 <AvatarImage src={user.image} alt="" size={28} className="w-7 h-7 rounded-full border border-border" />
               ) : (

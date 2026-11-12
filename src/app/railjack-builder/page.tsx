@@ -731,7 +731,7 @@ export default function RailjackBuilderPage() {
                 </div>
               </div>
               <p className="text-xs lg:text-[10px] text-muted-foreground mb-2">
-                Dirac / Avionics Grid removed in U29.10 (→ Endo). Rank Plexus mods + Forma as usual.
+                Plexus mods are ranked with Endo, and empty slots can be Forma’d — the old Avionics grid is gone.
               </p>
               <div className="border border-border rounded-xl p-3 bg-card space-y-2.5">
                 {RAILJACK_INTRINSIC_TREES.map((tree) => {

@@ -16,6 +16,7 @@ import { QrCodeImage } from "@/components/game-asset-image";
 import { toast } from "sonner";
 import { localBuildOpenUrl, encodeJsonPayload, decodeJsonPayload } from "@/lib/builds/build-url";
 import { copyTextToClipboard } from "@/lib/display/clipboard";
+import { prepareShareableItems } from "@/lib/builds/shareable-items";
 
 function getBuildTypeIcon(type: string) {
   if (type === "warframe") return Shield;
@@ -96,9 +97,9 @@ export default function ImportExportPage() {
       });
     }
 
-    items.sort((a, b) => b.updatedAt - a.updatedAt);
+    const prepared = prepareShareableItems(items);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- saved builds live in localStorage; read once after mount to stay hydration-safe
-    setBuilds(items);
+    setBuilds(prepared);
   }, []);
 
   // Generate QR + link when a build is selected
@@ -369,7 +370,7 @@ export default function ImportExportPage() {
                   {filteredBuilds.length === 0 ? (
                     <div className="p-8 text-center text-sm text-muted-foreground">
                       {builds.length === 0
-                        ? "No saved builds yet. Create a build in the weapon or warframe builder first!"
+                        ? "No saved builds yet. Create one in a builder (Warframe, Weapon, Operator, Companion, Modular, Archwing, or Railjack) or in Loadouts first."
                         : "No builds match your search."}
                     </div>
                   ) : (

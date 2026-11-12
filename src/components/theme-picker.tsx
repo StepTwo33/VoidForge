@@ -84,6 +84,8 @@ export function ThemePicker() {
         onClick={() => setOpen(!open)}
         className="tap-target inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-border px-2 text-xs text-muted-foreground transition-all hover:border-primary/50 hover:text-foreground"
         title="Appearance"
+        aria-label="Appearance"
+        aria-expanded={open}
       >
         <span
           className="w-3 h-3 rounded-full border border-border/60 dark:border-white/20"
