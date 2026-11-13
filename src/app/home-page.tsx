@@ -12,7 +12,6 @@ import {
   Rocket,
   Hammer,
   Plane,
-  Sun,
   ExternalLink,
   Users,
 } from "lucide-react";
@@ -75,14 +74,6 @@ export default function Home({ counts }: { counts: CatalogCounts }) {
                 icon={Shield}
                 accent="purple"
                 badges={[`${counts.warframePicker} Warframes`, "Archon Shards"]}
-              />
-              <FeatureCard
-                href="/operator-builder"
-                title="Operator Builder"
-                description="Pick a Focus school, attach an Amp from the Modular Builder, and set Operator and Amp arcanes."
-                icon={Sun}
-                accent="emerald"
-                badges={["Focus Schools", "Amps"]}
               />
               <FeatureCard
                 href="/companion-builder"
