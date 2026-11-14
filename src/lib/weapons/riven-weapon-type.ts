@@ -154,3 +154,18 @@ export function getRivenModIdForWeapon(
   return type ? `riven_${type.toLowerCase()}` : null;
 }
 
+/** True for any catalog riven placeholder/slot mod ID (`riven_*` and `*_riven_mod`). */
+export function isRivenModId(modId: string): boolean {
+  return (
+    modId.startsWith("riven_") ||
+    modId === "zaw_riven_mod" ||
+    modId === "kitgun_riven_mod" ||
+    modId === "companion_weapon_riven_mod" ||
+    modId === "archgun_riven_mod" ||
+    modId === "melee_riven_mod" ||
+    modId === "pistol_riven_mod" ||
+    modId === "rifle_riven_mod" ||
+    modId === "shotgun_riven_mod"
+  );
+}
+

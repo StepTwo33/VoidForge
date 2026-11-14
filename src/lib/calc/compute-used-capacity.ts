@@ -1,5 +1,6 @@
 import type { Mod, EquippedMod } from "@/lib/types";
 import { modCapacityAtRank, modSlotCapacityCost } from "@/lib/calc/mod-capacity";
+import { isRivenModId } from "@/lib/weapons/riven-weapon-type";
 
 /** Sum of capacity cost for equipped mods given slot polarities. */
 export function computeUsedCapacity(
@@ -12,7 +13,7 @@ export function computeUsedCapacity(
     if (!mod) return sum;
     // Rivens carry their own rolled polarity (Round 54). Drain is not rolled: catalog 10 + rank,
     // capped at 18 at rank 8 (Round 54b), so every mod uses the catalog drain.
-    const isRiven = m.modId.startsWith("riven_");
+    const isRiven = isRivenModId(m.modId);
     const polarity = isRiven && m.polarity ? m.polarity : mod.polarity;
     const baseDrain = modCapacityAtRank(mod.drain, m.rank);
     return sum + modSlotCapacityCost(baseDrain, slotPolarities[m.slotIndex], polarity);

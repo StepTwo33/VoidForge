@@ -26,6 +26,7 @@ import { enrichWeapon } from '../weapons/weapon-enrich';
 import { resolveExaltedStrengthForCalc } from '../weapons/exalted-weapons';
 import { sentientIncisionElementForFaction } from './sentient-incision';
 import { isProgenitorElementId } from '../weapons/weapon-progenitor';
+import { isRivenModId } from '../weapons/riven-weapon-type';
 
 export { avgCritMultiplier, quantizeBaseCritMultiplier } from './crit-utils';
 import {
@@ -1067,10 +1068,10 @@ export function calculateWeaponBuild(
 
   // Riven additive stats / elements enter at the equipped riven's slot; with no riven
   // slot (stats passed directly) they enter after all mods.
-  const rivenSlotPresent = !!rivenStatChanges && orderedMods.some((s) => s.modId.startsWith('riven_'));
+  const rivenSlotPresent = !!rivenStatChanges && orderedMods.some((s) => isRivenModId(s.modId));
   let rivenFolded = false;
   for (const modSlot of orderedMods) {
-    if (rivenStatChanges && !rivenFolded && modSlot.modId.startsWith('riven_')) {
+    if (rivenStatChanges && !rivenFolded && isRivenModId(modSlot.modId)) {
       applyRivenAtSlot(rivenStatChanges, weaponModAcc, elementalMods, baseWeapon.damage);
       rivenFolded = true;
     }

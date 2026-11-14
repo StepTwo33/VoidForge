@@ -11,18 +11,24 @@ COMPANIONS_TS = ROOT / "src/data/companions.ts"
 MODS_TS = ROOT / "src/data/mods.ts"
 OUT = ROOT / "src/lib/mods/companion-precept-eligibility.ts"
 
-# Sentinel precepts equippable on any sentinel (true universals / shared robotic).
-SENTINEL_UNIVERSAL = {
+# Robotic precepts (wiki Type = "Robotic") equippable on any robotic companion (sentinel, moa, hound).
+ROBOTIC_UNIVERSAL = {
     "anti_grav_array",
+    "coolant_leak",
+    "guardian",
+    "medi_ray",
+    "shield_charger",
+    "vacuum",
+}
+
+# Sentinel precepts equippable on any sentinel.
+SENTINEL_UNIVERSAL = {
     "auto_omni",
     "calculated_shot",
-    "coolant_leak",
     "crowd_dispersion",
     "detect_vulnerability",
     "electro_pulse",
-    "guardian",
     "looter",
-    "medi_ray",
     "melee_prowess_sentinel",
     "molecular_conversion",
     "negate",
@@ -31,12 +37,10 @@ SENTINEL_UNIVERSAL = {
     "reawaken",
     "regen",
     "sacrifice",
-    "shield_charger",
     "target_acquisition",
     "targeting_receptor",
     "tease",
     "thumper",
-    "vacuum",
 }
 
 # Beast precepts equippable on kubrow, kavat, predasite, and vulpaphyla.
@@ -115,6 +119,7 @@ FAMILY: dict[str, str] = {
 
 # Breed-specific sentinel precepts (overrides companion-precept string parse).
 MANUAL_SENTINEL_EXCLUSIVE: dict[str, list[str]] = {
+    "ambush": ["prisma_shade", "shade", "shade_prime"],
     "ammo_case": ["carrier", "carrier_prime"],
     "arc_coil": ["diriga"],
     "botanist": ["oxylus"],
@@ -131,7 +136,10 @@ MANUAL_SENTINEL_EXCLUSIVE: dict[str, list[str]] = {
 
 def load_companions() -> list[dict]:
     text = COMPANIONS_TS.read_text(encoding="utf-8")
-    return json.loads(re.search(r"export const allCompanions: Companion\[\] = (\[[\s\S]*?\n\]);", text).group(1))
+    raw = re.search(r"export const allCompanions: Companion\[\] = (\[[\s\S]*?\n\]);", text).group(1)
+    # Strip JS line comments that appear inside allCompanions.
+    raw = re.sub(r"//.*?$", "", raw, flags=re.MULTILINE)
+    return json.loads(raw)
 
 
 def load_mods() -> list[dict]:
@@ -209,6 +217,13 @@ def main() -> None:
                 eligibility[mid] = sorted(type_ids)
             else:
                 unmapped.append(mid)
+            continue
+
+        if mid in ROBOTIC_UNIVERSAL:
+            robotic_ids: list[str] = []
+            for rob_type in ("sentinel", "moa", "hound"):
+                robotic_ids.extend(ids_by_type.get(rob_type, []))
+            eligibility[mid] = sorted(set(robotic_ids))
             continue
 
         if mid in SENTINEL_UNIVERSAL:

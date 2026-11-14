@@ -23,14 +23,15 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { saveBuilderRivenToLibrary, useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
 import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-validation";
 import { hasBuildLinkParam } from "@/lib/builds/weapon-url-param";
+import { computeUsedCapacity } from "@/lib/calc/compute-used-capacity";
+import { getRivenWeaponType, isRivenModId } from "@/lib/weapons/riven-weapon-type";
 
 function withRivenRoll(eq: EquippedMod | undefined, mod: Mod | null): Mod | null {
-  if (!eq || !mod || (!eq.modId.startsWith("riven_") && eq.modId !== "zaw_riven_mod" && eq.modId !== "kitgun_riven_mod" && eq.modId !== "companion_weapon_riven_mod")) return mod;
+  if (!eq || !mod || !isRivenModId(eq.modId)) return mod;
   return {
     ...mod,
     name: eq.modName && eq.modName !== mod.name ? eq.modName : mod.name,
     polarity: eq.polarity || mod.polarity,
-    drain: rivenDrainFromRank(eq.rank),
   };
 }
 import { PageShell } from "@/components/page-shell";
@@ -75,7 +76,6 @@ import { appendReturnTo } from "@/lib/site/nav-return";
 import { toast } from "sonner";
 import { getCompanionImage, getWeaponImage } from "@/lib/display/images";
 import { GameAssetImage } from "@/components/game-asset-image";
-import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
 import { snapshotFromBuild } from "@/lib/builds/compare-build";
 import { BuildCompareDialog } from "@/components/compare/build-compare-dialog";
 
@@ -289,7 +289,7 @@ export default function CompanionBuilderPage() {
     if (editRivenSlot == null || !modPickerOpen || modPickerTarget !== "weapon") return null;
     const eq = weaponMods.find((m) => m.slotIndex === editRivenSlot);
     const mod = eq ? modsMap.get(eq.modId) : undefined;
-    if (!eq || !mod || (!eq.modId.startsWith("riven_") && eq.modId !== "companion_weapon_riven_mod")) return null;
+    if (!eq || !mod || !isRivenModId(eq.modId)) return null;
     return {
       mod,
       stats: weaponRivenStatsMap?.[editRivenSlot] ?? {},
@@ -708,15 +708,10 @@ export default function CompanionBuilderPage() {
   }, [selectedCompanion, equippedMods, modsMap, companionParts, linkedWarframe]);
 
   const baseCapacity = hasReactor || isExaltedCompanion ? 60 : 30;
-  const capacityUsed = useMemo(() => {
-    return equippedMods.reduce((sum, m) => {
-      const mod = modsMap.get(m.modId);
-      if (!mod) return sum;
-      const baseDrain = modCapacityAtRank(mod.drain, m.rank);
-      const slotPol = effectivePolarities[m.slotIndex];
-      return sum + modSlotCapacityCost(baseDrain, slotPol, mod.polarity);
-    }, 0);
-  }, [equippedMods, effectivePolarities]);
+  const capacityUsed = useMemo(
+    () => computeUsedCapacity(equippedMods, modsMap, effectivePolarities),
+    [equippedMods, modsMap, effectivePolarities],
+  );
 
   const companionPreceptMods = useMemo(() => {
     if (!selectedCompanion) return [];
@@ -836,15 +831,10 @@ export default function CompanionBuilderPage() {
   }, [selectedWeapon, weaponMods, weaponRivenStatsMap, modsMap, equippedMods, applyHunterVsSlash, loadoutLinkedCompanionWeaponBuffs]);
 
   const weaponCapacity = hasCatalyst || isExaltedCompanionWeapon ? 60 : 30;
-  const weaponCapacityUsed = useMemo(() => {
-    return weaponMods.reduce((sum, m) => {
-      const mod = modsMap.get(m.modId);
-      if (!mod) return sum;
-      const baseDrain = modCapacityAtRank(mod.drain, m.rank);
-      const slotPol = effectiveWeaponPolarities[m.slotIndex];
-      return sum + modSlotCapacityCost(baseDrain, slotPol, mod.polarity);
-    }, 0);
-  }, [weaponMods, effectiveWeaponPolarities]);
+  const weaponCapacityUsed = useMemo(
+    () => computeUsedCapacity(weaponMods, modsMap, effectiveWeaponPolarities),
+    [weaponMods, modsMap, effectiveWeaponPolarities],
+  );
 
   /** Kavat/Kubrow/Predasite/Vulpaphyla: claws are part of the animal (no swap) + a Posture slot. */
   const hasFixedWeapon = companionHasFixedWeapon(selectedCompanion);
@@ -1551,7 +1541,7 @@ export default function CompanionBuilderPage() {
                                 slotPolarity={effectiveWeaponPolarities[i]}
                                 innatePolarity={isInnatePolarity(innateWeaponPolarities, weaponSlotPolarities, i)}
                                 rivenStats={weaponRivenStatsMap?.[i]}
-                                weaponCategory={selectedWeapon.category}
+                                weaponCategory={getRivenWeaponType(selectedWeapon)?.toLowerCase() ?? selectedWeapon.category}
                                 equippedModIds={weaponMods.map((m) => m.modId)}
                                 onAdd={() => handleOpenWeaponModPicker(i)}
                                 onRemove={() => handleRemoveWeaponMod(i)}

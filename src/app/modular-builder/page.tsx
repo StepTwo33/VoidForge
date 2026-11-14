@@ -27,7 +27,8 @@ import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-valida
 import { mergeRivenStatChanges } from "@/lib/calc/weapon-stat-merges";
 import { useMods, useWarframes } from "@/lib/weapons/use-data";
 import { calculateWeaponBuild, calculateWeaponBuildWithArcanes } from "@/lib/calc/calculator";
-import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
+import { computeUsedCapacity } from "@/lib/calc/compute-used-capacity";
+import { isRivenModId } from "@/lib/weapons/riven-weapon-type";
 import { Weapon, Mod, EquippedMod, SimulationParams, DEFAULT_SIM_PARAMS, ModularBuildData, WeaponExternalBuff, WeaponCalculationOptions, SetBonusLinkage } from "@/lib/types";
 import { getWeaponArcanes, arcanesForSlot, arcaneSlotLabel, type WeaponArcaneConfig } from "@/lib/weapons/weapon-arcane-config";
 import { ArcaneSlotCard, ArcanePicker } from "@/components/arcane-picker";
@@ -98,22 +99,12 @@ function StatDelta({ label, value, suffix = "" }: { label: string; value: number
   );
 }
 
-function isRivenSlotModId(modId: string): boolean {
-  return (
-    modId.startsWith("riven_") ||
-    modId === "zaw_riven_mod" ||
-    modId === "kitgun_riven_mod" ||
-    modId === "companion_weapon_riven_mod"
-  );
-}
-
 function withRivenRoll(eq: EquippedMod | undefined, mod: Mod | null): Mod | null {
-  if (!eq || !mod || !isRivenSlotModId(eq.modId)) return mod;
+  if (!eq || !mod || !isRivenModId(eq.modId)) return mod;
   return {
     ...mod,
     name: eq.modName && eq.modName !== mod.name ? eq.modName : mod.name,
     polarity: eq.polarity || mod.polarity,
-    drain: rivenDrainFromRank(eq.rank),
   };
 }
 
@@ -195,7 +186,7 @@ export default function ModularBuilderPage() {
     if (editRivenSlot == null || !modPickerOpen) return null;
     const eq = equippedMods.find((m) => m.slotIndex === editRivenSlot);
     const mod = eq ? modsMap.get(eq.modId) : undefined;
-    if (!eq || !mod || !isRivenSlotModId(eq.modId)) return null;
+    if (!eq || !mod || !isRivenModId(eq.modId)) return null;
     return {
       mod,
       stats: rivenStatsMap[editRivenSlot] ?? {},
@@ -244,15 +235,10 @@ export default function ModularBuilderPage() {
 
   const [slotPolarities, setSlotPolarities] = useState<Record<number, string>>({});
   const capacity = hasOrokinCatalyst ? 60 : 30;
-  const capacityUsed = useMemo(() => {
-    return equippedMods.reduce((sum, m) => {
-      const mod = modsMap.get(m.modId);
-      if (!mod) return sum;
-      const baseDrain = modCapacityAtRank(mod.drain, m.rank);
-      const slotPol = slotPolarities[m.slotIndex];
-      return sum + modSlotCapacityCost(baseDrain, slotPol, mod.polarity);
-    }, 0);
-  }, [equippedMods, slotPolarities, modsMap]);
+  const capacityUsed = useMemo(
+    () => computeUsedCapacity(equippedMods, modsMap, slotPolarities),
+    [equippedMods, slotPolarities, modsMap],
+  );
 
   const { savedBuilds, refreshSavedBuilds, deleteSavedBuild } = useBuilderSavedBuilds("modular");
   const [showSavedBuilds, setShowSavedBuilds] = useState(false);
@@ -283,7 +269,7 @@ export default function ModularBuilderPage() {
       modularType,
       parts,
       mods: equippedMods.map((m) => {
-        const riven = isRivenSlotModId(m.modId) ? rivenStatsMap[m.slotIndex] : undefined;
+        const riven = isRivenModId(m.modId) ? rivenStatsMap[m.slotIndex] : undefined;
         if (!riven) return { modId: m.modId, rank: m.rank, slotIndex: m.slotIndex };
         return {
           modId: m.modId,
@@ -372,7 +358,7 @@ export default function ModularBuilderPage() {
     const nextRivenMap: Record<number, Record<string, number>> = {};
     setEquippedMods(d.mods.map((m) => {
       const mod = modsMap.get(m.modId);
-      const isRiven = isRivenSlotModId(m.modId);
+      const isRiven = isRivenModId(m.modId);
       const rank = isRiven && !m.rank && typeof m.rivenDrain === "number" ? rivenRankFromDrain(m.rivenDrain) : m.rank;
       if (isRiven && m.rivenStats) {
         nextRivenMap[m.slotIndex] = m.rivenStats;

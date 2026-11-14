@@ -254,7 +254,7 @@ function enumerateSources(ctx: WeaponDpsCalcContext): OmitSource[] {
   }
 
   if (ctx.rivenStatChanges && Object.keys(ctx.rivenStatChanges).length > 0) {
-    if (!ctx.modSlots.some((s) => s.modId.startsWith("riven_"))) {
+    if (!ctx.modSlots.some((s) => isRivenModId(s.modId))) {
       sources.push({
         id: "riven",
         label: "Riven",

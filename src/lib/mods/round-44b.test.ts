@@ -52,9 +52,18 @@ describe("Round 44b: card stat lines (wiki mod pages)", () => {
     expect(card("set_bonus_tek", 4)).toEqual(["+200 Zone damage/s"]);
   });
   it("Rivens: 10 drain at R0 (18 at R8, in-game card) and a neutral polarity (each riven rolls its own)", () => {
-    for (const id of ["riven_rifle", "riven_shotgun", "riven_pistol", "riven_melee"]) {
+    for (const id of [
+      "riven_rifle",
+      "riven_shotgun",
+      "riven_pistol",
+      "riven_melee",
+      "companion_weapon_riven_mod",
+      "zaw_riven_mod",
+      "kitgun_riven_mod",
+      "archgun_riven_mod",
+    ]) {
       const m = modsMap.get(id)!;
-      expect([m.polarity, m.drain], id).toEqual(["universal", 10]);
+      expect([m.polarity, m.drain, m.maxRank], id).toEqual(["universal", 10, 8]);
     }
   });
   it("the Tek 'vs marked' damage toggle is gone (Tek set is a damage zone, not a multiplier)", () => {

@@ -8,6 +8,7 @@ import {
   INCARNON_CONDITIONAL_PERKS,
   type IncarnonConditionalPerk,
 } from "@/data/incarnon-conditionals";
+import { isRivenModId } from "@/lib/weapons/riven-weapon-type";
 
 export type MergeIncarnonOptions = {
   /** When true, also merge formStatChanges / variantFormStatChanges. */
@@ -155,7 +156,7 @@ export function mergeRivenStatChanges(
   for (const [slotStr, stats] of Object.entries(rivenStatsMap)) {
     const slotIdx = Number(slotStr);
     const equipped = equippedMods.find((m) => m.slotIndex === slotIdx);
-    if (equipped && equipped.modId.startsWith("riven_")) {
+    if (equipped && isRivenModId(equipped.modId)) {
       for (const [k, v] of Object.entries(stats)) {
         merged[k] = (merged[k] ?? 0) + v;
       }

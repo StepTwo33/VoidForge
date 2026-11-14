@@ -24,7 +24,6 @@ import { calculateWeaponBuild } from "@/lib/calc/calculator";
 import { buildWeaponContributionContext } from "@/lib/calc/dps-contributions";
 import { calculateArchwingBuild, calculateNecramechBuild } from "@/lib/calc/archwing-calculator";
 import { gunneryArchWeaponDamageBonus, MAX_INTRINSIC_RANK } from "@/data/railjack-intrinsics";
-import { modSlotCapacityCost, modCapacityAtRank } from "@/lib/calc/mod-capacity";
 import { weaponModCapacity } from "@/lib/weapons/weapon-progenitor";
 import { WeaponStatsPanel, ArchwingStatsPanel } from "@/components/stats-panel";
 import { Weapon, EquippedMod, CalculatedStats, ArchwingCalculatedStats, DEFAULT_SIM_PARAMS, type Mod, type ModSlot } from "@/lib/types";
@@ -614,26 +613,13 @@ export default function ArchwingBuilderPage() {
 
   const frameModsUsed = useMemo(() => {
     const mods = mode === "archwing" ? archwingMods : necramechMods;
-    return mods.reduce((sum, m) => {
-      const mod = modsMap.get(m.modId);
-      if (!mod) return sum;
-      const baseDrain = modCapacityAtRank(mod.drain, m.rank);
-      const slotPol = effectiveFramePolarities[m.slotIndex];
-      return sum + modSlotCapacityCost(baseDrain, slotPol, mod.polarity);
-    }, 0);
-  }, [mode, archwingMods, necramechMods, effectiveFramePolarities]);
+    return computeUsedCapacity(mods, modsMap, effectiveFramePolarities);
+  }, [mode, archwingMods, necramechMods, modsMap, effectiveFramePolarities]);
 
-  const weaponModsUsed = useMemo(() => {
-    return weaponMods.reduce((sum, m) => {
-      const mod = modsMap.get(m.modId);
-      if (!mod) return sum;
-      const isRiven = isRivenModId(m.modId);
-      const baseDrain = isRiven ? rivenDrainFromRank(m.rank) : modCapacityAtRank(mod.drain, m.rank);
-      const slotPol = effectiveWeaponPolarities[m.slotIndex];
-      const polarity = isRiven ? (m.polarity || mod.polarity) : mod.polarity;
-      return sum + modSlotCapacityCost(baseDrain, slotPol, polarity);
-    }, 0);
-  }, [weaponMods, effectiveWeaponPolarities, modsMap]);
+  const weaponModsUsed = useMemo(
+    () => computeUsedCapacity(weaponMods, modsMap, effectiveWeaponPolarities),
+    [weaponMods, modsMap, effectiveWeaponPolarities],
+  );
 
   // Archwing / necramech mod pools
   const filteredFrameMods = useMemo(() => {

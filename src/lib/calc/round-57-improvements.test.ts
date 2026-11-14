@@ -4,10 +4,11 @@
  * Conditional Toggles, and Loadout Combat & TTK Enemy Priming + Blast U36.
  */
 import { describe, expect, it } from "vitest";
-import { modsMap } from "@/data/mods";
+import { allMods, modsMap } from "@/data/mods";
 import { allWeapons } from "@/data/weapons";
 import { allWarframes } from "@/data/warframes";
-import { allCompanions } from "@/data/companions";
+import { allCompanions, companionsMap } from "@/data/companions";
+import { customWeapons } from "@/data/custom-items";
 import { incarnonDataMap } from "@/data/incarnon";
 import { allArcanes, warframeArcanes } from "@/data/arcanes";
 import {
@@ -27,7 +28,13 @@ import {
   resolveIncarnonActiveWeapon,
   resolveIncarnonGenesisInstalled,
 } from "@/lib/calc/incarnon-active-weapon";
-import { mergeIncarnonStatChanges } from "@/lib/calc/weapon-stat-merges";
+import { mergeIncarnonStatChanges, mergeRivenStatChanges } from "@/lib/calc/weapon-stat-merges";
+import { computeUsedCapacity } from "@/lib/calc/compute-used-capacity";
+import { modCapacityAtRank, modSlotCapacityCost } from "@/lib/calc/mod-capacity";
+import {
+  companionPreceptEligibleForCompanion,
+  companionPreceptModsForBuilder,
+} from "@/lib/mods/companion-precept-eligibility";
 import {
   applyWarframeShardsAndArcanes,
   calculateWarframeBuild,
@@ -857,5 +864,104 @@ describe("round 57: Sirocco Amp arcanes, Virtuos rank scaling, Warframe conditio
       khoraPaper.warframe!.stats.totalSprint + warframe("khora").sprintSpeed * 0.15,
       4,
     );
+  });
+});
+
+describe("round 57: Companion Weapon / Zaw / Kitgun Riven drain, capacity, and stat merging", () => {
+  it("companion_weapon_riven_mod at R8 costs 9 on matching polarity, 18 unpolarized, and 23 on mismatch", () => {
+    const rivenMod = modsMap.get("companion_weapon_riven_mod")!;
+    expect(rivenMod.drain).toBe(10);
+    expect(rivenMod.maxRank).toBe(8);
+
+    const drainAtR8 = modCapacityAtRank(rivenMod.drain, 8);
+    expect(drainAtR8).toBe(18);
+    expect(modSlotCapacityCost(drainAtR8, "naramon", "naramon")).toBe(9);
+    expect(modSlotCapacityCost(drainAtR8, undefined, "naramon")).toBe(18);
+    expect(modSlotCapacityCost(drainAtR8, "madurai", "naramon")).toBe(23);
+
+    const slot = { modId: "companion_weapon_riven_mod", rank: 8, slotIndex: 3, polarity: "naramon" };
+    expect(computeUsedCapacity([slot], modsMap, { 3: "naramon" })).toBe(9);
+    expect(computeUsedCapacity([slot], modsMap, {})).toBe(18);
+    expect(computeUsedCapacity([slot], modsMap, { 3: "madurai" })).toBe(23);
+  });
+
+  it("merges rivenStatsMap and applies Riven bonuses for companion_weapon_riven_mod, zaw_riven_mod, and kitgun_riven_mod", () => {
+    const lacerten = customWeapons.find((w) => w.id === "lacerten")!;
+    const compRivenStats = { criticalChance: 2.902, statusChance: 1.247, factionInfested: -0.28 };
+    const compSlots: ModSlot[] = [{ modId: "companion_weapon_riven_mod", rank: 8, slotIndex: 0 }];
+    const mergedComp = mergeRivenStatChanges({ 0: compRivenStats }, compSlots);
+    expect(mergedComp).toEqual(compRivenStats);
+
+    const compResult = calculateWeaponBuild(lacerten, compSlots, modsMap, undefined, DEFAULT_SIM_PARAMS, undefined, undefined, mergedComp);
+    expect(compResult.criticalChance).toBeCloseTo(lacerten.criticalChance * (1 + 2.902), 6);
+    expect(compResult.statusChance).toBeCloseTo(lacerten.statusChance * (1 + 1.247), 6);
+
+    const zaw = buildZaw(
+      zawStrikes.find((s) => s.id === "zaw_sepfahn")!,
+      zawGrips[0]!,
+      zawLinks[0]!,
+    );
+    const zawSlots: ModSlot[] = [{ modId: "zaw_riven_mod", rank: 8, slotIndex: 0 }];
+    const mergedZaw = mergeRivenStatChanges({ 0: { damage: 1.5 } }, zawSlots);
+    expect(mergedZaw).toEqual({ damage: 1.5 });
+    const zawBase = calculateWeaponBuild(zaw, [], modsMap);
+    const zawWithRiven = calculateWeaponBuild(zaw, zawSlots, modsMap, undefined, DEFAULT_SIM_PARAMS, undefined, undefined, mergedZaw);
+    expect(zawWithRiven.totalDamage).toBeCloseTo(zawBase.totalDamage * 2.5, 4);
+
+    const kitgun = buildKitgun(
+      kitgunChambers.find((c) => c.id === "sporelacer_chamber")!,
+      kitgunGrips.find((g) => g.type === "secondary")!,
+      kitgunLoaders[0]!,
+    );
+    const kitgunSlots: ModSlot[] = [{ modId: "kitgun_riven_mod", rank: 8, slotIndex: 0 }];
+    const mergedKitgun = mergeRivenStatChanges({ 0: { criticalChance: 1.2 } }, kitgunSlots);
+    expect(mergedKitgun).toEqual({ criticalChance: 1.2 });
+    const kitgunBase = calculateWeaponBuild(kitgun, [], modsMap);
+    const kitgunWithRiven = calculateWeaponBuild(kitgun, kitgunSlots, modsMap, undefined, DEFAULT_SIM_PARAMS, undefined, undefined, mergedKitgun);
+    expect(kitgunWithRiven.criticalChance).toBeCloseTo(kitgunBase.criticalChance * 2.2, 6);
+  });
+});
+
+describe("round 57: Robotic precept eligibility on Hounds and MOAs (Vacuum)", () => {
+  it("allows Vacuum and other Robotic precepts on all Hounds and MOAs, while keeping Sentinel precepts restricted", () => {
+    const roboticPreceptIds = [
+      "vacuum",
+      "guardian",
+      "medi_ray",
+      "shield_charger",
+      "coolant_leak",
+      "anti_grav_array",
+    ];
+    const sentinelOnlyIds = ["regen", "primed_regen"];
+    const houndAndMoaIds = [
+      "bhaira_hound",
+      "dorma_hound",
+      "hec_hound",
+      "lambeo",
+      "nidus_moa",
+      "olaro",
+      "para",
+    ];
+
+    for (const compId of houndAndMoaIds) {
+      const comp = companionsMap.get(compId)!;
+      expect(comp, compId).toBeDefined();
+      const builderIds = new Set(companionPreceptModsForBuilder(comp, allMods).map((m) => m.id));
+      for (const modId of roboticPreceptIds) {
+        const mod = modsMap.get(modId)!;
+        expect(companionPreceptEligibleForCompanion(comp, mod), `${compId} -> ${modId}`).toBe(true);
+        expect(builderIds.has(modId), `${compId} builder -> ${modId}`).toBe(true);
+      }
+      for (const modId of sentinelOnlyIds) {
+        const mod = modsMap.get(modId)!;
+        expect(companionPreceptEligibleForCompanion(comp, mod), `${compId} -> ${modId}`).toBe(false);
+        expect(builderIds.has(modId), `${compId} builder -> ${modId}`).toBe(false);
+      }
+    }
+
+    const carrier = companionsMap.get("carrier")!;
+    for (const modId of [...roboticPreceptIds, ...sentinelOnlyIds]) {
+      expect(companionPreceptEligibleForCompanion(carrier, modsMap.get(modId)!), `carrier -> ${modId}`).toBe(true);
+    }
   });
 });
