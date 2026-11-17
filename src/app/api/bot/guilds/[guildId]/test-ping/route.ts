@@ -21,8 +21,13 @@ export async function POST(
     );
   }
 
-  const body = (await req.json()) as { channelId?: string };
-  if (!body.channelId) {
+  let body: { channelId?: string };
+  try {
+    body = (await req.json()) as { channelId?: string };
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  if (!body?.channelId) {
     return NextResponse.json({ error: "channelId required" }, { status: 400 });
   }
 

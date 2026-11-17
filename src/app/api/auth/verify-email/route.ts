@@ -7,6 +7,7 @@ import {
     SESSION_COOKIE,
     framehubSessionCookieOptions,
 } from "@/lib/auth/auth";
+import { isUserBanned } from "@/lib/auth/admin";
 import { checkRateLimit, getClientIp } from "@/lib/auth/rate-limit";
 import { getPublicOrigin } from "@/lib/site/public-origin";
 import { logServerError } from "@/lib/log-server-error";
@@ -50,6 +51,13 @@ export async function POST(req: NextRequest) {
             return NextResponse.json(
                 { error: "Invalid or expired verification code" },
                 { status: 400 }
+            );
+        }
+
+        if (isUserBanned(user)) {
+            return NextResponse.json(
+                { error: "This account has been suspended. Contact support if you believe this is a mistake." },
+                { status: 403 }
             );
         }
 

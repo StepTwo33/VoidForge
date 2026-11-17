@@ -8,8 +8,10 @@ import { prisma } from "@/lib/prisma";
  */
 export const getBuildPageRecord = cache(async (id: string) => {
   if (!id || id.length > 64) return null;
-  return prisma.build.findUnique({
+  const build = await prisma.build.findUnique({
     where: { id },
-    include: { user: { select: { username: true, name: true, image: true, supporterAt: true } } },
+    include: { user: { select: { username: true, name: true, image: true, supporterAt: true, bannedAt: true } } },
   });
+  if (!build || build.user.bannedAt != null) return null;
+  return build;
 });

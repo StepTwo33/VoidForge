@@ -189,13 +189,14 @@ export async function findOrCreateUser(
   email: string,
   data: { name?: string | null; image?: string | null; emailVerified?: boolean; provider?: string; providerAccountId?: string }
 ): Promise<Session["user"]> {
-  let user = await prisma.user.findUnique({ where: { email }, select: AUTH_USER_SELECT });
+  const normalizedEmail = email.trim().toLowerCase();
+  let user = await findUserByEmailInsensitive(email);
 
   if (!user) {
-    const username = await generateUniqueUsername(data.name ?? email.split("@")[0] ?? "tenno");
+    const username = await generateUniqueUsername(data.name ?? normalizedEmail.split("@")[0] ?? "tenno");
     user = await prisma.user.create({
       data: {
-        email,
+        email: normalizedEmail,
         name: data.name ?? null,
         username,
         image: data.image ?? null,
@@ -283,7 +284,24 @@ export async function getSession(): Promise<Session | null> {
     const token = cookieStore.get(SESSION_COOKIE)?.value;
     if (!token) return null;
     const { payload } = await jwtVerify(token, secret);
-    return payload as unknown as Session;
+    const session = payload as unknown as Session;
+    if (!session?.user?.id) return null;
+
+    // Enforce bans, account deletion, and live role changes immediately instead of
+    // waiting for the 30-day JWT to expire.
+    const dbUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { bannedAt: true, role: true, emailVerified: true },
+    });
+    if (!dbUser || isUserBanned(dbUser)) return null;
+
+    return {
+      user: {
+        ...session.user,
+        role: dbUser.role,
+        emailVerified: Boolean(dbUser.emailVerified),
+      },
+    };
   } catch {
     return null;
   }
@@ -331,6 +349,7 @@ export async function exchangeCodeForUser(
 
   if (!userRes.ok) return null;
   const profile = await userRes.json();
+  if (!profile?.email || profile.verified_email === false) return null;
 
   return {
     id: profile.id,

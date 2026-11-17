@@ -94,12 +94,12 @@ export async function GET(
     where: { id },
     include: {
       user: {
-        select: { username: true, name: true, image: true, supporterAt: true }
+        select: { username: true, name: true, image: true, supporterAt: true, bannedAt: true }
       }
     }
   });
 
-  if (!build) {
+  if (!build || build.user.bannedAt != null) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

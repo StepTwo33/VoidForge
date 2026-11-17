@@ -81,7 +81,11 @@ export function getAppBaseUrl(): string {
 }
 
 function unsubscribeSecret(): string {
-  return process.env.AUTH_SECRET?.trim() || "dev-unsubscribe-secret";
+  const s = process.env.AUTH_SECRET?.trim();
+  if (!s && process.env.NODE_ENV === "production") {
+    throw new Error("AUTH_SECRET environment variable is required in production");
+  }
+  return s || "dev-unsubscribe-secret";
 }
 
 /** Signed token for one-click newsletter unsubscribe links. */

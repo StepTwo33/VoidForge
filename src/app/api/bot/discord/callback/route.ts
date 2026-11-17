@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSession } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
 import {
   discordAvatarUrl,
@@ -21,7 +22,8 @@ export async function GET(req: NextRequest) {
   if (!code || !state || !cookieState || state !== cookieState) {
     return fail("Invalid OAuth state. Try linking Discord again.");
   }
-  if (!userId) {
+  const session = await getSession();
+  if (!userId || !session?.user?.id || session.user.id !== userId) {
     return fail("Session expired. Sign in and try again.");
   }
 

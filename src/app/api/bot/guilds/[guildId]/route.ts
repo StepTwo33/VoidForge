@@ -83,10 +83,12 @@ export async function PATCH(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const body = (await req.json()) as {
-    platform?: string;
-    timezone?: string;
-  };
+  let body: { platform?: string; timezone?: string };
+  try {
+    body = (await req.json()) as { platform?: string; timezone?: string };
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
 
   const platform =
     body.platform === "ps4" || body.platform === "xb1" || body.platform === "swi" || body.platform === "pc"

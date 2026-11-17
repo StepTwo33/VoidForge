@@ -28,8 +28,13 @@ export async function PUT(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const body = (await req.json()) as RouteBody;
-  if (!Array.isArray(body.routes)) {
+  let body: RouteBody;
+  try {
+    body = (await req.json()) as RouteBody;
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  if (!body || !Array.isArray(body.routes)) {
     return NextResponse.json({ error: "routes array required" }, { status: 400 });
   }
 

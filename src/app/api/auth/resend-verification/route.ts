@@ -41,16 +41,12 @@ export async function POST(req: NextRequest) {
         }
 
         const user = await findUserByEmailInsensitive(email);
-        if (!user) {
-            // Don't reveal whether the email exists
-            return NextResponse.json({ success: true, message: "If an account exists, a new code has been sent." });
-        }
-
-        if (user.emailVerified) {
-            return NextResponse.json(
-                { error: "This email is already verified" },
-                { status: 400 }
-            );
+        if (!user || user.emailVerified) {
+            // Don't reveal whether the email exists or is already verified
+            return NextResponse.json({
+                success: true,
+                message: "If an account exists and needs verification, a new code has been sent.",
+            });
         }
 
         // Use the stored email so the token identifier matches the user row.

@@ -14,6 +14,13 @@ const REPORT_NAME_MAX = 200;
 const REPORT_COMMENT_MAX = 8_000;
 const REPORT_REPORTER_MAX = 100;
 const REPORT_ITEM_ID_MAX = 200;
+const REPORT_SCREENSHOT_PATH_RE = /^\/api\/uploads\/reports\/[a-zA-Z0-9._-]+$/;
+
+function isSafeReportScreenshotUrl(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  return REPORT_SCREENSHOT_PATH_RE.test(trimmed) && !trimmed.includes("..");
+}
 
 // GET /api/reports — anyone logged in can see their own reports; admin/mod sees all
 export async function GET(req: NextRequest) {
@@ -100,9 +107,10 @@ export async function POST(req: NextRequest) {
     let screenshots: string[] = [];
     if (Array.isArray(body.screenshots)) {
       screenshots = body.screenshots
-        .filter((s): s is string => typeof s === "string" && s.trim().length > 0)
+        .filter(isSafeReportScreenshotUrl)
+        .map((s) => s.trim())
         .slice(0, 5);
-    } else if (typeof body.screenshotUrl === "string" && body.screenshotUrl.trim()) {
+    } else if (isSafeReportScreenshotUrl(body.screenshotUrl)) {
       screenshots = [body.screenshotUrl.trim()];
     }
 

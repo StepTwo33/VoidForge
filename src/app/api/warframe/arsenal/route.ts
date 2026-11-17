@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit, getClientIp } from "@/lib/auth/rate-limit";
 import { ArsenalFetchError, fetchAndMapWarframeArsenal } from "@/lib/warframe-arsenal/fetch";
 import type { WarframePlatform } from "@/lib/warframe-arsenal/platforms";
 
@@ -7,6 +8,15 @@ export const dynamic = "force-dynamic";
 const PLATFORMS = new Set<WarframePlatform>(["pc", "ps4", "xb1", "swi"]);
 
 export async function GET(request: NextRequest) {
+  const ip = getClientIp(request.headers);
+  const rl = checkRateLimit(`arsenal:${ip}`, 30, 5 * 60 * 1000);
+  if (rl.limited) {
+    return NextResponse.json(
+      { error: "Too many arsenal lookups. Please try again in a few minutes.", code: "rate_limited" },
+      { status: 429 },
+    );
+  }
+
   const platform = (request.nextUrl.searchParams.get("platform") || "pc").toLowerCase();
   const account = request.nextUrl.searchParams.get("account")?.trim() ?? "";
 
