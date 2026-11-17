@@ -62,7 +62,7 @@ export default function Home({ counts }: { counts: CatalogCounts }) {
               <FeatureCard
                 href="/weapon-builder"
                 title="Weapon Builder"
-                description={`Configure mods for ${counts.weaponPicker} weapons with real-time DPS, crit, and status calculations. Kitgun, Zaw and Amp parts and companion weapons are built in their own builders.`}
+                description={`Configure mods for ${counts.weaponPicker} weapons with real-time DPS, crit, and status calculations.`}
                 icon={Crosshair}
                 accent="blue"
                 badges={[`${counts.weaponPicker} Weapons`, "Orokin Catalyst"]}
@@ -70,7 +70,7 @@ export default function Home({ counts }: { counts: CatalogCounts }) {
               <FeatureCard
                 href="/warframe-builder"
                 title="Warframe Builder"
-                description={`Mod your Warframe, install Archon Shards, and see ability stats and survivability for ${counts.warframePicker} Warframes. Necramechs are in the Vehicle Builder.`}
+                description={`Mod your Warframe, install Archon Shards, and see ability stats and survivability for ${counts.warframePicker} Warframes.`}
                 icon={Shield}
                 accent="purple"
                 badges={[`${counts.warframePicker} Warframes`, "Archon Shards"]}
@@ -94,7 +94,7 @@ export default function Home({ counts }: { counts: CatalogCounts }) {
               <FeatureCard
                 href="/codex?section=mods&category=aura"
                 title="Codex"
-                description="Browse mods, arcanes, and archon shards — verify drain, effects, and data coverage."
+                description="Browse mods, arcanes, and archon shards to verify drain, effects, and data coverage."
                 icon={BookOpen}
                 accent="indigo"
                 badges={["Mods", "Arcanes", "Shards"]}
@@ -126,7 +126,7 @@ export default function Home({ counts }: { counts: CatalogCounts }) {
               <FeatureCard
                 href="/discover"
                 title="Discover Builds"
-                description="Browse community builds shared by other Tenno. Upvote, filter, and load shared loadouts."
+                description="Browse, filter, upvote, and load community builds shared by other Tenno."
                 icon={Users}
                 accent="primary"
                 badges={["Community", "Upvotes"]}
