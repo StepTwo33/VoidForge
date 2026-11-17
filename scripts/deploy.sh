@@ -3,18 +3,16 @@
 # Run on the server (Cockpit terminal), from the repo root:
 #   bash scripts/deploy.sh
 #
-# Fetches origin/dev and origin/design/ui-pass, fast-forwards dev when the UI
-# branch is ahead, merges if the two have diverged, then npm ci, build, and
-# restart. Pushes origin/dev when this machine has GitHub credentials.
+# Fetches origin/dev (or a specified branch like `main`), checks safety rails,
+# then runs npm ci, build, DB repair/migrations, and restarts the service.
 #
 #   bash scripts/deploy.sh main
-# deploys that branch only (no UI-pass merge). Because that would put older code
-# live, it refuses unless ALLOW_OLDER_DEPLOY=1 when the branch does not contain
-# what is live now (see .deploy-last-sha).
+# deploys `main` instead of `dev`. Because that would put older code live, it
+# refuses unless ALLOW_OLDER_DEPLOY=1 when the branch does not contain what is
+# live now (see .deploy-last-sha).
 #
 # Safety rails: refuses to run with local edits (other than npm lockfile drift)
-# or with local commits that are on neither origin/dev nor origin/design/ui-pass,
-# checks the result contains both branches, never force-pushes, backs up the
+# or with local commits that are not on origin/$BRANCH, backs up the
 # SQLite DB before restart (start.sh runs prisma migrate deploy), and records
 # the deployed commit in .deploy-last-sha.
 #
@@ -80,13 +78,12 @@ refuse_local_edits() {
   fi
 }
 
-# Commits that only exist on this server (not on origin/dev or origin/design/ui-pass)
-# would be thrown away by `reset --hard`. A local merge of those two from an
-# earlier run whose push failed is fine: it gets rebuilt from the same parents.
+# Commits that only exist on this server (not on origin/$branch)
+# would be thrown away by `reset --hard`.
 refuse_unpushed_commits() {
   local branch="$1" stray
   git rev-parse --verify -q "refs/heads/$branch" >/dev/null || return 0
-  stray="$(git rev-list --no-merges "refs/heads/$branch" --not origin/dev origin/design/ui-pass "origin/$branch" 2>/dev/null || true)"
+  stray="$(git rev-list --no-merges "refs/heads/$branch" --not "origin/$branch" 2>/dev/null || true)"
   if [ -n "$stray" ]; then
     echo "ERROR: local $branch has commits that are not on GitHub:"
     git log --oneline --no-walk $stray | head -20
@@ -125,68 +122,6 @@ backup_database() {
   fi
 }
 
-# Bring design/ui-pass onto local dev. Push when GitHub login works; otherwise
-# still build the merged tree so Cockpit deploys the UI branch.
-include_ui_pass() {
-  echo "==> Fetching origin/dev and origin/design/ui-pass"
-  git fetch --prune origin \
-    +refs/heads/dev:refs/remotes/origin/dev \
-    +refs/heads/design/ui-pass:refs/remotes/origin/design/ui-pass
-
-  refuse_local_edits
-  refuse_unpushed_commits dev
-
-  git checkout -f dev
-
-  # If origin/dev has commits dev lacks, update dev to origin/dev:
-  if ! git merge-base --is-ancestor origin/dev HEAD; then
-    echo "==> Updating local dev to origin/dev"
-    git merge --ff-only origin/dev || git reset --hard origin/dev
-  else
-    # Discard local working tree changes (e.g. lockfile drift from accidental npm install)
-    git checkout -f HEAD -- .
-  fi
-
-  if git merge-base --is-ancestor origin/design/ui-pass HEAD; then
-    echo "==> dev already includes design/ui-pass ($(git rev-parse --short HEAD))"
-    refuse_older_than_live HEAD
-    return 0
-  fi
-
-  if git merge-base --is-ancestor HEAD origin/design/ui-pass; then
-    echo "==> Fast-forwarding dev to design/ui-pass"
-    git merge --ff-only origin/design/ui-pass
-  else
-    echo "==> design/ui-pass and dev have diverged; merging"
-    # The box has no git user.name/email. A merge commit needs an identity, and
-    # `git -c` supplies one for this command without writing git config.
-    if ! git -c user.name="${GIT_AUTHOR_NAME:-Voidforge deploy}" \
-            -c user.email="${GIT_AUTHOR_EMAIL:-deploy@void-forge.org}" \
-            merge --no-edit origin/design/ui-pass; then
-      echo "ERROR: merge of design/ui-pass into dev failed. Resolve it on a machine with GitHub login, then run this again."
-      git merge --abort || true
-      exit 1
-    fi
-  fi
-
-  for ref in origin/dev origin/design/ui-pass; do
-    if ! git merge-base --is-ancestor "$ref" HEAD; then
-      echo "ERROR: result does not contain $ref; stopping before push/build."
-      exit 1
-    fi
-  done
-
-  refuse_older_than_live HEAD
-
-  echo "==> Pushing dev (fast-forward only, never forced)"
-  if GIT_TERMINAL_PROMPT=0 git push origin HEAD:dev; then
-    echo "==> origin/dev updated"
-  else
-    echo "WARN: this box has no GitHub login, so origin/dev was not pushed."
-    echo "      The build below still includes design/ui-pass."
-  fi
-}
-
 FORCE="${FORCE:-0}"
 BRANCH="dev"
 
@@ -205,18 +140,14 @@ for arg in "$@"; do
   esac
 done
 
-if [ "$BRANCH" = "dev" ]; then
-  include_ui_pass
-else
-  echo "==> Fetching origin/$BRANCH"
-  git fetch --prune origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
-  refuse_local_edits
-  refuse_unpushed_commits "$BRANCH"
-  refuse_older_than_live "origin/$BRANCH"
-  echo "==> Resetting working tree to origin/$BRANCH"
-  git checkout -f -B "$BRANCH" "origin/$BRANCH"
-  git reset --hard "origin/$BRANCH"
-fi
+echo "==> Fetching origin/$BRANCH"
+git fetch --prune origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+refuse_local_edits
+refuse_unpushed_commits "$BRANCH"
+refuse_older_than_live "origin/$BRANCH"
+echo "==> Resetting working tree to origin/$BRANCH"
+git checkout -f -B "$BRANCH" "origin/$BRANCH"
+git reset --hard "origin/$BRANCH"
 
 CURRENT_HEAD="$(git rev-parse HEAD)"
 LAST_DEPLOYED="$(cat .deploy-last-sha 2>/dev/null || true)"
