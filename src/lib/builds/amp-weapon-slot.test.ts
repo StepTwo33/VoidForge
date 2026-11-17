@@ -178,4 +178,8 @@ describe("modular builder page wiring (Amp type)", () => {
     expect(src).toMatch(/Amps belong on the Operator, not in a weapon slot/);
     expect(src).toMatch(/can't be saved in a weapon slot/);
   });
+
+  it("switches to the Amp tab when opened with ?type=amp", () => {
+    expect(src).toMatch(/typeParam === "amp"[\s\S]*?setModularType\("amp"\)/);
+  });
 });

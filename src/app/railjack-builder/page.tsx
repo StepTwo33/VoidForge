@@ -58,7 +58,7 @@ import { saveIdentityId } from "@/lib/builds/quicksave";
 import { BuilderSaveControls } from "@/components/builder-save-controls";
 import { BuilderToolbar } from "@/components/builder-toolbar";
 import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
-import { railjackStatSummary } from "@/lib/ui/mobile-stat-summary";
+import { railjackStatSummary, railjackStatSummaryExtra } from "@/lib/ui/mobile-stat-summary";
 import { BuilderItemHeader } from "@/components/item-picker";
 import { stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
@@ -448,7 +448,10 @@ export default function RailjackBuilderPage() {
           />
         </BuilderItemHeader>
         <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 -mx-0.5 mb-3 bg-background pb-1 backdrop-blur-md supports-[backdrop-filter]:bg-background lg:hidden">
-          <MobileStatSummary items={railjackStatSummary(computedStats)} />
+          <MobileStatSummary
+            items={railjackStatSummary(computedStats)}
+            extraItems={railjackStatSummaryExtra(computedStats)}
+          />
         </div>
 
         {/* Reference ships: one-tap loads of the in-game reference Railjack loadouts (components, turrets, ordnance, max-rank Plexus). */}

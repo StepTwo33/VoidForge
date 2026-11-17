@@ -132,7 +132,7 @@ import { BuilderSaveControls } from "@/components/builder-save-controls";
 import { BuilderToolbar, BuilderToolbarButton, BUILDER_REPORT_CLASS } from "@/components/builder-toolbar";
 import { BuilderSavedEmpty } from "@/components/builder-saved-empty";
 import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
-import { companionStatSummary } from "@/lib/ui/mobile-stat-summary";
+import { companionStatSummary, companionStatSummaryExtra } from "@/lib/ui/mobile-stat-summary";
 import { saveIdentityId } from "@/lib/builds/quicksave";
 import { LoadoutEditBanner } from "@/components/loadout-edit-banner";
 import { SAVE_DIRTY_CLASS, SAVE_DIRTY_DOT_CLASS, stableBuildSnapshot, useUnsavedChanges } from "@/lib/builds/unsaved-changes";
@@ -1344,7 +1344,10 @@ export default function CompanionBuilderPage() {
                       {capacityUsed} / {baseCapacity}
                     </span>
                   </div>
-                  <MobileStatSummary items={companionStatSummary(calculatedStats)} />
+                  <MobileStatSummary
+                    items={companionStatSummary(calculatedStats)}
+                    extraItems={companionStatSummaryExtra(calculatedStats)}
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
                   {Array.from({ length: COMPANION_MOD_SLOT_COUNT }, (_, i) => {

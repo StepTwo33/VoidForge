@@ -12,14 +12,16 @@ import { cn } from "@/lib/utils";
  */
 export function MobileStatSummary({
   items,
+  extraItems = [],
   className,
   statsSectionId = "build-stats",
 }: {
   items: StatSummaryItem[];
+  extraItems?: StatSummaryItem[];
   className?: string;
   statsSectionId?: string;
 }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   if (items.length === 0) return null;
 
   const openStats = () => {
@@ -28,7 +30,25 @@ export function MobileStatSummary({
       ?.click();
   };
 
-  const summaryLabel = `Key stats: ${items.map((i) => `${i.title} ${i.value}`).join(", ")}`;
+  const allItems = [...items, ...extraItems];
+  const summaryLabel = `Key stats: ${allItems.map((i) => `${i.title} ${i.value}`).join(", ")}`;
+
+  const renderGridRow = (row: StatSummaryItem[], borderedTop = false) => (
+    <span
+      className={cn(
+        "grid w-full gap-1",
+        borderedTop && "mt-1 border-t border-border/40 pt-1",
+      )}
+      style={{ gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))` }}
+    >
+      {row.map((i) => (
+        <span key={i.key} title={i.title} className="min-w-0">
+          <span className="block truncate text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">{i.label}</span>
+          <span className="block truncate font-mono text-xs tabular-nums text-foreground">{i.value}</span>
+        </span>
+      ))}
+    </span>
+  );
 
   return (
     <div
@@ -53,15 +73,10 @@ export function MobileStatSummary({
           type="button"
           onClick={openStats}
           aria-label={`${summaryLabel}. Tap to open all stats.`}
-          className="min-h-11 min-w-0 flex-1 grid gap-1 px-2 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+          className="min-h-11 min-w-0 flex-1 px-2 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          {items.map((i) => (
-            <span key={i.key} title={i.title} className="min-w-0">
-              <span className="block truncate text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">{i.label}</span>
-              <span className="block truncate font-mono text-xs tabular-nums text-foreground">{i.value}</span>
-            </span>
-          ))}
+          {renderGridRow(items)}
+          {extraItems.length > 0 && renderGridRow(extraItems, true)}
         </button>
       )}
       <button

@@ -1,11 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
   archwingStatSummary,
+  archwingStatSummaryExtra,
   companionStatSummary,
+  companionStatSummaryExtra,
   operatorStatSummary,
+  operatorStatSummaryExtra,
   railjackStatSummary,
+  railjackStatSummaryExtra,
   warframeStatSummary,
+  warframeStatSummaryExtra,
   weaponStatSummary,
+  weaponStatSummaryExtra,
 } from "./mobile-stat-summary";
 import type {
   ArchwingCalculatedStats,
@@ -95,6 +101,79 @@ describe("mobile stat summary", () => {
       ["CC", "30%"],
       ["CD", "2.0×"],
       ["SC", "12%"],
+    ]);
+  });
+
+  it("extra rows return secondary stats for expanded mobile view", () => {
+    expect(weaponStatSummaryExtra(null)).toEqual([]);
+    expect(warframeStatSummaryExtra(null)).toEqual([]);
+    expect(
+      weaponStatSummaryExtra({
+        statusChance: 0.28,
+        multishot: 2.8,
+        fireRate: 12,
+        effectiveFireRate: 10.5,
+        totalDamage: 145,
+      } as CalculatedStats).map((i) => [i.label, i.value]),
+    ).toEqual([
+      ["SC", "28.0%"],
+      ["MS", "2.8"],
+      ["FR", "10.50/s"],
+      ["Dmg", "145"],
+    ]);
+    expect(
+      warframeStatSummaryExtra({
+        totalHealth: 740,
+        totalShield: 370,
+        totalArmor: 225,
+        damageReduction: 42.9,
+        totalEnergy: 425,
+      } as WarframeCalculatedStats).map((i) => [i.label, i.value]),
+    ).toEqual([
+      ["HP", "740"],
+      ["Shield", "370"],
+      ["Armor", "225"],
+      ["DR", "43%"],
+      ["Energy", "425"],
+    ]);
+    expect(
+      companionStatSummaryExtra({
+        damageReduction: 55.2,
+        meleeDamageBonus: 3.3,
+        critChanceBonus: 1.1,
+        critDamageBonus: 0.6,
+      } as CompanionCalculatedStats).map((i) => [i.label, i.value]),
+    ).toEqual([
+      ["DR", "55%"],
+      ["Melee", "+330%"],
+      ["CC", "+110%"],
+      ["CD", "+60%"],
+    ]);
+    expect(
+      railjackStatSummaryExtra({
+        boostSpeed: 640,
+        shieldRecharge: 14.5,
+        turretDamageBonus: 0.5,
+        ordnanceDamageBonus: 0.25,
+      } as RailjackCalculatedStats).map((i) => [i.label, i.value]),
+    ).toEqual([
+      ["Boost", "640"],
+      ["Regen", "14.5%"],
+      ["Turret", "+50%"],
+      ["Ord.", "+25%"],
+    ]);
+    expect(
+      operatorStatSummaryExtra({
+        fireRate: 3,
+        magazine: 10,
+        reloadTime: 2,
+        triggerType: "Semi",
+      }).map((i) => [i.label, i.value]),
+    ).toEqual([
+      ["FR", "3.0/s"],
+      ["Mag", "10"],
+      ["Reload", "2.0s"],
+      ["Trigger", "Semi"],
     ]);
   });
 });

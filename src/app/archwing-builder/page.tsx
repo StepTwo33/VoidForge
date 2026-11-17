@@ -36,7 +36,7 @@ import { BuilderSaveControls } from "@/components/builder-save-controls";
 import { BuilderToolbar, BuilderToolbarButton, BUILDER_REPORT_CLASS } from "@/components/builder-toolbar";
 import { BuilderSavedEmpty } from "@/components/builder-saved-empty";
 import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
-import { archwingStatSummary } from "@/lib/ui/mobile-stat-summary";
+import { archwingStatSummary, archwingStatSummaryExtra } from "@/lib/ui/mobile-stat-summary";
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { BuildsReturnLink } from "@/components/builds-return-link";
 import { cleanLoadedBuild } from "@/lib/builds/incompatible-mod-warnings";
@@ -804,7 +804,10 @@ export default function ArchwingBuilderPage() {
                       {frameModsUsed} / {frameCapacity}
                     </span>
                   </div>
-                  <MobileStatSummary items={archwingStatSummary(frameStats)} />
+                  <MobileStatSummary
+                    items={archwingStatSummary(frameStats)}
+                    extraItems={archwingStatSummaryExtra(frameStats)}
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 sm:gap-2">
                   {Array.from({ length: mode === "necramech" ? 12 : 8 }, (_, i) => {

@@ -16,7 +16,7 @@ import { saveIdentityId } from "@/lib/builds/quicksave";
 import { BuilderSaveControls } from "@/components/builder-save-controls";
 import { BuilderToolbar, BuilderToolbarButton, BUILDER_REPORT_CLASS } from "@/components/builder-toolbar";
 import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
-import { operatorStatSummary } from "@/lib/ui/mobile-stat-summary";
+import { operatorStatSummary, operatorStatSummaryExtra } from "@/lib/ui/mobile-stat-summary";
 import { BuilderSavedEmpty } from "@/components/builder-saved-empty";
 import { useBuilderSavedBuilds } from "@/lib/builds/use-builder-saved-builds";
 import { SaveBuildDialog, type SaveBuildDialogValues } from "@/components/save-build-dialog";
@@ -381,7 +381,10 @@ export default function OperatorBuilderPage() {
           />
         </BuilderItemHeader>
         <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 mb-3 bg-background pb-1 backdrop-blur-md supports-[backdrop-filter]:bg-background lg:hidden">
-          <MobileStatSummary items={operatorStatSummary(currentAmpWeapon ?? null)} />
+          <MobileStatSummary
+            items={operatorStatSummary(currentAmpWeapon ?? null)}
+            extraItems={operatorStatSummaryExtra(currentAmpWeapon ?? null)}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

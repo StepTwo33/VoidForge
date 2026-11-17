@@ -84,3 +84,80 @@ export function operatorStatSummary(amp: {
     { key: "sc", label: "SC", value: `${(amp.statusChance * 100).toFixed(0)}%`, title: "Status chance" },
   ];
 }
+
+/** Secondary rows revealed when the mobile stat summary strip is expanded. */
+export function warframeStatSummaryExtra(stats: WarframeCalculatedStats | null): StatSummaryItem[] {
+  if (!stats) return [];
+  return [
+    { key: "hp", label: "HP", value: stats.totalHealth.toFixed(0), title: "Health" },
+    { key: "shield", label: "Shield", value: stats.totalShield.toFixed(0), title: "Shield" },
+    { key: "armor", label: "Armor", value: stats.totalArmor.toFixed(0), title: "Armor" },
+    { key: "dr", label: "DR", value: `${stats.damageReduction.toFixed(0)}%`, title: "Damage Reduction" },
+    { key: "energy", label: "Energy", value: stats.totalEnergy.toFixed(0), title: "Max Energy" },
+  ];
+}
+
+export function weaponStatSummaryExtra(stats: CalculatedStats | null): StatSummaryItem[] {
+  if (!stats) return [];
+  const fr = stats.effectiveFireRate ?? stats.fireRate;
+  return [
+    { key: "sc", label: "SC", value: `${(stats.statusChance * 100).toFixed(1)}%`, title: "Status chance" },
+    { key: "ms", label: "MS", value: stats.multishot.toFixed(1), title: "Multishot" },
+    { key: "fr", label: "FR", value: `${fr.toFixed(2)}/s`, title: "Effective fire rate" },
+    { key: "dmg", label: "Dmg", value: stats.totalDamage.toFixed(0), title: "Total damage per shot" },
+  ];
+}
+
+export function companionStatSummaryExtra(stats: CompanionCalculatedStats | null): StatSummaryItem[] {
+  if (!stats) return [];
+  return [
+    { key: "dr", label: "DR", value: `${stats.damageReduction.toFixed(0)}%`, title: "Damage Reduction" },
+    { key: "melee", label: "Melee", value: `+${(stats.meleeDamageBonus * 100).toFixed(0)}%`, title: "Companion melee damage bonus" },
+    { key: "cc", label: "CC", value: `+${(stats.critChanceBonus * 100).toFixed(0)}%`, title: "Companion critical chance bonus" },
+    { key: "cd", label: "CD", value: `+${(stats.critDamageBonus * 100).toFixed(0)}%`, title: "Companion critical damage bonus" },
+  ];
+}
+
+export function archwingStatSummaryExtra(stats: ArchwingCalculatedStats | null): StatSummaryItem[] {
+  if (!stats) return [];
+  return [
+    { key: "hp", label: "HP", value: stats.totalHealth.toFixed(0), title: "Health" },
+    { key: "shield", label: "Shield", value: stats.totalShield.toFixed(0), title: "Shield" },
+    { key: "armor", label: "Armor", value: stats.totalArmor.toFixed(0), title: "Armor" },
+    { key: "dr", label: "DR", value: `${stats.damageReduction.toFixed(0)}%`, title: "Damage Reduction" },
+    { key: "energy", label: "Energy", value: stats.totalEnergy.toFixed(0), title: "Max Energy" },
+  ];
+}
+
+export function railjackStatSummaryExtra(stats: RailjackCalculatedStats | null): StatSummaryItem[] {
+  if (!stats) return [];
+  return [
+    { key: "boost", label: "Boost", value: stats.boostSpeed.toFixed(0), title: "Boost speed (m/s)" },
+    { key: "regen", label: "Regen", value: `${stats.shieldRecharge.toFixed(1)}%`, title: "Shield recharge per second" },
+    { key: "turret", label: "Turret", value: `+${(stats.turretDamageBonus * 100).toFixed(0)}%`, title: "Turret damage bonus" },
+    { key: "ord", label: "Ord.", value: `+${(stats.ordnanceDamageBonus * 100).toFixed(0)}%`, title: "Ordnance damage bonus" },
+  ];
+}
+
+export function operatorStatSummaryExtra(amp: {
+  fireRate?: number;
+  magazine?: number;
+  reloadTime?: number;
+  triggerType?: string;
+} | null): StatSummaryItem[] {
+  if (!amp) return [];
+  const items: StatSummaryItem[] = [];
+  if (typeof amp.fireRate === "number" && amp.fireRate > 0) {
+    items.push({ key: "fr", label: "FR", value: `${amp.fireRate.toFixed(1)}/s`, title: "Fire rate" });
+  }
+  if (typeof amp.magazine === "number" && amp.magazine > 0) {
+    items.push({ key: "mag", label: "Mag", value: String(amp.magazine), title: "Magazine / energy pool" });
+  }
+  if (typeof amp.reloadTime === "number" && amp.reloadTime > 0) {
+    items.push({ key: "reload", label: "Reload", value: `${amp.reloadTime.toFixed(1)}s`, title: "Reload time" });
+  }
+  if (amp.triggerType) {
+    items.push({ key: "type", label: "Trigger", value: amp.triggerType, title: "Trigger type" });
+  }
+  return items;
+}

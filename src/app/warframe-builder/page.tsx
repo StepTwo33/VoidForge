@@ -28,7 +28,7 @@ import {
 import { ModSlotCard } from "@/components/mod-slot";
 import { WarframeStatsPanel } from "@/components/stats-panel";
 import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
-import { warframeStatSummary } from "@/lib/ui/mobile-stat-summary";
+import { warframeStatSummary, warframeStatSummaryExtra } from "@/lib/ui/mobile-stat-summary";
 import { ModPicker, buildSlotNav, SlotType } from "@/components/mod-picker";
 import { useWeapons, useWarframes, useMods, useArchonShards } from "@/lib/weapons/use-data";
 import {
@@ -1662,7 +1662,10 @@ export default function WarframeBuilderPage() {
                         </span>
                       )}
                     </div>
-                    <MobileStatSummary items={warframeStatSummary(calculatedStats)} />
+                    <MobileStatSummary
+                      items={warframeStatSummary(calculatedStats)}
+                      extraItems={warframeStatSummaryExtra(calculatedStats)}
+                    />
                   </div>
                   {importCapacityNotice.visible && (
                     <ImportCapacityNotice used={capacityUsed} max={totalCapacity} onDismiss={importCapacityNotice.dismiss} />

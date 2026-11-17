@@ -22,7 +22,7 @@ import {
 import { ModSlotCard } from "@/components/mod-slot";
 import { WeaponStatsPanel } from "@/components/stats-panel";
 import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
-import { weaponStatSummary } from "@/lib/ui/mobile-stat-summary";
+import { weaponStatSummary, weaponStatSummaryExtra } from "@/lib/ui/mobile-stat-summary";
 import { ModPicker, buildSlotNav, type SlotType, type RivenSelectMeta } from "@/components/mod-picker";
 import { saveBuilderRivenToLibrary, useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
 import { sanitizeRivenStats } from "@/lib/riven/saved-rivens";
@@ -1569,7 +1569,10 @@ export default function WeaponBuilderPage() {
                     <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
                     {weaponCapacityUsed} / {modCapacity}
                   </span>
-                  <MobileStatSummary items={weaponStatSummary(calculatedStats)} />
+                  <MobileStatSummary
+                    items={weaponStatSummary(calculatedStats)}
+                    extraItems={weaponStatSummaryExtra(calculatedStats)}
+                  />
                 </div>
                 {importCapacityNotice.visible && (
                   <ImportCapacityNotice used={weaponCapacityUsed} max={modCapacity} onDismiss={importCapacityNotice.dismiss} />

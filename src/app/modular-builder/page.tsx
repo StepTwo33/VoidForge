@@ -20,7 +20,7 @@ import { PageShell } from "@/components/page-shell";
 import { ModSlotCard } from "@/components/mod-slot";
 import { WeaponStatsPanel } from "@/components/stats-panel";
 import { MobileStatSummary } from "@/components/stats/mobile-stat-summary";
-import { weaponStatSummary } from "@/lib/ui/mobile-stat-summary";
+import { weaponStatSummary, weaponStatSummaryExtra } from "@/lib/ui/mobile-stat-summary";
 import { ModPicker, buildSlotNav, type RivenSelectMeta } from "@/components/mod-picker";
 import { saveBuilderRivenToLibrary, useSavedRivenLibrary } from "@/lib/riven/use-saved-rivens";
 import { rivenDrainFromRank, rivenRankFromDrain } from "@/lib/riven/riven-validation";
@@ -494,6 +494,7 @@ export default function ModularBuilderPage() {
         toast.error("Amps cannot use Rivens.");
         stripEquip("amp", partParam ?? "");
       }
+      queueMicrotask(() => setModularType("amp"));
       return;
     }
 
@@ -1398,7 +1399,10 @@ export default function ModularBuilderPage() {
                         <span className="text-[10px] font-sans font-semibold uppercase tracking-wider text-muted-foreground">Capacity</span>
                         {capacityUsed} / {capacity}
                       </span>
-                      <MobileStatSummary items={weaponStatSummary(calculatedStats)} />
+                      <MobileStatSummary
+                        items={weaponStatSummary(calculatedStats)}
+                        extraItems={weaponStatSummaryExtra(calculatedStats)}
+                      />
                     </div>
                     {isSecondaryKitgun && (
                       <p className="mb-2 text-[11px] leading-snug text-muted-foreground">
